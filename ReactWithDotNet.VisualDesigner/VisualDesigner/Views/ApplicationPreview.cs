@@ -98,6 +98,18 @@ sealed class ApplicationPreview : Component
                 element = new img();
             }
 
+            if (model.Tag == "BTypeography" || model.Tag == "BDigitalAccountView")
+            {
+                var component = GetComponenUserOrMainVersion(2, model.Tag, userName).GetAwaiter().GetResult().Value;
+
+                var root = DeserializeFromJson<VisualElementModel>(component.RootElementAsJson);
+
+                root.Children.AddRange(model.Children);
+                
+                return renderElement(root, path);
+            }
+            
+            
             element.style.Add(UserSelect(none));
 
             element.Add(Hover(Outline($"1px {dashed} {Blue300}")));
@@ -335,6 +347,12 @@ sealed class ApplicationPreview : Component
                             }
 
                             element.Add(FontSize(value));
+                            continue;
+                        }
+                        
+                        case "font-weight":
+                        {
+                            element.Add(FontWeight(value));
                             continue;
                         }
                         

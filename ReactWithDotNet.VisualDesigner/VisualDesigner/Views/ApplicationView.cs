@@ -219,7 +219,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
         // try take from db cache
         {
-            var lastUsage = (await GetLastUsageInfoByUserName(userName)).FirstOrDefault();
+            var lastUsage = (await GetLastUsageInfoByUserName(userName)).FirstOrDefault(p=>p.ProjectId == projectId);
             if (lastUsage is not null)
             {
                 state = DeserializeFromJson<ApplicationState>(lastUsage.StateAsJson);
