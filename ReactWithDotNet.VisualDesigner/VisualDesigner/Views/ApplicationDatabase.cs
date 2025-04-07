@@ -9,7 +9,8 @@ static class ApplicationDatabase
     static readonly string CacheDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "ReactVisualDesigner") +
                                             Path.DirectorySeparatorChar;
 
-    static string ConnectionString => $"Data Source={CacheDirectory}app.db";
+    // static string ConnectionString => $"Data Source={CacheDirectory}app.db";
+    static string ConnectionString => @$"Data Source=C:\github\ReactWithDotNet.VisualDesigner\app.db";
 
     static IReadOnlyList<ProjectEntity> Projects { get; set; }
 
