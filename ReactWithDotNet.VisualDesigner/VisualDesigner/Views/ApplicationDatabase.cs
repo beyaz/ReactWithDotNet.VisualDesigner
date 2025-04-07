@@ -6,11 +6,9 @@ namespace ReactWithDotNet.VisualDesigner.Views;
 
 static class ApplicationDatabase
 {
-    static readonly string CacheDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "ReactVisualDesigner") +
-                                            Path.DirectorySeparatorChar;
+    public static readonly string AppDirectory = @"C:\github\ReactWithDotNet.VisualDesigner\";
 
-    // static string ConnectionString => $"Data Source={CacheDirectory}app.db";
-    static string ConnectionString => @$"Data Source=C:\github\ReactWithDotNet.VisualDesigner\app.db";
+    static string ConnectionString => $"Data Source={AppDirectory}app.db";
 
     static IReadOnlyList<ProjectEntity> Projects { get; set; }
 

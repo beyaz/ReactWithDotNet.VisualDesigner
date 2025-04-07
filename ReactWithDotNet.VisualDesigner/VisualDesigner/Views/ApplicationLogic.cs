@@ -7,7 +7,7 @@ namespace ReactWithDotNet.VisualDesigner.Views;
 
 static class ApplicationLogic
 {
-    public static ProjectConfigModel Project => DeserializeFromYaml<ProjectConfigModel>(File.ReadAllText(@"C:\github\ReactWithDotNet.VisualDesigner\ReactWithDotNet.VisualDesigner\VisualDesigner\Project.yaml"));
+    public static ProjectConfigModel Project => DeserializeFromYaml<ProjectConfigModel>(File.ReadAllText($@"{AppDirectory}ReactWithDotNet.VisualDesigner\VisualDesigner\Project.yaml"));
 
     public static Task<Result> CommitComponent(ApplicationState state)
     {
