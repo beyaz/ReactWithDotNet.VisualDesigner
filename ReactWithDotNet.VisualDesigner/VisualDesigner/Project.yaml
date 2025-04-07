@@ -1,0 +1,146 @@
+colors:
+  content-strong: "#0E121B"
+  content-sub: "#222530"
+  content-soft: "#525866"
+  content-disable: "#CACFD8"
+  content-weak: "#F5F7FA"
+  content-white: "#FFFFFF"
+  button-text-white: "#FFFFFF"
+  border-strong: "#181B25"
+  border-sub: "#CACFD8"
+  border-soft: "#E1E4EA"
+  border-white: "#FFFFFF"
+  primary-dark: "#552502"
+  primary-base: "#FF6E06"
+  primary-light: "#FFB682"
+  primary-lighter: "#FFE2CD"
+  secondary-dark: "#14464F"
+  secondary-base: "#3DD3EE"
+  secondary-light: "#9EE9F6"
+  secondary-lighter: "#D8F6FC"
+
+styles:
+  bg-strong: "background: #0E121B"
+  bg-surface: "background: #222530"
+  bg-sub: "background: #CACFD8"
+  bg-soft: "background: #E1E4EA"
+  bg-weak: "background: #F5F7FA"
+  bg-white: "background: #FFFFFF"
+  heading-01: |
+    font-family: "Host Grotesk";
+    font-size: 56px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 64px;
+  heading-02: |
+    font-family: "Host Grotesk";
+    font-size: 48px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 56px;
+  heading-03: |
+    font-family: "Host Grotesk";
+    font-size: 40px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 48px;
+  heading-04: |
+    font-family: "Host Grotesk";
+    font-size: 32px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 40px;
+  heading-05: |
+    font-family: "Host Grotesk";
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 32px;
+  heading-06: |
+    font-family: "Host Grotesk";
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 28px;
+  body-XL: |
+    font-family: "Host Grotesk";
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 32px;
+  body-L: |
+    font-family: "Host Grotesk";
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 26px;
+  body-M: |
+    font-family: "Host Grotesk";
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 24px;
+  body-S: |
+    font-family: "Host Grotesk";
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 20px;
+  body-XS: |
+    font-family: "Host Grotesk";
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 16px;
+ 
+  label-XXL: |
+    font-family: "Host Grotesk";
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 32px;
+
+  label-XL: |
+    font-family: "Host Grotesk";
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 28px;
+
+  label-L: |
+    font-family: "Host Grotesk";
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 26px;
+
+  label-M: |
+    font-family: "Host Grotesk";
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 24px;
+  
+  label-S: |
+    font-family: "Host Grotesk";
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 20px;
+
+  label-XS: |
+    font-family: "Host Grotesk";
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 16px;
+
+
+
+globalCss: |
+  @font-face {
+    font-family: 'Host Grotesk';
+    src: url('/wwwroot/fonts/HostGrotesk-Regular.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+  }
