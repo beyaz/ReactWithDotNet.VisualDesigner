@@ -15,23 +15,62 @@ static class Exporter_For_NextJs_with_Tailwind
 
         var partRender = GenerateHtml(context, state.ComponentRootElement, indentLevel);
 
-        var file = new StringBuilder();
+        var importLines = new StringBuilder();
 
         foreach (var import in context.Imports)
         {
             if (import.IsNamed)
             {
-                file.AppendLine($"import {{ {import.ClassName} }} from \"{import.Package}\";");
+                importLines.AppendLine($"import {{ {import.ClassName} }} from \"{import.Package}\";");
             }
             else
             {
-                file.AppendLine($"import {import.ClassName} from \"{import.Package}\";");
+                importLines.AppendLine($"import {import.ClassName} from \"{import.Package}\";");
             }
         }
 
-        file.AppendLine();
+        var file = new StringBuilder();
 
-        file.AppendLine($"export default function {state.ComponentName}() {{");
+
+        string propsParameterTypeName = string.Empty;
+        
+        var propsTypeDefinition = GetPropsTypeDefinition(state);
+        if (propsTypeDefinition is not null)
+        {
+            file.AppendLine();
+            file.AppendLine($"interface {propsTypeDefinition.Name} {{");
+            foreach (var fieldDefinition in propsTypeDefinition.Fields)
+            {
+                var typeName = fieldDefinition.FieldType.Name;
+                if (typeName == "Boolean")
+                {
+                    typeName = "boolean";
+                }
+                
+                if (typeName == "Action")
+                {
+                    typeName = "() => void";
+                }
+                
+                if (typeName == "Int32")
+                {
+                    typeName = "number";
+                }
+
+                if (typeName == "ReactNode")
+                {
+                    context.Imports.Add(new (){ ClassName = "React", Package = "react"});
+                }
+                
+                file.AppendLine($"{fieldDefinition.Name} : {typeName}");
+            }
+            file.AppendLine("}");
+
+            propsParameterTypeName = propsTypeDefinition.Name;
+        }
+
+        file.AppendLine();
+        file.AppendLine($"export default function {state.ComponentName}({(propsParameterTypeName.HasNoValue() ? string.Empty  : "props: " +propsParameterTypeName )}) {{");
 
         foreach (var line in context.Body)
         {
@@ -44,7 +83,7 @@ static class Exporter_For_NextJs_with_Tailwind
 
         file.AppendLine("}");
 
-        File.WriteAllText($"C:\\github\\hopgogo\\web\\enduser-ui\\src\\components\\{state.ComponentName}.tsx", file.ToString());
+        File.WriteAllText($"C:\\github\\hopgogo\\web\\enduser-ui\\src\\components\\{state.ComponentName}.tsx", importLines.ToString() + file.ToString());
     }
 
     static string GenerateHtml(Context context, VisualElementModel element, int indentLevel = 0)
@@ -98,6 +137,12 @@ static class Exporter_For_NextJs_with_Tailwind
                 if (tag == "Image")
                 {
                     value = "/"+value; // todo: fixme
+                }
+
+                if (value.StartsWith("props."))
+                {
+                    sb.Append($" {name}={{{value}}}");
+                    continue;
                 }
 
                 sb.Append($" {name}=\"{value}\"");
