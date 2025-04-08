@@ -242,6 +242,10 @@ static class ApplicationLogic
             items.Add("href: ");
         }
 
+
+        items.AddRange(GetPropsSuggestions(state));
+        
+
         return items;
     }
 

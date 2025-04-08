@@ -6,7 +6,22 @@ namespace React
     {
         
     }
+
+    class MouseEvent
+    {
+        
+    }
+
+    delegate void MouseEventHandler(MouseEvent e);
+    
+    class div
+    {
+        public bool disabled;
+        
+        public MouseEventHandler onClick;
+    }
 }
+
 namespace DemoProject
 {
     class CircleImageButtonProps

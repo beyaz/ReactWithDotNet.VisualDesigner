@@ -1395,6 +1395,18 @@ sealed class ApplicationView : Component<ApplicationState>
                     })
                 };
 
+                Element content = value;
+                {
+                    var (success, name, realValue) = TryParsePropertyValue(value);
+                    if (success)
+                    {
+                        content = new FlexRowCentered
+                        {
+                            new span(FontWeight500) { name }, ": ", realValue
+                        };
+                    }
+                }
+                
                 return new(CursorDefault, Padding(4, 8), BorderRadius(16))
                 {
                     Background(isSelected ? Gray200 : Gray50),
@@ -1402,7 +1414,7 @@ sealed class ApplicationView : Component<ApplicationState>
                     isSelected ? PositionRelative : null,
                     isSelected ? closeIcon : null,
 
-                    value,
+                    content,
                     Id("PROPS-" + index),
                     OnClick([StopPropagation](e) =>
                     {
