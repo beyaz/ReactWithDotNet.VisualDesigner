@@ -120,7 +120,7 @@ sealed class MagicInput : Component<MagicInput.State>
     [StopPropagation]
     Task OnInputClicked(MouseEvent e)
     {
-        state.ShowSuggestions = !state.ShowSuggestions;
+        state.ShowSuggestions = false;
 
         return Task.CompletedTask;
     }

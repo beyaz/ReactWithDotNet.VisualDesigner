@@ -1418,7 +1418,7 @@ sealed class ApplicationView : Component<ApplicationState>
                     Id("PROPS-" + index),
                     OnClick([StopPropagation](e) =>
                     {
-                        var location = int.Parse(e.target.id.RemoveFromStart("PROPS-"));
+                        var location = int.Parse(e.currentTarget.id.RemoveFromStart("PROPS-"));
 
                         state.Selection = new()
                         {
