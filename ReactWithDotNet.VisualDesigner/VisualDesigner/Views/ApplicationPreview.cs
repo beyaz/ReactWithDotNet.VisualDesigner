@@ -51,6 +51,8 @@ sealed class ApplicationPreview : Component
     
     protected override Element render()
     {
+        const string childrenIdentifier = "[...]";
+        
         var userName = Environment.UserName; // future: get userName from cookie or url
 
         var appState = GetUserLastState(userName);
@@ -63,6 +65,8 @@ sealed class ApplicationPreview : Component
             };
         }
         
+        var projectId = appState.ProjectId;
+
         var rootElement = appState.ComponentRootElement;
         if (rootElement is null)
         {
@@ -98,15 +102,18 @@ sealed class ApplicationPreview : Component
                 element = new img();
             }
 
-            if (model.Tag == "BTypeography" || model.Tag == "BDigitalAccountView")
+            if (model.Tag.Length > 3)
             {
-                var component = GetComponenUserOrMainVersion(2, model.Tag, userName).GetAwaiter().GetResult().Value;
+                var component = GetComponenUserOrMainVersion(projectId, model.Tag, userName);
+                if (component is not null)
+                {
+                    var root = DeserializeFromJson<VisualElementModel>(component.RootElementAsJson);
 
-                var root = DeserializeFromJson<VisualElementModel>(component.RootElementAsJson);
-
-                root.Children.AddRange(model.Children);
+                    root.Children.AddRange(model.Children);
                 
-                return renderElement(root, path);
+                    return renderElement(root, path);
+                }
+               
             }
             
             
@@ -118,7 +125,7 @@ sealed class ApplicationPreview : Component
             
             element.onClick = OnItemClick;
             
-            if (model.Text.HasValue())
+            if (model.Text.HasValue() && model.Text != childrenIdentifier)
             {
                 element.text = model.Text;
             }

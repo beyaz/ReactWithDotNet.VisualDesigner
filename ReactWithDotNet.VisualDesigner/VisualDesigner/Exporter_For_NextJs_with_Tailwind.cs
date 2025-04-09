@@ -30,7 +30,7 @@ static class Exporter_For_NextJs_with_Tailwind
             sourceFile.PropsParameterTypeName = propsTypeDefinition.Name;
         }
 
-        sourceFile.RootNode = ConvertToReactNode(sourceFile, state.ComponentRootElement);
+        sourceFile.RootNode = ConvertToReactNode(state.ProjectId, state.UserName, sourceFile, state.ComponentRootElement);
 
         var fileContent = new StringBuilder();
 
@@ -95,7 +95,19 @@ static class Exporter_For_NextJs_with_Tailwind
         return decleration;
     }
 
-    static ReactNode ConvertToReactNode(ComponentDefinition componentDefinition, VisualElementModel element)
+    static ImportInfo GetTagImportInfo(int projectId, string userName, string tag)
+    {
+       
+        
+        var component = GetComponenUserOrMainVersion(projectId, tag, userName);
+        if (component is not null)
+        {
+            return new ImportInfo { ClassName = tag, Package = $"@/components/{tag}" };
+        }
+
+        return null;
+    }
+    static ReactNode ConvertToReactNode(int projectId, string userName, ComponentDefinition componentDefinition, VisualElementModel element)
     {
         List<string> classNames = [];
 
@@ -113,6 +125,9 @@ static class Exporter_For_NextJs_with_Tailwind
             componentDefinition.Imports.Add("Image", "next/image");
             tag = "Image";
         }
+
+        componentDefinition.Imports.TryAdd(GetTagImportInfo(projectId, userName, tag));
+        
 
         var node = new ReactNode { Tag = tag };
 
@@ -458,7 +473,7 @@ static class Exporter_For_NextJs_with_Tailwind
         // Add children
         foreach (var child in element.Children)
         {
-            node.Children.Add(ConvertToReactNode(componentDefinition, child));
+            node.Children.Add(ConvertToReactNode(projectId, userName, componentDefinition, child));
         }
 
         return node;
@@ -633,6 +648,22 @@ static class Exporter_For_NextJs_with_Tailwind
                 Add(new() { ClassName = className, Package = package, IsNamed = isNamed });
             }
         }
+
+        
+    }
+
+    static void TryAdd(this List<ImportInfo> items, ImportInfo item)
+    {
+        if (item is null)
+        {
+            return;
+        }
+        var import = items.FirstOrDefault(i => i.ClassName == item.ClassName && i.Package == item.Package);
+        if (import == null)
+        {
+            items.Add(item);
+        }
+        
     }
 
     class InterfaceDecleration

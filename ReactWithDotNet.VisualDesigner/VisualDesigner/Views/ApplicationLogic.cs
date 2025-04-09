@@ -176,7 +176,7 @@ static class ApplicationLogic
         return userVersion;
     }
 
-    public static Task<Result<ComponentEntity>> GetComponenUserOrMainVersion(int projectId, string componentName, string userName)
+    public static Task<Result<ComponentEntity>> GetComponenUserOrMainVersionAsync(int projectId, string componentName, string userName)
     {
         return DbOperation(async db =>
         {
@@ -193,6 +193,11 @@ static class ApplicationLogic
 
             return await db.GetComponentMainVersion(projectId, componentName);
         });
+    }
+    
+    public static ComponentEntity GetComponenUserOrMainVersion(int projectId, string componentName, string userName)
+    {
+        return GetComponenUserOrMainVersionAsync(projectId, componentName, userName).GetAwaiter().GetResult().Value;
     }
 
     public static Task<Result<ComponentEntity>> GetComponenUserOrMainVersion(ApplicationState state)

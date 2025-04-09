@@ -178,7 +178,7 @@ sealed class ApplicationView : Component<ApplicationState>
     {
         ComponentEntity component;
         {
-            var componentResult = await GetComponenUserOrMainVersion(state.ProjectId, componentName, state.UserName);
+            var componentResult = await GetComponenUserOrMainVersionAsync(state.ProjectId, componentName, state.UserName);
             if (componentResult.HasError)
             {
                 this.FailNotification(componentResult.Error.Message);
