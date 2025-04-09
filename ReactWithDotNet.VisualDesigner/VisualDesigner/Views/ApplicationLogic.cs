@@ -223,6 +223,9 @@ static class ApplicationLogic
     {
         var items = new List<string>();
 
+        items.Add("class: ph ph-minus");
+        items.Add("class: ph ph-plus");
+        
         items.Add("class: ph ph-facebook-logo");
         items.Add("class: ph ph-x-logo");
         items.Add("class: ph ph-instagram-logo");

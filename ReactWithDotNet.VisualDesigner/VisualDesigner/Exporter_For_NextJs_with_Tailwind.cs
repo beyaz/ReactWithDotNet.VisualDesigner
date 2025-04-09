@@ -52,12 +52,19 @@ static class Exporter_For_NextJs_with_Tailwind
 
             var isNullable = false;
 
-            if (fieldType.Namespace == "System" && fieldType.Name == "System.Nullable`1")
+          
+            
+            if (fieldType is GenericInstanceType genericType &&
+                genericType.ElementType.FullName == "System.Nullable`1" &&
+                genericType.GenericArguments.Count == 1)
             {
+                TypeReference elementType = genericType.GenericArguments[0];
+                
                 isNullable = true;
 
-                fieldType = fieldType.GetElementType();
+                fieldType = elementType;
             }
+            
 
             var typeName = fieldType.Name;
             if (typeName == "Boolean")
@@ -530,21 +537,42 @@ static class Exporter_For_NextJs_with_Tailwind
 
     static void WriteTo(StringBuilder sb, ComponentDefinition componentDefinition, ReactNode node, int indentLevel)
     {
+        if (node.Tag is null)
+        {
+            if (node.Text.HasValue())
+            {
+                sb.AppendLine(Indent(indentLevel) + node.Text);
+                return;
+            }
+        }
+        
         var indent = new string(' ', indentLevel * 4);
 
         sb.Append($"{indent}<{node.Tag}");
 
         foreach (var reactProperty in node.Properties)
         {
-            sb.Append($" {reactProperty.Name}={{{reactProperty.Value}}}");
+            var propertyName = reactProperty.Name;
+
+            var propertyValue = reactProperty.Value;
+
+            if (propertyValue != null && propertyValue[0] == '"')
+            {
+                sb.Append($" {propertyName}={propertyValue}");    
+                continue;
+            }
+            
+            sb.Append($" {propertyName}={{{propertyValue}}}");
         }
 
         var hasSelfClose = node.Children.Count == 0 && node.Text.HasNoValue();
         if (hasSelfClose)
         {
-            sb.AppendLine(" />");
+            sb.AppendLine("/>");
             return;
         }
+        
+        
 
         // try add as children
         {
@@ -563,6 +591,8 @@ static class Exporter_For_NextJs_with_Tailwind
                 }
             }
         }
+        
+        sb.AppendLine(">");
 
         // Add text content
         if (!string.IsNullOrWhiteSpace(node.Text))

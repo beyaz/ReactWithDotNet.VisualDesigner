@@ -29,14 +29,16 @@ static class CecilHelper
         return null;
     }
     
-    public static IEnumerable<FieldDefinition> GetDefinedProps(ApplicationState state)
+    public static ICollection<FieldDefinition> GetDefinedProps(ApplicationState state)
     {
         var typeDefinition = GetPropsTypeDefinition(state);
-        
-        foreach (var typeDefinitionField in typeDefinition.Fields)
+
+        if (typeDefinition is null)
         {
-            yield return typeDefinitionField;
+            return [];
         }
+
+        return typeDefinition.Fields;
     }
     
     static bool IsDelegate(TypeDefinition type)
