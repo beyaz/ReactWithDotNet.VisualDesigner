@@ -1,44 +1,21 @@
 ﻿using React;
 
-namespace React
+namespace DemoProject;
+
+class CircleImageButtonProps
 {
-    class ReactNode
-    {
-        
-    }
+    public bool? isDisabled;
 
-    class MouseEvent
-    {
+    public Action onClick;
         
-    }
-
-    delegate void MouseEventHandler(MouseEvent e);
-    
-    class div
-    {
-        public bool disabled;
-        
-        public MouseEventHandler onClick;
-    }
+    public ReactNode children;
 }
 
-namespace DemoProject
+class NumericUpDownProps
 {
-    class CircleImageButtonProps
-    {
-        public bool? isDisabled;
-
-        public Action onClick;
+    public int? value;
         
-        public ReactNode children;
-    }
-
-    class NumericUpDownProps
-    {
-        public int? value;
+    public Action onDownClick;
         
-        public Action onDownClick;
-        
-        public Action onUpClick;
-    }
+    public Action onUpClick;
 }
