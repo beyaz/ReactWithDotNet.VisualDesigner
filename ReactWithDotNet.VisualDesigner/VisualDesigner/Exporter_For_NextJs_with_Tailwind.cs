@@ -62,6 +62,7 @@ static class Exporter_For_NextJs_with_Tailwind
             sourceFile.Imports.Add(new(){ ClassName = "Logic", Package = $"@/components/{state.ComponentName}.Logic", IsNamed = true});
             
            
+            sourceFile.Body.Add("");
             sourceFile.Body.Add("const call = (name: string) =>");
             sourceFile.Body.Add("{");
             sourceFile.Body.Add("    setState((prevState: State) =>");
@@ -71,7 +72,6 @@ static class Exporter_For_NextJs_with_Tailwind
             sourceFile.Body.Add("        return { ...prevState };");
             sourceFile.Body.Add("    });");
             sourceFile.Body.Add("};");
-            
             
         }
        
@@ -204,7 +204,7 @@ static class Exporter_For_NextJs_with_Tailwind
                     value = "/" + value; // todo: fixme
                 }
 
-                if (value.StartsWith("props."))
+                if (value.StartsWith("props.") || value.StartsWith("state."))
                 {
                     node.Properties.Add(new() { Name = name, Value = value });
                     continue;
@@ -515,6 +515,7 @@ static class Exporter_For_NextJs_with_Tailwind
             {
                 componentDefinition.Imports.Add("useTranslations", "next-intl", true);
 
+                componentDefinition.Body.Add("");
                 componentDefinition.Body.Add("const t = useTranslations();");
             }
 
@@ -604,11 +605,12 @@ static class Exporter_For_NextJs_with_Tailwind
 
         if (componentDefinition.HasState)
         {
-          
-            
-            file.AppendLine($"{Indent(1)} const [state, setState] = useState<State>(() => Logic.createInitialState(props));");
+
+            file.AppendLine();
+            file.AppendLine($"{Indent(1)}const [state, setState] = useState<State>(() => Logic.createInitialState(props));");
         }
 
+        file.AppendLine();
         file.AppendLine($"{Indent(1)}return (");
         WriteTo(file, componentDefinition, componentDefinition.RootNode, 2);
         file.AppendLine($"{Indent(1)});");

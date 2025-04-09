@@ -102,11 +102,19 @@ static class CecilHelper
     {
         TypeDefinition definition = null;
         
+        string tag = null;
+        if (state.Selection.VisualElementTreeItemPath.HasValue())
+        {
+            var selectedVisualItem = FindTreeNodeByTreePath(state.ComponentRootElement, state.Selection.VisualElementTreeItemPath);
+
+            tag = selectedVisualItem.Tag;
+        }
+        
         foreach (var moduleDefinition in GetAssemblyDefinition(state).Modules)
         {
             foreach (var typeDefinition in moduleDefinition.Types)
             {
-                if (typeDefinition.Name == nameof(React.div))
+                if (typeDefinition.Name == tag || typeDefinition.Name == tag+"Props")
                 {
                     definition = typeDefinition;
                     break;
@@ -114,6 +122,10 @@ static class CecilHelper
             }
         }
 
+        if (definition is null)
+        {
+            return [];
+        }
         return GetPropsSuggestions(definition, state);
     }
 }
