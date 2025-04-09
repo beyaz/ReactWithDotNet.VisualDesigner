@@ -190,6 +190,9 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
         var commonStyles = node.StyleGroups?.FirstOrDefault(x => x.Condition == "*");
         if (commonStyles is not null)
         {
+            var hasCol = commonStyles.Items.Contains("col");
+            var hasRow = commonStyles.Items.Contains("row");
+            
             var hasFlex = commonStyles.Items.Any(x =>
             {
                 var (success, name, value) = TryParsePropertyValue(x);
@@ -270,11 +273,11 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
                 return false;
             });
 
-            if (hasFlexDirectionColumn)
+            if (hasFlexDirectionColumn || hasCol)
             {
                 icon = new IconFlexColumn() + Size(16) + Color(Gray300);
             }
-            else if (hasFlexDirectionRow || hasFlex)
+            else if (hasFlexDirectionRow || hasFlex || hasRow)
             {
                 icon = new IconFlexRow() + Size(16) + Color(Gray300);
             }

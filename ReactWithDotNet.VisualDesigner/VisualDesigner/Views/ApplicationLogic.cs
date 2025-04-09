@@ -228,13 +228,7 @@ static class ApplicationLogic
     {
         var items = new List<string>();
 
-        items.Add("class: ph ph-minus");
-        items.Add("class: ph ph-plus");
-        
-        items.Add("class: ph ph-facebook-logo");
-        items.Add("class: ph ph-x-logo");
-        items.Add("class: ph ph-instagram-logo");
-        items.Add("class: ph ph-linkedin-logo");
+       
 
         string tag = null;
 
@@ -248,6 +242,17 @@ static class ApplicationLogic
         if (tag == "a")
         {
             items.Add("href: ");
+        }
+
+        if (tag == "i")
+        {
+            items.Add("class: ph ph-minus");
+            items.Add("class: ph ph-plus");
+        
+            items.Add("class: ph ph-facebook-logo");
+            items.Add("class: ph ph-x-logo");
+            items.Add("class: ph ph-instagram-logo");
+            items.Add("class: ph ph-linkedin-logo");
         }
 
 

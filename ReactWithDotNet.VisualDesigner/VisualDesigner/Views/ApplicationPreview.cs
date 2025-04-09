@@ -230,6 +230,16 @@ sealed class ApplicationPreview : Component
                             element.Add(DisplayFlexColumnCentered);
                             continue;
                         }
+                        case "col":
+                        {
+                            element.Add(DisplayFlexColumn);
+                            continue;
+                        }
+                        case "row":
+                        {
+                            element.Add(DisplayFlexRow);
+                            continue;
+                        }
                     }
                     
                     var (success, name, value) = TryParsePropertyValue(styleAttribute);

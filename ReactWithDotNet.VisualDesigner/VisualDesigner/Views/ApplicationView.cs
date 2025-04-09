@@ -150,7 +150,9 @@ sealed class ApplicationView : Component<ApplicationState>
         {
             state.ComponentRootElement = new()
             {
-                Tag = "div"
+                Tag = "div",
+                
+                StyleGroups = [new (){ Condition = "*"}]
             };
 
             state.Selection = new()
@@ -168,6 +170,7 @@ sealed class ApplicationView : Component<ApplicationState>
         node.Children.Add(new()
         {
             Tag = "div",
+            
             StyleGroups = [new (){ Condition = "*"}]
         });
         
