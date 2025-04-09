@@ -18,20 +18,64 @@ static class Exporter_For_NextJs_with_Tailwind
         var propsTypeDefinition = GetPropsTypeDefinition(state);
         if (propsTypeDefinition is not null)
         {
-            var interfaceDecleration = ConvertToInterfaceDecleration(propsTypeDefinition);
+            var decleration = ConvertToInterfaceDecleration(propsTypeDefinition);
+            
+            decleration.Identifier = "Props";
 
-            sourceFile.PropsDecleration = interfaceDecleration;
+            sourceFile.PropsDecleration = decleration;
 
-            foreach (var import in interfaceDecleration.Imports)
+            foreach (var import in decleration.Imports)
             {
                 sourceFile.Imports.Add(import.ClassName, import.Package, import.IsNamed);
             }
 
             sourceFile.PropsParameterTypeName = propsTypeDefinition.Name;
         }
+        
+        var stateTypeDefinition = GetStateTypeDefinition(state);
+        if (stateTypeDefinition is not null)
+        {
+            var decleration = ConvertToInterfaceDecleration(stateTypeDefinition);
+
+            decleration.Identifier = "State";
+            
+            sourceFile.StateDecleration = decleration;
+
+            foreach (var import in decleration.Imports)
+            {
+                sourceFile.Imports.Add(import.ClassName, import.Package, import.IsNamed);
+            }
+            
+            sourceFile.Imports.Add("useState","react", true);
+
+            sourceFile.HasState = true;
+
+        }
+        
+        
 
         sourceFile.RootNode = ConvertToReactNode(state.ProjectId, state.UserName, sourceFile, state.ComponentRootElement);
 
+        if (stateTypeDefinition is not null)
+        {
+            
+            sourceFile.Imports.Add(new(){ ClassName = "Logic", Package = $"@/components/{state.ComponentName}.Logic", IsNamed = true});
+            
+           
+            sourceFile.Body.Add("const call = (name: string) =>");
+            sourceFile.Body.Add("{");
+            sourceFile.Body.Add("    setState((prevState: State) =>");
+            sourceFile.Body.Add("    {");
+            sourceFile.Body.Add("        Logic[name as keyof typeof Logic](props, prevState);");
+            sourceFile.Body.Add("");
+            sourceFile.Body.Add("        return { ...prevState };");
+            sourceFile.Body.Add("    });");
+            sourceFile.Body.Add("};");
+            
+            
+        }
+       
+        
         var fileContent = new StringBuilder();
 
         WriteTo(fileContent, sourceFile);
@@ -163,6 +207,13 @@ static class Exporter_For_NextJs_with_Tailwind
                 if (value.StartsWith("props."))
                 {
                     node.Properties.Add(new() { Name = name, Value = value });
+                    continue;
+                }
+                
+                var component = GetComponenUserOrMainVersion(projectId, tag, userName);
+                if (component is not null)
+                {
+                    node.Properties.Add(new() { Name = name, Value = $"()=>call('{value}')" });
                     continue;
                 }
 
@@ -496,7 +547,7 @@ static class Exporter_For_NextJs_with_Tailwind
 
     static void WriteTo(this InterfaceDecleration decleration, StringBuilder sb, int indentLevel)
     {
-        sb.AppendLine($"{Indent(indentLevel)}interface {decleration.Identifier} {{");
+        sb.AppendLine($"{Indent(indentLevel)}export interface {decleration.Identifier} {{");
 
         indentLevel++;
 
@@ -534,13 +585,28 @@ static class Exporter_For_NextJs_with_Tailwind
             file.AppendLine();
             componentDefinition.PropsDecleration.WriteTo(file, 0);
         }
+        
+        if (componentDefinition.StateDecleration is not null)
+        {
+            file.AppendLine();
+            componentDefinition.StateDecleration.WriteTo(file, 0);
+        }
 
         file.AppendLine();
-        file.AppendLine($"export default function {componentDefinition.ComponentName}({(componentDefinition.PropsParameterTypeName.HasNoValue() ? string.Empty : "props: " + componentDefinition.PropsParameterTypeName)}) {{");
+        file.AppendLine($"export default function {componentDefinition.ComponentName}({(componentDefinition.PropsParameterTypeName.HasNoValue() ? string.Empty : "props: Props")}) {{");
 
         foreach (var line in componentDefinition.Body)
         {
             file.AppendLine($"{Indent(1)}{line}");
+        }
+        
+      
+
+        if (componentDefinition.HasState)
+        {
+          
+            
+            file.AppendLine($"{Indent(1)} const [state, setState] = useState<State>(() => Logic.createInitialState(props));");
         }
 
         file.AppendLine($"{Indent(1)}return (");
@@ -632,8 +698,12 @@ static class Exporter_For_NextJs_with_Tailwind
         public Imports Imports { get; } = new();
 
         public InterfaceDecleration PropsDecleration { get; set; }
+        
+        public InterfaceDecleration StateDecleration { get; set; }
 
         public string PropsParameterTypeName { get; set; }
+
+        public bool HasState { get; set; }
 
         public ReactNode RootNode { get; set; }
     }
@@ -668,7 +738,7 @@ static class Exporter_For_NextJs_with_Tailwind
 
     class InterfaceDecleration
     {
-        public string Identifier { get; init; }
+        public string Identifier { get; set; }
         public Imports Imports { get; } = new();
 
         public List<PropertySignature> PropertySignatures { get; } = [];

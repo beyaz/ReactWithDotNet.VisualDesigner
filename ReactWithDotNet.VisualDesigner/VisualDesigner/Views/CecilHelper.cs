@@ -29,6 +29,24 @@ static class CecilHelper
         return null;
     }
     
+    public static TypeDefinition GetStateTypeDefinition(ApplicationState state)
+    {
+        var assembly = GetAssemblyDefinition(state);
+        
+        foreach (var moduleDefinition in assembly.Modules)
+        {
+            foreach (var typeDefinition in moduleDefinition.Types)
+            {
+                if (typeDefinition.Name == state.ComponentName+"State")
+                {
+                    return typeDefinition;
+                }
+            }
+        }
+
+        return null;
+    }
+    
     public static ICollection<FieldDefinition> GetDefinedProps(ApplicationState state)
     {
         var typeDefinition = GetPropsTypeDefinition(state);
