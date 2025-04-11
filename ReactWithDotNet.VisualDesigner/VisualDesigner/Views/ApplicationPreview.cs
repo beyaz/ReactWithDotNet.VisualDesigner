@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using System.Text;
 using ReactWithDotNet.ThirdPartyLibraries.HeroUI;
+using YamlDotNet.RepresentationModel;
 
 namespace ReactWithDotNet.VisualDesigner.Views;
 
@@ -67,6 +68,8 @@ sealed class ApplicationPreview : Component
         }
         
         var projectId = appState.ProjectId;
+
+        var cmp = GetComponenUserOrMainVersion(appState).GetAwaiter().GetResult().Value;
 
         var rootElement = appState.ComponentRootElement;
         if (rootElement is null)
@@ -136,6 +139,25 @@ sealed class ApplicationPreview : Component
             if (model.Text.HasValue() && model.Text != childrenIdentifier)
             {
                 element.text = model.Text;
+
+                // todo: think more
+                if (cmp.PropsAsYaml.HasValue() && element.text.StartsWith("props.", StringComparison.OrdinalIgnoreCase))
+                {
+                    var target = element.text.RemoveFromStart("props.");
+                    
+                    var yamlStream = new YamlStream();
+                    yamlStream.Load(new StringReader(cmp.PropsAsYaml));
+
+                    var root = (YamlMappingNode)yamlStream.Documents[0].RootNode;
+                    
+                    foreach (var (yamlNode, value) in root.Children)
+                    {
+                        if ((yamlNode as YamlScalarNode).Value == target)
+                        {
+                            element.text = (value as YamlScalarNode).Value;
+                        }
+                    }
+                }
             }
             
             foreach (var property in model.Properties)

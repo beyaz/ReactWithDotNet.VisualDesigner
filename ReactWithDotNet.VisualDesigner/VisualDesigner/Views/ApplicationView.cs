@@ -340,17 +340,15 @@ sealed class ApplicationView : Component<ApplicationState>
         }
     }
 
-    Task JsonTextInComponentSettingsUpdatedByUser()
+    Task YamlTextUpdatedByUser()
     {
-        state.JsonText = JsonPrettify(state.JsonText);
-
         switch (state.LeftPanelSelectedTab)
         {
             case LeftPanelTab.Props:
-                return UpdateUserVersion(state, x => x with { PropsAsJson = state.JsonText });
+                return UpdateUserVersion(state, x => x with { PropsAsYaml = state.YamlText });
 
             case LeftPanelTab.State:
-                return UpdateUserVersion(state, x => x with { StateAsJson = state.JsonText });
+                return UpdateUserVersion(state, x => x with { StateAsYaml = state.YamlText });
 
             default:
                 throw new ArgumentOutOfRangeException();
@@ -601,7 +599,7 @@ sealed class ApplicationView : Component<ApplicationState>
                     {
                         state.LeftPanelSelectedTab = LeftPanelTab.Props;
 
-                        ShowErrorIfExist(await GetComponenUserOrMainVersion(state).Then(x => { state.JsonText = x.PropsAsJson; }));
+                        ShowErrorIfExist(await GetComponenUserOrMainVersion(state).Then(x => { state.YamlText = x.PropsAsYaml; }));
                     })
                 },
                 new FlexRowCentered(WidthFull, Opacity(0.7), When(state.LeftPanelSelectedTab == LeftPanelTab.State, Color(Gray500)))
@@ -611,7 +609,7 @@ sealed class ApplicationView : Component<ApplicationState>
                     {
                         state.LeftPanelSelectedTab = LeftPanelTab.State;
 
-                        ShowErrorIfExist(await GetComponenUserOrMainVersion(state).Then(x => { state.JsonText = x.StateAsJson; }));
+                        ShowErrorIfExist(await GetComponenUserOrMainVersion(state).Then(x => { state.YamlText = x.StateAsYaml; }));
                     })
                 }
             },
@@ -803,10 +801,10 @@ sealed class ApplicationView : Component<ApplicationState>
             {
                 new Editor
                 {
-                    defaultLanguage          = "json",
-                    valueBind                = () => state.JsonText,
+                    defaultLanguage          = "yaml",
+                    valueBind                = () => state.YamlText,
                     valueBindDebounceTimeout = 700,
-                    valueBindDebounceHandler = JsonTextInComponentSettingsUpdatedByUser,
+                    valueBindDebounceHandler = YamlTextUpdatedByUser,
                     options =
                     {
                         renderLineHighlight = "none",

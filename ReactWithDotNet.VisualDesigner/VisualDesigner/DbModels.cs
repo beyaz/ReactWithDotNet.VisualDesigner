@@ -25,9 +25,9 @@ public sealed record ComponentEntity
     
     public required string Name { get; init; }
 
-    public string PropsAsJson { get; init; }
+    public string PropsAsYaml { get; init; }
 
-    public string StateAsJson { get; init; }
+    public string StateAsYaml { get; init; }
     
     public string RootElementAsJson { get; init; }
 
@@ -50,9 +50,9 @@ public sealed record ComponentHistoryEntity
     
     public required string Name { get; init; }
 
-    public string PropsAsJson { get; init; }
+    public string PropsAsYaml { get; init; }
 
-    public string StateAsJson { get; init; }
+    public string StateAsYaml { get; init; }
     
     public string RootElementAsJson { get; init; }
 

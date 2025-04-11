@@ -37,8 +37,8 @@ static class ApplicationLogic
             }
 
             // Check if the user version is the same as the main version
-            if (mainVersion.PropsAsJson == userVersion.PropsAsJson &&
-                mainVersion.StateAsJson == userVersion.StateAsJson &&
+            if (mainVersion.PropsAsYaml == userVersion.PropsAsYaml &&
+                mainVersion.StateAsYaml == userVersion.StateAsYaml &&
                 mainVersion.RootElementAsJson == SerializeToJson(state.ComponentRootElement))
             {
                 return Fail($"User ({state.UserName}) has no change to commit.");
@@ -54,16 +54,16 @@ static class ApplicationLogic
                 ProjectId         = mainVersion.ProjectId,
                 Name              = mainVersion.Name,
                 RootElementAsJson = mainVersion.RootElementAsJson,
-                PropsAsJson       = mainVersion.PropsAsJson,
-                StateAsJson       = mainVersion.StateAsJson,
+                PropsAsYaml       = mainVersion.PropsAsYaml,
+                StateAsYaml       = mainVersion.StateAsYaml,
                 LastAccessTime    = mainVersion.LastAccessTime,
                 UserName          = userVersion.UserName
             });
 
             mainVersion = mainVersion with
             {
-                PropsAsJson = userVersion.PropsAsJson,
-                StateAsJson = userVersion.StateAsJson,
+                PropsAsYaml = userVersion.PropsAsYaml,
+                StateAsYaml = userVersion.StateAsYaml,
                 RootElementAsJson = userVersion.RootElementAsJson
             };
 

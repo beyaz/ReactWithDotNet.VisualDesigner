@@ -58,7 +58,7 @@ public sealed class ApplicationState
     
     public LeftPanelTab LeftPanelSelectedTab { get; set; }
     
-    public string JsonText { get; set; }
+    public string YamlText { get; set; }
 
     public required ApplicationSelectionState Selection { get; set; }
     
