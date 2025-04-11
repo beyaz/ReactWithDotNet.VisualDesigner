@@ -149,9 +149,9 @@ static class Exporter_For_NextJs_with_Tailwind
             return new() { ClassName = tag.Split('/').Last(), Package = $"@/components/{tag}" };
         }
 
-        if (tag == "Popover" || tag == "PopoverTrigger" || tag == "PopoverContent")
+        if (tag == "Popover" || tag == "PopoverTrigger" || tag == "PopoverContent" || tag == "heroui/Checkbox")
         {
-            return new() { ClassName = tag, Package = "@heroui/react", IsNamed = true}; 
+            return new() { ClassName = tag.Split('/').Last(), Package = "@heroui/react", IsNamed = true}; 
         }
 
         return null;
@@ -233,270 +233,181 @@ static class Exporter_For_NextJs_with_Tailwind
                 var (success, name, value) = TryParsePropertyValue(styleItem);
                 if (success)
                 {
-                    if (name == "W" || name == "w" || name == "width")
+                    switch (name)
                     {
-                        if (value == "fit-content")
+                        case "W":
+                        case "w":
+                        case "width":
                         {
-                            classNames.Add("w-fit");
-                            continue;
-                        }
-
-                        classNames.Add($"w-[{value}px]");
-                        continue;
-                    }
-
-                    if (name == "h" || name == "height")
-                    {
-                        if (value == "fit-content")
-                        {
-                            classNames.Add("h-fit");
-                            continue;
-                        }
-
-                        classNames.Add($"h-[{value}px]");
-                        continue;
-                    }
-
-                    if (name == "max-width")
-                    {
-                        classNames.Add($"max-w-[{value}px]");
-                        continue;
-                    }
-
-                    if (name == "max-height")
-                    {
-                        classNames.Add($"max-h-[{value}px]");
-                        continue;
-                    }
-                    
-                    if (name == "min-width")
-                    {
-                        classNames.Add($"min-w-[{value}px]");
-                        continue;
-                    }
-
-                    if (name == "min-height")
-                    {
-                        classNames.Add($"min-h-[{value}px]");
-                        continue;
-                    }
-
-                    if (name == "pt")
-                    {
-                        classNames.Add($"pt-[{value}px]");
-                        continue;
-                    }
-
-                    if (name == "z-index")
-                    {
-                        classNames.Add($"z-[{value}]");
-                        continue;
-                    }
-
-                    if (name == "overflow-y" || name == "overflow-x")
-                    {
-                        classNames.Add($"{name}-{value}");
-                        continue;
-                    }
-
-                    if (name == "pb")
-                    {
-                        classNames.Add($"pb-[{value}px]");
-                        continue;
-                    }
-
-                    if (name == "pl")
-                    {
-                        classNames.Add($"pl-[{value}px]");
-                        continue;
-                    }
-
-                    if (name == "p")
-                    {
-                        classNames.Add($"p-[{value}px]");
-                        continue;
-                    }
-
-                    if (name == "border-top-left-radius")
-                    {
-                        classNames.Add($"rounded-tl-[{value}px]");
-                        continue;
-                    }
-
-                    if (name == "border-top-right-radius")
-                    {
-                        classNames.Add($"rounded-tr-[{value}px]");
-                        continue;
-                    }
-
-                    if (name == "border-bottom-left-radius")
-                    {
-                        classNames.Add($"rounded-bl-[{value}px]");
-                        continue;
-                    }
-
-                    if (name == "border-bottom-right-radius")
-                    {
-                        classNames.Add($"rounded-br-[{value}px]");
-                        continue;
-                    }
-
-                    if (name == "flex-grow")
-                    {
-                        classNames.Add($"flex-grow-[{value}]");
-                        continue;
-                    }
-
-                    if (name == "border-bottom-width")
-                    {
-                        classNames.Add($"border-b-[{value}px]");
-                        continue;
-                    }
-
-                    if (name == "border-top-width")
-                    {
-                        classNames.Add($"border-t-[{value}px]");
-                        continue;
-                    }
-
-                    if (name == "border-left-width")
-                    {
-                        classNames.Add($"border-l-[{value}px]");
-                        continue;
-                    }
-
-                    if (name == "border-right-width")
-                    {
-                        classNames.Add($"border-r-[{value}px]");
-                        continue;
-                    }
-
-                    if (name == "pr")
-                    {
-                        classNames.Add($"pr-[{value}px]");
-                        continue;
-                    }
-
-                    if (name == "px")
-                    {
-                        classNames.Add($"px-[{value}px]");
-                        continue;
-                    }
-
-                    if (name == "py")
-                    {
-                        classNames.Add($"py-[{value}px]");
-                        continue;
-                    }
-
-                    if (name == "display")
-                    {
-                        classNames.Add($"{value}");
-                        continue;
-                    }
-
-                    if (name == "color")
-                    {
-                        if (Project.Colors.TryGetValue(value, out var htmlColor))
-                        {
-                            value = htmlColor;
-                        }
-
-                        classNames.Add($"text-[{value}]");
-                        continue;
-                    }
-
-                    if (name == "gap")
-                    {
-                        classNames.Add($"gap-[{value}px]");
-                        continue;
-                    }
-
-                    if (name == "size")
-                    {
-                        classNames.Add($"size-[{value}px]");
-                        continue;
-                    }
-
-                    if (name == "bottom" || name == "top" || name == "left" || name == "right")
-                    {
-                        classNames.Add($"{name}-[{value}px]");
-                        continue;
-                    }
-
-                    if (name == "flex-direction")
-                    {
-                        if (value == "column")
-                        {
-                            classNames.Add("flex-col");
-                            continue;
-                        }
-                    }
-
-                    if (name == "align-items")
-                    {
-                        classNames.Add($"items-{value.RemoveFromStart("align-")}");
-                        continue;
-                    }
-
-                    if (name == "justify-content")
-                    {
-                        classNames.Add($"justify-{value.Split('-').Last()}");
-                        continue;
-                    }
-
-                    if (name == "border-radius")
-                    {
-                        classNames.Add($"rounded-[{value}px]");
-                        continue;
-                    }
-
-                    if (name == "font-size")
-                    {
-                        classNames.Add($"[font-size:{value}px]");
-                        continue;
-                    }
-
-                    if (name == "border")
-                    {
-                        var parts = value.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-                        if (parts.Length == 3)
-                        {
-                            if (Project.Colors.TryGetValue(parts[2], out var htmlColor))
+                            if (value == "fit-content")
                             {
-                                parts[2] = htmlColor;
-                            }
-
-                            if (parts[0] == "1px" && parts[1] == "solid")
-                            {
-                                classNames.Add("border");
-                                classNames.Add($"border-[{parts[2]}]");
+                                classNames.Add("w-fit");
                                 continue;
                             }
 
-                            classNames.Add($"border-[{parts[0]}]");
-                            classNames.Add($"border-[{parts[1]}]");
-                            classNames.Add($"border-[{parts[2]}]");
-
+                            classNames.Add($"w-[{value}px]");
                             continue;
                         }
-                    }
-
-                    if (name == "background" || name == "bg")
-                    {
-                        if (Project.Colors.TryGetValue(value, out var htmlColor))
+                        case "h":
+                        case "height":
                         {
-                            value = htmlColor;
+                            if (value == "fit-content")
+                            {
+                                classNames.Add("h-fit");
+                                continue;
+                            }
+
+                            classNames.Add($"h-[{value}px]");
+                            continue;
                         }
+                        
+                        case "max-width":
+                            classNames.Add($"max-w-[{value}px]");
+                            continue;
+                        case "max-height":
+                            classNames.Add($"max-h-[{value}px]");
+                            continue;
+                        case "min-width":
+                            classNames.Add($"min-w-[{value}px]");
+                            continue;
+                        case "min-height":
+                            classNames.Add($"min-h-[{value}px]");
+                            continue;
+                        case "pt":
+                            classNames.Add($"pt-[{value}px]");
+                            continue;
+                        case "z-index":
+                            classNames.Add($"z-[{value}]");
+                            continue;
+                        case "overflow-y":
+                        case "overflow-x":
+                            classNames.Add($"{name}-{value}");
+                            continue;
+                        case "pb":
+                            classNames.Add($"pb-[{value}px]");
+                            continue;
+                        case "pl":
+                            classNames.Add($"pl-[{value}px]");
+                            continue;
+                        case "p":
+                            classNames.Add($"p-[{value}px]");
+                            continue;
+                        case "border-top-left-radius":
+                            classNames.Add($"rounded-tl-[{value}px]");
+                            continue;
+                        case "border-top-right-radius":
+                            classNames.Add($"rounded-tr-[{value}px]");
+                            continue;
+                        case "border-bottom-left-radius":
+                            classNames.Add($"rounded-bl-[{value}px]");
+                            continue;
+                        case "border-bottom-right-radius":
+                            classNames.Add($"rounded-br-[{value}px]");
+                            continue;
+                        case "flex-grow":
+                            classNames.Add($"flex-grow-[{value}]");
+                            continue;
+                        case "border-bottom-width":
+                            classNames.Add($"border-b-[{value}px]");
+                            continue;
+                        case "border-top-width":
+                            classNames.Add($"border-t-[{value}px]");
+                            continue;
+                        case "border-left-width":
+                            classNames.Add($"border-l-[{value}px]");
+                            continue;
+                        case "border-right-width":
+                            classNames.Add($"border-r-[{value}px]");
+                            continue;
+                        case "pr":
+                            classNames.Add($"pr-[{value}px]");
+                            continue;
+                        case "px":
+                            classNames.Add($"px-[{value}px]");
+                            continue;
+                        case "py":
+                            classNames.Add($"py-[{value}px]");
+                            continue;
+                        case "display":
+                            classNames.Add($"{value}");
+                            continue;
+                        case "color":
+                        {
+                            if (Project.Colors.TryGetValue(value, out var htmlColor))
+                            {
+                                value = htmlColor;
+                            }
 
-                        classNames.Add($"bg-[{value}]");
-                        continue;
-                    }
+                            classNames.Add($"text-[{value}]");
+                            continue;
+                        }
+                        case "gap":
+                            classNames.Add($"gap-[{value}px]");
+                            continue;
+                        case "size":
+                            classNames.Add($"size-[{value}px]");
+                            continue;
+                        case "bottom":
+                        case "top":
+                        case "left":
+                        case "right":
+                            classNames.Add($"{name}-[{value}px]");
+                            continue;
+                        case "flex-direction" when value == "column":
+                            classNames.Add("flex-col");
+                            continue;
+                        case "align-items":
+                            classNames.Add($"items-{value.RemoveFromStart("align-")}");
+                            continue;
+                        case "justify-content":
+                            classNames.Add($"justify-{value.Split('-').Last()}");
+                            continue;
+                        case "border-radius":
+                            classNames.Add($"rounded-[{value}px]");
+                            continue;
+                        case "font-size":
+                            classNames.Add($"[font-size:{value}px]");
+                            continue;
+                        case "border":
+                        {
+                            var parts = value.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                            if (parts.Length == 3)
+                            {
+                                if (Project.Colors.TryGetValue(parts[2], out var htmlColor))
+                                {
+                                    parts[2] = htmlColor;
+                                }
 
-                    if (name == "position")
-                    {
-                        classNames.Add($"{value}");
-                        continue;
+                                if (parts[0] == "1px" && parts[1] == "solid")
+                                {
+                                    classNames.Add("border");
+                                    classNames.Add($"border-[{parts[2]}]");
+                                    continue;
+                                }
+
+                                classNames.Add($"border-[{parts[0]}]");
+                                classNames.Add($"border-[{parts[1]}]");
+                                classNames.Add($"border-[{parts[2]}]");
+
+                                continue;
+                            }
+
+                            break;
+                        }
+                        case "background":
+                        case "bg":
+                        {
+                            if (Project.Colors.TryGetValue(value, out var htmlColor))
+                            {
+                                value = htmlColor;
+                            }
+
+                            classNames.Add($"bg-[{value}]");
+                            continue;
+                        }
+                        case "position":
+                            classNames.Add($"{value}");
+                            continue;
                     }
                 }
 

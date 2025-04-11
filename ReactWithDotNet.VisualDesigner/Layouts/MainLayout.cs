@@ -63,6 +63,11 @@ sealed class MainLayout : PureComponent, IPageLayout
                 {
                     rel = "stylesheet", type = "text/css", href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css"
                 },
+                
+                new link
+                {
+                    rel = "stylesheet", type = "text/css", href="https://cdn.heroui.com/latest/heroui.css"
+                },
 
                 arrangeFonts(),
 
