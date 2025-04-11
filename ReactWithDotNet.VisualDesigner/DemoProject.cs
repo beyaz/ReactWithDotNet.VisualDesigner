@@ -45,3 +45,16 @@ class TravelersEditorState
 
     public bool isPetFriendly;
 }
+
+
+class DestinationEditorProps
+{
+    public int stayDayCount;
+}
+
+class DestinationEditorState
+{
+    public int stayDayCount;
+    
+    public int isInSearchMode;
+}

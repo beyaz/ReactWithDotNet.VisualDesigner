@@ -135,8 +135,6 @@ styles:
     font-weight: 500;
     line-height: 16px;
 
-
-
 globalCss: |
   @font-face {
     font-family: 'Host Grotesk';

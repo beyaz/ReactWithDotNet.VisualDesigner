@@ -387,7 +387,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
         return new SplitRow
         {
-            sizes = [20, 60, 20],
+            sizes = [25, 50, 25],
             children =
             {
                 await PartLeftPanel() + BorderBottomLeftRadius(8) + OverflowAuto,

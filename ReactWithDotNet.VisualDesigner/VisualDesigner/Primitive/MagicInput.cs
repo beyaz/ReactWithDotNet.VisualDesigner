@@ -125,7 +125,7 @@ sealed class MagicInput : Component<MagicInput.State>
         return Task.CompletedTask;
     }
 
-    [KeyboardEventCallOnly("ArrowDown", "ArrowUp", "Enter")]
+    [KeyboardEventCallOnly("ArrowDown", "ArrowUp", "Enter", "ArrowRight")]
     Task OnKeyDown(KeyboardEvent e)
     {
         if (state.ShowSuggestions is false)
@@ -200,6 +200,19 @@ sealed class MagicInput : Component<MagicInput.State>
                 state.Value = suggestions[state.SelectedSuggestionOffset.Value];
 
                 DispatchEvent(OnChange, [Name,state.Value]);
+            }
+        }
+        
+        if (e.key == "ArrowRight")
+        {
+            if (state.SelectedSuggestionOffset is not null)
+            {
+                if (suggestions.Count > state.SelectedSuggestionOffset.Value)
+                {
+                    state.Value = suggestions[state.SelectedSuggestionOffset.Value];
+
+                    state.ShowSuggestions = false;
+                }
             }
         }
 

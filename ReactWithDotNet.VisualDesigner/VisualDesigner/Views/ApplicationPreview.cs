@@ -99,7 +99,11 @@ sealed class ApplicationPreview : Component
             }
             else if (model.Tag == "img")
             {
-                element = new img();
+                element = new img{ src = DummySrc(500)};
+            }
+            else if (model.Tag == "input")
+            {
+                element = new input();
             }
             else if (model.Tag == "heroui/Checkbox")
             {
@@ -177,7 +181,14 @@ sealed class ApplicationPreview : Component
                             elementAsImage.src = Path.Combine(Context.wwwroot, value);
                         }
                     }
-                    
+
+                    if (element is input elementAsInput)
+                    {
+                        if (name.Equals("type", StringComparison.OrdinalIgnoreCase))
+                        {
+                            elementAsInput.type = value;
+                        }
+                    }
                 }
             }
 
