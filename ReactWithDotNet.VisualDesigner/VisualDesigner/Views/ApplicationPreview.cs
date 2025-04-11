@@ -87,9 +87,8 @@ sealed class ApplicationPreview : Component
             }
         }
         
-
-        return renderElement(rootElement,"0");
-
+        return renderElement(rootElement, "0");
+        
         Element renderElement(VisualElementModel model, string path)
         {
             HtmlElement element = new div();
