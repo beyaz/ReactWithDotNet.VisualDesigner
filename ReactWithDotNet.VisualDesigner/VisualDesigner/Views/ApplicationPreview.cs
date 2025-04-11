@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Text;
+using ReactWithDotNet.ThirdPartyLibraries.HeroUI;
 
 namespace ReactWithDotNet.VisualDesigner.Views;
 
@@ -100,6 +101,10 @@ sealed class ApplicationPreview : Component
             else if (model.Tag == "img")
             {
                 element = new img();
+            }
+            else if (model.Tag == "heroui/Checkbox")
+            {
+                return  new Checkbox();
             }
 
             if (model.Tag.Length > 3)
@@ -252,6 +257,18 @@ sealed class ApplicationPreview : Component
 
                     switch (name)
                     {
+                        case "min-width":
+                        {
+                            if (isValueDouble)
+                            {
+                                element.Add(MinWidth(valueAsDouble));
+                                continue;
+                            }
+                            
+                            element.Add(MinWidth(value));
+                            continue;
+                        }
+                        
                         case "top":
                         {
                             if (isValueDouble)

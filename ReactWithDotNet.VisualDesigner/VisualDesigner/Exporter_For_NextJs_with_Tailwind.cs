@@ -268,6 +268,18 @@ static class Exporter_For_NextJs_with_Tailwind
                         classNames.Add($"max-h-[{value}px]");
                         continue;
                     }
+                    
+                    if (name == "min-width")
+                    {
+                        classNames.Add($"min-w-[{value}px]");
+                        continue;
+                    }
+
+                    if (name == "min-height")
+                    {
+                        classNames.Add($"min-h-[{value}px]");
+                        continue;
+                    }
 
                     if (name == "pt")
                     {
