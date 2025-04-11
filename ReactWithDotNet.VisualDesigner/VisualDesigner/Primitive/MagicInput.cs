@@ -46,7 +46,7 @@ sealed class MagicInput : Component<MagicInput.State>
 
     protected override Element render()
     {
-        return new FlexColumn(FitContent is false ? FlexGrow(1) : null)
+        return new FlexColumn(FitContent is false ? WidthFull : null)
         {
             new input
             {

@@ -408,6 +408,8 @@ static class ApplicationLogic
         var suggestions = new List<string>(TagNameList);
 
         suggestions.AddRange((await GetAllComponentNamesInProject(state.ProjectId)).Where(name => name != state.ComponentName));
+        
+        suggestions.Add("heroui/Checkbox");
 
         return suggestions;
     }

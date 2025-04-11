@@ -13,13 +13,16 @@ static class CecilHelper
     
     public static TypeDefinition GetPropsTypeDefinition(ApplicationState state)
     {
+        var searchTypeName = state.ComponentName.Split('/').Last()+"Props";
+        
         var assembly = GetAssemblyDefinition(state);
         
         foreach (var moduleDefinition in assembly.Modules)
         {
             foreach (var typeDefinition in moduleDefinition.Types)
             {
-                if (typeDefinition.Name == state.ComponentName+"Props")
+                
+                if (typeDefinition.Name == searchTypeName)
                 {
                     return typeDefinition;
                 }
@@ -31,13 +34,15 @@ static class CecilHelper
     
     public static TypeDefinition GetStateTypeDefinition(ApplicationState state)
     {
+        var searchTypeName = state.ComponentName.Split('/').Last()+"State";
+        
         var assembly = GetAssemblyDefinition(state);
         
         foreach (var moduleDefinition in assembly.Modules)
         {
             foreach (var typeDefinition in moduleDefinition.Types)
             {
-                if (typeDefinition.Name == state.ComponentName+"State")
+                if (typeDefinition.Name == searchTypeName)
                 {
                     return typeDefinition;
                 }

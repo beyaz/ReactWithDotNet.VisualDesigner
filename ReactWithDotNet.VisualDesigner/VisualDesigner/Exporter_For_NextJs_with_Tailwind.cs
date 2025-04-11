@@ -59,7 +59,7 @@ static class Exporter_For_NextJs_with_Tailwind
         if (stateTypeDefinition is not null)
         {
             
-            sourceFile.Imports.Add(new(){ ClassName = "Logic", Package = $"@/components/{state.ComponentName}.Logic", IsNamed = true});
+            sourceFile.Imports.Add(new(){ ClassName = "initializeState, logic", Package = $"@/components/{state.ComponentName}.Logic", IsNamed = true});
             
            
             sourceFile.Body.Add("");
@@ -67,7 +67,7 @@ static class Exporter_For_NextJs_with_Tailwind
             sourceFile.Body.Add("{");
             sourceFile.Body.Add("    setState((prevState: State) =>");
             sourceFile.Body.Add("    {");
-            sourceFile.Body.Add("        Logic[name as keyof typeof Logic](props, prevState);");
+            sourceFile.Body.Add("        logic(props, prevState)[name]();");
             sourceFile.Body.Add("");
             sourceFile.Body.Add("        return { ...prevState };");
             sourceFile.Body.Add("    });");
@@ -146,7 +146,12 @@ static class Exporter_For_NextJs_with_Tailwind
         var component = GetComponenUserOrMainVersion(projectId, tag, userName);
         if (component is not null)
         {
-            return new ImportInfo { ClassName = tag, Package = $"@/components/{tag}" };
+            return new() { ClassName = tag.Split('/').Last(), Package = $"@/components/{tag}" };
+        }
+
+        if (tag == "Popover" || tag == "PopoverTrigger" || tag == "PopoverContent")
+        {
+            return new() { ClassName = tag, Package = "@heroui/react", IsNamed = true}; 
         }
 
         return null;
@@ -424,11 +429,8 @@ static class Exporter_For_NextJs_with_Tailwind
 
                     if (name == "justify-content")
                     {
-                        if (value == "space-between")
-                        {
-                            classNames.Add("justify-between");
-                            continue;
-                        }
+                        classNames.Add($"justify-{value.Split('-').Last()}");
+                        continue;
                     }
 
                     if (name == "border-radius")
@@ -502,6 +504,13 @@ static class Exporter_For_NextJs_with_Tailwind
         }
 
         if (element.Text == childrenIdentifier && componentDefinition.HasChildrenDeclerationInProps())
+        {
+            node.Children.Add(new() { Text = element.Text });
+
+            return node;
+        }
+
+        if ((element.Text + string.Empty).StartsWith("props.") || (element.Text + string.Empty).StartsWith("state."))
         {
             node.Children.Add(new() { Text = element.Text });
 
@@ -594,7 +603,7 @@ static class Exporter_For_NextJs_with_Tailwind
         }
 
         file.AppendLine();
-        file.AppendLine($"export default function {componentDefinition.ComponentName}({(componentDefinition.PropsParameterTypeName.HasNoValue() ? string.Empty : "props: Props")}) {{");
+        file.AppendLine($"export default function {componentDefinition.ComponentName.Split('/').Last()}({(componentDefinition.PropsParameterTypeName.HasNoValue() ? string.Empty : "props: Props")}) {{");
 
         foreach (var line in componentDefinition.Body)
         {
@@ -605,9 +614,8 @@ static class Exporter_For_NextJs_with_Tailwind
 
         if (componentDefinition.HasState)
         {
-
             file.AppendLine();
-            file.AppendLine($"{Indent(1)}const [state, setState] = useState<State>(() => Logic.createInitialState(props));");
+            file.AppendLine($"{Indent(1)}const [state, setState] = useState<State>(() => initializeState(props));");
         }
 
         file.AppendLine();
@@ -620,18 +628,24 @@ static class Exporter_For_NextJs_with_Tailwind
 
     static void WriteTo(StringBuilder sb, ComponentDefinition componentDefinition, ReactNode node, int indentLevel)
     {
-        if (node.Tag is null)
+        var nodeTag = node.Tag;
+        
+        if (nodeTag is null)
         {
             if (node.Text.HasValue())
             {
                 sb.AppendLine(Indent(indentLevel) + node.Text);
                 return;
             }
+
+            throw new ArgumentNullException(nameof(nodeTag));
         }
+
+        var tag = nodeTag.Split('/').Last();
         
         var indent = new string(' ', indentLevel * 4);
 
-        sb.Append($"{indent}<{node.Tag}");
+        sb.Append($"{indent}<{tag}");
 
         foreach (var reactProperty in node.Properties)
         {
@@ -668,10 +682,25 @@ static class Exporter_For_NextJs_with_Tailwind
                     sb.AppendLine($"{Indent(indentLevel + 1)}{{ props.children }}");
 
                     // Close tag
-                    sb.AppendLine($"{indent}</{node.Tag}>");
+                    sb.AppendLine($"{indent}</{tag}>");
 
                     return;
                 }
+            }
+        }
+
+        // from props
+        {
+            if (node.Children.Count == 1 && (node.Children[0].Text + string.Empty).StartsWith("props.") || (node.Children[0].Text + string.Empty).StartsWith("state."))
+            {
+                sb.AppendLine(">");
+
+                sb.AppendLine($"{Indent(indentLevel + 1)}{{ {node.Children[0].Text} }}");
+
+                // Close tag
+                sb.AppendLine($"{indent}</{tag}>");
+
+                return;
             }
         }
         
@@ -690,7 +719,7 @@ static class Exporter_For_NextJs_with_Tailwind
         }
 
         // Close tag
-        sb.AppendLine($"{indent}</{node.Tag}>");
+        sb.AppendLine($"{indent}</{tag}>");
     }
 
     class ComponentDefinition
