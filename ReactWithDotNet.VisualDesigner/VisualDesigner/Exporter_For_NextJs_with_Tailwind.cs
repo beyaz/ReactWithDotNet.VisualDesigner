@@ -1,6 +1,5 @@
 ﻿using System.IO;
 using System.Text;
-using Mono.Cecil;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
@@ -10,259 +9,6 @@ static class Exporter_For_NextJs_with_Tailwind
 {
     const string childrenIdentifier = "[...]";
 
-    static (List<string> lines, List<ImportInfo> imports)  TryWriteProps(ComponentEntity cmp, int indent)
-    {
-        List<string> lines = [];
-
-        List<ImportInfo> imports = [];
-
-        if (cmp.PropsAsYaml.HasNoValue())
-        {
-            return (lines, imports);
-        }
-        
-        
-        lines.Add($"{Indent(indent)}export interface Props {{");
-
-        indent++;
-
-        // body
-        {
-            var result = TryWriteInterfaceBody(indent, cmp.PropsAsYaml);
-        
-            lines.AddRange(result.lines);
-        
-            imports.AddRange(result.imports);
-        }
-        
-        indent--;
-        
-        lines.Add($"{Indent(indent)}}}");
-        
-        return (lines, imports);
-    }
-    
-    static (List<string> lines, List<ImportInfo> imports)  TryWriteState(ComponentEntity cmp, int indent)
-    {
-        List<string> lines = [];
-
-        List<ImportInfo> imports = [];
-
-        if (cmp.StateAsYaml.HasNoValue())
-        {
-            return (lines, imports);
-        }
-        
-        
-        lines.Add($"{Indent(indent)}export interface State {{");
-
-        indent++;
-
-        // body
-        {
-            var result = TryWriteInterfaceBody(indent, cmp.StateAsYaml);
-        
-            lines.AddRange(result.lines);
-        
-            imports.AddRange(result.imports);
-        }
-        
-        indent--;
-        
-        lines.Add($"{Indent(indent)}}}");
-        
-        return (lines, imports);
-    }
-    
-    static (List<string> lines, List<ImportInfo> imports) TryWriteInterfaceBody(int indent, string yaml)
-    {
-        List<string> lines = [];
-
-        List<ImportInfo> imports = [];
-        
-        var deserializer = new DeserializerBuilder()
-            .WithNamingConvention(CamelCaseNamingConvention.Instance)
-            .Build();
-
-        var yamlObject = deserializer.Deserialize<Dictionary<string, object>>(yaml);
-            
-        foreach (var kvp in yamlObject)
-        {
-            string propertyName = kvp.Key;
-            string tsTypeName = InferTsTypeName(kvp.Value?.ToString());
-
-            var isNullable = propertyName.TrimEnd().EndsWith("?");
-            
-            if (isNullable)
-            {
-                propertyName = propertyName.RemoveFromEnd("?");
-            }
-            
-            lines.Add($"{Indent(indent)}{propertyName}{(isNullable ? "?" : string.Empty)}: {tsTypeName};");
-        }
-
-        return (lines, imports);
-
-        string InferTsTypeName(string value)
-        {
-            if (value == null)
-            {
-                return "string";
-            }
-
-            value = value.Trim();
-
-            if (bool.TryParse(value, out _))
-            {
-                return "boolean";
-            }
-
-            if (int.TryParse(value, out _))
-            {
-                return "number";
-            }
-
-            if (value.StartsWith("() =>"))
-            {
-                return value;
-            }
-
-            if (value.Equals("ReactNode", StringComparison.OrdinalIgnoreCase))
-            {
-                imports.Add(new() { ClassName = "React", Package = "react" });
-                
-                return "React.ReactNode";
-            }
-
-            return "string"; 
-        }
-
-        static string ToPascalCase(string input)
-        {
-            if (string.IsNullOrEmpty(input)) return input;
-            
-            return char.ToUpperInvariant(input[0]) + input.Substring(1);
-        }
-    }
-    
-    static (List<string> lines, List<ImportInfo> imports) AsLines(ComponentEntity component, string userName)
-    {
-        List<ImportInfo> imports = [];
-        
-        List<string> lines = [];
-        
-        bool hasState = false;
-
-        var hasProps = false;
-
-        var hasChildrenDeclerationInProps = false;
-
-        // TryWriteProps
-        {
-            var result = TryWriteProps(component, 0);
-
-            hasProps = result.lines.Any();
-            
-            if (hasProps)
-            {
-                lines.Add(string.Empty);
-                
-                lines.AddRange(result.lines);
-            
-                imports.AddRange(result.imports);
-            }
-           
-
-            
-            
-            hasChildrenDeclerationInProps = result.lines.Any(x => x.TrimStart().StartsWith("children", StringComparison.OrdinalIgnoreCase));
-        }
-        
-        // TryWriteState
-        {
-            var result = TryWriteState(component, 0);
-            
-            lines.AddRange(result.lines);
-            
-            imports.AddRange(result.imports);
-
-            if (result.lines.Any())
-            {
-                imports.Add(new ImportInfo{ ClassName = "useState", Package = "react", IsNamed = true});
-
-                hasState = true;
-            }
-        }
-
-     
-        
-        lines.Add(string.Empty);
-        lines.Add($"export default function {component.Name.Split('/').Last()}({(hasProps ? "props: Props": string.Empty)}) {{");
-
-        if (hasState)
-        {
-            imports.Add(new(){ ClassName = "initializeState, logic", Package = $"@/components/{component.Name}.Logic", IsNamed = true});
-            
-            lines.Add(string.Empty);
-            lines.Add($"{Indent(1)}const [state, setState] = useState<State>(() => initializeState(props));");
-        }
-        
-        
-        {
-            var rootVisualElement = DeserializeFromJson<VisualElementModel>(component.RootElementAsJson ?? "");
-            
-            var result = ConvertToReactNode(( component,userName,hasChildrenDeclerationInProps), rootVisualElement);
-            
-            imports.AddRange(result.imports);
-            
-            foreach (var line in result.bodyLines.Distinct())
-            {
-                lines.Add($"{Indent(1)}{line}");
-            }
-            
-            if (hasState)
-            {
-                lines.Add("");
-                lines.Add(1,"const call = (name: string, ...args: any[]) =>");
-                lines.Add(1,"{");
-                lines.Add(1,"    setState((prevState: State) =>");
-                lines.Add(1,"    {");
-                lines.Add(1,"        logic(props, prevState)[name](...args);");
-                lines.Add("");
-                lines.Add(1,"        return { ...prevState };");
-                lines.Add(1,"    });");
-                lines.Add(1,"};");
-            
-            }
-            
-            lines.Add(string.Empty);
-            lines.Add($"{Indent(1)}return (");
-            
-            WriteTo(lines, hasChildrenDeclerationInProps, result.node, 2);
-
-            
-            lines.Add($"{Indent(1)});");
-
-            lines.Add("}");
-            
-        }
-
-        
-        
-        
-        
-       
-
-        
-
-        
-
-
-        return (lines, imports);
-
-
-    }
-    
     public static async Task<Result> Export(ApplicationState state)
     {
         var result = await CalculateExportInfo(state);
@@ -270,82 +16,170 @@ static class Exporter_For_NextJs_with_Tailwind
         {
             return result.Error;
         }
+
         var (filePath, fileContent) = result.Value;
-        
+
         return await TryWriteToFile(filePath, fileContent);
     }
 
-    static async Task<Result> TryWriteToFile(string filePath, string fileContent)
+    static void Add(this List<string> list, int indentLevel, string value)
     {
-        try
+        list.Add(Indent(indentLevel) + value);
+    }
+
+    static (List<string> lines, List<ImportInfo> imports) AsLines(ComponentEntity component, string userName)
+    {
+        List<ImportInfo> imports = [];
+
+        List<string> lines = [];
+
+        var hasState = false;
+
+        bool hasProps;
+
+        bool hasChildrenDeclerationInProps;
+
+        // TryWriteProps
         {
-            await File.WriteAllTextAsync(filePath, fileContent);
-        }
-        catch (Exception exception)
-        {
-            return exception;
+            var result = TryWriteProps(component, 0);
+
+            hasProps = result.lines.Any();
+
+            if (hasProps)
+            {
+                lines.Add(string.Empty);
+
+                lines.AddRange(result.lines);
+
+                imports.AddRange(result.imports);
+            }
+
+            hasChildrenDeclerationInProps = result.lines.Any(x => x.TrimStart().StartsWith("children", StringComparison.OrdinalIgnoreCase));
         }
 
-        return Success;
+        // TryWriteState
+        {
+            var result = TryWriteState(component, 0);
+
+            lines.AddRange(result.lines);
+
+            imports.AddRange(result.imports);
+
+            if (result.lines.Any())
+            {
+                imports.Add(new() { ClassName = "useState", Package = "react", IsNamed = true });
+
+                hasState = true;
+            }
+        }
+
+        lines.Add(string.Empty);
+        lines.Add($"export default function {component.Name.Split('/').Last()}({(hasProps ? "props: Props" : string.Empty)}) {{");
+
+        if (hasState)
+        {
+            imports.Add(new() { ClassName = "initializeState, logic", Package = $"@/components/{component.Name}.Logic", IsNamed = true });
+
+            lines.Add(string.Empty);
+            lines.Add($"{Indent(1)}const [state, setState] = useState<State>(() => initializeState(props));");
+        }
+
+        {
+            var rootVisualElement = DeserializeFromJson<VisualElementModel>(component.RootElementAsJson ?? "");
+
+            var result = ConvertToReactNode((component, userName, hasChildrenDeclerationInProps), rootVisualElement);
+
+            imports.AddRange(result.imports);
+
+            foreach (var line in result.bodyLines.Distinct())
+            {
+                lines.Add($"{Indent(1)}{line}");
+            }
+
+            if (hasState)
+            {
+                lines.Add("");
+                lines.Add(1, "const call = (name: string, ...args: any[]) =>");
+                lines.Add(1, "{");
+                lines.Add(1, "    setState((prevState: State) =>");
+                lines.Add(1, "    {");
+                lines.Add(1, "        logic(props, prevState)[name](...args);");
+                lines.Add("");
+                lines.Add(1, "        return { ...prevState };");
+                lines.Add(1, "    });");
+                lines.Add(1, "};");
+            }
+
+            lines.Add(string.Empty);
+            lines.Add($"{Indent(1)}return (");
+
+            WriteTo(lines, hasChildrenDeclerationInProps, result.node, 2);
+
+            lines.Add($"{Indent(1)});");
+
+            lines.Add("}");
+        }
+
+        return (lines, imports);
     }
-    
-    
+
+    static IReadOnlyList<string> AsTsLines(this IReadOnlyList<ImportInfo> imports)
+    {
+        List<string> lines = [];
+
+        foreach (var import in imports.DistinctBy(x => x.Package + x.ClassName))
+        {
+            if (import.IsNamed)
+            {
+                lines.Add($"import {{ {import.ClassName} }} from \"{import.Package}\";");
+            }
+            else
+            {
+                lines.Add($"import {import.ClassName} from \"{import.Package}\";");
+            }
+        }
+
+        return lines;
+    }
+
     static async Task<Result<(string filePath, string fileContent)>> CalculateExportInfo(ApplicationState state)
     {
         ComponentEntity component;
         {
-            var result =  await GetComponenUserOrMainVersion(state);
+            var result = await GetComponenUserOrMainVersion(state);
             if (result.HasError)
             {
                 return result.Error;
             }
-            
+
             component = result.Value;
         }
-        
+
         string fileContent;
         {
             var result = AsLines(component, state.UserName);
 
             var fileLines = new List<string>(result.imports.AsTsLines());
-        
-            
+
             fileLines.AddRange(result.lines);
 
             fileContent = string.Join(Environment.NewLine, fileLines);
         }
 
         var filePath = $"{GetExportFolderPath()}{state.ComponentName}.tsx";
-        
+
         return (filePath, fileContent);
     }
 
-
-    static ImportInfo GetTagImportInfo(int projectId, string userName, string tag)
-    {
-        var component = GetComponenUserOrMainVersion(projectId, tag, userName);
-        if (component is not null)
-        {
-            return new() { ClassName = tag.Split('/').Last(), Package = $"@/components/{tag}" };
-        }
-
-        if (tag == "Popover" || tag == "PopoverTrigger" || tag == "PopoverContent" || tag == "heroui/Checkbox")
-        {
-            return new() { ClassName = tag.Split('/').Last(), Package = "@heroui/react", IsNamed = true}; 
-        }
-
-        return null;
-    }
-    
-    static (ReactNode node, List<string> bodyLines, List<ImportInfo> imports) 
-        ConvertToReactNode( (ComponentEntity component,string userName,bool hasChildrenDeclerationInProps) context,  VisualElementModel element)
+    static (ReactNode node, List<string> bodyLines, List<ImportInfo> imports)
+        ConvertToReactNode((ComponentEntity component, string userName, bool hasChildrenDeclerationInProps) context, VisualElementModel element)
     {
         var (component, userName, hasChildrenDeclerationInProps) = context;
-            
+
         List<ImportInfo> imports = [];
-        
+
         List<string> bodyLines = [];
-        
+
         List<string> classNames = [];
 
         // Open tag
@@ -353,19 +187,18 @@ static class Exporter_For_NextJs_with_Tailwind
 
         if (tag == "a")
         {
-            imports.Add(new ImportInfo{ ClassName = "Link", Package = "next/link"});
+            imports.Add(new() { ClassName = "Link", Package = "next/link" });
             tag = "Link";
         }
 
         if (tag == "img")
         {
-            imports.Add(new ImportInfo{ ClassName = "Image", Package = "next/image"});
-            
+            imports.Add(new() { ClassName = "Image", Package = "next/image" });
+
             tag = "Image";
         }
 
-        imports.TryAdd(GetTagImportInfo(component.ProjectId, userName, tag));
-        
+        imports.Add(GetTagImportInfo(component.ProjectId, userName, tag));
 
         var node = new ReactNode { Tag = tag };
 
@@ -403,7 +236,7 @@ static class Exporter_For_NextJs_with_Tailwind
                     node.Properties.Add(new() { Name = name, Value = value });
                     continue;
                 }
-                
+
                 var componentInProject = GetComponenUserOrMainVersion(component.ProjectId, tag, userName);
                 if (componentInProject is not null)
                 {
@@ -414,8 +247,8 @@ static class Exporter_For_NextJs_with_Tailwind
                 // process as external
                 {
                     var isConnectedToExternalComponent = false;
-                
-                    foreach (var externalComponent in Project.ExternalComponents.Where(x=>x.Name==tag))
+
+                    foreach (var externalComponent in Project.ExternalComponents.Where(x => x.Name == tag))
                     {
                         var @event = externalComponent.Events.FirstOrDefault(e => e.Name == name);
                         if (@event is not null)
@@ -424,7 +257,7 @@ static class Exporter_For_NextJs_with_Tailwind
 
                             if (@event.Parameters.Any())
                             {
-                                var partPrm = string.Join(", ", @event.Parameters.Select(p=>p.Name));
+                                var partPrm = string.Join(", ", @event.Parameters.Select(p => p.Name));
 
                                 node.Properties.Add(new()
                                 {
@@ -450,7 +283,7 @@ static class Exporter_For_NextJs_with_Tailwind
                         continue;
                     }
                 }
-                
+
                 node.Properties.Add(new() { Name = name, Value = '"' + value + '"' });
             }
         }
@@ -489,7 +322,7 @@ static class Exporter_For_NextJs_with_Tailwind
                             classNames.Add($"h-[{value}px]");
                             continue;
                         }
-                        
+
                         case "max-width":
                             classNames.Add($"max-w-[{value}px]");
                             continue;
@@ -652,21 +485,21 @@ static class Exporter_For_NextJs_with_Tailwind
         var hasSelfClose = element.Children.Count == 0 && element.Text.HasNoValue();
         if (hasSelfClose)
         {
-            return (node, bodyLines ,imports);
+            return (node, bodyLines, imports);
         }
 
         if (element.Text == childrenIdentifier && hasChildrenDeclerationInProps)
         {
             node.Children.Add(new() { Text = element.Text });
 
-            return (node,  bodyLines ,imports);
+            return (node, bodyLines, imports);
         }
 
         if ((element.Text + string.Empty).StartsWith("props.") || (element.Text + string.Empty).StartsWith("state."))
         {
             node.Children.Add(new() { Text = element.Text });
 
-            return (node,  bodyLines ,imports);
+            return (node, bodyLines, imports);
         }
 
         // Add text content
@@ -674,7 +507,7 @@ static class Exporter_For_NextJs_with_Tailwind
         {
             if (imports.All(x => x.ClassName != "useTranslations"))
             {
-                imports.Add(new ImportInfo{ ClassName = "useTranslations", Package = "next-intl", IsNamed = true});
+                imports.Add(new() { ClassName = "useTranslations", Package = "next-intl", IsNamed = true });
 
                 bodyLines.Add(string.Empty);
                 bodyLines.Add("const t = useTranslations();");
@@ -689,17 +522,17 @@ static class Exporter_For_NextJs_with_Tailwind
             ReactNode childNode;
             {
                 var result = ConvertToReactNode(context, child);
-                
+
                 childNode = result.node;
-                
+
                 bodyLines.AddRange(result.bodyLines);
                 imports.AddRange(result.imports);
             }
-            
+
             node.Children.Add(childNode);
         }
 
-        return (node, bodyLines ,imports);
+        return (node, bodyLines, imports);
     }
 
     static string GetExportFolderPath()
@@ -707,9 +540,20 @@ static class Exporter_For_NextJs_with_Tailwind
         return "C:\\github\\hopgogo\\web\\enduser-ui\\src\\components\\";
     }
 
-    static bool HasChildrenDeclerationInProps(this ComponentDefinition definition)
+    static ImportInfo GetTagImportInfo(int projectId, string userName, string tag)
     {
-        return definition.PropsDecleration?.PropertySignatures.Any(x => x.Identifier == "children") is true;
+        var component = GetComponenUserOrMainVersion(projectId, tag, userName);
+        if (component is not null)
+        {
+            return new() { ClassName = tag.Split('/').Last(), Package = $"@/components/{tag}" };
+        }
+
+        if (tag == "Popover" || tag == "PopoverTrigger" || tag == "PopoverContent" || tag == "heroui/Checkbox")
+        {
+            return new() { ClassName = tag.Split('/').Last(), Package = "@heroui/react", IsNamed = true };
+        }
+
+        return null;
     }
 
     static string Indent(int indentLevel)
@@ -717,36 +561,150 @@ static class Exporter_For_NextJs_with_Tailwind
         return new(' ', indentLevel * 4);
     }
 
-    
-
-    static IReadOnlyList<string> AsTsLines(this IReadOnlyList<ImportInfo> imports)
+    static (List<string> lines, List<ImportInfo> imports) TryWriteInterfaceBody(int indent, string yaml)
     {
         List<string> lines = [];
-        
-        foreach (var import in imports.DistinctBy(x=>x.Package + x.ClassName))
+
+        List<ImportInfo> imports = [];
+
+        var deserializer = new DeserializerBuilder()
+            .WithNamingConvention(CamelCaseNamingConvention.Instance)
+            .Build();
+
+        var yamlObject = deserializer.Deserialize<Dictionary<string, object>>(yaml);
+
+        foreach (var kvp in yamlObject)
         {
-            if (import.IsNamed)
+            var propertyName = kvp.Key;
+            var tsTypeName = InferTsTypeName(kvp.Value?.ToString());
+
+            var isNullable = propertyName.TrimEnd().EndsWith("?");
+
+            if (isNullable)
             {
-                lines.Add($"import {{ {import.ClassName} }} from \"{import.Package}\";");
+                propertyName = propertyName.RemoveFromEnd("?");
             }
-            else
-            {
-                lines.Add($"import {import.ClassName} from \"{import.Package}\";");
-            }
+
+            lines.Add($"{Indent(indent)}{propertyName}{(isNullable ? "?" : string.Empty)}: {tsTypeName};");
         }
 
-        return lines;
+        return (lines, imports);
+
+        string InferTsTypeName(string value)
+        {
+            if (value == null)
+            {
+                return "string";
+            }
+
+            value = value.Trim();
+
+            if (bool.TryParse(value, out _))
+            {
+                return "boolean";
+            }
+
+            if (int.TryParse(value, out _))
+            {
+                return "number";
+            }
+
+            if (value.StartsWith("() =>"))
+            {
+                return value;
+            }
+
+            if (value.Equals("ReactNode", StringComparison.OrdinalIgnoreCase))
+            {
+                imports.Add(new() { ClassName = "React", Package = "react" });
+
+                return "React.ReactNode";
+            }
+
+            return "string";
+        }
     }
 
-    static void Add(this List<string> list, int indentLevel, string value)
+    static (List<string> lines, List<ImportInfo> imports) TryWriteProps(ComponentEntity cmp, int indent)
     {
-        list.Add(Indent(indentLevel)+value);
+        List<string> lines = [];
+
+        List<ImportInfo> imports = [];
+
+        if (cmp.PropsAsYaml.HasNoValue())
+        {
+            return (lines, imports);
+        }
+
+        lines.Add($"{Indent(indent)}export interface Props {{");
+
+        indent++;
+
+        // body
+        {
+            var result = TryWriteInterfaceBody(indent, cmp.PropsAsYaml);
+
+            lines.AddRange(result.lines);
+
+            imports.AddRange(result.imports);
+        }
+
+        indent--;
+
+        lines.Add($"{Indent(indent)}}}");
+
+        return (lines, imports);
     }
-    static void  WriteTo(List<string> lines, bool hasChildrenDeclerationInProps, ReactNode node, int indentLevel)
+
+    static (List<string> lines, List<ImportInfo> imports) TryWriteState(ComponentEntity cmp, int indent)
     {
-        
+        List<string> lines = [];
+
+        List<ImportInfo> imports = [];
+
+        if (cmp.StateAsYaml.HasNoValue())
+        {
+            return (lines, imports);
+        }
+
+        lines.Add($"{Indent(indent)}export interface State {{");
+
+        indent++;
+
+        // body
+        {
+            var result = TryWriteInterfaceBody(indent, cmp.StateAsYaml);
+
+            lines.AddRange(result.lines);
+
+            imports.AddRange(result.imports);
+        }
+
+        indent--;
+
+        lines.Add($"{Indent(indent)}}}");
+
+        return (lines, imports);
+    }
+
+    static async Task<Result> TryWriteToFile(string filePath, string fileContent)
+    {
+        try
+        {
+            await File.WriteAllTextAsync(filePath, fileContent);
+        }
+        catch (Exception exception)
+        {
+            return exception;
+        }
+
+        return Success;
+    }
+
+    static void WriteTo(List<string> lines, bool hasChildrenDeclerationInProps, ReactNode node, int indentLevel)
+    {
         var nodeTag = node.Tag;
-        
+
         if (nodeTag is null)
         {
             if (node.Text.HasValue())
@@ -759,11 +717,11 @@ static class Exporter_For_NextJs_with_Tailwind
         }
 
         var tag = nodeTag.Split('/').Last();
-        
+
         var indent = new string(' ', indentLevel * 4);
 
         var sb = new StringBuilder();
-        
+
         sb.Append($"{indent}<{tag}");
 
         foreach (var reactProperty in node.Properties)
@@ -774,10 +732,10 @@ static class Exporter_For_NextJs_with_Tailwind
 
             if (propertyValue != null && propertyValue[0] == '"')
             {
-                sb.Append($" {propertyName}={propertyValue}");    
+                sb.Append($" {propertyName}={propertyValue}");
                 continue;
             }
-            
+
             sb.Append($" {propertyName}={{{propertyValue}}}");
         }
 
@@ -788,8 +746,6 @@ static class Exporter_For_NextJs_with_Tailwind
             lines.Add(sb.ToString());
             return;
         }
-        
-        
 
         // try add as children
         {
@@ -812,7 +768,7 @@ static class Exporter_For_NextJs_with_Tailwind
 
         // from props
         {
-            if (node.Children.Count == 1 && (node.Children[0].Text + string.Empty).StartsWith("props.") || (node.Children[0].Text + string.Empty).StartsWith("state."))
+            if ((node.Children.Count == 1 && (node.Children[0].Text + string.Empty).StartsWith("props.")) || (node.Children[0].Text + string.Empty).StartsWith("state."))
             {
                 sb.Append(">");
                 lines.Add(sb.ToString());
@@ -825,7 +781,7 @@ static class Exporter_For_NextJs_with_Tailwind
                 return;
             }
         }
-        
+
         sb.Append(">");
         lines.Add(sb.ToString());
 
@@ -845,75 +801,12 @@ static class Exporter_For_NextJs_with_Tailwind
         lines.Add($"{indent}</{tag}>");
     }
 
-    class ComponentDefinition
-    {
-        public List<string> Body { get; } = [];
-        public string ComponentName { get; init; }
-        public Imports Imports { get; } = new();
-
-        public InterfaceDecleration PropsDecleration { get; set; }
-        
-        public InterfaceDecleration StateDecleration { get; set; }
-        
-        public IReadOnlyList<string> PropsDeclerationLines { get; set; }
-        
-        public IReadOnlyList<string> StateDeclerationLines { get; set; }
-
-        public string PropsParameterTypeName { get; set; }
-
-        public bool HasState { get; set; }
-
-        public ReactNode RootNode { get; set; }
-    }
-
-    class Imports : List<ImportInfo>
-    {
-        public void Add(string className, string package, bool isNamed = false)
-        {
-            var import = this.FirstOrDefault(i => i.ClassName == className && i.Package == package);
-            if (import == null)
-            {
-                Add(new() { ClassName = className, Package = package, IsNamed = isNamed });
-            }
-        }
-
-        
-    }
-
-    static void TryAdd(this List<ImportInfo> items, ImportInfo item)
-    {
-        if (item is null)
-        {
-            return;
-        }
-        var import = items.FirstOrDefault(i => i.ClassName == item.ClassName && i.Package == item.Package);
-        if (import == null)
-        {
-            items.Add(item);
-        }
-        
-    }
-
-    class InterfaceDecleration
-    {
-        public string Identifier { get; set; }
-        public Imports Imports { get; } = new();
-
-        public List<PropertySignature> PropertySignatures { get; } = [];
-    }
-
-    class PropertySignature
-    {
-        public string Identifier { get; init; }
-        public bool IsNullable { get; init; }
-        public string Type { get; init; }
-    }
-
     class ReactNode
     {
         public List<ReactNode> Children { get; } = [];
 
         public List<ReactProperty> Properties { get; } = [];
+        
         public string Tag { get; init; }
 
         public string Text { get; init; }
