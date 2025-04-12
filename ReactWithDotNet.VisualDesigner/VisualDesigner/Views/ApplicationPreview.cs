@@ -162,6 +162,13 @@ sealed class ApplicationPreview : Component
 
                                     continue;
                                 }
+                                
+                                if (mapping.Children.TryGetValue(new YamlScalarNode(key+"?"), out nextNode))
+                                {
+                                    currentNode = nextNode;
+
+                                    continue;
+                                }
                             }
 
                             break;

@@ -476,13 +476,16 @@ sealed class ApplicationView : Component<ApplicationState>
                         new FlexRowCentered(Hover(Color(Blue300)))
                         {
                             "Export",
-                            OnClick(_ =>
+                            OnClick(async _ =>
                             {
-                                Exporter_For_NextJs_with_Tailwind.Export(state);
-                                
+                                var result = await Exporter_For_NextJs_with_Tailwind.Export(state);
+                                if (result.HasError)
+                                {
+                                    this.FailNotification(result.Error.Message);
+                                    return;
+                                }
                                 this.SuccessNotification("OK");
-
-                                return Task.CompletedTask;
+                                
                             })
                         }
                     }
@@ -1508,6 +1511,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
         this.FailNotification(result.Error.Message);
     }
+    
 
     Task StyleGroupAddClicked(MouseEvent e)
     {

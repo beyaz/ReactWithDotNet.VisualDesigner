@@ -1,6 +1,8 @@
 ﻿using System.IO;
 using System.Text;
 using Mono.Cecil;
+using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
 
 namespace ReactWithDotNet.VisualDesigner.Models;
 
@@ -8,141 +10,319 @@ static class Exporter_For_NextJs_with_Tailwind
 {
     const string childrenIdentifier = "[...]";
 
-    public static void Export(ApplicationState state)
+    static (List<string> lines, List<ImportInfo> imports)  TryWriteProps(ComponentEntity cmp, int indent)
     {
-        var sourceFile = new ComponentDefinition
+        List<string> lines = [];
+
+        List<ImportInfo> imports = [];
+
+        if (cmp.PropsAsYaml.HasNoValue())
         {
-            ComponentName = state.ComponentName
-        };
-
-        var propsTypeDefinition = GetPropsTypeDefinition(state);
-        if (propsTypeDefinition is not null)
-        {
-            var decleration = ConvertToInterfaceDecleration(propsTypeDefinition);
-            
-            decleration.Identifier = "Props";
-
-            sourceFile.PropsDecleration = decleration;
-
-            foreach (var import in decleration.Imports)
-            {
-                sourceFile.Imports.Add(import.ClassName, import.Package, import.IsNamed);
-            }
-
-            sourceFile.PropsParameterTypeName = propsTypeDefinition.Name;
-        }
-        
-        var stateTypeDefinition = GetStateTypeDefinition(state);
-        if (stateTypeDefinition is not null)
-        {
-            var decleration = ConvertToInterfaceDecleration(stateTypeDefinition);
-
-            decleration.Identifier = "State";
-            
-            sourceFile.StateDecleration = decleration;
-
-            foreach (var import in decleration.Imports)
-            {
-                sourceFile.Imports.Add(import.ClassName, import.Package, import.IsNamed);
-            }
-            
-            sourceFile.Imports.Add("useState","react", true);
-
-            sourceFile.HasState = true;
-
+            return (lines, imports);
         }
         
         
+        lines.Add($"{Indent(indent)}export interface Props {{");
 
-        sourceFile.RootNode = ConvertToReactNode(state.ProjectId, state.UserName, sourceFile, state.ComponentRootElement);
+        indent++;
 
-        if (stateTypeDefinition is not null)
+        // body
         {
-            
-            sourceFile.Imports.Add(new(){ ClassName = "initializeState, logic", Package = $"@/components/{state.ComponentName}.Logic", IsNamed = true});
-            
-           
-            sourceFile.Body.Add("");
-            sourceFile.Body.Add("const call = (name: string) =>");
-            sourceFile.Body.Add("{");
-            sourceFile.Body.Add("    setState((prevState: State) =>");
-            sourceFile.Body.Add("    {");
-            sourceFile.Body.Add("        logic(props, prevState)[name]();");
-            sourceFile.Body.Add("");
-            sourceFile.Body.Add("        return { ...prevState };");
-            sourceFile.Body.Add("    });");
-            sourceFile.Body.Add("};");
-            
-        }
-       
+            var result = TryWriteInterfaceBody(indent, cmp.PropsAsYaml);
         
-        var fileContent = new StringBuilder();
-
-        WriteTo(fileContent, sourceFile);
-
-        File.WriteAllText($"{GetExportFolderPath()}{sourceFile.ComponentName}.tsx", fileContent.ToString());
+            lines.AddRange(result.lines);
+        
+            imports.AddRange(result.imports);
+        }
+        
+        indent--;
+        
+        lines.Add($"{Indent(indent)}}}");
+        
+        return (lines, imports);
     }
-
-    static InterfaceDecleration ConvertToInterfaceDecleration(TypeDefinition typeDefinition)
+    
+    static (List<string> lines, List<ImportInfo> imports)  TryWriteState(ComponentEntity cmp, int indent)
     {
-        var decleration = new InterfaceDecleration
+        List<string> lines = [];
+
+        List<ImportInfo> imports = [];
+
+        if (cmp.StateAsYaml.HasNoValue())
         {
-            Identifier = typeDefinition.Name
-        };
+            return (lines, imports);
+        }
+        
+        
+        lines.Add($"{Indent(indent)}export interface State {{");
 
-        foreach (var fieldDefinition in typeDefinition.Fields)
+        indent++;
+
+        // body
         {
-            var fieldType = fieldDefinition.FieldType;
+            var result = TryWriteInterfaceBody(indent, cmp.StateAsYaml);
+        
+            lines.AddRange(result.lines);
+        
+            imports.AddRange(result.imports);
+        }
+        
+        indent--;
+        
+        lines.Add($"{Indent(indent)}}}");
+        
+        return (lines, imports);
+    }
+    
+    static (List<string> lines, List<ImportInfo> imports) TryWriteInterfaceBody(int indent, string yaml)
+    {
+        List<string> lines = [];
 
-            var isNullable = false;
+        List<ImportInfo> imports = [];
+        
+        var deserializer = new DeserializerBuilder()
+            .WithNamingConvention(CamelCaseNamingConvention.Instance)
+            .Build();
 
-          
+        var yamlObject = deserializer.Deserialize<Dictionary<string, object>>(yaml);
             
-            if (fieldType is GenericInstanceType genericType &&
-                genericType.ElementType.FullName == "System.Nullable`1" &&
-                genericType.GenericArguments.Count == 1)
+        foreach (var kvp in yamlObject)
+        {
+            string propertyName = kvp.Key;
+            string tsTypeName = InferTsTypeName(kvp.Value?.ToString());
+
+            var isNullable = propertyName.TrimEnd().EndsWith("?");
+            
+            if (isNullable)
             {
-                TypeReference elementType = genericType.GenericArguments[0];
+                propertyName = propertyName.RemoveFromEnd("?");
+            }
+            
+            lines.Add($"{Indent(indent)}{propertyName}{(isNullable ? "?" : string.Empty)}: {tsTypeName};");
+        }
+
+        return (lines, imports);
+
+        string InferTsTypeName(string value)
+        {
+            if (value == null)
+            {
+                return "string";
+            }
+
+            value = value.Trim();
+
+            if (bool.TryParse(value, out _))
+            {
+                return "boolean";
+            }
+
+            if (int.TryParse(value, out _))
+            {
+                return "number";
+            }
+
+            if (value.StartsWith("() =>"))
+            {
+                return value;
+            }
+
+            if (value.Equals("ReactNode", StringComparison.OrdinalIgnoreCase))
+            {
+                imports.Add(new() { ClassName = "React", Package = "react" });
                 
-                isNullable = true;
-
-                fieldType = elementType;
-            }
-            
-
-            var typeName = fieldType.Name;
-            if (typeName == "Boolean")
-            {
-                typeName = "boolean";
+                return "React.ReactNode";
             }
 
-            if (typeName == "Action")
-            {
-                typeName = "() => void";
-            }
-
-            if (typeName == "Int32")
-            {
-                typeName = "number";
-            }
-
-            if (typeName == "ReactNode")
-            {
-                typeName = "React.ReactNode";
-
-                decleration.Imports.Add(new() { ClassName = "React", Package = "react" });
-            }
-
-            decleration.PropertySignatures.Add(new() { Identifier = fieldDefinition.Name, Type = typeName, IsNullable = isNullable });
+            return "string"; 
         }
 
-        return decleration;
+        static string ToPascalCase(string input)
+        {
+            if (string.IsNullOrEmpty(input)) return input;
+            
+            return char.ToUpperInvariant(input[0]) + input.Substring(1);
+        }
     }
+    
+    static (List<string> lines, List<ImportInfo> imports) AsLines(ComponentEntity component, string userName)
+    {
+        List<ImportInfo> imports = [];
+        
+        List<string> lines = [];
+        
+        bool hasState = false;
+
+        var hasProps = false;
+
+        var hasChildrenDeclerationInProps = false;
+
+        // TryWriteProps
+        {
+            var result = TryWriteProps(component, 0);
+
+            hasProps = result.lines.Any();
+            
+            if (hasProps)
+            {
+                lines.Add(string.Empty);
+                
+                lines.AddRange(result.lines);
+            
+                imports.AddRange(result.imports);
+            }
+           
+
+            
+            
+            hasChildrenDeclerationInProps = result.lines.Any(x => x.TrimStart().StartsWith("children", StringComparison.OrdinalIgnoreCase));
+        }
+        
+        // TryWriteState
+        {
+            var result = TryWriteState(component, 0);
+            
+            lines.AddRange(result.lines);
+            
+            imports.AddRange(result.imports);
+
+            if (result.lines.Any())
+            {
+                imports.Add(new ImportInfo{ ClassName = "useState", Package = "react", IsNamed = true});
+
+                hasState = true;
+            }
+        }
+
+     
+        
+        lines.Add(string.Empty);
+        lines.Add($"export default function {component.Name.Split('/').Last()}({(hasProps ? "props: Props": string.Empty)}) {{");
+
+        if (hasState)
+        {
+            imports.Add(new(){ ClassName = "initializeState, logic", Package = $"@/components/{component.Name}.Logic", IsNamed = true});
+            
+            lines.Add(string.Empty);
+            lines.Add($"{Indent(1)}const [state, setState] = useState<State>(() => initializeState(props));");
+        }
+        
+        
+        {
+            var rootVisualElement = DeserializeFromJson<VisualElementModel>(component.RootElementAsJson ?? "");
+            
+            var result = ConvertToReactNode(( component,userName,hasChildrenDeclerationInProps), rootVisualElement);
+            
+            imports.AddRange(result.imports);
+            
+            foreach (var line in result.bodyLines.Distinct())
+            {
+                lines.Add($"{Indent(1)}{line}");
+            }
+            
+            if (hasState)
+            {
+                lines.Add("");
+                lines.Add(1,"const call = (name: string, ...args: any[]) =>");
+                lines.Add(1,"{");
+                lines.Add(1,"    setState((prevState: State) =>");
+                lines.Add(1,"    {");
+                lines.Add(1,"        logic(props, prevState)[name](...args);");
+                lines.Add("");
+                lines.Add(1,"        return { ...prevState };");
+                lines.Add(1,"    });");
+                lines.Add(1,"};");
+            
+            }
+            
+            lines.Add(string.Empty);
+            lines.Add($"{Indent(1)}return (");
+            
+            WriteTo(lines, hasChildrenDeclerationInProps, result.node, 2);
+
+            
+            lines.Add($"{Indent(1)});");
+
+            lines.Add("}");
+            
+        }
+
+        
+        
+        
+        
+       
+
+        
+
+        
+
+
+        return (lines, imports);
+
+
+    }
+    
+    public static async Task<Result> Export(ApplicationState state)
+    {
+        var result = await CalculateExportInfo(state);
+        if (result.HasError)
+        {
+            return result.Error;
+        }
+        var (filePath, fileContent) = result.Value;
+        
+        return await TryWriteToFile(filePath, fileContent);
+    }
+
+    static async Task<Result> TryWriteToFile(string filePath, string fileContent)
+    {
+        try
+        {
+            await File.WriteAllTextAsync(filePath, fileContent);
+        }
+        catch (Exception exception)
+        {
+            return exception;
+        }
+
+        return Success;
+    }
+    
+    
+    static async Task<Result<(string filePath, string fileContent)>> CalculateExportInfo(ApplicationState state)
+    {
+        ComponentEntity component;
+        {
+            var result =  await GetComponenUserOrMainVersion(state);
+            if (result.HasError)
+            {
+                return result.Error;
+            }
+            
+            component = result.Value;
+        }
+        
+        string fileContent;
+        {
+            var result = AsLines(component, state.UserName);
+
+            var fileLines = new List<string>(result.imports.AsTsLines());
+        
+            
+            fileLines.AddRange(result.lines);
+
+            fileContent = string.Join(Environment.NewLine, fileLines);
+        }
+
+        var filePath = $"{GetExportFolderPath()}{state.ComponentName}.tsx";
+        
+        return (filePath, fileContent);
+    }
+
 
     static ImportInfo GetTagImportInfo(int projectId, string userName, string tag)
     {
-       
-        
         var component = GetComponenUserOrMainVersion(projectId, tag, userName);
         if (component is not null)
         {
@@ -156,8 +336,16 @@ static class Exporter_For_NextJs_with_Tailwind
 
         return null;
     }
-    static ReactNode ConvertToReactNode(int projectId, string userName, ComponentDefinition componentDefinition, VisualElementModel element)
+    
+    static (ReactNode node, List<string> bodyLines, List<ImportInfo> imports) 
+        ConvertToReactNode( (ComponentEntity component,string userName,bool hasChildrenDeclerationInProps) context,  VisualElementModel element)
     {
+        var (component, userName, hasChildrenDeclerationInProps) = context;
+            
+        List<ImportInfo> imports = [];
+        
+        List<string> bodyLines = [];
+        
         List<string> classNames = [];
 
         // Open tag
@@ -165,17 +353,18 @@ static class Exporter_For_NextJs_with_Tailwind
 
         if (tag == "a")
         {
-            componentDefinition.Imports.Add("Link", "next/link");
+            imports.Add(new ImportInfo{ ClassName = "Link", Package = "next/link"});
             tag = "Link";
         }
 
         if (tag == "img")
         {
-            componentDefinition.Imports.Add("Image", "next/image");
+            imports.Add(new ImportInfo{ ClassName = "Image", Package = "next/image"});
+            
             tag = "Image";
         }
 
-        componentDefinition.Imports.TryAdd(GetTagImportInfo(projectId, userName, tag));
+        imports.TryAdd(GetTagImportInfo(component.ProjectId, userName, tag));
         
 
         var node = new ReactNode { Tag = tag };
@@ -215,13 +404,53 @@ static class Exporter_For_NextJs_with_Tailwind
                     continue;
                 }
                 
-                var component = GetComponenUserOrMainVersion(projectId, tag, userName);
-                if (component is not null)
+                var componentInProject = GetComponenUserOrMainVersion(component.ProjectId, tag, userName);
+                if (componentInProject is not null)
                 {
                     node.Properties.Add(new() { Name = name, Value = $"()=>call('{value}')" });
                     continue;
                 }
 
+                // process as external
+                {
+                    var isConnectedToExternalComponent = false;
+                
+                    foreach (var externalComponent in Project.ExternalComponents.Where(x=>x.Name==tag))
+                    {
+                        var @event = externalComponent.Events.FirstOrDefault(e => e.Name == name);
+                        if (@event is not null)
+                        {
+                            isConnectedToExternalComponent = true;
+
+                            if (@event.Parameters.Any())
+                            {
+                                var partPrm = string.Join(", ", @event.Parameters.Select(p=>p.Name));
+
+                                node.Properties.Add(new()
+                                {
+                                    Name  = name,
+                                    Value = $"({partPrm})=>call('{name}', {partPrm})"
+                                });
+                            }
+                            else
+                            {
+                                node.Properties.Add(new()
+                                {
+                                    Name  = name,
+                                    Value = $"()=>call('{name}')"
+                                });
+                            }
+
+                            break;
+                        }
+                    }
+
+                    if (isConnectedToExternalComponent)
+                    {
+                        continue;
+                    }
+                }
+                
                 node.Properties.Add(new() { Name = name, Value = '"' + value + '"' });
             }
         }
@@ -423,32 +652,32 @@ static class Exporter_For_NextJs_with_Tailwind
         var hasSelfClose = element.Children.Count == 0 && element.Text.HasNoValue();
         if (hasSelfClose)
         {
-            return node;
+            return (node, bodyLines ,imports);
         }
 
-        if (element.Text == childrenIdentifier && componentDefinition.HasChildrenDeclerationInProps())
+        if (element.Text == childrenIdentifier && hasChildrenDeclerationInProps)
         {
             node.Children.Add(new() { Text = element.Text });
 
-            return node;
+            return (node,  bodyLines ,imports);
         }
 
         if ((element.Text + string.Empty).StartsWith("props.") || (element.Text + string.Empty).StartsWith("state."))
         {
             node.Children.Add(new() { Text = element.Text });
 
-            return node;
+            return (node,  bodyLines ,imports);
         }
 
         // Add text content
         if (!string.IsNullOrWhiteSpace(element.Text))
         {
-            if (componentDefinition.Imports.All(x => x.ClassName != "useTranslations"))
+            if (imports.All(x => x.ClassName != "useTranslations"))
             {
-                componentDefinition.Imports.Add("useTranslations", "next-intl", true);
+                imports.Add(new ImportInfo{ ClassName = "useTranslations", Package = "next-intl", IsNamed = true});
 
-                componentDefinition.Body.Add("");
-                componentDefinition.Body.Add("const t = useTranslations();");
+                bodyLines.Add(string.Empty);
+                bodyLines.Add("const t = useTranslations();");
             }
 
             node.Children.Add(new() { Text = $"{{t(\"{element.Text}\")}}" });
@@ -457,10 +686,20 @@ static class Exporter_For_NextJs_with_Tailwind
         // Add children
         foreach (var child in element.Children)
         {
-            node.Children.Add(ConvertToReactNode(projectId, userName, componentDefinition, child));
+            ReactNode childNode;
+            {
+                var result = ConvertToReactNode(context, child);
+                
+                childNode = result.node;
+                
+                bodyLines.AddRange(result.bodyLines);
+                imports.AddRange(result.imports);
+            }
+            
+            node.Children.Add(childNode);
         }
 
-        return node;
+        return (node, bodyLines ,imports);
     }
 
     static string GetExportFolderPath()
@@ -478,86 +717,41 @@ static class Exporter_For_NextJs_with_Tailwind
         return new(' ', indentLevel * 4);
     }
 
-    static void WriteTo(this InterfaceDecleration decleration, StringBuilder sb, int indentLevel)
+    
+
+    static IReadOnlyList<string> AsTsLines(this IReadOnlyList<ImportInfo> imports)
     {
-        sb.AppendLine($"{Indent(indentLevel)}export interface {decleration.Identifier} {{");
-
-        indentLevel++;
-
-        foreach (var propertySignature in decleration.PropertySignatures)
-        {
-            sb.AppendLine($"{Indent(indentLevel)}{propertySignature.Identifier}{(propertySignature.IsNullable ? "?" : "")}: {propertySignature.Type};");
-        }
-
-        indentLevel--;
-
-        sb.AppendLine(Indent(indentLevel) + "}");
-    }
-
-    static void WriteTo(StringBuilder sb, IReadOnlyList<ImportInfo> imports)
-    {
-        foreach (var import in imports)
+        List<string> lines = [];
+        
+        foreach (var import in imports.DistinctBy(x=>x.Package + x.ClassName))
         {
             if (import.IsNamed)
             {
-                sb.AppendLine($"import {{ {import.ClassName} }} from \"{import.Package}\";");
+                lines.Add($"import {{ {import.ClassName} }} from \"{import.Package}\";");
             }
             else
             {
-                sb.AppendLine($"import {import.ClassName} from \"{import.Package}\";");
+                lines.Add($"import {import.ClassName} from \"{import.Package}\";");
             }
         }
+
+        return lines;
     }
 
-    static void WriteTo(StringBuilder file, ComponentDefinition componentDefinition)
+    static void Add(this List<string> list, int indentLevel, string value)
     {
-        WriteTo(file, componentDefinition.Imports);
-
-        if (componentDefinition.PropsDecleration is not null)
-        {
-            file.AppendLine();
-            componentDefinition.PropsDecleration.WriteTo(file, 0);
-        }
-        
-        if (componentDefinition.StateDecleration is not null)
-        {
-            file.AppendLine();
-            componentDefinition.StateDecleration.WriteTo(file, 0);
-        }
-
-        file.AppendLine();
-        file.AppendLine($"export default function {componentDefinition.ComponentName.Split('/').Last()}({(componentDefinition.PropsParameterTypeName.HasNoValue() ? string.Empty : "props: Props")}) {{");
-
-        foreach (var line in componentDefinition.Body)
-        {
-            file.AppendLine($"{Indent(1)}{line}");
-        }
-        
-      
-
-        if (componentDefinition.HasState)
-        {
-            file.AppendLine();
-            file.AppendLine($"{Indent(1)}const [state, setState] = useState<State>(() => initializeState(props));");
-        }
-
-        file.AppendLine();
-        file.AppendLine($"{Indent(1)}return (");
-        WriteTo(file, componentDefinition, componentDefinition.RootNode, 2);
-        file.AppendLine($"{Indent(1)});");
-
-        file.AppendLine("}");
+        list.Add(Indent(indentLevel)+value);
     }
-
-    static void WriteTo(StringBuilder sb, ComponentDefinition componentDefinition, ReactNode node, int indentLevel)
+    static void  WriteTo(List<string> lines, bool hasChildrenDeclerationInProps, ReactNode node, int indentLevel)
     {
+        
         var nodeTag = node.Tag;
         
         if (nodeTag is null)
         {
             if (node.Text.HasValue())
             {
-                sb.AppendLine(Indent(indentLevel) + node.Text);
+                lines.Add(Indent(indentLevel) + node.Text);
                 return;
             }
 
@@ -568,6 +762,8 @@ static class Exporter_For_NextJs_with_Tailwind
         
         var indent = new string(' ', indentLevel * 4);
 
+        var sb = new StringBuilder();
+        
         sb.Append($"{indent}<{tag}");
 
         foreach (var reactProperty in node.Properties)
@@ -588,7 +784,8 @@ static class Exporter_For_NextJs_with_Tailwind
         var hasSelfClose = node.Children.Count == 0 && node.Text.HasNoValue();
         if (hasSelfClose)
         {
-            sb.AppendLine("/>");
+            sb.Append("/>");
+            lines.Add(sb.ToString());
             return;
         }
         
@@ -596,16 +793,17 @@ static class Exporter_For_NextJs_with_Tailwind
 
         // try add as children
         {
-            if (componentDefinition.HasChildrenDeclerationInProps())
+            if (hasChildrenDeclerationInProps)
             {
                 if (node.Children.Count == 1 && node.Children[0].Text == childrenIdentifier)
                 {
-                    sb.AppendLine(">");
+                    sb.Append(">");
+                    lines.Add(sb.ToString());
 
-                    sb.AppendLine($"{Indent(indentLevel + 1)}{{ props.children }}");
+                    lines.Add($"{Indent(indentLevel + 1)}{{ props.children }}");
 
                     // Close tag
-                    sb.AppendLine($"{indent}</{tag}>");
+                    lines.Add($"{indent}</{tag}>");
 
                     return;
                 }
@@ -616,33 +814,35 @@ static class Exporter_For_NextJs_with_Tailwind
         {
             if (node.Children.Count == 1 && (node.Children[0].Text + string.Empty).StartsWith("props.") || (node.Children[0].Text + string.Empty).StartsWith("state."))
             {
-                sb.AppendLine(">");
+                sb.Append(">");
+                lines.Add(sb.ToString());
 
-                sb.AppendLine($"{Indent(indentLevel + 1)}{{ {node.Children[0].Text} }}");
+                lines.Add($"{Indent(indentLevel + 1)}{{ {node.Children[0].Text} }}");
 
                 // Close tag
-                sb.AppendLine($"{indent}</{tag}>");
+                lines.Add($"{indent}</{tag}>");
 
                 return;
             }
         }
         
-        sb.AppendLine(">");
+        sb.Append(">");
+        lines.Add(sb.ToString());
 
         // Add text content
         if (!string.IsNullOrWhiteSpace(node.Text))
         {
-            sb.AppendLine($"{indent}{{{node.Text})}}");
+            lines.Add($"{indent}{{{node.Text})}}");
         }
 
         // Add children
         foreach (var child in node.Children)
         {
-            WriteTo(sb, componentDefinition, child, indentLevel + 1);
+            WriteTo(lines, hasChildrenDeclerationInProps, child, indentLevel + 1);
         }
 
         // Close tag
-        sb.AppendLine($"{indent}</{tag}>");
+        lines.Add($"{indent}</{tag}>");
     }
 
     class ComponentDefinition
@@ -654,6 +854,10 @@ static class Exporter_For_NextJs_with_Tailwind
         public InterfaceDecleration PropsDecleration { get; set; }
         
         public InterfaceDecleration StateDecleration { get; set; }
+        
+        public IReadOnlyList<string> PropsDeclerationLines { get; set; }
+        
+        public IReadOnlyList<string> StateDeclerationLines { get; set; }
 
         public string PropsParameterTypeName { get; set; }
 
