@@ -19,8 +19,6 @@ sealed class ApplicationPreview : Component
             exceptionOccurredInRender.ToString()
         };
     }
-    
-    
 
     protected override Task constructor()
     {
@@ -29,32 +27,10 @@ sealed class ApplicationPreview : Component
         return Task.CompletedTask;
     }
 
-    [StopPropagation]
-    Task OnItemClick(MouseEvent e)
-    {
-        var visualElementTreeItemPath = e.target.id;
-
-        var sb = new StringBuilder();
-
-        sb.AppendLine("var parentWindow = window.parent;");
-        sb.AppendLine("if(parentWindow)");
-        sb.AppendLine("{");
-        sb.AppendLine("  var reactWithDotNet = parentWindow.ReactWithDotNet;");
-        sb.AppendLine("  if(reactWithDotNet)");
-        sb.AppendLine("  {");
-        sb.AppendLine($"    reactWithDotNet.DispatchEvent('Change_VisualElementTreeItemPath', ['{visualElementTreeItemPath}']);");
-        sb.AppendLine("  }");
-        sb.AppendLine("}");
-        
-        Client.RunJavascript(sb.ToString());
-        
-        return Task.CompletedTask;
-    }
-    
     protected override Element render()
     {
         const string childrenIdentifier = "[...]";
-        
+
         var userName = Environment.UserName; // future: get userName from cookie or url
 
         var appState = GetUserLastState(userName);
@@ -66,7 +42,7 @@ sealed class ApplicationPreview : Component
                 "Has no state"
             };
         }
-        
+
         var projectId = appState.ProjectId;
 
         var cmp = GetComponenUserOrMainVersion(appState).GetAwaiter().GetResult().Value;
@@ -89,9 +65,9 @@ sealed class ApplicationPreview : Component
                 highlightedElement = FindTreeNodeByTreePath(rootElement, selection.VisualElementTreeItemPath);
             }
         }
-        
+
         return renderElement(rootElement, "0");
-        
+
         Element renderElement(VisualElementModel model, string path)
         {
             HtmlElement element = new div();
@@ -102,7 +78,7 @@ sealed class ApplicationPreview : Component
             }
             else if (model.Tag == "img")
             {
-                element = new img{ src = DummySrc(500)};
+                element = new img { src = DummySrc(500) };
             }
             else if (model.Tag == "input")
             {
@@ -110,7 +86,7 @@ sealed class ApplicationPreview : Component
             }
             else if (model.Tag == "heroui/Checkbox")
             {
-                return  new Checkbox();
+                return new Checkbox();
             }
 
             if (model.Tag.Length > 3)
@@ -121,45 +97,86 @@ sealed class ApplicationPreview : Component
                     var root = DeserializeFromJson<VisualElementModel>(component.RootElementAsJson);
 
                     root.Children.AddRange(model.Children);
-                
+
                     return renderElement(root, path);
                 }
-               
             }
-            
-            
+
             element.style.Add(UserSelect(none));
 
             element.Add(Hover(Outline($"1px {dashed} {Blue300}")));
-            
+
             element.id = $"{path}";
-            
+
             element.onClick = OnItemClick;
-            
+
             if (model.Text.HasValue() && model.Text != childrenIdentifier)
             {
                 element.text = model.Text;
 
-                // todo: think more
-                if (cmp.PropsAsYaml.HasValue() && element.text.StartsWith("props.", StringComparison.OrdinalIgnoreCase))
-                {
-                    var target = element.text.RemoveFromStart("props.");
-                    
-                    var yamlStream = new YamlStream();
-                    yamlStream.Load(new StringReader(cmp.PropsAsYaml));
+                element.text = TryGetStringDesignValueFromYamlDefinitions(element.text, cmp.PropsAsYaml, cmp.StateAsYaml);
 
-                    var root = (YamlMappingNode)yamlStream.Documents[0].RootNode;
-                    
-                    foreach (var (yamlNode, value) in root.Children)
+                static string TryGetStringDesignValueFromYamlDefinitions(string text, string propsDefinitionsAsYaml, string stateDefinitionsAsYaml)
+                {
+                    if (text is null)
                     {
-                        if ((yamlNode as YamlScalarNode).Value == target)
+                        return null;
+                    }
+
+                    string[] properties;
+
+                    string yamlDefinitions;
+
+                    if (text.StartsWith("props.") && propsDefinitionsAsYaml.HasValue())
+                    {
+                        properties = text.RemoveFromStart("props.").Split('.');
+
+                        yamlDefinitions = propsDefinitionsAsYaml;
+                    }
+                    else if (text.StartsWith("state.") && stateDefinitionsAsYaml.HasValue())
+                    {
+                        properties = text.RemoveFromStart("state.").Split('.');
+
+                        yamlDefinitions = stateDefinitionsAsYaml;
+                    }
+                    else
+                    {
+                        return text;
+                    }
+
+                    var yamlStream = new YamlStream();
+
+                    yamlStream.Load(new StringReader(yamlDefinitions));
+
+                    // search nested mode
+                    {
+                        var currentNode = yamlStream.Documents[0].RootNode;
+
+                        foreach (var key in properties)
                         {
-                            element.text = (value as YamlScalarNode).Value;
+                            if (currentNode is YamlMappingNode mapping)
+                            {
+                                if (mapping.Children.TryGetValue(new YamlScalarNode(key), out var nextNode))
+                                {
+                                    currentNode = nextNode;
+
+                                    continue;
+                                }
+                            }
+
+                            break;
+                        }
+
+                        if (currentNode is YamlScalarNode scalar)
+                        {
+                            return scalar.Value;
                         }
                     }
+
+                    return text;
                 }
             }
-            
+
             foreach (var property in model.Properties)
             {
                 var (success, name, value) = TryParsePropertyValue(property);
@@ -173,31 +190,31 @@ sealed class ApplicationPreview : Component
                     if (element is img elementAsImage)
                     {
                         var isValueDouble = double.TryParse(value, out var valueAsDouble);
-                        
+
                         if (name.Equals("h", StringComparison.OrdinalIgnoreCase) || name.Equals("height", StringComparison.OrdinalIgnoreCase))
                         {
                             if (isValueDouble)
                             {
-                                elementAsImage.height = valueAsDouble+ "px";    
+                                elementAsImage.height = valueAsDouble + "px";
                             }
                             else
                             {
                                 elementAsImage.height = value;
                             }
                         }
-                        
+
                         if (name.Equals("w", StringComparison.OrdinalIgnoreCase) || name.Equals("width", StringComparison.OrdinalIgnoreCase))
                         {
                             if (isValueDouble)
                             {
-                                elementAsImage.width = valueAsDouble + "px";    
+                                elementAsImage.width = valueAsDouble + "px";
                             }
                             else
                             {
                                 elementAsImage.width = value;
                             }
                         }
-                        
+
                         if (name.Equals("src", StringComparison.OrdinalIgnoreCase))
                         {
                             elementAsImage.src = Path.Combine(Context.wwwroot, value);
@@ -232,7 +249,7 @@ sealed class ApplicationPreview : Component
                             continue;
                         }
                     }
-                    
+
                     switch (styleAttribute)
                     {
                         case "w-full":
@@ -256,7 +273,7 @@ sealed class ApplicationPreview : Component
                             element.Add(HeightFitContent);
                             continue;
                         }
-                        
+
                         case "flex-row-centered":
                         {
                             element.Add(DisplayFlexRowCentered);
@@ -278,13 +295,13 @@ sealed class ApplicationPreview : Component
                             continue;
                         }
                     }
-                    
+
                     var (success, name, value) = TryParsePropertyValue(styleAttribute);
                     if (!success)
                     {
                         continue;
                     }
-                    
+
                     var isValueDouble = double.TryParse(value, out var valueAsDouble);
 
                     switch (name)
@@ -296,11 +313,11 @@ sealed class ApplicationPreview : Component
                                 element.Add(MinWidth(valueAsDouble));
                                 continue;
                             }
-                            
+
                             element.Add(MinWidth(value));
                             continue;
                         }
-                        
+
                         case "top":
                         {
                             if (isValueDouble)
@@ -308,7 +325,7 @@ sealed class ApplicationPreview : Component
                                 element.Add(Top(valueAsDouble));
                                 continue;
                             }
-                            
+
                             element.Add(Top(value));
                             continue;
                         }
@@ -319,7 +336,7 @@ sealed class ApplicationPreview : Component
                                 element.Add(Bottom(valueAsDouble));
                                 continue;
                             }
-                            
+
                             element.Add(Bottom(value));
                             continue;
                         }
@@ -330,7 +347,7 @@ sealed class ApplicationPreview : Component
                                 element.Add(Left(valueAsDouble));
                                 continue;
                             }
-                            
+
                             element.Add(Left(value));
                             continue;
                         }
@@ -341,34 +358,31 @@ sealed class ApplicationPreview : Component
                                 element.Add(Right(valueAsDouble));
                                 continue;
                             }
-                            
+
                             element.Add(Right(value));
                             continue;
                         }
-                        
+
                         case "border":
                         {
                             var parts = value.Split(' ', StringSplitOptions.RemoveEmptyEntries);
                             if (parts.Length == 3)
                             {
-                                for (int i = 0; i < parts.Length; i++)
+                                for (var i = 0; i < parts.Length; i++)
                                 {
                                     if (Project.Colors.TryGetValue(parts[i], out var color))
                                     {
                                         parts[i] = color;
                                     }
-                                    
                                 }
 
                                 value = string.Join(" ", parts);
                             }
-                            
-                            
+
                             element.Add(Border(value));
                             continue;
                         }
-                        
-                        
+
                         case "justify-items":
                         {
                             element.Add(JustifyItems(value));
@@ -379,13 +393,13 @@ sealed class ApplicationPreview : Component
                             element.Add(JustifyContent(value));
                             continue;
                         }
-                            
+
                         case "align-items":
                         {
                             element.Add(AlignItems(value));
                             continue;
                         }
-                        
+
                         case "display":
                         {
                             element.Add(Display(value));
@@ -399,11 +413,11 @@ sealed class ApplicationPreview : Component
                             {
                                 value = realColor;
                             }
-                            
+
                             element.Add(Background(value));
                             continue;
                         }
-                        
+
                         case "font-size":
                         {
                             if (isValueDouble)
@@ -415,13 +429,13 @@ sealed class ApplicationPreview : Component
                             element.Add(FontSize(value));
                             continue;
                         }
-                        
+
                         case "font-weight":
                         {
                             element.Add(FontWeight(value));
                             continue;
                         }
-                        
+
                         case "w":
                         case "width":
                         {
@@ -495,8 +509,7 @@ sealed class ApplicationPreview : Component
                             element.Add(Padding(value));
                             continue;
                         }
-                       
-                        
+
                         case "size":
                         {
                             if (isValueDouble)
@@ -508,17 +521,18 @@ sealed class ApplicationPreview : Component
                             element.Add(Size(value));
                             continue;
                         }
-                        
+
                         case "color":
                         {
                             if (Project.Colors.TryGetValue(value, out var realColor))
                             {
                                 value = realColor;
                             }
+
                             element.Add(Color(value));
                             continue;
                         }
-                        
+
                         case "px":
                         {
                             if (isValueDouble)
@@ -541,7 +555,7 @@ sealed class ApplicationPreview : Component
                             element.Add(PaddingTopBottom(value));
                             continue;
                         }
-                        
+
                         case "pl":
                         case "padding-left":
                         {
@@ -554,7 +568,7 @@ sealed class ApplicationPreview : Component
                             element.Add(PaddingLeft(value));
                             continue;
                         }
-                        
+
                         case "pr":
                         case "padding-right":
                         {
@@ -567,7 +581,7 @@ sealed class ApplicationPreview : Component
                             element.Add(PaddingRight(value));
                             continue;
                         }
-                        
+
                         case "pt":
                         case "padding-top":
                         {
@@ -580,7 +594,7 @@ sealed class ApplicationPreview : Component
                             element.Add(PaddingTop(value));
                             continue;
                         }
-                        
+
                         case "pb":
                         case "padding-bottom":
                         {
@@ -593,7 +607,7 @@ sealed class ApplicationPreview : Component
                             element.Add(PaddingBottom(value));
                             continue;
                         }
-                        
+
                         case "ml":
                         case "margin-left":
                         {
@@ -606,7 +620,7 @@ sealed class ApplicationPreview : Component
                             element.Add(MarginLeft(value));
                             continue;
                         }
-                        
+
                         case "mr":
                         case "margin-right":
                         {
@@ -619,7 +633,7 @@ sealed class ApplicationPreview : Component
                             element.Add(MarginRight(value));
                             continue;
                         }
-                        
+
                         case "mt":
                         case "margin-top":
                         {
@@ -632,7 +646,7 @@ sealed class ApplicationPreview : Component
                             element.Add(MarginTop(value));
                             continue;
                         }
-                        
+
                         case "mb":
                         case "margin-bottom":
                         {
@@ -645,7 +659,7 @@ sealed class ApplicationPreview : Component
                             element.Add(MarginBottom(value));
                             continue;
                         }
-                        
+
                         case "flex-direction":
                         {
                             element.Add(FlexDirection(value));
@@ -683,27 +697,27 @@ sealed class ApplicationPreview : Component
                             element.Add(MaxHeight(value));
                             continue;
                         }
-                        case  "border-top-left-radius":
-                            {
-                                element.Add(BorderTopLeftRadius(valueAsDouble));
-                                continue;
-                            }
+                        case "border-top-left-radius":
+                        {
+                            element.Add(BorderTopLeftRadius(valueAsDouble));
+                            continue;
+                        }
                         case "border-top-right-radius":
-                            {
-                                element.Add(BorderTopRightRadius(valueAsDouble));
-                                continue;
-                            }
+                        {
+                            element.Add(BorderTopRightRadius(valueAsDouble));
+                            continue;
+                        }
                         case "border-bottom-left-radius":
-                            {
-                                element.Add(BorderBottomLeftRadius(valueAsDouble));
-                                continue;
-                            }
+                        {
+                            element.Add(BorderBottomLeftRadius(valueAsDouble));
+                            continue;
+                        }
                         case "border-bottom-right-radius":
-                            {
-                                element.Add(BorderBottomRightRadius(valueAsDouble));
-                                continue;
-                            }
-                            
+                        {
+                            element.Add(BorderBottomRightRadius(valueAsDouble));
+                            continue;
+                        }
+
                         case "overflow-y":
                         {
                             element.Add(OverflowY(value));
@@ -718,14 +732,13 @@ sealed class ApplicationPreview : Component
                         {
                             if (isValueDouble)
                             {
-                                element.Add(BorderBottomWidth(valueAsDouble+"px"));
+                                element.Add(BorderBottomWidth(valueAsDouble + "px"));
                                 continue;
                             }
 
                             element.Add(BorderBottomWidth(value));
                             continue;
                         }
-                        
                     }
                 }
             }
@@ -739,10 +752,32 @@ sealed class ApplicationPreview : Component
             {
                 var childElement = renderElement(model.Children[i], $"{path},{i}");
 
-                element.children.Add(childElement);    
+                element.children.Add(childElement);
             }
 
             return element;
         }
+    }
+
+    [StopPropagation]
+    Task OnItemClick(MouseEvent e)
+    {
+        var visualElementTreeItemPath = e.target.id;
+
+        var sb = new StringBuilder();
+
+        sb.AppendLine("var parentWindow = window.parent;");
+        sb.AppendLine("if(parentWindow)");
+        sb.AppendLine("{");
+        sb.AppendLine("  var reactWithDotNet = parentWindow.ReactWithDotNet;");
+        sb.AppendLine("  if(reactWithDotNet)");
+        sb.AppendLine("  {");
+        sb.AppendLine($"    reactWithDotNet.DispatchEvent('Change_VisualElementTreeItemPath', ['{visualElementTreeItemPath}']);");
+        sb.AppendLine("  }");
+        sb.AppendLine("}");
+
+        Client.RunJavascript(sb.ToString());
+
+        return Task.CompletedTask;
     }
 }
