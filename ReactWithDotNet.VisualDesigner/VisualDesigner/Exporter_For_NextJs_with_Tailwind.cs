@@ -113,7 +113,7 @@ static class Exporter_For_NextJs_with_Tailwind
             lines.Add(string.Empty);
             lines.Add($"{Indent(1)}return (");
 
-            WriteTo(lines, hasChildrenDeclerationInProps, result.node, 2);
+            lines.AddRange(WriteTo(hasChildrenDeclerationInProps, result.node, 2));
 
             lines.Add($"{Indent(1)});");
 
@@ -701,8 +701,10 @@ static class Exporter_For_NextJs_with_Tailwind
         return Success;
     }
 
-    static void WriteTo(List<string> lines, bool hasChildrenDeclerationInProps, ReactNode node, int indentLevel)
+    static IReadOnlyList<string> WriteTo(bool hasChildrenDeclerationInProps, ReactNode node, int indentLevel)
     {
+        List<string> lines = [];
+            
         var nodeTag = node.Tag;
 
         if (nodeTag is null)
@@ -710,7 +712,7 @@ static class Exporter_For_NextJs_with_Tailwind
             if (node.Text.HasValue())
             {
                 lines.Add(Indent(indentLevel) + node.Text);
-                return;
+                return lines;
             }
 
             throw new ArgumentNullException(nameof(nodeTag));
@@ -744,7 +746,7 @@ static class Exporter_For_NextJs_with_Tailwind
         {
             sb.Append("/>");
             lines.Add(sb.ToString());
-            return;
+            return lines;
         }
 
         // try add as children
@@ -761,7 +763,7 @@ static class Exporter_For_NextJs_with_Tailwind
                     // Close tag
                     lines.Add($"{indent}</{tag}>");
 
-                    return;
+                    return lines;
                 }
             }
         }
@@ -778,7 +780,7 @@ static class Exporter_For_NextJs_with_Tailwind
                 // Close tag
                 lines.Add($"{indent}</{tag}>");
 
-                return;
+                return lines;
             }
         }
 
@@ -794,11 +796,13 @@ static class Exporter_For_NextJs_with_Tailwind
         // Add children
         foreach (var child in node.Children)
         {
-            WriteTo(lines, hasChildrenDeclerationInProps, child, indentLevel + 1);
+            lines.AddRange(WriteTo(hasChildrenDeclerationInProps, child, indentLevel + 1));
         }
 
         // Close tag
         lines.Add($"{indent}</{tag}>");
+        
+        return lines;
     }
 
     class ReactNode
