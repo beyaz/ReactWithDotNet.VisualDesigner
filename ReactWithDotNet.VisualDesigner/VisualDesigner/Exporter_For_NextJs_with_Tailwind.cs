@@ -71,6 +71,8 @@ static class Exporter_For_NextJs_with_Tailwind
         {
             var result = TryWriteState(component, 0);
 
+            lines.Add(string.Empty);
+            
             lines.AddRange(result.lines);
 
             imports.AddRange(result.imports);
@@ -89,6 +91,8 @@ static class Exporter_For_NextJs_with_Tailwind
         if (hasState)
         {
             imports.Add(new() { ClassName = "initializeState, logic", Package = $"@/components/{component.Name}.Logic", IsNamed = true });
+            
+            imports.Add(new() { ClassName = "useLogic", Package = "@/components/Hooks/useLogic", IsNamed = true });
 
             lines.Add(string.Empty);
             lines.Add($"{Indent(1)}const [state, setState] = useState<State>(() => initializeState(props));");
@@ -109,15 +113,7 @@ static class Exporter_For_NextJs_with_Tailwind
             if (hasState)
             {
                 lines.Add("");
-                lines.Add(1, "const call = (name: string, ...args: any[]) =>");
-                lines.Add(1, "{");
-                lines.Add(1, "    setState((prevState: State) =>");
-                lines.Add(1, "    {");
-                lines.Add(1, "        logic(props, prevState)[name](...args);");
-                lines.Add("");
-                lines.Add(1, "        return { ...prevState };");
-                lines.Add(1, "    });");
-                lines.Add(1, "};");
+                lines.Add(1, "const { invokeLogic } = useLogic(props, setState, logic);");
             }
 
             lines.Add(string.Empty);
@@ -252,7 +248,7 @@ static class Exporter_For_NextJs_with_Tailwind
                 var componentInProject = GetComponenUserOrMainVersion(component.ProjectId, tag, userName);
                 if (componentInProject is not null)
                 {
-                    node.Properties.Add(new() { Name = name, Value = $"()=>call('{value}')" });
+                    node.Properties.Add(new() { Name = name, Value = $"()=>invokeLogic('{value}')" });
                     continue;
                 }
 
@@ -274,7 +270,7 @@ static class Exporter_For_NextJs_with_Tailwind
                                 node.Properties.Add(new()
                                 {
                                     Name  = name,
-                                    Value = $"({partPrm})=>call('{name}', {partPrm})"
+                                    Value = $"({partPrm})=>invokeLogic('{value}', {partPrm})"
                                 });
                             }
                             else
@@ -282,7 +278,7 @@ static class Exporter_For_NextJs_with_Tailwind
                                 node.Properties.Add(new()
                                 {
                                     Name  = name,
-                                    Value = $"()=>call('{name}')"
+                                    Value = $"()=>invokeLogic('{value}')"
                                 });
                             }
 
@@ -309,6 +305,12 @@ static class Exporter_For_NextJs_with_Tailwind
                 {
                     switch (name)
                     {
+                        case "outline":
+                        {
+                            classNames.Add($"{name}-{value}");
+                            continue;
+                        }
+                        
                         case "W":
                         case "w":
                         case "width":
@@ -585,7 +587,7 @@ static class Exporter_For_NextJs_with_Tailwind
 
         var yamlObject = deserializer.Deserialize<Dictionary<string, object>>(yaml);
 
-        foreach (var kvp in yamlObject)
+        foreach (KeyValuePair<string, object> kvp in yamlObject)
         {
             var propertyName = kvp.Key;
             var tsTypeName = InferTsTypeName(kvp.Value?.ToString());
@@ -774,6 +776,12 @@ static class Exporter_For_NextJs_with_Tailwind
         var sb = new StringBuilder();
 
         sb.Append($"{indent}<{tag}");
+        
+        var childrenProperty = node.Properties.FirstOrDefault(x => x.Name == "children");
+        if (childrenProperty is not null)
+        {
+            node.Properties.Remove(childrenProperty);
+        }
 
         foreach (var reactProperty in node.Properties)
         {
@@ -790,7 +798,7 @@ static class Exporter_For_NextJs_with_Tailwind
             sb.Append($" {propertyName}={{{propertyValue}}}");
         }
 
-        var hasSelfClose = node.Children.Count == 0 && node.Text.HasNoValue();
+        var hasSelfClose = node.Children.Count == 0 && node.Text.HasNoValue() && childrenProperty is null;
         if (hasSelfClose)
         {
             sb.Append("/>");
@@ -814,6 +822,24 @@ static class Exporter_For_NextJs_with_Tailwind
 
                     return lines;
                 }
+            }
+        }
+
+        // try add from state 
+        {
+            // sample: children: state.suggestionNodes
+            
+            if (childrenProperty is not null)
+            {
+                sb.Append(">");
+                lines.Add(sb.ToString());
+
+                lines.Add($"{Indent(indentLevel + 1)}{{ {childrenProperty.Value} }}");
+
+                // Close tag
+                lines.Add($"{indent}</{tag}>");
+
+                return lines;
             }
         }
 

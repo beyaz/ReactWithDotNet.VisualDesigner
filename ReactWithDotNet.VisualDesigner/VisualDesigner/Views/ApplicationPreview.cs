@@ -455,6 +455,12 @@ sealed class ApplicationPreview : Component
                             element.Add(Width(value));
                             continue;
                         }
+                        
+                        case "outline":
+                        {
+                            element.Add(Outline(value));
+                            continue;
+                        }
 
                         case "h":
                         case "height":
