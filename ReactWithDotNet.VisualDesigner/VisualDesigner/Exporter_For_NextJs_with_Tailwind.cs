@@ -1,7 +1,6 @@
 ﻿using System.IO;
 using System.Text;
-using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.NamingConventions;
+using static ReactWithDotNet.VisualDesigner.Models.YamlToTypescriptHelper;
 
 namespace ReactWithDotNet.VisualDesigner.Models;
 
@@ -26,14 +25,14 @@ static class Exporter_For_NextJs_with_Tailwind
     {
         list.Add(Indent(indentLevel) + value);
     }
-    
-    static void AddIfNotNull(this List<ImportInfo> list,ImportInfo value)
+
+    static void AddIfNotNull(this List<ImportInfo> list, ImportInfo value)
     {
         if (value is null)
         {
             return;
         }
-        
+
         list.Add(value);
     }
 
@@ -72,7 +71,7 @@ static class Exporter_For_NextJs_with_Tailwind
             var result = TryWriteState(component, 0);
 
             lines.Add(string.Empty);
-            
+
             lines.AddRange(result.lines);
 
             imports.AddRange(result.imports);
@@ -91,7 +90,7 @@ static class Exporter_For_NextJs_with_Tailwind
         if (hasState)
         {
             imports.Add(new() { ClassName = "initializeState, logic", Package = $"@/components/{component.Name}.Logic", IsNamed = true });
-            
+
             imports.Add(new() { ClassName = "useLogic", Package = "@/components/Hooks/useLogic", IsNamed = true });
 
             lines.Add(string.Empty);
@@ -232,8 +231,6 @@ static class Exporter_For_NextJs_with_Tailwind
                     continue;
                 }
 
-                
-
                 if (value.StartsWith("props.") || value.StartsWith("state."))
                 {
                     node.Properties.Add(new() { Name = name, Value = value });
@@ -244,7 +241,7 @@ static class Exporter_For_NextJs_with_Tailwind
                 {
                     value = "/" + value; // todo: fixme
                 }
-                
+
                 var componentInProject = GetComponenUserOrMainVersion(component.ProjectId, tag, userName);
                 if (componentInProject is not null)
                 {
@@ -291,7 +288,7 @@ static class Exporter_For_NextJs_with_Tailwind
                         continue;
                     }
                 }
-                
+
                 node.Properties.Add(new() { Name = name, Value = '"' + value + '"' });
             }
         }
@@ -310,7 +307,7 @@ static class Exporter_For_NextJs_with_Tailwind
                             classNames.Add($"{name}-{value}");
                             continue;
                         }
-                        
+
                         case "W":
                         case "w":
                         case "width":
@@ -575,132 +572,6 @@ static class Exporter_For_NextJs_with_Tailwind
         return new(' ', indentLevel * 4);
     }
 
-    static (List<string> lines, List<ImportInfo> imports) TryWriteInterfaceBody(int indent, string yaml)
-    {
-        List<string> lines = [];
-
-        List<ImportInfo> imports = [];
-
-        var deserializer = new DeserializerBuilder()
-            .WithNamingConvention(CamelCaseNamingConvention.Instance)
-            .Build();
-
-        var yamlObject = deserializer.Deserialize<Dictionary<string, object>>(yaml);
-
-        foreach (KeyValuePair<string, object> kvp in yamlObject)
-        {
-            var propertyName = kvp.Key;
-            var tsTypeName = InferTsTypeName(kvp.Value?.ToString());
-
-            var isNullable = propertyName.TrimEnd().EndsWith("?");
-
-            if (isNullable)
-            {
-                propertyName = propertyName.RemoveFromEnd("?");
-            }
-
-            lines.Add($"{Indent(indent)}{propertyName}{(isNullable ? "?" : string.Empty)}: {tsTypeName};");
-        }
-
-        return (lines, imports);
-
-        string InferTsTypeName(string value)
-        {
-            if (value == null)
-            {
-                return "string";
-            }
-
-            value = value.Trim();
-
-            if (bool.TryParse(value, out _))
-            {
-                return "boolean";
-            }
-
-            if (int.TryParse(value, out _))
-            {
-                return "number";
-            }
-
-            if (value.StartsWith("() =>"))
-            {
-                return value;
-            }
-
-            if (value.Equals("ReactNode", StringComparison.OrdinalIgnoreCase))
-            {
-                imports.Add(new() { ClassName = "React", Package = "react" });
-
-                return "React.ReactNode";
-            }
-
-            return "string";
-        }
-    }
-
-    static (List<string> lines, List<ImportInfo> imports) TryWriteProps(ComponentEntity cmp, int indent)
-    {
-        List<string> lines = [];
-
-        List<ImportInfo> imports = [];
-
-        if (cmp.PropsAsYaml.HasNoValue())
-        {
-            return (lines, imports);
-        }
-
-        lines.Add($"{Indent(indent)}export interface Props {{");
-
-        indent++;
-
-        // body
-        {
-            var result = TryWriteInterfaceBody(indent, cmp.PropsAsYaml);
-
-            lines.AddRange(result.lines);
-
-            imports.AddRange(result.imports);
-        }
-
-        indent--;
-
-        lines.Add($"{Indent(indent)}}}");
-
-        return (lines, imports);
-    }
-
-    static (List<string> lines, List<ImportInfo> imports) TryWriteState(ComponentEntity cmp, int indent)
-    {
-        List<string> lines = [];
-
-        List<ImportInfo> imports = [];
-
-        if (cmp.StateAsYaml.HasNoValue())
-        {
-            return (lines, imports);
-        }
-
-        lines.Add($"{Indent(indent)}export interface State {{");
-
-        indent++;
-
-        // body
-        {
-            var result = TryWriteInterfaceBody(indent, cmp.StateAsYaml);
-
-            lines.AddRange(result.lines);
-
-            imports.AddRange(result.imports);
-        }
-
-        indent--;
-
-        lines.Add($"{Indent(indent)}}}");
-
-        return (lines, imports);
-    }
-
     static async Task<Result> TryWriteToFile(string filePath, string fileContent)
     {
         try
@@ -715,10 +586,10 @@ static class Exporter_For_NextJs_with_Tailwind
         return Success;
     }
 
-    static IReadOnlyList<string> WriteTo(ReactNode node, bool hasChildrenDeclerationInProps,  int indentLevel)
+    static IReadOnlyList<string> WriteTo(ReactNode node, bool hasChildrenDeclerationInProps, int indentLevel)
     {
         List<string> lines = [];
-            
+
         var nodeTag = node.Tag;
 
         if (nodeTag is null)
@@ -738,12 +609,12 @@ static class Exporter_For_NextJs_with_Tailwind
         if (showIf is not null)
         {
             node.Properties.Remove(showIf);
-            
+
             lines.Add($"{Indent(indentLevel)}{{{showIf.Value} && (");
             indentLevel++;
 
             var innerLines = WriteTo(node, hasChildrenDeclerationInProps, indentLevel);
-            
+
             lines.AddRange(innerLines);
 
             indentLevel--;
@@ -751,24 +622,24 @@ static class Exporter_For_NextJs_with_Tailwind
 
             return lines;
         }
-        
+
         if (hideIf is not null)
         {
             node.Properties.Remove(hideIf);
-            
+
             lines.Add($"{Indent(indentLevel)}{{!{hideIf.Value} && (");
             indentLevel++;
 
             var innerLines = WriteTo(node, hasChildrenDeclerationInProps, indentLevel);
-            
+
             lines.AddRange(innerLines);
 
             indentLevel--;
             lines.Add($"{Indent(indentLevel)})}}");
-            
+
             return lines;
         }
-        
+
         var tag = nodeTag.Split('/').Last();
 
         var indent = new string(' ', indentLevel * 4);
@@ -776,7 +647,7 @@ static class Exporter_For_NextJs_with_Tailwind
         var sb = new StringBuilder();
 
         sb.Append($"{indent}<{tag}");
-        
+
         var childrenProperty = node.Properties.FirstOrDefault(x => x.Name == "children");
         if (childrenProperty is not null)
         {
@@ -828,7 +699,7 @@ static class Exporter_For_NextJs_with_Tailwind
         // try add from state 
         {
             // sample: children: state.suggestionNodes
-            
+
             if (childrenProperty is not null)
             {
                 sb.Append(">");
@@ -876,7 +747,7 @@ static class Exporter_For_NextJs_with_Tailwind
 
         // Close tag
         lines.Add($"{indent}</{tag}>");
-        
+
         return lines;
     }
 
@@ -885,7 +756,7 @@ static class Exporter_For_NextJs_with_Tailwind
         public List<ReactNode> Children { get; } = [];
 
         public List<ReactProperty> Properties { get; } = [];
-        
+
         public string Tag { get; init; }
 
         public string Text { get; init; }
@@ -896,11 +767,11 @@ static class Exporter_For_NextJs_with_Tailwind
         public string Name { get; init; }
         public string Value { get; init; }
     }
+}
 
-    record ImportInfo
-    {
-        public string ClassName { get; init; }
-        public bool IsNamed { get; init; }
-        public string Package { get; init; }
-    }
+record ImportInfo
+{
+    public string ClassName { get; init; }
+    public bool IsNamed { get; init; }
+    public string Package { get; init; }
 }
