@@ -222,7 +222,7 @@ sealed class ApplicationPreview : Component
                             }
                         }
 
-                        if (name.Equals("src", StringComparison.OrdinalIgnoreCase))
+                        if (name.Equals("src", StringComparison.OrdinalIgnoreCase) && !(value.StartsWith("props.") || value.StartsWith("state.")))
                         {
                             elementAsImage.src = Path.Combine(Context.wwwroot, value);
                         }

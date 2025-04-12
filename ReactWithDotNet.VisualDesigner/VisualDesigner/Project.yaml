@@ -144,6 +144,10 @@ globalCss: |
   }
 
 externalComponents:
+  - name: input
+    events:
+      - name: onClick
+        parameters: []
   - name: heroui/Checkbox
     events:
       - name: onValueChange

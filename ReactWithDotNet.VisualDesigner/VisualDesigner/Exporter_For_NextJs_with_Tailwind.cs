@@ -26,6 +26,16 @@ static class Exporter_For_NextJs_with_Tailwind
     {
         list.Add(Indent(indentLevel) + value);
     }
+    
+    static void AddIfNotNull(this List<ImportInfo> list,ImportInfo value)
+    {
+        if (value is null)
+        {
+            return;
+        }
+        
+        list.Add(value);
+    }
 
     static (List<string> lines, List<ImportInfo> imports) AsLines(ComponentEntity component, string userName)
     {
@@ -113,7 +123,7 @@ static class Exporter_For_NextJs_with_Tailwind
             lines.Add(string.Empty);
             lines.Add($"{Indent(1)}return (");
 
-            lines.AddRange(WriteTo(hasChildrenDeclerationInProps, result.node, 2));
+            lines.AddRange(WriteTo(result.node, hasChildrenDeclerationInProps, 2));
 
             lines.Add($"{Indent(1)});");
 
@@ -198,7 +208,7 @@ static class Exporter_For_NextJs_with_Tailwind
             tag = "Image";
         }
 
-        imports.Add(GetTagImportInfo(component.ProjectId, userName, tag));
+        imports.AddIfNotNull(GetTagImportInfo(component.ProjectId, userName, tag));
 
         var node = new ReactNode { Tag = tag };
 
@@ -226,10 +236,7 @@ static class Exporter_For_NextJs_with_Tailwind
                     continue;
                 }
 
-                if (tag == "Image")
-                {
-                    value = "/" + value; // todo: fixme
-                }
+                
 
                 if (value.StartsWith("props.") || value.StartsWith("state."))
                 {
@@ -237,6 +244,11 @@ static class Exporter_For_NextJs_with_Tailwind
                     continue;
                 }
 
+                if (tag == "Image")
+                {
+                    value = "/" + value; // todo: fixme
+                }
+                
                 var componentInProject = GetComponenUserOrMainVersion(component.ProjectId, tag, userName);
                 if (componentInProject is not null)
                 {
@@ -283,7 +295,7 @@ static class Exporter_For_NextJs_with_Tailwind
                         continue;
                     }
                 }
-
+                
                 node.Properties.Add(new() { Name = name, Value = '"' + value + '"' });
             }
         }
@@ -701,7 +713,7 @@ static class Exporter_For_NextJs_with_Tailwind
         return Success;
     }
 
-    static IReadOnlyList<string> WriteTo(bool hasChildrenDeclerationInProps, ReactNode node, int indentLevel)
+    static IReadOnlyList<string> WriteTo(ReactNode node, bool hasChildrenDeclerationInProps,  int indentLevel)
     {
         List<string> lines = [];
             
@@ -718,6 +730,43 @@ static class Exporter_For_NextJs_with_Tailwind
             throw new ArgumentNullException(nameof(nodeTag));
         }
 
+        var showIf = node.Properties.FirstOrDefault(x => x.Name is "show-if");
+        var hideIf = node.Properties.FirstOrDefault(x => x.Name is "hide-if");
+
+        if (showIf is not null)
+        {
+            node.Properties.Remove(showIf);
+            
+            lines.Add($"{Indent(indentLevel)}{{{showIf.Value} && (");
+            indentLevel++;
+
+            var innerLines = WriteTo(node, hasChildrenDeclerationInProps, indentLevel);
+            
+            lines.AddRange(innerLines);
+
+            indentLevel--;
+            lines.Add($"{Indent(indentLevel)})}}");
+
+            return lines;
+        }
+        
+        if (hideIf is not null)
+        {
+            node.Properties.Remove(hideIf);
+            
+            lines.Add($"{Indent(indentLevel)}{{!{hideIf.Value} && (");
+            indentLevel++;
+
+            var innerLines = WriteTo(node, hasChildrenDeclerationInProps, indentLevel);
+            
+            lines.AddRange(innerLines);
+
+            indentLevel--;
+            lines.Add($"{Indent(indentLevel)})}}");
+            
+            return lines;
+        }
+        
         var tag = nodeTag.Split('/').Last();
 
         var indent = new string(' ', indentLevel * 4);
@@ -796,7 +845,7 @@ static class Exporter_For_NextJs_with_Tailwind
         // Add children
         foreach (var child in node.Children)
         {
-            lines.AddRange(WriteTo(hasChildrenDeclerationInProps, child, indentLevel + 1));
+            lines.AddRange(WriteTo(child, hasChildrenDeclerationInProps, indentLevel + 1));
         }
 
         // Close tag
