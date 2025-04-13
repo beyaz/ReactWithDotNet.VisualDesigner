@@ -1,13 +1,10 @@
-﻿using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using System.Text;
-using static ReactWithDotNet.VisualDesigner.Models.YamlToTypescriptHelper;
 
 namespace ReactWithDotNet.VisualDesigner.Models;
 
 static class Exporter_For_NextJs_with_Tailwind
 {
-    const string childrenIdentifier = "[...]";
     
     
     static class TypeScriptFileHelper
@@ -54,20 +51,8 @@ static class Exporter_For_NextJs_with_Tailwind
         return await TryWriteToFile(filePath, fileContent);
     }
 
-    static void Add(this List<string> list, int indentLevel, string value)
-    {
-        list.Add(Indent(indentLevel) + value);
-    }
+   
 
-    static void AddIfNotNull(this List<ImportInfo> list, ImportInfo value)
-    {
-        if (value is null)
-        {
-            return;
-        }
-
-        list.Add(value);
-    }
 
     static (List<string> lines, List<ImportInfo> imports, IReadOnlyList<string> elementTreeCodes) AsLines(ComponentEntity component, string userName)
     {
@@ -75,66 +60,11 @@ static class Exporter_For_NextJs_with_Tailwind
 
         List<string> lines = [];
 
-        var hasState = false;
-
-        bool hasProps;
-
-        bool hasChildrenDeclerationInProps;
-
-        // TryWriteProps
-        {
-            var result = TryWriteProps(component, 0);
-
-            hasProps = result.lines.Any();
-
-            if (hasProps)
-            {
-                lines.Add(string.Empty);
-
-                lines.AddRange(result.lines);
-
-                imports.AddRange(result.imports);
-            }
-
-            hasChildrenDeclerationInProps = result.lines.Any(x => x.TrimStart().StartsWith("children", StringComparison.OrdinalIgnoreCase));
-        }
-
-        // TryWriteState
-        {
-            var result = TryWriteState(component, 0);
-
-            lines.Add(string.Empty);
-
-            lines.AddRange(result.lines);
-
-            imports.AddRange(result.imports);
-
-            if (result.lines.Any())
-            {
-                imports.Add(new() { ClassName = "useState", Package = "react", IsNamed = true });
-
-                hasState = true;
-            }
-        }
-
-        lines.Add(string.Empty);
-        lines.Add($"export default function {component.Name.Split('/').Last()}({(hasProps ? "props: Props" : string.Empty)}) {{");
-
-        if (hasState)
-        {
-            imports.Add(new() { ClassName = "initializeState, logic", Package = $"@/components/{component.Name}.Logic", IsNamed = true });
-
-            imports.Add(new() { ClassName = "useLogic", Package = "@/components/Hooks/useLogic", IsNamed = true });
-
-            lines.Add(string.Empty);
-            lines.Add($"{Indent(1)}const [state, setState] = useState<State>(() => initializeState(props));");
-        }
-
         IReadOnlyList<string> elementTreeCodes;
         {
             var rootVisualElement = DeserializeFromJson<VisualElementModel>(component.RootElementAsJson ?? "");
 
-            var result = ConvertToReactNode((component, userName, hasChildrenDeclerationInProps), rootVisualElement);
+            var result = ConvertToReactNode((component, userName), rootVisualElement);
 
             imports.AddRange(result.imports);
 
@@ -143,16 +73,12 @@ static class Exporter_For_NextJs_with_Tailwind
                 lines.Add($"{Indent(1)}{line}");
             }
 
-            if (hasState)
-            {
-                lines.Add("");
-                lines.Add(1, "const { invokeLogic } = useLogic(props, setState, logic);");
-            }
+           
 
             lines.Add(string.Empty);
             lines.Add($"{Indent(1)}return (");
 
-             elementTreeCodes = WriteTo(result.node, null, hasChildrenDeclerationInProps, 2);
+             elementTreeCodes = WriteTo(result.node, null, 2);
             
             lines.AddRange(elementTreeCodes);
 
@@ -164,24 +90,6 @@ static class Exporter_For_NextJs_with_Tailwind
         return (lines, imports, elementTreeCodes);
     }
 
-    static IReadOnlyList<string> AsTsLines(this IReadOnlyList<ImportInfo> imports)
-    {
-        List<string> lines = [];
-
-        foreach (var import in imports.DistinctBy(x => x.Package + x.ClassName))
-        {
-            if (import.IsNamed)
-            {
-                lines.Add($"import {{ {import.ClassName} }} from \"{import.Package}\";");
-            }
-            else
-            {
-                lines.Add($"import {import.ClassName} from \"{import.Package}\";");
-            }
-        }
-
-        return lines;
-    }
 
     static async Task<Result<(string filePath, string fileContent)>> CalculateExportInfo(ApplicationState state)
     {
@@ -229,9 +137,9 @@ static class Exporter_For_NextJs_with_Tailwind
     }
 
     static (ReactNode node, List<string> bodyLines, List<ImportInfo> imports)
-        ConvertToReactNode((ComponentEntity component, string userName, bool hasChildrenDeclerationInProps) context, VisualElementModel element)
+        ConvertToReactNode((ComponentEntity component, string userName) context, VisualElementModel element)
     {
-        var (component, userName, hasChildrenDeclerationInProps) = context;
+        var (component, userName) = context;
 
         List<ImportInfo> imports = [];
 
@@ -244,13 +152,11 @@ static class Exporter_For_NextJs_with_Tailwind
 
         if (tag == "a")
         {
-            imports.Add(new() { ClassName = "Link", Package = "next/link" });
             tag = "Link";
         }
 
         if (tag == "img")
         {
-            imports.Add(new() { ClassName = "Image", Package = "next/image" });
 
             tag = "Image";
 
@@ -260,7 +166,6 @@ static class Exporter_For_NextJs_with_Tailwind
             }
         }
 
-        imports.AddIfNotNull(GetTagImportInfo(component.ProjectId, userName, tag));
 
         var node = new ReactNode { Tag = tag };
 
@@ -569,12 +474,7 @@ static class Exporter_For_NextJs_with_Tailwind
             return (node, bodyLines, imports);
         }
 
-        if (element.Text == childrenIdentifier && hasChildrenDeclerationInProps)
-        {
-            node.Children.Add(new() { Text = element.Text });
-
-            return (node, bodyLines, imports);
-        }
+        
 
      
         
@@ -588,14 +488,6 @@ static class Exporter_For_NextJs_with_Tailwind
         // Add text content
         if (!string.IsNullOrWhiteSpace(element.Text))
         {
-            if (imports.All(x => x.ClassName != "useTranslations"))
-            {
-                imports.Add(new() { ClassName = "useTranslations", Package = "next-intl", IsNamed = true });
-
-                bodyLines.Add(string.Empty);
-                bodyLines.Add("const t = useTranslations();");
-            }
-
             node.Children.Add(new() { Text = $"{{t(\"{element.Text}\")}}" });
         }
 
@@ -623,21 +515,7 @@ static class Exporter_For_NextJs_with_Tailwind
         return "C:\\github\\hopgogo\\web\\enduser-ui\\src\\components\\";
     }
 
-    static ImportInfo GetTagImportInfo(int projectId, string userName, string tag)
-    {
-        var component = GetComponenUserOrMainVersion(projectId, tag, userName);
-        if (component is not null)
-        {
-            return new() { ClassName = tag.Split('/').Last(), Package = $"@/components/{tag}" };
-        }
-
-        if (tag == "Popover" || tag == "PopoverTrigger" || tag == "PopoverContent" || tag == "heroui/Checkbox")
-        {
-            return new() { ClassName = tag.Split('/').Last(), Package = "@heroui/react", IsNamed = true };
-        }
-
-        return null;
-    }
+   
 
     static string Indent(int indentLevel)
     {
@@ -658,7 +536,7 @@ static class Exporter_For_NextJs_with_Tailwind
         return Success;
     }
     
-    static IReadOnlyList<string> WriteTo(ReactNode node, ReactNode parentNode, bool hasChildrenDeclerationInProps, int indentLevel)
+    static IReadOnlyList<string> WriteTo(ReactNode node, ReactNode parentNode, int indentLevel)
     {
         List<string> lines = [];
 
@@ -685,7 +563,7 @@ static class Exporter_For_NextJs_with_Tailwind
             lines.Add($"{Indent(indentLevel)}{{{clearValue(showIf.Value)} && (");
             indentLevel++;
 
-            var innerLines = WriteTo(node, parentNode, hasChildrenDeclerationInProps, indentLevel);
+            var innerLines = WriteTo(node, parentNode, indentLevel);
 
             lines.AddRange(innerLines);
 
@@ -704,7 +582,7 @@ static class Exporter_For_NextJs_with_Tailwind
             lines.Add($"{Indent(indentLevel)}{{!{clearValue(hideIf.Value)} && (");
             indentLevel++;
 
-            var innerLines = WriteTo(node, parentNode, hasChildrenDeclerationInProps, indentLevel);
+            var innerLines = WriteTo(node, parentNode, indentLevel);
 
             lines.AddRange(innerLines);
 
@@ -733,7 +611,7 @@ static class Exporter_For_NextJs_with_Tailwind
                 indentLevel++;
 
                 {
-                    var innerLines = WriteTo(node, parentNode, hasChildrenDeclerationInProps, indentLevel);
+                    var innerLines = WriteTo(node, parentNode, indentLevel);
                     lines.AddRange(innerLines);
                 }
                 
@@ -865,7 +743,7 @@ static class Exporter_For_NextJs_with_Tailwind
         // Add children
         foreach (var child in node.Children)
         {
-            lines.AddRange(WriteTo(child, node, hasChildrenDeclerationInProps, indentLevel + 1));
+            lines.AddRange(WriteTo(child, node, indentLevel + 1));
         }
 
         // Close tag
@@ -894,7 +772,6 @@ static class Exporter_For_NextJs_with_Tailwind
 
 record ImportInfo
 {
-    public string ClassName { get; init; }
-    public bool IsNamed { get; init; }
-    public string Package { get; init; }
+   
+  
 }
