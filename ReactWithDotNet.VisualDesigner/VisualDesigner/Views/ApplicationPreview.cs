@@ -193,7 +193,7 @@ sealed class ApplicationPreview : Component
                 var (success, name, value) = TryParsePropertyValue(property);
                 if (success)
                 {
-                    if (name =="d-items-source-design-time-count")
+                    if (name =="-items-source-design-time-count")
                     {
                         var designTimeChildrenCount = double.Parse(value);
 
@@ -238,7 +238,7 @@ sealed class ApplicationPreview : Component
                             }
                         }
 
-                        if (name.Equals("src", StringComparison.OrdinalIgnoreCase) && !(value.StartsWith("props.") || value.StartsWith("state.") || value.StartsWith("item.")))
+                        if (name.Equals("src", StringComparison.OrdinalIgnoreCase) && !IsConnectedValue(value))
                         {
                             elementAsImage.src = Path.Combine(Context.wwwroot, value);
                         }

@@ -12,26 +12,27 @@ static class Exporter_For_NextJs_with_Tailwind
     
     static class TypeScriptFileHelper
     {
-        public static Result<string> InjectRender(string fileContent, IReadOnlyList<string> linesToInject)
+        public static Result<string> InjectRender(IReadOnlyList<string> fileContent, IReadOnlyList<string> linesToInject)
         {
-            var lines = fileContent.Split(Environment.NewLine).ToList();
+            var lines = fileContent.ToList();
 
-            var firstReturnLineIndex = lines.FindIndex(l => l.Trim().Replace(" ", string.Empty) == "return(");
+            var firstReturnLineIndex = lines.FindIndex(l => l == "    return (");
             if (firstReturnLineIndex < 0)
             {
                 return new InvalidOperationException("No return found");
             }
             
-            var firstReturnCloseLineIndex = lines.FindIndex(firstReturnLineIndex, l => l.Trim().Replace(" ", string.Empty) == ");");
+            var firstReturnCloseLineIndex = lines.FindIndex(firstReturnLineIndex, l => l == "    );");
             if (firstReturnCloseLineIndex < 0)
             {
                 return new InvalidOperationException("Return close not found");
             }
             
             
-            lines.RemoveRange(firstReturnLineIndex, firstReturnCloseLineIndex - firstReturnLineIndex);
+            lines.RemoveRange(firstReturnLineIndex + 1, firstReturnCloseLineIndex - firstReturnLineIndex - 1);
             
-            lines.InsertRange(firstReturnLineIndex, linesToInject);
+            
+            lines.InsertRange(firstReturnLineIndex + 1, linesToInject);
 
             var injectedFileContent = string.Join(Environment.NewLine, lines);
 
@@ -68,7 +69,7 @@ static class Exporter_For_NextJs_with_Tailwind
         list.Add(value);
     }
 
-    static (List<string> lines, List<ImportInfo> imports) AsLines(ComponentEntity component, string userName)
+    static (List<string> lines, List<ImportInfo> imports, IReadOnlyList<string> elementTreeCodes) AsLines(ComponentEntity component, string userName)
     {
         List<ImportInfo> imports = [];
 
@@ -129,6 +130,7 @@ static class Exporter_For_NextJs_with_Tailwind
             lines.Add($"{Indent(1)}const [state, setState] = useState<State>(() => initializeState(props));");
         }
 
+        IReadOnlyList<string> elementTreeCodes;
         {
             var rootVisualElement = DeserializeFromJson<VisualElementModel>(component.RootElementAsJson ?? "");
 
@@ -150,14 +152,16 @@ static class Exporter_For_NextJs_with_Tailwind
             lines.Add(string.Empty);
             lines.Add($"{Indent(1)}return (");
 
-            lines.AddRange(WriteTo(result.node, null, hasChildrenDeclerationInProps, 2));
+             elementTreeCodes = WriteTo(result.node, null, hasChildrenDeclerationInProps, 2);
+            
+            lines.AddRange(elementTreeCodes);
 
             lines.Add($"{Indent(1)});");
 
             lines.Add("}");
         }
 
-        return (lines, imports);
+        return (lines, imports, elementTreeCodes);
     }
 
     static IReadOnlyList<string> AsTsLines(this IReadOnlyList<ImportInfo> imports)
@@ -192,18 +196,34 @@ static class Exporter_For_NextJs_with_Tailwind
             component = result.Value;
         }
 
+        var filePath = $"{GetExportFolderPath()}{state.ComponentName}.tsx";
+        
         string fileContent;
         {
             var result = AsLines(component, state.UserName);
 
-            var fileLines = new List<string>(result.imports.AsTsLines());
+            var linesToInject =result.elementTreeCodes;
 
-            fileLines.AddRange(result.lines);
+            string[] fileContentInDirectory;
+            try
+            {
+                fileContentInDirectory = await File.ReadAllLinesAsync(filePath);
+            }
+            catch (Exception e)
+            {
+                return e;
+            }
 
-            fileContent = string.Join(Environment.NewLine, fileLines);
+            var newVersion = TypeScriptFileHelper.InjectRender(fileContentInDirectory, linesToInject);
+            if (newVersion.HasError)
+            {
+                return newVersion.Error;
+            }
+
+            fileContent = newVersion.Value;
         }
 
-        var filePath = $"{GetExportFolderPath()}{state.ComponentName}.tsx";
+        
 
         return (filePath, fileContent);
     }
@@ -637,15 +657,7 @@ static class Exporter_For_NextJs_with_Tailwind
 
         return Success;
     }
-    static bool IsConnectedValue(string value)
-    {
-        if (value is null)
-        {
-            return false;
-        }
-
-        return value.StartsWith("{") && value.EndsWith("}");
-    }
+    
     static IReadOnlyList<string> WriteTo(ReactNode node, ReactNode parentNode, bool hasChildrenDeclerationInProps, int indentLevel)
     {
         List<string> lines = [];
@@ -706,7 +718,7 @@ static class Exporter_For_NextJs_with_Tailwind
 
         // is map
         {
-            var itemsSource = parentNode?.Properties.FirstOrDefault(x => x.Name is "d-items-source");
+            var itemsSource = parentNode?.Properties.FirstOrDefault(x => x.Name is "-items-source");
             if (itemsSource is not null)
             {
                 parentNode.Properties.Remove(itemsSource);
@@ -752,7 +764,7 @@ static class Exporter_For_NextJs_with_Tailwind
             node.Properties.Remove(childrenProperty);
         }
         
-        var bindProperty = node.Properties.FirstOrDefault(x => x.Name == "d-bind");
+        var bindProperty = node.Properties.FirstOrDefault(x => x.Name == "-bind");
         if (bindProperty is not null)
         {
             node.Properties.Remove(bindProperty);
@@ -765,7 +777,7 @@ static class Exporter_For_NextJs_with_Tailwind
 
             var propertyValue = reactProperty.Value;
 
-            if (propertyName is "d-items-source")
+            if (propertyName is "-items-source" || propertyName is "-items-source-design-time-count")
             {
                 continue;
             }
@@ -794,24 +806,7 @@ static class Exporter_For_NextJs_with_Tailwind
             return lines;
         }
 
-        // try add as children
-        {
-            if (hasChildrenDeclerationInProps)
-            {
-                if (node.Children.Count == 1 && node.Children[0].Text == childrenIdentifier)
-                {
-                    sb.Append(">");
-                    lines.Add(sb.ToString());
-
-                    lines.Add($"{Indent(indentLevel + 1)}{{ props.children }}");
-
-                    // Close tag
-                    lines.Add($"{indent}</{tag}>");
-
-                    return lines;
-                }
-            }
-        }
+     
 
         // try add from state 
         {
@@ -822,7 +817,7 @@ static class Exporter_For_NextJs_with_Tailwind
                 sb.Append(">");
                 lines.Add(sb.ToString());
 
-                lines.Add($"{Indent(indentLevel + 1)}{{ {childrenProperty.Value} }}");
+                lines.Add($"{Indent(indentLevel + 1)}{childrenProperty.Value}");
 
                 // Close tag
                 lines.Add($"{indent}</{tag}>");

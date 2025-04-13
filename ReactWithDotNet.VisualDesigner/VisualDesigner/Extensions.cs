@@ -473,6 +473,18 @@ static class Extensions
         return RemoveFromStart(data, value, StringComparison.OrdinalIgnoreCase);
     }
 
+    public static bool IsConnectedValue(string value)
+    {
+        if (value is null)
+        {
+            return false;
+        }
+
+        return value.StartsWith("{") && value.EndsWith("}");
+    }
+    
+    public static string ClearConnectedValue(string value) => value.RemoveFromStart("{").RemoveFromEnd("}");
+    
     /// <summary>
     ///     Removes value from start of str
     /// </summary>
