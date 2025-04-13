@@ -297,7 +297,28 @@ static class Exporter_For_NextJs_with_Tailwind
 
             if (element.Properties.Any(x => x.Contains("alt:")) is false)
             {
-                element.Properties.Add("alt: -");
+                element.Properties.Add("alt: ?");
+            }
+
+            var sizeProperty = element.Properties.FirstOrDefault(x => x.Contains("size:"));
+            if (sizeProperty is not null)
+            {
+                element.Properties.Remove(sizeProperty);
+                
+                element.Properties.Add(sizeProperty.Replace("size:","width:"));
+                
+                element.Properties.Add(sizeProperty.Replace("size:","height:"));
+            }
+            else
+            {
+                var hasNoWidthDecleration = element.Properties.Any(x => x.Contains("w:") || x.Contains("width:")) is false;
+                var hasNoHeightDecleration = element.Properties.Any(x => x.Contains("h:") || x.Contains("height:")) is false;
+                var hasNoFilltDecleration = element.Properties.Any(x => x.Contains("fill:")) is false;
+            
+                if ( hasNoWidthDecleration && hasNoHeightDecleration && hasNoFilltDecleration)
+                {
+                    element.Properties.Add("fill: {true}");
+                }
             }
         }
 
@@ -333,10 +354,10 @@ static class Exporter_For_NextJs_with_Tailwind
                     continue;
                 }
 
-                if (tag == "Image")
-                {
-                    value = "/" + value; // todo: fixme
-                }
+                //if (tag == "Image")
+                //{
+                //    value = "/" + value; // todo: fixme
+                //}
 
                 var componentInProject = (await GetComponenUserOrMainVersionAsync(component.ProjectId, tag, userName)).Value;
                 if (componentInProject is not null)

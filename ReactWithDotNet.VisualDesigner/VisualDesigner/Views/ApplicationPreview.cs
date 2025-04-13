@@ -188,7 +188,13 @@ sealed class ApplicationPreview : Component
 
                         if (name.Equals("src", StringComparison.OrdinalIgnoreCase) && !IsConnectedValue(value))
                         {
+                            if (value.StartsWith("/assets/"))
+                            {
+                                value = value.RemoveFromStart("/");
+                            }
                             elementAsImage.src = Path.Combine(Context.wwwroot, value);
+                            
+                            continue;
                         }
                     }
 
