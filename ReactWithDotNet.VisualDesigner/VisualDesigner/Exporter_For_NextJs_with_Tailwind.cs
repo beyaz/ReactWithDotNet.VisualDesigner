@@ -15,7 +15,7 @@ static class Exporter_For_NextJs_with_Tailwind
 
         var (filePath, fileContent) = result.Value;
 
-        return await TryWriteToFile(filePath, fileContent);
+        return await IO.TryWriteToFile(filePath, fileContent);
     }
 
     static IReadOnlyList<string> CalculateElementTreeTsxCodes(ComponentEntity component, string userName)
@@ -46,7 +46,7 @@ static class Exporter_For_NextJs_with_Tailwind
         {
             string[] fileContentInDirectory;
             {
-                var result = await TryReadFile(filePath);
+                var result = await IO.TryReadFile(filePath);
                 if (result.HasError)
                 {
                     return result.Error;
@@ -667,30 +667,33 @@ static class Exporter_For_NextJs_with_Tailwind
         return injectedFileContent;
     }
 
-    static async Task<Result<string[]>> TryReadFile(string filePath)
+    class IO
     {
-        try
+        public static async Task<Result<string[]>> TryReadFile(string filePath)
         {
-            return await File.ReadAllLinesAsync(filePath);
-        }
-        catch (Exception exception)
-        {
-            return exception;
-        }
-    }
-
-    static async Task<Result> TryWriteToFile(string filePath, string fileContent)
-    {
-        try
-        {
-            await File.WriteAllTextAsync(filePath, fileContent);
-        }
-        catch (Exception exception)
-        {
-            return exception;
+            try
+            {
+                return await File.ReadAllLinesAsync(filePath);
+            }
+            catch (Exception exception)
+            {
+                return exception;
+            }
         }
 
-        return Success;
+        public static async Task<Result> TryWriteToFile(string filePath, string fileContent)
+        {
+            try
+            {
+                await File.WriteAllTextAsync(filePath, fileContent);
+            }
+            catch (Exception exception)
+            {
+                return exception;
+            }
+
+            return Success;
+        }
     }
 
     record ReactNode
