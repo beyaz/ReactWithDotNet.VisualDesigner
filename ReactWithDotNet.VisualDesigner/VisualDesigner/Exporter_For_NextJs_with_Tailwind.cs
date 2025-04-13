@@ -31,7 +31,7 @@ static class Exporter_For_NextJs_with_Tailwind
     {
         ComponentEntity component;
         {
-            var result = await GetComponenUserOrMainVersion(state);
+            var result = await GetComponenUserOrMainVersionAsync(state.ProjectId, state.ComponentName, state.UserName);
             if (result.HasError)
             {
                 return result.Error;

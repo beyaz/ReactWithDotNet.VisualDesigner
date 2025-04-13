@@ -199,6 +199,8 @@ static class ApplicationLogic
     {
         return GetComponenUserOrMainVersionAsync(projectId, componentName, userName).GetAwaiter().GetResult().Value;
     }
+    
+    
 
     public static Task<Result<ComponentEntity>> GetComponenUserOrMainVersion(ApplicationState state)
     {
