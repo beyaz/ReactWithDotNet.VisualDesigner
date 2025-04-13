@@ -41,7 +41,7 @@ sealed class ApplicationPreview : Component
         }
 
         appState = CloneByUsingJson(appState);
-        
+
         var projectId = appState.ProjectId;
 
         var rootElement = appState.ComponentRootElement;
@@ -63,9 +63,23 @@ sealed class ApplicationPreview : Component
             }
         }
 
-        return await renderElement(rootElement, "0");
+        Element finalElement;
+        {
+            var result = await renderElement(rootElement, "0");
+            if (result.HasError)
+            {
+                return new div(Size(200), Background(Gray100))
+                {
+                    result.Error.ToString()
+                };
+            }
 
-        async Task<Element> renderElement(VisualElementModel model, string path)
+            finalElement = result.Value;
+        }
+
+        return finalElement;
+
+        async Task<Result<Element>> renderElement(VisualElementModel model, string path)
         {
             HtmlElement element = new div();
 
@@ -88,14 +102,24 @@ sealed class ApplicationPreview : Component
 
             if (model.Tag.Length > 3)
             {
-                var component = (await GetComponenUserOrMainVersionAsync(projectId, model.Tag, userName)).Value;
+                ComponentEntity component;
+                {
+                    var result = await GetComponenUserOrMainVersionAsync(projectId, model.Tag, userName);
+                    if (result.HasError)
+                    {
+                        return result.Error;
+                    }
+
+                    component = result.Value;
+                }
+
                 if (component is not null)
                 {
                     var root = DeserializeFromJson<VisualElementModel>(component.RootElementAsJson);
 
                     root.Children.AddRange(model.Children);
 
-                    return renderElement(root, path);
+                    return await renderElement(root, path);
                 }
             }
 
@@ -112,25 +136,23 @@ sealed class ApplicationPreview : Component
                 element.text = model.Text;
             }
 
-            
-            
             foreach (var property in model.Properties)
             {
                 var (success, name, value) = TryParsePropertyValue(property);
                 if (success)
                 {
-                    if (name =="-items-source-design-time-count")
+                    if (name == "-items-source-design-time-count")
                     {
                         var designTimeChildrenCount = double.Parse(value);
 
-                        for (var i = 0; i < designTimeChildrenCount-1; i++)
+                        for (var i = 0; i < designTimeChildrenCount - 1; i++)
                         {
                             model.Children.Add(CloneByUsingJson(model.Children[0]));
                         }
 
                         continue;
                     }
-                    
+
                     if (name == "class")
                     {
                         element.AddClass(value);
@@ -384,7 +406,7 @@ sealed class ApplicationPreview : Component
                             element.Add(FontWeight(value));
                             continue;
                         }
-                        
+
                         case "text-align":
                         {
                             element.Add(TextAlign(value));
@@ -403,13 +425,13 @@ sealed class ApplicationPreview : Component
                             element.Add(Width(value));
                             continue;
                         }
-                        
+
                         case "outline":
                         {
                             element.Add(Outline(value));
                             continue;
                         }
-                        
+
                         case "text-decoration":
                         {
                             element.Add(TextDecoration(value));
@@ -717,7 +739,16 @@ sealed class ApplicationPreview : Component
 
             for (var i = 0; i < model.Children.Count; i++)
             {
-                var childElement = renderElement(model.Children[i], $"{path},{i}");
+                Element childElement;
+                {
+                    var result = await renderElement(model.Children[i], $"{path},{i}");
+                    if (result.HasError)
+                    {
+                        return result;
+                    }
+
+                    childElement = result.Value;
+                }
 
                 element.children.Add(childElement);
             }
