@@ -1,6 +1,5 @@
 ﻿using System.Text;
 using Dapper.Contrib.Extensions;
-using ReactWithDotNet.ThirdPartyLibraries.MonacoEditorReact;
 using Page = ReactWithDotNet.WebSite.Page;
 
 namespace ReactWithDotNet.VisualDesigner.Views;
@@ -340,20 +339,6 @@ sealed class ApplicationView : Component<ApplicationState>
         }
     }
 
-    Task YamlTextUpdatedByUser()
-    {
-        switch (state.LeftPanelSelectedTab)
-        {
-            case LeftPanelTab.Props:
-                return UpdateUserVersion(state, x => x with { PropsAsYaml = state.YamlText });
-
-            case LeftPanelTab.State:
-                return UpdateUserVersion(state, x => x with { StateAsYaml = state.YamlText });
-
-            default:
-                throw new ArgumentOutOfRangeException();
-        }
-    }
 
     Task LayersTabRemoveSelectedItemClicked(MouseEvent e) => DeleteSelectedTreeItem();
     
@@ -601,27 +586,6 @@ sealed class ApplicationView : Component<ApplicationState>
                     },
 
                     addIconInLayersTab
-                },
-
-                new FlexRowCentered(WidthFull, When(state.LeftPanelSelectedTab == LeftPanelTab.Props, Color(Gray500)))
-                {
-                    "Props",
-                    PaddingX(8), OnClick(async _ =>
-                    {
-                        state.LeftPanelSelectedTab = LeftPanelTab.Props;
-
-                        ShowErrorIfExist(await GetComponenUserOrMainVersion(state).Then(x => { state.YamlText = x.PropsAsYaml; }));
-                    })
-                },
-                new FlexRowCentered(WidthFull, Opacity(0.7), When(state.LeftPanelSelectedTab == LeftPanelTab.State, Color(Gray500)))
-                {
-                    "State",
-                    PaddingX(8), OnClick(async _ =>
-                    {
-                        state.LeftPanelSelectedTab = LeftPanelTab.State;
-
-                        ShowErrorIfExist(await GetComponenUserOrMainVersion(state).Then(x => { state.YamlText = x.StateAsYaml; }));
-                    })
                 }
             },
 
@@ -807,28 +771,6 @@ sealed class ApplicationView : Component<ApplicationState>
                     }
 
                     return Task.CompletedTask;
-                }
-            }),
-
-            When(state.LeftPanelSelectedTab == LeftPanelTab.Props || state.LeftPanelSelectedTab == LeftPanelTab.State, () => new FlexColumnCentered(SizeFull)
-            {
-                new Editor
-                {
-                    defaultLanguage          = "yaml",
-                    valueBind                = () => state.YamlText,
-                    valueBindDebounceTimeout = 700,
-                    valueBindDebounceHandler = YamlTextUpdatedByUser,
-                    options =
-                    {
-                        renderLineHighlight = "none",
-                        fontFamily          = "'IBM Plex Mono Medium', 'Courier New', monospace",
-                        fontSize            = 11,
-                        minimap             = new { enabled = false },
-                        formatOnPaste       = true,
-                        formatOnType        = true,
-                        automaticLayout     = true,
-                        lineNumbers         = false
-                    }
                 }
             })
         };
@@ -1512,15 +1454,7 @@ sealed class ApplicationView : Component<ApplicationState>
         };
     }
 
-    void ShowErrorIfExist<T>(Result<T> result)
-    {
-        if (result.Success)
-        {
-            return;
-        }
-
-        this.FailNotification(result.Error.Message);
-    }
+   
     
 
     Task StyleGroupAddClicked(MouseEvent e)

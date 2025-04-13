@@ -57,8 +57,6 @@ public sealed class ApplicationState
     public bool IsActionButtonsVisible { get; set; }
     
     public LeftPanelTab LeftPanelSelectedTab { get; set; }
-    
-    public string YamlText { get; set; }
 
     public required ApplicationSelectionState Selection { get; set; }
     
