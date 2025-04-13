@@ -22,15 +22,14 @@ sealed class ApplicationView : Component<ApplicationState>
 
         Client.ListenEvent("Change_VisualElementTreeItemPath", treeItemPath =>
         {
-            state.Selection = new ()
+            state.Selection = new()
             {
                 VisualElementTreeItemPath = treeItemPath
             };
 
             return Task.CompletedTask;
         });
-        
-        
+
         // try take from memory cache
         {
             var userLastState = GetUserLastState(userName);
@@ -150,8 +149,8 @@ sealed class ApplicationView : Component<ApplicationState>
             state.ComponentRootElement = new()
             {
                 Tag = "div",
-                
-                StyleGroups = [new (){ Condition = "*"}]
+
+                StyleGroups = [new() { Condition = "*" }]
             };
 
             state.Selection = new()
@@ -169,10 +168,10 @@ sealed class ApplicationView : Component<ApplicationState>
         node.Children.Add(new()
         {
             Tag = "div",
-            
-            StyleGroups = [new (){ Condition = "*"}]
+
+            StyleGroups = [new() { Condition = "*" }]
         });
-        
+
         return Task.CompletedTask;
     }
 
@@ -205,8 +204,6 @@ sealed class ApplicationView : Component<ApplicationState>
 
             Preview = state.Preview,
 
-            LeftPanelSelectedTab = LeftPanelTab.Layers,
-
             ComponentName = componentName,
 
             ComponentRootElement = componentRootElement,
@@ -221,7 +218,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
         // try take from db cache
         {
-            var lastUsage = (await GetLastUsageInfoByUserName(userName)).FirstOrDefault(p=>p.ProjectId == projectId);
+            var lastUsage = (await GetLastUsageInfoByUserName(userName)).FirstOrDefault(p => p.ProjectId == projectId);
             if (lastUsage is not null)
             {
                 state = DeserializeFromJson<ApplicationState>(lastUsage.StateAsJson);
@@ -237,8 +234,6 @@ sealed class ApplicationView : Component<ApplicationState>
             ProjectId = projectId,
 
             Preview = state.Preview,
-
-            LeftPanelSelectedTab = LeftPanelTab.Layers,
 
             Selection = new()
         };
@@ -339,16 +334,13 @@ sealed class ApplicationView : Component<ApplicationState>
         }
     }
 
-
-    Task LayersTabRemoveSelectedItemClicked(MouseEvent e) => DeleteSelectedTreeItem();
-    
     Task DeleteSelectedTreeItem()
     {
         if (state.Selection.VisualElementTreeItemPath.HasNoValue())
         {
             return Task.CompletedTask;
         }
-        
+
         var intArray = state.Selection.VisualElementTreeItemPath.Split(',');
         if (intArray.Length == 1)
         {
@@ -370,7 +362,11 @@ sealed class ApplicationView : Component<ApplicationState>
 
         return Task.CompletedTask;
     }
-    
+
+    Task LayersTabRemoveSelectedItemClicked(MouseEvent e)
+    {
+        return DeleteSelectedTreeItem();
+    }
 
     async Task<Element> MainContent()
     {
@@ -477,8 +473,8 @@ sealed class ApplicationView : Component<ApplicationState>
                                     this.FailNotification(result.Error.Message);
                                     return;
                                 }
+
                                 this.SuccessNotification("OK");
-                                
                             })
                         }
                     }
@@ -538,12 +534,11 @@ sealed class ApplicationView : Component<ApplicationState>
             Value             = state.ComponentName,
             OnChange          = (_, componentName) => OnComponentNameChanged(componentName),
             IsTextAlignCenter = true,
-            IsBold            = true,
-            
+            IsBold            = true
         };
 
         var removeIconInLayersTab = CreateIcon(Icon.remove, 16);
-        if (state.LeftPanelSelectedTab == LeftPanelTab.Layers && state.Selection.VisualElementTreeItemPath.HasValue())
+        if (state.Selection.VisualElementTreeItemPath.HasValue())
         {
             removeIconInLayersTab.Add(Hover(Color(Blue300), BorderColor(Blue300)), OnClick(LayersTabRemoveSelectedItemClicked));
         }
@@ -553,7 +548,7 @@ sealed class ApplicationView : Component<ApplicationState>
         }
 
         var addIconInLayersTab = CreateIcon(Icon.add, 16);
-        if (state.LeftPanelSelectedTab == LeftPanelTab.Layers && (state.ComponentRootElement is null || state.Selection.VisualElementTreeItemPath.HasValue()))
+        if (state.ComponentRootElement is null || state.Selection.VisualElementTreeItemPath.HasValue())
         {
             addIconInLayersTab.Add(Hover(Color(Blue300), BorderColor(Blue300)), OnClick(AddNewLayerClicked));
         }
@@ -575,21 +570,14 @@ sealed class ApplicationView : Component<ApplicationState>
 
                     new FlexRowCentered(WidthFull)
                     {
-                        new IconLayers() + Size(18) + (state.LeftPanelSelectedTab == LeftPanelTab.Layers ? Color(Gray500) : null),
-
-                        OnClick(_ =>
-                        {
-                            state.LeftPanelSelectedTab = LeftPanelTab.Layers;
-
-                            return Task.CompletedTask;
-                        })
+                        new IconLayers() + Size(18) + Color(Gray500)
                     },
 
                     addIconInLayersTab
                 }
             },
 
-            When(state.LeftPanelSelectedTab == LeftPanelTab.Layers, () => new VisualElementTreeView
+            new VisualElementTreeView
             {
                 Model = state.ComponentRootElement,
 
@@ -615,7 +603,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
                     return Task.CompletedTask;
                 },
-                
+
                 OnDelete = DeleteSelectedTreeItem,
 
                 CopyPaste = (source, target) =>
@@ -626,7 +614,7 @@ sealed class ApplicationView : Component<ApplicationState>
                     var sourceNodeClone = DeserializeFromJson<VisualElementModel>(SerializeToJson(sourceNode));
 
                     targetNode.Children.Add(sourceNodeClone);
-                    
+
                     return Task.CompletedTask;
                 },
                 TreeItemMove = (source, target, position) =>
@@ -772,7 +760,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
                     return Task.CompletedTask;
                 }
-            })
+            }
         };
     }
 
@@ -943,9 +931,9 @@ sealed class ApplicationView : Component<ApplicationState>
 
                             var newDbRecord = new ComponentEntity
                             {
-                                Name      = newValue,
-                                ProjectId = state.ProjectId,
-                                UserName  = state.UserName,
+                                Name           = newValue,
+                                ProjectId      = state.ProjectId,
+                                UserName       = state.UserName,
                                 LastAccessTime = DateTime.Now
                             };
 
@@ -1206,7 +1194,7 @@ sealed class ApplicationView : Component<ApplicationState>
                         };
                     }
                 }
-                
+
                 return new(CursorDefault, Padding(4, 8), BorderRadius(16))
                 {
                     Background(isSelected ? Gray200 : Gray50),
@@ -1363,7 +1351,7 @@ sealed class ApplicationView : Component<ApplicationState>
                         };
                     }
                 }
-                
+
                 return new(CursorDefault, Padding(4, 8), BorderRadius(16))
                 {
                     Background(isSelected ? Gray200 : Gray50),
@@ -1453,9 +1441,6 @@ sealed class ApplicationView : Component<ApplicationState>
             }
         };
     }
-
-   
-    
 
     Task StyleGroupAddClicked(MouseEvent e)
     {

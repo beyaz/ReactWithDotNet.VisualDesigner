@@ -2,13 +2,6 @@
 
 namespace ReactWithDotNet.VisualDesigner.Views;
 
-public enum LeftPanelTab
-{
-    Layers,
-    Props,
-    State
-}
-
 public sealed class ApplicationPreviewInfo
 {
     // @formatter:off
@@ -55,8 +48,6 @@ public sealed class ApplicationState
     public bool IsProjectSettingsPopupVisible { get; set; }
     
     public bool IsActionButtonsVisible { get; set; }
-    
-    public LeftPanelTab LeftPanelSelectedTab { get; set; }
 
     public required ApplicationSelectionState Selection { get; set; }
     
