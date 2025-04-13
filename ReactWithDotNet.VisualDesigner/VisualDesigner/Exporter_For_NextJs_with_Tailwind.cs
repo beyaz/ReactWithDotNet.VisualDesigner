@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using static ReactWithDotNet.VisualDesigner.Models.YamlToTypescriptHelper;
 
@@ -7,6 +8,37 @@ namespace ReactWithDotNet.VisualDesigner.Models;
 static class Exporter_For_NextJs_with_Tailwind
 {
     const string childrenIdentifier = "[...]";
+    
+    
+    static class TypeScriptFileHelper
+    {
+        public static Result<string> InjectRender(string fileContent, IReadOnlyList<string> linesToInject)
+        {
+            var lines = fileContent.Split(Environment.NewLine).ToList();
+
+            var firstReturnLineIndex = lines.FindIndex(l => l.Trim().Replace(" ", string.Empty) == "return(");
+            if (firstReturnLineIndex < 0)
+            {
+                return new InvalidOperationException("No return found");
+            }
+            
+            var firstReturnCloseLineIndex = lines.FindIndex(firstReturnLineIndex, l => l.Trim().Replace(" ", string.Empty) == ");");
+            if (firstReturnCloseLineIndex < 0)
+            {
+                return new InvalidOperationException("Return close not found");
+            }
+            
+            
+            lines.RemoveRange(firstReturnLineIndex, firstReturnCloseLineIndex - firstReturnLineIndex);
+            
+            lines.InsertRange(firstReturnLineIndex, linesToInject);
+
+            var injectedFileContent = string.Join(Environment.NewLine, lines);
+
+            return injectedFileContent;
+
+        }
+    }
 
     public static async Task<Result> Export(ApplicationState state)
     {
