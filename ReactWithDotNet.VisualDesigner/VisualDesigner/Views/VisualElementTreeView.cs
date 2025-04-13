@@ -13,10 +13,15 @@ delegate Task OnTreeItemMove(string treeItemPathSourge, string treeItemPathTarge
 
 delegate Task OnTreeItemCopyPaste(string treeItemPathSourge, string treeItemPathTarget);
 
+delegate Task OnTreeItemDelete();
+
 sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
 {
     public VisualElementModel Model { get; init; }
 
+    [CustomEvent]
+    public OnTreeItemDelete OnDelete { get; init; }
+    
     [CustomEvent]
     public OnTreeItemCopyPaste CopyPaste { get; init; }
     
@@ -379,9 +384,17 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
     }
 
 
-    [KeyboardEventCallOnly("CTRL+c", "CTRL+v")]
+    [KeyboardEventCallOnly("CTRL+c", "CTRL+v", "Delete")]
     Task On_Key_Down(KeyboardEvent e)
     {
+        if (e.key == "Delete")
+        {
+            
+                
+                DispatchEvent(OnDelete, []);
+                return Task.CompletedTask;
+
+        }
         if (e.key == "c")
         {
             state.CopiedTreeItemPath = SelectedPath;

@@ -355,8 +355,15 @@ sealed class ApplicationView : Component<ApplicationState>
         }
     }
 
-    Task LayersTabRemoveSelectedItemClicked(MouseEvent e)
+    Task LayersTabRemoveSelectedItemClicked(MouseEvent e) => DeleteSelectedTreeItem();
+    
+    Task DeleteSelectedTreeItem()
     {
+        if (state.Selection.VisualElementTreeItemPath.HasNoValue())
+        {
+            return Task.CompletedTask;
+        }
+        
         var intArray = state.Selection.VisualElementTreeItemPath.Split(',');
         if (intArray.Length == 1)
         {
@@ -378,6 +385,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
         return Task.CompletedTask;
     }
+    
 
     async Task<Element> MainContent()
     {
@@ -643,6 +651,8 @@ sealed class ApplicationView : Component<ApplicationState>
 
                     return Task.CompletedTask;
                 },
+                
+                OnDelete = DeleteSelectedTreeItem,
 
                 CopyPaste = (source, target) =>
                 {

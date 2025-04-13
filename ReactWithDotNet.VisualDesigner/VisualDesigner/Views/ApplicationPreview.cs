@@ -43,6 +43,8 @@ sealed class ApplicationPreview : Component
             };
         }
 
+        appState = CloneByUsingJson(appState);
+        
         var projectId = appState.ProjectId;
 
         var cmp = GetComponenUserOrMainVersion(appState).GetAwaiter().GetResult().Value;
@@ -184,11 +186,25 @@ sealed class ApplicationPreview : Component
                 }
             }
 
+            
+            
             foreach (var property in model.Properties)
             {
                 var (success, name, value) = TryParsePropertyValue(property);
                 if (success)
                 {
+                    if (name =="d-items-source-design-time-count")
+                    {
+                        var designTimeChildrenCount = double.Parse(value);
+
+                        for (var i = 0; i < designTimeChildrenCount-1; i++)
+                        {
+                            model.Children.Add(CloneByUsingJson(model.Children[0]));
+                        }
+
+                        continue;
+                    }
+                    
                     if (name == "class")
                     {
                         element.AddClass(value);
@@ -222,7 +238,7 @@ sealed class ApplicationPreview : Component
                             }
                         }
 
-                        if (name.Equals("src", StringComparison.OrdinalIgnoreCase) && !(value.StartsWith("props.") || value.StartsWith("state.")))
+                        if (name.Equals("src", StringComparison.OrdinalIgnoreCase) && !(value.StartsWith("props.") || value.StartsWith("state.") || value.StartsWith("item.")))
                         {
                             elementAsImage.src = Path.Combine(Context.wwwroot, value);
                         }
@@ -442,6 +458,12 @@ sealed class ApplicationPreview : Component
                             element.Add(FontWeight(value));
                             continue;
                         }
+                        
+                        case "text-align":
+                        {
+                            element.Add(TextAlign(value));
+                            continue;
+                        }
 
                         case "w":
                         case "width":
@@ -459,6 +481,12 @@ sealed class ApplicationPreview : Component
                         case "outline":
                         {
                             element.Add(Outline(value));
+                            continue;
+                        }
+                        
+                        case "text-decoration":
+                        {
+                            element.Add(TextDecoration(value));
                             continue;
                         }
 

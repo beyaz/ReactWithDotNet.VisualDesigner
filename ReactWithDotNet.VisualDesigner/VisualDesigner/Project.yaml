@@ -18,6 +18,14 @@ colors:
   secondary-base: "#3DD3EE"
   secondary-light: "#9EE9F6"
   secondary-lighter: "#D8F6FC"
+  error-dark: "rgba(78, 25, 15, 1)"
+  error-base: "rgba(233, 74, 46, 1)"
+  error-light: "rgba(244, 164, 150, 1)"
+  error-lighter: "rgba(251, 219, 213, 1)"
+  future-dark: "#281355"
+  future-base: "#7939FF"
+  future-light: "#BC9CFF"
+  future-lighter: "#E4D7FF"
 
 styles:
   bg-strong: "background: #0E121B"
@@ -133,6 +141,50 @@ styles:
     font-size: 12px;
     font-style: normal;
     font-weight: 500;
+    line-height: 16px;
+
+
+  # s u b t i t l e
+  subTitle-XXL: |
+    font-family: "Host Grotesk";
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 32px;
+  
+  subTitle-XL: |
+    font-family: "Host Grotesk";
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 28px;
+  
+  subTitle-L: |
+    font-family: "Host Grotesk";
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 26px;
+  
+  subTitle-M: |
+    font-family: "Host Grotesk";
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 24px;
+  
+  subTitle-S: |
+    font-family: "Host Grotesk";
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 20px;
+  
+  subTitle-XS: |
+    font-family: "Host Grotesk";
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 600;
     line-height: 16px;
 
 globalCss: |

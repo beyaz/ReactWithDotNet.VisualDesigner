@@ -414,6 +414,16 @@ static class Extensions
         });
     }
     
+    public static T CloneByUsingJson<T>(T value) where T : class
+    {
+        if (value is null)
+        {
+            return null;
+        }
+        
+        return DeserializeFromJson<T>(SerializeToJson(value));
+    }
+    
     public static T DeserializeFromJson<T>(string json) where T : class
     {
         if (json is null)

@@ -287,6 +287,11 @@ static class ApplicationLogic
             items.Add($"border: 1px solid {colorName}");
         }
         
+        items.Add("text-decoration: line-through");
+        items.Add("text-decoration: underline");
+        items.Add("text-decoration: overline");
+        items.Add("text-decoration: none");
+            
         items.Add("overflow-y: hidden");
         items.Add("overflow-y: scroll");
         items.Add("overflow-y: auto");
@@ -369,6 +374,19 @@ static class ApplicationLogic
                 {
                     items.Add($"{name}: 1px solid {key}");
                 }
+            }
+        }
+        
+        // border radius
+        {
+            for (var i = 1; i <= 48; i++)
+            {
+                items.Add($"border-top-left-radius: {i}");
+                items.Add($"border-top-right-radius: {i}");
+                    
+                items.Add($"border-bottom-left-radius: {i}");
+                items.Add($"border-bottom-right-radius: {i}");
+                    
             }
         }
 

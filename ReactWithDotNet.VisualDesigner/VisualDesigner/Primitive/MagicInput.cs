@@ -60,6 +60,7 @@ sealed class MagicInput : Component<MagicInput.State>
                 onFocus = OnFocused,
                 onBlur = OnBlur,
                 id=Id,
+                autoComplete = "off",
                 style =
                 {
                     OutlineNone,

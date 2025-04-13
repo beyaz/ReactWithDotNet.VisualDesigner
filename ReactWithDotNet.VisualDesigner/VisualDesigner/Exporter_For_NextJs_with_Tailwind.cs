@@ -118,7 +118,7 @@ static class Exporter_For_NextJs_with_Tailwind
             lines.Add(string.Empty);
             lines.Add($"{Indent(1)}return (");
 
-            lines.AddRange(WriteTo(result.node, hasChildrenDeclerationInProps, 2));
+            lines.AddRange(WriteTo(result.node, null, hasChildrenDeclerationInProps, 2));
 
             lines.Add($"{Indent(1)});");
 
@@ -201,6 +201,11 @@ static class Exporter_For_NextJs_with_Tailwind
             imports.Add(new() { ClassName = "Image", Package = "next/image" });
 
             tag = "Image";
+
+            if (element.Properties.Any(x=>x.Contains("alt:")) is false)
+            {
+                element.Properties.Add("alt: -");
+            }
         }
 
         imports.AddIfNotNull(GetTagImportInfo(component.ProjectId, userName, tag));
@@ -231,7 +236,7 @@ static class Exporter_For_NextJs_with_Tailwind
                     continue;
                 }
 
-                if (value.StartsWith("props.") || value.StartsWith("state."))
+                if (IsConnectedValue(value) || value.StartsWith("props.") || value.StartsWith("state."))
                 {
                     node.Properties.Add(new() { Name = name, Value = value });
                     continue;
@@ -307,6 +312,12 @@ static class Exporter_For_NextJs_with_Tailwind
                             classNames.Add($"{name}-{value}");
                             continue;
                         }
+                        
+                        case "text-decoration":
+                        {
+                            classNames.Add($"{value}");
+                            continue;
+                        }
 
                         case "W":
                         case "w":
@@ -321,6 +332,13 @@ static class Exporter_For_NextJs_with_Tailwind
                             classNames.Add($"w-[{value}px]");
                             continue;
                         }
+                        
+                        case "text-align":
+                        {
+                            classNames.Add($"text-{value}");
+                            continue;
+                        }
+                        
                         case "h":
                         case "height":
                         {
@@ -506,7 +524,9 @@ static class Exporter_For_NextJs_with_Tailwind
             return (node, bodyLines, imports);
         }
 
-        if ((element.Text + string.Empty).StartsWith("props.") || (element.Text + string.Empty).StartsWith("state."))
+     
+        
+        if (IsConnectedValue(element.Text) ||   (element.Text + string.Empty).StartsWith("props.") || (element.Text + string.Empty).StartsWith("state."))
         {
             node.Children.Add(new() { Text = element.Text });
 
@@ -585,8 +605,16 @@ static class Exporter_For_NextJs_with_Tailwind
 
         return Success;
     }
+    static bool IsConnectedValue(string value)
+    {
+        if (value is null)
+        {
+            return false;
+        }
 
-    static IReadOnlyList<string> WriteTo(ReactNode node, bool hasChildrenDeclerationInProps, int indentLevel)
+        return value.StartsWith("{") && value.EndsWith("}");
+    }
+    static IReadOnlyList<string> WriteTo(ReactNode node, ReactNode parentNode, bool hasChildrenDeclerationInProps, int indentLevel)
     {
         List<string> lines = [];
 
@@ -610,10 +638,10 @@ static class Exporter_For_NextJs_with_Tailwind
         {
             node.Properties.Remove(showIf);
 
-            lines.Add($"{Indent(indentLevel)}{{{showIf.Value} && (");
+            lines.Add($"{Indent(indentLevel)}{{{clearValue(showIf.Value)} && (");
             indentLevel++;
 
-            var innerLines = WriteTo(node, hasChildrenDeclerationInProps, indentLevel);
+            var innerLines = WriteTo(node, parentNode, hasChildrenDeclerationInProps, indentLevel);
 
             lines.AddRange(innerLines);
 
@@ -621,16 +649,18 @@ static class Exporter_For_NextJs_with_Tailwind
             lines.Add($"{Indent(indentLevel)})}}");
 
             return lines;
+
+            static string clearValue(string value) => value.RemoveFromStart("{").RemoveFromEnd("}");
         }
 
         if (hideIf is not null)
         {
             node.Properties.Remove(hideIf);
 
-            lines.Add($"{Indent(indentLevel)}{{!{hideIf.Value} && (");
+            lines.Add($"{Indent(indentLevel)}{{!{clearValue(hideIf.Value)} && (");
             indentLevel++;
 
-            var innerLines = WriteTo(node, hasChildrenDeclerationInProps, indentLevel);
+            var innerLines = WriteTo(node, parentNode, hasChildrenDeclerationInProps, indentLevel);
 
             lines.AddRange(innerLines);
 
@@ -638,6 +668,42 @@ static class Exporter_For_NextJs_with_Tailwind
             lines.Add($"{Indent(indentLevel)})}}");
 
             return lines;
+            
+            static string clearValue(string value) => value.RemoveFromStart("{").RemoveFromEnd("}");
+        }
+
+        // is map
+        {
+            var itemsSource = parentNode?.Properties.FirstOrDefault(x => x.Name is "d-items-source");
+            if (itemsSource is not null)
+            {
+                parentNode.Properties.Remove(itemsSource);
+
+                lines.Add($"{Indent(indentLevel)}{{{clearValue(itemsSource.Value)}.map((item, index) => {{");
+                indentLevel++;
+                lines.Add(Indent(indentLevel)+"const isFirst = index === 0;");
+                lines.Add(Indent(indentLevel)+$"const isLast = index === {clearValue(itemsSource.Value)}.length - 1;");
+
+                lines.Add(string.Empty);
+                lines.Add(Indent(indentLevel) + "return (");
+                indentLevel++;
+
+                {
+                    var innerLines = WriteTo(node, parentNode, hasChildrenDeclerationInProps, indentLevel);
+                    lines.AddRange(innerLines);
+                }
+                
+                indentLevel--;
+                lines.Add(Indent(indentLevel) + ");");
+                
+
+                indentLevel--;
+                lines.Add(Indent(indentLevel) + "})}");
+
+                return lines;
+            
+                static string clearValue(string value) => value.RemoveFromStart("{").RemoveFromEnd("}");
+            }
         }
 
         var tag = nodeTag.Split('/').Last();
@@ -653,6 +719,13 @@ static class Exporter_For_NextJs_with_Tailwind
         {
             node.Properties.Remove(childrenProperty);
         }
+        
+        var bindProperty = node.Properties.FirstOrDefault(x => x.Name == "d-bind");
+        if (bindProperty is not null)
+        {
+            node.Properties.Remove(bindProperty);
+        }
+        
 
         foreach (var reactProperty in node.Properties)
         {
@@ -660,7 +733,19 @@ static class Exporter_For_NextJs_with_Tailwind
 
             var propertyValue = reactProperty.Value;
 
+            if (propertyName is "d-items-source")
+            {
+                continue;
+            }
+           
+
             if (propertyValue != null && propertyValue[0] == '"')
+            {
+                sb.Append($" {propertyName}={propertyValue}");
+                continue;
+            }
+            
+            if (IsConnectedValue(propertyValue))
             {
                 sb.Append($" {propertyName}={propertyValue}");
                 continue;
@@ -716,18 +801,29 @@ static class Exporter_For_NextJs_with_Tailwind
 
         // from props
         {
-            if ((node.Children.Count == 1 && (node.Children[0].Text + string.Empty).StartsWith("props.")) || (node.Children[0].Text + string.Empty).StartsWith("state."))
+            if (node.Children.Count == 1)
             {
-                sb.Append(">");
-                lines.Add(sb.ToString());
+                var childrenText = node.Children[0].Text  + string.Empty;
+                if (bindProperty is not null)
+                {
+                    childrenText = bindProperty.Value;
+                }
+                
+            
+                if (IsConnectedValue(childrenText))
+                {
+                    sb.Append(">");
+                    lines.Add(sb.ToString());
 
-                lines.Add($"{Indent(indentLevel + 1)}{{ {node.Children[0].Text} }}");
+                    lines.Add($"{Indent(indentLevel + 1)}{childrenText}");
 
-                // Close tag
-                lines.Add($"{indent}</{tag}>");
+                    // Close tag
+                    lines.Add($"{indent}</{tag}>");
 
-                return lines;
+                    return lines;
+                }
             }
+            
         }
 
         sb.Append(">");
@@ -742,7 +838,7 @@ static class Exporter_For_NextJs_with_Tailwind
         // Add children
         foreach (var child in node.Children)
         {
-            lines.AddRange(WriteTo(child, hasChildrenDeclerationInProps, indentLevel + 1));
+            lines.AddRange(WriteTo(child, node, hasChildrenDeclerationInProps, indentLevel + 1));
         }
 
         // Close tag
