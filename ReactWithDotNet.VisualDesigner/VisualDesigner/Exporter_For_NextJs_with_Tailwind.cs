@@ -18,7 +18,7 @@ static class Exporter_For_NextJs_with_Tailwind
         return await TryWriteToFile(filePath, fileContent);
     }
 
-    static (List<string> lines, IReadOnlyList<string> elementTreeCodes) AsLines(ComponentEntity component, string userName)
+    static (List<string> lines, IReadOnlyList<string> elementTreeCodes) CalculateElementTreeTsCodes(ComponentEntity component, string userName)
     {
         List<string> lines = [];
 
@@ -26,17 +26,14 @@ static class Exporter_For_NextJs_with_Tailwind
         {
             var rootVisualElement = DeserializeFromJson<VisualElementModel>(component.RootElementAsJson ?? "");
 
-            var result = ConvertToReactNode((component, userName), rootVisualElement);
+            var rootNode = ConvertToReactNode((component, userName), rootVisualElement);
 
-            foreach (var line in result.bodyLines.Distinct())
-            {
-                lines.Add($"{Indent(1)}{line}");
-            }
+           
 
             lines.Add(string.Empty);
             lines.Add($"{Indent(1)}return (");
 
-            elementTreeCodes = WriteTo(result.node, null, 2);
+            elementTreeCodes = WriteTo(rootNode, null, 2);
 
             lines.AddRange(elementTreeCodes);
 
@@ -65,7 +62,7 @@ static class Exporter_For_NextJs_with_Tailwind
 
         string fileContent;
         {
-            var result = AsLines(component, state.UserName);
+            var result = CalculateElementTreeTsCodes(component, state.UserName);
 
             var linesToInject = result.elementTreeCodes;
 
@@ -91,11 +88,10 @@ static class Exporter_For_NextJs_with_Tailwind
         return (filePath, fileContent);
     }
 
-    static (ReactNode node, List<string> bodyLines) ConvertToReactNode((ComponentEntity component, string userName) context, VisualElementModel element)
+    static ReactNode ConvertToReactNode((ComponentEntity component, string userName) context, VisualElementModel element)
     {
         var (component, userName) = context;
 
-        List<string> bodyLines = [];
 
         List<string> classNames = [];
 
@@ -421,14 +417,14 @@ static class Exporter_For_NextJs_with_Tailwind
         var hasSelfClose = element.Children.Count == 0 && element.Text.HasNoValue();
         if (hasSelfClose)
         {
-            return (node, bodyLines);
+            return node;
         }
 
         if (IsConnectedValue(element.Text) || (element.Text + string.Empty).StartsWith("props.") || (element.Text + string.Empty).StartsWith("state."))
         {
             node.Children.Add(new() { Text = element.Text });
 
-            return (node, bodyLines);
+            return node;
         }
 
         // Add text content
@@ -440,19 +436,12 @@ static class Exporter_For_NextJs_with_Tailwind
         // Add children
         foreach (var child in element.Children)
         {
-            ReactNode childNode;
-            {
-                var result = ConvertToReactNode(context, child);
-
-                childNode = result.node;
-
-                bodyLines.AddRange(result.bodyLines);
-            }
+            var childNode = ConvertToReactNode(context, child);
 
             node.Children.Add(childNode);
         }
 
-        return (node, bodyLines);
+        return node;
     }
 
     static string GetExportFolderPath()
