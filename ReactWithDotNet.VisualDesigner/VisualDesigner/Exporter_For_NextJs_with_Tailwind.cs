@@ -18,13 +18,13 @@ static class Exporter_For_NextJs_with_Tailwind
         return await TryWriteToFile(filePath, fileContent);
     }
 
-    static IReadOnlyList<string> CalculateElementTreeTsCodes(ComponentEntity component, string userName)
+    static IReadOnlyList<string> CalculateElementTreeTsxCodes(ComponentEntity component, string userName)
     {
         var rootVisualElement = DeserializeFromJson<VisualElementModel>(component.RootElementAsJson ?? "");
 
-        var rootNode = ConvertToReactNode((component, userName), rootVisualElement);
+        var rootNode = ConvertVisualElementModelToReactNodeModel((component, userName), rootVisualElement);
 
-        return WriteTo(rootNode, null, 2);
+        return ConvertReactNodeModelToTsxCode(rootNode, null, 2);
     }
 
     static async Task<Result<(string filePath, string fileContent)>> CalculateExportInfo(ApplicationState state)
@@ -42,33 +42,242 @@ static class Exporter_For_NextJs_with_Tailwind
 
         var filePath = $"{GetExportFolderPath()}{state.ComponentName}.tsx";
 
-        string fileContent;
+        string fileNewContent;
         {
-            var linesToInject = CalculateElementTreeTsCodes(component, state.UserName);
-
             string[] fileContentInDirectory;
-            try
             {
-                fileContentInDirectory = await File.ReadAllLinesAsync(filePath);
-            }
-            catch (Exception e)
-            {
-                return e;
+                var result = await TryReadFile(filePath);
+                if (result.HasError)
+                {
+                    return result.Error;
+                }
+
+                fileContentInDirectory = result.Value;
             }
 
-            var newVersion = TypeScriptFileHelper.InjectRender(fileContentInDirectory, linesToInject);
-            if (newVersion.HasError)
+            var linesToInject = CalculateElementTreeTsxCodes(component, state.UserName);
+
+            string injectedVersion;
             {
-                return newVersion.Error;
+                var newVersion = InjectRender(fileContentInDirectory, linesToInject);
+                if (newVersion.HasError)
+                {
+                    return newVersion.Error;
+                }
+
+                injectedVersion = newVersion.Value;
             }
 
-            fileContent = newVersion.Value;
+            fileNewContent = injectedVersion;
         }
 
-        return (filePath, fileContent);
+        return (filePath, fileNewContent);
     }
 
-    static ReactNode ConvertToReactNode((ComponentEntity component, string userName) context, VisualElementModel element)
+    static IReadOnlyList<string> ConvertReactNodeModelToTsxCode(ReactNode node, ReactNode parentNode, int indentLevel)
+    {
+        List<string> lines = [];
+
+        var nodeTag = node.Tag;
+
+        if (nodeTag is null)
+        {
+            if (node.Text.HasValue())
+            {
+                lines.Add(Indent(indentLevel) + node.Text);
+                return lines;
+            }
+
+            throw new ArgumentNullException(nameof(nodeTag));
+        }
+
+        var showIf = node.Properties.FirstOrDefault(x => x.Name is "show-if");
+        var hideIf = node.Properties.FirstOrDefault(x => x.Name is "hide-if");
+
+        if (showIf is not null)
+        {
+            node.Properties.Remove(showIf);
+
+            lines.Add($"{Indent(indentLevel)}{{{ClearConnectedValue(showIf.Value)} && (");
+            indentLevel++;
+
+            var innerLines = ConvertReactNodeModelToTsxCode(node, parentNode, indentLevel);
+
+            lines.AddRange(innerLines);
+
+            indentLevel--;
+            lines.Add($"{Indent(indentLevel)})}}");
+
+            return lines;
+        }
+
+        if (hideIf is not null)
+        {
+            node.Properties.Remove(hideIf);
+
+            lines.Add($"{Indent(indentLevel)}{{!{ClearConnectedValue(hideIf.Value)} && (");
+            indentLevel++;
+
+            var innerLines = ConvertReactNodeModelToTsxCode(node, parentNode, indentLevel);
+
+            lines.AddRange(innerLines);
+
+            indentLevel--;
+            lines.Add($"{Indent(indentLevel)})}}");
+
+            return lines;
+        }
+
+        // is map
+        {
+            var itemsSource = parentNode?.Properties.FirstOrDefault(x => x.Name is "-items-source");
+            if (itemsSource is not null)
+            {
+                parentNode.Properties.Remove(itemsSource);
+
+                lines.Add($"{Indent(indentLevel)}{{{ClearConnectedValue(itemsSource.Value)}.map((item, index) => {{");
+                indentLevel++;
+                lines.Add(Indent(indentLevel) + "const isFirst = index === 0;");
+                lines.Add(Indent(indentLevel) + $"const isLast = index === {ClearConnectedValue(itemsSource.Value)}.length - 1;");
+
+                lines.Add(string.Empty);
+                lines.Add(Indent(indentLevel) + "return (");
+                indentLevel++;
+
+                {
+                    var innerLines = ConvertReactNodeModelToTsxCode(node, parentNode, indentLevel);
+                    lines.AddRange(innerLines);
+                }
+
+                indentLevel--;
+                lines.Add(Indent(indentLevel) + ");");
+
+                indentLevel--;
+                lines.Add(Indent(indentLevel) + "})}");
+
+                return lines;
+            }
+        }
+
+        var tag = nodeTag.Split('/').Last();
+
+        var indent = new string(' ', indentLevel * 4);
+
+        var sb = new StringBuilder();
+
+        sb.Append($"{indent}<{tag}");
+
+        var childrenProperty = node.Properties.FirstOrDefault(x => x.Name == "children");
+        if (childrenProperty is not null)
+        {
+            node.Properties.Remove(childrenProperty);
+        }
+
+        var bindProperty = node.Properties.FirstOrDefault(x => x.Name == "-bind");
+        if (bindProperty is not null)
+        {
+            node.Properties.Remove(bindProperty);
+        }
+
+        foreach (var reactProperty in node.Properties)
+        {
+            var propertyName = reactProperty.Name;
+
+            var propertyValue = reactProperty.Value;
+
+            if (propertyName is "-items-source" || propertyName is "-items-source-design-time-count")
+            {
+                continue;
+            }
+
+            if (propertyValue != null && propertyValue[0] == '"')
+            {
+                sb.Append($" {propertyName}={propertyValue}");
+                continue;
+            }
+
+            if (IsConnectedValue(propertyValue))
+            {
+                sb.Append($" {propertyName}={propertyValue}");
+                continue;
+            }
+
+            sb.Append($" {propertyName}={{{propertyValue}}}");
+        }
+
+        var hasSelfClose = node.Children.Count == 0 && node.Text.HasNoValue() && childrenProperty is null;
+        if (hasSelfClose)
+        {
+            sb.Append("/>");
+            lines.Add(sb.ToString());
+            return lines;
+        }
+
+        // try add from state 
+        {
+            // sample: children: state.suggestionNodes
+
+            if (childrenProperty is not null)
+            {
+                sb.Append(">");
+                lines.Add(sb.ToString());
+
+                lines.Add($"{Indent(indentLevel + 1)}{childrenProperty.Value}");
+
+                // Close tag
+                lines.Add($"{indent}</{tag}>");
+
+                return lines;
+            }
+        }
+
+        // from props
+        {
+            if (node.Children.Count == 1)
+            {
+                var childrenText = node.Children[0].Text + string.Empty;
+                if (bindProperty is not null)
+                {
+                    childrenText = bindProperty.Value;
+                }
+
+                if (IsConnectedValue(childrenText))
+                {
+                    sb.Append(">");
+                    lines.Add(sb.ToString());
+
+                    lines.Add($"{Indent(indentLevel + 1)}{childrenText}");
+
+                    // Close tag
+                    lines.Add($"{indent}</{tag}>");
+
+                    return lines;
+                }
+            }
+        }
+
+        sb.Append(">");
+        lines.Add(sb.ToString());
+
+        // Add text content
+        if (!string.IsNullOrWhiteSpace(node.Text))
+        {
+            lines.Add($"{indent}{{{node.Text})}}");
+        }
+
+        // Add children
+        foreach (var child in node.Children)
+        {
+            lines.AddRange(ConvertReactNodeModelToTsxCode(child, node, indentLevel + 1));
+        }
+
+        // Close tag
+        lines.Add($"{indent}</{tag}>");
+
+        return lines;
+    }
+
+    static ReactNode ConvertVisualElementModelToReactNodeModel((ComponentEntity component, string userName) context, VisualElementModel element)
     {
         var (component, userName) = context;
 
@@ -415,7 +624,7 @@ static class Exporter_For_NextJs_with_Tailwind
         // Add children
         foreach (var child in element.Children)
         {
-            var childNode = ConvertToReactNode(context, child);
+            var childNode = ConvertVisualElementModelToReactNodeModel(context, child);
 
             node.Children.Add(childNode);
         }
@@ -433,6 +642,43 @@ static class Exporter_For_NextJs_with_Tailwind
         return new(' ', indentLevel * 4);
     }
 
+    static Result<string> InjectRender(IReadOnlyList<string> fileContent, IReadOnlyList<string> linesToInject)
+    {
+        var lines = fileContent.ToList();
+
+        var firstReturnLineIndex = lines.FindIndex(l => l == "    return (");
+        if (firstReturnLineIndex < 0)
+        {
+            return new InvalidOperationException("No return found");
+        }
+
+        var firstReturnCloseLineIndex = lines.FindIndex(firstReturnLineIndex, l => l == "    );");
+        if (firstReturnCloseLineIndex < 0)
+        {
+            return new InvalidOperationException("Return close not found");
+        }
+
+        lines.RemoveRange(firstReturnLineIndex + 1, firstReturnCloseLineIndex - firstReturnLineIndex - 1);
+
+        lines.InsertRange(firstReturnLineIndex + 1, linesToInject);
+
+        var injectedFileContent = string.Join(Environment.NewLine, lines);
+
+        return injectedFileContent;
+    }
+
+    static async Task<Result<string[]>> TryReadFile(string filePath)
+    {
+        try
+        {
+            return await File.ReadAllLinesAsync(filePath);
+        }
+        catch (Exception exception)
+        {
+            return exception;
+        }
+    }
+
     static async Task<Result> TryWriteToFile(string filePath, string fileContent)
     {
         try
@@ -447,238 +693,7 @@ static class Exporter_For_NextJs_with_Tailwind
         return Success;
     }
 
-    static IReadOnlyList<string> WriteTo(ReactNode node, ReactNode parentNode, int indentLevel)
-    {
-        List<string> lines = [];
-
-        var nodeTag = node.Tag;
-
-        if (nodeTag is null)
-        {
-            if (node.Text.HasValue())
-            {
-                lines.Add(Indent(indentLevel) + node.Text);
-                return lines;
-            }
-
-            throw new ArgumentNullException(nameof(nodeTag));
-        }
-
-        var showIf = node.Properties.FirstOrDefault(x => x.Name is "show-if");
-        var hideIf = node.Properties.FirstOrDefault(x => x.Name is "hide-if");
-
-        if (showIf is not null)
-        {
-            node.Properties.Remove(showIf);
-
-            lines.Add($"{Indent(indentLevel)}{{{ClearConnectedValue(showIf.Value)} && (");
-            indentLevel++;
-
-            var innerLines = WriteTo(node, parentNode, indentLevel);
-
-            lines.AddRange(innerLines);
-
-            indentLevel--;
-            lines.Add($"{Indent(indentLevel)})}}");
-
-            return lines;
-        }
-
-        if (hideIf is not null)
-        {
-            node.Properties.Remove(hideIf);
-
-            lines.Add($"{Indent(indentLevel)}{{!{ClearConnectedValue(hideIf.Value)} && (");
-            indentLevel++;
-
-            var innerLines = WriteTo(node, parentNode, indentLevel);
-
-            lines.AddRange(innerLines);
-
-            indentLevel--;
-            lines.Add($"{Indent(indentLevel)})}}");
-
-            return lines;
-        }
-
-        // is map
-        {
-            var itemsSource = parentNode?.Properties.FirstOrDefault(x => x.Name is "-items-source");
-            if (itemsSource is not null)
-            {
-                parentNode.Properties.Remove(itemsSource);
-
-                lines.Add($"{Indent(indentLevel)}{{{ClearConnectedValue(itemsSource.Value)}.map((item, index) => {{");
-                indentLevel++;
-                lines.Add(Indent(indentLevel) + "const isFirst = index === 0;");
-                lines.Add(Indent(indentLevel) + $"const isLast = index === {ClearConnectedValue(itemsSource.Value)}.length - 1;");
-
-                lines.Add(string.Empty);
-                lines.Add(Indent(indentLevel) + "return (");
-                indentLevel++;
-
-                {
-                    var innerLines = WriteTo(node, parentNode, indentLevel);
-                    lines.AddRange(innerLines);
-                }
-
-                indentLevel--;
-                lines.Add(Indent(indentLevel) + ");");
-
-                indentLevel--;
-                lines.Add(Indent(indentLevel) + "})}");
-
-                return lines;
-            }
-        }
-
-        var tag = nodeTag.Split('/').Last();
-
-        var indent = new string(' ', indentLevel * 4);
-
-        var sb = new StringBuilder();
-
-        sb.Append($"{indent}<{tag}");
-
-        var childrenProperty = node.Properties.FirstOrDefault(x => x.Name == "children");
-        if (childrenProperty is not null)
-        {
-            node.Properties.Remove(childrenProperty);
-        }
-
-        var bindProperty = node.Properties.FirstOrDefault(x => x.Name == "-bind");
-        if (bindProperty is not null)
-        {
-            node.Properties.Remove(bindProperty);
-        }
-
-        foreach (var reactProperty in node.Properties)
-        {
-            var propertyName = reactProperty.Name;
-
-            var propertyValue = reactProperty.Value;
-
-            if (propertyName is "-items-source" || propertyName is "-items-source-design-time-count")
-            {
-                continue;
-            }
-
-            if (propertyValue != null && propertyValue[0] == '"')
-            {
-                sb.Append($" {propertyName}={propertyValue}");
-                continue;
-            }
-
-            if (IsConnectedValue(propertyValue))
-            {
-                sb.Append($" {propertyName}={propertyValue}");
-                continue;
-            }
-
-            sb.Append($" {propertyName}={{{propertyValue}}}");
-        }
-
-        var hasSelfClose = node.Children.Count == 0 && node.Text.HasNoValue() && childrenProperty is null;
-        if (hasSelfClose)
-        {
-            sb.Append("/>");
-            lines.Add(sb.ToString());
-            return lines;
-        }
-
-        // try add from state 
-        {
-            // sample: children: state.suggestionNodes
-
-            if (childrenProperty is not null)
-            {
-                sb.Append(">");
-                lines.Add(sb.ToString());
-
-                lines.Add($"{Indent(indentLevel + 1)}{childrenProperty.Value}");
-
-                // Close tag
-                lines.Add($"{indent}</{tag}>");
-
-                return lines;
-            }
-        }
-
-        // from props
-        {
-            if (node.Children.Count == 1)
-            {
-                var childrenText = node.Children[0].Text + string.Empty;
-                if (bindProperty is not null)
-                {
-                    childrenText = bindProperty.Value;
-                }
-
-                if (IsConnectedValue(childrenText))
-                {
-                    sb.Append(">");
-                    lines.Add(sb.ToString());
-
-                    lines.Add($"{Indent(indentLevel + 1)}{childrenText}");
-
-                    // Close tag
-                    lines.Add($"{indent}</{tag}>");
-
-                    return lines;
-                }
-            }
-        }
-
-        sb.Append(">");
-        lines.Add(sb.ToString());
-
-        // Add text content
-        if (!string.IsNullOrWhiteSpace(node.Text))
-        {
-            lines.Add($"{indent}{{{node.Text})}}");
-        }
-
-        // Add children
-        foreach (var child in node.Children)
-        {
-            lines.AddRange(WriteTo(child, node, indentLevel + 1));
-        }
-
-        // Close tag
-        lines.Add($"{indent}</{tag}>");
-
-        return lines;
-    }
-
-    static class TypeScriptFileHelper
-    {
-        public static Result<string> InjectRender(IReadOnlyList<string> fileContent, IReadOnlyList<string> linesToInject)
-        {
-            var lines = fileContent.ToList();
-
-            var firstReturnLineIndex = lines.FindIndex(l => l == "    return (");
-            if (firstReturnLineIndex < 0)
-            {
-                return new InvalidOperationException("No return found");
-            }
-
-            var firstReturnCloseLineIndex = lines.FindIndex(firstReturnLineIndex, l => l == "    );");
-            if (firstReturnCloseLineIndex < 0)
-            {
-                return new InvalidOperationException("Return close not found");
-            }
-
-            lines.RemoveRange(firstReturnLineIndex + 1, firstReturnCloseLineIndex - firstReturnLineIndex - 1);
-
-            lines.InsertRange(firstReturnLineIndex + 1, linesToInject);
-
-            var injectedFileContent = string.Join(Environment.NewLine, lines);
-
-            return injectedFileContent;
-        }
-    }
-
-    class ReactNode
+    record ReactNode
     {
         public List<ReactNode> Children { get; } = [];
 
@@ -689,7 +704,7 @@ static class Exporter_For_NextJs_with_Tailwind
         public string Text { get; init; }
     }
 
-    class ReactProperty
+    record ReactProperty
     {
         public string Name { get; init; }
         public string Value { get; init; }
