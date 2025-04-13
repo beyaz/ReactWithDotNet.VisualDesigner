@@ -18,11 +18,11 @@ static class Exporter_For_NextJs_with_Tailwind
         return await IO.TryWriteToFile(filePath, fileContent);
     }
 
-    static IReadOnlyList<string> CalculateElementTreeTsxCodes(ComponentEntity component, string userName)
+    static async Task<IReadOnlyList<string>> CalculateElementTreeTsxCodes(ComponentEntity component, string userName)
     {
         var rootVisualElement = DeserializeFromJson<VisualElementModel>(component.RootElementAsJson ?? "");
 
-        var rootNode = ConvertVisualElementModelToReactNodeModel((component, userName), rootVisualElement);
+        var rootNode = await ConvertVisualElementModelToReactNodeModel((component, userName), rootVisualElement);
 
         return ConvertReactNodeModelToTsxCode(rootNode, null, 2);
     }
@@ -55,7 +55,7 @@ static class Exporter_For_NextJs_with_Tailwind
                 fileContentInDirectory = result.Value;
             }
 
-            var linesToInject = CalculateElementTreeTsxCodes(component, state.UserName);
+            var linesToInject = await CalculateElementTreeTsxCodes(component, state.UserName);
 
             string injectedVersion;
             {
@@ -277,7 +277,7 @@ static class Exporter_For_NextJs_with_Tailwind
         return lines;
     }
 
-    static ReactNode ConvertVisualElementModelToReactNodeModel((ComponentEntity component, string userName) context, VisualElementModel element)
+    static async Task<ReactNode> ConvertVisualElementModelToReactNodeModel((ComponentEntity component, string userName) context, VisualElementModel element)
     {
         var (component, userName) = context;
 
@@ -338,7 +338,7 @@ static class Exporter_For_NextJs_with_Tailwind
                     value = "/" + value; // todo: fixme
                 }
 
-                var componentInProject = GetComponenUserOrMainVersion(component.ProjectId, tag, userName);
+                var componentInProject = (await GetComponenUserOrMainVersionAsync(component.ProjectId, tag, userName)).Value;
                 if (componentInProject is not null)
                 {
                     node.Properties.Add(new() { Name = name, Value = $"()=>invokeLogic('{value}')" });
@@ -624,7 +624,7 @@ static class Exporter_For_NextJs_with_Tailwind
         // Add children
         foreach (var child in element.Children)
         {
-            var childNode = ConvertVisualElementModelToReactNodeModel(context, child);
+            var childNode = await ConvertVisualElementModelToReactNodeModel(context, child);
 
             node.Children.Add(childNode);
         }

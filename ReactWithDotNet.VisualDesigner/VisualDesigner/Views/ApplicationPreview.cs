@@ -1,7 +1,6 @@
 ﻿using System.IO;
 using System.Text;
 using ReactWithDotNet.ThirdPartyLibraries.HeroUI;
-using YamlDotNet.RepresentationModel;
 
 namespace ReactWithDotNet.VisualDesigner.Views;
 
@@ -27,10 +26,8 @@ sealed class ApplicationPreview : Component
         return Task.CompletedTask;
     }
 
-    protected override Element render()
+    protected override async Task<Element> renderAsync()
     {
-        const string childrenIdentifier = "[...]";
-
         var userName = Environment.UserName; // future: get userName from cookie or url
 
         var appState = GetUserLastState(userName);
@@ -46,8 +43,6 @@ sealed class ApplicationPreview : Component
         appState = CloneByUsingJson(appState);
         
         var projectId = appState.ProjectId;
-
-        var cmp = GetComponenUserOrMainVersion(appState).GetAwaiter().GetResult().Value;
 
         var rootElement = appState.ComponentRootElement;
         if (rootElement is null)
@@ -68,9 +63,9 @@ sealed class ApplicationPreview : Component
             }
         }
 
-        return renderElement(rootElement, "0");
+        return await renderElement(rootElement, "0");
 
-        Element renderElement(VisualElementModel model, string path)
+        async Task<Element> renderElement(VisualElementModel model, string path)
         {
             HtmlElement element = new div();
 
@@ -93,7 +88,7 @@ sealed class ApplicationPreview : Component
 
             if (model.Tag.Length > 3)
             {
-                var component = GetComponenUserOrMainVersion(projectId, model.Tag, userName);
+                var component = (await GetComponenUserOrMainVersionAsync(projectId, model.Tag, userName)).Value;
                 if (component is not null)
                 {
                     var root = DeserializeFromJson<VisualElementModel>(component.RootElementAsJson);
@@ -112,78 +107,9 @@ sealed class ApplicationPreview : Component
 
             element.onClick = OnItemClick;
 
-            if (model.Text.HasValue() && model.Text != childrenIdentifier)
+            if (model.Text.HasValue())
             {
                 element.text = model.Text;
-
-                element.text = TryGetStringDesignValueFromYamlDefinitions(element.text, cmp.PropsAsYaml, cmp.StateAsYaml);
-
-                static string TryGetStringDesignValueFromYamlDefinitions(string text, string propsDefinitionsAsYaml, string stateDefinitionsAsYaml)
-                {
-                    if (text is null)
-                    {
-                        return null;
-                    }
-
-                    string[] properties;
-
-                    string yamlDefinitions;
-
-                    if (text.StartsWith("props.") && propsDefinitionsAsYaml.HasValue())
-                    {
-                        properties = text.RemoveFromStart("props.").Split('.');
-
-                        yamlDefinitions = propsDefinitionsAsYaml;
-                    }
-                    else if (text.StartsWith("state.") && stateDefinitionsAsYaml.HasValue())
-                    {
-                        properties = text.RemoveFromStart("state.").Split('.');
-
-                        yamlDefinitions = stateDefinitionsAsYaml;
-                    }
-                    else
-                    {
-                        return text;
-                    }
-
-                    var yamlStream = new YamlStream();
-
-                    yamlStream.Load(new StringReader(yamlDefinitions));
-
-                    // search nested mode
-                    {
-                        var currentNode = yamlStream.Documents[0].RootNode;
-
-                        foreach (var key in properties)
-                        {
-                            if (currentNode is YamlMappingNode mapping)
-                            {
-                                if (mapping.Children.TryGetValue(new YamlScalarNode(key), out var nextNode))
-                                {
-                                    currentNode = nextNode;
-
-                                    continue;
-                                }
-                                
-                                if (mapping.Children.TryGetValue(new YamlScalarNode(key+"?"), out nextNode))
-                                {
-                                    currentNode = nextNode;
-
-                                    continue;
-                                }
-                            }
-
-                            break;
-                        }
-
-                        if (currentNode is YamlScalarNode scalar)
-                        {
-                            return scalar.Value;
-                        }
-                    }
-
-                    return text;
-                }
             }
 
             

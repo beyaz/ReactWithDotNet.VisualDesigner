@@ -194,14 +194,7 @@ static class ApplicationLogic
             return await db.GetComponentMainVersion(projectId, componentName);
         });
     }
-    
-    public static ComponentEntity GetComponenUserOrMainVersion(int projectId, string componentName, string userName)
-    {
-        return GetComponenUserOrMainVersionAsync(projectId, componentName, userName).GetAwaiter().GetResult().Value;
-    }
-    
-    
-
+   
     public static Task<Result<ComponentEntity>> GetComponenUserOrMainVersion(ApplicationState state)
     {
         return DbOperation(async db =>
