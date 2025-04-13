@@ -5,39 +5,6 @@ namespace ReactWithDotNet.VisualDesigner.Models;
 
 static class Exporter_For_NextJs_with_Tailwind
 {
-    
-    
-    static class TypeScriptFileHelper
-    {
-        public static Result<string> InjectRender(IReadOnlyList<string> fileContent, IReadOnlyList<string> linesToInject)
-        {
-            var lines = fileContent.ToList();
-
-            var firstReturnLineIndex = lines.FindIndex(l => l == "    return (");
-            if (firstReturnLineIndex < 0)
-            {
-                return new InvalidOperationException("No return found");
-            }
-            
-            var firstReturnCloseLineIndex = lines.FindIndex(firstReturnLineIndex, l => l == "    );");
-            if (firstReturnCloseLineIndex < 0)
-            {
-                return new InvalidOperationException("Return close not found");
-            }
-            
-            
-            lines.RemoveRange(firstReturnLineIndex + 1, firstReturnCloseLineIndex - firstReturnLineIndex - 1);
-            
-            
-            lines.InsertRange(firstReturnLineIndex + 1, linesToInject);
-
-            var injectedFileContent = string.Join(Environment.NewLine, lines);
-
-            return injectedFileContent;
-
-        }
-    }
-
     public static async Task<Result> Export(ApplicationState state)
     {
         var result = await CalculateExportInfo(state);
@@ -51,13 +18,8 @@ static class Exporter_For_NextJs_with_Tailwind
         return await TryWriteToFile(filePath, fileContent);
     }
 
-   
-
-
-    static (List<string> lines, List<ImportInfo> imports, IReadOnlyList<string> elementTreeCodes) AsLines(ComponentEntity component, string userName)
+    static (List<string> lines, IReadOnlyList<string> elementTreeCodes) AsLines(ComponentEntity component, string userName)
     {
-        List<ImportInfo> imports = [];
-
         List<string> lines = [];
 
         IReadOnlyList<string> elementTreeCodes;
@@ -66,20 +28,16 @@ static class Exporter_For_NextJs_with_Tailwind
 
             var result = ConvertToReactNode((component, userName), rootVisualElement);
 
-            imports.AddRange(result.imports);
-
             foreach (var line in result.bodyLines.Distinct())
             {
                 lines.Add($"{Indent(1)}{line}");
             }
 
-           
-
             lines.Add(string.Empty);
             lines.Add($"{Indent(1)}return (");
 
-             elementTreeCodes = WriteTo(result.node, null, 2);
-            
+            elementTreeCodes = WriteTo(result.node, null, 2);
+
             lines.AddRange(elementTreeCodes);
 
             lines.Add($"{Indent(1)});");
@@ -87,9 +45,8 @@ static class Exporter_For_NextJs_with_Tailwind
             lines.Add("}");
         }
 
-        return (lines, imports, elementTreeCodes);
+        return (lines, elementTreeCodes);
     }
-
 
     static async Task<Result<(string filePath, string fileContent)>> CalculateExportInfo(ApplicationState state)
     {
@@ -105,12 +62,12 @@ static class Exporter_For_NextJs_with_Tailwind
         }
 
         var filePath = $"{GetExportFolderPath()}{state.ComponentName}.tsx";
-        
+
         string fileContent;
         {
             var result = AsLines(component, state.UserName);
 
-            var linesToInject =result.elementTreeCodes;
+            var linesToInject = result.elementTreeCodes;
 
             string[] fileContentInDirectory;
             try
@@ -131,17 +88,12 @@ static class Exporter_For_NextJs_with_Tailwind
             fileContent = newVersion.Value;
         }
 
-        
-
         return (filePath, fileContent);
     }
 
-    static (ReactNode node, List<string> bodyLines, List<ImportInfo> imports)
-        ConvertToReactNode((ComponentEntity component, string userName) context, VisualElementModel element)
+    static (ReactNode node, List<string> bodyLines) ConvertToReactNode((ComponentEntity component, string userName) context, VisualElementModel element)
     {
         var (component, userName) = context;
-
-        List<ImportInfo> imports = [];
 
         List<string> bodyLines = [];
 
@@ -157,15 +109,13 @@ static class Exporter_For_NextJs_with_Tailwind
 
         if (tag == "img")
         {
-
             tag = "Image";
 
-            if (element.Properties.Any(x=>x.Contains("alt:")) is false)
+            if (element.Properties.Any(x => x.Contains("alt:")) is false)
             {
                 element.Properties.Add("alt: -");
             }
         }
-
 
         var node = new ReactNode { Tag = tag };
 
@@ -269,7 +219,7 @@ static class Exporter_For_NextJs_with_Tailwind
                             classNames.Add($"{name}-{value}");
                             continue;
                         }
-                        
+
                         case "text-decoration":
                         {
                             classNames.Add($"{value}");
@@ -289,13 +239,13 @@ static class Exporter_For_NextJs_with_Tailwind
                             classNames.Add($"w-[{value}px]");
                             continue;
                         }
-                        
+
                         case "text-align":
                         {
                             classNames.Add($"text-{value}");
                             continue;
                         }
-                        
+
                         case "h":
                         case "height":
                         {
@@ -471,18 +421,14 @@ static class Exporter_For_NextJs_with_Tailwind
         var hasSelfClose = element.Children.Count == 0 && element.Text.HasNoValue();
         if (hasSelfClose)
         {
-            return (node, bodyLines, imports);
+            return (node, bodyLines);
         }
 
-        
-
-     
-        
-        if (IsConnectedValue(element.Text) ||   (element.Text + string.Empty).StartsWith("props.") || (element.Text + string.Empty).StartsWith("state."))
+        if (IsConnectedValue(element.Text) || (element.Text + string.Empty).StartsWith("props.") || (element.Text + string.Empty).StartsWith("state."))
         {
             node.Children.Add(new() { Text = element.Text });
 
-            return (node, bodyLines, imports);
+            return (node, bodyLines);
         }
 
         // Add text content
@@ -501,21 +447,18 @@ static class Exporter_For_NextJs_with_Tailwind
                 childNode = result.node;
 
                 bodyLines.AddRange(result.bodyLines);
-                imports.AddRange(result.imports);
             }
 
             node.Children.Add(childNode);
         }
 
-        return (node, bodyLines, imports);
+        return (node, bodyLines);
     }
 
     static string GetExportFolderPath()
     {
         return "C:\\github\\hopgogo\\web\\enduser-ui\\src\\components\\";
     }
-
-   
 
     static string Indent(int indentLevel)
     {
@@ -535,7 +478,7 @@ static class Exporter_For_NextJs_with_Tailwind
 
         return Success;
     }
-    
+
     static IReadOnlyList<string> WriteTo(ReactNode node, ReactNode parentNode, int indentLevel)
     {
         List<string> lines = [];
@@ -572,7 +515,10 @@ static class Exporter_For_NextJs_with_Tailwind
 
             return lines;
 
-            static string clearValue(string value) => value.RemoveFromStart("{").RemoveFromEnd("}");
+            static string clearValue(string value)
+            {
+                return value.RemoveFromStart("{").RemoveFromEnd("}");
+            }
         }
 
         if (hideIf is not null)
@@ -590,8 +536,11 @@ static class Exporter_For_NextJs_with_Tailwind
             lines.Add($"{Indent(indentLevel)})}}");
 
             return lines;
-            
-            static string clearValue(string value) => value.RemoveFromStart("{").RemoveFromEnd("}");
+
+            static string clearValue(string value)
+            {
+                return value.RemoveFromStart("{").RemoveFromEnd("}");
+            }
         }
 
         // is map
@@ -603,8 +552,8 @@ static class Exporter_For_NextJs_with_Tailwind
 
                 lines.Add($"{Indent(indentLevel)}{{{clearValue(itemsSource.Value)}.map((item, index) => {{");
                 indentLevel++;
-                lines.Add(Indent(indentLevel)+"const isFirst = index === 0;");
-                lines.Add(Indent(indentLevel)+$"const isLast = index === {clearValue(itemsSource.Value)}.length - 1;");
+                lines.Add(Indent(indentLevel) + "const isFirst = index === 0;");
+                lines.Add(Indent(indentLevel) + $"const isLast = index === {clearValue(itemsSource.Value)}.length - 1;");
 
                 lines.Add(string.Empty);
                 lines.Add(Indent(indentLevel) + "return (");
@@ -614,17 +563,19 @@ static class Exporter_For_NextJs_with_Tailwind
                     var innerLines = WriteTo(node, parentNode, indentLevel);
                     lines.AddRange(innerLines);
                 }
-                
+
                 indentLevel--;
                 lines.Add(Indent(indentLevel) + ");");
-                
 
                 indentLevel--;
                 lines.Add(Indent(indentLevel) + "})}");
 
                 return lines;
-            
-                static string clearValue(string value) => value.RemoveFromStart("{").RemoveFromEnd("}");
+
+                static string clearValue(string value)
+                {
+                    return value.RemoveFromStart("{").RemoveFromEnd("}");
+                }
             }
         }
 
@@ -641,13 +592,12 @@ static class Exporter_For_NextJs_with_Tailwind
         {
             node.Properties.Remove(childrenProperty);
         }
-        
+
         var bindProperty = node.Properties.FirstOrDefault(x => x.Name == "-bind");
         if (bindProperty is not null)
         {
             node.Properties.Remove(bindProperty);
         }
-        
 
         foreach (var reactProperty in node.Properties)
         {
@@ -659,14 +609,13 @@ static class Exporter_For_NextJs_with_Tailwind
             {
                 continue;
             }
-           
 
             if (propertyValue != null && propertyValue[0] == '"')
             {
                 sb.Append($" {propertyName}={propertyValue}");
                 continue;
             }
-            
+
             if (IsConnectedValue(propertyValue))
             {
                 sb.Append($" {propertyName}={propertyValue}");
@@ -683,8 +632,6 @@ static class Exporter_For_NextJs_with_Tailwind
             lines.Add(sb.ToString());
             return lines;
         }
-
-     
 
         // try add from state 
         {
@@ -708,13 +655,12 @@ static class Exporter_For_NextJs_with_Tailwind
         {
             if (node.Children.Count == 1)
             {
-                var childrenText = node.Children[0].Text  + string.Empty;
+                var childrenText = node.Children[0].Text + string.Empty;
                 if (bindProperty is not null)
                 {
                     childrenText = bindProperty.Value;
                 }
-                
-            
+
                 if (IsConnectedValue(childrenText))
                 {
                     sb.Append(">");
@@ -728,7 +674,6 @@ static class Exporter_For_NextJs_with_Tailwind
                     return lines;
                 }
             }
-            
         }
 
         sb.Append(">");
@@ -752,6 +697,34 @@ static class Exporter_For_NextJs_with_Tailwind
         return lines;
     }
 
+    static class TypeScriptFileHelper
+    {
+        public static Result<string> InjectRender(IReadOnlyList<string> fileContent, IReadOnlyList<string> linesToInject)
+        {
+            var lines = fileContent.ToList();
+
+            var firstReturnLineIndex = lines.FindIndex(l => l == "    return (");
+            if (firstReturnLineIndex < 0)
+            {
+                return new InvalidOperationException("No return found");
+            }
+
+            var firstReturnCloseLineIndex = lines.FindIndex(firstReturnLineIndex, l => l == "    );");
+            if (firstReturnCloseLineIndex < 0)
+            {
+                return new InvalidOperationException("Return close not found");
+            }
+
+            lines.RemoveRange(firstReturnLineIndex + 1, firstReturnCloseLineIndex - firstReturnLineIndex - 1);
+
+            lines.InsertRange(firstReturnLineIndex + 1, linesToInject);
+
+            var injectedFileContent = string.Join(Environment.NewLine, lines);
+
+            return injectedFileContent;
+        }
+    }
+
     class ReactNode
     {
         public List<ReactNode> Children { get; } = [];
@@ -768,10 +741,4 @@ static class Exporter_For_NextJs_with_Tailwind
         public string Name { get; init; }
         public string Value { get; init; }
     }
-}
-
-record ImportInfo
-{
-   
-  
 }
