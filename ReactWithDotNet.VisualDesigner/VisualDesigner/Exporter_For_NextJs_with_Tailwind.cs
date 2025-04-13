@@ -18,31 +18,13 @@ static class Exporter_For_NextJs_with_Tailwind
         return await TryWriteToFile(filePath, fileContent);
     }
 
-    static (List<string> lines, IReadOnlyList<string> elementTreeCodes) CalculateElementTreeTsCodes(ComponentEntity component, string userName)
+    static IReadOnlyList<string> CalculateElementTreeTsCodes(ComponentEntity component, string userName)
     {
-        List<string> lines = [];
+        var rootVisualElement = DeserializeFromJson<VisualElementModel>(component.RootElementAsJson ?? "");
 
-        IReadOnlyList<string> elementTreeCodes;
-        {
-            var rootVisualElement = DeserializeFromJson<VisualElementModel>(component.RootElementAsJson ?? "");
+        var rootNode = ConvertToReactNode((component, userName), rootVisualElement);
 
-            var rootNode = ConvertToReactNode((component, userName), rootVisualElement);
-
-           
-
-            lines.Add(string.Empty);
-            lines.Add($"{Indent(1)}return (");
-
-            elementTreeCodes = WriteTo(rootNode, null, 2);
-
-            lines.AddRange(elementTreeCodes);
-
-            lines.Add($"{Indent(1)});");
-
-            lines.Add("}");
-        }
-
-        return (lines, elementTreeCodes);
+        return WriteTo(rootNode, null, 2);
     }
 
     static async Task<Result<(string filePath, string fileContent)>> CalculateExportInfo(ApplicationState state)
@@ -62,9 +44,7 @@ static class Exporter_For_NextJs_with_Tailwind
 
         string fileContent;
         {
-            var result = CalculateElementTreeTsCodes(component, state.UserName);
-
-            var linesToInject = result.elementTreeCodes;
+            var linesToInject = CalculateElementTreeTsCodes(component, state.UserName);
 
             string[] fileContentInDirectory;
             try
@@ -91,7 +71,6 @@ static class Exporter_For_NextJs_with_Tailwind
     static ReactNode ConvertToReactNode((ComponentEntity component, string userName) context, VisualElementModel element)
     {
         var (component, userName) = context;
-
 
         List<string> classNames = [];
 
@@ -492,7 +471,7 @@ static class Exporter_For_NextJs_with_Tailwind
         {
             node.Properties.Remove(showIf);
 
-            lines.Add($"{Indent(indentLevel)}{{{clearValue(showIf.Value)} && (");
+            lines.Add($"{Indent(indentLevel)}{{{ClearConnectedValue(showIf.Value)} && (");
             indentLevel++;
 
             var innerLines = WriteTo(node, parentNode, indentLevel);
@@ -503,18 +482,13 @@ static class Exporter_For_NextJs_with_Tailwind
             lines.Add($"{Indent(indentLevel)})}}");
 
             return lines;
-
-            static string clearValue(string value)
-            {
-                return value.RemoveFromStart("{").RemoveFromEnd("}");
-            }
         }
 
         if (hideIf is not null)
         {
             node.Properties.Remove(hideIf);
 
-            lines.Add($"{Indent(indentLevel)}{{!{clearValue(hideIf.Value)} && (");
+            lines.Add($"{Indent(indentLevel)}{{!{ClearConnectedValue(hideIf.Value)} && (");
             indentLevel++;
 
             var innerLines = WriteTo(node, parentNode, indentLevel);
@@ -525,11 +499,6 @@ static class Exporter_For_NextJs_with_Tailwind
             lines.Add($"{Indent(indentLevel)})}}");
 
             return lines;
-
-            static string clearValue(string value)
-            {
-                return value.RemoveFromStart("{").RemoveFromEnd("}");
-            }
         }
 
         // is map
@@ -539,10 +508,10 @@ static class Exporter_For_NextJs_with_Tailwind
             {
                 parentNode.Properties.Remove(itemsSource);
 
-                lines.Add($"{Indent(indentLevel)}{{{clearValue(itemsSource.Value)}.map((item, index) => {{");
+                lines.Add($"{Indent(indentLevel)}{{{ClearConnectedValue(itemsSource.Value)}.map((item, index) => {{");
                 indentLevel++;
                 lines.Add(Indent(indentLevel) + "const isFirst = index === 0;");
-                lines.Add(Indent(indentLevel) + $"const isLast = index === {clearValue(itemsSource.Value)}.length - 1;");
+                lines.Add(Indent(indentLevel) + $"const isLast = index === {ClearConnectedValue(itemsSource.Value)}.length - 1;");
 
                 lines.Add(string.Empty);
                 lines.Add(Indent(indentLevel) + "return (");
@@ -560,11 +529,6 @@ static class Exporter_For_NextJs_with_Tailwind
                 lines.Add(Indent(indentLevel) + "})}");
 
                 return lines;
-
-                static string clearValue(string value)
-                {
-                    return value.RemoveFromStart("{").RemoveFromEnd("}");
-                }
             }
         }
 
