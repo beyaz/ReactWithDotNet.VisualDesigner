@@ -1439,28 +1439,31 @@ sealed class ApplicationView : Component<ApplicationState>
             const int step = 50;
             const int max = maxHeight / step + 1;
 
-            return new div(SizeFull, Width(30), MarginLeft(-30), OverflowHidden, PositionRelative)
+            return new div(HeightFull)
             {
-                Enumerable.Range(0, max).Select(number => new div(PositionAbsolute)
+                new div(HeightFull, Width(30), MarginLeft(-30), OverflowHidden, PositionRelative)
                 {
-                    Right(3), Top(number * step),
-                    new FlexRow(FontSize8, LineHeight6, FontWeight500, Gap(4))
+                    Enumerable.Range(0, max).Select(number => new div(PositionAbsolute)
                     {
-                        new div(MarginTop(number == 0 ? 0 : -3))
+                        Right(3), Top(number * step),
+                        new FlexRow(FontSize8, LineHeight6, FontWeight500, Gap(4))
                         {
-                            Convert.ToInt32(number * step * (100 / scale))
-                        },
-                        new div
-                        {
-                            Height(0.5),
-                            Width(7),
+                            new div(MarginTop(number == 0 ? 0 : -3))
+                            {
+                                Convert.ToInt32(number * step * (100 / scale))
+                            },
+                            new div
+                            {
+                                Height(0.5),
+                                Width(7),
 
-                            Background("green")
+                                Background("green")
+                            }
                         }
-                    }
-                }),
+                    }),
 
-                createTenPoints()
+                    createTenPoints()
+                }
             };
 
             IReadOnlyList<Element> createTenPoints()
