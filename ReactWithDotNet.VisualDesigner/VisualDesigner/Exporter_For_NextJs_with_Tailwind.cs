@@ -583,6 +583,26 @@ static class Exporter_For_NextJs_with_Tailwind
                         case "border-right-width":
                             classNames.Add($"border-r-[{value}px]");
                             continue;
+
+                        case "border-bottom":
+                        {
+                            var parts = value.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                            if (parts.Length == 3)
+                            {
+                                if (Project.Colors.TryGetValue(parts[2], out var htmlColor))
+                                {
+                                    parts[2] = htmlColor;
+                                }
+                                
+                                classNames.Add($"border-b-[{parts[0]}]");
+                                classNames.Add($"[border-bottom-style:{parts[1]}]");
+                                classNames.Add($"[border-bottom-color:{parts[2]}]");
+                            }
+                            
+                            continue;
+                        }
+                            
+                        
                         case "pr":
                             classNames.Add($"pr-[{value}px]");
                             continue;

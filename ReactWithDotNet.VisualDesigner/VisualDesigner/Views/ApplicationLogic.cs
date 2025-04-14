@@ -243,6 +243,9 @@ static class ApplicationLogic
             items.Add("class: ph ph-instagram-logo");
             items.Add("class: ph ph-linkedin-logo");
         }
+        
+        items.Add("-items-source-design-time-count: 3");
+        items.Add("-items-source: {state.userList}");
 
 
         items.AddRange(GetPropsSuggestions(state));
