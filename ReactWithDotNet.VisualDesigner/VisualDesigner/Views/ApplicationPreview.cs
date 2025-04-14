@@ -137,15 +137,9 @@ sealed class ApplicationPreview : Component
 
             element.Add(Hover(Outline($"1px {dashed} {Blue300}")));
 
-            
+            element.id = $"{path}";
 
-            var isCurrentPreviewComponent = context.Parent is null;
-            if (isCurrentPreviewComponent)
-            {
-                element.id = $"{path}";
-                
-                element.onClick = context.OnTreeItemClicked;
-            }
+            element.onClick = context.OnTreeItemClicked;
 
             if (model.Text.HasValue())
             {
@@ -764,7 +758,13 @@ sealed class ApplicationPreview : Component
             {
                 Element childElement;
                 {
-                    var result = await renderElement(context, model.Children[i], $"{path},{i}");
+                    var childPath = $"{path},{i}";
+                    if (context.Parent is not null)
+                    {
+                        childPath = path;
+                    }
+
+                    var result = await renderElement(context, model.Children[i], childPath);
                     if (result.HasError)
                     {
                         return result;
