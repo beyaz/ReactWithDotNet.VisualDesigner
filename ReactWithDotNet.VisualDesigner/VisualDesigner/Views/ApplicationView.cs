@@ -250,90 +250,6 @@ sealed class ApplicationView : Component<ApplicationState>
         }
     }
 
-    static Element createHorizontalRuler(int screenWidth, double scale = 100)
-    {
-        const int step = 50;
-        var max = screenWidth / step + 1;
-
-        return new FlexRow(PositionRelative, WidthFull, Height(20))
-        {
-            Enumerable.Range(0, max).Select(number => new div(PositionAbsolute)
-            {
-                Bottom(3), Left(number * step),
-                new FlexColumn(FontSize8, LineHeight6, FontWeight500, Gap(4))
-                {
-                    new div(MarginLeft(calculateMarginForCenterizeLabel(number)))
-                    {
-                        Convert.ToInt32((number * step) * (100/scale))
-                    },
-                    new div(BorderRadius(3))
-                    {
-                        Width(0.5),
-                        Height(7),
-
-                        Background("green")
-                    }
-                }
-            }),
-            createTenPoints()
-        };
-
-        IReadOnlyList<Element> createTenPoints()
-        {
-            var returnList = new List<Element>();
-
-            var miniStep = 10;
-
-            var cursor = 0;
-            var distance = miniStep;
-            while (distance <= screenWidth)
-            {
-                cursor++;
-
-                distance = cursor * miniStep;
-
-                if (distance % step == 0 || distance > screenWidth)
-                {
-                    continue;
-                }
-
-                returnList.Add(new div(PositionAbsolute)
-                {
-                    Bottom(3),
-                    Left(distance),
-
-                    Width(0.5),
-                    Height(4),
-                    Background("green")
-                });
-            }
-
-            return returnList;
-        }
-
-        double calculateMarginForCenterizeLabel(int stepNumber)
-        {
-            var label = stepNumber * step;
-
-            if (label < 10)
-            {
-                return -2;
-            }
-
-            if (label < 100)
-            {
-                return -4.5;
-            }
-
-            if (label < 1000)
-            {
-                return -7;
-            }
-
-            return -9;
-        }
-    }
-
     Task DeleteSelectedTreeItem()
     {
         if (state.Selection.VisualElementTreeItemPath.HasNoValue())
@@ -379,7 +295,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
                 new FlexColumn(state.Preview.Width < 768 ? AlignItemsCenter : AlignItemsFlexStart, FlexGrow(1), Padding(7), MarginLeft(40), OverflowXAuto)
                 {
-                    createHorizontalRuler(state.Preview.Width, state.Preview.Scale) + Width(state.Preview.Width) + MarginTop(12),
+                    Ruler.HorizontalRuler(state.Preview.Width, state.Preview.Scale) + Width(state.Preview.Width) + MarginTop(12),
                     PartPreview
                 },
 
@@ -798,78 +714,13 @@ sealed class ApplicationView : Component<ApplicationState>
             BackgroundImage("radial-gradient(#a5a8ed 0.5px, #f8f8f8 0.5px)"),
             BackgroundSize("10px 10px"),
 
-            createVerticleRuler(state.Preview.Scale),
+            Ruler.VerticleRuler(state.Preview.Scale),
             createElement(),
 
             Width(state.Preview.Width),
             Height(state.Preview.Height * percent),
             BoxShadow(0, 4, 12, 0, rgba(0, 0, 0, 0.1))
         };
-
-        static Element createVerticleRuler(double scale = 100)
-        {
-            const int maxHeight = 5000;
-
-            const int step = 50;
-            const int max = maxHeight / step + 1;
-
-            return new div(SizeFull, Width(30), MarginLeft(-30), OverflowHidden, PositionRelative)
-            {
-                Enumerable.Range(0, max).Select(number => new div(PositionAbsolute)
-                {
-                    Right(3), Top(number * step),
-                    new FlexRow(FontSize8, LineHeight6, FontWeight500, Gap(4))
-                    {
-                        new div(MarginTop(number == 0 ? 0 : -3))
-                        {
-                            Convert.ToInt32((number * step) * (100/scale))
-                        },
-                        new div
-                        {
-                            Height(0.5),
-                            Width(7),
-
-                            Background("green")
-                        }
-                    }
-                }),
-
-                createTenPoints()
-            };
-
-            IReadOnlyList<Element> createTenPoints()
-            {
-                var returnList = new List<Element>();
-
-                var miniStep = 10;
-
-                var cursor = 0;
-                var distance = miniStep;
-                while (distance <= maxHeight)
-                {
-                    cursor++;
-
-                    distance = cursor * miniStep;
-
-                    if (distance % step == 0 || distance > maxHeight)
-                    {
-                        continue;
-                    }
-
-                    returnList.Add(new div(PositionAbsolute)
-                    {
-                        Right(3),
-                        Top(distance),
-
-                        Height(0.5),
-                        Width(4),
-                        Background("green")
-                    });
-                }
-
-                return returnList;
-            }
-        }
 
         static Element createElement()
         {
@@ -1490,6 +1341,158 @@ sealed class ApplicationView : Component<ApplicationState>
         state.IsActionButtonsVisible = !state.IsActionButtonsVisible;
 
         return Task.CompletedTask;
+    }
+
+    static class Ruler
+    {
+        public static Element HorizontalRuler(int screenWidth, double scale = 100)
+        {
+            const int step = 50;
+            var max = screenWidth / step + 1;
+
+            return new FlexRow(PositionRelative, WidthFull, Height(20))
+            {
+                Enumerable.Range(0, max).Select(number => new div(PositionAbsolute)
+                {
+                    Bottom(3), Left(number * step),
+                    new FlexColumn(FontSize8, LineHeight6, FontWeight500, Gap(4))
+                    {
+                        new div(MarginLeft(calculateMarginForCenterizeLabel(number)))
+                        {
+                            Convert.ToInt32(number * step * (100 / scale))
+                        },
+                        new div(BorderRadius(3))
+                        {
+                            Width(0.5),
+                            Height(7),
+
+                            Background("green")
+                        }
+                    }
+                }),
+                createTenPoints()
+            };
+
+            IReadOnlyList<Element> createTenPoints()
+            {
+                var returnList = new List<Element>();
+
+                var miniStep = 10;
+
+                var cursor = 0;
+                var distance = miniStep;
+                while (distance <= screenWidth)
+                {
+                    cursor++;
+
+                    distance = cursor * miniStep;
+
+                    if (distance % step == 0 || distance > screenWidth)
+                    {
+                        continue;
+                    }
+
+                    returnList.Add(new div(PositionAbsolute)
+                    {
+                        Bottom(3),
+                        Left(distance),
+
+                        Width(0.5),
+                        Height(4),
+                        Background("green")
+                    });
+                }
+
+                return returnList;
+            }
+
+            double calculateMarginForCenterizeLabel(int stepNumber)
+            {
+                var label = stepNumber * step;
+
+                if (label < 10)
+                {
+                    return -2;
+                }
+
+                if (label < 100)
+                {
+                    return -4.5;
+                }
+
+                if (label < 1000)
+                {
+                    return -7;
+                }
+
+                return -9;
+            }
+        }
+
+        public static Element VerticleRuler(double scale = 100)
+        {
+            const int maxHeight = 5000;
+
+            const int step = 50;
+            const int max = maxHeight / step + 1;
+
+            return new div(SizeFull, Width(30), MarginLeft(-30), OverflowHidden, PositionRelative)
+            {
+                Enumerable.Range(0, max).Select(number => new div(PositionAbsolute)
+                {
+                    Right(3), Top(number * step),
+                    new FlexRow(FontSize8, LineHeight6, FontWeight500, Gap(4))
+                    {
+                        new div(MarginTop(number == 0 ? 0 : -3))
+                        {
+                            Convert.ToInt32(number * step * (100 / scale))
+                        },
+                        new div
+                        {
+                            Height(0.5),
+                            Width(7),
+
+                            Background("green")
+                        }
+                    }
+                }),
+
+                createTenPoints()
+            };
+
+            IReadOnlyList<Element> createTenPoints()
+            {
+                var returnList = new List<Element>();
+
+                var miniStep = 10;
+
+                var cursor = 0;
+                var distance = miniStep;
+                while (distance <= maxHeight)
+                {
+                    cursor++;
+
+                    distance = cursor * miniStep;
+
+                    if (distance % step == 0 || distance > maxHeight)
+                    {
+                        continue;
+                    }
+
+                    returnList.Add(new div(PositionAbsolute)
+                    {
+                        Right(3),
+                        Top(distance),
+
+                        Height(0.5),
+                        Width(4),
+                        Background("green")
+                    });
+                }
+
+                return returnList;
+            }
+        }
     }
 
     class StyleInputLocation
