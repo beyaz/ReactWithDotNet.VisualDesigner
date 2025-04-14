@@ -324,32 +324,51 @@ static class Exporter_For_NextJs_with_Tailwind
                     element.Properties.Add("fill: {true}");
                 }
             }
-            
-            //// try to add width and height to default style
-            //{
-            //    var widthPropertyValue = element.Properties.FirstOrDefault(p =>
-            //    {
-            //        var (success, name, _) = TryParsePropertyValue(p);
-            //        if (success)
-            //        {
-            //            return name.Equals("width", StringComparison.OrdinalIgnoreCase) ||
-            //                   name.Equals("w", StringComparison.OrdinalIgnoreCase);
-            //        }
 
-            //        return false;
-            //    });
-            //    if (widthPropertyValue is not null)
-            //    {
-            //        var defaultStyle = element.StyleGroups.FirstOrDefault(x => x.Condition == "*");
-            //        if (defaultStyle is not null)
-            //        {
-            //            if (defaultStyle.Items.All(x => TryParsePropertyValue(x).name != name))
-            //            {
-            //                defaultStyle.Items.Add($"{name}: {propertyValue}");
-            //            }
-            //        }
-            //    }
-            //}
+
+            
+            // try to add width and height to default style
+            {
+                // width
+                {
+                    var propertyValue = element.Properties.TryGetPropertyValue("width", "w");
+                    if (propertyValue is not null)
+                    {
+                        var defaultStyle = element.StyleGroups.FirstOrDefault(x => x.Condition == "*");
+                        if (defaultStyle is null)
+                        {
+                            element.StyleGroups.Add(new() {Condition = "*", Items = [$"width: {propertyValue}"]});
+                        }
+                        else
+                        {
+                            if (defaultStyle.Items.TryGetPropertyValue("width", "w") is null)
+                            {
+                                defaultStyle.Items.Add($"width: {propertyValue}");
+                            }
+                        }
+                    }
+                }
+                
+                // height
+                {
+                    var propertyValue = element.Properties.TryGetPropertyValue("height", "h");
+                    if (propertyValue is not null)
+                    {
+                        var defaultStyle = element.StyleGroups.FirstOrDefault(x => x.Condition == "*");
+                        if (defaultStyle is null)
+                        {
+                            element.StyleGroups.Add(new() {Condition = "*", Items = [$"height: {propertyValue}"]});
+                        }
+                        else
+                        {
+                            if (defaultStyle.Items.TryGetPropertyValue("height", "h") is null)
+                            {
+                                defaultStyle.Items.Add($"height: {propertyValue}");
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         var node = new ReactNode { Tag = tag };

@@ -595,4 +595,25 @@ static class Extensions
 
         return (success: true, name.Trim(), value.Trim());
     }
+    
+    
+    public static string TryGetPropertyValue(this IReadOnlyList<string> properties, params string[] propertyNameWithAlias)
+    {
+        foreach (var property in properties)
+        {
+            var (success, name, value) = TryParsePropertyValue(property);
+            if (success)
+            {
+                foreach (var propertyName in propertyNameWithAlias)
+                {
+                    if (name.Equals(propertyName, StringComparison.OrdinalIgnoreCase) )
+                    {
+                        return value;
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
 }
