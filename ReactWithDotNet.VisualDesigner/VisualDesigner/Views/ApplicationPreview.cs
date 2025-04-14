@@ -129,7 +129,7 @@ sealed class ApplicationPreview : Component
 
                     root.Children.AddRange(model.Children);
 
-                    return await renderElement(context, root, path);
+                    return await renderElement(context with { Parent = context }, root, path);
                 }
             }
 
@@ -137,9 +137,15 @@ sealed class ApplicationPreview : Component
 
             element.Add(Hover(Outline($"1px {dashed} {Blue300}")));
 
-            element.id = $"{path}";
+            
 
-            element.onClick = context.OnTreeItemClicked;
+            var isCurrentPreviewComponent = context.Parent is null;
+            if (isCurrentPreviewComponent)
+            {
+                element.id = $"{path}";
+                
+                element.onClick = context.OnTreeItemClicked;
+            }
 
             if (model.Text.HasValue())
             {
@@ -801,6 +807,9 @@ sealed class ApplicationPreview : Component
         public required VisualElementModel HighlightedElement { get; init; }
 
         public required MouseEventHandler OnTreeItemClicked { get; init; }
+
+        public RenderContext Parent { get; init; }
+
         public required int ProjectId { get; init; }
 
         public required ReactContext ReactContext { get; init; }
