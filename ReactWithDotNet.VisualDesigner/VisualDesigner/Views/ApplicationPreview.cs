@@ -65,7 +65,15 @@ sealed class ApplicationPreview : Component
 
         Element finalElement;
         {
-            var result = await renderElement(rootElement, "0");
+            var renderContext = new RenderContext
+            {
+                ProjectId          = projectId,
+                UserName           = userName,
+                OnTreeItemClicked  = OnItemClick,
+                ReactContext       = Context,
+                HighlightedElement = highlightedElement
+            };
+            var result = await renderElement(renderContext, rootElement, "0");
             if (result.HasError)
             {
                 return new div(Size(200), Background(Gray100))
@@ -75,14 +83,13 @@ sealed class ApplicationPreview : Component
             }
 
             finalElement = result.Value;
-            
         }
-        
-        var scaleStyle = TransformOrigin("0 0") + Transform($"scale({appState.Preview.Scale / (double)100})");
+
+        var scaleStyle = TransformOrigin("0 0") + Transform($"scale({appState.Preview.Scale / 100})");
 
         return finalElement + scaleStyle;
 
-        async Task<Result<Element>> renderElement(VisualElementModel model, string path)
+        static async Task<Result<Element>> renderElement(RenderContext context, VisualElementModel model, string path)
         {
             HtmlElement element = new div();
 
@@ -107,7 +114,7 @@ sealed class ApplicationPreview : Component
             {
                 ComponentEntity component;
                 {
-                    var result = await GetComponenUserOrMainVersionAsync(projectId, model.Tag, userName);
+                    var result = await GetComponenUserOrMainVersionAsync(context.ProjectId, model.Tag, context.UserName);
                     if (result.HasError)
                     {
                         return result.Error;
@@ -122,7 +129,7 @@ sealed class ApplicationPreview : Component
 
                     root.Children.AddRange(model.Children);
 
-                    return await renderElement(root, path);
+                    return await renderElement(context, root, path);
                 }
             }
 
@@ -132,7 +139,7 @@ sealed class ApplicationPreview : Component
 
             element.id = $"{path}";
 
-            element.onClick = OnItemClick;
+            element.onClick = context.OnTreeItemClicked;
 
             if (model.Text.HasValue())
             {
@@ -195,8 +202,9 @@ sealed class ApplicationPreview : Component
                             {
                                 value = value.RemoveFromStart("/");
                             }
-                            elementAsImage.src = Path.Combine(Context.wwwroot, value);
-                            
+
+                            elementAsImage.src = Path.Combine(context.ReactContext.wwwroot, value);
+
                             continue;
                         }
                     }
@@ -211,7 +219,7 @@ sealed class ApplicationPreview : Component
                 }
             }
 
-            if (highlightedElement == model)
+            if (context.HighlightedElement == model)
             {
                 element.Add(Outline($"1px {dashed} {Blue300}"));
             }
@@ -750,7 +758,7 @@ sealed class ApplicationPreview : Component
             {
                 Element childElement;
                 {
-                    var result = await renderElement(model.Children[i], $"{path},{i}");
+                    var result = await renderElement(context, model.Children[i], $"{path},{i}");
                     if (result.HasError)
                     {
                         return result;
@@ -786,5 +794,17 @@ sealed class ApplicationPreview : Component
         Client.RunJavascript(sb.ToString());
 
         return Task.CompletedTask;
+    }
+
+    record RenderContext
+    {
+        public required VisualElementModel HighlightedElement { get; init; }
+
+        public required MouseEventHandler OnTreeItemClicked { get; init; }
+        public required int ProjectId { get; init; }
+
+        public required ReactContext ReactContext { get; init; }
+
+        public required string UserName { get; init; }
     }
 }
