@@ -250,10 +250,10 @@ sealed class ApplicationView : Component<ApplicationState>
         }
     }
 
-    Element createHorizontalRuler()
+    static Element createHorizontalRuler(int screenWidth, double scale = 100)
     {
         const int step = 50;
-        var max = state.Preview.Width / step + 1;
+        var max = screenWidth / step + 1;
 
         return new FlexRow(PositionRelative, WidthFull, Height(20))
         {
@@ -264,7 +264,7 @@ sealed class ApplicationView : Component<ApplicationState>
                 {
                     new div(MarginLeft(calculateMarginForCenterizeLabel(number)))
                     {
-                        (number * step).ToString()
+                        Convert.ToInt32((number * step) * (100/scale))
                     },
                     new div(BorderRadius(3))
                     {
@@ -286,13 +286,13 @@ sealed class ApplicationView : Component<ApplicationState>
 
             var cursor = 0;
             var distance = miniStep;
-            while (distance <= state.Preview.Width)
+            while (distance <= screenWidth)
             {
                 cursor++;
 
                 distance = cursor * miniStep;
 
-                if (distance % step == 0 || distance > state.Preview.Width)
+                if (distance % step == 0 || distance > screenWidth)
                 {
                     continue;
                 }
@@ -370,8 +370,6 @@ sealed class ApplicationView : Component<ApplicationState>
 
     async Task<Element> MainContent()
     {
-        var scaleStyle = TransformOrigin("0 0") + Transform($"scale({state.Preview.Scale / (double)100})");
-
         return new SplitRow
         {
             sizes = [25, 50, 25],
@@ -379,9 +377,9 @@ sealed class ApplicationView : Component<ApplicationState>
             {
                 await PartLeftPanel() + BorderBottomLeftRadius(8) + OverflowAuto,
 
-                new FlexColumn(state.Preview.Width < 768 ? AlignItemsCenter : AlignItemsFlexStart, FlexGrow(1), Padding(7), MarginLeft(40), scaleStyle, OverflowXAuto)
+                new FlexColumn(state.Preview.Width < 768 ? AlignItemsCenter : AlignItemsFlexStart, FlexGrow(1), Padding(7), MarginLeft(40), OverflowXAuto)
                 {
-                    createHorizontalRuler() + Width(state.Preview.Width) + MarginTop(12),
+                    createHorizontalRuler(state.Preview.Width, state.Preview.Scale) + Width(state.Preview.Width) + MarginTop(12),
                     PartPreview
                 },
 
@@ -800,7 +798,7 @@ sealed class ApplicationView : Component<ApplicationState>
             BackgroundImage("radial-gradient(#a5a8ed 0.5px, #f8f8f8 0.5px)"),
             BackgroundSize("10px 10px"),
 
-            createVerticleRuler,
+            createVerticleRuler(state.Preview.Scale),
             createElement(),
 
             Width(state.Preview.Width),
@@ -808,7 +806,7 @@ sealed class ApplicationView : Component<ApplicationState>
             BoxShadow(0, 4, 12, 0, rgba(0, 0, 0, 0.1))
         };
 
-        static Element createVerticleRuler()
+        static Element createVerticleRuler(double scale = 100)
         {
             const int maxHeight = 5000;
 
@@ -824,7 +822,7 @@ sealed class ApplicationView : Component<ApplicationState>
                     {
                         new div(MarginTop(number == 0 ? 0 : -3))
                         {
-                            (number * step).ToString()
+                            Convert.ToInt32((number * step) * (100/scale))
                         },
                         new div
                         {

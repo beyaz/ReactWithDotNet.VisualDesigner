@@ -10,7 +10,7 @@ public sealed class ApplicationPreviewInfo
     
     public int Height { get; init; }
     
-    public int Scale { get; set; }
+    public double Scale { get; set; }
     
     // @formatter:on
 }

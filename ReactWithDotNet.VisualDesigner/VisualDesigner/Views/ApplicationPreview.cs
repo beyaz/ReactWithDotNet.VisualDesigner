@@ -75,9 +75,12 @@ sealed class ApplicationPreview : Component
             }
 
             finalElement = result.Value;
+            
         }
+        
+        var scaleStyle = TransformOrigin("0 0") + Transform($"scale({appState.Preview.Scale / (double)100})");
 
-        return finalElement;
+        return finalElement + scaleStyle;
 
         async Task<Result<Element>> renderElement(VisualElementModel model, string path)
         {
