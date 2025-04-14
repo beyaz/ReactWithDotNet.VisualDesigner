@@ -1350,27 +1350,30 @@ sealed class ApplicationView : Component<ApplicationState>
             const int step = 50;
             var max = screenWidth / step + 1;
 
-            return new FlexRow(PositionRelative, WidthFull, Height(20))
+            return new FlexRow(WidthFull)
             {
-                Enumerable.Range(0, max).Select(number => new div(PositionAbsolute)
+                new FlexRow(PositionRelative, WidthFull, Height(20))
                 {
-                    Bottom(3), Left(number * step),
-                    new FlexColumn(FontSize8, LineHeight6, FontWeight500, Gap(4))
+                    Enumerable.Range(0, max).Select(number => new div(PositionAbsolute)
                     {
-                        new div(MarginLeft(calculateMarginForCenterizeLabel(number)))
+                        Bottom(3), Left(number * step),
+                        new FlexColumn(FontSize8, LineHeight6, FontWeight500, Gap(4))
                         {
-                            Convert.ToInt32(number * step * (100 / scale))
-                        },
-                        new div(BorderRadius(3))
-                        {
-                            Width(0.5),
-                            Height(7),
+                            new div(MarginLeft(calculateMarginForCenterizeLabel(number)))
+                            {
+                                Convert.ToInt32(number * step * (100 / scale))
+                            },
+                            new div(BorderRadius(3))
+                            {
+                                Width(0.5),
+                                Height(7),
 
-                            Background("green")
+                                Background("green")
+                            }
                         }
-                    }
-                }),
-                createTenPoints()
+                    }),
+                    createTenPoints()
+                }
             };
 
             IReadOnlyList<Element> createTenPoints()
