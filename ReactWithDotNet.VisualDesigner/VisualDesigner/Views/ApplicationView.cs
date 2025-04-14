@@ -714,7 +714,7 @@ sealed class ApplicationView : Component<ApplicationState>
             BackgroundImage("radial-gradient(#a5a8ed 0.5px, #f8f8f8 0.5px)"),
             BackgroundSize("10px 10px"),
 
-            Ruler.VerticleRuler(state.Preview.Scale),
+            Ruler.VerticleRuler(state.Preview.Scale) + MarginLeft(-30),
             createElement(),
 
             Width(state.Preview.Width),
@@ -1441,7 +1441,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
             return new div(HeightFull)
             {
-                new div(HeightFull, Width(30), MarginLeft(-30), OverflowHidden, PositionRelative)
+                new div(HeightFull, Width(30), OverflowHidden, PositionRelative)
                 {
                     Enumerable.Range(0, max).Select(number => new div(PositionAbsolute)
                     {
