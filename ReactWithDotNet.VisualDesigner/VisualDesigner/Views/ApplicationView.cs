@@ -293,10 +293,16 @@ sealed class ApplicationView : Component<ApplicationState>
             {
                 await PartLeftPanel() + BorderBottomLeftRadius(8) + OverflowAuto,
 
-                new FlexColumn(state.Preview.Width < 768 ? AlignItemsCenter : AlignItemsFlexStart, FlexGrow(1), Padding(7), MarginLeft(40), OverflowXAuto)
+                new FlexColumn(FlexGrow(1), Padding(7),  OverflowXAuto)
                 {
-                    Ruler.HorizontalRuler(state.Preview.Width, state.Preview.Scale) + Width(state.Preview.Width) + MarginTop(12),
-                    PartPreview
+                    Ruler.HorizontalRuler(state.Preview.Width, state.Preview.Scale) + Width(state.Preview.Width) + MarginTop(12) + PaddingLeft(30),
+                    new FlexRow(SizeFull, Width(state.Preview.Width))
+                    {
+                        Ruler.VerticleRuler(state.Preview.Scale), 
+                        PartPreview
+                    }
+                    
+                    
                 },
 
                 await PartRightPanel() + BorderBottomRightRadius(8)
@@ -714,7 +720,7 @@ sealed class ApplicationView : Component<ApplicationState>
             BackgroundImage("radial-gradient(#a5a8ed 0.5px, #f8f8f8 0.5px)"),
             BackgroundSize("10px 10px"),
 
-            Ruler.VerticleRuler(state.Preview.Scale) + MarginLeft(-30),
+            
             createElement(),
 
             Width(state.Preview.Width),
