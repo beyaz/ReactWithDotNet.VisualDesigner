@@ -18,14 +18,15 @@ colors:
   secondary-base: "#3DD3EE"
   secondary-light: "#9EE9F6"
   secondary-lighter: "#D8F6FC"
-  error-dark: "rgba(78, 25, 15, 1)"
-  error-base: "rgba(233, 74, 46, 1)"
-  error-light: "rgba(244, 164, 150, 1)"
-  error-lighter: "rgba(251, 219, 213, 1)"
+  error-dark: "#4E190F"
+  error-base: "#E94A2E"
+  error-light: "#F4A496"
+  error-lighter: "#FBDBD5"
   future-dark: "#281355"
   future-base: "#7939FF"
   future-light: "#BC9CFF"
   future-lighter: "#E4D7FF"
+
 
 styles:
   bg-strong: "background: #0E121B"

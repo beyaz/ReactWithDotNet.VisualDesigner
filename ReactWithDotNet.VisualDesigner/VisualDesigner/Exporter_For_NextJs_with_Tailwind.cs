@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Globalization;
+using System.IO;
 using System.Text;
 
 namespace ReactWithDotNet.VisualDesigner.Models;
@@ -300,6 +301,9 @@ static class Exporter_For_NextJs_with_Tailwind
                 element.Properties.Add("alt: ?");
             }
 
+           
+           
+            
             var sizeProperty = element.Properties.FirstOrDefault(x => x.Contains("size:"));
             if (sizeProperty is not null)
             {
@@ -320,6 +324,32 @@ static class Exporter_For_NextJs_with_Tailwind
                     element.Properties.Add("fill: {true}");
                 }
             }
+            
+            //// try to add width and height to default style
+            //{
+            //    var widthPropertyValue = element.Properties.FirstOrDefault(p =>
+            //    {
+            //        var (success, name, _) = TryParsePropertyValue(p);
+            //        if (success)
+            //        {
+            //            return name.Equals("width", StringComparison.OrdinalIgnoreCase) ||
+            //                   name.Equals("w", StringComparison.OrdinalIgnoreCase);
+            //        }
+
+            //        return false;
+            //    });
+            //    if (widthPropertyValue is not null)
+            //    {
+            //        var defaultStyle = element.StyleGroups.FirstOrDefault(x => x.Condition == "*");
+            //        if (defaultStyle is not null)
+            //        {
+            //            if (defaultStyle.Items.All(x => TryParsePropertyValue(x).name != name))
+            //            {
+            //                defaultStyle.Items.Add($"{name}: {propertyValue}");
+            //            }
+            //        }
+            //    }
+            //}
         }
 
         var node = new ReactNode { Tag = tag };
@@ -417,6 +447,8 @@ static class Exporter_For_NextJs_with_Tailwind
                 var (success, name, value) = TryParsePropertyValue(styleItem);
                 if (success)
                 {
+                    var isValueDouble = double.TryParse(value, out var valueAsDouble);
+                    
                     switch (name)
                     {
                         case "outline":
@@ -441,7 +473,12 @@ static class Exporter_For_NextJs_with_Tailwind
                                 continue;
                             }
 
-                            classNames.Add($"w-[{value}px]");
+                            if (isValueDouble)
+                            {
+                                value = valueAsDouble.AsPixel();
+                            }
+
+                            classNames.Add($"w-[{value}]");
                             continue;
                         }
 
@@ -459,8 +496,13 @@ static class Exporter_For_NextJs_with_Tailwind
                                 classNames.Add("h-fit");
                                 continue;
                             }
+                            
+                            if (isValueDouble)
+                            {
+                                value = valueAsDouble.AsPixel();
+                            }
 
-                            classNames.Add($"h-[{value}px]");
+                            classNames.Add($"h-[{value}]");
                             continue;
                         }
 
@@ -688,6 +730,11 @@ static class Exporter_For_NextJs_with_Tailwind
         return injectedFileContent;
     }
 
+    static readonly CultureInfo CultureInfo_en_US = new ("en-US");
+    static string AsPixel(this double value)
+    {
+        return value.ToString(CultureInfo_en_US)+"px";
+    }
     class IO
     {
         public static async Task<Result<string[]>> TryReadFile(string filePath)
