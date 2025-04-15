@@ -561,7 +561,7 @@ static class Exporter_For_NextJs_with_Tailwind
             return designerStyleItem;
         }
 
-        public static string ConvertToTailwindClass(string name, string value)
+        static string ConvertToTailwindClass(string name, string value)
         {
             if (value is null)
             {
