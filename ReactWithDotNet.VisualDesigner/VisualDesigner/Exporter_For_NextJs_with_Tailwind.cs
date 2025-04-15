@@ -6,6 +6,8 @@ namespace ReactWithDotNet.VisualDesigner.Models;
 
 static class Exporter_For_NextJs_with_Tailwind
 {
+    static readonly CultureInfo CultureInfo_en_US = new("en-US");
+
     public static async Task<Result> Export(ApplicationState state)
     {
         var result = await CalculateExportInfo(state);
@@ -17,6 +19,11 @@ static class Exporter_For_NextJs_with_Tailwind
         var (filePath, fileContent) = result.Value;
 
         return await IO.TryWriteToFile(filePath, fileContent);
+    }
+
+    static string AsPixel(this double value)
+    {
+        return value.ToString(CultureInfo_en_US) + "px";
     }
 
     static async Task<IReadOnlyList<string>> CalculateElementTreeTsxCodes(ComponentEntity component, string userName)
@@ -301,32 +308,27 @@ static class Exporter_For_NextJs_with_Tailwind
                 element.Properties.Add("alt: ?");
             }
 
-           
-           
-            
             var sizeProperty = element.Properties.FirstOrDefault(x => x.Contains("size:"));
             if (sizeProperty is not null)
             {
                 element.Properties.Remove(sizeProperty);
-                
-                element.Properties.Add(sizeProperty.Replace("size:","width:"));
-                
-                element.Properties.Add(sizeProperty.Replace("size:","height:"));
+
+                element.Properties.Add(sizeProperty.Replace("size:", "width:"));
+
+                element.Properties.Add(sizeProperty.Replace("size:", "height:"));
             }
             else
             {
                 var hasNoWidthDecleration = element.Properties.Any(x => x.Contains("w:") || x.Contains("width:")) is false;
                 var hasNoHeightDecleration = element.Properties.Any(x => x.Contains("h:") || x.Contains("height:")) is false;
                 var hasNoFilltDecleration = element.Properties.Any(x => x.Contains("fill:")) is false;
-            
-                if ( hasNoWidthDecleration && hasNoHeightDecleration && hasNoFilltDecleration)
+
+                if (hasNoWidthDecleration && hasNoHeightDecleration && hasNoFilltDecleration)
                 {
                     element.Properties.Add("fill: {true}");
                 }
             }
 
-
-            
             // try to add width and height to default style
             {
                 // width
@@ -337,7 +339,7 @@ static class Exporter_For_NextJs_with_Tailwind
                         var defaultStyle = element.StyleGroups.FirstOrDefault(x => x.Condition == "*");
                         if (defaultStyle is null)
                         {
-                            element.StyleGroups.Add(new() {Condition = "*", Items = [$"width: {propertyValue}"]});
+                            element.StyleGroups.Add(new() { Condition = "*", Items = [$"width: {propertyValue}"] });
                         }
                         else
                         {
@@ -348,7 +350,7 @@ static class Exporter_For_NextJs_with_Tailwind
                         }
                     }
                 }
-                
+
                 // height
                 {
                     var propertyValue = element.Properties.TryGetPropertyValue("height", "h");
@@ -357,7 +359,7 @@ static class Exporter_For_NextJs_with_Tailwind
                         var defaultStyle = element.StyleGroups.FirstOrDefault(x => x.Condition == "*");
                         if (defaultStyle is null)
                         {
-                            element.StyleGroups.Add(new() {Condition = "*", Items = [$"height: {propertyValue}"]});
+                            element.StyleGroups.Add(new() { Condition = "*", Items = [$"height: {propertyValue}"] });
                         }
                         else
                         {
@@ -466,13 +468,13 @@ static class Exporter_For_NextJs_with_Tailwind
                 foreach (var styleItem in styleGroup.Items)
                 {
                     var tailwindClassName = Css.ConvertDesignerStyleItemToTailwindClassName(styleItem);
-                    
+
                     classNames.Add(tailwindClassName);
                 }
-                
+
                 continue;
             }
-            
+
             throw new NotImplementedException($"Condition not handled: {styleGroup.Condition}");
         }
 
@@ -510,6 +512,42 @@ static class Exporter_For_NextJs_with_Tailwind
 
         return node;
     }
+
+    static string GetExportFolderPath()
+    {
+        return "C:\\github\\hopgogo\\web\\enduser-ui\\src\\components\\";
+    }
+
+    static string Indent(int indentLevel)
+    {
+        return new(' ', indentLevel * 4);
+    }
+
+    static Result<string> InjectRender(IReadOnlyList<string> fileContent, IReadOnlyList<string> linesToInject)
+    {
+        var lines = fileContent.ToList();
+
+        var firstReturnLineIndex = lines.FindIndex(l => l == "    return (");
+        if (firstReturnLineIndex < 0)
+        {
+            return new InvalidOperationException("No return found");
+        }
+
+        var firstReturnCloseLineIndex = lines.FindIndex(firstReturnLineIndex, l => l == "    );");
+        if (firstReturnCloseLineIndex < 0)
+        {
+            return new InvalidOperationException("Return close not found");
+        }
+
+        lines.RemoveRange(firstReturnLineIndex + 1, firstReturnCloseLineIndex - firstReturnLineIndex - 1);
+
+        lines.InsertRange(firstReturnLineIndex + 1, linesToInject);
+
+        var injectedFileContent = string.Join(Environment.NewLine, lines);
+
+        return injectedFileContent;
+    }
+
     static class Css
     {
         public static string ConvertDesignerStyleItemToTailwindClassName(string designerStyleItem)
@@ -522,14 +560,14 @@ static class Exporter_For_NextJs_with_Tailwind
 
             return designerStyleItem;
         }
-        
+
         public static string ConvertToTailwindClass(string name, string value)
         {
             if (value is null)
             {
                 throw new ArgumentNullException(nameof(value));
             }
-            
+
             var isValueDouble = double.TryParse(value, out var valueAsDouble);
 
             switch (name)
@@ -640,7 +678,6 @@ static class Exporter_For_NextJs_with_Tailwind
                 case "border-right-width":
                     return $"border-r-[{value}px]";
 
-
                 case "border-top":
                 case "border-right":
                 case "border-left":
@@ -668,13 +705,10 @@ static class Exporter_For_NextJs_with_Tailwind
                         return $"border-{directionShortName}-[{parts[0]}]" +
                                $"[border-{direction}-style:{parts[1]}]" +
                                $"[border-{direction}-color:{parts[2]}]";
-
-
                     }
 
                     throw new ArgumentOutOfRangeException(direction);
                 }
-
 
                 case "pr":
                     return $"pr-[{value}px]";
@@ -696,7 +730,6 @@ static class Exporter_For_NextJs_with_Tailwind
                     }
 
                     return $"text-[{value}]";
-
                 }
                 case "gap":
                     return $"gap-[{value}px]";
@@ -739,14 +772,11 @@ static class Exporter_For_NextJs_with_Tailwind
                         {
                             return "border" +
                                    $"border-[{parts[2]}]";
-
                         }
 
                         return $"border-[{parts[0]}]" +
                                $"border-[{parts[1]}]" +
                                $"border-[{parts[2]}]";
-
-
                     }
 
                     break;
@@ -760,56 +790,15 @@ static class Exporter_For_NextJs_with_Tailwind
                     }
 
                     return $"bg-[{value}]";
-
                 }
                 case "position":
                     return $"{value}";
-
             }
 
             throw new InvalidOperationException($"Css not handled. {name}: {value}");
         }
     }
-    static string GetExportFolderPath()
-    {
-        return "C:\\github\\hopgogo\\web\\enduser-ui\\src\\components\\";
-    }
 
-    static string Indent(int indentLevel)
-    {
-        return new(' ', indentLevel * 4);
-    }
-
-    static Result<string> InjectRender(IReadOnlyList<string> fileContent, IReadOnlyList<string> linesToInject)
-    {
-        var lines = fileContent.ToList();
-
-        var firstReturnLineIndex = lines.FindIndex(l => l == "    return (");
-        if (firstReturnLineIndex < 0)
-        {
-            return new InvalidOperationException("No return found");
-        }
-
-        var firstReturnCloseLineIndex = lines.FindIndex(firstReturnLineIndex, l => l == "    );");
-        if (firstReturnCloseLineIndex < 0)
-        {
-            return new InvalidOperationException("Return close not found");
-        }
-
-        lines.RemoveRange(firstReturnLineIndex + 1, firstReturnCloseLineIndex - firstReturnLineIndex - 1);
-
-        lines.InsertRange(firstReturnLineIndex + 1, linesToInject);
-
-        var injectedFileContent = string.Join(Environment.NewLine, lines);
-
-        return injectedFileContent;
-    }
-
-    static readonly CultureInfo CultureInfo_en_US = new ("en-US");
-    static string AsPixel(this double value)
-    {
-        return value.ToString(CultureInfo_en_US)+"px";
-    }
     class IO
     {
         public static async Task<Result<string[]>> TryReadFile(string filePath)
