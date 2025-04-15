@@ -605,13 +605,13 @@ static class Exporter_For_NextJs_with_Tailwind
                 if(conditionalValue.success)
                 {
                     var lefTailwindClass = ConvertToTailwindClass(name, conditionalValue.left);
-                    string rightTailwindClass = "''";
+                    string rightTailwindClass = "";
                     if (conditionalValue.right.HasValue())
                     {
                         rightTailwindClass = ConvertToTailwindClass(name, conditionalValue.right);
                     }
 
-                    return '{' + $"${conditionalValue.condition} ? {lefTailwindClass} : {rightTailwindClass}" + '}';
+                    return "${" + $"{ClearConnectedValue(conditionalValue.condition)} ? '{lefTailwindClass}' : '{rightTailwindClass}'" + '}';
                 }
             }
 
@@ -817,6 +817,16 @@ static class Exporter_For_NextJs_with_Tailwind
                 case "font-size":
                     return $"[font-size:{value}px]";
 
+                case "border-width":
+                {
+                    if (isValueDouble)
+                    {
+                        value = valueAsDouble.AsPixel();
+                    }
+                    
+                    return $"[border-[{value}]";
+                }
+
                 case "border":
                 {
                     var parts = value.Split(' ', StringSplitOptions.RemoveEmptyEntries);
@@ -852,6 +862,11 @@ static class Exporter_For_NextJs_with_Tailwind
                 }
                 case "position":
                     return $"{value}";
+
+                case "border-style":
+                {
+                    return $"border-{value}";
+                }
             }
 
             throw new InvalidOperationException($"Css not handled. {name}: {value}");
