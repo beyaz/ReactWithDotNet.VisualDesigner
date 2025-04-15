@@ -605,7 +605,7 @@ static class Exporter_For_NextJs_with_Tailwind
                 if(conditionalValue.success)
                 {
                     var lefTailwindClass = ConvertToTailwindClass(name, conditionalValue.left);
-                    string rightTailwindClass = null;
+                    string rightTailwindClass = "''";
                     if (conditionalValue.right.HasValue())
                     {
                         rightTailwindClass = ConvertToTailwindClass(name, conditionalValue.right);
