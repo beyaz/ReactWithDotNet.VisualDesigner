@@ -47,8 +47,6 @@ public sealed class ApplicationState
     
     public bool IsProjectSettingsPopupVisible { get; set; }
     
-    public bool IsActionButtonsVisible { get; set; }
-
     public required ApplicationSelectionState Selection { get; set; }
     
     public string UserName { get; init; }

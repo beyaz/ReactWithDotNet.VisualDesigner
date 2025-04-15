@@ -37,8 +37,6 @@ sealed class ApplicationView : Component<ApplicationState>
             {
                 state = userLastState;
 
-                state.IsActionButtonsVisible = false;
-
                 return;
             }
         }
@@ -49,8 +47,6 @@ sealed class ApplicationView : Component<ApplicationState>
             if (lastUsage is not null)
             {
                 state = DeserializeFromJson<ApplicationState>(lastUsage.StateAsJson);
-
-                state.IsActionButtonsVisible = false;
 
                 return;
             }
@@ -293,16 +289,14 @@ sealed class ApplicationView : Component<ApplicationState>
             {
                 await PartLeftPanel() + BorderBottomLeftRadius(8) + OverflowAuto,
 
-                new FlexColumn(FlexGrow(1), Padding(7),  OverflowXAuto)
+                new FlexColumn(FlexGrow(1), Padding(7), OverflowXAuto)
                 {
                     Ruler.HorizontalRuler(state.Preview.Width, state.Preview.Scale) + Width(state.Preview.Width) + MarginTop(12) + PaddingLeft(30),
                     new FlexRow(SizeFull, Width(state.Preview.Width))
                     {
-                        Ruler.VerticleRuler(state.Preview.Scale), 
+                        Ruler.VerticleRuler(state.Preview.Scale),
                         PartPreview
                     }
-                    
-                    
                 },
 
                 await PartRightPanel() + BorderBottomRightRadius(8)
@@ -345,20 +339,23 @@ sealed class ApplicationView : Component<ApplicationState>
                 SpaceX(8),
                 new FlexRowCentered
                 {
-                    OnMouseEnter(ToggleIsActionButtonsVisible), OnMouseLeave(ToggleIsActionButtonsVisible),
-
                     new FlexRowCentered(Gap(16), Border(1, solid, Theme.BorderColor), BorderRadius(4), PaddingX(8))
                     {
                         PositionRelative,
                         new label(PositionAbsolute, Top(-4), Left(8), FontSize10, LineHeight7, Background(Theme.BackgroundColor), PaddingX(4)) { "Component" },
-
-                        state.IsActionButtonsVisible is false ? VisibilityHidden : null,
 
                         new FlexRowCentered(Hover(Color(Blue300)))
                         {
                             "Rollback",
                             OnClick(_ =>
                             {
+                                if (state.ComponentName.HasNoValue())
+                                {
+                                    this.FailNotification("Select any component.");
+
+                                    return Task.CompletedTask;
+                                }
+
                                 this.SuccessNotification("Rollback ok");
 
                                 return Task.CompletedTask;
@@ -370,10 +367,17 @@ sealed class ApplicationView : Component<ApplicationState>
                             "Commit",
                             OnClick(async _ =>
                             {
+                                if (state.ComponentName.HasNoValue())
+                                {
+                                    this.FailNotification("Select any component.");
+
+                                    return;
+                                }
+
                                 var result = await CommitComponent(state);
                                 if (result.HasError)
                                 {
-                                    this.SuccessNotification(result.Error.Message);
+                                    this.FailNotification(result.Error.Message);
 
                                     return;
                                 }
@@ -387,6 +391,13 @@ sealed class ApplicationView : Component<ApplicationState>
                             "Export",
                             OnClick(async _ =>
                             {
+                                if (state.ComponentName.HasNoValue())
+                                {
+                                    this.FailNotification("Select any component.");
+
+                                    return;
+                                }
+
                                 var result = await Exporter_For_NextJs_with_Tailwind.Export(state);
                                 if (result.HasError)
                                 {
@@ -720,7 +731,6 @@ sealed class ApplicationView : Component<ApplicationState>
             BackgroundImage("radial-gradient(#a5a8ed 0.5px, #f8f8f8 0.5px)"),
             BackgroundSize("10px 10px"),
 
-            
             createElement(),
 
             Width(state.Preview.Width),
@@ -1337,14 +1347,6 @@ sealed class ApplicationView : Component<ApplicationState>
         {
             VisualElementTreeItemPath = state.Selection.VisualElementTreeItemPath
         };
-
-        return Task.CompletedTask;
-    }
-
-    [StopPropagation]
-    Task ToggleIsActionButtonsVisible(MouseEvent _)
-    {
-        state.IsActionButtonsVisible = !state.IsActionButtonsVisible;
 
         return Task.CompletedTask;
     }
