@@ -469,8 +469,11 @@ static class Exporter_For_NextJs_with_Tailwind
                     
                     classNames.Add(tailwindClassName);
                 }
+                
+                continue;
             }
             
+            throw new NotImplementedException($"Condition not handled: {styleGroup.Condition}");
         }
 
         if (classNames.Any())
