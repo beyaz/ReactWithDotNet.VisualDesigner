@@ -584,8 +584,13 @@ static class Exporter_For_NextJs_with_Tailwind
                             classNames.Add($"border-r-[{value}px]");
                             continue;
 
+                        case "border-top":
+                        case "border-right":
+                        case "border-left":
                         case "border-bottom":
                         {
+                            var direction = name.Split('-', StringSplitOptions.RemoveEmptyEntries).Last();
+                            
                             var parts = value.Split(' ', StringSplitOptions.RemoveEmptyEntries);
                             if (parts.Length == 3)
                             {
@@ -593,13 +598,24 @@ static class Exporter_For_NextJs_with_Tailwind
                                 {
                                     parts[2] = htmlColor;
                                 }
+
+                                var directionShortName = direction switch
+                                {
+                                    "top"    => "t",
+                                    "bottom" => "b",
+                                    "right"  => "r",
+                                    "left"   => "l",
+                                    _        => throw new ArgumentOutOfRangeException(direction)
+                                };
+
+                                classNames.Add($"border-{directionShortName}-[{parts[0]}]");
+                                classNames.Add($"[border-{direction}-style:{parts[1]}]");
+                                classNames.Add($"[border-{direction}-color:{parts[2]}]");
                                 
-                                classNames.Add($"border-b-[{parts[0]}]");
-                                classNames.Add($"[border-bottom-style:{parts[1]}]");
-                                classNames.Add($"[border-bottom-color:{parts[2]}]");
+                                continue;
                             }
-                            
-                            continue;
+
+                            throw new ArgumentOutOfRangeException(direction);
                         }
                             
                         
