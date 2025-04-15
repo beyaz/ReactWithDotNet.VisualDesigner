@@ -1,6 +1,7 @@
 ﻿using System.Globalization;
 using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace ReactWithDotNet.VisualDesigner.Models;
 
@@ -291,6 +292,8 @@ static class Exporter_For_NextJs_with_Tailwind
 
         List<string> classNames = [];
 
+        var classNameShouldBeTemplateLiteral = false;
+
         // Open tag
         var tag = element.Tag;
 
@@ -468,6 +471,10 @@ static class Exporter_For_NextJs_with_Tailwind
                 foreach (var styleItem in styleGroup.Items)
                 {
                     var tailwindClassName = Css.ConvertDesignerStyleItemToTailwindClassName(styleItem);
+                    if (tailwindClassName.StartsWith("${"))
+                    {
+                        classNameShouldBeTemplateLiteral = true;
+                    }
 
                     classNames.Add(tailwindClassName);
                 }
@@ -480,7 +487,9 @@ static class Exporter_For_NextJs_with_Tailwind
 
         if (classNames.Any())
         {
-            node.Properties.Add(new() { Name = "className", Value = '"' + string.Join(" ", classNames) + '"' });
+            var firstLastChar= classNameShouldBeTemplateLiteral ? "`" : "\"";
+            
+            node.Properties.Add(new() { Name = "className", Value = firstLastChar + string.Join(" ", classNames) + firstLastChar });
         }
 
         var hasSelfClose = element.Children.Count == 0 && element.Text.HasNoValue();
@@ -548,6 +557,28 @@ static class Exporter_For_NextJs_with_Tailwind
         return injectedFileContent;
     }
 
+    static class TextParser
+    {
+        public static (bool success, string condition, string left, string right) TryParseConditionalValue(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                return (false, null, null, null);
+
+            // condition ? left : right  (right opsiyonel)
+            var pattern = @"^\s*(?<condition>[^?]+?)\s*\?\s*(?<left>[^:]+?)\s*(?::\s*(?<right>.+))?$";
+            var match = Regex.Match(value, pattern);
+
+            if (match.Success)
+            {
+                var condition = match.Groups["condition"].Value.Trim();
+                var left = match.Groups["left"].Value.Trim();
+                var right = match.Groups["right"].Success ? match.Groups["right"].Value.Trim() : null;
+                return (true, condition, left, right);
+            }
+
+            return (false, null, null, null);
+        }
+    }
     static class Css
     {
         public static string ConvertDesignerStyleItemToTailwindClassName(string designerStyleItem)
@@ -566,6 +597,22 @@ static class Exporter_For_NextJs_with_Tailwind
             if (value is null)
             {
                 throw new ArgumentNullException(nameof(value));
+            }
+
+            // check is conditional sample: border-width: {props.isSelected} ? 2 : 5
+            {
+                var conditionalValue = TextParser.TryParseConditionalValue(value);
+                if(conditionalValue.success)
+                {
+                    var lefTailwindClass = ConvertToTailwindClass(name, conditionalValue.left);
+                    string rightTailwindClass = null;
+                    if (conditionalValue.right.HasValue())
+                    {
+                        rightTailwindClass = ConvertToTailwindClass(name, conditionalValue.right);
+                    }
+
+                    return '{' + $"${conditionalValue.condition} ? {lefTailwindClass} : {rightTailwindClass}" + '}';
+                }
             }
 
             var isValueDouble = double.TryParse(value, out var valueAsDouble);
@@ -677,6 +724,8 @@ static class Exporter_For_NextJs_with_Tailwind
 
                 case "border-right-width":
                     return $"border-r-[{value}px]";
+                
+               
 
                 case "border-top":
                 case "border-right":
@@ -731,6 +780,16 @@ static class Exporter_For_NextJs_with_Tailwind
 
                     return $"text-[{value}]";
                 }
+
+                case "border-color":
+                {                  
+                    if (Project.Colors.TryGetValue(value, out var htmlColor))
+                    {
+                        value = htmlColor;
+                    }
+                    return $"border-[{value}]";
+                }
+                
                 case "gap":
                     return $"gap-[{value}px]";
 
