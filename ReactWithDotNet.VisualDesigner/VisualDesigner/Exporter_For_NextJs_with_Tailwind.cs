@@ -852,12 +852,12 @@ static class Exporter_For_NextJs_with_Tailwind
 
                         if (parts[0] == "1px" && parts[1] == "solid")
                         {
-                            return "border" +
+                            return "border " +
                                    $"border-[{parts[2]}]";
                         }
 
-                        return $"border-[{parts[0]}]" +
-                               $"border-[{parts[1]}]" +
+                        return $"border-[{parts[0]}] " +
+                               $"border-[{parts[1]}] " +
                                $"border-[{parts[2]}]";
                     }
 

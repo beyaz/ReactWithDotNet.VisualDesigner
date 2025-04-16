@@ -71,7 +71,8 @@ sealed class ApplicationPreview : Component
                 UserName           = userName,
                 OnTreeItemClicked  = OnItemClick,
                 ReactContext       = Context,
-                HighlightedElement = highlightedElement
+                HighlightedElement = highlightedElement,
+                ParentModel        = null
             };
             var result = await renderElement(renderContext, rootElement, "0");
             if (result.HasError)
@@ -129,7 +130,7 @@ sealed class ApplicationPreview : Component
 
                     root.Children.AddRange(model.Children);
 
-                    return await renderElement(context with { Parent = context }, root, path);
+                    return await renderElement(context with { Parent = context, ParentModel = model }, root, path);
                 }
             }
 
@@ -144,6 +145,51 @@ sealed class ApplicationPreview : Component
             if (model.Text.HasValue())
             {
                 element.text = model.Text;
+
+                if (context.ParentModel is not null)
+                {
+                    foreach (var property in model.Properties)
+                    {
+                        string bindPropertyValue;
+                        {
+                            var (success, name, value) = TryParsePropertyValue(property);
+                            if (!success)
+                            {
+                                continue;
+                            }
+
+                            if (name != "-bind")
+                            {
+                                continue;
+                            }
+
+                            bindPropertyValue = value;
+                        }
+
+                        foreach (var componentProperty in context.ParentModel.Properties)
+                        {
+                            string name, value;
+                            {
+                                var result = TryParsePropertyValue(componentProperty);
+                                if (!result.success)
+                                {
+                                    continue;
+                                }
+
+                                name  = result.name;
+                                value = result.value;
+                            }
+
+                            if (ClearConnectedValue(bindPropertyValue) == $"props.{name}")
+                            {
+                                if (ClearConnectedValue(value).StartsWith("'"))
+                                {
+                                    element.text = ClearConnectedValue(value).RemoveFromStart("'").RemoveFromEnd("'");
+                                }
+                            }
+                        }
+                    }
+                }
             }
 
             foreach (var property in model.Properties)
@@ -809,6 +855,8 @@ sealed class ApplicationPreview : Component
         public required MouseEventHandler OnTreeItemClicked { get; init; }
 
         public RenderContext Parent { get; init; }
+
+        public required VisualElementModel ParentModel { get; init; }
 
         public required int ProjectId { get; init; }
 
