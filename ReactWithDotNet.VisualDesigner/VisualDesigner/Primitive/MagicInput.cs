@@ -126,7 +126,7 @@ sealed class MagicInput : Component<MagicInput.State>
         return Task.CompletedTask;
     }
 
-    [KeyboardEventCallOnly("ArrowDown", "ArrowUp", "Enter", "ArrowRight")]
+    [KeyboardEventCallOnly("ArrowDown", "ArrowUp", "Enter", "CTRL+ArrowRight")]
     Task OnKeyDown(KeyboardEvent e)
     {
         if (state.ShowSuggestions is false)

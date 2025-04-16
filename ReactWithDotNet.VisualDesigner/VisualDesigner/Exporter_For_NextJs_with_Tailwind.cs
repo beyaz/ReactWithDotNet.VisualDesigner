@@ -824,7 +824,20 @@ static class Exporter_For_NextJs_with_Tailwind
                         value = valueAsDouble.AsPixel();
                     }
                     
-                    return $"[border-[{value}]";
+                    return $"border-[{value}]";
+                }
+                
+                case "ml":
+                case "mr":
+                case "mb":
+                case "mt":
+                {
+                    if (isValueDouble)
+                    {
+                        value = valueAsDouble.AsPixel();
+                    }
+                    
+                    return $"[{name}-[{value}]";
                 }
 
                 case "border":
@@ -866,6 +879,11 @@ static class Exporter_For_NextJs_with_Tailwind
                 case "border-style":
                 {
                     return $"border-{value}";
+                }
+                
+                case "cursor":
+                {
+                    return $"cursor-{value}";
                 }
             }
 
