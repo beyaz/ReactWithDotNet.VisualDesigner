@@ -100,8 +100,8 @@ static class Exporter_For_NextJs_with_Tailwind
             throw new ArgumentNullException(nameof(nodeTag));
         }
 
-        var showIf = node.Properties.FirstOrDefault(x => x.Name is "show-if");
-        var hideIf = node.Properties.FirstOrDefault(x => x.Name is "hide-if");
+        var showIf = node.Properties.FirstOrDefault(x => x.Name is "-show-if");
+        var hideIf = node.Properties.FirstOrDefault(x => x.Name is "-hide-if");
 
         if (showIf is not null)
         {

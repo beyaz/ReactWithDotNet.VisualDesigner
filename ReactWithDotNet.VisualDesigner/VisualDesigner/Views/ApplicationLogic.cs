@@ -246,6 +246,9 @@ static class ApplicationLogic
         
         items.Add("-items-source-design-time-count: 3");
         items.Add("-items-source: {state.userList}");
+        items.Add("-bind: {state.userList}");
+        items.Add("-show-if: {state.isSelectedUser}");
+        items.Add("-hide-if: {state.isSelectedUser}");
 
 
         items.AddRange(GetPropsSuggestions(state));
