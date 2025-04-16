@@ -402,7 +402,7 @@ static class Exporter_For_NextJs_with_Tailwind
                     continue;
                 }
 
-                if (IsConnectedValue(value) || value.StartsWith("props.") || value.StartsWith("state."))
+                if (IsConnectedValue(value) || value.StartsWith("props.") || value.StartsWith("state.") || IsStringValue(value))
                 {
                     node.Properties.Add(new() { Name = name, Value = value });
                     continue;

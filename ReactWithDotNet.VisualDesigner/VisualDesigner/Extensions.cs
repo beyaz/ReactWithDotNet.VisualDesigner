@@ -483,6 +483,16 @@ static class Extensions
         return value.StartsWith("{") && value.EndsWith("}");
     }
     
+    public static bool IsStringValue(string value)
+    {
+        if (value is null)
+        {
+            return false;
+        }
+
+        return (value.StartsWith("'") && value.EndsWith("'")) || (value.StartsWith("\"") && value.EndsWith("\""));
+    }
+    
     public static string ClearConnectedValue(string value) => value.RemoveFromStart("{").RemoveFromEnd("}");
     
     /// <summary>
@@ -541,7 +551,7 @@ static class Extensions
         return
         [
             FontFamily("'Wix Madefor Text', sans-serif"),
-            FontSize(13),
+            FontSize(12),
             LetterSpacingNormal
         ];
     }
