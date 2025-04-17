@@ -38,6 +38,7 @@ static class Exporter_For_NextJs_with_Tailwind
             {
                 return result.Error;
             }
+
             rootNode = result.Value;
         }
 
@@ -79,6 +80,7 @@ static class Exporter_For_NextJs_with_Tailwind
                 {
                     return result.Error;
                 }
+
                 linesToInject = result.Value;
             }
 
@@ -133,7 +135,7 @@ static class Exporter_For_NextJs_with_Tailwind
                 {
                     return result.Error;
                 }
-                
+
                 innerLines = result.Value;
             }
 
@@ -159,7 +161,7 @@ static class Exporter_For_NextJs_with_Tailwind
                 {
                     return result.Error;
                 }
-                
+
                 innerLines = result.Value;
             }
 
@@ -194,7 +196,7 @@ static class Exporter_For_NextJs_with_Tailwind
                     {
                         return result.Error;
                     }
-                
+
                     innerLines = result.Value;
                 }
                 lines.AddRange(innerLines);
@@ -328,7 +330,7 @@ static class Exporter_For_NextJs_with_Tailwind
 
                 childTsx = result.Value;
             }
-            
+
             lines.AddRange(childTsx);
         }
 
@@ -522,7 +524,17 @@ static class Exporter_For_NextJs_with_Tailwind
             {
                 foreach (var styleItem in styleGroup.Items)
                 {
-                    var tailwindClassName = Css.ConvertDesignerStyleItemToTailwindClassName(styleItem);
+                    string tailwindClassName;
+                    {
+                        var result = Css.ConvertDesignerStyleItemToTailwindClassName(styleItem);
+                        if (result.HasError)
+                        {
+                            return result.Error;
+                        }
+
+                        tailwindClassName = result.Value;
+                    }
+
                     if (tailwindClassName.StartsWith("${"))
                     {
                         classNameShouldBeTemplateLiteral = true;
@@ -534,13 +546,13 @@ static class Exporter_For_NextJs_with_Tailwind
                 continue;
             }
 
-            return  new NotImplementedException($"Condition not handled: {styleGroup.Condition}");
+            return new NotImplementedException($"Condition not handled: {styleGroup.Condition}");
         }
 
         if (classNames.Any())
         {
-            var firstLastChar= classNameShouldBeTemplateLiteral ? "`" : "\"";
-            
+            var firstLastChar = classNameShouldBeTemplateLiteral ? "`" : "\"";
+
             node.Properties.Add(new() { Name = "className", Value = firstLastChar + string.Join(" ", classNames) + firstLastChar });
         }
 
@@ -573,6 +585,7 @@ static class Exporter_For_NextJs_with_Tailwind
                 {
                     return result.Error;
                 }
+
                 childNode = result.Value;
             }
 
@@ -617,31 +630,9 @@ static class Exporter_For_NextJs_with_Tailwind
         return injectedFileContent;
     }
 
-    static class TextParser
-    {
-        public static (bool success, string condition, string left, string right) TryParseConditionalValue(string value)
-        {
-            if (string.IsNullOrWhiteSpace(value))
-                return (false, null, null, null);
-
-            // condition ? left : right  (right opsiyonel)
-            var pattern = @"^\s*(?<condition>[^?]+?)\s*\?\s*(?<left>[^:]+?)\s*(?::\s*(?<right>.+))?$";
-            var match = Regex.Match(value, pattern);
-
-            if (match.Success)
-            {
-                var condition = match.Groups["condition"].Value.Trim();
-                var left = match.Groups["left"].Value.Trim();
-                var right = match.Groups["right"].Success ? match.Groups["right"].Value.Trim() : null;
-                return (true, condition, left, right);
-            }
-
-            return (false, null, null, null);
-        }
-    }
     static class Css
     {
-        public static string ConvertDesignerStyleItemToTailwindClassName(string designerStyleItem)
+        public static Result<string> ConvertDesignerStyleItemToTailwindClassName(string designerStyleItem)
         {
             var (success, name, value) = TryParsePropertyValue(designerStyleItem);
             if (success)
@@ -652,23 +643,31 @@ static class Exporter_For_NextJs_with_Tailwind
             return designerStyleItem;
         }
 
-        static string ConvertToTailwindClass(string name, string value)
+        static Result<string> ConvertToTailwindClass(string name, string value)
         {
             if (value is null)
             {
-                throw new ArgumentNullException(nameof(value));
+                return new ArgumentNullException(nameof(value));
             }
 
             // check is conditional sample: border-width: {props.isSelected} ? 2 : 5
             {
                 var conditionalValue = TextParser.TryParseConditionalValue(value);
-                if(conditionalValue.success)
+                if (conditionalValue.success)
                 {
                     var lefTailwindClass = ConvertToTailwindClass(name, conditionalValue.left);
-                    string rightTailwindClass = "";
+                    var rightTailwindClass = "";
                     if (conditionalValue.right.HasValue())
                     {
-                        rightTailwindClass = ConvertToTailwindClass(name, conditionalValue.right);
+                        {
+                            var result = ConvertToTailwindClass(name, conditionalValue.right);
+                            if (result.HasError)
+                            {
+                                return result.Error;
+                            }
+
+                            rightTailwindClass = result.Value;
+                        }
                     }
 
                     return "${" + $"{ClearConnectedValue(conditionalValue.condition)} ? '{lefTailwindClass}' : '{rightTailwindClass}'" + '}';
@@ -784,8 +783,6 @@ static class Exporter_For_NextJs_with_Tailwind
 
                 case "border-right-width":
                     return $"border-r-[{value}px]";
-                
-               
 
                 case "border-top":
                 case "border-right":
@@ -808,15 +805,20 @@ static class Exporter_For_NextJs_with_Tailwind
                             "bottom" => "b",
                             "right"  => "r",
                             "left"   => "l",
-                            _        => throw new ArgumentOutOfRangeException(direction)
+                            _        => null
                         };
+
+                        if (directionShortName is null)
+                        {
+                            return new ArgumentOutOfRangeException(direction);
+                        }
 
                         return $"border-{directionShortName}-[{parts[0]}]" +
                                $"[border-{direction}-style:{parts[1]}]" +
                                $"[border-{direction}-color:{parts[2]}]";
                     }
 
-                    throw new ArgumentOutOfRangeException(direction);
+                    return new ArgumentOutOfRangeException(direction);
                 }
 
                 case "pr":
@@ -842,14 +844,15 @@ static class Exporter_For_NextJs_with_Tailwind
                 }
 
                 case "border-color":
-                {                  
+                {
                     if (Project.Colors.TryGetValue(value, out var htmlColor))
                     {
                         value = htmlColor;
                     }
+
                     return $"border-[{value}]";
                 }
-                
+
                 case "gap":
                     return $"gap-[{value}px]";
 
@@ -883,10 +886,10 @@ static class Exporter_For_NextJs_with_Tailwind
                     {
                         value = valueAsDouble.AsPixel();
                     }
-                    
+
                     return $"border-[{value}]";
                 }
-                
+
                 case "ml":
                 case "mr":
                 case "mb":
@@ -896,7 +899,7 @@ static class Exporter_For_NextJs_with_Tailwind
                     {
                         value = valueAsDouble.AsPixel();
                     }
-                    
+
                     return $"[{name}-[{value}]";
                 }
 
@@ -940,14 +943,39 @@ static class Exporter_For_NextJs_with_Tailwind
                 {
                     return $"border-{value}";
                 }
-                
+
                 case "cursor":
                 {
                     return $"cursor-{value}";
                 }
             }
 
-            throw new InvalidOperationException($"Css not handled. {name}: {value}");
+            return new InvalidOperationException($"Css not handled. {name}: {value}");
+        }
+    }
+
+    static class TextParser
+    {
+        public static (bool success, string condition, string left, string right) TryParseConditionalValue(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return (false, null, null, null);
+            }
+
+            // condition ? left : right  (right opsiyonel)
+            var pattern = @"^\s*(?<condition>[^?]+?)\s*\?\s*(?<left>[^:]+?)\s*(?::\s*(?<right>.+))?$";
+            var match = Regex.Match(value, pattern);
+
+            if (match.Success)
+            {
+                var condition = match.Groups["condition"].Value.Trim();
+                var left = match.Groups["left"].Value.Trim();
+                var right = match.Groups["right"].Success ? match.Groups["right"].Value.Trim() : null;
+                return (true, condition, left, right);
+            }
+
+            return (false, null, null, null);
         }
     }
 
