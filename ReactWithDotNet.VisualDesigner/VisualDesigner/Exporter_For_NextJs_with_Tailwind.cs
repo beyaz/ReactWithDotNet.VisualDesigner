@@ -27,7 +27,7 @@ static class Exporter_For_NextJs_with_Tailwind
         return value.ToString(CultureInfo_en_US) + "px";
     }
 
-    static async Task<IReadOnlyList<string>> CalculateElementTreeTsxCodes(ComponentEntity component, string userName)
+    static async Task<Result<IReadOnlyList<string>>> CalculateElementTreeTsxCodes(ComponentEntity component, string userName)
     {
         var rootVisualElement = DeserializeFromJson<VisualElementModel>(component.RootElementAsJson ?? "");
 
@@ -64,7 +64,15 @@ static class Exporter_For_NextJs_with_Tailwind
                 fileContentInDirectory = result.Value;
             }
 
-            var linesToInject = await CalculateElementTreeTsxCodes(component, state.UserName);
+            IReadOnlyList<string> linesToInject;
+            {
+                var result = await CalculateElementTreeTsxCodes(component, state.UserName);
+                if (result.HasError)
+                {
+                    return result.Error;
+                }
+                linesToInject = result.Value;
+            }
 
             string injectedVersion;
             {
@@ -83,7 +91,7 @@ static class Exporter_For_NextJs_with_Tailwind
         return (filePath, fileNewContent);
     }
 
-    static IReadOnlyList<string> ConvertReactNodeModelToTsxCode(ReactNode node, ReactNode parentNode, int indentLevel)
+    static Result<IReadOnlyList<string>> ConvertReactNodeModelToTsxCode(ReactNode node, ReactNode parentNode, int indentLevel)
     {
         List<string> lines = [];
 
@@ -97,7 +105,7 @@ static class Exporter_For_NextJs_with_Tailwind
                 return lines;
             }
 
-            throw new ArgumentNullException(nameof(nodeTag));
+            return new ArgumentNullException(nameof(nodeTag));
         }
 
         var showIf = node.Properties.FirstOrDefault(x => x.Name is "-show-if");
@@ -110,7 +118,16 @@ static class Exporter_For_NextJs_with_Tailwind
             lines.Add($"{Indent(indentLevel)}{{{ClearConnectedValue(showIf.Value)} && (");
             indentLevel++;
 
-            var innerLines = ConvertReactNodeModelToTsxCode(node, parentNode, indentLevel);
+            IReadOnlyList<string> innerLines;
+            {
+                var result = ConvertReactNodeModelToTsxCode(node, parentNode, indentLevel);
+                if (result.HasError)
+                {
+                    return result.Error;
+                }
+                
+                innerLines = result.Value;
+            }
 
             lines.AddRange(innerLines);
 
@@ -127,7 +144,16 @@ static class Exporter_For_NextJs_with_Tailwind
             lines.Add($"{Indent(indentLevel)}{{!{ClearConnectedValue(hideIf.Value)} && (");
             indentLevel++;
 
-            var innerLines = ConvertReactNodeModelToTsxCode(node, parentNode, indentLevel);
+            IReadOnlyList<string> innerLines;
+            {
+                var result = ConvertReactNodeModelToTsxCode(node, parentNode, indentLevel);
+                if (result.HasError)
+                {
+                    return result.Error;
+                }
+                
+                innerLines = result.Value;
+            }
 
             lines.AddRange(innerLines);
 
@@ -153,10 +179,17 @@ static class Exporter_For_NextJs_with_Tailwind
                 lines.Add(Indent(indentLevel) + "return (");
                 indentLevel++;
 
+                IReadOnlyList<string> innerLines;
                 {
-                    var innerLines = ConvertReactNodeModelToTsxCode(node, parentNode, indentLevel);
-                    lines.AddRange(innerLines);
+                    var result = ConvertReactNodeModelToTsxCode(node, parentNode, indentLevel);
+                    if (result.HasError)
+                    {
+                        return result.Error;
+                    }
+                
+                    innerLines = result.Value;
                 }
+                lines.AddRange(innerLines);
 
                 indentLevel--;
                 lines.Add(Indent(indentLevel) + ");");
@@ -277,7 +310,18 @@ static class Exporter_For_NextJs_with_Tailwind
         // Add children
         foreach (var child in node.Children)
         {
-            lines.AddRange(ConvertReactNodeModelToTsxCode(child, node, indentLevel + 1));
+            IReadOnlyList<string> childTsx;
+            {
+                var result = ConvertReactNodeModelToTsxCode(child, node, indentLevel + 1);
+                if (result.HasError)
+                {
+                    return result.Error;
+                }
+
+                childTsx = result.Value;
+            }
+            
+            lines.AddRange(childTsx);
         }
 
         // Close tag

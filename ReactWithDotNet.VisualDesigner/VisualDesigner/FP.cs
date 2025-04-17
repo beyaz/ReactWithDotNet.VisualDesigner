@@ -13,6 +13,11 @@ public sealed class Result
     {
         return new() { HasError = true, Error = failInfo };
     }
+
+    public static Result<T> From<T>(T value)
+    {
+        return new() { Success = true, Value = value };
+    }
 }
 
 public sealed class Result<TValue>
