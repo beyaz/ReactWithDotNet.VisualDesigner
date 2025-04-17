@@ -31,7 +31,15 @@ static class Exporter_For_NextJs_with_Tailwind
     {
         var rootVisualElement = DeserializeFromJson<VisualElementModel>(component.RootElementAsJson ?? "");
 
-        var rootNode = await ConvertVisualElementModelToReactNodeModel((component, userName), rootVisualElement);
+        ReactNode rootNode;
+        {
+            var result = await ConvertVisualElementModelToReactNodeModel((component, userName), rootVisualElement);
+            if (result.HasError)
+            {
+                return result.Error;
+            }
+            rootNode = result.Value;
+        }
 
         return ConvertReactNodeModelToTsxCode(rootNode, null, 2);
     }
@@ -330,7 +338,7 @@ static class Exporter_For_NextJs_with_Tailwind
         return lines;
     }
 
-    static async Task<ReactNode> ConvertVisualElementModelToReactNodeModel((ComponentEntity component, string userName) context, VisualElementModel element)
+    static async Task<Result<ReactNode>> ConvertVisualElementModelToReactNodeModel((ComponentEntity component, string userName) context, VisualElementModel element)
     {
         var (component, userName) = context;
 
@@ -526,7 +534,7 @@ static class Exporter_For_NextJs_with_Tailwind
                 continue;
             }
 
-            throw new NotImplementedException($"Condition not handled: {styleGroup.Condition}");
+            return  new NotImplementedException($"Condition not handled: {styleGroup.Condition}");
         }
 
         if (classNames.Any())
@@ -558,7 +566,15 @@ static class Exporter_For_NextJs_with_Tailwind
         // Add children
         foreach (var child in element.Children)
         {
-            var childNode = await ConvertVisualElementModelToReactNodeModel(context, child);
+            ReactNode childNode;
+            {
+                var result = await ConvertVisualElementModelToReactNodeModel(context, child);
+                if (result.HasError)
+                {
+                    return result.Error;
+                }
+                childNode = result.Value;
+            }
 
             node.Children.Add(childNode);
         }
