@@ -520,6 +520,12 @@ sealed class ApplicationView : Component<ApplicationState>
 
                     return Task.CompletedTask;
                 },
+                OnHideInDesignerToggle = () =>
+                {
+                    CurrentVisualElement.HideInDesigner = !CurrentVisualElement.HideInDesigner;
+                    
+                    return Task.CompletedTask;
+                },
                 MouseLeave = () =>
                 {
                     state.Selection.VisualElementTreeItemPathHover = null;

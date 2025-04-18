@@ -810,13 +810,20 @@ sealed class ApplicationPreview : Component
                         childPath = path;
                     }
 
-                    var result = await renderElement(context, model.Children[i], childPath);
+                    var childModel = model.Children[i];
+                    
+                    var result = await renderElement(context, childModel, childPath);
                     if (result.HasError)
                     {
                         return result;
                     }
 
                     childElement = result.Value;
+
+                    if (childModel.HideInDesigner)
+                    {
+                        childElement.Add(DisplayNone);
+                    }
                 }
 
                 element.children.Add(childElement);

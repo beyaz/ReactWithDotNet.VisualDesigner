@@ -23,6 +23,9 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
     public OnTreeItemDelete OnDelete { get; init; }
     
     [CustomEvent]
+    public Func<Task> OnHideInDesignerToggle { get; init; }
+    
+    [CustomEvent]
     public OnTreeItemCopyPaste CopyPaste { get; init; }
     
     [CustomEvent]
@@ -331,6 +334,12 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
             foldIcon = null;
         }
 
+        Element eyeIcon = node.HideInDesigner ? new IconEyeClose() : new IconEyeOpen();
+        if (isSelected is false && node.HideInDesigner is false)
+        {
+            eyeIcon = null;
+        }
+
         var returnList = new List<Element>
         {
             new FlexColumn(PaddingLeft(indent * 16), Id(path), OnClick(OnTreeItemClicked), OnMouseEnter(OnMouseEnterHandler))
@@ -347,7 +356,13 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
 
                     new span { node.Tag },
 
-                    icon
+                    icon,
+
+                    new FlexRow(FlexGrow(1), JustifyContentFlexEnd, PaddingRight(8))
+                    {
+                        eyeIcon + Width(16) + Height(16) + When(isSelected, OnClick(Toggle_HideInDesigner))
+                    }
+                    
                 },
 
                 state.DragStartedTreeItemPath.HasNoValue() && isSelected ? Background(Blue100) + BorderRadius(3) : null,
@@ -383,6 +398,12 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
         return returnList;
     }
 
+    Task Toggle_HideInDesigner(MouseEvent e)
+    {
+        DispatchEvent(OnHideInDesignerToggle, []);
+        
+        return Task.CompletedTask;
+    }
 
     [KeyboardEventCallOnly("CTRL+c", "CTRL+v", "Delete")]
     Task On_Key_Down(KeyboardEvent e)
