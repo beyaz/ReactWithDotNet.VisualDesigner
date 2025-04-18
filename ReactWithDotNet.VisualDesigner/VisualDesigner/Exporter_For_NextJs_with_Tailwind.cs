@@ -948,6 +948,11 @@ static class Exporter_For_NextJs_with_Tailwind
                 {
                     return $"cursor-{value}";
                 }
+                
+                case "inset":
+                {
+                    return $"inset-{value}";
+                }
             }
 
             return new InvalidOperationException($"Css not handled. {name}: {value}");
