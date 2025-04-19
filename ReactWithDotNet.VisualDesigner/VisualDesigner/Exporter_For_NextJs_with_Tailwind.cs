@@ -182,10 +182,7 @@ static class Exporter_For_NextJs_with_Tailwind
 
                 lines.Add($"{Indent(indentLevel)}{{{ClearConnectedValue(itemsSource.Value)}.map((item, index) => {{");
                 indentLevel++;
-                lines.Add(Indent(indentLevel) + "const isFirst = index === 0;");
-                lines.Add(Indent(indentLevel) + $"const isLast = index === {ClearConnectedValue(itemsSource.Value)}.length - 1;");
 
-                lines.Add(string.Empty);
                 lines.Add(Indent(indentLevel) + "return (");
                 indentLevel++;
 
