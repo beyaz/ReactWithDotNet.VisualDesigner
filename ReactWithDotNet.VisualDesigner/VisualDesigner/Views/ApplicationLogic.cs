@@ -480,6 +480,11 @@ static class ApplicationLogic
 
                 var mainVersion = mainVersionResult.Value;
 
+                if (mainVersion is null)
+                {
+                    return new InvalidOperationException(state.ComponentName+" Main version cannot be null");
+                }
+
                 if (SerializeToJson(state.ComponentRootElement) == mainVersion.RootElementAsJson)
                 {
                     return Success;
