@@ -184,7 +184,7 @@ static class Exporter_For_NextJs_with_Tailwind
                 indentLevel++;
                 
                 
-                lines.Add($"{Indent(indentLevel)}{ClearConnectedValue(itemsSource.Value)}.map((item, index) =>");
+                lines.Add($"{Indent(indentLevel)}{ClearConnectedValue(itemsSource.Value)}.map((_item, _index) =>");
                 lines.Add($"{Indent(indentLevel)}{{");
                 indentLevel++;
 
