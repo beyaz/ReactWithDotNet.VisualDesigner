@@ -525,13 +525,35 @@ static class Exporter_For_NextJs_with_Tailwind
 
         foreach (var styleGroup in element.StyleGroups)
         {
-            if (styleGroup.Condition == "*")
+            foreach (var styleItem in styleGroup.Items)
             {
-                foreach (var styleItem in styleGroup.Items)
+                string tailwindClassName;
                 {
-                    string tailwindClassName;
+                    var result = Css.ConvertDesignerStyleItemToTailwindClassName(styleItem);
+                    if (result.HasError)
                     {
-                        var result = Css.ConvertDesignerStyleItemToTailwindClassName(styleItem);
+                        return result.Error;
+                    }
+
+                    tailwindClassName = result.Value;
+                }
+
+                if (tailwindClassName.StartsWith("${"))
+                {
+                    classNameShouldBeTemplateLiteral = true;
+                }
+
+                if (styleGroup.Condition == "*")
+                {
+                    classNames.Add(tailwindClassName);
+                    continue;
+                }
+                
+                if (styleGroup.Condition == "hover")
+                {
+                    if (Project.Styles.TryGetValue(tailwindClassName, out var css))
+                    {
+                        var result = Css.ConvertDesignerStyleItemToTailwindClassName(css);
                         if (result.HasError)
                         {
                             return result.Error;
@@ -539,19 +561,12 @@ static class Exporter_For_NextJs_with_Tailwind
 
                         tailwindClassName = result.Value;
                     }
-
-                    if (tailwindClassName.StartsWith("${"))
-                    {
-                        classNameShouldBeTemplateLiteral = true;
-                    }
-
-                    classNames.Add(tailwindClassName);
+                    classNames.Add("hover:" + tailwindClassName);
+                    continue;
                 }
-
-                continue;
+                
+                return new NotImplementedException($"Condition not handled: {styleGroup.Condition}");
             }
-
-            return new NotImplementedException($"Condition not handled: {styleGroup.Condition}");
         }
 
         if (classNames.Any())
