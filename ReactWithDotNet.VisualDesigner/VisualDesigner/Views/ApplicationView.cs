@@ -961,7 +961,17 @@ sealed class ApplicationView : Component<ApplicationState>
                 {
                     new MagicInput
                     {
-                        Name = styleGroupIndex.ToString(),
+                        
+                        Name  = styleGroupIndex.ToString(),
+                        Value = styleGroup.Condition,
+                        OnChange = (senderName, newValue) =>
+                        {
+                            var indexInStyleGroups = int.Parse(senderName);
+
+                            CurrentVisualElement.StyleGroups[indexInStyleGroups].Condition = newValue;
+
+                            return Task.CompletedTask;
+                        },
                         OnFocus = senderNameAsStyleGroupIndex =>
                         {
                             state.Selection = new()
@@ -973,7 +983,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
                             return Task.CompletedTask;
                         },
-                        Value             = styleGroup.Condition,
+                        
                         IsTextAlignCenter = true,
                         Suggestions       = GetStyleGroupConditionSuggestions(state)
                     } + FlexGrow(1)
