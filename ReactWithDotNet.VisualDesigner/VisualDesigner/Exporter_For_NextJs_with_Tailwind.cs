@@ -675,7 +675,7 @@ static class Exporter_For_NextJs_with_Tailwind
                 var conditionalValue = TextParser.TryParseConditionalValue(value);
                 if (conditionalValue.success)
                 {
-                    var lefTailwindClass = string.Empty;
+                    string lefTailwindClass;
                     {
                         var result = ConvertToTailwindClass(name, conditionalValue.left);
                         if (result.HasError)
