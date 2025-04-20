@@ -274,524 +274,7 @@ sealed class ApplicationPreview : Component
             {
                 foreach (var styleAttribute in styleGroup.Items ?? [])
                 {
-                    // try process from plugin
-                    {
-                        var style = TryProcessStyleAttributeByProjectConfig(styleAttribute);
-                        if (style is not null)
-                        {
-                            element.Add(style);
-                            continue;
-                        }
-                    }
-
-                    switch (styleAttribute)
-                    {
-                        case "w-full":
-                        {
-                            element.Add(Width("100%"));
-                            continue;
-                        }
-                        case "w-fit":
-                        {
-                            element.Add(WidthFitContent);
-                            continue;
-                        }
-                        case "h-fit":
-                        {
-                            element.Add(HeightFitContent);
-                            continue;
-                        }
-                        case "size-fit":
-                        {
-                            element.Add(WidthFitContent);
-                            element.Add(HeightFitContent);
-                            continue;
-                        }
-
-                        case "flex-row-centered":
-                        {
-                            element.Add(DisplayFlexRowCentered);
-                            continue;
-                        }
-                        case "flex-col-centered":
-                        {
-                            element.Add(DisplayFlexColumnCentered);
-                            continue;
-                        }
-                        case "col":
-                        {
-                            element.Add(DisplayFlexColumn);
-                            continue;
-                        }
-                        case "row":
-                        {
-                            element.Add(DisplayFlexRow);
-                            continue;
-                        }
-                    }
-
-                    var (success, name, value) = TryParsePropertyValue(styleAttribute);
-                    if (!success)
-                    {
-                        continue;
-                    }
-
-                    var isValueDouble = double.TryParse(value, out var valueAsDouble);
-
-                    switch (name)
-                    {
-                        case "min-width":
-                        {
-                            if (isValueDouble)
-                            {
-                                element.Add(MinWidth(valueAsDouble));
-                                continue;
-                            }
-
-                            element.Add(MinWidth(value));
-                            continue;
-                        }
-
-                        case "top":
-                        {
-                            if (isValueDouble)
-                            {
-                                element.Add(Top(valueAsDouble));
-                                continue;
-                            }
-
-                            element.Add(Top(value));
-                            continue;
-                        }
-                        case "bottom":
-                        {
-                            if (isValueDouble)
-                            {
-                                element.Add(Bottom(valueAsDouble));
-                                continue;
-                            }
-
-                            element.Add(Bottom(value));
-                            continue;
-                        }
-                        case "left":
-                        {
-                            if (isValueDouble)
-                            {
-                                element.Add(Left(valueAsDouble));
-                                continue;
-                            }
-
-                            element.Add(Left(value));
-                            continue;
-                        }
-                        case "right":
-                        {
-                            if (isValueDouble)
-                            {
-                                element.Add(Right(valueAsDouble));
-                                continue;
-                            }
-
-                            element.Add(Right(value));
-                            continue;
-                        }
-
-                        case "border":
-                        {
-                            var parts = value.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-                            if (parts.Length == 3)
-                            {
-                                for (var i = 0; i < parts.Length; i++)
-                                {
-                                    if (Project.Colors.TryGetValue(parts[i], out var color))
-                                    {
-                                        parts[i] = color;
-                                    }
-                                }
-
-                                value = string.Join(" ", parts);
-                            }
-
-                            element.Add(Border(value));
-                            continue;
-                        }
-
-                        case "justify-items":
-                        {
-                            element.Add(JustifyItems(value));
-                            continue;
-                        }
-                        case "justify-content":
-                        {
-                            element.Add(JustifyContent(value));
-                            continue;
-                        }
-
-                        case "align-items":
-                        {
-                            element.Add(AlignItems(value));
-                            continue;
-                        }
-
-                        case "display":
-                        {
-                            element.Add(Display(value));
-                            continue;
-                        }
-
-                        case "background":
-                        case "bg":
-                        {
-                            if (Project.Colors.TryGetValue(value, out var realColor))
-                            {
-                                value = realColor;
-                            }
-
-                            element.Add(Background(value));
-                            continue;
-                        }
-
-                        case "font-size":
-                        {
-                            if (isValueDouble)
-                            {
-                                element.Add(FontSize(valueAsDouble));
-                                continue;
-                            }
-
-                            element.Add(FontSize(value));
-                            continue;
-                        }
-
-                        case "font-weight":
-                        {
-                            element.Add(FontWeight(value));
-                            continue;
-                        }
-
-                        case "text-align":
-                        {
-                            element.Add(TextAlign(value));
-                            continue;
-                        }
-
-                        case "w":
-                        case "width":
-                        {
-                            if (isValueDouble)
-                            {
-                                element.Add(Width(valueAsDouble));
-                                continue;
-                            }
-
-                            element.Add(Width(value));
-                            continue;
-                        }
-
-                        case "outline":
-                        {
-                            element.Add(Outline(value));
-                            continue;
-                        }
-
-                        case "text-decoration":
-                        {
-                            element.Add(TextDecoration(value));
-                            continue;
-                        }
-
-                        case "h":
-                        case "height":
-                        {
-                            if (isValueDouble)
-                            {
-                                element.Add(Height(valueAsDouble));
-                                continue;
-                            }
-
-                            element.Add(Height(value));
-                            continue;
-                        }
-
-                        case "border-radius":
-                        {
-                            if (isValueDouble)
-                            {
-                                element.Add(BorderRadius(valueAsDouble));
-                                continue;
-                            }
-
-                            element.Add(BorderRadius(value));
-                            continue;
-                        }
-
-                        case "gap":
-                        {
-                            if (isValueDouble)
-                            {
-                                element.Add(Gap(valueAsDouble));
-                                continue;
-                            }
-
-                            element.Add(Gap(value));
-                            continue;
-                        }
-                        case "flex-grow":
-                        {
-                            if (isValueDouble)
-                            {
-                                element.Add(FlexGrow(valueAsDouble));
-                                continue;
-                            }
-
-                            element.Add(FlexGrow(value));
-                            continue;
-                        }
-
-                        case "p":
-                        case "padding":
-                        {
-                            if (isValueDouble)
-                            {
-                                element.Add(Padding(valueAsDouble));
-                                continue;
-                            }
-
-                            element.Add(Padding(value));
-                            continue;
-                        }
-
-                        case "size":
-                        {
-                            if (isValueDouble)
-                            {
-                                element.Add(Size(valueAsDouble));
-                                continue;
-                            }
-
-                            element.Add(Size(value));
-                            continue;
-                        }
-
-                        case "color":
-                        {
-                            if (Project.Colors.TryGetValue(value, out var realColor))
-                            {
-                                value = realColor;
-                            }
-
-                            element.Add(Color(value));
-                            continue;
-                        }
-
-                        case "px":
-                        {
-                            if (isValueDouble)
-                            {
-                                element.Add(PaddingLeftRight(valueAsDouble));
-                                continue;
-                            }
-
-                            element.Add(PaddingLeftRight(value));
-                            continue;
-                        }
-                        case "py":
-                        {
-                            if (isValueDouble)
-                            {
-                                element.Add(PaddingTopBottom(valueAsDouble));
-                                continue;
-                            }
-
-                            element.Add(PaddingTopBottom(value));
-                            continue;
-                        }
-
-                        case "pl":
-                        case "padding-left":
-                        {
-                            if (isValueDouble)
-                            {
-                                element.Add(PaddingLeft(valueAsDouble));
-                                continue;
-                            }
-
-                            element.Add(PaddingLeft(value));
-                            continue;
-                        }
-
-                        case "pr":
-                        case "padding-right":
-                        {
-                            if (isValueDouble)
-                            {
-                                element.Add(PaddingRight(valueAsDouble));
-                                continue;
-                            }
-
-                            element.Add(PaddingRight(value));
-                            continue;
-                        }
-
-                        case "pt":
-                        case "padding-top":
-                        {
-                            if (isValueDouble)
-                            {
-                                element.Add(PaddingTop(valueAsDouble));
-                                continue;
-                            }
-
-                            element.Add(PaddingTop(value));
-                            continue;
-                        }
-
-                        case "pb":
-                        case "padding-bottom":
-                        {
-                            if (isValueDouble)
-                            {
-                                element.Add(PaddingBottom(valueAsDouble));
-                                continue;
-                            }
-
-                            element.Add(PaddingBottom(value));
-                            continue;
-                        }
-
-                        case "ml":
-                        case "margin-left":
-                        {
-                            if (isValueDouble)
-                            {
-                                element.Add(MarginLeft(valueAsDouble));
-                                continue;
-                            }
-
-                            element.Add(MarginLeft(value));
-                            continue;
-                        }
-
-                        case "mr":
-                        case "margin-right":
-                        {
-                            if (isValueDouble)
-                            {
-                                element.Add(MarginRight(valueAsDouble));
-                                continue;
-                            }
-
-                            element.Add(MarginRight(value));
-                            continue;
-                        }
-
-                        case "mt":
-                        case "margin-top":
-                        {
-                            if (isValueDouble)
-                            {
-                                element.Add(MarginTop(valueAsDouble));
-                                continue;
-                            }
-
-                            element.Add(MarginTop(value));
-                            continue;
-                        }
-
-                        case "mb":
-                        case "margin-bottom":
-                        {
-                            if (isValueDouble)
-                            {
-                                element.Add(MarginBottom(valueAsDouble));
-                                continue;
-                            }
-
-                            element.Add(MarginBottom(value));
-                            continue;
-                        }
-
-                        case "flex-direction":
-                        {
-                            element.Add(FlexDirection(value));
-                            continue;
-                        }
-                        case "z-index":
-                        {
-                            element.Add(ZIndex(value));
-                            continue;
-                        }
-                        case "position":
-                        {
-                            element.Add(Position(value));
-                            continue;
-                        }
-                        case "max-width":
-                        {
-                            if (isValueDouble)
-                            {
-                                element.Add(MaxWidth(valueAsDouble));
-                                continue;
-                            }
-
-                            element.Add(MaxWidth(value));
-                            continue;
-                        }
-                        case "max-height":
-                        {
-                            if (isValueDouble)
-                            {
-                                element.Add(MaxHeight(valueAsDouble));
-                                continue;
-                            }
-
-                            element.Add(MaxHeight(value));
-                            continue;
-                        }
-                        case "border-top-left-radius":
-                        {
-                            element.Add(BorderTopLeftRadius(valueAsDouble));
-                            continue;
-                        }
-                        case "border-top-right-radius":
-                        {
-                            element.Add(BorderTopRightRadius(valueAsDouble));
-                            continue;
-                        }
-                        case "border-bottom-left-radius":
-                        {
-                            element.Add(BorderBottomLeftRadius(valueAsDouble));
-                            continue;
-                        }
-                        case "border-bottom-right-radius":
-                        {
-                            element.Add(BorderBottomRightRadius(valueAsDouble));
-                            continue;
-                        }
-
-                        case "overflow-y":
-                        {
-                            element.Add(OverflowY(value));
-                            continue;
-                        }
-                        case "overflow-x":
-                        {
-                            element.Add(OverflowX(value));
-                            continue;
-                        }
-                        case "border-bottom-width":
-                        {
-                            if (isValueDouble)
-                            {
-                                element.Add(BorderBottomWidth(valueAsDouble + "px"));
-                                continue;
-                            }
-
-                            element.Add(BorderBottomWidth(value));
-                            continue;
-                        }
-                    }
+                    ProcessStyleAttribute(styleAttribute, element);
                 }
             }
 
@@ -830,6 +313,528 @@ sealed class ApplicationPreview : Component
             }
 
             return element;
+        }
+    }
+
+    static void ProcessStyleAttribute(string styleAttribute, HtmlElement element)
+    {
+        // try process from plugin
+        {
+            var style = TryProcessStyleAttributeByProjectConfig(styleAttribute);
+            if (style is not null)
+            {
+                element.Add(style);
+                return;
+            }
+        }
+
+        switch (styleAttribute)
+        {
+            case "w-full":
+            {
+                element.Add(Width("100%"));
+                return;
+            }
+            case "w-fit":
+            {
+                element.Add(WidthFitContent);
+                return;
+            }
+            case "h-fit":
+            {
+                element.Add(HeightFitContent);
+                return;
+            }
+            case "size-fit":
+            {
+                element.Add(WidthFitContent);
+                element.Add(HeightFitContent);
+                return;
+            }
+
+            case "flex-row-centered":
+            {
+                element.Add(DisplayFlexRowCentered);
+                return;
+            }
+            case "flex-col-centered":
+            {
+                element.Add(DisplayFlexColumnCentered);
+                return;
+            }
+            case "col":
+            {
+                element.Add(DisplayFlexColumn);
+                return;
+            }
+            case "row":
+            {
+                element.Add(DisplayFlexRow);
+                return;
+            }
+        }
+
+        var (success, name, value) = TryParsePropertyValue(styleAttribute);
+        if (!success)
+        {
+            return;
+        }
+
+        var isValueDouble = double.TryParse(value, out var valueAsDouble);
+
+        switch (name)
+        {
+            case "min-width":
+            {
+                if (isValueDouble)
+                {
+                    element.Add(MinWidth(valueAsDouble));
+                    return;
+                }
+
+                element.Add(MinWidth(value));
+                return;
+            }
+
+            case "top":
+            {
+                if (isValueDouble)
+                {
+                    element.Add(Top(valueAsDouble));
+                    return;
+                }
+
+                element.Add(Top(value));
+                return;
+            }
+            case "bottom":
+            {
+                if (isValueDouble)
+                {
+                    element.Add(Bottom(valueAsDouble));
+                    return;
+                }
+
+                element.Add(Bottom(value));
+                return;
+            }
+            case "left":
+            {
+                if (isValueDouble)
+                {
+                    element.Add(Left(valueAsDouble));
+                    return;
+                }
+
+                element.Add(Left(value));
+                return;
+            }
+            case "right":
+            {
+                if (isValueDouble)
+                {
+                    element.Add(Right(valueAsDouble));
+                    return;
+                }
+
+                element.Add(Right(value));
+                return;
+            }
+
+            case "border":
+            {
+                var parts = value.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                if (parts.Length == 3)
+                {
+                    for (var i = 0; i < parts.Length; i++)
+                    {
+                        if (Project.Colors.TryGetValue(parts[i], out var color))
+                        {
+                            parts[i] = color;
+                        }
+                    }
+
+                    value = string.Join(" ", parts);
+                }
+
+                element.Add(Border(value));
+                return;
+            }
+
+            case "justify-items":
+            {
+                element.Add(JustifyItems(value));
+                return;
+            }
+            case "justify-content":
+            {
+                element.Add(JustifyContent(value));
+                return;
+            }
+
+            case "align-items":
+            {
+                element.Add(AlignItems(value));
+                return;
+            }
+
+            case "display":
+            {
+                element.Add(Display(value));
+                return;
+            }
+
+            case "background":
+            case "bg":
+            {
+                if (Project.Colors.TryGetValue(value, out var realColor))
+                {
+                    value = realColor;
+                }
+
+                element.Add(Background(value));
+                return;
+            }
+
+            case "font-size":
+            {
+                if (isValueDouble)
+                {
+                    element.Add(FontSize(valueAsDouble));
+                    return;
+                }
+
+                element.Add(FontSize(value));
+                return;
+            }
+
+            case "font-weight":
+            {
+                element.Add(FontWeight(value));
+                return;
+            }
+
+            case "text-align":
+            {
+                element.Add(TextAlign(value));
+                return;
+            }
+
+            case "w":
+            case "width":
+            {
+                if (isValueDouble)
+                {
+                    element.Add(Width(valueAsDouble));
+                    return;
+                }
+
+                element.Add(Width(value));
+                return;
+            }
+
+            case "outline":
+            {
+                element.Add(Outline(value));
+                return;
+            }
+
+            case "text-decoration":
+            {
+                element.Add(TextDecoration(value));
+                return;
+            }
+
+            case "h":
+            case "height":
+            {
+                if (isValueDouble)
+                {
+                    element.Add(Height(valueAsDouble));
+                    return;
+                }
+
+                element.Add(Height(value));
+                return;
+            }
+
+            case "border-radius":
+            {
+                if (isValueDouble)
+                {
+                    element.Add(BorderRadius(valueAsDouble));
+                    return;
+                }
+
+                element.Add(BorderRadius(value));
+                return;
+            }
+
+            case "gap":
+            {
+                if (isValueDouble)
+                {
+                    element.Add(Gap(valueAsDouble));
+                    return;
+                }
+
+                element.Add(Gap(value));
+                return;
+            }
+            case "flex-grow":
+            {
+                if (isValueDouble)
+                {
+                    element.Add(FlexGrow(valueAsDouble));
+                    return;
+                }
+
+                element.Add(FlexGrow(value));
+                return;
+            }
+
+            case "p":
+            case "padding":
+            {
+                if (isValueDouble)
+                {
+                    element.Add(Padding(valueAsDouble));
+                    return;
+                }
+
+                element.Add(Padding(value));
+                return;
+            }
+
+            case "size":
+            {
+                if (isValueDouble)
+                {
+                    element.Add(Size(valueAsDouble));
+                    return;
+                }
+
+                element.Add(Size(value));
+                return;
+            }
+
+            case "color":
+            {
+                if (Project.Colors.TryGetValue(value, out var realColor))
+                {
+                    value = realColor;
+                }
+
+                element.Add(Color(value));
+                return;
+            }
+
+            case "px":
+            {
+                if (isValueDouble)
+                {
+                    element.Add(PaddingLeftRight(valueAsDouble));
+                    return;
+                }
+
+                element.Add(PaddingLeftRight(value));
+                return;
+            }
+            case "py":
+            {
+                if (isValueDouble)
+                {
+                    element.Add(PaddingTopBottom(valueAsDouble));
+                    return;
+                }
+
+                element.Add(PaddingTopBottom(value));
+                return;
+            }
+
+            case "pl":
+            case "padding-left":
+            {
+                if (isValueDouble)
+                {
+                    element.Add(PaddingLeft(valueAsDouble));
+                    return;
+                }
+
+                element.Add(PaddingLeft(value));
+                return;
+            }
+
+            case "pr":
+            case "padding-right":
+            {
+                if (isValueDouble)
+                {
+                    element.Add(PaddingRight(valueAsDouble));
+                    return;
+                }
+
+                element.Add(PaddingRight(value));
+                return;
+            }
+
+            case "pt":
+            case "padding-top":
+            {
+                if (isValueDouble)
+                {
+                    element.Add(PaddingTop(valueAsDouble));
+                    return;
+                }
+
+                element.Add(PaddingTop(value));
+                return;
+            }
+
+            case "pb":
+            case "padding-bottom":
+            {
+                if (isValueDouble)
+                {
+                    element.Add(PaddingBottom(valueAsDouble));
+                    return;
+                }
+
+                element.Add(PaddingBottom(value));
+                return;
+            }
+
+            case "ml":
+            case "margin-left":
+            {
+                if (isValueDouble)
+                {
+                    element.Add(MarginLeft(valueAsDouble));
+                    return;
+                }
+
+                element.Add(MarginLeft(value));
+                return;
+            }
+
+            case "mr":
+            case "margin-right":
+            {
+                if (isValueDouble)
+                {
+                    element.Add(MarginRight(valueAsDouble));
+                    return;
+                }
+
+                element.Add(MarginRight(value));
+                return;
+            }
+
+            case "mt":
+            case "margin-top":
+            {
+                if (isValueDouble)
+                {
+                    element.Add(MarginTop(valueAsDouble));
+                    return;
+                }
+
+                element.Add(MarginTop(value));
+                return;
+            }
+
+            case "mb":
+            case "margin-bottom":
+            {
+                if (isValueDouble)
+                {
+                    element.Add(MarginBottom(valueAsDouble));
+                    return;
+                }
+
+                element.Add(MarginBottom(value));
+                return;
+            }
+
+            case "flex-direction":
+            {
+                element.Add(FlexDirection(value));
+                return;
+            }
+            case "z-index":
+            {
+                element.Add(ZIndex(value));
+                return;
+            }
+            case "position":
+            {
+                element.Add(Position(value));
+                return;
+            }
+            case "max-width":
+            {
+                if (isValueDouble)
+                {
+                    element.Add(MaxWidth(valueAsDouble));
+                    return;
+                }
+
+                element.Add(MaxWidth(value));
+                return;
+            }
+            case "max-height":
+            {
+                if (isValueDouble)
+                {
+                    element.Add(MaxHeight(valueAsDouble));
+                    return;
+                }
+
+                element.Add(MaxHeight(value));
+                return;
+            }
+            case "border-top-left-radius":
+            {
+                element.Add(BorderTopLeftRadius(valueAsDouble));
+                return;
+            }
+            case "border-top-right-radius":
+            {
+                element.Add(BorderTopRightRadius(valueAsDouble));
+                return;
+            }
+            case "border-bottom-left-radius":
+            {
+                element.Add(BorderBottomLeftRadius(valueAsDouble));
+                return;
+            }
+            case "border-bottom-right-radius":
+            {
+                element.Add(BorderBottomRightRadius(valueAsDouble));
+                return;
+            }
+
+            case "overflow-y":
+            {
+                element.Add(OverflowY(value));
+                return;
+            }
+            case "overflow-x":
+            {
+                element.Add(OverflowX(value));
+                return;
+            }
+            case "border-bottom-width":
+            {
+                if (isValueDouble)
+                {
+                    element.Add(BorderBottomWidth(valueAsDouble + "px"));
+                    return;
+                }
+
+                element.Add(BorderBottomWidth(value));
+                return;
+            }
         }
     }
 
