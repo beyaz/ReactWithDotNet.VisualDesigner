@@ -294,7 +294,7 @@ sealed class ApplicationPreview : Component
                     }
 
                     var childModel = model.Children[i];
-                    
+
                     var result = await renderElement(context, childModel, childPath);
                     if (result.HasError)
                     {
