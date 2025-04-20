@@ -6,6 +6,17 @@ namespace ReactWithDotNet.VisualDesigner.Views;
 
 sealed class ApplicationPreview : Component
 {
+    static readonly Dictionary<string, Func<StyleModifier[], StyleModifier>> ConditionMap = new()
+    {
+        { "hover", Hover },
+        { "Focus", Focus },
+        { "SM", SM },
+        { "MD", MD },
+        { "LG", LG },
+        { "XL", XL },
+        { "XXL", XXL }
+    };
+
     public Task Refresh()
     {
         return Task.CompletedTask;
@@ -275,7 +286,24 @@ sealed class ApplicationPreview : Component
                 foreach (var styleAttribute in styleGroup.Items ?? [])
                 {
                     var styleModifier = ConvertToStyleModifier(styleAttribute);
-                    element.Add(styleModifier);
+                    if (styleModifier is null)
+                    {
+                        continue;
+                    }
+
+                    if (styleGroup.Condition.HasNoValue() || styleGroup.Condition == "*")
+                    {
+                        element.Add(styleModifier);
+                        continue;
+                    }
+
+                    if (ConditionMap.TryGetValue(styleGroup.Condition, out var fn))
+                    {
+                        element.Add(fn([styleModifier]));
+                        continue;
+                    }
+
+                    return new Exception($"{styleGroup.Condition} not implemented yet");
                 }
             }
 
