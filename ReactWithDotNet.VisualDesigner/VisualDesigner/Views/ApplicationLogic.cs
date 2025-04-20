@@ -408,7 +408,7 @@ static class ApplicationLogic
 
     public static IReadOnlyList<string> GetStyleGroupConditionSuggestions(ApplicationState state)
     {
-        return ["MD", "XXL", "state.user.isActive", "MD: state.user.isActive", "XXL: state.user.isActive"];
+        return ["M","SM","MD","LG", "XL", "XXL", "hover", "focus", "active","visited","disabled","checked","first-child","last-child"];
     }
 
     public static async Task<IReadOnlyList<string>> GetSuggestionsForComponentSelection(ApplicationState state)

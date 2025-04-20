@@ -180,7 +180,12 @@ static class Exporter_For_NextJs_with_Tailwind
             {
                 parentNode.Properties.Remove(itemsSource);
 
-                lines.Add($"{Indent(indentLevel)}{{{ClearConnectedValue(itemsSource.Value)}.map((item, index) => {{");
+                lines.Add($"{Indent(indentLevel)}{{");
+                indentLevel++;
+                
+                
+                lines.Add($"{Indent(indentLevel)}{ClearConnectedValue(itemsSource.Value)}.map((item, index) =>");
+                lines.Add($"{Indent(indentLevel)}{{");
                 indentLevel++;
 
                 lines.Add(Indent(indentLevel) + "return (");
@@ -202,7 +207,10 @@ static class Exporter_For_NextJs_with_Tailwind
                 lines.Add(Indent(indentLevel) + ");");
 
                 indentLevel--;
-                lines.Add(Indent(indentLevel) + "})}");
+                lines.Add(Indent(indentLevel) + "})");
+                
+                indentLevel--;
+                lines.Add(Indent(indentLevel) + "}");
 
                 return lines;
             }
