@@ -195,7 +195,7 @@ sealed class ApplicationPreview : Component
             foreach (var property in model.Properties)
             {
                 var (success, name, value) = TryParsePropertyValue(property);
-                if (success)
+                if (success && value is not null)
                 {
                     if (name == "-items-source-design-time-count")
                     {
@@ -274,7 +274,8 @@ sealed class ApplicationPreview : Component
             {
                 foreach (var styleAttribute in styleGroup.Items ?? [])
                 {
-                    ProcessStyleAttribute(styleAttribute, element);
+                    var styleModifier = ConvertToStyleModifier(styleAttribute);
+                    element.Add(styleModifier);
                 }
             }
 
@@ -316,15 +317,14 @@ sealed class ApplicationPreview : Component
         }
     }
 
-    static void ProcessStyleAttribute(string styleAttribute, HtmlElement element)
+    static StyleModifier ConvertToStyleModifier(string styleAttribute)
     {
         // try process from plugin
         {
             var style = TryProcessStyleAttributeByProjectConfig(styleAttribute);
             if (style is not null)
             {
-                element.Add(style);
-                return;
+                return style;
             }
         }
 
@@ -332,52 +332,43 @@ sealed class ApplicationPreview : Component
         {
             case "w-full":
             {
-                element.Add(Width("100%"));
-                return;
+                return Width("100%");
             }
             case "w-fit":
             {
-                element.Add(WidthFitContent);
-                return;
+                return WidthFitContent;
             }
             case "h-fit":
             {
-                element.Add(HeightFitContent);
-                return;
+                return HeightFitContent;
             }
             case "size-fit":
             {
-                element.Add(WidthFitContent);
-                element.Add(HeightFitContent);
-                return;
+                return WidthFitContent + HeightFitContent;
             }
 
             case "flex-row-centered":
             {
-                element.Add(DisplayFlexRowCentered);
-                return;
+                return DisplayFlexRowCentered;
             }
             case "flex-col-centered":
             {
-                element.Add(DisplayFlexColumnCentered);
-                return;
+                return DisplayFlexColumnCentered;
             }
             case "col":
             {
-                element.Add(DisplayFlexColumn);
-                return;
+                return DisplayFlexColumn;
             }
             case "row":
             {
-                element.Add(DisplayFlexRow);
-                return;
+                return DisplayFlexRow;
             }
         }
 
         var (success, name, value) = TryParsePropertyValue(styleAttribute);
-        if (!success)
+        if (!success || value is null)
         {
-            return;
+            return null;
         }
 
         var isValueDouble = double.TryParse(value, out var valueAsDouble);
@@ -388,57 +379,47 @@ sealed class ApplicationPreview : Component
             {
                 if (isValueDouble)
                 {
-                    element.Add(MinWidth(valueAsDouble));
-                    return;
+                    return MinWidth(valueAsDouble);
                 }
 
-                element.Add(MinWidth(value));
-                return;
+                return MinWidth(value);
             }
 
             case "top":
             {
                 if (isValueDouble)
                 {
-                    element.Add(Top(valueAsDouble));
-                    return;
+                    return Top(valueAsDouble);
                 }
 
-                element.Add(Top(value));
-                return;
+                return Top(value);
             }
             case "bottom":
             {
                 if (isValueDouble)
                 {
-                    element.Add(Bottom(valueAsDouble));
-                    return;
+                    return Bottom(valueAsDouble);
                 }
 
-                element.Add(Bottom(value));
-                return;
+                return Bottom(value);
             }
             case "left":
             {
                 if (isValueDouble)
                 {
-                    element.Add(Left(valueAsDouble));
-                    return;
+                    return Left(valueAsDouble);
                 }
 
-                element.Add(Left(value));
-                return;
+                return Left(value);
             }
             case "right":
             {
                 if (isValueDouble)
                 {
-                    element.Add(Right(valueAsDouble));
-                    return;
+                    return Right(valueAsDouble);
                 }
 
-                element.Add(Right(value));
-                return;
+                return Right(value);
             }
 
             case "border":
@@ -457,31 +438,26 @@ sealed class ApplicationPreview : Component
                     value = string.Join(" ", parts);
                 }
 
-                element.Add(Border(value));
-                return;
+                return Border(value);
             }
 
             case "justify-items":
             {
-                element.Add(JustifyItems(value));
-                return;
+                return JustifyItems(value);
             }
             case "justify-content":
             {
-                element.Add(JustifyContent(value));
-                return;
+                return JustifyContent(value);
             }
 
             case "align-items":
             {
-                element.Add(AlignItems(value));
-                return;
+                return AlignItems(value);
             }
 
             case "display":
             {
-                element.Add(Display(value));
-                return;
+                return Display(value);
             }
 
             case "background":
@@ -492,32 +468,27 @@ sealed class ApplicationPreview : Component
                     value = realColor;
                 }
 
-                element.Add(Background(value));
-                return;
+                return Background(value);
             }
 
             case "font-size":
             {
                 if (isValueDouble)
                 {
-                    element.Add(FontSize(valueAsDouble));
-                    return;
+                    return FontSize(valueAsDouble);
                 }
 
-                element.Add(FontSize(value));
-                return;
+                return FontSize(value);
             }
 
             case "font-weight":
             {
-                element.Add(FontWeight(value));
-                return;
+                return FontWeight(value);
             }
 
             case "text-align":
             {
-                element.Add(TextAlign(value));
-                return;
+                return TextAlign(value);
             }
 
             case "w":
@@ -525,24 +496,20 @@ sealed class ApplicationPreview : Component
             {
                 if (isValueDouble)
                 {
-                    element.Add(Width(valueAsDouble));
-                    return;
+                    return Width(valueAsDouble);
                 }
 
-                element.Add(Width(value));
-                return;
+                return Width(value);
             }
 
             case "outline":
             {
-                element.Add(Outline(value));
-                return;
+                return Outline(value);
             }
 
             case "text-decoration":
             {
-                element.Add(TextDecoration(value));
-                return;
+                return TextDecoration(value);
             }
 
             case "h":
@@ -550,47 +517,39 @@ sealed class ApplicationPreview : Component
             {
                 if (isValueDouble)
                 {
-                    element.Add(Height(valueAsDouble));
-                    return;
+                    return Height(valueAsDouble);
                 }
 
-                element.Add(Height(value));
-                return;
+                return Height(value);
             }
 
             case "border-radius":
             {
                 if (isValueDouble)
                 {
-                    element.Add(BorderRadius(valueAsDouble));
-                    return;
+                    return BorderRadius(valueAsDouble);
                 }
 
-                element.Add(BorderRadius(value));
-                return;
+                return BorderRadius(value);
             }
 
             case "gap":
             {
                 if (isValueDouble)
                 {
-                    element.Add(Gap(valueAsDouble));
-                    return;
+                    return Gap(valueAsDouble);
                 }
 
-                element.Add(Gap(value));
-                return;
+                return Gap(value);
             }
             case "flex-grow":
             {
                 if (isValueDouble)
                 {
-                    element.Add(FlexGrow(valueAsDouble));
-                    return;
+                    return FlexGrow(valueAsDouble);
                 }
 
-                element.Add(FlexGrow(value));
-                return;
+                return FlexGrow(value);
             }
 
             case "p":
@@ -598,24 +557,20 @@ sealed class ApplicationPreview : Component
             {
                 if (isValueDouble)
                 {
-                    element.Add(Padding(valueAsDouble));
-                    return;
+                    return Padding(valueAsDouble);
                 }
 
-                element.Add(Padding(value));
-                return;
+                return Padding(value);
             }
 
             case "size":
             {
                 if (isValueDouble)
                 {
-                    element.Add(Size(valueAsDouble));
-                    return;
+                    return Size(valueAsDouble);
                 }
 
-                element.Add(Size(value));
-                return;
+                return Size(value);
             }
 
             case "color":
@@ -625,31 +580,26 @@ sealed class ApplicationPreview : Component
                     value = realColor;
                 }
 
-                element.Add(Color(value));
-                return;
+                return Color(value);
             }
 
             case "px":
             {
                 if (isValueDouble)
                 {
-                    element.Add(PaddingLeftRight(valueAsDouble));
-                    return;
+                    return PaddingLeftRight(valueAsDouble);
                 }
 
-                element.Add(PaddingLeftRight(value));
-                return;
+                return PaddingLeftRight(value);
             }
             case "py":
             {
                 if (isValueDouble)
                 {
-                    element.Add(PaddingTopBottom(valueAsDouble));
-                    return;
+                    return PaddingTopBottom(valueAsDouble);
                 }
 
-                element.Add(PaddingTopBottom(value));
-                return;
+                return PaddingTopBottom(value);
             }
 
             case "pl":
@@ -657,12 +607,10 @@ sealed class ApplicationPreview : Component
             {
                 if (isValueDouble)
                 {
-                    element.Add(PaddingLeft(valueAsDouble));
-                    return;
+                    return PaddingLeft(valueAsDouble);
                 }
 
-                element.Add(PaddingLeft(value));
-                return;
+                return PaddingLeft(value);
             }
 
             case "pr":
@@ -670,12 +618,10 @@ sealed class ApplicationPreview : Component
             {
                 if (isValueDouble)
                 {
-                    element.Add(PaddingRight(valueAsDouble));
-                    return;
+                    return PaddingRight(valueAsDouble);
                 }
 
-                element.Add(PaddingRight(value));
-                return;
+                return PaddingRight(value);
             }
 
             case "pt":
@@ -683,12 +629,10 @@ sealed class ApplicationPreview : Component
             {
                 if (isValueDouble)
                 {
-                    element.Add(PaddingTop(valueAsDouble));
-                    return;
+                    return PaddingTop(valueAsDouble);
                 }
 
-                element.Add(PaddingTop(value));
-                return;
+                return PaddingTop(value);
             }
 
             case "pb":
@@ -696,12 +640,10 @@ sealed class ApplicationPreview : Component
             {
                 if (isValueDouble)
                 {
-                    element.Add(PaddingBottom(valueAsDouble));
-                    return;
+                    return PaddingBottom(valueAsDouble);
                 }
 
-                element.Add(PaddingBottom(value));
-                return;
+                return PaddingBottom(value);
             }
 
             case "ml":
@@ -709,12 +651,10 @@ sealed class ApplicationPreview : Component
             {
                 if (isValueDouble)
                 {
-                    element.Add(MarginLeft(valueAsDouble));
-                    return;
+                    return MarginLeft(valueAsDouble);
                 }
 
-                element.Add(MarginLeft(value));
-                return;
+                return MarginLeft(value);
             }
 
             case "mr":
@@ -722,12 +662,10 @@ sealed class ApplicationPreview : Component
             {
                 if (isValueDouble)
                 {
-                    element.Add(MarginRight(valueAsDouble));
-                    return;
+                    return MarginRight(valueAsDouble);
                 }
 
-                element.Add(MarginRight(value));
-                return;
+                return MarginRight(value);
             }
 
             case "mt":
@@ -735,12 +673,10 @@ sealed class ApplicationPreview : Component
             {
                 if (isValueDouble)
                 {
-                    element.Add(MarginTop(valueAsDouble));
-                    return;
+                    return MarginTop(valueAsDouble);
                 }
 
-                element.Add(MarginTop(value));
-                return;
+                return MarginTop(value);
             }
 
             case "mb":
@@ -748,94 +684,79 @@ sealed class ApplicationPreview : Component
             {
                 if (isValueDouble)
                 {
-                    element.Add(MarginBottom(valueAsDouble));
-                    return;
+                    return MarginBottom(valueAsDouble);
                 }
 
-                element.Add(MarginBottom(value));
-                return;
+                return MarginBottom(value);
             }
 
             case "flex-direction":
             {
-                element.Add(FlexDirection(value));
-                return;
+                return FlexDirection(value);
             }
             case "z-index":
             {
-                element.Add(ZIndex(value));
-                return;
+                return ZIndex(value);
             }
             case "position":
             {
-                element.Add(Position(value));
-                return;
+                return Position(value);
             }
             case "max-width":
             {
                 if (isValueDouble)
                 {
-                    element.Add(MaxWidth(valueAsDouble));
-                    return;
+                    return MaxWidth(valueAsDouble);
                 }
 
-                element.Add(MaxWidth(value));
-                return;
+                return MaxWidth(value);
             }
             case "max-height":
             {
                 if (isValueDouble)
                 {
-                    element.Add(MaxHeight(valueAsDouble));
-                    return;
+                    return MaxHeight(valueAsDouble);
                 }
 
-                element.Add(MaxHeight(value));
-                return;
+                return MaxHeight(value);
             }
             case "border-top-left-radius":
             {
-                element.Add(BorderTopLeftRadius(valueAsDouble));
-                return;
+                return BorderTopLeftRadius(valueAsDouble);
             }
             case "border-top-right-radius":
             {
-                element.Add(BorderTopRightRadius(valueAsDouble));
-                return;
+                return BorderTopRightRadius(valueAsDouble);
             }
             case "border-bottom-left-radius":
             {
-                element.Add(BorderBottomLeftRadius(valueAsDouble));
-                return;
+                return BorderBottomLeftRadius(valueAsDouble);
             }
             case "border-bottom-right-radius":
             {
-                element.Add(BorderBottomRightRadius(valueAsDouble));
-                return;
+                return BorderBottomRightRadius(valueAsDouble);
             }
 
             case "overflow-y":
             {
-                element.Add(OverflowY(value));
-                return;
+                return OverflowY(value);
             }
             case "overflow-x":
             {
-                element.Add(OverflowX(value));
-                return;
+                return OverflowX(value);
             }
             case "border-bottom-width":
             {
                 if (isValueDouble)
                 {
-                    element.Add(BorderBottomWidth(valueAsDouble + "px"));
-                    return;
+                    return BorderBottomWidth(valueAsDouble + "px");
                 }
 
-                element.Add(BorderBottomWidth(value));
-                return;
+                return BorderBottomWidth(value);
             }
         }
+
+        return null;
     }
 
     [StopPropagation]
