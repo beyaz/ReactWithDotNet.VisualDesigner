@@ -675,8 +675,19 @@ static class Exporter_For_NextJs_with_Tailwind
                 var conditionalValue = TextParser.TryParseConditionalValue(value);
                 if (conditionalValue.success)
                 {
-                    var lefTailwindClass = ConvertToTailwindClass(name, conditionalValue.left);
-                    var rightTailwindClass = "";
+                    var lefTailwindClass = string.Empty;
+                    {
+                        var result = ConvertToTailwindClass(name, conditionalValue.left);
+                        if (result.HasError)
+                        {
+                            return result.Error;
+                        }
+
+                        lefTailwindClass = result.Value;
+                    }
+                    
+                    var rightTailwindClass = string.Empty;
+                    
                     if (conditionalValue.right.HasValue())
                     {
                         {
@@ -698,6 +709,24 @@ static class Exporter_For_NextJs_with_Tailwind
 
             switch (name)
             {
+                case "transform":
+                {
+                    if (value.StartsWith("rotate("))
+                    {
+                        var parts = value.Split("()".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+                        if (parts.Length ==2)
+                        {
+                            var sign = parts[1][0]=='-' ? "-": "";
+                            if (parts[1].EndsWith("deg"))
+                            {
+                                return $"{sign}rotate-{value.RemoveFromEnd("deg")}";
+                            }
+                        }
+                        
+                    }
+
+                    break;
+                }
                 case "outline":
                 {
                     return $"{name}-{value}";

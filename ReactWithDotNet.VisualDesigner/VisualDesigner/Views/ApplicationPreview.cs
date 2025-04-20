@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Text;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using ReactWithDotNet.ThirdPartyLibraries.HeroUI;
 
 namespace ReactWithDotNet.VisualDesigner.Views;
@@ -117,6 +118,18 @@ sealed class ApplicationPreview : Component
             {
                 element = new input();
             }
+            else if (model.Tag == "svg")
+            {
+                element = new svg();
+            }
+            else if (model.Tag == "rect")
+            {
+                element = new rect();
+            }
+            else if (model.Tag == "circle")
+            {
+                element = new circle();
+            }
             else if (model.Tag == "heroui/Checkbox")
             {
                 return new Checkbox();
@@ -223,6 +236,7 @@ sealed class ApplicationPreview : Component
                     if (name == "class")
                     {
                         element.AddClass(value);
+                        continue;
                     }
 
                     if (element is img elementAsImage)
@@ -239,6 +253,7 @@ sealed class ApplicationPreview : Component
                             {
                                 elementAsImage.height = value;
                             }
+                            continue;
                         }
 
                         if (name.Equals("w", StringComparison.OrdinalIgnoreCase) || name.Equals("width", StringComparison.OrdinalIgnoreCase))
@@ -251,10 +266,16 @@ sealed class ApplicationPreview : Component
                             {
                                 elementAsImage.width = value;
                             }
+                            continue;
                         }
 
-                        if (name.Equals("src", StringComparison.OrdinalIgnoreCase) && !IsConnectedValue(value))
+                        if (name.Equals("src", StringComparison.OrdinalIgnoreCase))
                         {
+                            if (IsConnectedValue(value))
+                            {
+                                continue;
+                            }
+                            
                             if (value.StartsWith("/assets/"))
                             {
                                 value = value.RemoveFromStart("/");
@@ -271,6 +292,24 @@ sealed class ApplicationPreview : Component
                         if (name.Equals("type", StringComparison.OrdinalIgnoreCase))
                         {
                             elementAsInput.type = value;
+                            continue;
+                        }
+                    }
+
+                    {
+                        var propertyInfo = element.GetType().GetProperty(name);
+                        if (propertyInfo is not null)
+                        {
+                            if (propertyInfo.PropertyType  == typeof(string))
+                            {
+                                propertyInfo.SetValue(element, value);
+                                continue;
+                            }
+                            if (propertyInfo.PropertyType  == typeof(UnionProp<string,double>))
+                            {
+                                propertyInfo.SetValue(element, (UnionProp<string,double>)value);
+                                continue;
+                            }
                         }
                     }
                 }
@@ -403,6 +442,15 @@ sealed class ApplicationPreview : Component
 
         switch (name)
         {
+            case "transform":
+            {
+                if (isValueDouble)
+                {
+                    return Transform(valueAsDouble+"deg");
+                }
+
+                return Transform(value);
+            }
             case "min-width":
             {
                 if (isValueDouble)
