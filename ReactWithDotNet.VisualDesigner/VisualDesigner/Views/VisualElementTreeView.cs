@@ -303,6 +303,11 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
 
         if (icon is null)
         {
+            if (node.Tag == "img")
+            {
+                icon = new IconImage() + Size(16) + Color(Gray300);
+            }
+            
             if (node.Text.HasValue())
             {
                 if (node.Tag[0] == 'h')
@@ -312,10 +317,6 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
                 else if (node.Tag == "a")
                 {
                     icon = new IconLink() + Size(16) + Color(Gray300);
-                }
-                else if (node.Tag == "img")
-                {
-                    icon = new IconImage() + Size(16) + Color(Gray300);
                 }
                 else
                 {

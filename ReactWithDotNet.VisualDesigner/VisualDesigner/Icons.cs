@@ -245,6 +245,7 @@ sealed class IconText : PureComponent
     }
 }
 
+
 sealed class IconHeader : PureComponent
 {
     protected override Element render()
