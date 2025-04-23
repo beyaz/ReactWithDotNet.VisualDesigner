@@ -85,7 +85,7 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
         return Task.CompletedTask;
     }
 
-    [DebounceTimeout(400)]
+    [DebounceTimeout(300)]
     Task OnMouseEnterHandler(MouseEvent e)
     {
         var selectedPath = e.currentTarget.id;
@@ -95,7 +95,7 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
         return Task.CompletedTask;
     }
 
-    [DebounceTimeout(400)]
+    [DebounceTimeout(300)]
     Task OnMouseLeaveHandler(MouseEvent e)
     {
         DispatchEvent(MouseLeave, []);
