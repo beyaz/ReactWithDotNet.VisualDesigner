@@ -417,31 +417,7 @@ sealed class ApplicationView : Component<ApplicationState>
             },
             new FlexRowCentered(Gap(32))
             {
-                new FlexRowCentered(Gap(4))
-                {
-                    new FlexRowCentered(BorderRadius(100), Padding(3), Background(Blue200), Hover(Background(Blue300)))
-                    {
-                        OnClick(_ =>
-                        {
-                            state.Preview.Width -= 10;
-
-                            return Task.CompletedTask;
-                        }),
-
-                        new IconMinus()
-                    },
-                    $"{state.Preview.Width}px",
-                    new FlexRowCentered(BorderRadius(100), Padding(3), Background(Blue200), Hover(Background(Blue300)))
-                    {
-                        OnClick(_ =>
-                        {
-                            state.Preview.Width += 10;
-
-                            return Task.CompletedTask;
-                        }),
-                        new IconPlus()
-                    }
-                },
+                
                 PartMediaSizeButtons,
 
                 PartScale
@@ -707,30 +683,67 @@ sealed class ApplicationView : Component<ApplicationState>
 
     Element PartMediaSizeButtons()
     {
-        return new FlexRow(JustifyContentSpaceAround, AlignItemsCenter, Gap(16))
+        return new FlexRowCentered(Border(1, solid, Theme.BorderColor), BorderRadius(4), PaddingY(2), PaddingX(4))
         {
-            new[] { "M", "SM", "MD", "LG", "XL", "XXL" }.Select(x => new FlexRowCentered
+            PositionRelative,
+            new label(PositionAbsolute, Top(-4), Left(8), FontSize10, LineHeight7, Background(Theme.BackgroundColor), PaddingX(4)) { "Width" },
+
+            new FlexRowCentered(Gap(32))
             {
-                x,
-                FontSize16,
-                FontWeight300,
-                CursorDefault,
-                PaddingTopBottom(3),
-                FlexGrow(1),
+                new FlexRowCentered(Gap(4))
+                {
+                    new FlexRowCentered(BorderRadius(100), Padding(3), Background(Blue200), Hover(Background(Blue300)))
+                    {
+                        OnClick(_ =>
+                        {
+                            state.Preview.Width -= 10;
 
-                Data("value", x),
-                OnClick(OnCommonSizeClicked),
-                Hover(Color("#2196f3")),
+                            return Task.CompletedTask;
+                        }),
 
-                (x == "M" && state.Preview.Width == 320) ||
-                (x == "SM" && state.Preview.Width == 640) ||
-                (x == "MD" && state.Preview.Width == 768) ||
-                (x == "LG" && state.Preview.Width == 1024) ||
-                (x == "XL" && state.Preview.Width == 1280) ||
-                (x == "XXL" && state.Preview.Width == 1536)
-                    ? FontWeight500 + Color("#2196f3")
-                    : null
-            })
+                        new IconMinus()
+                    },
+                    $"{state.Preview.Width}px",
+                    new FlexRowCentered(BorderRadius(100), Padding(3), Background(Blue200), Hover(Background(Blue300)))
+                    {
+                        OnClick(_ =>
+                        {
+                            state.Preview.Width += 10;
+
+                            return Task.CompletedTask;
+                        }),
+                        new IconPlus()
+                    }
+                },
+                
+                new FlexRow(JustifyContentSpaceAround, AlignItemsCenter, Gap(16))
+                {
+                    new[] { "M", "SM", "MD", "LG", "XL", "XXL" }.Select(x => new FlexRowCentered
+                    {
+                        x,
+                        FontSize16,
+                        FontWeight300,
+                        CursorDefault,
+                        PaddingTopBottom(3),
+                        FlexGrow(1),
+
+                        Data("value", x),
+                        OnClick(OnCommonSizeClicked),
+                        Hover(Color("#2196f3")),
+
+                        (x == "M" && state.Preview.Width == 320) ||
+                        (x == "SM" && state.Preview.Width == 640) ||
+                        (x == "MD" && state.Preview.Width == 768) ||
+                        (x == "LG" && state.Preview.Width == 1024) ||
+                        (x == "XL" && state.Preview.Width == 1280) ||
+                        (x == "XXL" && state.Preview.Width == 1536)
+                            ? FontWeight500 + Color("#2196f3")
+                            : null
+                    })
+                }
+            }
+            
+            
         };
     }
 
@@ -1294,45 +1307,52 @@ sealed class ApplicationView : Component<ApplicationState>
     }
     Element PartScale()
     {
-        return new FlexRow(WidthFull, PaddingLeftRight(3), AlignItemsCenter, Gap(4))
+        return new FlexRowCentered(Border(1, solid, Theme.BorderColor), BorderRadius(4), PaddingY(4))
         {
-            new FlexRowCentered(BorderRadius(100), Padding(3), Background(Blue200), Hover(Background(Blue300)))
+            PositionRelative,
+            new label(PositionAbsolute, Top(-4), Left(8), FontSize10, LineHeight7, Background(Theme.BackgroundColor), PaddingX(4)) { "Zoom" },
+            
+            new FlexRow(WidthFull, PaddingLeftRight(4), AlignItemsCenter, Gap(4))
             {
-                OnClick(_ =>
+                new FlexRowCentered(BorderRadius(100), Padding(3), Background(Blue200), Hover(Background(Blue300)))
                 {
-                    if (state.Preview.Scale <= 20)
+                    OnClick(_ =>
                     {
+                        if (state.Preview.Scale <= 20)
+                        {
+                            return Task.CompletedTask;
+                        }
+
+                        state.Preview.Scale -= 10;
+
+                        UpdateZoomInClient();
+
                         return Task.CompletedTask;
-                    }
+                    }),
+                    new IconMinus()
+                },
 
-                    state.Preview.Scale -= 10;
-
-                    UpdateZoomInClient();
-
-                    return Task.CompletedTask;
-                }),
-                new IconMinus()
-            },
-
-            $"%{state.Preview.Scale}",
-            new FlexRowCentered(BorderRadius(100), Padding(3), Background(Blue200), Hover(Background(Blue300)))
-            {
-                OnClick(_ =>
+                $"%{state.Preview.Scale}",
+                new FlexRowCentered(BorderRadius(100), Padding(3), Background(Blue200), Hover(Background(Blue300)))
                 {
-                    if (state.Preview.Scale >= 100)
+                    OnClick(_ =>
                     {
+                        if (state.Preview.Scale >= 100)
+                        {
+                            return Task.CompletedTask;
+                        }
+
+                        state.Preview.Scale += 10;
+
+                        UpdateZoomInClient();
+
                         return Task.CompletedTask;
-                    }
-
-                    state.Preview.Scale += 10;
-                    
-                    UpdateZoomInClient();
-
-                    return Task.CompletedTask;
-                }),
-                new IconPlus()
+                    }),
+                    new IconPlus()
+                }
             }
         };
+
     }
 
     Task StyleGroupAddClicked(MouseEvent e)
