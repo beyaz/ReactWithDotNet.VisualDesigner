@@ -54,6 +54,40 @@ public static class ReactWithDotNetIntegration
 
             await next();
         });
+
+        app.Use(async (httpContext, next) =>
+        {
+            var path = httpContext.Request.Path.Value ?? string.Empty;
+
+            if (path.StartsWith("/wwwroot/"))
+            {
+                // todo: make this configurable
+                const string publicFolder = @"C:\github\hopgogo\web\enduser-ui\public\";
+
+                var filePath = Path.Combine(publicFolder, path.RemoveFromStart("/wwwroot/"));
+
+                if (File.Exists(filePath))
+                {
+                    var ext = Path.GetExtension(filePath).ToLowerInvariant();
+                    var contentType = ext switch
+                    {
+                        ".jpg" or ".jpeg" => "image/jpeg",
+                        ".png"            => "image/png",
+                        ".gif"            => "image/gif",
+                        ".svg"            => "image/svg+xml",
+                        _                 => "application/octet-stream"
+                    };
+
+                    var fileBytes = await File.ReadAllBytesAsync(filePath);
+
+                    await Results.File(fileBytes, contentType).ExecuteAsync(httpContext);
+
+                    return;
+                }
+            }
+
+            await next();
+        });
     }
 
     static Task HandleReactWithDotNetRequest(HttpContext httpContext)
