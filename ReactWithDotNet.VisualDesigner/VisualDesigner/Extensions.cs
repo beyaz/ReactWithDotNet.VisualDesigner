@@ -199,6 +199,11 @@ static class Extensions
         
         foreach (var index in path.Split(',').Select(int.Parse).Skip(1))
         {
+            if (node.Children.Count <= index)
+            {
+                return null;
+            }
+            
             node = node.Children[index];
         }
 

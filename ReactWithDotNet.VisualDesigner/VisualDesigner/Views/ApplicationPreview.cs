@@ -315,17 +315,6 @@ sealed class ApplicationPreview : Component
                 }
             }
 
-            if (context.HighlightedElement == model)
-            {
-                element.Add(Outline($"1px {dashed} {Blue300}"));
-                
-                const string linearGradientValueForOverlayBackground = "repeating-linear-gradient(45deg, #fde047 0, #fde047 1px, transparent 0, transparent 50%)";
-                const string backgroundSizeValueForOverlayBackground = "5px 5px";
-
-                element.style.backgroundImage = linearGradientValueForOverlayBackground;
-                element.style.backgroundSize  = backgroundSizeValueForOverlayBackground;
-            }
-
             foreach (var styleGroup in model.StyleGroups ?? [])
             {
                 foreach (var styleAttribute in styleGroup.Items ?? [])
@@ -352,6 +341,24 @@ sealed class ApplicationPreview : Component
                 }
             }
 
+            if (context.HighlightedElement == model)
+            {
+                if (element.style.outline is null)
+                {
+                    element.Add(Outline($"1px {dashed} {Blue300}"));    
+                }
+
+                if (element.style.background is null)
+                {
+                    const string linearGradientValueForOverlayBackground = "repeating-linear-gradient(45deg, #fde047 0, #fde047 1px, transparent 0, transparent 50%)";
+                    const string backgroundSizeValueForOverlayBackground = "5px 5px";
+
+                    element.style.backgroundImage = linearGradientValueForOverlayBackground;
+                    element.style.backgroundSize  = backgroundSizeValueForOverlayBackground;    
+                }
+                
+            }
+            
             if (model.HasNoChild())
             {
                 return element;
