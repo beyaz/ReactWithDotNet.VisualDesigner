@@ -502,6 +502,10 @@ sealed class ApplicationPreview : Component
                 return Right(value);
             }
 
+            case "border-top":
+            case "border-bottom":
+            case "border-left":
+            case "border-right":
             case "border":
             {
                 var parts = value.Split(' ', StringSplitOptions.RemoveEmptyEntries);
@@ -518,7 +522,19 @@ sealed class ApplicationPreview : Component
                     value = string.Join(" ", parts);
                 }
 
-                return Border(value);
+                switch (name)
+                {
+                    case "border-top":
+                        return BorderTop(value);
+                    case "border-bottom":
+                        return BorderBottom(value);
+                    case "border-left":
+                        return BorderLeft(value);
+                    case "border-right":
+                        return BorderRight(value);
+                    default:
+                        return Border(value);
+                }
             }
 
             case "justify-items":

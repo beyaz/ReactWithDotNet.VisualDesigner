@@ -787,8 +787,7 @@ static class Exporter_For_NextJs_with_Tailwind
                 case "min-height":
                     return $"min-h-[{value}px]";
 
-                case "pt":
-                    return $"pt-[{value}px]";
+               
 
                 case "z-index":
                     return $"z-[{value}]";
@@ -797,14 +796,7 @@ static class Exporter_For_NextJs_with_Tailwind
                 case "overflow-x":
                     return $"{name}-{value}";
 
-                case "pb":
-                    return $"pb-[{value}px]";
-
-                case "pl":
-                    return $"pl-[{value}px]";
-
-                case "p":
-                    return $"p-[{value}px]";
+               
 
                 case "border-top-left-radius":
                     return $"rounded-tl-[{value}px]";
@@ -863,21 +855,14 @@ static class Exporter_For_NextJs_with_Tailwind
                         }
 
                         return $"border-{directionShortName}-[{parts[0]}]" +
-                               $"[border-{direction}-style:{parts[1]}]" +
-                               $"[border-{direction}-color:{parts[2]}]";
+                               $" [border-{direction}-style:{parts[1]}]" +
+                               $" [border-{direction}-color:{parts[2]}]";
                     }
 
                     return new ArgumentOutOfRangeException(direction);
                 }
 
-                case "pr":
-                    return $"pr-[{value}px]";
-
-                case "px":
-                    return $"px-[{value}px]";
-
-                case "py":
-                    return $"py-[{value}px]";
+                
 
                 case "display":
                     return $"{value}";
@@ -949,8 +934,31 @@ static class Exporter_For_NextJs_with_Tailwind
                         value = valueAsDouble.AsPixel();
                     }
 
-                    return $"[{name}-[{value}]";
+                    return $"{name}-[{value}]";
                 }
+                
+                case "pl":
+                case "pr":
+                case "pb":
+                case "pt":
+                case "px":
+                case "py":
+                case "p":
+                {
+                    if (isValueDouble)
+                    {
+                        value = valueAsDouble.AsPixel();
+                    }
+
+                    return $"{name}-[{value}]";
+                }
+                
+               
+
+               
+                
+                
+                
 
                 case "border":
                 {
