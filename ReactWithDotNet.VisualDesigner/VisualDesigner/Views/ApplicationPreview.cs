@@ -135,7 +135,7 @@ sealed class ApplicationPreview : Component
                 return new Checkbox();
             }
 
-            if (model.Tag.Length > 3)
+            if (model.Tag.Length > 5)
             {
                 ComponentEntity component;
                 {
@@ -318,6 +318,12 @@ sealed class ApplicationPreview : Component
             if (context.HighlightedElement == model)
             {
                 element.Add(Outline($"1px {dashed} {Blue300}"));
+                
+                const string linearGradientValueForOverlayBackground = "repeating-linear-gradient(45deg, #fde047 0, #fde047 1px, transparent 0, transparent 50%)";
+                const string backgroundSizeValueForOverlayBackground = "5px 5px";
+
+                element.style.backgroundImage = linearGradientValueForOverlayBackground;
+                element.style.backgroundSize  = backgroundSizeValueForOverlayBackground;
             }
 
             foreach (var styleGroup in model.StyleGroups ?? [])
