@@ -36,6 +36,8 @@ sealed class ApplicationView : Component<ApplicationState>
             if (userLastState is not null)
             {
                 state = userLastState;
+                
+                UpdateZoomInClient();
 
                 return;
             }
@@ -48,6 +50,8 @@ sealed class ApplicationView : Component<ApplicationState>
             {
                 state = DeserializeFromJson<ApplicationState>(lastUsage.StateAsJson);
 
+                UpdateZoomInClient();
+                
                 return;
             }
         }
@@ -1284,6 +1288,10 @@ sealed class ApplicationView : Component<ApplicationState>
         }
     }
 
+    void UpdateZoomInClient()
+    {
+        Client.RunJavascript($"window.ComponentIndicatorZoom = {state.Preview.Scale}");
+    }
     Element PartScale()
     {
         return new FlexRow(WidthFull, PaddingLeftRight(3), AlignItemsCenter, Gap(4))
@@ -1298,6 +1306,8 @@ sealed class ApplicationView : Component<ApplicationState>
                     }
 
                     state.Preview.Scale -= 10;
+
+                    UpdateZoomInClient();
 
                     return Task.CompletedTask;
                 }),
@@ -1315,6 +1325,8 @@ sealed class ApplicationView : Component<ApplicationState>
                     }
 
                     state.Preview.Scale += 10;
+                    
+                    UpdateZoomInClient();
 
                     return Task.CompletedTask;
                 }),
