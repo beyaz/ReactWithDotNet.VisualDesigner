@@ -36,7 +36,7 @@ sealed class ApplicationView : Component<ApplicationState>
             if (userLastState is not null)
             {
                 state = userLastState;
-                
+
                 UpdateZoomInClient();
 
                 return;
@@ -51,7 +51,7 @@ sealed class ApplicationView : Component<ApplicationState>
                 state = DeserializeFromJson<ApplicationState>(lastUsage.StateAsJson);
 
                 UpdateZoomInClient();
-                
+
                 return;
             }
         }
@@ -337,7 +337,13 @@ sealed class ApplicationView : Component<ApplicationState>
             {
                 new h3 { "React Visual Designer" },
 
-                PartProject,
+                new FlexRowCentered(Gap(16), Border(1, solid, Theme.BorderColor), BorderRadius(4), PaddingX(8))
+                {
+                    PositionRelative,
+                    new label(PositionAbsolute, Top(-4), Left(8), FontSize10, LineHeight7, Background(Theme.BackgroundColor), PaddingX(4)) { "Project" },
+
+                    PartProject
+                },
 
                 // A C T I O N S
                 SpaceX(8),
@@ -417,7 +423,6 @@ sealed class ApplicationView : Component<ApplicationState>
             },
             new FlexRowCentered(Gap(32))
             {
-                
                 PartMediaSizeButtons,
 
                 PartScale
@@ -503,7 +508,7 @@ sealed class ApplicationView : Component<ApplicationState>
                 OnHideInDesignerToggle = () =>
                 {
                     CurrentVisualElement.HideInDesigner = !CurrentVisualElement.HideInDesigner;
-                    
+
                     return Task.CompletedTask;
                 },
                 MouseLeave = () =>
@@ -715,7 +720,7 @@ sealed class ApplicationView : Component<ApplicationState>
                         new IconPlus()
                     }
                 },
-                
+
                 new FlexRow(JustifyContentSpaceAround, AlignItemsCenter, Gap(16))
                 {
                     new[] { "M", "SM", "MD", "LG", "XL", "XXL" }.Select(x => new FlexRowCentered
@@ -742,8 +747,6 @@ sealed class ApplicationView : Component<ApplicationState>
                     })
                 }
             }
-            
-            
         };
     }
 
@@ -777,6 +780,27 @@ sealed class ApplicationView : Component<ApplicationState>
     {
         return new FlexRowCentered(Gap(4))
         {
+            new MagicInput
+            {
+                Name = string.Empty,
+
+                Suggestions = GetProjectNames(state),
+                Value       = GetAllProjects().FirstOrDefault(p => p.Id == state.ProjectId)?.Name,
+                OnChange = async (_, projectName) =>
+                {
+                    var projectEntity = GetAllProjects().FirstOrDefault(x => x.Name == projectName);
+                    if (projectEntity is null)
+                    {
+                        this.FailNotification("Project not found. @" + projectName);
+
+                        return;
+                    }
+
+                    await ChangeSelectedProject(projectEntity.Id);
+                },
+                FitContent = true
+            },
+
             new FlexRowCentered
             {
                 new IconPlus() + Size(24) + Color(state.IsProjectSettingsPopupVisible ? Gray600 : Gray300) + Hover(Color(Gray600)),
@@ -833,27 +857,6 @@ sealed class ApplicationView : Component<ApplicationState>
                         }
                     }
                 } : null
-            },
-
-            new MagicInput
-            {
-                Name = string.Empty,
-
-                Suggestions = GetProjectNames(state),
-                Value       = GetAllProjects().FirstOrDefault(p => p.Id == state.ProjectId)?.Name,
-                OnChange = async (_, projectName) =>
-                {
-                    var projectEntity = GetAllProjects().FirstOrDefault(x => x.Name == projectName);
-                    if (projectEntity is null)
-                    {
-                        this.FailNotification("Project not found. @" + projectName);
-
-                        return;
-                    }
-
-                    await ChangeSelectedProject(projectEntity.Id);
-                },
-                FitContent = true
             }
         };
     }
@@ -978,7 +981,6 @@ sealed class ApplicationView : Component<ApplicationState>
                 {
                     new MagicInput
                     {
-                        
                         Name  = styleGroupIndex.ToString(),
                         Value = styleGroup.Condition,
                         OnChange = (senderName, newValue) =>
@@ -1000,7 +1002,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
                             return Task.CompletedTask;
                         },
-                        
+
                         IsTextAlignCenter = true,
                         Suggestions       = GetStyleGroupConditionSuggestions(state)
                     } + FlexGrow(1)
@@ -1301,17 +1303,13 @@ sealed class ApplicationView : Component<ApplicationState>
         }
     }
 
-    void UpdateZoomInClient()
-    {
-        Client.RunJavascript($"window.ComponentIndicatorZoom = {state.Preview.Scale}");
-    }
     Element PartScale()
     {
         return new FlexRowCentered(Border(1, solid, Theme.BorderColor), BorderRadius(4), PaddingY(4))
         {
             PositionRelative,
             new label(PositionAbsolute, Top(-4), Left(8), FontSize10, LineHeight7, Background(Theme.BackgroundColor), PaddingX(4)) { "Zoom" },
-            
+
             new FlexRow(WidthFull, PaddingLeftRight(4), AlignItemsCenter, Gap(4))
             {
                 new FlexRowCentered(BorderRadius(100), Padding(3), Background(Blue200), Hover(Background(Blue300)))
@@ -1352,7 +1350,6 @@ sealed class ApplicationView : Component<ApplicationState>
                 }
             }
         };
-
     }
 
     Task StyleGroupAddClicked(MouseEvent e)
@@ -1397,6 +1394,11 @@ sealed class ApplicationView : Component<ApplicationState>
         };
 
         return Task.CompletedTask;
+    }
+
+    void UpdateZoomInClient()
+    {
+        Client.RunJavascript($"window.ComponentIndicatorZoom = {state.Preview.Scale}");
     }
 
     static class Ruler
