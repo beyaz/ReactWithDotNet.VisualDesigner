@@ -1,6 +1,5 @@
 ﻿using System.IO;
 using System.Text;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using ReactWithDotNet.ThirdPartyLibraries.HeroUI;
 
 namespace ReactWithDotNet.VisualDesigner.Views;
@@ -253,6 +252,7 @@ sealed class ApplicationPreview : Component
                             {
                                 elementAsImage.height = value;
                             }
+
                             continue;
                         }
 
@@ -266,6 +266,7 @@ sealed class ApplicationPreview : Component
                             {
                                 elementAsImage.width = value;
                             }
+
                             continue;
                         }
 
@@ -275,7 +276,7 @@ sealed class ApplicationPreview : Component
                             {
                                 continue;
                             }
-                            
+
                             if (value.StartsWith("/assets/"))
                             {
                                 value = value.RemoveFromStart("/");
@@ -300,15 +301,15 @@ sealed class ApplicationPreview : Component
                         var propertyInfo = element.GetType().GetProperty(name);
                         if (propertyInfo is not null)
                         {
-                            if (propertyInfo.PropertyType  == typeof(string))
+                            if (propertyInfo.PropertyType == typeof(string))
                             {
                                 propertyInfo.SetValue(element, value);
                                 continue;
                             }
-                            if (propertyInfo.PropertyType  == typeof(UnionProp<string,double>))
+
+                            if (propertyInfo.PropertyType == typeof(UnionProp<string, double>))
                             {
-                                propertyInfo.SetValue(element, (UnionProp<string,double>)value);
-                                continue;
+                                propertyInfo.SetValue(element, (UnionProp<string, double>)value);
                             }
                         }
                     }
@@ -345,10 +346,10 @@ sealed class ApplicationPreview : Component
             {
                 if (element.style.outline is null)
                 {
-                    element.Add(Outline($"1px {dashed} {Blue300}"));    
+                    element.Add(Outline($"1px {dashed} {Blue300}"));
                 }
             }
-            
+
             if (model.HasNoChild())
             {
                 return element;
@@ -449,7 +450,7 @@ sealed class ApplicationPreview : Component
             {
                 if (isValueDouble)
                 {
-                    return Transform(valueAsDouble+"deg");
+                    return Transform(valueAsDouble + "deg");
                 }
 
                 return Transform(value);
