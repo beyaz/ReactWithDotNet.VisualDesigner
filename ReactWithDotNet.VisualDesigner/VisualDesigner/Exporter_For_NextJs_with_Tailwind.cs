@@ -924,26 +924,22 @@ static class Exporter_For_NextJs_with_Tailwind
                     return $"border-[{value}]";
                 }
 
+                
+                case "m":
+                case "mx":
+                case "my":
                 case "ml":
                 case "mr":
                 case "mb":
                 case "mt":
-                {
-                    if (isValueDouble)
-                    {
-                        value = valueAsDouble.AsPixel();
-                    }
-
-                    return $"{name}-[{value}]";
-                }
                 
+                case "p":
+                case "px":
+                case "py":
                 case "pl":
                 case "pr":
                 case "pb":
                 case "pt":
-                case "px":
-                case "py":
-                case "p":
                 {
                     if (isValueDouble)
                     {
