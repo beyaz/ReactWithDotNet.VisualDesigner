@@ -707,6 +707,23 @@ static class Exporter_For_NextJs_with_Tailwind
 
             var isValueDouble = double.TryParse(value, out var valueAsDouble);
 
+            name = name switch
+            {
+                "padding"  => "p",
+                "padding-right"  => "pr",
+                "padding-left"   => "pl",
+                "padding-top"    => "pt",
+                "padding-bottom" => "pb",
+                
+                "margin"  => "m",
+                "margin-right"  => "mr",
+                "margin-left"   => "ml",
+                "margin-top"    => "mt",
+                "margin-bottom" => "mb",
+
+                _ => name
+            };
+
             switch (name)
             {
                 case "transform":
@@ -948,6 +965,8 @@ static class Exporter_For_NextJs_with_Tailwind
 
                     return $"{name}-[{value}]";
                 }
+                
+                
                 
                
 
