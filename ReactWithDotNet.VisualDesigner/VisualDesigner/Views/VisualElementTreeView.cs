@@ -17,19 +17,19 @@ delegate Task OnTreeItemDelete();
 
 sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
 {
+    [CustomEvent]
+    public OnTreeItemCopyPaste CopyPaste { get; init; }
+
     public VisualElementModel Model { get; init; }
 
     [CustomEvent]
+    public Func<Task> MouseLeave { get; init; }
+
+    [CustomEvent]
     public OnTreeItemDelete OnDelete { get; init; }
-    
+
     [CustomEvent]
     public Func<Task> OnHideInDesignerToggle { get; init; }
-    
-    [CustomEvent]
-    public OnTreeItemCopyPaste CopyPaste { get; init; }
-    
-    [CustomEvent]
-    public Func<Task> MouseLeave { get; init; }
 
     public string SelectedPath { get; init; }
 
@@ -54,6 +54,29 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
             ToVisual(Model, 0, "0"),
             WidthFull, HeightFull
         };
+    }
+
+    [KeyboardEventCallOnly("CTRL+c", "CTRL+v", "Delete")]
+    Task On_Key_Down(KeyboardEvent e)
+    {
+        if (e.key == "Delete")
+        {
+            DispatchEvent(OnDelete, []);
+            return Task.CompletedTask;
+        }
+
+        if (e.key == "c")
+        {
+            state.CopiedTreeItemPath = SelectedPath;
+        }
+        else if (e.key == "v" && state.CopiedTreeItemPath.HasValue())
+        {
+            DispatchEvent(CopyPaste, [state.CopiedTreeItemPath, SelectedPath]);
+
+            state.CopiedTreeItemPath = null;
+        }
+
+        return Task.CompletedTask;
     }
 
     Task OnDragEntered(DragEvent e)
@@ -108,6 +131,13 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
         var selectedPath = e.currentTarget.id;
 
         DispatchEvent(SelectionChanged, [selectedPath]);
+
+        return Task.CompletedTask;
+    }
+
+    Task Toggle_HideInDesigner(MouseEvent e)
+    {
+        DispatchEvent(OnHideInDesignerToggle, []);
 
         return Task.CompletedTask;
     }
@@ -200,9 +230,9 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
         var commonStyles = node.StyleGroups?.FirstOrDefault(x => x.Condition == "*");
         if (commonStyles is not null)
         {
-            var hasCol = commonStyles.Items.Contains("col")|| commonStyles.Items.Contains("flex-col-centered");
+            var hasCol = commonStyles.Items.Contains("col") || commonStyles.Items.Contains("flex-col-centered");
             var hasRow = commonStyles.Items.Contains("row") || commonStyles.Items.Contains("flex-row-centered");
-            
+
             var hasFlex = commonStyles.Items.Any(x =>
             {
                 var (success, name, value) = TryParsePropertyValue(x);
@@ -307,7 +337,7 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
             {
                 icon = new IconImage() + Size(16) + Color(Gray300);
             }
-            
+
             if (node.Text.HasValue())
             {
                 if (node.Tag[0] == 'h')
@@ -365,7 +395,6 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
                     {
                         eyeIcon + Width(16) + Height(16) + When(isSelected, OnClick(Toggle_HideInDesigner))
                     }
-                    
                 },
 
                 state.DragStartedTreeItemPath.HasNoValue() && isSelected ? Background(Blue100) + BorderRadius(3) : null,
@@ -401,48 +430,16 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
         return returnList;
     }
 
-    Task Toggle_HideInDesigner(MouseEvent e)
-    {
-        DispatchEvent(OnHideInDesignerToggle, []);
-        
-        return Task.CompletedTask;
-    }
-
-    [KeyboardEventCallOnly("CTRL+c", "CTRL+v", "Delete")]
-    Task On_Key_Down(KeyboardEvent e)
-    {
-        if (e.key == "Delete")
-        {
-            
-                
-                DispatchEvent(OnDelete, []);
-                return Task.CompletedTask;
-
-        }
-        if (e.key == "c")
-        {
-            state.CopiedTreeItemPath = SelectedPath;
-        }
-        else if (e.key == "v" && state.CopiedTreeItemPath.HasValue())
-        {
-            DispatchEvent(CopyPaste,[state.CopiedTreeItemPath, SelectedPath]);
-            
-            state.CopiedTreeItemPath = null;
-        }
-
-        return Task.CompletedTask;
-    }
-
     internal class State
     {
         public List<string> CollapsedNodes { get; init; } = [];
-        
+
+        public string CopiedTreeItemPath { get; set; }
+
         public string CurrentDragOveredPath { get; set; }
 
         public DragPosition DragPosition { get; set; }
 
         public string DragStartedTreeItemPath { get; set; }
-
-        public string CopiedTreeItemPath { get; set; }
     }
 }
