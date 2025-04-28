@@ -11,6 +11,21 @@ public class Program
 {
     public static void Main(string[] args)
     {
+        var input = """
+                    <div>
+                      <DestinationButton key="{_index + ''}" indexInDestinations="{_index}" onValueChange="{onDestinationItemChanged}" destinations="destinations" onRemove="onDestinationItemRemoveClicked"/>
+                    </div>
+                    """;
+        
+        HtmlImporter.Import(input);
+
+        input = """
+                <div>
+                   <input placeholder="First Destination" class="w-full flex-1 bg-transparent flex-grow pl-4  text-base font-grotesk" type="text">
+                </div>
+                """;
+        
+        
         var builder = WebApplication.CreateBuilder(args);
 
         var services = builder.Services;
