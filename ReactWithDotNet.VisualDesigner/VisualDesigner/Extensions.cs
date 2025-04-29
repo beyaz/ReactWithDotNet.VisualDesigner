@@ -598,6 +598,15 @@ static class Extensions
             return AttributeParseResult.Fail;
         }
 
+        string pseudo = null;
+        
+        if (nameValueCombined.StartsWith("hover:"))
+        {
+            pseudo = "hover";
+            nameValueCombined = nameValueCombined.RemoveFromStart("hover:").Trim();
+        }
+        
+        
         var colonIndex = nameValueCombined.IndexOf(':');
         if (colonIndex < 0)
         {
@@ -608,7 +617,13 @@ static class Extensions
 
         var value = nameValueCombined[(colonIndex + 1)..];
 
-        return AttributeParseResult.Success(name.Trim(), value.Trim());
+        return new()
+        {
+            success = true,
+            name    = name.Trim(),
+            value   = value.Trim(),
+            Pseudo  = pseudo
+        };
     }
     
     
@@ -670,16 +685,10 @@ sealed class AttributeParseResult
     public bool success { get; init; }
     public string name { get; init; }
     public string value { get; init; }
-    
+    public string Pseudo { get; init; }
+
     public static AttributeParseResult Fail=>new()
     {
         success = false
-    };
-    
-    public static AttributeParseResult Success(string name, string value)=>new()
-    {
-        success = true,
-        name = name,
-        value = value
     };
 }
