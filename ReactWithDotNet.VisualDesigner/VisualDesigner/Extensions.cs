@@ -660,3 +660,11 @@ static class Extensions
         }
     }
 }
+
+
+sealed class AttributeParseResult
+{
+    public bool success { get; init; }
+    public string name { get; init; }
+    public string value { get; init; }
+}
