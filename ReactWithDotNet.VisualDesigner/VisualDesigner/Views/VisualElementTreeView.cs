@@ -230,10 +230,12 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
         var commonStyles = node.StyleGroups?.FirstOrDefault(x => x.Condition == "*");
         if (commonStyles is not null)
         {
-            var hasCol = commonStyles.Items.Contains("col") || commonStyles.Items.Contains("flex-col-centered");
-            var hasRow = commonStyles.Items.Contains("row") || commonStyles.Items.Contains("flex-row-centered");
+            var styles = commonStyles.Items;
+            
+            var hasCol = styles.Contains("col") || styles.Contains("flex-col-centered");
+            var hasRow = styles.Contains("row") || styles.Contains("flex-row-centered");
 
-            var hasFlex = commonStyles.Items.Any(x =>
+            var hasFlex = styles.Any(x =>
             {
                 var (success, name, value) = TryParsePropertyValue(x);
                 if (!success)
@@ -249,7 +251,7 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
                 return false;
             });
 
-            var hasFlexDirectionColumn = commonStyles.Items.Any(x =>
+            var hasFlexDirectionColumn = styles.Any(x =>
             {
                 var (success, name, value) = TryParsePropertyValue(x);
                 if (!success)
@@ -265,7 +267,7 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
                 return false;
             });
 
-            var hasFlexDirectionRow = commonStyles.Items.Any(x =>
+            var hasFlexDirectionRow = styles.Any(x =>
             {
                 var (success, name, value) = TryParsePropertyValue(x);
                 if (!success)
@@ -281,7 +283,7 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
                 return false;
             });
 
-            var hasHeightWithConstantValue = commonStyles.Items.Any(x =>
+            var hasHeightWithConstantValue = styles.Any(x =>
             {
                 var (success, name, value) = TryParsePropertyValue(x);
                 if (!success)
@@ -297,7 +299,7 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
                 return false;
             });
 
-            var hasWidhtWithConstantValue = commonStyles.Items.Any(x =>
+            var hasWidhtWithConstantValue = styles.Any(x =>
             {
                 var (success, name, value) = TryParsePropertyValue(x);
                 if (!success)
@@ -321,11 +323,11 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
             {
                 icon = new IconFlexRow() + Size(16) + Color(Gray300);
             }
-            else if (node.Text.HasNoValue() && commonStyles.Items.Count == 1 && hasHeightWithConstantValue)
+            else if (node.Text.HasNoValue() && styles.Count == 1 && hasHeightWithConstantValue)
             {
                 icon = new IconSpaceVertical();
             }
-            else if (node.Text.HasNoValue() && commonStyles.Items.Count == 1 && hasWidhtWithConstantValue)
+            else if (node.Text.HasNoValue() && styles.Count == 1 && hasWidhtWithConstantValue)
             {
                 icon = new IconSpaceHorizontal();
             }
