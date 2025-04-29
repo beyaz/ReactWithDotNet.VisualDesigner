@@ -74,4 +74,11 @@ static class ApplicationDatabase
 
         return (await DbOperation(async db =>  await db.QueryFirstOrDefaultAsync<ProjectEntity>(query)))?.Id;
     }
+    
+    public static Task<IEnumerable<ComponentEntity>> GetAllComponents()
+    {
+        const string query = "SELECT * FROM Component";
+
+        return DbOperation(db => db.QueryAsync<ComponentEntity>(query));
+    }
 }

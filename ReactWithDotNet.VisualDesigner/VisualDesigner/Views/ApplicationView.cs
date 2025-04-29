@@ -196,6 +196,8 @@ sealed class ApplicationView : Component<ApplicationState>
         }
 
         var componentRootElement = DeserializeFromJson<VisualElementModel>(component.RootElementAsJson ?? string.Empty);
+        
+        Fix(componentRootElement);
 
         state = new()
         {

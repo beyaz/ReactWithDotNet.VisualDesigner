@@ -30,6 +30,8 @@ public sealed record VisualElementModel
     
     public List<string> Properties { get; init; } = [];
     
+    public List<string> Style { get; init; } = [];
+    
     public List<VisualElementModel> Children { get; init; } = [];
 
     public bool HideInDesigner { get; set; }

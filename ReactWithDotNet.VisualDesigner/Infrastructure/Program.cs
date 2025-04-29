@@ -1,4 +1,5 @@
 using System.IO.Compression;
+using Dapper.Contrib.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.ResponseCompression;
@@ -11,6 +12,17 @@ public class Program
 {
     public static void Main(string[] args)
     {
+        foreach (var item in GetAllComponents().Result)
+        {
+            var model = DeserializeFromJson<VisualElementModel>(item.RootElementAsJson);
+
+            Fix(model);
+
+            var newItem = item with { RootElementAsJson = SerializeToJson(model) };
+
+            DbOperation(db => db.UpdateAsync(newItem)).Result.ToString();
+        }
+        
         var builder = WebApplication.CreateBuilder(args);
 
         var services = builder.Services;

@@ -631,4 +631,32 @@ static class Extensions
 
         return null;
     }
+
+    public static void Fix(VisualElementModel model)
+    {
+        foreach (var group in model.StyleGroups)
+        {
+            
+            var prefix = group.Condition;
+            if (prefix == "*")
+            {
+                prefix = null;
+            }
+            else
+            {
+                
+                prefix += ":";
+            }
+            
+            foreach (var item in group.Items)
+            {
+                model.Style.Add(prefix+item);
+            }
+        }
+
+        foreach (var child in model.Children)
+        {
+            Fix(child);
+        }
+    }
 }
