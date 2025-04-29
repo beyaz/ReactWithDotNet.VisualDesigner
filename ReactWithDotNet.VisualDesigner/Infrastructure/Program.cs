@@ -12,16 +12,16 @@ public class Program
 {
     public static void Main(string[] args)
     {
-        foreach (var item in GetAllComponents().Result)
-        {
-            var model = DeserializeFromJson<VisualElementModel>(item.RootElementAsJson);
+        //foreach (var item in GetAllComponents().Result)
+        //{
+        //    var model = DeserializeFromJson<VisualElementModel>(item.RootElementAsJson);
 
-            Fix(model);
+        //    Fix(model);
 
-            var newItem = item with { RootElementAsJson = SerializeToJson(model) };
+        //    var newItem = item with { RootElementAsJson = SerializeToJson(model) };
 
-            DbOperation(db => db.UpdateAsync(newItem)).Result.ToString();
-        }
+        //    DbOperation(db => db.UpdateAsync(newItem)).Result.ToString();
+        //}
         
         var builder = WebApplication.CreateBuilder(args);
 
