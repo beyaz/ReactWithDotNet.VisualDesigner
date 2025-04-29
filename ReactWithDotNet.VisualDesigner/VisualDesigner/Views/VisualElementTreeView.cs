@@ -237,13 +237,13 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
 
             var hasFlex = styles.Any(x =>
             {
-                var (success, name, value) = TryParsePropertyValue(x);
-                if (!success)
+                var parseResult = TryParsePropertyValue(x);
+                if (!parseResult.success)
                 {
                     return false;
                 }
 
-                if (name == "display" && value == "flex")
+                if (parseResult.name == "display" && parseResult.value == "flex")
                 {
                     return true;
                 }
@@ -253,13 +253,13 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
 
             var hasFlexDirectionColumn = styles.Any(x =>
             {
-                var (success, name, value) = TryParsePropertyValue(x);
-                if (!success)
+                var parseResult = TryParsePropertyValue(x);
+                if (!parseResult.success)
                 {
                     return false;
                 }
 
-                if (name == "flex-direction" && value == "column")
+                if (parseResult.name == "flex-direction" && parseResult.value == "column")
                 {
                     return true;
                 }
@@ -269,13 +269,13 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
 
             var hasFlexDirectionRow = styles.Any(x =>
             {
-                var (success, name, value) = TryParsePropertyValue(x);
-                if (!success)
+                var parseResult = TryParsePropertyValue(x);
+                if (!parseResult.success)
                 {
                     return false;
                 }
 
-                if (name == "flex-direction" && value == "row")
+                if (parseResult.name == "flex-direction" && parseResult.value == "row")
                 {
                     return true;
                 }
@@ -285,15 +285,15 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
 
             var hasHeightWithConstantValue = styles.Any(x =>
             {
-                var (success, name, value) = TryParsePropertyValue(x);
-                if (!success)
+                var parseResult = TryParsePropertyValue(x);
+                if (!parseResult.success)
                 {
                     return false;
                 }
 
-                if (double.TryParse(value, out _))
+                if (double.TryParse(parseResult.value, out _))
                 {
-                    return name == "h" || name == "height";
+                    return parseResult.name == "h" || parseResult.name == "height";
                 }
 
                 return false;
@@ -301,15 +301,15 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
 
             var hasWidhtWithConstantValue = styles.Any(x =>
             {
-                var (success, name, value) = TryParsePropertyValue(x);
-                if (!success)
+                var parseResult = TryParsePropertyValue(x);
+                if (!parseResult.success)
                 {
                     return false;
                 }
 
-                if (double.TryParse(value, out _))
+                if (double.TryParse(parseResult.value, out _))
                 {
-                    return name == "w" || name == "width";
+                    return parseResult.name == "w" || parseResult.name == "width";
                 }
 
                 return false;

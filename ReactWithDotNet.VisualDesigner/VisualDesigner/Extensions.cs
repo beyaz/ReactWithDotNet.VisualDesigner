@@ -591,24 +591,24 @@ static class Extensions
         return $"{name.Trim()}: {value.Trim()}";
     }
     
-    public static (bool success, string name, string value) TryParsePropertyValue(string nameValueCombined)
+    public static AttributeParseResult TryParsePropertyValue(string nameValueCombined)
     {
         if (string.IsNullOrWhiteSpace(nameValueCombined))
         {
-            return default;
+            return AttributeParseResult.Fail;
         }
 
         var colonIndex = nameValueCombined.IndexOf(':');
         if (colonIndex < 0)
         {
-            return default;
+            return AttributeParseResult.Fail;
         }
 
         var name = nameValueCombined[..colonIndex];
 
         var value = nameValueCombined[(colonIndex + 1)..];
 
-        return (success: true, name.Trim(), value.Trim());
+        return AttributeParseResult.Success(name.Trim(), value.Trim());
     }
     
     
@@ -616,9 +616,12 @@ static class Extensions
     {
         foreach (var property in properties)
         {
-            var (success, name, value) = TryParsePropertyValue(property);
-            if (success)
+            var parseResult = TryParsePropertyValue(property);
+            if (parseResult.success)
             {
+                var name = parseResult.name;
+                var value = parseResult.value;
+                
                 foreach (var propertyName in propertyNameWithAlias)
                 {
                     if (name.Equals(propertyName, StringComparison.OrdinalIgnoreCase) )
@@ -667,4 +670,16 @@ sealed class AttributeParseResult
     public bool success { get; init; }
     public string name { get; init; }
     public string value { get; init; }
+    
+    public static AttributeParseResult Fail=>new()
+    {
+        success = false
+    };
+    
+    public static AttributeParseResult Success(string name, string value)=>new()
+    {
+        success = true,
+        name = name,
+        value = value
+    };
 }

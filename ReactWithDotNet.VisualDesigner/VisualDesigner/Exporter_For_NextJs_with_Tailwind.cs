@@ -440,9 +440,12 @@ static class Exporter_For_NextJs_with_Tailwind
         // Add properties
         foreach (var property in element.Properties)
         {
-            var (success, name, value) = TryParsePropertyValue(property);
-            if (success)
+            var parseResult = TryParsePropertyValue(property);
+            if (parseResult.success)
             {
+                var name = parseResult.name;
+                var value = parseResult.value;
+                
                 if (name == "class")
                 {
                     classNames.AddRange(value.Split(" ", StringSplitOptions.RemoveEmptyEntries));
@@ -654,10 +657,10 @@ static class Exporter_For_NextJs_with_Tailwind
     {
         public static Result<string> ConvertDesignerStyleItemToTailwindClassName(string designerStyleItem)
         {
-            var (success, name, value) = TryParsePropertyValue(designerStyleItem);
-            if (success)
+            var parseResult = TryParsePropertyValue(designerStyleItem);
+            if (parseResult.success)
             {
-                return ConvertToTailwindClass(name, value);
+                return ConvertToTailwindClass(parseResult.name, parseResult.value);
             }
 
             return designerStyleItem;

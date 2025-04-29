@@ -430,9 +430,12 @@ static class ApplicationLogic
     public static StyleModifier TryProcessStyleAttributeByProjectConfig(string styleAttribute)
     {
         {
-            var (success, name, value) = TryParsePropertyValue(styleAttribute);
-            if (success)
+            var parseResult = TryParsePropertyValue(styleAttribute);
+            if (parseResult.success)
             {
+                var name = parseResult.name;
+                var value = parseResult.value;
+                
                 if (name == "color")
                 {
                     if (Project.Colors.TryGetValue(value, out var realColor))

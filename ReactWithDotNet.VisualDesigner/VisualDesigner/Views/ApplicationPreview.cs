@@ -175,12 +175,15 @@ sealed class ApplicationPreview : Component
                     {
                         string bindPropertyValue;
                         {
-                            var (success, name, value) = TryParsePropertyValue(property);
-                            if (!success)
+                            var parseResult = TryParsePropertyValue(property);
+                            if (!parseResult.success)
                             {
                                 continue;
                             }
 
+                            var name = parseResult.name;
+                            var value = parseResult.value;
+                            
                             if (name != "-bind")
                             {
                                 continue;
@@ -217,9 +220,12 @@ sealed class ApplicationPreview : Component
 
             foreach (var property in model.Properties)
             {
-                var (success, name, value) = TryParsePropertyValue(property);
-                if (success && value is not null)
+                var parseResult = TryParsePropertyValue(property);
+                if (parseResult.success && parseResult.value is not null)
                 {
+                    var name = parseResult.name;
+                    var value = parseResult.value;
+                    
                     if (name == "-items-source-design-time-count")
                     {
                         var designTimeChildrenCount = double.Parse(value);
@@ -436,11 +442,14 @@ sealed class ApplicationPreview : Component
             }
         }
 
-        var (success, name, value) = TryParsePropertyValue(styleAttribute);
-        if (!success || value is null)
+        var parseResult = TryParsePropertyValue(styleAttribute);
+        if (!parseResult.success || parseResult.value is null)
         {
             return null;
         }
+        
+        var name = parseResult.name;
+        var value = parseResult.value;
 
         var isValueDouble = double.TryParse(value, out var valueAsDouble);
 

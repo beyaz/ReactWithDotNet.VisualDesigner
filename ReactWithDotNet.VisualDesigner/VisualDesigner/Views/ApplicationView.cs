@@ -1127,12 +1127,12 @@ sealed class ApplicationView : Component<ApplicationState>
 
                 Element content = value;
                 {
-                    var (success, name, realValue) = TryParsePropertyValue(value);
-                    if (success)
+                    var parseResult = TryParsePropertyValue(value);
+                    if (parseResult.success)
                     {
                         content = new FlexRowCentered
                         {
-                            new span(FontWeight500) { name }, ": ", realValue
+                            new span(FontWeight500) { parseResult.name }, ": ", parseResult.value
                         };
                     }
                 }
@@ -1177,10 +1177,10 @@ sealed class ApplicationView : Component<ApplicationState>
                             // calculate text selection in edit input
                             {
                                 var nameValue = CurrentVisualElement.StyleGroups[location.StyleGroupIndex].Items[state.Selection.PropertyIndexInStyleGroup.Value];
-                                var (success, _, parsedValue) = TryParsePropertyValue(nameValue);
-                                if (success)
+                                var parseResult = TryParsePropertyValue(nameValue);
+                                if (parseResult.success)
                                 {
-                                    var startIndex = nameValue.LastIndexOf(parsedValue, StringComparison.OrdinalIgnoreCase);
+                                    var startIndex = nameValue.LastIndexOf(parseResult.value, StringComparison.OrdinalIgnoreCase);
                                     var endIndex = nameValue.Length;
 
                                     jsCode.AppendLine($"document.getElementById('{id}').setSelectionRange({startIndex}, {endIndex});");
@@ -1284,12 +1284,12 @@ sealed class ApplicationView : Component<ApplicationState>
 
                 Element content = value;
                 {
-                    var (success, name, realValue) = TryParsePropertyValue(value);
-                    if (success)
+                    var parseResult = TryParsePropertyValue(value);
+                    if (parseResult.success)
                     {
                         content = new FlexRowCentered
                         {
-                            new span(FontWeight500) { name }, ": ", realValue
+                            new span(FontWeight500) { parseResult.name }, ": ", parseResult.value
                         };
                     }
                 }
@@ -1325,10 +1325,10 @@ sealed class ApplicationView : Component<ApplicationState>
                             // calculate text selection in edit input
                             {
                                 var nameValue = CurrentVisualElement.Properties[location];
-                                var (success, _, parsedValue) = TryParsePropertyValue(nameValue);
-                                if (success)
+                                var parseResult = TryParsePropertyValue(nameValue);
+                                if (parseResult.success)
                                 {
-                                    var startIndex = nameValue.LastIndexOf(parsedValue, StringComparison.OrdinalIgnoreCase);
+                                    var startIndex = nameValue.LastIndexOf(parseResult.value, StringComparison.OrdinalIgnoreCase);
                                     var endIndex = nameValue.Length;
 
                                     jsCode.AppendLine($"document.getElementById('{id}').setSelectionRange({startIndex}, {endIndex});");
