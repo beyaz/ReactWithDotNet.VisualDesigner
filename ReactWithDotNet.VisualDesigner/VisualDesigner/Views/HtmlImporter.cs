@@ -8,11 +8,13 @@ static class HtmlImporter
 {
     public static VisualElementModel Import(string html)
     {
-        var doc = new HtmlDocument();
-        doc.OptionOutputOriginalCase = true;
-        doc.LoadHtml(html);
+        var htmlDocument = new HtmlDocument
+        {
+            OptionOutputOriginalCase = true
+        };
+        htmlDocument.LoadHtml(html);
 
-        var root = doc.DocumentNode.FirstChild;
+        var root = htmlDocument.DocumentNode.FirstChild;
         
         
         var sb = new StringBuilder();
