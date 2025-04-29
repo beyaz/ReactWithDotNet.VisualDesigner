@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using Dapper.Contrib.Extensions;
+using ReactWithDotNet.ThirdPartyLibraries.MonacoEditorReact;
 using Page = ReactWithDotNet.WebSite.Page;
 
 namespace ReactWithDotNet.VisualDesigner.Views;
@@ -293,6 +294,28 @@ sealed class ApplicationView : Component<ApplicationState>
             {
                 await PartLeftPanel() + BorderBottomLeftRadius(8) + OverflowAuto,
 
+                state.HtmlCodeVisible ? 
+                
+                    new FlexColumn(FlexGrow(1), Padding(7), OverflowXAuto)
+                    {
+                        new Editor
+                        {
+                            valueBind                = ()=>state.HtmlCode,
+                            valueBindDebounceTimeout = 500,
+                            defaultLanguage          = "html",
+                            options =
+                            {
+                                renderLineHighlight = "none",
+                                fontFamily          = "consolas, 'IBM Plex Mono Medium', 'Courier New', monospace",
+                                fontSize            = 11,
+                                minimap             = new { enabled = false },
+                                lineNumbers         = "off",
+                                unicodeHighlight    = new { showExcludeOptions = false }
+                            }
+                        }
+                    }
+                    
+                :
                 new FlexColumn(FlexGrow(1), Padding(7), OverflowXAuto)
                 {
                     Ruler.HorizontalRuler(state.Preview.Width, state.Preview.Scale) + Width(state.Preview.Width) + MarginTop(12) + PaddingLeft(30),
@@ -419,6 +442,23 @@ sealed class ApplicationView : Component<ApplicationState>
                             })
                         }
                     }
+                },
+                
+                SpaceX(8),
+                new FlexRowCentered(Border(1, solid, Theme.BorderColor), BorderRadius(4), Width(60))
+                {
+                    PositionRelative,
+                    new label(PositionAbsolute, Top(-4), Left(8), FontSize10, LineHeight7, Background(Theme.BackgroundColor), PaddingX(4)) { "View" },
+                    
+                    state.HtmlCodeVisible ? "Design" : "Code",
+                    
+                    OnClick(_ =>
+                    {
+                        state.HtmlCodeVisible = !state.HtmlCodeVisible;
+                        
+                        return Task.CompletedTask;
+                    })
+                    
                 }
             },
             new FlexRowCentered(Gap(32))

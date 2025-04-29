@@ -50,6 +50,10 @@ public sealed class ApplicationState
     public required ApplicationSelectionState Selection { get; set; }
     
     public string UserName { get; init; }
+    
+    public bool HtmlCodeVisible { get; set; }
+    
+    public string HtmlCode { get; init; }
 
     // @formatter:on
 }
