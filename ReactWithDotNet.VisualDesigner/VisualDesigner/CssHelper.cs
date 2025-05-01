@@ -155,7 +155,7 @@ public static class CssHelper
         }
     }
     
-    public static Result<StyleModifier> ConvertToStyleModifier(string name, string value)
+    public static HtmlStyleItem ConvertToStyleModifier(string name, string value)
     {
         if (name == null)
         {
@@ -175,56 +175,57 @@ public static class CssHelper
             {
                 if (isValueDouble)
                 {
-                    return Transform(valueAsDouble + "deg");
+                    return (name, valueAsDouble + "deg");
                 }
 
-                return Transform(value);
+                return (name, value);
             }
+            
             case "min-width":
             {
                 if (isValueDouble)
                 {
-                    return MinWidth(valueAsDouble);
+                    return (name, valueAsDouble.AsPixel());
                 }
 
-                return MinWidth(value);
+                return (name, value);
             }
 
             case "top":
             {
                 if (isValueDouble)
                 {
-                    return Top(valueAsDouble);
+                    return (name, valueAsDouble.AsPixel());
                 }
 
-                return Top(value);
+                return (name, value);
             }
             case "bottom":
             {
                 if (isValueDouble)
                 {
-                    return Bottom(valueAsDouble);
+                    return (name, valueAsDouble.AsPixel());
                 }
 
-                return Bottom(value);
+                return (name, value);
             }
             case "left":
             {
                 if (isValueDouble)
                 {
-                    return Left(valueAsDouble);
+                    return (name, valueAsDouble.AsPixel());
                 }
 
-                return Left(value);
+                return (name, value);
             }
             case "right":
             {
                 if (isValueDouble)
                 {
-                    return Right(valueAsDouble);
+                    return (name, valueAsDouble.AsPixel());
                 }
 
-                return Right(value);
+                return (name, value);
             }
 
             case "border-top":
@@ -247,152 +248,146 @@ public static class CssHelper
                     value = string.Join(" ", parts);
                 }
 
-                switch (name)
-                {
-                    case "border-top":
-                        return BorderTop(value);
-                    case "border-bottom":
-                        return BorderBottom(value);
-                    case "border-left":
-                        return BorderLeft(value);
-                    case "border-right":
-                        return BorderRight(value);
-                    default:
-                        return Border(value);
-                }
+                return (name, value);
             }
 
             case "justify-items":
             {
-                return JustifyItems(value);
+                return (name, value);
             }
             case "justify-content":
             {
-                return JustifyContent(value);
+                return (name,value);
             }
 
             case "align-items":
             {
-                return AlignItems(value);
+                return (name, value);
             }
 
             case "display":
             {
-                return Display(value);
+                return (name, value);
             }
 
             case "background":
             case "bg":
             {
-                if (Project.Colors.TryGetValue(value, out var realColor))
+                name = "background";
+                
+                    if (Project.Colors.TryGetValue(value, out var realColor))
                 {
                     value = realColor;
                 }
 
-                return Background(value);
+                return (name,value);
             }
 
             case "font-size":
             {
                 if (isValueDouble)
                 {
-                    return FontSize(valueAsDouble);
+                    return (name, valueAsDouble.AsPixel());
                 }
 
-                return FontSize(value);
+                return (name, value);
             }
 
             case "font-weight":
             {
-                return FontWeight(value);
+                return (name, value);
             }
 
             case "text-align":
             {
-                return TextAlign(value);
+                return (name, value);
             }
 
             case "w":
             case "width":
             {
-                if (isValueDouble)
+                name = "width";
+                
+                    if (isValueDouble)
                 {
-                    return Width(valueAsDouble);
+                    return (name,valueAsDouble.AsPixel());
                 }
 
-                return Width(value);
+                return (name, value);
+            }
+            
+            case "h":
+            case "height":
+            {
+                name = "height";
+                
+                if (isValueDouble)
+                {
+                    return (name, valueAsDouble.AsPixel());
+                }
+
+                return (name, value);
+            }
+            case "size":
+            {
+                if (isValueDouble)
+                {
+                    return new[]{("width", valueAsDouble.AsPixel()), ("height", valueAsDouble.AsPixel())};
+                }
+
+                return new[]{("width", value), ("height", value)};
             }
 
             case "outline":
             {
-                return Outline(value);
+                return (name, value);
             }
 
             case "text-decoration":
             {
-                return TextDecoration(value);
+                return (name, value);
             }
 
-            case "h":
-            case "height":
-            {
-                if (isValueDouble)
-                {
-                    return Height(valueAsDouble);
-                }
-
-                return Height(value);
-            }
+            
 
             case "border-radius":
             {
                 if (isValueDouble)
                 {
-                    return BorderRadius(valueAsDouble);
+                    return (name,valueAsDouble.AsPixel());
                 }
 
-                return BorderRadius(value);
+                return (name, value);
             }
 
             case "gap":
             {
                 if (isValueDouble)
                 {
-                    return Gap(valueAsDouble);
+                    return (name, valueAsDouble.AsPixel());
                 }
 
-                return Gap(value);
+                return (name, value);
             }
             case "flex-grow":
             {
-                if (isValueDouble)
-                {
-                    return FlexGrow(valueAsDouble);
-                }
-
-                return FlexGrow(value);
+                return (name, value);
             }
 
             case "p":
             case "padding":
             {
-                if (isValueDouble)
+                name = "padding";
+                
+                    if (isValueDouble)
                 {
-                    return Padding(valueAsDouble);
+                    return (name, valueAsDouble.AsPixel());
                 }
 
-                return Padding(value);
+                return (name, value);
             }
 
-            case "size":
-            {
-                if (isValueDouble)
-                {
-                    return Size(valueAsDouble);
-                }
-
-                return Size(value);
-            }
+           
 
             case "color":
             {
@@ -401,37 +396,38 @@ public static class CssHelper
                     value = realColor;
                 }
 
-                return Color(value);
+                return (name,value);
             }
 
             case "px":
             {
                 if (isValueDouble)
                 {
-                    return PaddingLeftRight(valueAsDouble);
+                    value = valueAsDouble.AsPixel();
                 }
 
-                return PaddingLeftRight(value);
+                return new[]{("padding-left", value), ("padding-right", value)};
             }
             case "py":
             {
                 if (isValueDouble)
                 {
-                    return PaddingTopBottom(valueAsDouble);
+                    value = valueAsDouble.AsPixel();
                 }
 
-                return PaddingTopBottom(value);
+                return new[]{("padding-top", value), ("padding-bottom", value)};
             }
+            
 
             case "pl":
             case "padding-left":
             {
                 if (isValueDouble)
                 {
-                    return PaddingLeft(valueAsDouble);
+                    value = valueAsDouble.AsPixel();
                 }
 
-                return PaddingLeft(value);
+                return ("padding-left", value);
             }
 
             case "pr":
@@ -439,10 +435,10 @@ public static class CssHelper
             {
                 if (isValueDouble)
                 {
-                    return PaddingRight(valueAsDouble);
+                    value = valueAsDouble.AsPixel();
                 }
 
-                return PaddingRight(value);
+                return ("padding-right", value);
             }
 
             case "pt":
@@ -450,10 +446,10 @@ public static class CssHelper
             {
                 if (isValueDouble)
                 {
-                    return PaddingTop(valueAsDouble);
+                    value = valueAsDouble.AsPixel();
                 }
 
-                return PaddingTop(value);
+                return ("padding-top", value);
             }
 
             case "pb":
@@ -461,10 +457,10 @@ public static class CssHelper
             {
                 if (isValueDouble)
                 {
-                    return PaddingBottom(valueAsDouble);
+                    value = valueAsDouble.AsPixel();
                 }
 
-                return PaddingBottom(value);
+                return ("padding-bottom", value);
             }
 
             case "ml":
@@ -472,10 +468,10 @@ public static class CssHelper
             {
                 if (isValueDouble)
                 {
-                    return MarginLeft(valueAsDouble);
+                    value = valueAsDouble.AsPixel();
                 }
 
-                return MarginLeft(value);
+                return ("margin-left", value);
             }
 
             case "mr":
@@ -483,10 +479,10 @@ public static class CssHelper
             {
                 if (isValueDouble)
                 {
-                    return MarginRight(valueAsDouble);
+                    value = valueAsDouble.AsPixel();
                 }
 
-                return MarginRight(value);
+                return ("margin-right", value);
             }
 
             case "mt":
@@ -494,10 +490,10 @@ public static class CssHelper
             {
                 if (isValueDouble)
                 {
-                    return MarginTop(valueAsDouble);
+                    value = valueAsDouble.AsPixel();
                 }
 
-                return MarginTop(value);
+                return ("margin-top", value);
             }
 
             case "mb":
@@ -505,120 +501,66 @@ public static class CssHelper
             {
                 if (isValueDouble)
                 {
-                    return MarginBottom(valueAsDouble);
+                    value = valueAsDouble.AsPixel();
                 }
 
-                return MarginBottom(value);
+                return ("margin-bottom", value);
             }
 
             case "flex-direction":
-            {
-                return FlexDirection(value);
-            }
             case "z-index":
-            {
-                return ZIndex(value);
-            }
             case "position":
             {
-                return Position(value);
+                return (name, value);
             }
             case "max-width":
-            {
-                if (isValueDouble)
-                {
-                    return MaxWidth(valueAsDouble);
-                }
-
-                return MaxWidth(value);
-            }
             case "max-height":
-            {
-                if (isValueDouble)
-                {
-                    return MaxHeight(valueAsDouble);
-                }
-
-                return MaxHeight(value);
-            }
-            case "border-top-left-radius":
-            {
-                return BorderTopLeftRadius(valueAsDouble);
-            }
+            case "inset":
+            case "border-width":
+            case "border-bottom-width":
             case "border-top-right-radius":
-            {
-                return BorderTopRightRadius(valueAsDouble);
-            }
+            case "border-top-left-radius":
             case "border-bottom-left-radius":
-            {
-                return BorderBottomLeftRadius(valueAsDouble);
-            }
             case "border-bottom-right-radius":
             {
-                return BorderBottomRightRadius(valueAsDouble);
+                if (isValueDouble)
+                {
+                    value = valueAsDouble.AsPixel();
+                }
+
+                return (name, value);
             }
+           
 
             case "overflow-y":
             {
-                return OverflowY(value);
+                return (name, value);
             }
             case "overflow-x":
             {
-                return OverflowX(value);
+                return (name, value);
             }
-            case "border-bottom-width":
-            {
-                if (isValueDouble)
-                {
-                    return BorderBottomWidth(valueAsDouble + "px");
-                }
-
-                return BorderBottomWidth(value);
-            }
+            
             case "fill":
             {
-                return Fill(value);
+                return (name, value);
             }
             case "stroke":
             {
-                return Stroke(value);
-            }
-
-            case "font-family":
-            {
-                return FontFamily(value);
+                return (name, value);
             }
 
             case "border-color":
-            {
-                return BorderColor(value);
-            }
+            case "font-family":
+            case "cursor":
             case "border-style":
             {
-                return BorderStyle(value);
+                return (name, value);
             }
-            case "border-width":
-            {
-                if (isValueDouble)
-                {
-                    return BorderWidth(valueAsDouble);
-                }
-
-                return BorderWidth(value);
-            }
-            case "cursor":
-            {
-                return Cursor(value);
-            }
-            case "inset":
-            {
-                if (isValueDouble)
-                {
-                    return Inset(valueAsDouble + "px");
-                }
-
-                return Inset(value);
-            }
+          
+            
+            
+            
         }
 
         return new Exception($"{name}: {value} is not recognized");
@@ -1310,6 +1252,39 @@ public sealed record DesignerStyleItem
         {
             Pseudo = tuple.Pseudo,
             RawHtmlStyles = tuple.RawHtmlStyles.ToDictionary(x=>x.Name, x=>x.Value)
+        };
+    }
+}
+
+public sealed class HtmlStyleItem : Result<Dictionary<string,string>>
+{
+    
+    public static implicit operator HtmlStyleItem((string Name, string Value) item)
+    {
+        return new()
+        {
+           Success = true,
+           Value = new()
+           {
+               [item.Name] = item.Value
+           }
+        };
+    }
+    public static implicit operator HtmlStyleItem((string Name, string Value)[] items)
+    {
+        return new()
+        {
+            Success = true,
+            Value = items.ToDictionary(x=>x.Name, x=>x.Value)
+        };
+    }
+    
+    public static implicit operator HtmlStyleItem(Exception exception)
+    {
+        return new()
+        {
+            Success = false,
+            Error = exception
         };
     }
 }

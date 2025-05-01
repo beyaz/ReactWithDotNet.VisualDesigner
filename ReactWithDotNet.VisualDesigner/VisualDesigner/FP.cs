@@ -24,7 +24,7 @@ public sealed class Result
     }
 }
 
-public sealed class Result<TValue>
+public class Result<TValue>
 {
     public Exception Error { get; init; }
 
