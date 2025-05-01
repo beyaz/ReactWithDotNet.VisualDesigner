@@ -322,32 +322,16 @@ sealed class ApplicationPreview : Component
                 }
             }
 
-            foreach (var styleGroup in model.StyleGroups ?? [])
+            Fix(model);
+
             {
-                foreach (var styleAttribute in styleGroup.Items ?? [])
+                var result = model.Style.Select(ConvertToStyleModifier).FoldThen(styleModifiers => element.Add(styleModifiers.ToArray()));
+                if (result.HasError)
                 {
-                    var styleModifier = ConvertToStyleModifier(styleAttribute);
-                    if (styleModifier is null)
-                    {
-                        continue;
-                    }
-
-                    if (styleGroup.Condition.HasNoValue() || styleGroup.Condition == "*")
-                    {
-                        element.Add(styleModifier);
-                        continue;
-                    }
-
-                    if (ConditionMap.TryGetValue(styleGroup.Condition, out var fn))
-                    {
-                        element.Add(fn([styleModifier]));
-                        continue;
-                    }
-
-                    return new Exception($"{styleGroup.Condition} not implemented yet");
+                    return result.Error;
                 }
             }
-
+            
             if (context.HighlightedElement == model)
             {
                 if (element.style.outline is null)
@@ -394,54 +378,49 @@ sealed class ApplicationPreview : Component
         }
     }
 
-    static StyleModifier ConvertToStyleModifier(string styleAttribute)
+    static Result<IReadOnlyList<StyleModifier>> ConvertToStyleModifier(string styleAttribute)
     {
         // try process from plugin
         {
             var style = TryProcessStyleAttributeByProjectConfig(styleAttribute);
             if (style is not null)
             {
-                return style;
+                return new[]{style};
             }
         }
 
-        switch (styleAttribute)
         {
-            case "w-full":
+            var maybe = TryConvertCssUtilityClassToHtmlStyle(styleAttribute);
+            if (maybe.HasValue)
             {
-                return Width("100%");
-            }
-            case "w-fit":
-            {
-                return WidthFitContent;
-            }
-            case "h-fit":
-            {
-                return HeightFitContent;
-            }
-            case "size-fit":
-            {
-                return WidthFitContent + HeightFitContent;
-            }
+                Func<StyleModifier[], StyleModifier> pseudoFunction = null;
+                
+                if (maybe.Value.Pseudo is not null)
+                {
+                   var result = GetPseudoFunction(maybe.Value.Pseudo);
+                   if (result.HasError)
+                   {
+                       return result.Error;
+                   }
+                   
+                   pseudoFunction = result.Value;
+                }
 
-            case "flex-row-centered":
-            {
-                return DisplayFlexRowCentered;
-            }
-            case "flex-col-centered":
-            {
-                return DisplayFlexColumnCentered;
-            }
-            case "col":
-            {
-                return DisplayFlexColumn;
-            }
-            case "row":
-            {
-                return DisplayFlexRow;
+                var cssStyles = maybe.Value.CssStyles;
+
+                return cssStyles.Select(x => CssHelper.ConvertToStyleModifier(x.Name, x.Value)).Then(styleModifiers =>
+                {
+                    if (pseudoFunction is not null)
+                    {
+                        return [pseudoFunction(styleModifiers.ToArray())];
+                    }
+
+                    return styleModifiers;
+                });
+                
             }
         }
-
+        
         var parseResult = TryParsePropertyValue(styleAttribute);
         if (!parseResult.success || parseResult.value is null)
         {
@@ -452,7 +431,7 @@ sealed class ApplicationPreview : Component
         var value = parseResult.value;
 
 
-        return CssHelper.ConvertToStyleModifier(name, value).Value;
+        return CssHelper.ConvertToStyleModifier(name, value).ToReadOnlyList();
     }
 
     [StopPropagation]

@@ -97,6 +97,23 @@ public sealed class NoneObject
 
 static class FP
 {
+    
+    public static Result<IReadOnlyList<TValue>> ToReadOnlyList<TValue>(this Result<TValue> result)
+    {
+        return result.Then(x => (IReadOnlyList<TValue>) [x]);
+    }
+    
+    
+    public static Result<B> Then<A,B>(this Result<A> result, Func<A,B> convertFunc)
+    {
+        if (result.HasError)
+        {
+            return result.Error;
+        }
+
+        return convertFunc(result.Value);
+    }
+    
     public static NoneObject None => NoneObject.Instance;
     
     public static readonly Result Success = new() { Success = true };
@@ -135,5 +152,41 @@ static class FP
         }
 
         return value;
+    }
+    
+    public static  Result<B> Then<A,B>(this IEnumerable<Result<A>> response, Func<IReadOnlyList<A>,B> nextAction)
+    {
+         List<A> values = [];
+
+         foreach (var result in response)
+         {
+             if (result.HasError)
+             {
+                 return result.Error;
+             }
+             
+             values.Add(result.Value);
+         }
+         
+         return nextAction(values);
+    }
+    
+    public static  Result FoldThen<A>(this IEnumerable<Result<IReadOnlyList<A>>> response, Action<IReadOnlyList<A>> nextAction)
+    {
+        List<A> values = [];
+
+        foreach (var result in response)
+        {
+            if (result.HasError)
+            {
+                return result.Error;
+            }
+             
+            values.AddRange(result.Value);
+        }
+         
+        nextAction(values);
+
+        return Success;
     }
 }

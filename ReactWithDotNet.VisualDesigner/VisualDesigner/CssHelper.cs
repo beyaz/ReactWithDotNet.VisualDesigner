@@ -2,7 +2,7 @@
 
 public static class CssHelper
 {
-    static readonly Dictionary<string, Func<StyleModifier[], StyleModifier>> MediaQueries = new()
+    static readonly Dictionary<string, Func<StyleModifier[], StyleModifier>> MediaQueries = new(StringComparer.OrdinalIgnoreCase)
     {
         { "hover", Hover },
         { "Focus", Focus },
@@ -12,6 +12,16 @@ public static class CssHelper
         { "XL", XL },
         { "XXL", XXL }
     };
+
+    public static Result<Func<StyleModifier[], StyleModifier>> GetPseudoFunction(string pseudoName)
+    {
+        if (MediaQueries.TryGetValue(pseudoName, out var func))
+        {
+            return func;
+        }
+
+        return new ArgumentOutOfRangeException($"{pseudoName} not recognized");
+    }
 
     public static Result<StyleModifier> ConvertToStyleModifier(string name, string value)
     {
