@@ -107,6 +107,8 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
 
         state.DragStartedTreeItemPath = null;
 
+        state.CollapsedNodes.Clear();
+
         return Task.CompletedTask;
     }
 

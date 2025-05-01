@@ -624,34 +624,52 @@ public static class CssHelper
 
         // text - color - weight
         {
-            var (success, color, number) = tryParse(utilityCssClassName);
+            var (success, color, number) = tryParseAs_prefix_color_weight(utilityCssClassName, "text");
             if (success)
             {
-                var fieldInfo = typeof(Tailwind).GetField(color + number, BindingFlags.IgnoreCase | BindingFlags.Static | BindingFlags.Public);
-                if (fieldInfo != null)
+                var tailwindColor = tryGetTailwindColor(color, number);
+                if (tailwindColor.HasValue)
                 {
-                    var hexColor = (string)fieldInfo.GetValue(null);
                     return (pseudo,
                     [
-                        ("color", hexColor)
+                        ("color", tailwindColor.Value)
                     ]);
                 }
             }
-
-            static (bool success, string color, string number) tryParse(string input)
+        }
+        
+        // bg - color - weight
+        {
+            var (success, color, number) = tryParseAs_prefix_color_weight(utilityCssClassName, "bg");
+            if (success)
             {
-                string pattern = @"text-(\w+)-(\d+)";
-                Regex regex = new Regex(pattern);
-                Match match = regex.Match(input);
-
-                if (match.Success)
+                var tailwindColor = tryGetTailwindColor(color, number);
+                if (tailwindColor.HasValue)
                 {
-                    string color = match.Groups[1].Value; // "pink"
-                    string value = match.Groups[2].Value; // "500"
-                    return (true,color, value);
+                    return (pseudo,
+                    [
+                        ("background", tailwindColor.Value)
+                    ]);
                 }
+            }
+        }
+        
+        // text-decoration-line
+        {
+            var map = new Dictionary<string, string>
+            {
+                { "underline", "underline" },
+                { "overline", "overline" },
+                { "line-through", "line-through" },
+                { "no-underline", "none" }
+            };
 
-                return (false, null, null);
+            if (map.TryGetValue(utilityCssClassName, out var value))
+            {
+                return (pseudo,
+                [
+                    ("text-decoration-line", value)
+                ]);
             }
         }
         
@@ -677,6 +695,33 @@ public static class CssHelper
             }
 
             return null;
+        }
+        
+        static (bool success, string color, string number) tryParseAs_prefix_color_weight(string input, string prefix)
+        {
+            string pattern = $@"{Regex.Escape(prefix)}-(\w+)-(\d+)";
+            Regex regex = new Regex(pattern);
+            Match match = regex.Match(input);
+
+            if (match.Success)
+            {
+                string color = match.Groups[1].Value; 
+                string value = match.Groups[2].Value;
+                return (true,color, value);
+            }
+
+            return (false, null, null);
+        }
+
+        static Maybe<string> tryGetTailwindColor(string colorName, string number)
+        {
+            var fieldInfo = typeof(Tailwind).GetField(colorName + number, BindingFlags.IgnoreCase | BindingFlags.Static | BindingFlags.Public);
+            if (fieldInfo != null)
+            {
+                return (string)fieldInfo.GetValue(null);
+            }
+
+            return None;
         }
     }
 
