@@ -21,6 +21,13 @@ public static class CssHelper
                     ("width", "fit-content")
                 };
             }
+            case "h-full":
+            {
+                return new[]
+                {
+                    ("height", "100%")
+                };
+            }
             case "h-fit":
             {
                 return new[]
@@ -42,9 +49,9 @@ public static class CssHelper
                 return new[]
                 {
                     ("display", "flex"),
-                    ("flexDirection", "row"),
-                    ("justifyContent", "center"),
-                    ("alignItems", "center")
+                    ("flex-direction", "row"),
+                    ("justify-content", "center"),
+                    ("align-items", "center")
                 };
             }
             case "flex-col-centered":
@@ -52,9 +59,9 @@ public static class CssHelper
                 return new[]
                 {
                     ("display", "flex"),
-                    ("flexDirection", "column"),
-                    ("justifyContent", "center"),
-                    ("alignItems", "center")
+                    ("flex-direction", "column"),
+                    ("justify-content", "center"),
+                    ("align-items", "center")
                 };
             }
             case "col":
@@ -62,7 +69,7 @@ public static class CssHelper
                 return new[]
                 {
                     ("display", "flex"),
-                    ("flexDirection", "column")
+                    ("flex-direction", "column")
                 };
             }
             case "row":
@@ -70,7 +77,7 @@ public static class CssHelper
                 return new[]
                 {
                     ("display", "flex"),
-                    ("flexDirection", "row")
+                    ("flex-direction", "row")
                 };
             }
         }
