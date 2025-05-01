@@ -989,12 +989,6 @@ sealed class ApplicationView : Component<ApplicationState>
                     },
                     new FlexRow(WidthFull, FlexWrap, Gap(4))
                     {
-                        OnClick(_ =>
-                        {
-                            state.Selection = state.Selection with { SelectedStyleIndex = null };
-
-                            return Task.CompletedTask;
-                        }),
                         styleGroup.Items?.Select((value, index) => attributeItem(index, value))
                     }
                 }
