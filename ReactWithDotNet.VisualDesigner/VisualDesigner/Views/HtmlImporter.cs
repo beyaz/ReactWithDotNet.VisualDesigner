@@ -36,7 +36,7 @@ static class HtmlImporter
         {
             return null;
         }
-        
+
         if (htmlNode.NodeType == HtmlNodeType.Comment)
         {
             return null;
@@ -51,39 +51,70 @@ static class HtmlImporter
         {
             Tag = htmlNode.Name
         };
-        
+
         foreach (var attribute in htmlNode.Attributes)
         {
-            var name = attribute.Name;
-            var value = attribute.Value;
-            
-            if (name == "style")
+            var attributeName = attribute.Name;
+            var attributeValue = attribute.Value;
+
+            if (attributeName == "style")
             {
+                var (map, _) = Style.ParseCssAsDictionary(attributeValue);
+                if (map != null)
+                {
+                    foreach (var item in map)
+                    {
+                        model.Styles.Add(item.Key + ": " + item.Value);
+                    }
+                }
+
                 continue;
             }
 
-            if (name == "class")
+            if (attributeName == "class")
             {
-                name = "className";
-            }
-            
-            model.Properties.Add(name + ": " + value);
-        }
-        
+                attributeName = "className";
 
-        var css = htmlNode.Attributes.FirstOrDefault(p => p.Name == "style")?.Value;
-        if (css.HasValue())
-        {
-            var (map, _) = Style.ParseCssAsDictionary(css);
-            if (map!=null)
-            {
-                foreach (var (key, value) in map)
+                var listOfCssClass = attributeValue.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+                List<string> remainigClassNames = [];
+                
+                foreach (var className in listOfCssClass)
                 {
-                    model.Styles.Add(key + ": " + value);
+                    var maybe = CssHelper.TryConvertCssUtilityClassToHtmlStyle(className);
+                    if (maybe.HasValue)
+                    {
+                        var pseudo = maybe.Value.Pseudo;
+                        var styles = maybe.Value.CssStyles;
+                        
+                        foreach (var (name, value) in styles)
+                        {
+                            if (pseudo.HasValue())
+                            {
+                                model.Styles.Add(pseudo +":"+ name + ": " + value);
+                            }
+                            else
+                            {
+                                model.Styles.Add(name + ": " + value);
+                            }
+                        }
+                        
+                        continue;
+                    }
+                    
+                    remainigClassNames.Add(className);
                 }
+
+                if (remainigClassNames.Count == 0)
+                {
+                    continue;
+                }
+
+                attributeValue = string.Join(" ", remainigClassNames);
             }
+
+            model.Properties.Add(attributeName + ": " + attributeValue);
         }
-        
 
         if (htmlNode.ChildNodes.Count == 1 && htmlNode.ChildNodes[0].NodeType == HtmlNodeType.Text && htmlNode.ChildNodes[0].InnerText.HasValue())
         {
