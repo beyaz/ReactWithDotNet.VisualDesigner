@@ -932,6 +932,8 @@ sealed class ApplicationView : Component<ApplicationState>
                 Value       = visualElementModel.Text,
                 OnChange = (_, newValue) =>
                 {
+                    
+                    
                     CurrentVisualElement.Text = newValue;
 
                     return Task.CompletedTask;

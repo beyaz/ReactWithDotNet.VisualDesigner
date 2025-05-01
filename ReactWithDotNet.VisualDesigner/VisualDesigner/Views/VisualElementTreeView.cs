@@ -68,8 +68,10 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
         if (e.key == "c")
         {
             state.CopiedTreeItemPath = SelectedPath;
+            return Task.CompletedTask;
         }
-        else if (e.key == "v" && state.CopiedTreeItemPath.HasValue())
+
+        if (e.key == "v" && state.CopiedTreeItemPath.HasValue())
         {
             DispatchEvent(CopyPaste, [state.CopiedTreeItemPath, SelectedPath]);
 
@@ -229,7 +231,7 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
 
         {
             var styles = node.Styles;
-            
+
             var hasCol = styles.Contains("col") || styles.Contains("flex-col-centered");
             var hasRow = styles.Contains("row") || styles.Contains("flex-row-centered");
 
