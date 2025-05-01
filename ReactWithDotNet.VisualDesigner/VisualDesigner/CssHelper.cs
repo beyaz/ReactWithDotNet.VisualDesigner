@@ -528,8 +528,9 @@ public static class CssHelper
 
     public static Maybe<(string Pseudo, string NewText)> TryReadPseudo(string text)
     {
-        foreach (var prefix in MediaQueries.Keys)
+        foreach (var pseudo in MediaQueries.Keys)
         {
+            var prefix = pseudo + ":";
             if (text.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
             {
                 var newText = text.RemoveFromStart(prefix, StringComparison.OrdinalIgnoreCase);
