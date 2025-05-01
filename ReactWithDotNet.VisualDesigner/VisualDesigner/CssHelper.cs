@@ -428,9 +428,9 @@ public static class CssHelper
         return new Exception($"{name}: {value} is not recognized");
     }
 
-    public static Result<(string Name, string Value)[]> TryConvertCssUtilityClassToHtmlStyle(string utilityCssClassName)
+    public static Result<(string Name, string Value)[]> TryConvertCssUtilityClassToHtmlStyle(string utilityCssClassNameWithoutPseudo)
     {
-        switch (utilityCssClassName)
+        switch (utilityCssClassNameWithoutPseudo)
         {
             case "w-full":
             {
@@ -508,6 +508,6 @@ public static class CssHelper
             }
         }
 
-        return new ArgumentException($"Unknown utility CSS class: {utilityCssClassName}.");
+        return new ArgumentException($"Unknown utility CSS class: {utilityCssClassNameWithoutPseudo}.");
     }
 }
