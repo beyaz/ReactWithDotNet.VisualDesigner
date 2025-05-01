@@ -970,14 +970,14 @@ sealed class ApplicationView : Component<ApplicationState>
 
             new FlexColumnCentered(WidthFull)
             {
-                visualElementModel.StyleGroups?.Select(viewStyleGroup)
+                visualElementModel.StyleGroups?.Select(viewStyles)
             },
 
             propsHeader,
             viewProps(visualElementModel.Properties)
         };
 
-        Element viewStyleGroup(PropertyGroupModel styleGroup, int styleGroupIndex)
+        Element viewStyles(PropertyGroupModel styleGroup, int styleGroupIndex)
         {
             return new FlexColumn(WidthFull, Gap(4))
             {
