@@ -468,6 +468,27 @@ public static class CssHelper
             {
                 return FontFamily(value);
             }
+            
+            case "border-color":
+            {
+                return BorderColor(value);
+            }
+            case "border-style":
+            {
+                return BorderStyle(value);
+            }
+            case "border-width":
+            {
+                if (isValueDouble)
+                {
+                    return BorderWidth(valueAsDouble);
+                }
+                return BorderWidth(value);
+            }
+            case "cursor":
+            {
+                return Cursor(value);
+            }
         }
 
         return new Exception($"{name}: {value} is not recognized");
