@@ -702,6 +702,28 @@ public static class CssHelper
                 ]);
             }
         }
+
+
+        // try read from project config
+        {
+            var (name, value, _) = ParseStyleAttibute(utilityCssClassName);
+            
+            if (Project.Styles.TryGetValue(utilityCssClassName, out var cssText))
+            {
+                var (map, exception) = Style.ParseCssAsDictionary(cssText);
+                if (exception is null)
+                {
+                    return (pseudo, map.Select(x=>(x.Key, x.Value)).ToArray());
+                }
+            }
+            else if (name == "color" && value is not null && Project.Colors.TryGetValue(value, out var realColor))
+            {
+                return (pseudo,
+                [
+                    ("color", realColor)
+                ]);
+            }
+        }
         
         return None;
         

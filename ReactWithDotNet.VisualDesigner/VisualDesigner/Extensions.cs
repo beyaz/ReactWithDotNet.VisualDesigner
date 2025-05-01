@@ -704,4 +704,17 @@ sealed class StyleAttribute
     public string name { get; init; }
     public string value { get; init; }
     public string Pseudo { get; init; }
+    
+    public static implicit operator (string name, string value, string pseudo)(StyleAttribute item)
+    {
+        return (item.name, item.value, item.Pseudo);
+    }
+
+    public void Deconstruct(out string name , out string value, out string pseudo)
+    {
+        name = this.name;
+        value = this.value;
+        pseudo = this.Pseudo;
+
+    }
 }
