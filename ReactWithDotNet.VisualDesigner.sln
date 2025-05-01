@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReactWithDotNet.VisualDesig
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReactWithDotNet", "..\ReactWithDotNet\ReactWithDotNet\ReactWithDotNet.csproj", "{34BB1EE9-BE34-DDE1-2847-62C464B6F96B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReactWithDotNet.VisualDesigner.Test", "ReactWithDotNet.VisualDesigner.Test\ReactWithDotNet.VisualDesigner.Test.csproj", "{9BB39A70-CDC3-4F24-A7CE-93FD78AEE253}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{34BB1EE9-BE34-DDE1-2847-62C464B6F96B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{34BB1EE9-BE34-DDE1-2847-62C464B6F96B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{34BB1EE9-BE34-DDE1-2847-62C464B6F96B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9BB39A70-CDC3-4F24-A7CE-93FD78AEE253}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9BB39A70-CDC3-4F24-A7CE-93FD78AEE253}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9BB39A70-CDC3-4F24-A7CE-93FD78AEE253}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9BB39A70-CDC3-4F24-A7CE-93FD78AEE253}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
