@@ -1,7 +1,6 @@
 ﻿using System.Globalization;
 using System.Reflection;
 using System.Text.RegularExpressions;
-using static Dapper.SqlMapper;
 
 namespace ReactWithDotNet.VisualDesigner;
 
@@ -34,9 +33,8 @@ public static class CssHelper
         return designerStyleItem;
     }
 
-    public static Result<DesignerStyleItem> ConvertDesignerStyleItemToHtmlStyle(string designerStyleItem)
+    public static Result<DesignerStyleItem> CreateDesignerStyleItemFromText(string designerStyleItem)
     {
-         
         // try process from plugin
         {
             var result = tryProcessByProjectConfig(designerStyleItem);
@@ -52,35 +50,14 @@ public static class CssHelper
         }
 
         {
-            var maybe = TryConvertCssUtilityClassToHtmlStyle(styleAttribute);
+            var maybe = TryConvertCssUtilityClassToHtmlStyle(designerStyleItem);
             if (maybe.HasValue)
             {
-                var pseudo = maybe.Value.Pseudo;
-
-                var cssStyles = maybe.Value.CssStyles;
-
-                Func<StyleModifier[], StyleModifier> pseudoFunction = null;
-
-                if (pseudo is not null)
+                return new DesignerStyleItem
                 {
-                    var result = GetPseudoFunction(pseudo);
-                    if (result.HasError)
-                    {
-                        return result.Error;
-                    }
-
-                    pseudoFunction = result.Value;
-                }
-
-                return cssStyles.Select(x => CssHelper.ConvertToStyleModifier(x.Name, x.Value)).Then(styleModifiers =>
-                {
-                    if (pseudoFunction is not null)
-                    {
-                        return [pseudoFunction(styleModifiers.ToArray())];
-                    }
-
-                    return styleModifiers;
-                });
+                    Pseudo        = maybe.Value.Pseudo,
+                    RawHtmlStyles = maybe.Value.CssStyles.ToDictionary(x => x.Name, x => x.Value)
+                };
             }
         }
 
@@ -88,21 +65,26 @@ public static class CssHelper
         {
             string name, value, pseudo;
             {
-                var attribute = ParseStyleAttibute(styleAttribute);
+                var attribute = ParseStyleAttibute(designerStyleItem);
 
                 name   = attribute.name;
                 value  = attribute.value;
                 pseudo = attribute.Pseudo;
             }
 
-            var styleModifiers = CssHelper.ConvertToStyleModifier(name, value);
-
-            if (pseudo is not null)
+            return new DesignerStyleItem
             {
-                return ApplyPseudo(pseudo, [styleModifiers.Value]).ToReadOnlyList();
-            }
-
-            return styleModifiers.ToReadOnlyList();
+                Pseudo = pseudo,
+                RawHtmlStyles = value is null ?
+                    new Dictionary<string, string>
+                    {
+                        { name, null }
+                    } :
+                    new()
+                    {
+                        { name, value }
+                    }
+            };
         }
 
         static Result<DesignerStyleItem> tryProcessByProjectConfig(string designerStyleItem)
@@ -1298,4 +1280,13 @@ public sealed record DesignerStyleItem
     public string Pseudo { get; init; }
     
     public IReadOnlyDictionary<string,string> RawHtmlStyles { get; init; }
+    
+    public static implicit operator DesignerStyleItem((string Pseudo, (string Name, string Value)[] RawHtmlStyles) tuple)
+    {
+        return new()
+        {
+            Pseudo = tuple.Pseudo,
+            RawHtmlStyles = tuple.RawHtmlStyles.ToDictionary(x=>x.Name, x=>x.Value)
+        };
+    }
 }
