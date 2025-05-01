@@ -49,9 +49,27 @@ static class HtmlImporter
 
         var model = new VisualElementModel
         {
-            Tag        = htmlNode.Name,
-            Properties = htmlNode.Attributes.Where(p=>p.Name != "style").Select(a => a.Name + ": " + a.Value).ToList()
+            Tag = htmlNode.Name
         };
+        
+        foreach (var attribute in htmlNode.Attributes)
+        {
+            var name = attribute.Name;
+            var value = attribute.Value;
+            
+            if (name == "style")
+            {
+                continue;
+            }
+
+            if (name == "class")
+            {
+                name = "className";
+            }
+            
+            model.Properties.Add(name + ": " + value);
+        }
+        
 
         var css = htmlNode.Attributes.FirstOrDefault(p => p.Name == "style")?.Value;
         if (css.HasValue())

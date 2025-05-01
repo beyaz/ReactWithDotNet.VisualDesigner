@@ -25,3 +25,5 @@ global using static ReactWithDotNet.VisualDesigner.Views.ApplicationStateMemoryC
 global using static ReactWithDotNet.VisualDesigner.FP;
 global using static ReactWithDotNet.VisualDesigner.Views.CecilHelper;
 global using static ReactWithDotNet.VisualDesigner.CssHelper;
+
+global using static ReactWithDotNet.Tailwind;

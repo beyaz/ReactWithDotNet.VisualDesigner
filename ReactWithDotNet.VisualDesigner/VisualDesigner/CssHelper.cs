@@ -1,5 +1,9 @@
-﻿using System.Globalization;
+﻿using Newtonsoft.Json.Linq;
+using System.Drawing;
+using System.Globalization;
+using System.Reflection;
 using System.Text.RegularExpressions;
+using YamlDotNet.Core.Tokens;
 
 namespace ReactWithDotNet.VisualDesigner;
 
@@ -616,7 +620,39 @@ public static class CssHelper
                     ("font-family", value)
                 ]);
             }
+        }
 
+        // text - color - weight
+        {
+            var (success, color, number) = tryParse(utilityCssClassName);
+            if (success)
+            {
+                var fieldInfo = typeof(Tailwind).GetField(color + number, BindingFlags.IgnoreCase | BindingFlags.Static | BindingFlags.Public);
+                if (fieldInfo != null)
+                {
+                    var hexColor = (string)fieldInfo.GetValue(null);
+                    return (pseudo,
+                    [
+                        ("color", hexColor)
+                    ]);
+                }
+            }
+
+            static (bool success, string color, string number) tryParse(string input)
+            {
+                string pattern = @"text-(\w+)-(\d+)";
+                Regex regex = new Regex(pattern);
+                Match match = regex.Match(input);
+
+                if (match.Success)
+                {
+                    string color = match.Groups[1].Value; // "pink"
+                    string value = match.Groups[2].Value; // "500"
+                    return (true,color, value);
+                }
+
+                return (false, null, null);
+            }
         }
         
         return None;
