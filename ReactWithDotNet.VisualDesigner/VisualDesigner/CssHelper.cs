@@ -24,6 +24,19 @@ public static class CssHelper
 
     public static Result<string> ConvertDesignerStyleItemToTailwindClassName(string designerStyleItemText)
     {
+
+        {
+            var maybe = TryReadPseudo(designerStyleItemText);
+            if (maybe.HasValue is false)
+            {
+                if (Project.Styles.TryGetValue(designerStyleItemText, out var cssText))
+                {
+                    return designerStyleItemText;
+                }
+            }
+            
+        }
+        
         DesignerStyleItem designerStyleItem = null;
         {
             var result = CreateDesignerStyleItemFromText(designerStyleItemText);
@@ -53,6 +66,37 @@ public static class CssHelper
             tailwindClassNames.Add(tailwindClassName);
         }
 
+        // size
+        {
+            var config = new[]
+            {
+                new { First = "w-", Second  = "h-", Target  = "size-" },
+                
+                new { First = "pt-", Second = "pb-", Target = "py-" },
+                new { First = "pr-", Second = "pl-", Target = "px-" },
+                
+                new { First = "mt-", Second = "mb-", Target = "my-" },
+                new { First = "mr-", Second = "ml-", Target = "mx-" }
+            };
+
+            foreach (var item in config)
+            {
+                var first = tailwindClassNames.FirstOrDefault(x => x.StartsWith(item.First));
+                var second = tailwindClassNames.FirstOrDefault(x => x.StartsWith(item.Second));
+
+                if (first is not null && second is not null)
+                {
+                    if (first.RemoveFromStart(item.First) == second.RemoveFromStart(item.Second))
+                    {
+                        tailwindClassNames[tailwindClassNames.IndexOf(first)] = item.Target + first.RemoveFromStart(item.First);
+
+                        tailwindClassNames.Remove(second);
+                    }
+                }
+            }
+            
+        }
+        
         if (designerStyleItem.Pseudo is null)
         {
             return string.Join(" ", tailwindClassNames);
@@ -152,8 +196,14 @@ public static class CssHelper
                 return $"{value}";
             }
 
-            case "W":
-            case "w":
+           
+            
+
+            case "text-align":
+            {
+                return $"text-{value}";
+            }
+
             case "width":
             {
                 if (value == "fit-content")
@@ -161,20 +211,14 @@ public static class CssHelper
                     return "w-fit";
                 }
 
-                if (isValueDouble)
+                if (value == "100%")
                 {
-                    value = valueAsDouble.AsPixel();
+                    return "w-full";
                 }
-
+                
                 return $"w-[{value}]";
             }
-
-            case "text-align":
-            {
-                return $"text-{value}";
-            }
-
-            case "h":
+            
             case "height":
             {
                 if (value == "fit-content")
@@ -182,25 +226,25 @@ public static class CssHelper
                     return "h-fit";
                 }
 
-                if (isValueDouble)
+                if (value == "100%")
                 {
-                    value = valueAsDouble.AsPixel();
+                    return "h-full";
                 }
 
                 return $"h-[{value}]";
             }
 
             case "max-width":
-                return $"max-w-[{value}px]";
+                return $"max-w-[{value}]";
 
             case "max-height":
-                return $"max-h-[{value}px]";
+                return $"max-h-[{value}]";
 
             case "min-width":
-                return $"min-w-[{value}px]";
+                return $"min-w-[{value}]";
 
             case "min-height":
-                return $"min-h-[{value}px]";
+                return $"min-h-[{value}]";
 
             case "z-index":
                 return $"z-[{value}]";
@@ -210,31 +254,31 @@ public static class CssHelper
                 return $"{name}-{value}";
 
             case "border-top-left-radius":
-                return $"rounded-tl-[{value}px]";
+                return $"rounded-tl-[{value}]";
 
             case "border-top-right-radius":
-                return $"rounded-tr-[{value}px]";
+                return $"rounded-tr-[{value}]";
 
             case "border-bottom-left-radius":
-                return $"rounded-bl-[{value}px]";
+                return $"rounded-bl-[{value}]";
 
             case "border-bottom-right-radius":
-                return $"rounded-br-[{value}px]";
+                return $"rounded-br-[{value}]";
 
             case "flex-grow":
                 return $"flex-grow-[{value}]";
 
             case "border-bottom-width":
-                return $"border-b-[{value}px]";
+                return $"border-b-[{value}]";
 
             case "border-top-width":
-                return $"border-t-[{value}px]";
+                return $"border-t-[{value}]";
 
             case "border-left-width":
-                return $"border-l-[{value}px]";
+                return $"border-l-[{value}]";
 
             case "border-right-width":
-                return $"border-r-[{value}px]";
+                return $"border-r-[{value}]";
 
             case "border-top":
             case "border-right":
@@ -297,16 +341,16 @@ public static class CssHelper
             }
 
             case "gap":
-                return $"gap-[{value}px]";
+                return $"gap-[{value}]";
 
             case "size":
-                return $"size-[{value}px]";
+                return $"size-[{value}]";
 
             case "bottom":
             case "top":
             case "left":
             case "right":
-                return $"{name}-[{value}px]";
+                return $"{name}-[{value}]";
 
             case "flex-direction":
             {
@@ -328,10 +372,10 @@ public static class CssHelper
                 return $"justify-{value.Split('-').Last()}";
 
             case "border-radius":
-                return $"rounded-[{value}px]";
+                return $"rounded-[{value}]";
 
             case "font-size":
-                return $"[font-size:{value}px]";
+                return $"[font-size:{value}]";
 
             case "border-width":
             {
@@ -416,6 +460,23 @@ public static class CssHelper
             case "inset":
             {
                 return $"inset-{value}";
+            }
+            
+            case "font-family":
+            {
+                return $"font-[{value}]";
+            }
+            case "font-style":
+            {
+                return $"[font-style:{value}]";
+            }
+            case "font-weight":
+            {
+                return $"[font-weight:{value}]";
+            }
+            case "line-height":
+            {
+                return $"[line-height:{value}]";
             }
         }
 
@@ -816,8 +877,7 @@ public static class CssHelper
             {
                 return (pseudo,
                 [
-                    ("display", "flex"),
-                    ("flex-direction", "row")
+                    ("display", "flex")
                 ]);
             }
         }

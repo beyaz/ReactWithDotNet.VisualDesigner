@@ -518,22 +518,6 @@ static class Exporter_For_NextJs_with_Tailwind
                 classNameShouldBeTemplateLiteral = true;
             }
 
-            if (styleItem.StartsWith("hover:"))
-            {
-                if (Project.Styles.TryGetValue(tailwindClassName, out var css))
-                {
-                    var result = ConvertDesignerStyleItemToTailwindClassName(css);
-                    if (result.HasError)
-                    {
-                        return result.Error;
-                    }
-
-                    tailwindClassName = result.Value;
-                }
-
-                classNames.Add("hover:" + tailwindClassName);
-                continue;
-            }
 
             classNames.Add(tailwindClassName);
         }
