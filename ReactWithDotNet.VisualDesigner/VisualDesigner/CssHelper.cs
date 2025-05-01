@@ -41,8 +41,12 @@ public static class CssHelper
         }
 
         var style = new Style();
-        
-        style.Import(designerStyleItem.RawHtmlStyles);
+
+        var exception = style.TryImport(designerStyleItem.RawHtmlStyles);
+        if (exception is not null)
+        {
+            return exception;
+        }
 
         if (designerStyleItem.Pseudo is not null)
         {
