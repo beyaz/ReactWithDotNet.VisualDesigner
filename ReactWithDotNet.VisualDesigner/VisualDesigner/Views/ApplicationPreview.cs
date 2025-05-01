@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Reflection;
 using System.Text;
 using ReactWithDotNet.ThirdPartyLibraries.HeroUI;
 
@@ -117,6 +118,10 @@ sealed class ApplicationPreview : Component
             else if (model.Tag == "circle")
             {
                 element = new circle();
+            }
+            else if (model.Tag == "path")
+            {
+                element = new path();
             }
             else if (model.Tag == "heroui/Checkbox")
             {
@@ -272,6 +277,12 @@ sealed class ApplicationPreview : Component
                                 continue;
                             }
 
+                            if (value.StartsWith("https://"))
+                            {
+                                elementAsImage.src = value;
+                                continue;
+                            }
+
                             if (value.StartsWith("/assets/"))
                             {
                                 value = value.RemoveFromStart("/");
@@ -293,7 +304,7 @@ sealed class ApplicationPreview : Component
                     }
 
                     {
-                        var propertyInfo = element.GetType().GetProperty(name);
+                        var propertyInfo = element.GetType().GetProperty(name,BindingFlags.IgnoreCase| BindingFlags.Public| BindingFlags.Instance);
                         if (propertyInfo is not null)
                         {
                             if (propertyInfo.PropertyType == typeof(string))

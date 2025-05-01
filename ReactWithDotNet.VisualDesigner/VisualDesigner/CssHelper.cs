@@ -1,4 +1,7 @@
-﻿namespace ReactWithDotNet.VisualDesigner;
+﻿using System.Globalization;
+using System.Text.RegularExpressions;
+
+namespace ReactWithDotNet.VisualDesigner;
 
 public static class CssHelper
 {
@@ -448,6 +451,19 @@ public static class CssHelper
 
                 return BorderBottomWidth(value);
             }
+            case "fill":
+            {
+                return Fill(value);
+            }
+            case "stroke":
+            {
+                return Stroke(value);
+            }
+            
+            case "font-family":
+            {
+                return FontFamily(value);
+            }
         }
 
         return new Exception($"{name}: {value} is not recognized");
@@ -528,7 +544,104 @@ public static class CssHelper
             }
         }
 
+        foreach (var prefix in "m,mt,mb,mr,ml,p,pt,pb,pl,pr".Split(','))
+        {
+            var numberSuffix = hasMatch(utilityCssClassName, prefix);
+            if (numberSuffix.HasValue)
+            {
+                var styleName = prefix switch
+                {
+                    "m" =>  "margin"   ,    
+                    "mr"=>  "margin-right" ,
+                    "ml"=>  "margin-left" , 
+                    "mt"=>  "margin-top"   ,
+                    "mb"=>  "margin-bottom",
+                    
+                    "p"  =>  "pargin"   ,    
+                    "pr" =>  "pargin-right" ,
+                    "pl" =>  "pargin-left" , 
+                    "pt" =>  "pargin-top"   ,
+                    "pb" =>  "pargin-bottom",
+
+                    _ => null
+                };
+
+                if (styleName is null)
+                {
+                    return None;
+                }
+                
+                return (pseudo, [(styleName, numberSuffix.Value * 4 + "px")]);
+            }
+        }
+
+        // F o n t  W e i g h t
+        {
+            var fontWeightMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                { "font-thin", "100" },
+                { "font-extralight", "200" },
+                { "font-light", "300" },
+                { "font-normal", "400" },
+                { "font-medium", "500" },
+                { "font-semibold", "600" },
+                { "font-bold", "700" },
+                { "font-extrabold", "800" },
+                { "font-black", "900" }
+            };
+
+            if (fontWeightMap.TryGetValue(utilityCssClassName, out var weightAsNumber))
+            {
+                return (pseudo,
+                [
+                    ("font-weight", weightAsNumber)
+                ]);
+            }
+
+        }
+        
+        // F o n t
+        {
+            var fontFamilyMap = new Dictionary<string, string>
+            {
+                { "font-sans", "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif" },
+                { "font-serif", "'Georgia', 'Times New Roman', Times, serif" },
+                { "font-mono", "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" }
+            };
+
+            if (fontFamilyMap.TryGetValue(utilityCssClassName, out var value))
+            {
+                return (pseudo,
+                [
+                    ("font-family", value)
+                ]);
+            }
+
+        }
+        
         return None;
+        
+        static double? hasMatch(string text, string prefix)
+        {
+            if (string.IsNullOrEmpty(text) || string.IsNullOrEmpty(prefix))
+            {
+                return null;
+            }
+
+            var pattern = $"^{Regex.Escape(prefix)}-(\\d+(\\.\\d+)?)";
+            
+            var match = Regex.Match(text, pattern);
+
+            if (match.Success)
+            {
+                if (double.TryParse(match.Groups[1].Value, NumberStyles.Float, CultureInfo.InvariantCulture, out double result))
+                {
+                    return result;
+                }
+            }
+
+            return null;
+        }
     }
 
     public static Maybe<(string Pseudo, string NewText)> TryReadPseudo(string text)

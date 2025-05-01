@@ -32,6 +32,11 @@ static class HtmlImporter
 
     static VisualElementModel ConvertToVisualElementModel(HtmlNode htmlNode)
     {
+        if (htmlNode is null)
+        {
+            return null;
+        }
+        
         if (htmlNode.NodeType == HtmlNodeType.Comment)
         {
             return null;
@@ -45,8 +50,22 @@ static class HtmlImporter
         var model = new VisualElementModel
         {
             Tag        = htmlNode.Name,
-            Properties = htmlNode.Attributes.Select(a => a.Name + ": " + a.Value).ToList()
+            Properties = htmlNode.Attributes.Where(p=>p.Name != "style").Select(a => a.Name + ": " + a.Value).ToList()
         };
+
+        var css = htmlNode.Attributes.FirstOrDefault(p => p.Name == "style")?.Value;
+        if (css.HasValue())
+        {
+            var (map, _) = Style.ParseCssAsDictionary(css);
+            if (map!=null)
+            {
+                foreach (var (key, value) in map)
+                {
+                    model.Styles.Add(key + ": " + value);
+                }
+            }
+        }
+        
 
         if (htmlNode.ChildNodes.Count == 1 && htmlNode.ChildNodes[0].NodeType == HtmlNodeType.Text && htmlNode.ChildNodes[0].InnerText.HasValue())
         {
