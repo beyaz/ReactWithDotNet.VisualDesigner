@@ -932,7 +932,7 @@ sealed class ApplicationView : Component<ApplicationState>
             }
         };
 
-        var inputText = new FlexRow(WidthFull, Gap(4))
+        var inputText = new FlexRow(WidthFull, Gap(4),BorderRadius(4), PaddingLeft(4), Background(WhiteSmoke))
         {
             new MagicInput
             {
@@ -945,26 +945,14 @@ sealed class ApplicationView : Component<ApplicationState>
 
                     return Task.CompletedTask;
                 }
-            } + Width(6, 10)
+            }
         };
 
         var stylesHeader = new FlexRow(WidthFull, AlignItemsCenter)
         {
-            CreateIcon(Icon.remove, 32, state.Selection.StyleGroupIndex.HasValue ?
-                           [
-                               OnClick(StyleGroupRemoveClicked),
-                               Hover(Color(Blue300))
-                           ] :
-                           [
-                               Color(Gray100),
-                               BorderColor(Gray100)
-                           ]),
-
             new div { Height(1), FlexGrow(1), Background(Gray200) },
             new span { "S T Y L E", WhiteSpaceNoWrap, UserSelect(none), PaddingX(4) },
-            new div { Height(1), FlexGrow(1), Background(Gray200) },
-
-            CreateIcon(Icon.add, 32) + OnClick(StyleGroupAddClicked)
+            new div { Height(1), FlexGrow(1), Background(Gray200) }
         };
 
         var propsHeader = new FlexRow(WidthFull, AlignItemsCenter)
@@ -1392,49 +1380,9 @@ sealed class ApplicationView : Component<ApplicationState>
         };
     }
 
-    Task StyleGroupAddClicked(MouseEvent e)
-    {
-        var styleGroups = CurrentVisualElement.StyleGroups;
+    
 
-        PropertyGroupModel newStyleGroup;
-        if (styleGroups.Count == 0)
-        {
-            newStyleGroup = new()
-            {
-                Condition = "*"
-            };
-        }
-        else
-        {
-            newStyleGroup = new()
-            {
-                Condition = "? ? ? ?"
-            };
-        }
-
-        styleGroups.Add(newStyleGroup);
-
-        state.Selection = new()
-        {
-            VisualElementTreeItemPath = state.Selection.VisualElementTreeItemPath,
-
-            StyleGroupIndex = styleGroups.Count - 1
-        };
-
-        return Task.CompletedTask;
-    }
-
-    Task StyleGroupRemoveClicked(MouseEvent e)
-    {
-        CurrentVisualElement.StyleGroups.RemoveAt(state.Selection.StyleGroupIndex!.Value);
-
-        state.Selection = new()
-        {
-            VisualElementTreeItemPath = state.Selection.VisualElementTreeItemPath
-        };
-
-        return Task.CompletedTask;
-    }
+   
 
     void UpdateZoomInClient()
     {
