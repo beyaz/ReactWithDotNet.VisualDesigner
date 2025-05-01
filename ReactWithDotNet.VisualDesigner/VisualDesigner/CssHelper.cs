@@ -171,58 +171,16 @@ public static class CssHelper
 
         switch (name)
         {
+            case "left":
+            case "right":
+            case "bottom":
+            case "top":
+            case "min-width":
             case "transform":
             {
                 if (isValueDouble)
                 {
                     return (name, valueAsDouble + "deg");
-                }
-
-                return (name, value);
-            }
-            
-            case "min-width":
-            {
-                if (isValueDouble)
-                {
-                    return (name, valueAsDouble.AsPixel());
-                }
-
-                return (name, value);
-            }
-
-            case "top":
-            {
-                if (isValueDouble)
-                {
-                    return (name, valueAsDouble.AsPixel());
-                }
-
-                return (name, value);
-            }
-            case "bottom":
-            {
-                if (isValueDouble)
-                {
-                    return (name, valueAsDouble.AsPixel());
-                }
-
-                return (name, value);
-            }
-            case "left":
-            {
-                if (isValueDouble)
-                {
-                    return (name, valueAsDouble.AsPixel());
-                }
-
-                return (name, value);
-            }
-            case "right":
-            {
-                if (isValueDouble)
-                {
-                    return (name, valueAsDouble.AsPixel());
                 }
 
                 return (name, value);
