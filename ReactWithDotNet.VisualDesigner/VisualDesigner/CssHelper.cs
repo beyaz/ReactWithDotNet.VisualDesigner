@@ -428,6 +428,32 @@ public static class CssHelper
         return new Exception($"{name}: {value} is not recognized");
     }
 
+    static readonly Dictionary<string, Func<StyleModifier[], StyleModifier>> MediaQueries = new()
+    {
+        { "hover", Hover },
+        { "Focus", Focus },
+        { "SM", SM },
+        { "MD", MD },
+        { "LG", LG },
+        { "XL", XL },
+        { "XXL", XXL }
+    };
+    
+    public static Maybe<(string Pseudo, string NewText)> TryReadPseudo(string text)
+    {
+        foreach (var prefix in MediaQueries.Keys)
+        {
+            if (text.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+            {
+                var newText = text.RemoveFromStart(prefix, StringComparison.OrdinalIgnoreCase);
+
+                return (prefix.ToLower(), newText);
+            }
+        }
+
+        return None;
+    }
+    
     public static Result<(string Name, string Value)[]> TryConvertCssUtilityClassToHtmlStyle(string utilityCssClassName)
     {
         switch (utilityCssClassName)
