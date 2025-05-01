@@ -8,16 +8,25 @@ public static class CssHelper
         {
             case "w-full":
             {
-                return new[]{("width", "100%")};
+                return new[]
+                {
+                    ("width", "100%")
+                };
             }
-            
+
             case "w-fit":
             {
-                return new[]{("width", "fit-content")};
+                return new[]
+                {
+                    ("width", "fit-content")
+                };
             }
             case "h-fit":
             {
-                return new[]{("height", "fit-content")};
+                return new[]
+                {
+                    ("height", "fit-content")
+                };
             }
             case "size-fit":
             {
@@ -47,7 +56,6 @@ public static class CssHelper
                     ("justifyContent", "center"),
                     ("alignItems", "center")
                 };
-                
             }
             case "col":
             {
@@ -66,8 +74,7 @@ public static class CssHelper
                 };
             }
         }
-        
-        return new ArgumentException($"Unknown utility CSS class: {utilityCssClassName}.");
 
+        return new ArgumentException($"Unknown utility CSS class: {utilityCssClassName}.");
     }
 }
