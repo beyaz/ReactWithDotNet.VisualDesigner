@@ -1,11 +1,24 @@
-﻿using System.IO;
-using System.Text;
-using HtmlAgilityPack;
+﻿using HtmlAgilityPack;
 
 namespace ReactWithDotNet.VisualDesigner;
 
 static class HtmlImporter
 {
+    public static bool CanImportAsHtml(string html)
+    {
+        if (html is null)
+        {
+            return false;
+        }
+
+        if (html.StartsWith("<") && html.EndsWith(">") && html.Length > 4)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
     public static VisualElementModel Import(string html)
     {
         var htmlDocument = new HtmlDocument
@@ -14,29 +27,37 @@ static class HtmlImporter
         };
         htmlDocument.LoadHtml(html);
 
-        var root = htmlDocument.DocumentNode.FirstChild;
-        
-        
-        var sb = new StringBuilder();
+        return ConvertToVisualElementModel(htmlDocument.DocumentNode.FirstChild);
+    }
 
-        root.WriteTo(new StringWriter(sb));
+    static VisualElementModel ConvertToVisualElementModel(HtmlNode htmlNode)
+    {
+        if (htmlNode.NodeType == HtmlNodeType.Comment)
+        {
+            return null;
+        }
 
-        sb.ToString();
-        
+        if (htmlNode.NodeType == HtmlNodeType.Text && htmlNode.InnerText.HasNoValue())
+        {
+            return null;
+        }
+
         var model = new VisualElementModel
         {
-            Tag         = root.Name,
-            Text        = root.InnerText,
-            Properties  = root.Attributes.Select(a => a.Name).ToList(),
-            Children    = new()
+            Tag        = htmlNode.Name,
+            Text       = htmlNode.InnerText,
+            Properties = htmlNode.Attributes.Select(a => a.Name + ": " + a.Value).ToList()
         };
 
-        foreach (var child in root.ChildNodes)
+        foreach (var child in htmlNode.ChildNodes)
         {
-            if (child.NodeType == HtmlNodeType.Element)
+            var childModel = ConvertToVisualElementModel(child);
+            if (childModel is null)
             {
-                model.Children.Add(Import(child.OuterHtml));
+                continue;
             }
+
+            model.Children.Add(childModel);
         }
 
         return model;
