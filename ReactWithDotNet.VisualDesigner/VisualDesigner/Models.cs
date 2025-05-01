@@ -26,7 +26,7 @@ public sealed record VisualElementModel
     
     public string Text { get; set; }
     
-    public List<PropertyGroupModel> StyleGroups { get; init; } = [];
+    public List<PropertyGroupModel> StyleGroups { get; set; } = [];
     
     public List<string> Properties { get; init; } = [];
     
