@@ -702,7 +702,7 @@ static class Extensions
             
             foreach (var item in group.Items)
             {
-                model.Style.Add(prefix+item);
+                model.Styles.Add(prefix+item);
             }
         }
 

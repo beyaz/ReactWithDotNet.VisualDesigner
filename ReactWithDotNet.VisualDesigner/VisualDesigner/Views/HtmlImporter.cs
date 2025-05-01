@@ -28,7 +28,6 @@ static class HtmlImporter
             Tag         = root.Name,
             Text        = root.InnerText,
             Properties  = root.Attributes.Select(a => a.Name).ToList(),
-            StyleGroups = new(),
             Children    = new()
         };
 

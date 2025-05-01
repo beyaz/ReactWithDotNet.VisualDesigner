@@ -227,10 +227,8 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
 
         Element icon = null;
 
-        var commonStyles = node.StyleGroups?.FirstOrDefault(x => x.Condition == "*");
-        if (commonStyles is not null)
         {
-            var styles = commonStyles.Items;
+            var styles = node.Styles;
             
             var hasCol = styles.Contains("col") || styles.Contains("flex-col-centered");
             var hasRow = styles.Contains("row") || styles.Contains("flex-row-centered");

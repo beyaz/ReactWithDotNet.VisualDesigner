@@ -314,7 +314,7 @@ sealed class ApplicationPreview : Component
             Fix(model);
 
             {
-                var result = model.Style.Select(ConvertToStyleModifier).FoldThen(styleModifiers => element.Add(styleModifiers.ToArray()));
+                var result = model.Styles.Select(ConvertToStyleModifier).FoldThen(styleModifiers => element.Add(styleModifiers.ToArray()));
                 if (result.HasError)
                 {
                     return result.Error;

@@ -147,9 +147,7 @@ sealed class ApplicationView : Component<ApplicationState>
         {
             state.ComponentRootElement = new()
             {
-                Tag = "div",
-
-                StyleGroups = [new() { Condition = "*" }]
+                Tag = "div"
             };
 
             state.Selection = new()
@@ -166,9 +164,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
         node.Children.Add(new()
         {
-            Tag = "div",
-
-            StyleGroups = [new() { Condition = "*" }]
+            Tag = "div"
         });
 
         return Task.CompletedTask;
@@ -986,7 +982,7 @@ sealed class ApplicationView : Component<ApplicationState>
                     },
                     new FlexRow(WidthFull, FlexWrap, Gap(4))
                     {
-                        CurrentVisualElement.Style.Select((value, index) => attributeItem(index, value)),
+                        CurrentVisualElement.Styles.Select((value, index) => attributeItem(index, value)),
                         OnClick([StopPropagation] (_) =>
                         {
                             state.Selection.SelectedStyleIndex = null;
@@ -1003,7 +999,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
                 if (state.Selection.SelectedStyleIndex >= 0)
                 {
-                    value = CurrentVisualElement.Style[state.Selection.SelectedStyleIndex.Value];
+                    value = CurrentVisualElement.Styles[state.Selection.SelectedStyleIndex.Value];
                 }
 
                 return new MagicInput
@@ -1018,11 +1014,11 @@ sealed class ApplicationView : Component<ApplicationState>
 
                         if (state.Selection.SelectedStyleIndex.HasValue)
                         {
-                            CurrentVisualElement.Style[state.Selection.SelectedStyleIndex.Value] = newValue;
+                            CurrentVisualElement.Styles[state.Selection.SelectedStyleIndex.Value] = newValue;
                         }
                         else
                         {
-                            CurrentVisualElement.Style.Add(newValue);
+                            CurrentVisualElement.Styles.Add(newValue);
                         }
 
                         state.Selection.SelectedStyleIndex = null;
@@ -1046,7 +1042,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
                     OnClick([StopPropagation](_) =>
                     {
-                        CurrentVisualElement.Style.RemoveAt(state.Selection.SelectedStyleIndex!.Value);
+                        CurrentVisualElement.Styles.RemoveAt(state.Selection.SelectedStyleIndex!.Value);
 
                         state.Selection.SelectedStyleIndex = null;
 
@@ -1096,7 +1092,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
                             // calculate text selection in edit input
                             {
-                                var nameValue = CurrentVisualElement.Style[state.Selection.SelectedStyleIndex.Value];
+                                var nameValue = CurrentVisualElement.Styles[state.Selection.SelectedStyleIndex.Value];
                                 var parseResult = TryParsePropertyValue(nameValue);
                                 if (parseResult.success)
                                 {
