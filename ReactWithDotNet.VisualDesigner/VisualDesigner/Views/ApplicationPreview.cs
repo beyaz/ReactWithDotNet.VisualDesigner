@@ -393,11 +393,15 @@ sealed class ApplicationPreview : Component
             var maybe = TryConvertCssUtilityClassToHtmlStyle(styleAttribute);
             if (maybe.HasValue)
             {
+                var pseudo = maybe.Value.Pseudo;
+                
+                var cssStyles = maybe.Value.CssStyles;
+                
                 Func<StyleModifier[], StyleModifier> pseudoFunction = null;
                 
-                if (maybe.Value.Pseudo is not null)
+                if (pseudo is not null)
                 {
-                   var result = GetPseudoFunction(maybe.Value.Pseudo);
+                   var result = GetPseudoFunction(pseudo);
                    if (result.HasError)
                    {
                        return result.Error;
@@ -405,8 +409,6 @@ sealed class ApplicationPreview : Component
                    
                    pseudoFunction = result.Value;
                 }
-
-                var cssStyles = maybe.Value.CssStyles;
 
                 return cssStyles.Select(x => CssHelper.ConvertToStyleModifier(x.Name, x.Value)).Then(styleModifiers =>
                 {
