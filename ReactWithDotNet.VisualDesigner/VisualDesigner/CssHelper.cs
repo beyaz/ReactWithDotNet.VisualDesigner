@@ -169,13 +169,95 @@ public static class CssHelper
 
         var isValueDouble = double.TryParse(value, out var valueAsDouble);
 
+        name = name switch
+        {
+            "p" => "padding",
+            "pl" => "padding-left",
+            "pr" => "padding-right",
+            "pt" => "padding-top",
+            "pb" => "padding-bottom",
+            
+            "m"  => "margin",
+            "ml" => "margin-left",
+            "mr" => "margin-right",
+            "mt" => "margin-top",
+            "mb" => "margin-bottom",
+            
+            "w" => "width",
+            "h" => "height",
+            
+            "bg" => "background",
+
+            _    => name
+        };
+        
         switch (name)
         {
+            case "max-width":
+            case "max-height":
+            case "min-width":
+            case "min-height":
+            case "inset":
+            case "border-width":
+            case "border-bottom-width":
+            case "border-top-right-radius":
+            case "border-top-left-radius":
+            case "border-bottom-left-radius":
+            case "border-bottom-right-radius":
+            case "font-size":
             case "left":
             case "right":
             case "bottom":
             case "top":
-            case "min-width":
+            case "padding":
+            case "padding-left":
+            case "padding-right":
+            case "padding-top":
+            case "padding-bottom":
+            case "margin":
+            case "margin-left":
+            case "margin-right":
+            case "margin-top":
+            case "margin-bottom":
+            case "gap":
+            case "border-radius":
+            {
+                if (isValueDouble)
+                {
+                    value = valueAsDouble.AsPixel();
+                }
+
+                return (name, value);
+            }
+            
+          
+           
+
+            case "align-items":
+            case "justify-items":
+            case "justify-content":
+            case "display":
+            case "font-weight":
+            case "flex-direction":
+            case "z-index":
+            case "position":
+            case "overflow-y":
+            case "overflow-x":
+            case "fill":
+            case "stroke":
+            case "border-color":
+            case "font-family":
+            case "cursor":
+            case "border-style":
+            case "text-align":
+            case "flex-grow":
+            case "outline":
+            case "text-decoration":
+            {
+                return (name, value);
+            }
+
+          
             case "transform":
             {
                 if (isValueDouble)
@@ -208,155 +290,24 @@ public static class CssHelper
 
                 return (name, value);
             }
-
-            case "justify-items":
-            {
-                return (name, value);
-            }
-            case "justify-content":
-            {
-                return (name,value);
-            }
-
-            case "align-items":
-            {
-                return (name, value);
-            }
-
-            case "display":
-            {
-                return (name, value);
-            }
-
-            case "background":
-            case "bg":
-            {
-                name = "background";
-                
-                    if (Project.Colors.TryGetValue(value, out var realColor))
-                {
-                    value = realColor;
-                }
-
-                return (name,value);
-            }
-
-            case "font-size":
-            {
-                if (isValueDouble)
-                {
-                    return (name, valueAsDouble.AsPixel());
-                }
-
-                return (name, value);
-            }
-
-            case "font-weight":
-            {
-                return (name, value);
-            }
-
-            case "text-align":
-            {
-                return (name, value);
-            }
-
-            case "w":
-            case "width":
-            {
-                name = "width";
-                
-                    if (isValueDouble)
-                {
-                    return (name,valueAsDouble.AsPixel());
-                }
-
-                return (name, value);
-            }
-            
-            case "h":
-            case "height":
-            {
-                name = "height";
-                
-                if (isValueDouble)
-                {
-                    return (name, valueAsDouble.AsPixel());
-                }
-
-                return (name, value);
-            }
-            case "size":
-            {
-                if (isValueDouble)
-                {
-                    return new[]{("width", valueAsDouble.AsPixel()), ("height", valueAsDouble.AsPixel())};
-                }
-
-                return new[]{("width", value), ("height", value)};
-            }
-
-            case "outline":
-            {
-                return (name, value);
-            }
-
-            case "text-decoration":
-            {
-                return (name, value);
-            }
-
-            
-
-            case "border-radius":
-            {
-                if (isValueDouble)
-                {
-                    return (name,valueAsDouble.AsPixel());
-                }
-
-                return (name, value);
-            }
-
-            case "gap":
-            {
-                if (isValueDouble)
-                {
-                    return (name, valueAsDouble.AsPixel());
-                }
-
-                return (name, value);
-            }
-            case "flex-grow":
-            {
-                return (name, value);
-            }
-
-            case "p":
-            case "padding":
-            {
-                name = "padding";
-                
-                    if (isValueDouble)
-                {
-                    return (name, valueAsDouble.AsPixel());
-                }
-
-                return (name, value);
-            }
-
            
 
-            case "color":
+            case "background":
             {
-                if (Project.Colors.TryGetValue(value, out var realColor))
-                {
-                    value = realColor;
-                }
+                
+                    if (Project.Colors.TryGetValue(value, out var realColor))
+                    {
+                        value = realColor;
+                    }
 
-                return (name,value);
+                    return (name,value);
             }
 
+            
+           
+
+           
+            // m u l t i p l e
             case "px":
             {
                 if (isValueDouble)
@@ -375,149 +326,26 @@ public static class CssHelper
 
                 return new[]{("padding-top", value), ("padding-bottom", value)};
             }
-            
-
-            case "pl":
-            case "padding-left":
+            case "size":
             {
                 if (isValueDouble)
                 {
                     value = valueAsDouble.AsPixel();
                 }
 
-                return ("padding-left", value);
+                return new[]{("width", value), ("height", value)};
             }
 
-            case "pr":
-            case "padding-right":
+            // c o l o r s
+            case "color":
             {
-                if (isValueDouble)
+                if (Project.Colors.TryGetValue(value, out var realColor))
                 {
-                    value = valueAsDouble.AsPixel();
+                    value = realColor;
                 }
 
-                return ("padding-right", value);
+                return (name,value);
             }
-
-            case "pt":
-            case "padding-top":
-            {
-                if (isValueDouble)
-                {
-                    value = valueAsDouble.AsPixel();
-                }
-
-                return ("padding-top", value);
-            }
-
-            case "pb":
-            case "padding-bottom":
-            {
-                if (isValueDouble)
-                {
-                    value = valueAsDouble.AsPixel();
-                }
-
-                return ("padding-bottom", value);
-            }
-
-            case "ml":
-            case "margin-left":
-            {
-                if (isValueDouble)
-                {
-                    value = valueAsDouble.AsPixel();
-                }
-
-                return ("margin-left", value);
-            }
-
-            case "mr":
-            case "margin-right":
-            {
-                if (isValueDouble)
-                {
-                    value = valueAsDouble.AsPixel();
-                }
-
-                return ("margin-right", value);
-            }
-
-            case "mt":
-            case "margin-top":
-            {
-                if (isValueDouble)
-                {
-                    value = valueAsDouble.AsPixel();
-                }
-
-                return ("margin-top", value);
-            }
-
-            case "mb":
-            case "margin-bottom":
-            {
-                if (isValueDouble)
-                {
-                    value = valueAsDouble.AsPixel();
-                }
-
-                return ("margin-bottom", value);
-            }
-
-            case "flex-direction":
-            case "z-index":
-            case "position":
-            {
-                return (name, value);
-            }
-            case "max-width":
-            case "max-height":
-            case "inset":
-            case "border-width":
-            case "border-bottom-width":
-            case "border-top-right-radius":
-            case "border-top-left-radius":
-            case "border-bottom-left-radius":
-            case "border-bottom-right-radius":
-            {
-                if (isValueDouble)
-                {
-                    value = valueAsDouble.AsPixel();
-                }
-
-                return (name, value);
-            }
-           
-
-            case "overflow-y":
-            {
-                return (name, value);
-            }
-            case "overflow-x":
-            {
-                return (name, value);
-            }
-            
-            case "fill":
-            {
-                return (name, value);
-            }
-            case "stroke":
-            {
-                return (name, value);
-            }
-
-            case "border-color":
-            case "font-family":
-            case "cursor":
-            case "border-style":
-            {
-                return (name, value);
-            }
-          
-            
-            
             
         }
 
