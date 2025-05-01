@@ -33,7 +33,7 @@ public static class CssHelper
         return designerStyleItem;
     }
 
-    public static HtmlStyleItem ConvertToStyleModifier(string name, string value)
+    public static HtmlStyle ToHtmlStyle(string name, string value)
     {
         if (name == null)
         {
@@ -72,6 +72,8 @@ public static class CssHelper
         switch (name)
         {
             // AS PIXEL
+            case "width":
+            case "height":
             case "max-width":
             case "max-height":
             case "min-width":
@@ -252,18 +254,29 @@ public static class CssHelper
                 pseudo = attribute.Pseudo;
             }
 
+            if (value is not null)
+            {
+                var htmlStyle = ToHtmlStyle(name, value);
+                if (htmlStyle.HasError)
+                {
+                    return htmlStyle.Error;
+                }
+                
+                return new DesignerStyleItem
+                {
+                    Pseudo = pseudo,
+                    RawHtmlStyles = htmlStyle.Value
+                };
+            }
+           
+
             return new DesignerStyleItem
             {
                 Pseudo = pseudo,
-                RawHtmlStyles = value is null ?
-                    new Dictionary<string, string>
-                    {
-                        { name, null }
-                    } :
-                    new()
-                    {
-                        { name, value }
-                    }
+                RawHtmlStyles =new Dictionary<string, string>
+                {
+                    { name, null }
+                }
             };
         }
 
@@ -1025,9 +1038,9 @@ public sealed record DesignerStyleItem
     }
 }
 
-public sealed class HtmlStyleItem : Result<Dictionary<string, string>>
+public sealed class HtmlStyle : Result<Dictionary<string, string>>
 {
-    public static implicit operator HtmlStyleItem((string Name, string Value) item)
+    public static implicit operator HtmlStyle((string Name, string Value) item)
     {
         return new()
         {
@@ -1039,7 +1052,7 @@ public sealed class HtmlStyleItem : Result<Dictionary<string, string>>
         };
     }
 
-    public static implicit operator HtmlStyleItem((string Name, string Value)[] items)
+    public static implicit operator HtmlStyle((string Name, string Value)[] items)
     {
         return new()
         {
@@ -1048,7 +1061,7 @@ public sealed class HtmlStyleItem : Result<Dictionary<string, string>>
         };
     }
 
-    public static implicit operator HtmlStyleItem(Exception exception)
+    public static implicit operator HtmlStyle(Exception exception)
     {
         return new()
         {
