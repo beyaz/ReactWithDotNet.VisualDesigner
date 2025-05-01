@@ -1,8 +1,18 @@
-﻿
-namespace ReactWithDotNet.VisualDesigner;
+﻿namespace ReactWithDotNet.VisualDesigner;
 
 public static class CssHelper
 {
+    static readonly Dictionary<string, Func<StyleModifier[], StyleModifier>> MediaQueries = new()
+    {
+        { "hover", Hover },
+        { "Focus", Focus },
+        { "SM", SM },
+        { "MD", MD },
+        { "LG", LG },
+        { "XL", XL },
+        { "XXL", XXL }
+    };
+
     public static Result<StyleModifier> ConvertToStyleModifier(string name, string value)
     {
         if (name == null)
@@ -428,17 +438,84 @@ public static class CssHelper
         return new Exception($"{name}: {value} is not recognized");
     }
 
-    static readonly Dictionary<string, Func<StyleModifier[], StyleModifier>> MediaQueries = new()
+    public static Maybe<(string Pseudo, (string Name, string Value)[] CssStyles)> TryConvertCssUtilityClassToHtmlStyle(string utilityCssClassName)
     {
-        { "hover", Hover },
-        { "Focus", Focus },
-        { "SM", SM },
-        { "MD", MD },
-        { "LG", LG },
-        { "XL", XL },
-        { "XXL", XXL }
-    };
-    
+        string pseudo = null;
+        {
+            var maybe = TryReadPseudo(utilityCssClassName);
+            if (maybe.HasValue)
+            {
+                pseudo = maybe.Value.Pseudo;
+
+                utilityCssClassName = maybe.Value.NewText;
+            }
+        }
+
+        switch (utilityCssClassName)
+        {
+            case "w-full":
+            {
+                return (pseudo, [("width", "100%")]);
+            }
+
+            case "w-fit":
+            {
+                return (pseudo, [("width", "fit-content")]);
+            }
+            case "h-full":
+            {
+                return (pseudo, [("height", "100%")]);
+            }
+            case "h-fit":
+            {
+                return (pseudo, [("height", "fit-content")]);
+            }
+            case "size-fit":
+            {
+                return (pseudo, [("width", "fit-content"), ("height", "fit-content")]);
+            }
+
+            case "flex-row-centered":
+            {
+                return (pseudo,
+                [
+                    ("display", "flex"),
+                    ("flex-direction", "row"),
+                    ("justify-content", "center"),
+                    ("align-items", "center")
+                ]);
+            }
+            case "flex-col-centered":
+            {
+                return (pseudo,
+                [
+                    ("display", "flex"),
+                    ("flex-direction", "column"),
+                    ("justify-content", "center"),
+                    ("align-items", "center")
+                ]);
+            }
+            case "col":
+            {
+                return (pseudo,
+                [
+                    ("display", "flex"),
+                    ("flex-direction", "column")
+                ]);
+            }
+            case "row":
+            {
+                return (pseudo,
+                [
+                    ("display", "flex"),
+                    ("flex-direction", "row")
+                ]);
+            }
+        }
+
+        return None;
+    }
+
     public static Maybe<(string Pseudo, string NewText)> TryReadPseudo(string text)
     {
         foreach (var prefix in MediaQueries.Keys)
@@ -452,88 +529,5 @@ public static class CssHelper
         }
 
         return None;
-    }
-    
-    public static Result<(string Name, string Value)[]> TryConvertCssUtilityClassToHtmlStyle(string utilityCssClassName)
-    {
-        switch (utilityCssClassName)
-        {
-            case "w-full":
-            {
-                return new[]
-                {
-                    ("width", "100%")
-                };
-            }
-
-            case "w-fit":
-            {
-                return new[]
-                {
-                    ("width", "fit-content")
-                };
-            }
-            case "h-full":
-            {
-                return new[]
-                {
-                    ("height", "100%")
-                };
-            }
-            case "h-fit":
-            {
-                return new[]
-                {
-                    ("height", "fit-content")
-                };
-            }
-            case "size-fit":
-            {
-                return new[]
-                {
-                    ("width", "fit-content"),
-                    ("height", "fit-content")
-                };
-            }
-
-            case "flex-row-centered":
-            {
-                return new[]
-                {
-                    ("display", "flex"),
-                    ("flex-direction", "row"),
-                    ("justify-content", "center"),
-                    ("align-items", "center")
-                };
-            }
-            case "flex-col-centered":
-            {
-                return new[]
-                {
-                    ("display", "flex"),
-                    ("flex-direction", "column"),
-                    ("justify-content", "center"),
-                    ("align-items", "center")
-                };
-            }
-            case "col":
-            {
-                return new[]
-                {
-                    ("display", "flex"),
-                    ("flex-direction", "column")
-                };
-            }
-            case "row":
-            {
-                return new[]
-                {
-                    ("display", "flex"),
-                    ("flex-direction", "row")
-                };
-            }
-        }
-
-        return new ArgumentException($"Unknown utility CSS class: {utilityCssClassName}.");
     }
 }
