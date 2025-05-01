@@ -24,3 +24,4 @@ global using static ReactWithDotNet.VisualDesigner.Views.ApplicationDatabase;
 global using static ReactWithDotNet.VisualDesigner.Views.ApplicationStateMemoryCache;
 global using static ReactWithDotNet.VisualDesigner.FP;
 global using static ReactWithDotNet.VisualDesigner.Views.CecilHelper;
+global using static ReactWithDotNet.VisualDesigner.CssHelper;
