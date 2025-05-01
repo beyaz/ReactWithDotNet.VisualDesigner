@@ -17,6 +17,11 @@ public sealed class Result
     {
         return new() { Success = true, Value = value };
     }
+    
+    public static implicit operator Result(NoneObject noneObject)
+    {
+        return new() { Success = true };
+    }
 }
 
 public sealed class Result<TValue>
@@ -156,6 +161,20 @@ static class FP
         return convertFunc(result.Value);
     }
     
+    public static Result Then<A>(this Result<A> result, Action<A> action)
+    {
+        if (result.HasError)
+        {
+            return result.Error;
+        }
+
+        action(result.Value);
+
+        return None;
+    }
+    
+    
+    
     public static NoneObject None => NoneObject.Instance;
     
     public static readonly Result Success = new() { Success = true };
@@ -211,6 +230,29 @@ static class FP
          }
          
          return nextAction(values);
+    }
+    
+    public static Result<IReadOnlyList<B>> ConvertAll<A,B>(this IEnumerable<NotNullResult<A>> response, Func<A,Result<B>> convertFunc)
+    {
+        List<B> values = [];
+
+        foreach (var result in response)
+        {
+            if (result.HasError)
+            {
+                return result.Error;
+            }
+
+            var resultB = convertFunc(result.Value);
+            if (resultB.HasError)
+            {
+                return resultB.Error;
+            }
+            
+            values.Add(resultB.Value);
+        }
+         
+        return values;
     }
     
     public static  Result FoldThen<A>(this IEnumerable<Result<IReadOnlyList<A>>> response, Action<IReadOnlyList<A>> nextAction)
