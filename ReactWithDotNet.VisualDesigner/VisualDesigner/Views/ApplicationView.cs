@@ -989,12 +989,10 @@ sealed class ApplicationView : Component<ApplicationState>
                     },
                     new FlexRow(WidthFull, FlexWrap, Gap(4))
                     {
-                        styleGroup.Items?.Select((value, index) => attributeItem(index, value))
+                        CurrentVisualElement.Style.Select((value, index) => attributeItem(index, value))
                     }
                 }
             };
-
-         
 
             Element inputEditor()
             {
@@ -1002,12 +1000,12 @@ sealed class ApplicationView : Component<ApplicationState>
 
                 if (state.Selection.SelectedStyleIndex >= 0)
                 {
-                    value = styleGroup.Items[state.Selection.SelectedStyleIndex.Value];
+                    value = CurrentVisualElement.Style[state.Selection.SelectedStyleIndex.Value];
                 }
 
                 return new MagicInput
                 {
-                    Placeholder = "Add style attribute",
+                    Placeholder = "Add style",
                     Suggestions = GetStyleAttributeNameSuggestions(state),
                     Id = new StyleInputLocation
                     {
