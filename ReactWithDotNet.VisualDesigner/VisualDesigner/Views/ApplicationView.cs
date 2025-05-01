@@ -12,9 +12,7 @@ sealed class ApplicationView : Component<ApplicationState>
         add,
         remove
     }
-
-    PropertyGroupModel CurrentStyleGroup => CurrentVisualElement.StyleGroups[state.Selection.StyleGroupIndex!.Value];
-
+    
     VisualElementModel CurrentVisualElement => FindTreeNodeByTreePath(state.ComponentRootElement, state.Selection.VisualElementTreeItemPath);
 
     protected override async Task constructor()
@@ -983,7 +981,6 @@ sealed class ApplicationView : Component<ApplicationState>
         {
             return new FlexColumn(WidthFull, Gap(4))
             {
-                conditionEditor(),
                 new FlexRow(FlexWrap, Gap(4))
                 {
                     new FlexRow(WidthFull, BorderRadius(4), PaddingLeft(4), Background(WhiteSmoke))
@@ -1003,45 +1000,13 @@ sealed class ApplicationView : Component<ApplicationState>
                 }
             };
 
-            Element conditionEditor()
-            {
-                return new FlexRow(WidthFull, AlignItemsCenter, Gap(4), PaddingX(2))
-                {
-                    new MagicInput
-                    {
-                        Name  = styleGroupIndex.ToString(),
-                        Value = styleGroup.Condition,
-                        OnChange = (senderName, newValue) =>
-                        {
-                            var indexInStyleGroups = int.Parse(senderName);
-
-                            CurrentVisualElement.StyleGroups[indexInStyleGroups].Condition = newValue;
-
-                            return Task.CompletedTask;
-                        },
-                        OnFocus = senderNameAsStyleGroupIndex =>
-                        {
-                            state.Selection = new()
-                            {
-                                VisualElementTreeItemPath = state.Selection.VisualElementTreeItemPath,
-
-                                StyleGroupIndex = int.Parse(senderNameAsStyleGroupIndex)
-                            };
-
-                            return Task.CompletedTask;
-                        },
-
-                        IsTextAlignCenter = true,
-                        Suggestions       = GetStyleGroupConditionSuggestions(state)
-                    } + FlexGrow(1)
-                };
-            }
+         
 
             Element inputEditor()
             {
                 string value = null;
 
-                if (state.Selection.StyleGroupIndex == styleGroupIndex && state.Selection.SelectedStyleIndex >= 0)
+                if (state.Selection.SelectedStyleIndex >= 0)
                 {
                     value = styleGroup.Items[state.Selection.SelectedStyleIndex.Value];
                 }
@@ -1059,26 +1024,17 @@ sealed class ApplicationView : Component<ApplicationState>
                         StyleGroupIndex      = styleGroupIndex,
                         PropertyIndexInGroup = state.Selection.SelectedStyleIndex ?? CurrentVisualElement.StyleGroups[styleGroupIndex].Items.Count
                     },
-                    OnChange = (senderName, newValue) =>
+                    OnChange = (_, newValue) =>
                     {
-                        StyleInputLocation location = senderName;
-                        if (state.Selection.StyleGroupIndex is null)
-                        {
-                            state.Selection = state.Selection with
-                            {
-                                StyleGroupIndex = location.StyleGroupIndex
-                            };
-                        }
-
                         newValue = TryBeautifyPropertyValue(newValue);
 
-                        if (state.Selection.StyleGroupIndex.HasValue && state.Selection.SelectedStyleIndex.HasValue)
+                        if (state.Selection.SelectedStyleIndex.HasValue)
                         {
-                            CurrentStyleGroup.Items[state.Selection.SelectedStyleIndex.Value] = newValue;
+                            CurrentVisualElement.Style[state.Selection.SelectedStyleIndex.Value] = newValue;
                         }
                         else
                         {
-                            CurrentStyleGroup.Items.Add(newValue);
+                            CurrentVisualElement.Style.Add(newValue);
                         }
 
                         state.Selection.SelectedStyleIndex = null;
@@ -1091,8 +1047,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
             FlexRowCentered attributeItem(int index, string value)
             {
-                var isSelected = index == state.Selection.SelectedStyleIndex &&
-                                 styleGroupIndex == state.Selection.StyleGroupIndex;
+                var isSelected = index == state.Selection.SelectedStyleIndex;
 
                 var closeIcon = new FlexRowCentered(Size(20), PositionAbsolute, Top(-8), Right(-8), Padding(4), Background(White),
                                                     Border(0.5, solid, Theme.BorderColor), BorderRadius(24))
@@ -1103,7 +1058,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
                     OnClick([StopPropagation](_) =>
                     {
-                        CurrentStyleGroup.Items.RemoveAt(state.Selection.SelectedStyleIndex!.Value);
+                        CurrentVisualElement.Style.RemoveAt(state.Selection.SelectedStyleIndex!.Value);
 
                         state.Selection.SelectedStyleIndex = null;
 
@@ -1143,9 +1098,7 @@ sealed class ApplicationView : Component<ApplicationState>
                         state.Selection = new()
                         {
                             VisualElementTreeItemPath = state.Selection.VisualElementTreeItemPath,
-
-                            StyleGroupIndex = location.StyleGroupIndex,
-
+                            
                             SelectedStyleIndex = location.PropertyIndexInGroup
                         };
 
