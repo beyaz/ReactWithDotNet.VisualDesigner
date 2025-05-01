@@ -378,12 +378,19 @@ sealed class ApplicationPreview : Component
 
     static Result<IReadOnlyList<StyleModifier>> ConvertToStyleModifier(string styleAttribute)
     {
+       
+        
         // try process from plugin
         {
             var style = TryProcessStyleAttributeByProjectConfig(styleAttribute);
-            if (style is not null)
+            if (!style.Success)
             {
-                return new[]{style};
+                return style.Error;
+            }
+            
+            if (style.Value is not null)
+            {
+                return new[]{style.Value};
             }
         }
 

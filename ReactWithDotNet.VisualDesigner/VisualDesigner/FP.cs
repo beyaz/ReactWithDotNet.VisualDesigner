@@ -38,6 +38,11 @@ public sealed class Result<TValue>
     {
         return new() { HasError = true, Error = failInfo };
     }
+    
+    public static implicit operator Result<TValue>(NoneObject noneObject)
+    {
+        return new() { Success = true };
+    }
 }
 
 public sealed record Maybe<TValue>
@@ -94,6 +99,7 @@ public sealed class NoneObject
     
     public static readonly NoneObject Instance = new();
 }
+
 
 static class FP
 {

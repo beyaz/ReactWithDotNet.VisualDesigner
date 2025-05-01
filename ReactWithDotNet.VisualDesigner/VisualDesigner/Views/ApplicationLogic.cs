@@ -427,33 +427,47 @@ static class ApplicationLogic
         return suggestions;
     }
 
-    public static StyleModifier TryProcessStyleAttributeByProjectConfig(string styleAttribute)
+    public static Result<StyleModifier> TryProcessStyleAttributeByProjectConfig(string styleAttribute)
     {
+        StyleModifier modifier = null;
+        
+        string name, value, pseudo;
         {
-            var parseResult = TryParsePropertyValue(styleAttribute);
-            if (parseResult.success)
-            {
-                var name = parseResult.name;
-                var value = parseResult.value;
+            var attribute = ParseStyleAttibute(styleAttribute);
+        
+            name   = attribute.name;
+            value  = attribute.value;
+            pseudo = attribute.Pseudo;
+
+            styleAttribute = name;
                 
-                if (name == "color")
-                {
-                    if (Project.Colors.TryGetValue(value, out var realColor))
-                    {
-                        return Color(realColor);
-                    }
-                }
-            }
-        }
-
-        {
-            if (!Project.Styles.TryGetValue(styleAttribute, out var value))
+            if (value is not null)
             {
-                return null;
+                styleAttribute += ":" + value;
+            }
+        }
+        
+       
+        if (Project.Styles.TryGetValue(styleAttribute, out var cssText))
+        {
+            modifier = Style.ParseCss(cssText);
+        }
+        else if (name == "color" && value is not null && Project.Colors.TryGetValue(value, out var realColor))
+        {
+            modifier = Color(realColor);
+        }
+
+        if (modifier is not null)
+        {
+            if (pseudo is not null)
+            {
+                return ApplyPseudo(pseudo, [modifier]);
             }
 
-            return Style.ParseCss(value);
+            return modifier;
         }
+
+        return None;
     }
 
     public static Task<Result> TrySaveComponentForUser(ApplicationState state)
