@@ -29,7 +29,7 @@ static class Exporter_For_NextJs_with_Tailwind
 
     static async Task<Result<IReadOnlyList<string>>> CalculateElementTreeTsxCodes(ComponentEntity component, string userName)
     {
-        var rootVisualElement = DeserializeFromJson<VisualElementModel>(component.RootElementAsJson ?? "");
+        var rootVisualElement = component.RootElementAsJson.AsVisualElementModel();
 
         ReactNode rootNode;
         {

@@ -195,10 +195,8 @@ sealed class ApplicationView : Component<ApplicationState>
             }
         }
 
-        var componentRootElement = DeserializeFromJson<VisualElementModel>(component.RootElementAsJson ?? string.Empty);
+        var componentRootElement = component.RootElementAsJson.AsVisualElementModel();
         
-        Fix(componentRootElement);
-
         state = new()
         {
             UserName = state.UserName,
@@ -575,7 +573,7 @@ sealed class ApplicationView : Component<ApplicationState>
                     var sourceNode = FindTreeNodeByTreePath(state.ComponentRootElement, source);
                     var targetNode = FindTreeNodeByTreePath(state.ComponentRootElement, target);
 
-                    var sourceNodeClone = DeserializeFromJson<VisualElementModel>(SerializeToJson(sourceNode));
+                    var sourceNodeClone = SerializeToJson(sourceNode).AsVisualElementModel();
 
                     targetNode.Children.Add(sourceNodeClone);
 

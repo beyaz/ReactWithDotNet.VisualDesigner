@@ -4,6 +4,7 @@ using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization.NamingConventions;
 using YamlDotNet.Serialization;
 using Formatting = Newtonsoft.Json.Formatting;
+using System.ComponentModel;
 
 namespace ReactWithDotNet.VisualDesigner;
 
@@ -428,6 +429,21 @@ static class Extensions
         
         return JsonConvert.DeserializeObject<T>(json);
     }
+    public static VisualElementModel AsVisualElementModel(this string rootElementAsJson)
+    {
+        if (rootElementAsJson is null)
+        {
+            return null;
+        }
+
+        var value = DeserializeFromJson<VisualElementModel>(rootElementAsJson);
+        
+        Fix(value);
+
+        return value;
+
+    }
+    
     
     public static T DeserializeFromYaml<T>(string yamlContent) where T : class
     {
