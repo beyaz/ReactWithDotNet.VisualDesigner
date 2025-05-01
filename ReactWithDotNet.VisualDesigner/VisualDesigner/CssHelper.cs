@@ -13,6 +13,11 @@ public static class CssHelper
         { "XXL", XXL }
     };
 
+    public static Result<StyleModifier> ApplyPseudo(string pseudo, IReadOnlyList<StyleModifier> styleModifiers)
+    {
+        return GetPseudoFunction(pseudo).Then(pseudoFunction=>pseudoFunction(styleModifiers.ToArray()));
+    }
+
     public static Result<Func<StyleModifier[], StyleModifier>> GetPseudoFunction(string pseudoName)
     {
         if (MediaQueries.TryGetValue(pseudoName, out var func))

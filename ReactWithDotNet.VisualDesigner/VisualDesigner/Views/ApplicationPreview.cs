@@ -410,17 +410,26 @@ sealed class ApplicationPreview : Component
             }
         }
         
-        var parseResult = TryParsePropertyValue(styleAttribute);
-        if (!parseResult.success || parseResult.value is null)
+        // final calculation
         {
-            return null;
-        }
+            string name, value, pseudo;
+            {
+                var attribute = ParseStyleAttibute(styleAttribute);
         
-        var name = parseResult.name;
-        var value = parseResult.value;
+                name   = attribute.name;
+                value  = attribute.value;
+                pseudo = attribute.Pseudo;
+            }
 
+            var styleModifiers = CssHelper.ConvertToStyleModifier(name, value);
+        
+            if (pseudo is not null)
+            {
+                return ApplyPseudo(pseudo, [styleModifiers.Value]).ToReadOnlyList();
+            }
 
-        return CssHelper.ConvertToStyleModifier(name, value).ToReadOnlyList();
+            return styleModifiers.ToReadOnlyList();
+        }
     }
 
     [StopPropagation]

@@ -12,7 +12,7 @@ sealed class ApplicationView : Component<ApplicationState>
         add,
         remove
     }
-    
+
     VisualElementModel CurrentVisualElement => FindTreeNodeByTreePath(state.ComponentRootElement, state.Selection.VisualElementTreeItemPath);
 
     protected override async Task constructor()
@@ -190,7 +190,7 @@ sealed class ApplicationView : Component<ApplicationState>
         }
 
         var componentRootElement = component.RootElementAsJson.AsVisualElementModel();
-        
+
         state = new()
         {
             UserName = state.UserName,
@@ -288,13 +288,12 @@ sealed class ApplicationView : Component<ApplicationState>
             {
                 await PartLeftPanel() + BorderBottomLeftRadius(8) + OverflowAuto,
 
-                state.HtmlCodeVisible ? 
-                
-                    new FlexColumn(FlexGrow(1), Padding(7), OverflowXAuto)
+                state.HtmlCodeVisible ?
+                    new(FlexGrow(1), Padding(7), OverflowXAuto)
                     {
                         new Editor
                         {
-                            valueBind                = ()=>state.HtmlCode,
+                            valueBind                = () => state.HtmlCode,
                             valueBindDebounceTimeout = 500,
                             defaultLanguage          = "html",
                             options =
@@ -308,17 +307,16 @@ sealed class ApplicationView : Component<ApplicationState>
                             }
                         }
                     }
-                    
-                :
-                new FlexColumn(FlexGrow(1), Padding(7), OverflowXAuto)
-                {
-                    Ruler.HorizontalRuler(state.Preview.Width, state.Preview.Scale) + Width(state.Preview.Width) + MarginTop(12) + PaddingLeft(30),
-                    new FlexRow(SizeFull, Width(state.Preview.Width))
+                    :
+                    new FlexColumn(FlexGrow(1), Padding(7), OverflowXAuto)
                     {
-                        Ruler.VerticleRuler(state.Preview.Scale),
-                        PartPreview
-                    }
-                },
+                        Ruler.HorizontalRuler(state.Preview.Width, state.Preview.Scale) + Width(state.Preview.Width) + MarginTop(12) + PaddingLeft(30),
+                        new FlexRow(SizeFull, Width(state.Preview.Width))
+                        {
+                            Ruler.VerticleRuler(state.Preview.Scale),
+                            PartPreview
+                        }
+                    },
 
                 await PartRightPanel() + BorderBottomRightRadius(8)
             }
@@ -437,22 +435,21 @@ sealed class ApplicationView : Component<ApplicationState>
                         }
                     }
                 },
-                
+
                 SpaceX(8),
                 new FlexRowCentered(Border(1, solid, Theme.BorderColor), BorderRadius(4), Width(60))
                 {
                     PositionRelative,
                     new label(PositionAbsolute, Top(-4), Left(8), FontSize10, LineHeight7, Background(Theme.BackgroundColor), PaddingX(4)) { "View" },
-                    
+
                     state.HtmlCodeVisible ? "Design" : "Code",
-                    
+
                     OnClick(_ =>
                     {
                         state.HtmlCodeVisible = !state.HtmlCodeVisible;
-                        
+
                         return Task.CompletedTask;
                     })
-                    
                 }
             },
             new FlexRowCentered(Gap(32))
@@ -926,7 +923,7 @@ sealed class ApplicationView : Component<ApplicationState>
             }
         };
 
-        var inputText = new FlexRow(WidthFull, Gap(4),BorderRadius(4), PaddingLeft(4), Background(WhiteSmoke))
+        var inputText = new FlexRow(WidthFull, Gap(4), BorderRadius(4), PaddingLeft(4), Background(WhiteSmoke))
         {
             new MagicInput
             {
@@ -983,10 +980,10 @@ sealed class ApplicationView : Component<ApplicationState>
                     new FlexRow(WidthFull, FlexWrap, Gap(4))
                     {
                         CurrentVisualElement.Styles.Select((value, index) => attributeItem(index, value)),
-                        OnClick([StopPropagation] (_) =>
+                        OnClick([StopPropagation](_) =>
                         {
                             state.Selection.SelectedStyleIndex = null;
-                            
+
                             return Task.CompletedTask;
                         })
                     }
@@ -1007,7 +1004,7 @@ sealed class ApplicationView : Component<ApplicationState>
                     Placeholder = "Add style",
                     Suggestions = GetStyleAttributeNameSuggestions(state),
                     Name        = "style_editor",
-                    Id = "style_editor",
+                    Id          = "style_editor",
                     OnChange = (_, newValue) =>
                     {
                         newValue = TryBeautifyPropertyValue(newValue);
@@ -1078,7 +1075,7 @@ sealed class ApplicationView : Component<ApplicationState>
                         state.Selection = new()
                         {
                             VisualElementTreeItemPath = state.Selection.VisualElementTreeItemPath,
-                            
+
                             SelectedStyleIndex = styleIndex
                         };
 
@@ -1310,10 +1307,6 @@ sealed class ApplicationView : Component<ApplicationState>
         };
     }
 
-    
-
-   
-
     void UpdateZoomInClient()
     {
         Client.RunJavascript($"window.ComponentIndicatorZoom = {state.Preview.Scale}");
@@ -1476,5 +1469,4 @@ sealed class ApplicationView : Component<ApplicationState>
             }
         }
     }
-
 }
