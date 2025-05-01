@@ -961,13 +961,13 @@ sealed class ApplicationView : Component<ApplicationState>
 
             stylesHeader,
 
-            viewStyles,
+            viewStyles(CurrentVisualElement.Styles),
 
             propsHeader,
             viewProps(visualElementModel.Properties)
         };
 
-        Element viewStyles()
+        Element viewStyles(IReadOnlyList<string> styles)
         {
             return new FlexColumn(WidthFull, Gap(4))
             {
@@ -979,7 +979,7 @@ sealed class ApplicationView : Component<ApplicationState>
                     },
                     new FlexRow(WidthFull, FlexWrap, Gap(4))
                     {
-                        CurrentVisualElement.Styles.Select((value, index) => attributeItem(index, value)),
+                        styles.Select((value, index) => attributeItem(index, value)),
                         OnClick([StopPropagation](_) =>
                         {
                             state.Selection.SelectedStyleIndex = null;
@@ -1003,7 +1003,7 @@ sealed class ApplicationView : Component<ApplicationState>
                 {
                     Placeholder = "Add style",
                     Suggestions = GetStyleAttributeNameSuggestions(state),
-                    Name        = "style_editor",
+                    Name        = "style_editor" + styles.Count,
                     Id          = "style_editor",
                     OnChange = (_, newValue) =>
                     {
