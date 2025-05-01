@@ -784,22 +784,6 @@ public static class CssHelper
         }
     }
 
-    public static Maybe<(string Pseudo, string NewText)> TryReadPseudo(string text)
-    {
-        foreach (var pseudo in MediaQueries.Keys)
-        {
-            var prefix = pseudo + ":";
-            if (text.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
-            {
-                var newText = text.RemoveFromStart(prefix, StringComparison.OrdinalIgnoreCase);
-
-                return (prefix.ToLower(), newText);
-            }
-        }
-
-        return None;
-    }
-
     static Result<string> ConvertToTailwindClass(string name, string value)
     {
         if (value is null)
@@ -1148,6 +1132,22 @@ public static class CssHelper
         }
 
         return new InvalidOperationException($"Css not handled. {name}: {value}");
+    }
+
+    static Maybe<(string Pseudo, string NewText)> TryReadPseudo(string text)
+    {
+        foreach (var pseudo in MediaQueries.Keys)
+        {
+            var prefix = pseudo + ":";
+            if (text.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+            {
+                var newText = text.RemoveFromStart(prefix, StringComparison.OrdinalIgnoreCase);
+
+                return (prefix.ToLower(), newText);
+            }
+        }
+
+        return None;
     }
 
     static class TextParser
