@@ -968,16 +968,13 @@ sealed class ApplicationView : Component<ApplicationState>
 
             stylesHeader,
 
-            new FlexColumnCentered(WidthFull)
-            {
-                visualElementModel.StyleGroups?.Select(viewStyles)
-            },
+            viewStyles,
 
             propsHeader,
             viewProps(visualElementModel.Properties)
         };
 
-        Element viewStyles(PropertyGroupModel styleGroup, int styleGroupIndex)
+        Element viewStyles()
         {
             return new FlexColumn(WidthFull, Gap(4))
             {
@@ -989,7 +986,13 @@ sealed class ApplicationView : Component<ApplicationState>
                     },
                     new FlexRow(WidthFull, FlexWrap, Gap(4))
                     {
-                        CurrentVisualElement.Style.Select((value, index) => attributeItem(index, value))
+                        CurrentVisualElement.Style.Select((value, index) => attributeItem(index, value)),
+                        OnClick([StopPropagation] (_) =>
+                        {
+                            state.Selection.SelectedStyleIndex = null;
+                            
+                            return Task.CompletedTask;
+                        })
                     }
                 }
             };
@@ -1007,15 +1010,8 @@ sealed class ApplicationView : Component<ApplicationState>
                 {
                     Placeholder = "Add style",
                     Suggestions = GetStyleAttributeNameSuggestions(state),
-                    Id = new StyleInputLocation
-                    {
-                        StyleGroupIndex = styleGroupIndex
-                    },
-                    Name = new StyleInputLocation
-                    {
-                        StyleGroupIndex      = styleGroupIndex,
-                        PropertyIndexInGroup = state.Selection.SelectedStyleIndex ?? CurrentVisualElement.StyleGroups[styleGroupIndex].Items.Count
-                    },
+                    Name        = "style_editor",
+                    Id = "style_editor",
                     OnChange = (_, newValue) =>
                     {
                         newValue = TryBeautifyPropertyValue(newValue);
@@ -1078,26 +1074,19 @@ sealed class ApplicationView : Component<ApplicationState>
                     isSelected ? closeIcon : null,
 
                     content,
-                    Id(new StyleInputLocation
-                    {
-                        StyleGroupIndex      = styleGroupIndex,
-                        PropertyIndexInGroup = index
-                    }),
+                    Id(index),
                     OnClick([StopPropagation](e) =>
                     {
-                        StyleInputLocation location = e.currentTarget.id;
+                        var styleIndex = int.Parse(e.currentTarget.id);
 
                         state.Selection = new()
                         {
                             VisualElementTreeItemPath = state.Selection.VisualElementTreeItemPath,
                             
-                            SelectedStyleIndex = location.PropertyIndexInGroup
+                            SelectedStyleIndex = styleIndex
                         };
 
-                        var id = new StyleInputLocation
-                        {
-                            StyleGroupIndex = location.StyleGroupIndex
-                        }.ToString();
+                        var id = "style_editor";
 
                         // calculate js code for focus to input editor
                         {
@@ -1107,7 +1096,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
                             // calculate text selection in edit input
                             {
-                                var nameValue = CurrentVisualElement.StyleGroups[location.StyleGroupIndex].Items[state.Selection.SelectedStyleIndex.Value];
+                                var nameValue = CurrentVisualElement.Style[state.Selection.SelectedStyleIndex.Value];
                                 var parseResult = TryParsePropertyValue(nameValue);
                                 if (parseResult.success)
                                 {
@@ -1492,42 +1481,4 @@ sealed class ApplicationView : Component<ApplicationState>
         }
     }
 
-    class StyleInputLocation
-    {
-        public int PropertyIndexInGroup { get; init; }
-
-        public required int StyleGroupIndex { get; init; }
-        string Prefix { get; init; } = "style-input-location";
-
-        public static implicit operator StyleInputLocation(string input)
-        {
-            return Parse(input);
-        }
-
-        public static implicit operator string(StyleInputLocation location)
-        {
-            return location.ToString();
-        }
-
-        public override string ToString()
-        {
-            return $"{Prefix},{StyleGroupIndex},{PropertyIndexInGroup}";
-        }
-
-        static StyleInputLocation Parse(string input)
-        {
-            var parts = input.Split(',');
-            if (parts.Length != 3)
-            {
-                throw new FormatException("Invalid input format");
-            }
-
-            return new()
-            {
-                Prefix               = parts[0],
-                StyleGroupIndex      = int.Parse(parts[1]),
-                PropertyIndexInGroup = int.Parse(parts[2])
-            };
-        }
-    }
 }
