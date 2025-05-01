@@ -547,7 +547,7 @@ static class Exporter_For_NextJs_with_Tailwind
                 continue;
             }
                 
-            return new NotImplementedException($"Condition not handled: {styleItem}");
+            classNames.Add(tailwindClassName);
         }
         
 

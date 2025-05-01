@@ -489,6 +489,14 @@ public static class CssHelper
             {
                 return Cursor(value);
             }
+            case "inset":
+            {
+                if (isValueDouble)
+                {
+                    return Inset(valueAsDouble + "px");
+                }
+                return Inset(value);
+            }
         }
 
         return new Exception($"{name}: {value} is not recognized");
