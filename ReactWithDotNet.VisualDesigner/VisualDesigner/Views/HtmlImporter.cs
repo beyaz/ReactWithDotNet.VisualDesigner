@@ -19,7 +19,7 @@ static class HtmlImporter
         return false;
     }
 
-    public static VisualElementModel Import(string html)
+    public static VisualElementModel ConvertToVisualElementModel(string html)
     {
         var htmlDocument = new HtmlDocument
         {
@@ -37,7 +37,7 @@ static class HtmlImporter
             return null;
         }
 
-        if (htmlNode.NodeType == HtmlNodeType.Text && htmlNode.InnerText.HasNoValue())
+        if (htmlNode.NodeType == HtmlNodeType.Text)
         {
             return null;
         }
@@ -45,9 +45,15 @@ static class HtmlImporter
         var model = new VisualElementModel
         {
             Tag        = htmlNode.Name,
-            Text       = htmlNode.InnerText,
             Properties = htmlNode.Attributes.Select(a => a.Name + ": " + a.Value).ToList()
         };
+
+        if (htmlNode.ChildNodes.Count == 1 && htmlNode.ChildNodes[0].NodeType == HtmlNodeType.Text && htmlNode.ChildNodes[0].InnerText.HasValue())
+        {
+            model.Text = htmlNode.ChildNodes[0].InnerText.Trim();
+
+            return model;
+        }
 
         foreach (var child in htmlNode.ChildNodes)
         {

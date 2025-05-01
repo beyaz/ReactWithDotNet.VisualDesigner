@@ -932,7 +932,13 @@ sealed class ApplicationView : Component<ApplicationState>
                 Value       = visualElementModel.Text,
                 OnChange = (_, newValue) =>
                 {
-                    
+                    var model = HtmlImporter.ConvertToVisualElementModel(newValue);
+                    if (model is not null)
+                    {
+                        CurrentVisualElement.Children.Add(model);
+                        
+                        return Task.CompletedTask;
+                    }
                     
                     CurrentVisualElement.Text = newValue;
 
