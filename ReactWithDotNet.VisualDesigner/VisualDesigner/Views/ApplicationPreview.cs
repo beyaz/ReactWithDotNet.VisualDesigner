@@ -6,17 +6,6 @@ namespace ReactWithDotNet.VisualDesigner.Views;
 
 sealed class ApplicationPreview : Component
 {
-    static readonly Dictionary<string, Func<StyleModifier[], StyleModifier>> ConditionMap = new()
-    {
-        { "hover", Hover },
-        { "Focus", Focus },
-        { "SM", SM },
-        { "MD", MD },
-        { "LG", LG },
-        { "XL", XL },
-        { "XXL", XXL }
-    };
-
     public Task Refresh()
     {
         return Task.CompletedTask;
@@ -398,7 +387,7 @@ sealed class ApplicationPreview : Component
                 var cssStyles = maybe.Value.CssStyles;
                 
                 Func<StyleModifier[], StyleModifier> pseudoFunction = null;
-                
+
                 if (pseudo is not null)
                 {
                    var result = GetPseudoFunction(pseudo);
