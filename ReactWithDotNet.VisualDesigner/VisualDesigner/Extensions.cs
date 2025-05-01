@@ -4,6 +4,7 @@ using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization.NamingConventions;
 using YamlDotNet.Serialization;
 using Formatting = Newtonsoft.Json.Formatting;
+using System.Globalization;
 
 namespace ReactWithDotNet.VisualDesigner;
 
@@ -51,6 +52,12 @@ static class YamlHelper
 
 static class Extensions
 {
+    static readonly CultureInfo CultureInfo_en_US = new("en-US");
+    public static string AsPixel(this double value)
+    {
+        return value.ToString(CultureInfo_en_US) + "px";
+    }
+    
     public static bool HasNoChild(this VisualElementModel model)
     {
         return model.Children is null || model.Children.Count == 0;
