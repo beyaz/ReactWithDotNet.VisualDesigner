@@ -311,8 +311,6 @@ sealed class ApplicationPreview : Component
                 }
             }
 
-            Fix(model);
-
             {
                 var result = model.Styles.Select(ConvertToStyleModifier).FoldThen(styleModifiers => element.Add(styleModifiers.ToArray()));
                 if (result.HasError)
