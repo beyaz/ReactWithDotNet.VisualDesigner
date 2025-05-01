@@ -432,6 +432,7 @@ sealed class ApplicationPreview : Component
                 pseudo = attribute.Pseudo;
             }
 
+
             var styleModifiers = CssHelper.ConvertToStyleModifier(name, value);
         
             if (pseudo is not null)
