@@ -177,7 +177,7 @@ sealed class ApplicationPreview : Component
 
                             var name = parseResult.name;
                             var value = parseResult.value;
-                            
+
                             if (name != "-bind")
                             {
                                 continue;
@@ -219,7 +219,7 @@ sealed class ApplicationPreview : Component
                 {
                     var name = parseResult.name;
                     var value = parseResult.value;
-                    
+
                     if (name == "-items-source-design-time-count")
                     {
                         var designTimeChildrenCount = double.Parse(value);
@@ -304,7 +304,7 @@ sealed class ApplicationPreview : Component
                     }
 
                     {
-                        var propertyInfo = element.GetType().GetProperty(name,BindingFlags.IgnoreCase| BindingFlags.Public| BindingFlags.Instance);
+                        var propertyInfo = element.GetType().GetProperty(name, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
                         if (propertyInfo is not null)
                         {
                             if (propertyInfo.PropertyType == typeof(string))
@@ -329,7 +329,7 @@ sealed class ApplicationPreview : Component
                     return result.Error;
                 }
             }
-            
+
             if (context.HighlightedElement == model)
             {
                 if (element.style.outline is null)
@@ -378,8 +378,6 @@ sealed class ApplicationPreview : Component
 
     static Result<IReadOnlyList<StyleModifier>> ConvertToStyleModifier(string styleAttribute)
     {
-       
-        
         // try process from plugin
         {
             var style = TryProcessStyleAttributeByProjectConfig(styleAttribute);
@@ -387,10 +385,10 @@ sealed class ApplicationPreview : Component
             {
                 return style.Error;
             }
-            
+
             if (style.Value is not null)
             {
-                return new[]{style.Value};
+                return new[] { style.Value };
             }
         }
 
@@ -399,20 +397,20 @@ sealed class ApplicationPreview : Component
             if (maybe.HasValue)
             {
                 var pseudo = maybe.Value.Pseudo;
-                
+
                 var cssStyles = maybe.Value.CssStyles;
-                
+
                 Func<StyleModifier[], StyleModifier> pseudoFunction = null;
 
                 if (pseudo is not null)
                 {
-                   var result = GetPseudoFunction(pseudo);
-                   if (result.HasError)
-                   {
-                       return result.Error;
-                   }
-                   
-                   pseudoFunction = result.Value;
+                    var result = GetPseudoFunction(pseudo);
+                    if (result.HasError)
+                    {
+                        return result.Error;
+                    }
+
+                    pseudoFunction = result.Value;
                 }
 
                 return cssStyles.Select(x => CssHelper.ConvertToStyleModifier(x.Name, x.Value)).Then(styleModifiers =>
@@ -424,30 +422,70 @@ sealed class ApplicationPreview : Component
 
                     return styleModifiers;
                 });
-                
             }
         }
-        
+
         // final calculation
         {
             string name, value, pseudo;
             {
                 var attribute = ParseStyleAttibute(styleAttribute);
-        
+
                 name   = attribute.name;
                 value  = attribute.value;
                 pseudo = attribute.Pseudo;
             }
 
-
             var styleModifiers = CssHelper.ConvertToStyleModifier(name, value);
-        
+
             if (pseudo is not null)
             {
                 return ApplyPseudo(pseudo, [styleModifiers.Value]).ToReadOnlyList();
             }
 
             return styleModifiers.ToReadOnlyList();
+        }
+
+        static Result<StyleModifier> TryProcessStyleAttributeByProjectConfig(string styleAttribute)
+        {
+            StyleModifier modifier = null;
+
+            string name, value, pseudo;
+            {
+                var attribute = ParseStyleAttibute(styleAttribute);
+
+                name   = attribute.name;
+                value  = attribute.value;
+                pseudo = attribute.Pseudo;
+
+                styleAttribute = name;
+
+                if (value is not null)
+                {
+                    styleAttribute += ":" + value;
+                }
+            }
+
+            if (Project.Styles.TryGetValue(styleAttribute, out var cssText))
+            {
+                modifier = Style.ParseCss(cssText);
+            }
+            else if (name == "color" && value is not null && Project.Colors.TryGetValue(value, out var realColor))
+            {
+                modifier = Color(realColor);
+            }
+
+            if (modifier is not null)
+            {
+                if (pseudo is not null)
+                {
+                    return ApplyPseudo(pseudo, [modifier]);
+                }
+
+                return modifier;
+            }
+
+            return None;
         }
     }
 
