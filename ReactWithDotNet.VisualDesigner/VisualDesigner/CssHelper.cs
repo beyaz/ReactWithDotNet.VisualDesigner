@@ -22,15 +22,404 @@ public static class CssHelper
         return GetPseudoFunction(pseudo).Then(pseudoFunction => pseudoFunction(styleModifiers.ToArray()));
     }
 
-    public static Result<string> ConvertDesignerStyleItemToTailwindClassName(string designerStyleItem)
+    public static Result<string> ConvertDesignerStyleItemToTailwindClassName(string designerStyleItemText)
     {
-        var parseResult = TryParsePropertyValue(designerStyleItem);
-        if (parseResult.success)
+        DesignerStyleItem designerStyleItem = null;
         {
-            return ConvertToTailwindClass(parseResult.name, parseResult.value);
+            var result = CreateDesignerStyleItemFromText(designerStyleItemText);
+            if (result.HasError)
+            {
+                return result.Error;
+            }
+
+            designerStyleItem = result.Value;    
         }
 
-        return designerStyleItem;
+        var tailwindClassNames = new List<string>();
+        
+        foreach (var (key, value) in designerStyleItem.RawHtmlStyles)
+        {
+            string tailwindClassName;
+            {
+                var result = ConvertToTailwindClass(key, value);
+                if (result.HasError)
+                {
+                    return result.Error;
+                }
+
+                tailwindClassName = result.Value; 
+            }
+            
+            tailwindClassNames.Add(tailwindClassName);
+        }
+
+        if (designerStyleItem.Pseudo is null)
+        {
+            return string.Join(" ", tailwindClassNames);
+        }
+        
+        return string.Join(" ", tailwindClassNames.Select(x=>designerStyleItem.Pseudo+":"+x));
+        
+    }
+    
+    static Result<string> ConvertToTailwindClass(string name, string value)
+    {
+        if (value is null)
+        {
+            return new ArgumentNullException(nameof(value));
+        }
+
+        // check is conditional sample: border-width: {props.isSelected} ? 2 : 5
+        {
+            var conditionalValue = TextParser.TryParseConditionalValue(value);
+            if (conditionalValue.success)
+            {
+                string lefTailwindClass;
+                {
+                    var result = ConvertToTailwindClass(name, conditionalValue.left);
+                    if (result.HasError)
+                    {
+                        return result.Error;
+                    }
+
+                    lefTailwindClass = result.Value;
+                }
+
+                var rightTailwindClass = string.Empty;
+
+                if (conditionalValue.right.HasValue())
+                {
+                    {
+                        var result = ConvertToTailwindClass(name, conditionalValue.right);
+                        if (result.HasError)
+                        {
+                            return result.Error;
+                        }
+
+                        rightTailwindClass = result.Value;
+                    }
+                }
+
+                return "${" + $"{ClearConnectedValue(conditionalValue.condition)} ? '{lefTailwindClass}' : '{rightTailwindClass}'" + '}';
+            }
+        }
+
+        var isValueDouble = double.TryParse(value, out var valueAsDouble);
+
+        name = name switch
+        {
+            "padding"        => "p",
+            "padding-right"  => "pr",
+            "padding-left"   => "pl",
+            "padding-top"    => "pt",
+            "padding-bottom" => "pb",
+
+            "margin"        => "m",
+            "margin-right"  => "mr",
+            "margin-left"   => "ml",
+            "margin-top"    => "mt",
+            "margin-bottom" => "mb",
+
+            _ => name
+        };
+
+        switch (name)
+        {
+            case "transform":
+            {
+                if (value.StartsWith("rotate("))
+                {
+                    var parts = value.Split("()".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+                    if (parts.Length == 2)
+                    {
+                        var sign = parts[1][0] == '-' ? "-" : "";
+                        if (parts[1].EndsWith("deg"))
+                        {
+                            return $"{sign}rotate-{value.RemoveFromEnd("deg")}";
+                        }
+                    }
+                }
+
+                break;
+            }
+            case "outline":
+            {
+                return $"{name}-{value}";
+            }
+
+            case "text-decoration":
+            {
+                return $"{value}";
+            }
+
+            case "W":
+            case "w":
+            case "width":
+            {
+                if (value == "fit-content")
+                {
+                    return "w-fit";
+                }
+
+                if (isValueDouble)
+                {
+                    value = valueAsDouble.AsPixel();
+                }
+
+                return $"w-[{value}]";
+            }
+
+            case "text-align":
+            {
+                return $"text-{value}";
+            }
+
+            case "h":
+            case "height":
+            {
+                if (value == "fit-content")
+                {
+                    return "h-fit";
+                }
+
+                if (isValueDouble)
+                {
+                    value = valueAsDouble.AsPixel();
+                }
+
+                return $"h-[{value}]";
+            }
+
+            case "max-width":
+                return $"max-w-[{value}px]";
+
+            case "max-height":
+                return $"max-h-[{value}px]";
+
+            case "min-width":
+                return $"min-w-[{value}px]";
+
+            case "min-height":
+                return $"min-h-[{value}px]";
+
+            case "z-index":
+                return $"z-[{value}]";
+
+            case "overflow-y":
+            case "overflow-x":
+                return $"{name}-{value}";
+
+            case "border-top-left-radius":
+                return $"rounded-tl-[{value}px]";
+
+            case "border-top-right-radius":
+                return $"rounded-tr-[{value}px]";
+
+            case "border-bottom-left-radius":
+                return $"rounded-bl-[{value}px]";
+
+            case "border-bottom-right-radius":
+                return $"rounded-br-[{value}px]";
+
+            case "flex-grow":
+                return $"flex-grow-[{value}]";
+
+            case "border-bottom-width":
+                return $"border-b-[{value}px]";
+
+            case "border-top-width":
+                return $"border-t-[{value}px]";
+
+            case "border-left-width":
+                return $"border-l-[{value}px]";
+
+            case "border-right-width":
+                return $"border-r-[{value}px]";
+
+            case "border-top":
+            case "border-right":
+            case "border-left":
+            case "border-bottom":
+            {
+                var direction = name.Split('-', StringSplitOptions.RemoveEmptyEntries).Last();
+
+                var parts = value.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                if (parts.Length == 3)
+                {
+                    if (Project.Colors.TryGetValue(parts[2], out var htmlColor))
+                    {
+                        parts[2] = htmlColor;
+                    }
+
+                    var directionShortName = direction switch
+                    {
+                        "top"    => "t",
+                        "bottom" => "b",
+                        "right"  => "r",
+                        "left"   => "l",
+                        _        => null
+                    };
+
+                    if (directionShortName is null)
+                    {
+                        return new ArgumentOutOfRangeException(direction);
+                    }
+
+                    return $"border-{directionShortName}-[{parts[0]}]" +
+                           $" [border-{direction}-style:{parts[1]}]" +
+                           $" [border-{direction}-color:{parts[2]}]";
+                }
+
+                return new ArgumentOutOfRangeException(direction);
+            }
+
+            case "display":
+                return $"{value}";
+
+            case "color":
+            {
+                if (Project.Colors.TryGetValue(value, out var htmlColor))
+                {
+                    value = htmlColor;
+                }
+
+                return $"text-[{value}]";
+            }
+
+            case "border-color":
+            {
+                if (Project.Colors.TryGetValue(value, out var htmlColor))
+                {
+                    value = htmlColor;
+                }
+
+                return $"border-[{value}]";
+            }
+
+            case "gap":
+                return $"gap-[{value}px]";
+
+            case "size":
+                return $"size-[{value}px]";
+
+            case "bottom":
+            case "top":
+            case "left":
+            case "right":
+                return $"{name}-[{value}px]";
+
+            case "flex-direction":
+            {
+                if (value == "column")
+                {
+                    return "flex-col";    
+                }
+                if (value == "row")
+                {
+                    return "flex";    
+                }
+                break;
+            }
+
+            case "align-items":
+                return $"items-{value.RemoveFromStart("align-")}";
+
+            case "justify-content":
+                return $"justify-{value.Split('-').Last()}";
+
+            case "border-radius":
+                return $"rounded-[{value}px]";
+
+            case "font-size":
+                return $"[font-size:{value}px]";
+
+            case "border-width":
+            {
+                if (isValueDouble)
+                {
+                    value = valueAsDouble.AsPixel();
+                }
+
+                return $"border-[{value}]";
+            }
+
+            case "m":
+            case "mx":
+            case "my":
+            case "ml":
+            case "mr":
+            case "mb":
+            case "mt":
+
+            case "p":
+            case "px":
+            case "py":
+            case "pl":
+            case "pr":
+            case "pb":
+            case "pt":
+            {
+                if (isValueDouble)
+                {
+                    value = valueAsDouble.AsPixel();
+                }
+
+                return $"{name}-[{value}]";
+            }
+
+            case "border":
+            {
+                var parts = value.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                if (parts.Length == 3)
+                {
+                    if (Project.Colors.TryGetValue(parts[2], out var htmlColor))
+                    {
+                        parts[2] = htmlColor;
+                    }
+
+                    if (parts[0] == "1px" && parts[1] == "solid")
+                    {
+                        return "border " +
+                               $"border-[{parts[2]}]";
+                    }
+
+                    return $"border-[{parts[0]}] " +
+                           $"border-[{parts[1]}] " +
+                           $"border-[{parts[2]}]";
+                }
+
+                break;
+            }
+            case "background":
+            case "bg":
+            {
+                if (Project.Colors.TryGetValue(value, out var htmlColor))
+                {
+                    value = htmlColor;
+                }
+
+                return $"bg-[{value}]";
+            }
+            case "position":
+                return $"{value}";
+
+            case "border-style":
+            {
+                return $"border-{value}";
+            }
+
+            case "cursor":
+            {
+                return $"cursor-{value}";
+            }
+
+            case "inset":
+            {
+                return $"inset-{value}";
+            }
+        }
+
+        return new InvalidOperationException($"Css not handled. {name}: {value}");
     }
 
     public static HtmlStyle ToHtmlStyle(string name, string value)
@@ -630,355 +1019,7 @@ public static class CssHelper
         }
     }
 
-    static Result<string> ConvertToTailwindClass(string name, string value)
-    {
-        if (value is null)
-        {
-            return new ArgumentNullException(nameof(value));
-        }
-
-        // check is conditional sample: border-width: {props.isSelected} ? 2 : 5
-        {
-            var conditionalValue = TextParser.TryParseConditionalValue(value);
-            if (conditionalValue.success)
-            {
-                string lefTailwindClass;
-                {
-                    var result = ConvertToTailwindClass(name, conditionalValue.left);
-                    if (result.HasError)
-                    {
-                        return result.Error;
-                    }
-
-                    lefTailwindClass = result.Value;
-                }
-
-                var rightTailwindClass = string.Empty;
-
-                if (conditionalValue.right.HasValue())
-                {
-                    {
-                        var result = ConvertToTailwindClass(name, conditionalValue.right);
-                        if (result.HasError)
-                        {
-                            return result.Error;
-                        }
-
-                        rightTailwindClass = result.Value;
-                    }
-                }
-
-                return "${" + $"{ClearConnectedValue(conditionalValue.condition)} ? '{lefTailwindClass}' : '{rightTailwindClass}'" + '}';
-            }
-        }
-
-        var isValueDouble = double.TryParse(value, out var valueAsDouble);
-
-        name = name switch
-        {
-            "padding"        => "p",
-            "padding-right"  => "pr",
-            "padding-left"   => "pl",
-            "padding-top"    => "pt",
-            "padding-bottom" => "pb",
-
-            "margin"        => "m",
-            "margin-right"  => "mr",
-            "margin-left"   => "ml",
-            "margin-top"    => "mt",
-            "margin-bottom" => "mb",
-
-            _ => name
-        };
-
-        switch (name)
-        {
-            case "transform":
-            {
-                if (value.StartsWith("rotate("))
-                {
-                    var parts = value.Split("()".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
-                    if (parts.Length == 2)
-                    {
-                        var sign = parts[1][0] == '-' ? "-" : "";
-                        if (parts[1].EndsWith("deg"))
-                        {
-                            return $"{sign}rotate-{value.RemoveFromEnd("deg")}";
-                        }
-                    }
-                }
-
-                break;
-            }
-            case "outline":
-            {
-                return $"{name}-{value}";
-            }
-
-            case "text-decoration":
-            {
-                return $"{value}";
-            }
-
-            case "W":
-            case "w":
-            case "width":
-            {
-                if (value == "fit-content")
-                {
-                    return "w-fit";
-                }
-
-                if (isValueDouble)
-                {
-                    value = valueAsDouble.AsPixel();
-                }
-
-                return $"w-[{value}]";
-            }
-
-            case "text-align":
-            {
-                return $"text-{value}";
-            }
-
-            case "h":
-            case "height":
-            {
-                if (value == "fit-content")
-                {
-                    return "h-fit";
-                }
-
-                if (isValueDouble)
-                {
-                    value = valueAsDouble.AsPixel();
-                }
-
-                return $"h-[{value}]";
-            }
-
-            case "max-width":
-                return $"max-w-[{value}px]";
-
-            case "max-height":
-                return $"max-h-[{value}px]";
-
-            case "min-width":
-                return $"min-w-[{value}px]";
-
-            case "min-height":
-                return $"min-h-[{value}px]";
-
-            case "z-index":
-                return $"z-[{value}]";
-
-            case "overflow-y":
-            case "overflow-x":
-                return $"{name}-{value}";
-
-            case "border-top-left-radius":
-                return $"rounded-tl-[{value}px]";
-
-            case "border-top-right-radius":
-                return $"rounded-tr-[{value}px]";
-
-            case "border-bottom-left-radius":
-                return $"rounded-bl-[{value}px]";
-
-            case "border-bottom-right-radius":
-                return $"rounded-br-[{value}px]";
-
-            case "flex-grow":
-                return $"flex-grow-[{value}]";
-
-            case "border-bottom-width":
-                return $"border-b-[{value}px]";
-
-            case "border-top-width":
-                return $"border-t-[{value}px]";
-
-            case "border-left-width":
-                return $"border-l-[{value}px]";
-
-            case "border-right-width":
-                return $"border-r-[{value}px]";
-
-            case "border-top":
-            case "border-right":
-            case "border-left":
-            case "border-bottom":
-            {
-                var direction = name.Split('-', StringSplitOptions.RemoveEmptyEntries).Last();
-
-                var parts = value.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-                if (parts.Length == 3)
-                {
-                    if (Project.Colors.TryGetValue(parts[2], out var htmlColor))
-                    {
-                        parts[2] = htmlColor;
-                    }
-
-                    var directionShortName = direction switch
-                    {
-                        "top"    => "t",
-                        "bottom" => "b",
-                        "right"  => "r",
-                        "left"   => "l",
-                        _        => null
-                    };
-
-                    if (directionShortName is null)
-                    {
-                        return new ArgumentOutOfRangeException(direction);
-                    }
-
-                    return $"border-{directionShortName}-[{parts[0]}]" +
-                           $" [border-{direction}-style:{parts[1]}]" +
-                           $" [border-{direction}-color:{parts[2]}]";
-                }
-
-                return new ArgumentOutOfRangeException(direction);
-            }
-
-            case "display":
-                return $"{value}";
-
-            case "color":
-            {
-                if (Project.Colors.TryGetValue(value, out var htmlColor))
-                {
-                    value = htmlColor;
-                }
-
-                return $"text-[{value}]";
-            }
-
-            case "border-color":
-            {
-                if (Project.Colors.TryGetValue(value, out var htmlColor))
-                {
-                    value = htmlColor;
-                }
-
-                return $"border-[{value}]";
-            }
-
-            case "gap":
-                return $"gap-[{value}px]";
-
-            case "size":
-                return $"size-[{value}px]";
-
-            case "bottom":
-            case "top":
-            case "left":
-            case "right":
-                return $"{name}-[{value}px]";
-
-            case "flex-direction" when value == "column":
-                return "flex-col";
-
-            case "align-items":
-                return $"items-{value.RemoveFromStart("align-")}";
-
-            case "justify-content":
-                return $"justify-{value.Split('-').Last()}";
-
-            case "border-radius":
-                return $"rounded-[{value}px]";
-
-            case "font-size":
-                return $"[font-size:{value}px]";
-
-            case "border-width":
-            {
-                if (isValueDouble)
-                {
-                    value = valueAsDouble.AsPixel();
-                }
-
-                return $"border-[{value}]";
-            }
-
-            case "m":
-            case "mx":
-            case "my":
-            case "ml":
-            case "mr":
-            case "mb":
-            case "mt":
-
-            case "p":
-            case "px":
-            case "py":
-            case "pl":
-            case "pr":
-            case "pb":
-            case "pt":
-            {
-                if (isValueDouble)
-                {
-                    value = valueAsDouble.AsPixel();
-                }
-
-                return $"{name}-[{value}]";
-            }
-
-            case "border":
-            {
-                var parts = value.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-                if (parts.Length == 3)
-                {
-                    if (Project.Colors.TryGetValue(parts[2], out var htmlColor))
-                    {
-                        parts[2] = htmlColor;
-                    }
-
-                    if (parts[0] == "1px" && parts[1] == "solid")
-                    {
-                        return "border " +
-                               $"border-[{parts[2]}]";
-                    }
-
-                    return $"border-[{parts[0]}] " +
-                           $"border-[{parts[1]}] " +
-                           $"border-[{parts[2]}]";
-                }
-
-                break;
-            }
-            case "background":
-            case "bg":
-            {
-                if (Project.Colors.TryGetValue(value, out var htmlColor))
-                {
-                    value = htmlColor;
-                }
-
-                return $"bg-[{value}]";
-            }
-            case "position":
-                return $"{value}";
-
-            case "border-style":
-            {
-                return $"border-{value}";
-            }
-
-            case "cursor":
-            {
-                return $"cursor-{value}";
-            }
-
-            case "inset":
-            {
-                return $"inset-{value}";
-            }
-        }
-
-        return new InvalidOperationException($"Css not handled. {name}: {value}");
-    }
+    
 
     static Maybe<(string Pseudo, string NewText)> TryReadPseudo(string text)
     {
