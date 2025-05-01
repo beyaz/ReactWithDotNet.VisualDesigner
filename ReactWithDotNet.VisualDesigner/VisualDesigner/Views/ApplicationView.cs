@@ -994,7 +994,7 @@ sealed class ApplicationView : Component<ApplicationState>
                     {
                         OnClick(_ =>
                         {
-                            state.Selection = state.Selection with { PropertyIndexInStyleGroup = null };
+                            state.Selection = state.Selection with { SelectedStyleIndex = null };
 
                             return Task.CompletedTask;
                         }),
@@ -1041,9 +1041,9 @@ sealed class ApplicationView : Component<ApplicationState>
             {
                 string value = null;
 
-                if (state.Selection.StyleGroupIndex == styleGroupIndex && state.Selection.PropertyIndexInStyleGroup >= 0)
+                if (state.Selection.StyleGroupIndex == styleGroupIndex && state.Selection.SelectedStyleIndex >= 0)
                 {
-                    value = styleGroup.Items[state.Selection.PropertyIndexInStyleGroup.Value];
+                    value = styleGroup.Items[state.Selection.SelectedStyleIndex.Value];
                 }
 
                 return new MagicInput
@@ -1057,7 +1057,7 @@ sealed class ApplicationView : Component<ApplicationState>
                     Name = new StyleInputLocation
                     {
                         StyleGroupIndex      = styleGroupIndex,
-                        PropertyIndexInGroup = state.Selection.PropertyIndexInStyleGroup ?? CurrentVisualElement.StyleGroups[styleGroupIndex].Items.Count
+                        PropertyIndexInGroup = state.Selection.SelectedStyleIndex ?? CurrentVisualElement.StyleGroups[styleGroupIndex].Items.Count
                     },
                     OnChange = (senderName, newValue) =>
                     {
@@ -1072,16 +1072,16 @@ sealed class ApplicationView : Component<ApplicationState>
 
                         newValue = TryBeautifyPropertyValue(newValue);
 
-                        if (state.Selection.StyleGroupIndex.HasValue && state.Selection.PropertyIndexInStyleGroup.HasValue)
+                        if (state.Selection.StyleGroupIndex.HasValue && state.Selection.SelectedStyleIndex.HasValue)
                         {
-                            CurrentStyleGroup.Items[state.Selection.PropertyIndexInStyleGroup.Value] = newValue;
+                            CurrentStyleGroup.Items[state.Selection.SelectedStyleIndex.Value] = newValue;
                         }
                         else
                         {
                             CurrentStyleGroup.Items.Add(newValue);
                         }
 
-                        state.Selection.PropertyIndexInStyleGroup = null;
+                        state.Selection.SelectedStyleIndex = null;
 
                         return Task.CompletedTask;
                     },
@@ -1091,7 +1091,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
             FlexRowCentered attributeItem(int index, string value)
             {
-                var isSelected = index == state.Selection.PropertyIndexInStyleGroup &&
+                var isSelected = index == state.Selection.SelectedStyleIndex &&
                                  styleGroupIndex == state.Selection.StyleGroupIndex;
 
                 var closeIcon = new FlexRowCentered(Size(20), PositionAbsolute, Top(-8), Right(-8), Padding(4), Background(White),
@@ -1103,9 +1103,9 @@ sealed class ApplicationView : Component<ApplicationState>
 
                     OnClick([StopPropagation](_) =>
                     {
-                        CurrentStyleGroup.Items.RemoveAt(state.Selection.PropertyIndexInStyleGroup!.Value);
+                        CurrentStyleGroup.Items.RemoveAt(state.Selection.SelectedStyleIndex!.Value);
 
-                        state.Selection.PropertyIndexInStyleGroup = null;
+                        state.Selection.SelectedStyleIndex = null;
 
                         return Task.CompletedTask;
                     })
@@ -1146,7 +1146,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
                             StyleGroupIndex = location.StyleGroupIndex,
 
-                            PropertyIndexInStyleGroup = location.PropertyIndexInGroup
+                            SelectedStyleIndex = location.PropertyIndexInGroup
                         };
 
                         var id = new StyleInputLocation
@@ -1162,7 +1162,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
                             // calculate text selection in edit input
                             {
-                                var nameValue = CurrentVisualElement.StyleGroups[location.StyleGroupIndex].Items[state.Selection.PropertyIndexInStyleGroup.Value];
+                                var nameValue = CurrentVisualElement.StyleGroups[location.StyleGroupIndex].Items[state.Selection.SelectedStyleIndex.Value];
                                 var parseResult = TryParsePropertyValue(nameValue);
                                 if (parseResult.success)
                                 {
@@ -1196,7 +1196,7 @@ sealed class ApplicationView : Component<ApplicationState>
                     {
                         OnClick(_ =>
                         {
-                            state.Selection = state.Selection with { PropertyIndexInProps = null };
+                            state.Selection = state.Selection with { SelectedPropertyIndex = null };
 
                             return Task.CompletedTask;
                         }),
@@ -1209,9 +1209,9 @@ sealed class ApplicationView : Component<ApplicationState>
             {
                 string value = null;
 
-                if (state.Selection.PropertyIndexInProps >= 0)
+                if (state.Selection.SelectedPropertyIndex >= 0)
                 {
-                    value = props[state.Selection.PropertyIndexInProps.Value];
+                    value = props[state.Selection.SelectedPropertyIndex.Value];
                 }
 
                 return new MagicInput
@@ -1220,9 +1220,9 @@ sealed class ApplicationView : Component<ApplicationState>
 
                     Suggestions = GetPropSuggestions(state),
 
-                    Name = (state.Selection.PropertyIndexInProps ?? (props.Count + 1) * -1).ToString(),
+                    Name = (state.Selection.SelectedPropertyIndex ?? (props.Count + 1) * -1).ToString(),
 
-                    Id = "PROPS-INPUT-EDITOR-" + (state.Selection.PropertyIndexInProps ?? -1),
+                    Id = "PROPS-INPUT-EDITOR-" + (state.Selection.SelectedPropertyIndex ?? -1),
 
                     OnChange = (senderName, newValue) =>
                     {
@@ -1239,7 +1239,7 @@ sealed class ApplicationView : Component<ApplicationState>
                             CurrentVisualElement.Properties.Add(newValue);
                         }
 
-                        state.Selection.PropertyIndexInProps = null;
+                        state.Selection.SelectedPropertyIndex = null;
 
                         return Task.CompletedTask;
                     },
@@ -1249,7 +1249,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
             FlexRowCentered attributeItem(int index, string value)
             {
-                var isSelected = index == state.Selection.PropertyIndexInProps;
+                var isSelected = index == state.Selection.SelectedPropertyIndex;
 
                 var closeIcon = new FlexRowCentered(Size(20), PositionAbsolute, Top(-8), Right(-8), Padding(4), Background(White),
                                                     Border(0.5, solid, Theme.BorderColor), BorderRadius(24))
@@ -1260,9 +1260,9 @@ sealed class ApplicationView : Component<ApplicationState>
 
                     OnClick([StopPropagation](_) =>
                     {
-                        CurrentVisualElement.Properties.RemoveAt(state.Selection.PropertyIndexInProps!.Value);
+                        CurrentVisualElement.Properties.RemoveAt(state.Selection.SelectedPropertyIndex!.Value);
 
-                        state.Selection.PropertyIndexInProps = null;
+                        state.Selection.SelectedPropertyIndex = null;
 
                         return Task.CompletedTask;
                     })
@@ -1297,7 +1297,7 @@ sealed class ApplicationView : Component<ApplicationState>
                         {
                             VisualElementTreeItemPath = state.Selection.VisualElementTreeItemPath,
 
-                            PropertyIndexInProps = location
+                            SelectedPropertyIndex = location
                         };
 
                         var id = "PROPS-INPUT-EDITOR-" + location;

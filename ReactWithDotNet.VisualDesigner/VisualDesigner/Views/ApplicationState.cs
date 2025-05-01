@@ -25,9 +25,9 @@ public sealed record ApplicationSelectionState
     
     public int? StyleGroupIndex { get; init; }
     
-    public int? PropertyIndexInStyleGroup { get; set; }
+    public int? SelectedStyleIndex { get; set; }
     
-    public int? PropertyIndexInProps { get; set; }
+    public int? SelectedPropertyIndex { get; set; }
     
     // @formatter:on
 }
