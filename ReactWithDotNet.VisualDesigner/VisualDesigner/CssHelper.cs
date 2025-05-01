@@ -33,7 +33,26 @@ public static class CssHelper
         return designerStyleItem;
     }
 
-    public static Result<DesignerStyleItem> CreateDesignerStyleItemFromText(string designerStyleItem)
+    public static Result<StyleModifier> ToStyleModifier(this DesignerStyleItem designerStyleItem)
+    {
+        if (designerStyleItem is  null)
+        {
+            throw new ArgumentNullException(nameof(designerStyleItem));
+        }
+
+        var style = new Style();
+        
+        style.Import(designerStyleItem.RawHtmlStyles);
+
+        if (designerStyleItem.Pseudo is not null)
+        {
+            return ApplyPseudo(designerStyleItem.Pseudo, style.ToArray());
+        }
+
+        return (StyleModifier)style;
+    }
+
+    public static NotNullResult<DesignerStyleItem> CreateDesignerStyleItemFromText(string designerStyleItem)
     {
         // try process from plugin
         {
@@ -45,7 +64,7 @@ public static class CssHelper
 
             if (result.Value is not null)
             {
-                return result;
+                return result.Value;
             }
         }
 

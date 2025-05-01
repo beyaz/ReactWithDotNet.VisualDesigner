@@ -45,6 +45,33 @@ public sealed class Result<TValue>
     }
 }
 
+public sealed class NotNullResult<TValue>
+{
+    public Exception Error { get; init; }
+
+    public bool HasError { get; init; }
+
+    public bool Success { get; init; }
+    
+    public TValue Value { get; init; }
+
+    public static implicit operator NotNullResult<TValue>(TValue value)
+    {
+        if (value is null)
+        {
+            throw new ArgumentNullException(nameof(value));
+        }
+        return new() { Value = value, Success = true };
+    }
+
+    public static implicit operator NotNullResult<TValue>(Exception failInfo)
+    {
+        return new() { HasError = true, Error = failInfo };
+    }
+}
+
+
+
 public sealed record Maybe<TValue>
 {
     public  TValue Value { get; init; }
