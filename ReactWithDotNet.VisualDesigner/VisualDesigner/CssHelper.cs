@@ -21,7 +21,7 @@ public static class CssHelper
     {
         {
             var pseudo = TryReadPseudo(designerStyleItemText);
-            if (pseudo.HasValue is false)
+            if (pseudo.HasNoValue)
             {
                 if (Project.Styles.TryGetValue(designerStyleItemText, out _))
                 {

@@ -7,17 +7,17 @@ public sealed class Result
     public bool HasError { get; init; }
 
     public bool Success { get; init; }
-    
-    public static implicit operator Result(Exception failInfo)
-    {
-        return new() { HasError = true, Error = failInfo };
-    }
 
     public static Result<T> From<T>(T value)
     {
         return new() { Success = true, Value = value };
     }
-    
+
+    public static implicit operator Result(Exception failInfo)
+    {
+        return new() { HasError = true, Error = failInfo };
+    }
+
     public static implicit operator Result(NoneObject noneObject)
     {
         return new() { Success = true };
@@ -31,7 +31,7 @@ public class Result<TValue>
     public bool HasError { get; init; }
 
     public bool Success { get; init; }
-    
+
     public TValue Value { get; init; }
 
     public static implicit operator Result<TValue>(TValue value)
@@ -43,10 +43,15 @@ public class Result<TValue>
     {
         return new() { HasError = true, Error = failInfo };
     }
-    
+
     public static implicit operator Result<TValue>(NoneObject noneObject)
     {
         return new() { Success = true };
+    }
+
+    public static implicit operator TValue(Result<TValue> result)
+    {
+        return result.Value;
     }
 }
 
@@ -57,7 +62,7 @@ public sealed class NotNullResult<TValue>
     public bool HasError { get; init; }
 
     public bool Success { get; init; }
-    
+
     public TValue Value { get; init; }
 
     public static implicit operator NotNullResult<TValue>(TValue value)
@@ -66,6 +71,7 @@ public sealed class NotNullResult<TValue>
         {
             throw new ArgumentNullException(nameof(value));
         }
+
         return new() { Value = value, Success = true };
     }
 
@@ -73,19 +79,33 @@ public sealed class NotNullResult<TValue>
     {
         return new() { HasError = true, Error = failInfo };
     }
+
+    public static implicit operator TValue(NotNullResult<TValue> result)
+    {
+        return result.Value;
+    }
 }
-
-
 
 public sealed record Maybe<TValue>
 {
-    public  TValue Value { get; init; }
-    
+    public bool HasNoValue => !HasValue;
+
     public bool HasValue { get; private init; }
+    public TValue Value { get; init; }
 
     public static implicit operator Maybe<TValue>(TValue value)
     {
         return Some(value);
+    }
+
+    public static implicit operator Maybe<TValue>(NoneObject noneObject)
+    {
+        return new() { HasValue = false };
+    }
+
+    public static implicit operator TValue(Maybe<TValue> maybe)
+    {
+        return maybe.Value;
     }
 
     public static Maybe<TValue> Some(TValue value)
@@ -94,19 +114,8 @@ public sealed record Maybe<TValue>
         {
             throw new ArgumentNullException(nameof(value));
         }
-        
+
         return new() { Value = value, HasValue = true };
-    }
-    
-    public static implicit operator Maybe<TValue>(NoneObject noneObject)
-    {
-        return new() { HasValue = false };
-    }
-
-
-    public TResult Match<TResult>(Func<TValue, TResult> onSome, Func<TResult> onNone)
-    {
-        return HasValue ? onSome(Value) : onNone();
     }
 
     public Maybe<TResult> Bind<TResult>(Func<TValue, Maybe<TResult>> func)
@@ -119,29 +128,80 @@ public sealed record Maybe<TValue>
         return HasValue ? Value : defaultValue;
     }
 
-    public override string ToString() => HasValue ? $"Some({Value})" : "None";
+    public TResult Match<TResult>(Func<TValue, TResult> onSome, Func<TResult> onNone)
+    {
+        return HasValue ? onSome(Value) : onNone();
+    }
+
+    public override string ToString()
+    {
+        return HasValue ? $"Some({Value})" : "None";
+    }
 }
 
 public sealed class NoneObject
 {
-    private NoneObject()
-    {
-        
-    }
-    
     public static readonly NoneObject Instance = new();
-}
 
+    NoneObject()
+    {
+    }
+}
 
 static class FP
 {
-    
-    public static Result<IReadOnlyList<TValue>> ToReadOnlyList<TValue>(this Result<TValue> result)
+    public static readonly Result Success = new() { Success = true };
+
+    public static NoneObject None => NoneObject.Instance;
+
+    public static Result<IReadOnlyList<B>> ConvertAll<A, B>(this IEnumerable<NotNullResult<A>> response, Func<A, Result<B>> convertFunc)
     {
-        return result.Then(x => (IReadOnlyList<TValue>) [x]);
+        List<B> values = [];
+
+        foreach (var result in response)
+        {
+            if (result.HasError)
+            {
+                return result.Error;
+            }
+
+            var resultB = convertFunc(result.Value);
+            if (resultB.HasError)
+            {
+                return resultB.Error;
+            }
+
+            values.Add(resultB.Value);
+        }
+
+        return values;
     }
-    
-    public static Result<B> Then<A,B>(this (A value, Exception exception) result, Func<A,B> convertFunc)
+
+    public static Result Fail(string message)
+    {
+        return new() { Success = false, HasError = true, Error = new(message) };
+    }
+
+    public static Result FoldThen<A>(this IEnumerable<Result<IReadOnlyList<A>>> response, Action<IReadOnlyList<A>> nextAction)
+    {
+        List<A> values = [];
+
+        foreach (var result in response)
+        {
+            if (result.HasError)
+            {
+                return result.Error;
+            }
+
+            values.AddRange(result.Value);
+        }
+
+        nextAction(values);
+
+        return Success;
+    }
+
+    public static Result<B> Then<A, B>(this (A value, Exception exception) result, Func<A, B> convertFunc)
     {
         if (result.exception is not null)
         {
@@ -150,8 +210,8 @@ static class FP
 
         return convertFunc(result.value);
     }
-    
-    public static Result<B> Then<A,B>(this Result<A> result, Func<A,B> convertFunc)
+
+    public static Result<B> Then<A, B>(this Result<A> result, Func<A, B> convertFunc)
     {
         if (result.HasError)
         {
@@ -160,7 +220,7 @@ static class FP
 
         return convertFunc(result.Value);
     }
-    
+
     public static Result Then<A>(this Result<A> result, Action<A> action)
     {
         if (result.HasError)
@@ -172,15 +232,41 @@ static class FP
 
         return None;
     }
-    
-    
-    
-    public static NoneObject None => NoneObject.Instance;
-    
-    public static readonly Result Success = new() { Success = true };
-    
-    public static  Result Fail(string message) => new() { Success = false, HasError = true, Error = new Exception(message)};
-    
+
+    public static async Task<Result<TValue>> Then<TValue>(this Task<Result<TValue>> response, Action<TValue> nextAction)
+    {
+        var value = await response;
+
+        if (value.Success)
+        {
+            nextAction(value.Value);
+        }
+
+        return value;
+    }
+
+    public static Result<B> Then<A, B>(this IEnumerable<Result<A>> response, Func<IReadOnlyList<A>, B> nextAction)
+    {
+        List<A> values = [];
+
+        foreach (var result in response)
+        {
+            if (result.HasError)
+            {
+                return result.Error;
+            }
+
+            values.Add(result.Value);
+        }
+
+        return nextAction(values);
+    }
+
+    public static Result<IReadOnlyList<TValue>> ToReadOnlyList<TValue>(this Result<TValue> result)
+    {
+        return result.Then(x => (IReadOnlyList<TValue>) [x]);
+    }
+
     public static async Task<TValue> Unwrap<TValue>(this Task<Result<TValue>> responseTask)
     {
         var response = await responseTask;
@@ -201,76 +287,5 @@ static class FP
         }
 
         throw result.Error;
-    }
-    
-    public static async Task<Result<TValue>> Then<TValue>(this Task<Result<TValue>> response, Action<TValue> nextAction)
-    {
-        var value = await response;
-
-        if (value.Success)
-        {
-            nextAction(value.Value);
-        }
-
-        return value;
-    }
-    
-    public static  Result<B> Then<A,B>(this IEnumerable<Result<A>> response, Func<IReadOnlyList<A>,B> nextAction)
-    {
-         List<A> values = [];
-
-         foreach (var result in response)
-         {
-             if (result.HasError)
-             {
-                 return result.Error;
-             }
-             
-             values.Add(result.Value);
-         }
-         
-         return nextAction(values);
-    }
-    
-    public static Result<IReadOnlyList<B>> ConvertAll<A,B>(this IEnumerable<NotNullResult<A>> response, Func<A,Result<B>> convertFunc)
-    {
-        List<B> values = [];
-
-        foreach (var result in response)
-        {
-            if (result.HasError)
-            {
-                return result.Error;
-            }
-
-            var resultB = convertFunc(result.Value);
-            if (resultB.HasError)
-            {
-                return resultB.Error;
-            }
-            
-            values.Add(resultB.Value);
-        }
-         
-        return values;
-    }
-    
-    public static  Result FoldThen<A>(this IEnumerable<Result<IReadOnlyList<A>>> response, Action<IReadOnlyList<A>> nextAction)
-    {
-        List<A> values = [];
-
-        foreach (var result in response)
-        {
-            if (result.HasError)
-            {
-                return result.Error;
-            }
-             
-            values.AddRange(result.Value);
-        }
-         
-        nextAction(values);
-
-        return Success;
     }
 }
