@@ -19,6 +19,7 @@ public static class CssHelper
 
     public static Result<string> ConvertDesignerStyleItemToTailwindClassName(string designerStyleItemText)
     {
+        // has no pseudo && is not in project config
         {
             var pseudo = TryReadPseudo(designerStyleItemText);
             if (pseudo.HasNoValue)
@@ -30,71 +31,81 @@ public static class CssHelper
             }
         }
 
-        DesignerStyleItem designerStyleItem;
         {
-            var result = CreateDesignerStyleItemFromText(designerStyleItemText);
-            if (result.HasError)
+            string pseudo;
+        
+            var tailwindClassNames = new List<string>();
+        
             {
-                return result.Error;
-            }
-
-            designerStyleItem = result.Value;
-        }
-
-        var tailwindClassNames = new List<string>();
-
-        foreach (var (key, value) in designerStyleItem.RawHtmlStyles)
-        {
-            string tailwindClassName;
-            {
-                var result = ConvertToTailwindClass(key, value);
-                if (result.HasError)
+                DesignerStyleItem designerStyleItem;
                 {
-                    return result.Error;
+                    var result = CreateDesignerStyleItemFromText(designerStyleItemText);
+                    if (result.HasError)
+                    {
+                        return result.Error;
+                    }
+
+                    designerStyleItem = result;
+
+                    pseudo = designerStyleItem.Pseudo;
                 }
 
-                tailwindClassName = result.Value;
+            
+
+                foreach (var (key, value) in designerStyleItem.RawHtmlStyles)
+                {
+                    string tailwindClassName;
+                    {
+                        var result = ConvertToTailwindClass(key, value);
+                        if (result.HasError)
+                        {
+                            return result.Error;
+                        }
+
+                        tailwindClassName = result.Value;
+                    }
+
+                    tailwindClassNames.Add(tailwindClassName);
+                }
             }
 
-            tailwindClassNames.Add(tailwindClassName);
-        }
-
-        // size
-        {
-            var config = new[]
+            // size
             {
-                new { First = "w-", Second = "h-", Target = "size-" },
-
-                new { First = "pt-", Second = "pb-", Target = "py-" },
-                new { First = "pr-", Second = "pl-", Target = "px-" },
-
-                new { First = "mt-", Second = "mb-", Target = "my-" },
-                new { First = "mr-", Second = "ml-", Target = "mx-" }
-            };
-
-            foreach (var item in config)
-            {
-                var first = tailwindClassNames.FirstOrDefault(x => x.StartsWith(item.First));
-                var second = tailwindClassNames.FirstOrDefault(x => x.StartsWith(item.Second));
-
-                if (first is not null && second is not null)
+                var config = new[]
                 {
-                    if (first.RemoveFromStart(item.First) == second.RemoveFromStart(item.Second))
-                    {
-                        tailwindClassNames[tailwindClassNames.IndexOf(first)] = item.Target + first.RemoveFromStart(item.First);
+                    new { First = "w-", Second = "h-", Target = "size-" },
 
-                        tailwindClassNames.Remove(second);
+                    new { First = "pt-", Second = "pb-", Target = "py-" },
+                    new { First = "pr-", Second = "pl-", Target = "px-" },
+
+                    new { First = "mt-", Second = "mb-", Target = "my-" },
+                    new { First = "mr-", Second = "ml-", Target = "mx-" }
+                };
+
+                foreach (var item in config)
+                {
+                    var first = tailwindClassNames.FirstOrDefault(x => x.StartsWith(item.First));
+                    var second = tailwindClassNames.FirstOrDefault(x => x.StartsWith(item.Second));
+
+                    if (first is not null && second is not null)
+                    {
+                        if (first.RemoveFromStart(item.First) == second.RemoveFromStart(item.Second))
+                        {
+                            tailwindClassNames[tailwindClassNames.IndexOf(first)] = item.Target + first.RemoveFromStart(item.First);
+
+                            tailwindClassNames.Remove(second);
+                        }
                     }
                 }
             }
-        }
 
-        if (designerStyleItem.Pseudo is null)
-        {
-            return string.Join(" ", tailwindClassNames);
-        }
+            if (pseudo is null)
+            {
+                return string.Join(" ", tailwindClassNames);
+            }
 
-        return string.Join(" ", tailwindClassNames.Select(x => designerStyleItem.Pseudo + ":" + x));
+            return string.Join(" ", tailwindClassNames.Select(x => pseudo + ":" + x));
+        }
     }
 
     public static NotNullResult<DesignerStyleItem> CreateDesignerStyleItemFromText(string designerStyleItem)
