@@ -24,20 +24,18 @@ public static class CssHelper
 
     public static Result<string> ConvertDesignerStyleItemToTailwindClassName(string designerStyleItemText)
     {
-
         {
             var maybe = TryReadPseudo(designerStyleItemText);
             if (maybe.HasValue is false)
             {
-                if (Project.Styles.TryGetValue(designerStyleItemText, out var cssText))
+                if (Project.Styles.TryGetValue(designerStyleItemText, out _))
                 {
                     return designerStyleItemText;
                 }
             }
-            
         }
-        
-        DesignerStyleItem designerStyleItem = null;
+
+        DesignerStyleItem designerStyleItem;
         {
             var result = CreateDesignerStyleItemFromText(designerStyleItemText);
             if (result.HasError)
@@ -45,11 +43,11 @@ public static class CssHelper
                 return result.Error;
             }
 
-            designerStyleItem = result.Value;    
+            designerStyleItem = result.Value;
         }
 
         var tailwindClassNames = new List<string>();
-        
+
         foreach (var (key, value) in designerStyleItem.RawHtmlStyles)
         {
             string tailwindClassName;
@@ -60,9 +58,9 @@ public static class CssHelper
                     return result.Error;
                 }
 
-                tailwindClassName = result.Value; 
+                tailwindClassName = result.Value;
             }
-            
+
             tailwindClassNames.Add(tailwindClassName);
         }
 
@@ -70,11 +68,11 @@ public static class CssHelper
         {
             var config = new[]
             {
-                new { First = "w-", Second  = "h-", Target  = "size-" },
-                
+                new { First = "w-", Second = "h-", Target = "size-" },
+
                 new { First = "pt-", Second = "pb-", Target = "py-" },
                 new { First = "pr-", Second = "pl-", Target = "px-" },
-                
+
                 new { First = "mt-", Second = "mb-", Target = "my-" },
                 new { First = "mr-", Second = "ml-", Target = "mx-" }
             };
@@ -94,393 +92,133 @@ public static class CssHelper
                     }
                 }
             }
-            
         }
-        
+
         if (designerStyleItem.Pseudo is null)
         {
             return string.Join(" ", tailwindClassNames);
         }
-        
-        return string.Join(" ", tailwindClassNames.Select(x=>designerStyleItem.Pseudo+":"+x));
-        
+
+        return string.Join(" ", tailwindClassNames.Select(x => designerStyleItem.Pseudo + ":" + x));
     }
-    
-    static Result<string> ConvertToTailwindClass(string name, string value)
+
+    public static NotNullResult<DesignerStyleItem> CreateDesignerStyleItemFromText(string designerStyleItem)
     {
-        if (value is null)
+        // try process from plugin
         {
-            return new ArgumentNullException(nameof(value));
-        }
-
-        // check is conditional sample: border-width: {props.isSelected} ? 2 : 5
-        {
-            var conditionalValue = TextParser.TryParseConditionalValue(value);
-            if (conditionalValue.success)
+            var result = tryProcessByProjectConfig(designerStyleItem);
+            if (result.HasError)
             {
-                string lefTailwindClass;
-                {
-                    var result = ConvertToTailwindClass(name, conditionalValue.left);
-                    if (result.HasError)
-                    {
-                        return result.Error;
-                    }
+                return result.Error;
+            }
 
-                    lefTailwindClass = result.Value;
-                }
-
-                var rightTailwindClass = string.Empty;
-
-                if (conditionalValue.right.HasValue())
-                {
-                    {
-                        var result = ConvertToTailwindClass(name, conditionalValue.right);
-                        if (result.HasError)
-                        {
-                            return result.Error;
-                        }
-
-                        rightTailwindClass = result.Value;
-                    }
-                }
-
-                return "${" + $"{ClearConnectedValue(conditionalValue.condition)} ? '{lefTailwindClass}' : '{rightTailwindClass}'" + '}';
+            if (result.Value is not null)
+            {
+                return result.Value;
             }
         }
 
-        var isValueDouble = double.TryParse(value, out var valueAsDouble);
-
-        name = name switch
         {
-            "padding"        => "p",
-            "padding-right"  => "pr",
-            "padding-left"   => "pl",
-            "padding-top"    => "pt",
-            "padding-bottom" => "pb",
-
-            "margin"        => "m",
-            "margin-right"  => "mr",
-            "margin-left"   => "ml",
-            "margin-top"    => "mt",
-            "margin-bottom" => "mb",
-
-            _ => name
-        };
-
-        switch (name)
-        {
-            case "transform":
+            var maybe = TryConvertCssUtilityClassToHtmlStyle(designerStyleItem);
+            if (maybe.HasValue)
             {
-                if (value.StartsWith("rotate("))
+                return new DesignerStyleItem
                 {
-                    var parts = value.Split("()".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
-                    if (parts.Length == 2)
-                    {
-                        var sign = parts[1][0] == '-' ? "-" : "";
-                        if (parts[1].EndsWith("deg"))
-                        {
-                            return $"{sign}rotate-{value.RemoveFromEnd("deg")}";
-                        }
-                    }
-                }
-
-                break;
-            }
-            case "outline":
-            {
-                return $"{name}-{value}";
-            }
-
-            case "text-decoration":
-            {
-                return $"{value}";
-            }
-
-           
-            
-
-            case "text-align":
-            {
-                return $"text-{value}";
-            }
-
-            case "width":
-            {
-                if (value == "fit-content")
-                {
-                    return "w-fit";
-                }
-
-                if (value == "100%")
-                {
-                    return "w-full";
-                }
-                
-                return $"w-[{value}]";
-            }
-            
-            case "height":
-            {
-                if (value == "fit-content")
-                {
-                    return "h-fit";
-                }
-
-                if (value == "100%")
-                {
-                    return "h-full";
-                }
-
-                return $"h-[{value}]";
-            }
-
-            case "max-width":
-                return $"max-w-[{value}]";
-
-            case "max-height":
-                return $"max-h-[{value}]";
-
-            case "min-width":
-                return $"min-w-[{value}]";
-
-            case "min-height":
-                return $"min-h-[{value}]";
-
-            case "z-index":
-                return $"z-[{value}]";
-
-            case "overflow-y":
-            case "overflow-x":
-                return $"{name}-{value}";
-
-            case "border-top-left-radius":
-                return $"rounded-tl-[{value}]";
-
-            case "border-top-right-radius":
-                return $"rounded-tr-[{value}]";
-
-            case "border-bottom-left-radius":
-                return $"rounded-bl-[{value}]";
-
-            case "border-bottom-right-radius":
-                return $"rounded-br-[{value}]";
-
-            case "flex-grow":
-                return $"flex-grow-[{value}]";
-
-            case "border-bottom-width":
-                return $"border-b-[{value}]";
-
-            case "border-top-width":
-                return $"border-t-[{value}]";
-
-            case "border-left-width":
-                return $"border-l-[{value}]";
-
-            case "border-right-width":
-                return $"border-r-[{value}]";
-
-            case "border-top":
-            case "border-right":
-            case "border-left":
-            case "border-bottom":
-            {
-                var direction = name.Split('-', StringSplitOptions.RemoveEmptyEntries).Last();
-
-                var parts = value.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-                if (parts.Length == 3)
-                {
-                    if (Project.Colors.TryGetValue(parts[2], out var htmlColor))
-                    {
-                        parts[2] = htmlColor;
-                    }
-
-                    var directionShortName = direction switch
-                    {
-                        "top"    => "t",
-                        "bottom" => "b",
-                        "right"  => "r",
-                        "left"   => "l",
-                        _        => null
-                    };
-
-                    if (directionShortName is null)
-                    {
-                        return new ArgumentOutOfRangeException(direction);
-                    }
-
-                    return $"border-{directionShortName}-[{parts[0]}]" +
-                           $" [border-{direction}-style:{parts[1]}]" +
-                           $" [border-{direction}-color:{parts[2]}]";
-                }
-
-                return new ArgumentOutOfRangeException(direction);
-            }
-
-            case "display":
-                return $"{value}";
-
-            case "color":
-            {
-                if (Project.Colors.TryGetValue(value, out var htmlColor))
-                {
-                    value = htmlColor;
-                }
-
-                return $"text-[{value}]";
-            }
-
-            case "border-color":
-            {
-                if (Project.Colors.TryGetValue(value, out var htmlColor))
-                {
-                    value = htmlColor;
-                }
-
-                return $"border-[{value}]";
-            }
-
-            case "gap":
-                return $"gap-[{value}]";
-
-            case "size":
-                return $"size-[{value}]";
-
-            case "bottom":
-            case "top":
-            case "left":
-            case "right":
-                return $"{name}-[{value}]";
-
-            case "flex-direction":
-            {
-                if (value == "column")
-                {
-                    return "flex-col";    
-                }
-                if (value == "row")
-                {
-                    return "flex";    
-                }
-                break;
-            }
-
-            case "align-items":
-                return $"items-{value.RemoveFromStart("align-")}";
-
-            case "justify-content":
-                return $"justify-{value.Split('-').Last()}";
-
-            case "border-radius":
-                return $"rounded-[{value}]";
-
-            case "font-size":
-                return $"[font-size:{value}]";
-
-            case "border-width":
-            {
-                if (isValueDouble)
-                {
-                    value = valueAsDouble.AsPixel();
-                }
-
-                return $"border-[{value}]";
-            }
-
-            case "m":
-            case "mx":
-            case "my":
-            case "ml":
-            case "mr":
-            case "mb":
-            case "mt":
-
-            case "p":
-            case "px":
-            case "py":
-            case "pl":
-            case "pr":
-            case "pb":
-            case "pt":
-            {
-                if (isValueDouble)
-                {
-                    value = valueAsDouble.AsPixel();
-                }
-
-                return $"{name}-[{value}]";
-            }
-
-            case "border":
-            {
-                var parts = value.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-                if (parts.Length == 3)
-                {
-                    if (Project.Colors.TryGetValue(parts[2], out var htmlColor))
-                    {
-                        parts[2] = htmlColor;
-                    }
-
-                    if (parts[0] == "1px" && parts[1] == "solid")
-                    {
-                        return "border " +
-                               $"border-[{parts[2]}]";
-                    }
-
-                    return $"border-[{parts[0]}] " +
-                           $"border-[{parts[1]}] " +
-                           $"border-[{parts[2]}]";
-                }
-
-                break;
-            }
-            case "background":
-            case "bg":
-            {
-                if (Project.Colors.TryGetValue(value, out var htmlColor))
-                {
-                    value = htmlColor;
-                }
-
-                return $"bg-[{value}]";
-            }
-            case "position":
-                return $"{value}";
-
-            case "border-style":
-            {
-                return $"border-{value}";
-            }
-
-            case "cursor":
-            {
-                return $"cursor-{value}";
-            }
-
-            case "inset":
-            {
-                return $"inset-{value}";
-            }
-            
-            case "font-family":
-            {
-                return $"font-[{value}]";
-            }
-            case "font-style":
-            {
-                return $"[font-style:{value}]";
-            }
-            case "font-weight":
-            {
-                return $"[font-weight:{value}]";
-            }
-            case "line-height":
-            {
-                return $"[line-height:{value}]";
+                    Pseudo        = maybe.Value.Pseudo,
+                    RawHtmlStyles = maybe.Value.CssStyles.ToDictionary(x => x.Name, x => x.Value)
+                };
             }
         }
 
-        return new InvalidOperationException($"Css not handled. {name}: {value}");
+        // final calculation
+        {
+            string name, value, pseudo;
+            {
+                var attribute = ParseStyleAttibute(designerStyleItem);
+
+                name   = attribute.name;
+                value  = attribute.value;
+                pseudo = attribute.Pseudo;
+            }
+
+            if (value is not null)
+            {
+                var htmlStyle = ToHtmlStyle(name, value);
+                if (htmlStyle.HasError)
+                {
+                    return htmlStyle.Error;
+                }
+
+                return new DesignerStyleItem
+                {
+                    Pseudo        = pseudo,
+                    RawHtmlStyles = htmlStyle.Value
+                };
+            }
+
+            return new DesignerStyleItem
+            {
+                Pseudo = pseudo,
+                RawHtmlStyles = new Dictionary<string, string>
+                {
+                    { name, null }
+                }
+            };
+        }
+
+        static Result<DesignerStyleItem> tryProcessByProjectConfig(string designerStyleItem)
+        {
+            string name, value, pseudo;
+            {
+                var attribute = ParseStyleAttibute(designerStyleItem);
+
+                name   = attribute.name;
+                value  = attribute.value;
+                pseudo = attribute.Pseudo;
+
+                designerStyleItem = name;
+
+                if (value is not null)
+                {
+                    designerStyleItem += ":" + value;
+                }
+            }
+
+            if (Project.Styles.TryGetValue(designerStyleItem, out var cssText))
+            {
+                return Style.ParseCssAsDictionary(cssText).Then(styleMap => new DesignerStyleItem
+                {
+                    Pseudo = pseudo,
+
+                    RawHtmlStyles = styleMap
+                });
+            }
+
+            if (name == "color" && value is not null && Project.Colors.TryGetValue(value, out var realColor))
+            {
+                return new DesignerStyleItem
+                {
+                    Pseudo = pseudo,
+
+                    RawHtmlStyles = new Dictionary<string, string>
+                    {
+                        { "color", realColor }
+                    }
+                };
+            }
+
+            return None;
+        }
+    }
+
+    public static Result<Func<StyleModifier[], StyleModifier>> GetPseudoFunction(string pseudoName)
+    {
+        if (MediaQueries.TryGetValue(pseudoName, out var func))
+        {
+            return func;
+        }
+
+        return new ArgumentOutOfRangeException($"{pseudoName} not recognized");
     }
 
     public static HtmlStyle ToHtmlStyle(string name, string value)
@@ -663,126 +401,6 @@ public static class CssHelper
         }
 
         return new Exception($"{name}: {value} is not recognized");
-    }
-
-    public static NotNullResult<DesignerStyleItem> CreateDesignerStyleItemFromText(string designerStyleItem)
-    {
-        // try process from plugin
-        {
-            var result = tryProcessByProjectConfig(designerStyleItem);
-            if (result.HasError)
-            {
-                return result.Error;
-            }
-
-            if (result.Value is not null)
-            {
-                return result.Value;
-            }
-        }
-
-        {
-            var maybe = TryConvertCssUtilityClassToHtmlStyle(designerStyleItem);
-            if (maybe.HasValue)
-            {
-                return new DesignerStyleItem
-                {
-                    Pseudo        = maybe.Value.Pseudo,
-                    RawHtmlStyles = maybe.Value.CssStyles.ToDictionary(x => x.Name, x => x.Value)
-                };
-            }
-        }
-
-        // final calculation
-        {
-            string name, value, pseudo;
-            {
-                var attribute = ParseStyleAttibute(designerStyleItem);
-
-                name   = attribute.name;
-                value  = attribute.value;
-                pseudo = attribute.Pseudo;
-            }
-
-            if (value is not null)
-            {
-                var htmlStyle = ToHtmlStyle(name, value);
-                if (htmlStyle.HasError)
-                {
-                    return htmlStyle.Error;
-                }
-                
-                return new DesignerStyleItem
-                {
-                    Pseudo = pseudo,
-                    RawHtmlStyles = htmlStyle.Value
-                };
-            }
-           
-
-            return new DesignerStyleItem
-            {
-                Pseudo = pseudo,
-                RawHtmlStyles =new Dictionary<string, string>
-                {
-                    { name, null }
-                }
-            };
-        }
-
-        static Result<DesignerStyleItem> tryProcessByProjectConfig(string designerStyleItem)
-        {
-            string name, value, pseudo;
-            {
-                var attribute = ParseStyleAttibute(designerStyleItem);
-
-                name   = attribute.name;
-                value  = attribute.value;
-                pseudo = attribute.Pseudo;
-
-                designerStyleItem = name;
-
-                if (value is not null)
-                {
-                    designerStyleItem += ":" + value;
-                }
-            }
-
-            if (Project.Styles.TryGetValue(designerStyleItem, out var cssText))
-            {
-                return Style.ParseCssAsDictionary(cssText).Then(styleMap => new DesignerStyleItem
-                {
-                    Pseudo = pseudo,
-
-                    RawHtmlStyles = styleMap
-                });
-            }
-
-            if (name == "color" && value is not null && Project.Colors.TryGetValue(value, out var realColor))
-            {
-                return new DesignerStyleItem
-                {
-                    Pseudo = pseudo,
-
-                    RawHtmlStyles = new Dictionary<string, string>
-                    {
-                        { "color", realColor }
-                    }
-                };
-            }
-
-            return None;
-        }
-    }
-
-    public static Result<Func<StyleModifier[], StyleModifier>> GetPseudoFunction(string pseudoName)
-    {
-        if (MediaQueries.TryGetValue(pseudoName, out var func))
-        {
-            return func;
-        }
-
-        return new ArgumentOutOfRangeException($"{pseudoName} not recognized");
     }
 
     public static Result<StyleModifier> ToStyleModifier(this DesignerStyleItem designerStyleItem)
@@ -1079,7 +697,381 @@ public static class CssHelper
         }
     }
 
-    
+    static Result<string> ConvertToTailwindClass(string name, string value)
+    {
+        if (value is null)
+        {
+            return new ArgumentNullException(nameof(value));
+        }
+
+        // check is conditional sample: border-width: {props.isSelected} ? 2 : 5
+        {
+            var conditionalValue = TextParser.TryParseConditionalValue(value);
+            if (conditionalValue.success)
+            {
+                string lefTailwindClass;
+                {
+                    var result = ConvertToTailwindClass(name, conditionalValue.left);
+                    if (result.HasError)
+                    {
+                        return result.Error;
+                    }
+
+                    lefTailwindClass = result.Value;
+                }
+
+                var rightTailwindClass = string.Empty;
+
+                if (conditionalValue.right.HasValue())
+                {
+                    {
+                        var result = ConvertToTailwindClass(name, conditionalValue.right);
+                        if (result.HasError)
+                        {
+                            return result.Error;
+                        }
+
+                        rightTailwindClass = result.Value;
+                    }
+                }
+
+                return "${" + $"{ClearConnectedValue(conditionalValue.condition)} ? '{lefTailwindClass}' : '{rightTailwindClass}'" + '}';
+            }
+        }
+
+        var isValueDouble = double.TryParse(value, out var valueAsDouble);
+
+        name = name switch
+        {
+            "padding"        => "p",
+            "padding-right"  => "pr",
+            "padding-left"   => "pl",
+            "padding-top"    => "pt",
+            "padding-bottom" => "pb",
+
+            "margin"        => "m",
+            "margin-right"  => "mr",
+            "margin-left"   => "ml",
+            "margin-top"    => "mt",
+            "margin-bottom" => "mb",
+
+            _ => name
+        };
+
+        switch (name)
+        {
+            case "transform":
+            {
+                if (value.StartsWith("rotate("))
+                {
+                    var parts = value.Split("()".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+                    if (parts.Length == 2)
+                    {
+                        var sign = parts[1][0] == '-' ? "-" : "";
+                        if (parts[1].EndsWith("deg"))
+                        {
+                            return $"{sign}rotate-{value.RemoveFromEnd("deg")}";
+                        }
+                    }
+                }
+
+                break;
+            }
+            case "outline":
+            {
+                return $"{name}-{value}";
+            }
+
+            case "text-decoration":
+            {
+                return $"{value}";
+            }
+
+            case "text-align":
+            {
+                return $"text-{value}";
+            }
+
+            case "width":
+            {
+                if (value == "fit-content")
+                {
+                    return "w-fit";
+                }
+
+                if (value == "100%")
+                {
+                    return "w-full";
+                }
+
+                return $"w-[{value}]";
+            }
+
+            case "height":
+            {
+                if (value == "fit-content")
+                {
+                    return "h-fit";
+                }
+
+                if (value == "100%")
+                {
+                    return "h-full";
+                }
+
+                return $"h-[{value}]";
+            }
+
+            case "max-width":
+                return $"max-w-[{value}]";
+
+            case "max-height":
+                return $"max-h-[{value}]";
+
+            case "min-width":
+                return $"min-w-[{value}]";
+
+            case "min-height":
+                return $"min-h-[{value}]";
+
+            case "z-index":
+                return $"z-[{value}]";
+
+            case "overflow-y":
+            case "overflow-x":
+                return $"{name}-{value}";
+
+            case "border-top-left-radius":
+                return $"rounded-tl-[{value}]";
+
+            case "border-top-right-radius":
+                return $"rounded-tr-[{value}]";
+
+            case "border-bottom-left-radius":
+                return $"rounded-bl-[{value}]";
+
+            case "border-bottom-right-radius":
+                return $"rounded-br-[{value}]";
+
+            case "flex-grow":
+                return $"flex-grow-[{value}]";
+
+            case "border-bottom-width":
+                return $"border-b-[{value}]";
+
+            case "border-top-width":
+                return $"border-t-[{value}]";
+
+            case "border-left-width":
+                return $"border-l-[{value}]";
+
+            case "border-right-width":
+                return $"border-r-[{value}]";
+
+            case "border-top":
+            case "border-right":
+            case "border-left":
+            case "border-bottom":
+            {
+                var direction = name.Split('-', StringSplitOptions.RemoveEmptyEntries).Last();
+
+                var parts = value.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                if (parts.Length == 3)
+                {
+                    if (Project.Colors.TryGetValue(parts[2], out var htmlColor))
+                    {
+                        parts[2] = htmlColor;
+                    }
+
+                    var directionShortName = direction switch
+                    {
+                        "top"    => "t",
+                        "bottom" => "b",
+                        "right"  => "r",
+                        "left"   => "l",
+                        _        => null
+                    };
+
+                    if (directionShortName is null)
+                    {
+                        return new ArgumentOutOfRangeException(direction);
+                    }
+
+                    return $"border-{directionShortName}-[{parts[0]}]" +
+                           $" [border-{direction}-style:{parts[1]}]" +
+                           $" [border-{direction}-color:{parts[2]}]";
+                }
+
+                return new ArgumentOutOfRangeException(direction);
+            }
+
+            case "display":
+                return $"{value}";
+
+            case "color":
+            {
+                if (Project.Colors.TryGetValue(value, out var htmlColor))
+                {
+                    value = htmlColor;
+                }
+
+                return $"text-[{value}]";
+            }
+
+            case "border-color":
+            {
+                if (Project.Colors.TryGetValue(value, out var htmlColor))
+                {
+                    value = htmlColor;
+                }
+
+                return $"border-[{value}]";
+            }
+
+            case "gap":
+                return $"gap-[{value}]";
+
+            case "size":
+                return $"size-[{value}]";
+
+            case "bottom":
+            case "top":
+            case "left":
+            case "right":
+                return $"{name}-[{value}]";
+
+            case "flex-direction":
+            {
+                if (value == "column")
+                {
+                    return "flex-col";
+                }
+
+                if (value == "row")
+                {
+                    return "flex";
+                }
+
+                break;
+            }
+
+            case "align-items":
+                return $"items-{value.RemoveFromStart("align-")}";
+
+            case "justify-content":
+                return $"justify-{value.Split('-').Last()}";
+
+            case "border-radius":
+                return $"rounded-[{value}]";
+
+            case "font-size":
+                return $"[font-size:{value}]";
+
+            case "border-width":
+            {
+                if (isValueDouble)
+                {
+                    value = valueAsDouble.AsPixel();
+                }
+
+                return $"border-[{value}]";
+            }
+
+            case "m":
+            case "mx":
+            case "my":
+            case "ml":
+            case "mr":
+            case "mb":
+            case "mt":
+
+            case "p":
+            case "px":
+            case "py":
+            case "pl":
+            case "pr":
+            case "pb":
+            case "pt":
+            {
+                if (isValueDouble)
+                {
+                    value = valueAsDouble.AsPixel();
+                }
+
+                return $"{name}-[{value}]";
+            }
+
+            case "border":
+            {
+                var parts = value.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                if (parts.Length == 3)
+                {
+                    if (Project.Colors.TryGetValue(parts[2], out var htmlColor))
+                    {
+                        parts[2] = htmlColor;
+                    }
+
+                    if (parts[0] == "1px" && parts[1] == "solid")
+                    {
+                        return "border " +
+                               $"border-[{parts[2]}]";
+                    }
+
+                    return $"border-[{parts[0]}] " +
+                           $"border-[{parts[1]}] " +
+                           $"border-[{parts[2]}]";
+                }
+
+                break;
+            }
+            case "background":
+            case "bg":
+            {
+                if (Project.Colors.TryGetValue(value, out var htmlColor))
+                {
+                    value = htmlColor;
+                }
+
+                return $"bg-[{value}]";
+            }
+            case "position":
+                return $"{value}";
+
+            case "border-style":
+            {
+                return $"border-{value}";
+            }
+
+            case "cursor":
+            {
+                return $"cursor-{value}";
+            }
+
+            case "inset":
+            {
+                return $"inset-{value}";
+            }
+
+            case "font-family":
+            {
+                return $"font-[{value}]";
+            }
+            case "font-style":
+            {
+                return $"[font-style:{value}]";
+            }
+            case "font-weight":
+            {
+                return $"[font-weight:{value}]";
+            }
+            case "line-height":
+            {
+                return $"[line-height:{value}]";
+            }
+        }
+
+        return new InvalidOperationException($"Css not handled. {name}: {value}");
+    }
 
     static Maybe<(string Pseudo, string NewText)> TryReadPseudo(string text)
     {
