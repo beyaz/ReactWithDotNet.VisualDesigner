@@ -358,6 +358,10 @@ sealed class ApplicationPreview : Component
                     }
 
                     var childModel = model.Children[i];
+                    if (childModel.HideInDesigner)
+                    {
+                        continue;
+                    }
 
                     var result = await renderElement(context, childModel, childPath);
                     if (result.HasError)
@@ -366,11 +370,6 @@ sealed class ApplicationPreview : Component
                     }
 
                     childElement = result.Value;
-
-                    if (childModel.HideInDesigner)
-                    {
-                        childElement.Add(DisplayNone);
-                    }
                 }
 
                 element.children.Add(childElement);
