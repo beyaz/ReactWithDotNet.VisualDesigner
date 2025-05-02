@@ -237,14 +237,27 @@ public static class CssHelper
     {
         string pseudo = null;
         {
-            var maybe = TryReadPseudo(utilityCssClassName);
-            if (maybe.HasValue)
+            TryReadPseudo(utilityCssClassName).HasValue(x =>
             {
-                pseudo = maybe.Value.Pseudo;
+                pseudo = x.Pseudo;
+                
+                utilityCssClassName = x.NewText;
+            });
+        }
 
-                utilityCssClassName = maybe.Value.NewText;
+        // try resolve from project config
+        {
+            if (Project.Styles.TryGetValue(utilityCssClassName, out var cssText))
+            {
+                var (map, exception) = Style.ParseCssAsDictionary(cssText);
+                if (exception is null)
+                {
+                    return (pseudo, map.Select(x => (x.Key, x.Value)).ToArray());
+                }
             }
         }
+       
+        
 
         switch (utilityCssClassName)
         {
@@ -434,16 +447,7 @@ public static class CssHelper
         // try read from project config
         {
             var (name, value, _) = ParseStyleAttibute(utilityCssClassName);
-
-            if (Project.Styles.TryGetValue(utilityCssClassName, out var cssText))
-            {
-                var (map, exception) = Style.ParseCssAsDictionary(cssText);
-                if (exception is null)
-                {
-                    return (pseudo, map.Select(x => (x.Key, x.Value)).ToArray());
-                }
-            }
-            else if (name == "color" && value is not null && Project.Colors.TryGetValue(value, out var realColor))
+            if (name == "color" && value is not null && Project.Colors.TryGetValue(value, out var realColor))
             {
                 return (pseudo,
                 [

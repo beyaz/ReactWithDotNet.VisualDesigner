@@ -188,6 +188,14 @@ styles:
     font-weight: 600;
     line-height: 16px;
 
+  # tailwind like shorthands
+  w-full: 'width: 100%;'
+  w-fit: 'width: fit-content;'
+  h-full: 'height: 100%;'
+  h-fit: 'height: fit-content;'
+  size-full: 'width: 100%; height: 100%;'
+  size-fit: 'width: fit-content; height: fit-content;'
+
 globalCss: |
   @font-face {
     font-family: 'Host Grotesk';
