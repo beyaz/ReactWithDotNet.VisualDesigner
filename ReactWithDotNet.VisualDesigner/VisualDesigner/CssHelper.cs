@@ -259,66 +259,6 @@ public static class CssHelper
        
         
 
-        switch (utilityCssClassName)
-        {
-            case "w-full":
-            {
-                return (pseudo, [("width", "100%")]);
-            }
-
-            case "w-fit":
-            {
-                return (pseudo, [("width", "fit-content")]);
-            }
-            case "h-full":
-            {
-                return (pseudo, [("height", "100%")]);
-            }
-            case "h-fit":
-            {
-                return (pseudo, [("height", "fit-content")]);
-            }
-            case "size-fit":
-            {
-                return (pseudo, [("width", "fit-content"), ("height", "fit-content")]);
-            }
-
-            case "flex-row-centered":
-            {
-                return (pseudo,
-                [
-                    ("display", "flex"),
-                    ("flex-direction", "row"),
-                    ("justify-content", "center"),
-                    ("align-items", "center")
-                ]);
-            }
-            case "flex-col-centered":
-            {
-                return (pseudo,
-                [
-                    ("display", "flex"),
-                    ("flex-direction", "column"),
-                    ("justify-content", "center"),
-                    ("align-items", "center")
-                ]);
-            }
-            case "col":
-            {
-                return (pseudo,
-                [
-                    ("display", "flex"),
-                    ("flex-direction", "column")
-                ]);
-            }
-            case "row":
-            {
-                return (pseudo,
-                [
-                    ("display", "flex")
-                ]);
-            }
-        }
 
         foreach (var prefix in "m,mt,mb,mr,ml,p,pt,pb,pl,pr".Split(','))
         {
@@ -1090,7 +1030,7 @@ public static class CssHelper
             {
                 var newText = text.RemoveFromStart(prefix, StringComparison.OrdinalIgnoreCase);
 
-                return (prefix.ToLower(), newText);
+                return (prefix.RemoveFromEnd(":").ToLower(), newText);
             }
         }
 
