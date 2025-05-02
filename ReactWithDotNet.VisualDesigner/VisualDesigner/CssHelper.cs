@@ -17,11 +17,6 @@ public static class CssHelper
         { "XXL", XXL }
     };
 
-    public static Result<StyleModifier> ApplyPseudo(string pseudo, IReadOnlyList<StyleModifier> styleModifiers)
-    {
-        return GetPseudoFunction(pseudo).Then(pseudoFunction => pseudoFunction(styleModifiers.ToArray()));
-    }
-
     public static Result<string> ConvertDesignerStyleItemToTailwindClassName(string designerStyleItemText)
     {
         {
@@ -209,198 +204,6 @@ public static class CssHelper
 
             return None;
         }
-    }
-
-    public static Result<Func<StyleModifier[], StyleModifier>> GetPseudoFunction(string pseudoName)
-    {
-        if (MediaQueries.TryGetValue(pseudoName, out var func))
-        {
-            return func;
-        }
-
-        return new ArgumentOutOfRangeException($"{pseudoName} not recognized");
-    }
-
-    public static HtmlStyle ToHtmlStyle(string name, string value)
-    {
-        if (name == null)
-        {
-            throw new ArgumentNullException(nameof(name));
-        }
-
-        if (value is null)
-        {
-            throw new ArgumentNullException(nameof(value));
-        }
-
-        var isValueDouble = double.TryParse(value, out var valueAsDouble);
-
-        name = name switch
-        {
-            "p"  => "padding",
-            "pl" => "padding-left",
-            "pr" => "padding-right",
-            "pt" => "padding-top",
-            "pb" => "padding-bottom",
-
-            "m"  => "margin",
-            "ml" => "margin-left",
-            "mr" => "margin-right",
-            "mt" => "margin-top",
-            "mb" => "margin-bottom",
-
-            "w" => "width",
-            "h" => "height",
-
-            "bg" => "background",
-
-            _ => name
-        };
-
-        switch (name)
-        {
-            // AS PIXEL
-            case "width":
-            case "height":
-            case "max-width":
-            case "max-height":
-            case "min-width":
-            case "min-height":
-            case "inset":
-            case "border-width":
-            case "border-bottom-width":
-            case "border-top-right-radius":
-            case "border-top-left-radius":
-            case "border-bottom-left-radius":
-            case "border-bottom-right-radius":
-            case "font-size":
-            case "left":
-            case "right":
-            case "bottom":
-            case "top":
-            case "padding":
-            case "padding-left":
-            case "padding-right":
-            case "padding-top":
-            case "padding-bottom":
-            case "margin":
-            case "margin-left":
-            case "margin-right":
-            case "margin-top":
-            case "margin-bottom":
-            case "gap":
-            case "border-radius":
-            {
-                if (isValueDouble)
-                {
-                    value = valueAsDouble.AsPixel();
-                }
-
-                return (name, value);
-            }
-
-            // S A M E
-            case "align-items":
-            case "justify-items":
-            case "justify-content":
-            case "display":
-            case "font-weight":
-            case "flex-direction":
-            case "z-index":
-            case "position":
-            case "overflow-y":
-            case "overflow-x":
-            case "fill":
-            case "stroke":
-            case "border-color":
-            case "font-family":
-            case "cursor":
-            case "border-style":
-            case "text-align":
-            case "flex-grow":
-            case "outline":
-            case "text-decoration":
-            {
-                return (name, value);
-            }
-
-            case "border-top":
-            case "border-bottom":
-            case "border-left":
-            case "border-right":
-            case "border":
-            {
-                var parts = value.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-                if (parts.Length == 3)
-                {
-                    for (var i = 0; i < parts.Length; i++)
-                    {
-                        if (Project.Colors.TryGetValue(parts[i], out var color))
-                        {
-                            parts[i] = color;
-                        }
-                    }
-
-                    value = string.Join(" ", parts);
-                }
-
-                return (name, value);
-            }
-
-            // m u l t i p l e
-            case "px":
-            {
-                if (isValueDouble)
-                {
-                    value = valueAsDouble.AsPixel();
-                }
-
-                return new[] { ("padding-left", value), ("padding-right", value) };
-            }
-            case "py":
-            {
-                if (isValueDouble)
-                {
-                    value = valueAsDouble.AsPixel();
-                }
-
-                return new[] { ("padding-top", value), ("padding-bottom", value) };
-            }
-            case "size":
-            {
-                if (isValueDouble)
-                {
-                    value = valueAsDouble.AsPixel();
-                }
-
-                return new[] { ("width", value), ("height", value) };
-            }
-
-            // c o l o r s
-            case "background":
-            case "color":
-            {
-                if (Project.Colors.TryGetValue(value, out var realColor))
-                {
-                    value = realColor;
-                }
-
-                return (name, value);
-            }
-
-            // SPECIAL
-            case "transform":
-            {
-                if (isValueDouble)
-                {
-                    value = valueAsDouble + "deg";
-                }
-
-                return (name, value);
-            }
-        }
-
-        return new Exception($"{name}: {value} is not recognized");
     }
 
     public static Result<StyleModifier> ToStyleModifier(this DesignerStyleItem designerStyleItem)
@@ -695,6 +498,11 @@ public static class CssHelper
 
             return None;
         }
+    }
+
+    static Result<StyleModifier> ApplyPseudo(string pseudo, IReadOnlyList<StyleModifier> styleModifiers)
+    {
+        return GetPseudoFunction(pseudo).Then(pseudoFunction => pseudoFunction(styleModifiers.ToArray()));
     }
 
     static Result<string> ConvertToTailwindClass(string name, string value)
@@ -1071,6 +879,198 @@ public static class CssHelper
         }
 
         return new InvalidOperationException($"Css not handled. {name}: {value}");
+    }
+
+    static Result<Func<StyleModifier[], StyleModifier>> GetPseudoFunction(string pseudoName)
+    {
+        if (MediaQueries.TryGetValue(pseudoName, out var func))
+        {
+            return func;
+        }
+
+        return new ArgumentOutOfRangeException($"{pseudoName} not recognized");
+    }
+
+    static HtmlStyle ToHtmlStyle(string name, string value)
+    {
+        if (name == null)
+        {
+            throw new ArgumentNullException(nameof(name));
+        }
+
+        if (value is null)
+        {
+            throw new ArgumentNullException(nameof(value));
+        }
+
+        var isValueDouble = double.TryParse(value, out var valueAsDouble);
+
+        name = name switch
+        {
+            "p"  => "padding",
+            "pl" => "padding-left",
+            "pr" => "padding-right",
+            "pt" => "padding-top",
+            "pb" => "padding-bottom",
+
+            "m"  => "margin",
+            "ml" => "margin-left",
+            "mr" => "margin-right",
+            "mt" => "margin-top",
+            "mb" => "margin-bottom",
+
+            "w" => "width",
+            "h" => "height",
+
+            "bg" => "background",
+
+            _ => name
+        };
+
+        switch (name)
+        {
+            // AS PIXEL
+            case "width":
+            case "height":
+            case "max-width":
+            case "max-height":
+            case "min-width":
+            case "min-height":
+            case "inset":
+            case "border-width":
+            case "border-bottom-width":
+            case "border-top-right-radius":
+            case "border-top-left-radius":
+            case "border-bottom-left-radius":
+            case "border-bottom-right-radius":
+            case "font-size":
+            case "left":
+            case "right":
+            case "bottom":
+            case "top":
+            case "padding":
+            case "padding-left":
+            case "padding-right":
+            case "padding-top":
+            case "padding-bottom":
+            case "margin":
+            case "margin-left":
+            case "margin-right":
+            case "margin-top":
+            case "margin-bottom":
+            case "gap":
+            case "border-radius":
+            {
+                if (isValueDouble)
+                {
+                    value = valueAsDouble.AsPixel();
+                }
+
+                return (name, value);
+            }
+
+            // S A M E
+            case "align-items":
+            case "justify-items":
+            case "justify-content":
+            case "display":
+            case "font-weight":
+            case "flex-direction":
+            case "z-index":
+            case "position":
+            case "overflow-y":
+            case "overflow-x":
+            case "fill":
+            case "stroke":
+            case "border-color":
+            case "font-family":
+            case "cursor":
+            case "border-style":
+            case "text-align":
+            case "flex-grow":
+            case "outline":
+            case "text-decoration":
+            {
+                return (name, value);
+            }
+
+            case "border-top":
+            case "border-bottom":
+            case "border-left":
+            case "border-right":
+            case "border":
+            {
+                var parts = value.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                if (parts.Length == 3)
+                {
+                    for (var i = 0; i < parts.Length; i++)
+                    {
+                        if (Project.Colors.TryGetValue(parts[i], out var color))
+                        {
+                            parts[i] = color;
+                        }
+                    }
+
+                    value = string.Join(" ", parts);
+                }
+
+                return (name, value);
+            }
+
+            // m u l t i p l e
+            case "px":
+            {
+                if (isValueDouble)
+                {
+                    value = valueAsDouble.AsPixel();
+                }
+
+                return new[] { ("padding-left", value), ("padding-right", value) };
+            }
+            case "py":
+            {
+                if (isValueDouble)
+                {
+                    value = valueAsDouble.AsPixel();
+                }
+
+                return new[] { ("padding-top", value), ("padding-bottom", value) };
+            }
+            case "size":
+            {
+                if (isValueDouble)
+                {
+                    value = valueAsDouble.AsPixel();
+                }
+
+                return new[] { ("width", value), ("height", value) };
+            }
+
+            // c o l o r s
+            case "background":
+            case "color":
+            {
+                if (Project.Colors.TryGetValue(value, out var realColor))
+                {
+                    value = realColor;
+                }
+
+                return (name, value);
+            }
+
+            // SPECIAL
+            case "transform":
+            {
+                if (isValueDouble)
+                {
+                    value = valueAsDouble + "deg";
+                }
+
+                return (name, value);
+            }
+        }
+
+        return new Exception($"{name}: {value} is not recognized");
     }
 
     static Maybe<(string Pseudo, string NewText)> TryReadPseudo(string text)
