@@ -52,7 +52,7 @@ static class YamlHelper
 
 static class Extensions
 {
-    static readonly CultureInfo CultureInfo_en_US = new("en-US");
+    public static readonly CultureInfo CultureInfo_en_US = new("en-US");
     public static string AsPixel(this double value)
     {
         return value.ToString(CultureInfo_en_US) + "px";
