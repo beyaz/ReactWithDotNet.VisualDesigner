@@ -141,6 +141,15 @@ public sealed class NoneObject
 
 static class FP
 {
+    public static void HasValue<TValue>(this Maybe<TValue> maybe, Action<TValue> action)
+    {
+        if (maybe.HasNoValue)
+        {
+            return;
+        }
+        
+        action(maybe.Value);
+    }
     
     public static readonly Result Success = new() { Success = true };
 
