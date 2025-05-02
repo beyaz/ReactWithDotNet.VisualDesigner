@@ -283,7 +283,7 @@ sealed class ApplicationPreview : Component
                                 continue;
                             }
 
-                            if (value.StartsWith("/assets/"))
+                            if (value.StartsWith("/"))
                             {
                                 value = value.RemoveFromStart("/");
                             }
