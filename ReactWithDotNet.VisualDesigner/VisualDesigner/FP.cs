@@ -49,10 +49,7 @@ public class Result<TValue>
         return new() { Success = true };
     }
 
-    public static implicit operator TValue(Result<TValue> result)
-    {
-        return result.Value;
-    }
+    
 }
 
 public sealed class NotNullResult<TValue>
@@ -80,10 +77,7 @@ public sealed class NotNullResult<TValue>
         return new() { HasError = true, Error = failInfo };
     }
 
-    public static implicit operator TValue(NotNullResult<TValue> result)
-    {
-        return result.Value;
-    }
+   
 }
 
 public sealed record Maybe<TValue>
@@ -103,10 +97,7 @@ public sealed record Maybe<TValue>
         return new() { HasValue = false };
     }
 
-    public static implicit operator TValue(Maybe<TValue> maybe)
-    {
-        return maybe.Value;
-    }
+    
 
     public static Maybe<TValue> Some(TValue value)
     {
@@ -150,6 +141,7 @@ public sealed class NoneObject
 
 static class FP
 {
+    
     public static readonly Result Success = new() { Success = true };
 
     public static NoneObject None => NoneObject.Instance;

@@ -45,7 +45,7 @@ public static class CssHelper
                         return result.Error;
                     }
 
-                    designerStyleItem = result;
+                    designerStyleItem = result.Value;
 
                     pseudo = designerStyleItem.Pseudo;
                 }
