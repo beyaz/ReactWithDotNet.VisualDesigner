@@ -20,8 +20,8 @@ public static class CssHelper
     public static Result<string> ConvertDesignerStyleItemToTailwindClassName(string designerStyleItemText)
     {
         {
-            var maybe = TryReadPseudo(designerStyleItemText);
-            if (maybe.HasValue is false)
+            var pseudo = TryReadPseudo(designerStyleItemText);
+            if (pseudo.HasValue is false)
             {
                 if (Project.Styles.TryGetValue(designerStyleItemText, out _))
                 {
