@@ -18,7 +18,7 @@ sealed record ExportInput
     }
 }
 
-static class Exporter_For_NextJs_with_Tailwind
+static class NextJs_with_Tailwind
 {
     public static async Task<Result> Export(ExportInput input)
     {

@@ -424,7 +424,7 @@ sealed class ApplicationView : Component<ApplicationState>
                                     return;
                                 }
 
-                                var result = await Exporter_For_NextJs_with_Tailwind.Export(state.AsExportInput());
+                                var result = await NextJs_with_Tailwind.Export(state.AsExportInput());
                                 if (result.HasError)
                                 {
                                     this.FailNotification(result.Error.Message);
