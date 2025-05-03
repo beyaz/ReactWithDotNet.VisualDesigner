@@ -299,34 +299,49 @@ sealed class ApplicationView : Component<ApplicationState>
         return DeleteSelectedTreeItem();
     }
 
-    async Task<Element> MainContent()
+    Element MainContent()
     {
         return new SplitRow
         {
             sizes = [25, 50, 25],
             children =
             {
-                await PartLeftPanel() + BorderBottomLeftRadius(8) + OverflowAuto,
+                left(),
 
-                state.HtmlCodeVisible ?
-                    new(FlexGrow(1), Padding(7), OverflowXAuto)
-                    {
-                        HtmlEditor
-                    }
-                    :
-                    new FlexColumn(FlexGrow(1), Padding(7), OverflowXAuto)
-                    {
-                        Ruler.HorizontalRuler(state.Preview.Width, state.Preview.Scale) + Width(state.Preview.Width) + MarginTop(12) + PaddingLeft(30),
-                        new FlexRow(SizeFull)
-                        {
-                            Ruler.VerticleRuler(state.Preview.Scale),
-                            PartPreview
-                        }
-                    },
+                middle,
 
-                await PartRightPanel() + BorderBottomRightRadius(8)
+                right()
             }
         };
+
+        async Task<Element> left()
+        {
+            return await PartLeftPanel() + BorderBottomLeftRadius(8) + OverflowAuto;
+        }
+
+        Element middle()
+        {
+            return state.HtmlCodeVisible ?
+                new(FlexGrow(1), Padding(7), OverflowXAuto)
+                {
+                    HtmlEditor
+                }
+                :
+                new FlexColumn(FlexGrow(1), Padding(7), OverflowXAuto)
+                {
+                    Ruler.HorizontalRuler(state.Preview.Width, state.Preview.Scale) + Width(state.Preview.Width) + MarginTop(12) + PaddingLeft(30),
+                    new FlexRow(SizeFull)
+                    {
+                        Ruler.VerticleRuler(state.Preview.Scale),
+                        PartPreview
+                    }
+                };
+        }
+
+        async Task<Element> right()
+        {
+            return await PartRightPanel() + BorderBottomRightRadius(8);
+        }
     }
 
     Task OnCommonSizeClicked(MouseEvent e)
