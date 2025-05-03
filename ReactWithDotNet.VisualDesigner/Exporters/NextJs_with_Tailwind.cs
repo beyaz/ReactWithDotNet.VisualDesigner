@@ -5,17 +5,22 @@ namespace ReactWithDotNet.VisualDesigner.Exporters;
 
 sealed record ExportInput
 {
-    public required string ComponentName { get; init; }
+    // @formatter:off
+     
     public required int ProjectId { get; init; }
+    
+    public required string ComponentName { get; init; }
 
     public required string UserName { get; init; }
-
+    
     public void Deconstruct(out int projectId, out string componentName, out string userName)
     {
         projectId     = ProjectId;
         componentName = ComponentName;
         userName      = UserName;
     }
+
+    // @formatter:on
 }
 
 static class NextJs_with_Tailwind
