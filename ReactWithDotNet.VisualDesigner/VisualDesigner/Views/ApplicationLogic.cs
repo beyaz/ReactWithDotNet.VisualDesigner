@@ -13,19 +13,32 @@ static class ApplicationLogic
     {
         return DbOperation(async db =>
         {
-            var userVersion = (await db.GetComponentUserVersion(state.ProjectId, state.ComponentName, state.UserName)).Value;
+            ComponentEntity userVersion;
+            {
+                var result = await db.GetComponentUserVersion(state.ProjectId, state.ComponentName, state.UserName);
+                if (result.HasError)
+                {
+                    return result.Error;
+                }
+                userVersion = result.Value;
+            }
+            
             if (userVersion is null)
             {
                 return Fail($"User ({state.UserName}) has no change to commit.");
             }
 
-            var resultMainVersion = await db.GetComponentMainVersion(state.ProjectId, state.ComponentName);
-            if (resultMainVersion.HasError)
+            ComponentEntity mainVersion;
             {
-                return resultMainVersion.Error;
-            }
+                var result = await db.GetComponentMainVersion(state.ProjectId, state.ComponentName);
+                if (result.HasError)
+                {
+                    return result.Error;
+                }
 
-            var mainVersion = resultMainVersion.Value;
+                mainVersion = result.Value;
+            }
+            
             if (mainVersion is null)
             {
                 await db.UpdateAsync(userVersion with
@@ -69,6 +82,56 @@ static class ApplicationLogic
         });
     }
 
+    public static Task<Result> RollbackComponent(ApplicationState state)
+    {
+        return DbOperation(async db =>
+        {
+            ComponentEntity userVersion;
+            {
+                var result = await db.GetComponentUserVersion(state.ProjectId, state.ComponentName, state.UserName);
+                if (result.HasError)
+                {
+                    return result.Error;
+                }
+                userVersion = result.Value;
+            }
+            
+            if (userVersion is null)
+            {
+                return Fail($"User ({state.UserName}) has no change to rollback.");
+            }
+
+            ComponentEntity mainVersion;
+            {
+                var result = await db.GetComponentMainVersion(state.ProjectId, state.ComponentName);
+                if (result.HasError)
+                {
+                    return result.Error;
+                }
+
+                mainVersion = result.Value;
+            }
+            
+            if (mainVersion is null)
+            {
+                return Success;
+            }
+
+            // Check if the user version is the same as the main version
+            if (mainVersion.RootElementAsJson == SerializeToJson(state.ComponentRootElement))
+            {
+                return Fail($"User ({state.UserName}) has no change to rollback.");
+            }
+
+            // restore from main version
+            state.ComponentRootElement = mainVersion.RootElementAsJson.AsVisualElementModel();
+            
+            await db.DeleteAsync(userVersion);
+
+            return Success;
+        });
+    }
+    
     public static Task<ImmutableList<string>> GetAllComponentNamesInProject(int projectId)
     {
         var query = $"SELECT DISTINCT({nameof(ComponentEntity.Name)}) FROM Component WHERE {nameof(ComponentEntity.ProjectId)} = @{nameof(projectId)}";

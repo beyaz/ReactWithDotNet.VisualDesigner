@@ -373,18 +373,24 @@ sealed class ApplicationView : Component<ApplicationState>
                         new FlexRowCentered(Hover(Color(Blue300)))
                         {
                             "Rollback",
-                            OnClick(_ =>
+                            OnClick(async _ =>
                             {
                                 if (state.ComponentName.HasNoValue())
                                 {
                                     this.FailNotification("Select any component.");
 
-                                    return Task.CompletedTask;
+                                    return;
+                                }
+                                
+                                var result = await RollbackComponent(state);
+                                if (result.HasError)
+                                {
+                                    this.FailNotification(result.Error.Message);
+
+                                    return;
                                 }
 
-                                this.SuccessNotification("Rollback ok");
-
-                                return Task.CompletedTask;
+                                this.SuccessNotification("OK");
                             })
                         },
 
