@@ -1,5 +1,4 @@
 ﻿using System.Data;
-using System.IO;
 using Microsoft.Data.Sqlite;
 
 namespace ReactWithDotNet.VisualDesigner.Views;
@@ -75,10 +74,10 @@ static class ApplicationDatabase
         return (await DbOperation(async db =>  await db.QueryFirstOrDefaultAsync<ProjectEntity>(query)))?.Id;
     }
     
-    public static Task<IEnumerable<ComponentEntity>> GetAllComponents()
+    public static Task<IEnumerable<ComponentEntity>> GetAllComponentsInProject(int projectId)
     {
-        const string query = "SELECT * FROM Component";
+        const string query = $"SELECT * FROM Component WHERE {nameof(ComponentEntity.ProjectId)} = @{nameof(projectId)}";
 
-        return DbOperation(db => db.QueryAsync<ComponentEntity>(query));
+        return DbOperation(db => db.QueryAsync<ComponentEntity>(query, new{projectId}));
     }
 }

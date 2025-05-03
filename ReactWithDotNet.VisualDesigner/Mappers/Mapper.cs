@@ -13,4 +13,14 @@ static class Mapper
             UserName      = state.UserName
         };
     }
+    
+    public static ExportInput AsExportInput(this ComponentEntity input)
+    {
+        return new()
+        {
+            ProjectId     = input.ProjectId,
+            ComponentName = input.Name,
+            UserName      = input.UserName ?? Environment.UserName
+        };
+    }
 }

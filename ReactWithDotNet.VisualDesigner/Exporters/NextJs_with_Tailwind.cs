@@ -23,8 +23,19 @@ sealed record ExportInput
     // @formatter:on
 }
 
+
 static class NextJs_with_Tailwind
 {
+    public static async Task ExportAll(int projectId)
+    {
+        var components = await GetAllComponentsInProject(projectId);
+
+        foreach (var component in components)
+        {
+            await Export(component.AsExportInput());
+        }
+    }
+    
     public static async Task<Result> Export(ExportInput input)
     {
         var result = await CalculateExportInfo(input);
