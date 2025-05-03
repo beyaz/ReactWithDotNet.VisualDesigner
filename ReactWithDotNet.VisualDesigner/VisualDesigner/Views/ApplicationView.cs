@@ -312,7 +312,7 @@ sealed class ApplicationView : Component<ApplicationState>
                     new FlexColumn(FlexGrow(1), Padding(7), OverflowXAuto)
                     {
                         Ruler.HorizontalRuler(state.Preview.Width, state.Preview.Scale) + Width(state.Preview.Width) + MarginTop(12) + PaddingLeft(30),
-                        new FlexRow(SizeFull, Width(state.Preview.Width))
+                        new FlexRow(SizeFull)
                         {
                             Ruler.VerticleRuler(state.Preview.Scale),
                             PartPreview
