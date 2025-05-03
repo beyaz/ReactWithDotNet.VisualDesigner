@@ -648,6 +648,20 @@ public static class CssHelper
             case "flex-grow":
                 return $"flex-grow-[{value}]";
 
+            case "flex-wrap":
+            {
+                if (value == "wrap")
+                {
+                    return "flex-wrap";
+                }
+                
+                if (value == "nowrap")
+                {
+                    return "flex-nowrap";
+                }
+                break;
+            }
+
             case "border-bottom-width":
                 return $"border-b-[{value}]";
 
@@ -985,6 +999,7 @@ public static class CssHelper
             case "border-style":
             case "text-align":
             case "flex-grow":
+            case "flex-wrap":
             case "outline":
             case "text-decoration":
             {
