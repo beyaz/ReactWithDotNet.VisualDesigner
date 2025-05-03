@@ -275,6 +275,25 @@ sealed class ApplicationView : Component<ApplicationState>
         return Task.CompletedTask;
     }
 
+    Element HtmlEditor()
+    {
+        return new Editor
+        {
+            valueBind                = () => state.HtmlCode,
+            valueBindDebounceTimeout = 500,
+            defaultLanguage          = "html",
+            options =
+            {
+                renderLineHighlight = "none",
+                fontFamily          = "consolas, 'IBM Plex Mono Medium', 'Courier New', monospace",
+                fontSize            = 11,
+                minimap             = new { enabled = false },
+                lineNumbers         = "off",
+                unicodeHighlight    = new { showExcludeOptions = false }
+            }
+        };
+    }
+
     Task LayersTabRemoveSelectedItemClicked(MouseEvent e)
     {
         return DeleteSelectedTreeItem();
@@ -292,21 +311,7 @@ sealed class ApplicationView : Component<ApplicationState>
                 state.HtmlCodeVisible ?
                     new(FlexGrow(1), Padding(7), OverflowXAuto)
                     {
-                        new Editor
-                        {
-                            valueBind                = () => state.HtmlCode,
-                            valueBindDebounceTimeout = 500,
-                            defaultLanguage          = "html",
-                            options =
-                            {
-                                renderLineHighlight = "none",
-                                fontFamily          = "consolas, 'IBM Plex Mono Medium', 'Courier New', monospace",
-                                fontSize            = 11,
-                                minimap             = new { enabled = false },
-                                lineNumbers         = "off",
-                                unicodeHighlight    = new { showExcludeOptions = false }
-                            }
-                        }
+                        HtmlEditor
                     }
                     :
                     new FlexColumn(FlexGrow(1), Padding(7), OverflowXAuto)
@@ -381,7 +386,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
                                     return;
                                 }
-                                
+
                                 var result = await RollbackComponent(state);
                                 if (result.HasError)
                                 {
@@ -943,10 +948,10 @@ sealed class ApplicationView : Component<ApplicationState>
                     if (model is not null)
                     {
                         CurrentVisualElement.Children.Add(model);
-                        
+
                         return Task.CompletedTask;
                     }
-                    
+
                     CurrentVisualElement.Text = newValue;
 
                     return Task.CompletedTask;
