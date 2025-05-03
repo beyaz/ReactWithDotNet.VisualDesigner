@@ -3,6 +3,17 @@ using System.Text;
 
 namespace ReactWithDotNet.VisualDesigner.Models;
 
+sealed record ExportInput
+{
+    public string ProjectId { get; set; }
+    
+    public string ComponentName { get; set; }
+    
+    public string UserName { get; set; }
+}
+
+
+
 static class Exporter_For_NextJs_with_Tailwind
 {
     public static async Task<Result> Export(ApplicationState state)
@@ -38,9 +49,15 @@ static class Exporter_For_NextJs_with_Tailwind
 
     static async Task<Result<(string filePath, string fileContent)>> CalculateExportInfo(ApplicationState state)
     {
+        var projectId = state.ProjectId;
+        
+        var componentName = state.ComponentName;
+        
+        var userName = state.UserName;
+        
         ComponentEntity component;
         {
-            var result = await GetComponenUserOrMainVersionAsync(state.ProjectId, state.ComponentName, state.UserName);
+            var result = await GetComponenUserOrMainVersionAsync(projectId, componentName, userName);
             if (result.HasError)
             {
                 return result.Error;
@@ -49,7 +66,7 @@ static class Exporter_For_NextJs_with_Tailwind
             component = result.Value;
         }
 
-        var filePath = $"{GetExportFolderPath()}{state.ComponentName}.tsx";
+        var filePath = $"{GetExportFolderPath()}{componentName}.tsx";
 
         string fileNewContent;
         {
@@ -66,7 +83,7 @@ static class Exporter_For_NextJs_with_Tailwind
 
             IReadOnlyList<string> linesToInject;
             {
-                var result = await CalculateElementTreeTsxCodes(component, state.UserName);
+                var result = await CalculateElementTreeTsxCodes(component, userName);
                 if (result.HasError)
                 {
                     return result.Error;
