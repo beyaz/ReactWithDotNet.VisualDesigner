@@ -161,7 +161,7 @@ sealed class ApplicationPreview : Component
 
             if (model.Text.HasValue())
             {
-                element.text = model.Text;
+                element.Add(model.Text);
 
                 if (context.ParentModel is not null)
                 {
