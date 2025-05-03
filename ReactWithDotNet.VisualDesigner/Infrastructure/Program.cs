@@ -5,12 +5,15 @@ using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
+
 namespace ReactWithDotNet.WebSite;
 
 public class Program
 {
     public static void Main(string[] args)
     {
+        // VisualDesigner.Exporters.NextJs_with_Tailwind.ExportAll(1).GetAwaiter().GetResult();
+        
         var builder = WebApplication.CreateBuilder(args);
 
         var services = builder.Services;
