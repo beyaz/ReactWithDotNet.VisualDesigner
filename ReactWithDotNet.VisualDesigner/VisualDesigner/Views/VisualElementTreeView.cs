@@ -49,7 +49,7 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
             return new FlexRowCentered(SizeFull) { "Empty" };
         }
 
-        return new div(CursorDefault, Padding(5), OnMouseLeave(OnMouseLeaveHandler), OnKeyDown(On_Key_Down), TabIndex(0))
+        return new div(CursorDefault, Padding(5), OnMouseLeave(OnMouseLeaveHandler), OnKeyDown(On_Key_Down), TabIndex(0), OutlineNone)
         {
             ToVisual(Model, 0, "0"),
             WidthFull, HeightFull
