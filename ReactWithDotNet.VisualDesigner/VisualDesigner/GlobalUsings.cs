@@ -27,3 +27,4 @@ global using static ReactWithDotNet.VisualDesigner.Views.CecilHelper;
 global using static ReactWithDotNet.VisualDesigner.CssHelper;
 
 global using static ReactWithDotNet.Tailwind;
+global using static ReactWithDotNet.VisualDesigner.Mappers.Mapper;

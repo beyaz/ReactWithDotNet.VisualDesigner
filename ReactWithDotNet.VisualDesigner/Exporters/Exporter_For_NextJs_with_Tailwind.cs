@@ -1,24 +1,28 @@
 ﻿using System.IO;
 using System.Text;
 
-namespace ReactWithDotNet.VisualDesigner.Models;
+namespace ReactWithDotNet.VisualDesigner.Exporters;
 
 sealed record ExportInput
 {
-    public string ProjectId { get; set; }
-    
-    public string ComponentName { get; set; }
-    
-    public string UserName { get; set; }
+    public required string ComponentName { get; init; }
+    public required int ProjectId { get; init; }
+
+    public required string UserName { get; init; }
+
+    public void Deconstruct(out int projectId, out string componentName, out string userName)
+    {
+        projectId     = ProjectId;
+        componentName = ComponentName;
+        userName      = UserName;
+    }
 }
-
-
 
 static class Exporter_For_NextJs_with_Tailwind
 {
-    public static async Task<Result> Export(ApplicationState state)
+    public static async Task<Result> Export(ExportInput input)
     {
-        var result = await CalculateExportInfo(state);
+        var result = await CalculateExportInfo(input);
         if (result.HasError)
         {
             return result.Error;
@@ -47,14 +51,10 @@ static class Exporter_For_NextJs_with_Tailwind
         return ConvertReactNodeModelToTsxCode(rootNode, null, 2);
     }
 
-    static async Task<Result<(string filePath, string fileContent)>> CalculateExportInfo(ApplicationState state)
+    static async Task<Result<(string filePath, string fileContent)>> CalculateExportInfo(ExportInput input)
     {
-        var projectId = state.ProjectId;
-        
-        var componentName = state.ComponentName;
-        
-        var userName = state.UserName;
-        
+        var (projectId, componentName, userName) = input;
+
         ComponentEntity component;
         {
             var result = await GetComponenUserOrMainVersionAsync(projectId, componentName, userName);
@@ -534,7 +534,6 @@ static class Exporter_For_NextJs_with_Tailwind
             {
                 classNameShouldBeTemplateLiteral = true;
             }
-
 
             classNames.Add(tailwindClassName);
         }

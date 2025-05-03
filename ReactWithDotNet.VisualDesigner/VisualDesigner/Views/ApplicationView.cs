@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using Dapper.Contrib.Extensions;
 using ReactWithDotNet.ThirdPartyLibraries.MonacoEditorReact;
+using ReactWithDotNet.VisualDesigner.Exporters;
 using Page = ReactWithDotNet.WebSite.Page;
 
 namespace ReactWithDotNet.VisualDesigner.Views;
@@ -423,7 +424,7 @@ sealed class ApplicationView : Component<ApplicationState>
                                     return;
                                 }
 
-                                var result = await Exporter_For_NextJs_with_Tailwind.Export(state);
+                                var result = await Exporter_For_NextJs_with_Tailwind.Export(state.AsExportInput());
                                 if (result.HasError)
                                 {
                                     this.FailNotification(result.Error.Message);
