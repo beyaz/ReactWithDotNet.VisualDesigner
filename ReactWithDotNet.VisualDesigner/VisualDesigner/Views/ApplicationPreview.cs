@@ -163,53 +163,9 @@ sealed class ApplicationPreview : Component
             {
                 element.Add(model.Text);
 
-                if (context.ParentModel is not null)
-                {
-                    foreach (var property in model.Properties)
-                    {
-                        string bindPropertyValue;
-                        {
-                            var parseResult = TryParsePropertyValue(property);
-                            if (!parseResult.HasValue)
-                            {
-                                continue;
-                            }
+                
 
-                            var name = parseResult.Name;
-                            var value = parseResult.Value;
-
-                            if (name != "-bind")
-                            {
-                                continue;
-                            }
-
-                            bindPropertyValue = value;
-                        }
-
-                        foreach (var componentProperty in context.ParentModel.Properties)
-                        {
-                            string name, value;
-                            {
-                                var result = TryParsePropertyValue(componentProperty);
-                                if (!result.HasValue)
-                                {
-                                    continue;
-                                }
-
-                                name  = result.Name;
-                                value = result.Value;
-                            }
-
-                            if (ClearConnectedValue(bindPropertyValue) == $"props.{name}")
-                            {
-                                if (ClearConnectedValue(value).StartsWith("'"))
-                                {
-                                    element.text = ClearConnectedValue(value).RemoveFromStart("'").RemoveFromEnd("'");
-                                }
-                            }
-                        }
-                    }
-                }
+                tryGetPropValueFromCaller(context, model,  "-bind").HasValue(text=>element.text = text);
             }
 
             foreach (var property in model.Properties)
@@ -363,6 +319,21 @@ sealed class ApplicationPreview : Component
                         continue;
                     }
 
+                    // check -show/hide-if
+                    {
+                        var hideIf = tryGetPropValueFromCaller(context, childModel, "-hide-if");
+                        if (hideIf.HasValue && hideIf.Value=="true")
+                        {
+                            continue;
+                        }
+                        
+                        var showIf = tryGetPropValueFromCaller(context, childModel, "-show-if");
+                        if (showIf.HasValue && showIf.Value=="false")
+                        {
+                            continue;
+                        }
+                    }
+
                     var result = await renderElement(context, childModel, childPath);
                     if (result.HasError)
                     {
@@ -376,6 +347,64 @@ sealed class ApplicationPreview : Component
             }
 
             return element;
+            
+            static Maybe<string> tryGetPropValueFromCaller(RenderContext context, VisualElementModel model, string propertyName)
+            {
+                if (context.ParentModel is not null)
+                {
+                    foreach (var property in model.Properties)
+                    {
+                        string bindPropertyValue;
+                        {
+                            var parseResult = TryParsePropertyValue(property);
+                            if (!parseResult.HasValue)
+                            {
+                                continue;
+                            }
+
+                            var name = parseResult.Name;
+                            var value = parseResult.Value;
+
+                            if (name != propertyName)
+                            {
+                                continue;
+                            }
+
+                            bindPropertyValue = value;
+                        }
+
+                        foreach (var componentProperty in context.ParentModel.Properties)
+                        {
+                            string name, value;
+                            {
+                                var result = TryParsePropertyValue(componentProperty);
+                                if (!result.HasValue)
+                                {
+                                    continue;
+                                }
+
+                                name  = result.Name;
+                                value = result.Value;
+                            }
+
+                            if (ClearConnectedValue(bindPropertyValue) == $"props.{name}")
+                            {
+                                if (ClearConnectedValue(value).StartsWith("'"))
+                                {
+                                    return ClearConnectedValue(value).RemoveFromStart("'").RemoveFromEnd("'");
+                                }
+
+                                if (value == "true" || value == "false")
+                                {
+                                    return value;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                return None;
+            }
         }
     }
 
