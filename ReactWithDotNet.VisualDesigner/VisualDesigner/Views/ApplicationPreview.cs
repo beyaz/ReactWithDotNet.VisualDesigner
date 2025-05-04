@@ -354,7 +354,7 @@ sealed class ApplicationPreview : Component
                 {
                     foreach (var property in model.Properties)
                     {
-                        string bindPropertyValue;
+                        string propertyValue;
                         {
                             var parseResult = TryParsePropertyValue(property);
                             if (!parseResult.HasValue)
@@ -370,33 +370,33 @@ sealed class ApplicationPreview : Component
                                 continue;
                             }
 
-                            bindPropertyValue = value;
+                            propertyValue = value;
                         }
 
-                        foreach (var componentProperty in context.ParentModel.Properties)
+                        foreach (var caller in context.ParentModel.Properties)
                         {
-                            string name, value;
+                            string callerPropertyName, callerPropertyValue;
                             {
-                                var result = TryParsePropertyValue(componentProperty);
+                                var result = TryParsePropertyValue(caller);
                                 if (!result.HasValue)
                                 {
                                     continue;
                                 }
 
-                                name  = result.Name;
-                                value = result.Value;
+                                callerPropertyName  = result.Name;
+                                callerPropertyValue = result.Value;
                             }
 
-                            if (ClearConnectedValue(bindPropertyValue) == $"props.{name}")
+                            if (ClearConnectedValue(propertyValue) == $"props.{callerPropertyName}")
                             {
-                                if (ClearConnectedValue(value).StartsWith("'"))
+                                if (ClearConnectedValue(callerPropertyValue).StartsWith("'"))
                                 {
-                                    return ClearConnectedValue(value).RemoveFromStart("'").RemoveFromEnd("'");
+                                    return ClearConnectedValue(callerPropertyValue).RemoveFromStart("'").RemoveFromEnd("'");
                                 }
 
-                                if (value == "true" || value == "false")
+                                if (callerPropertyValue == "true" || callerPropertyValue == "false")
                                 {
-                                    return value;
+                                    return callerPropertyValue;
                                 }
                             }
                         }
