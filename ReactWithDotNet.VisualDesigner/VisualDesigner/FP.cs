@@ -1,6 +1,7 @@
-﻿global using static ReactWithDotNet.VisualDesigner.FP;
+﻿global using FunctionalUtilities;
+global using static FunctionalUtilities.FP;
 
-namespace ReactWithDotNet.VisualDesigner;
+namespace FunctionalUtilities;
 
 public sealed class Result
 {
