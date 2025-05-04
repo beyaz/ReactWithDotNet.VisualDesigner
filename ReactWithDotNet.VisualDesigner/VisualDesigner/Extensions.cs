@@ -435,13 +435,13 @@ static class Extensions
     {
         if (string.IsNullOrWhiteSpace(nameValueCombined))
         {
-            return AttributeParseResult.Fail;
+            return None;
         }
         
         var colonIndex = nameValueCombined.IndexOf(':');
         if (colonIndex < 0)
         {
-            return AttributeParseResult.Fail;
+            return None;
         }
 
         var name = nameValueCombined[..colonIndex];
@@ -529,11 +529,11 @@ sealed class AttributeParseResult
     
     public string Name { get; init; }
     public string Value { get; init; }
-
-    public static AttributeParseResult Fail=>new()
+    
+    public static implicit operator AttributeParseResult(NoneObject noneObject)
     {
-        HasValue = false
-    };
+        return new() { HasValue = false };
+    }
 }
 
 sealed class StyleAttribute
