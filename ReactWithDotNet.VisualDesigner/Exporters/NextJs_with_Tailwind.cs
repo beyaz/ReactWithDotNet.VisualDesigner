@@ -23,19 +23,8 @@ sealed record ExportInput
     // @formatter:on
 }
 
-
 static class NextJs_with_Tailwind
 {
-    public static async Task ExportAll(int projectId)
-    {
-        var components = await GetAllComponentsInProject(projectId);
-
-        foreach (var component in components)
-        {
-            await Export(component.AsExportInput());
-        }
-    }
-    
     public static async Task<Result> Export(ExportInput input)
     {
         var result = await CalculateExportInfo(input);
@@ -49,13 +38,23 @@ static class NextJs_with_Tailwind
         return await IO.TryWriteToFile(filePath, fileContent);
     }
 
-    static async Task<Result<IReadOnlyList<string>>> CalculateElementTreeTsxCodes(ComponentEntity component, string userName)
+    public static async Task ExportAll(int projectId)
+    {
+        var components = await GetAllComponentsInProject(projectId);
+
+        foreach (var component in components)
+        {
+            await Export(component.AsExportInput());
+        }
+    }
+
+    static async Task<Result<IReadOnlyList<string>>> CalculateElementTreeTsxCodes(ComponentEntity component)
     {
         var rootVisualElement = component.RootElementAsJson.AsVisualElementModel();
 
         ReactNode rootNode;
         {
-            var result = await ConvertVisualElementModelToReactNodeModel((component, userName), rootVisualElement);
+            var result = await ConvertVisualElementModelToReactNodeModel(rootVisualElement);
             if (result.HasError)
             {
                 return result.Error;
@@ -99,7 +98,7 @@ static class NextJs_with_Tailwind
 
             IReadOnlyList<string> linesToInject;
             {
-                var result = await CalculateElementTreeTsxCodes(component, userName);
+                var result = await CalculateElementTreeTsxCodes(component);
                 if (result.HasError)
                 {
                     return result.Error;
@@ -368,10 +367,8 @@ static class NextJs_with_Tailwind
         return lines;
     }
 
-    static async Task<Result<ReactNode>> ConvertVisualElementModelToReactNodeModel((ComponentEntity component, string userName) context, VisualElementModel element)
+    static async Task<Result<ReactNode>> ConvertVisualElementModelToReactNodeModel(VisualElementModel element)
     {
-        var (component, userName) = context;
-
         List<string> classNames = [];
 
         var classNameShouldBeTemplateLiteral = false;
@@ -533,7 +530,7 @@ static class NextJs_with_Tailwind
         {
             ReactNode childNode;
             {
-                var result = await ConvertVisualElementModelToReactNodeModel(context, child);
+                var result = await ConvertVisualElementModelToReactNodeModel(child);
                 if (result.HasError)
                 {
                     return result.Error;
