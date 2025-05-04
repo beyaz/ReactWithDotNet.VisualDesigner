@@ -287,7 +287,7 @@ static class NextJs_with_Tailwind
         var hasSelfClose = node.Children.Count == 0 && node.Text.HasNoValue() && childrenProperty is null;
         if (hasSelfClose)
         {
-            sb.Append("/>");
+            sb.Append(" />");
             lines.Add(sb.ToString());
             return lines;
         }

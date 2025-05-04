@@ -599,6 +599,7 @@ sealed class ApplicationView : Component<ApplicationState>
                 },
                 TreeItemMove = (source, target, position) =>
                 {
+                    
                     // root check
                     {
                         if (source == "0")
@@ -627,6 +628,8 @@ sealed class ApplicationView : Component<ApplicationState>
                         }
                     }
 
+                    var isTryingToMakeRoot = target == "0" && position == DragPosition.Before;
+
                     VisualElementModel sourceNodeParent;
                     int sourceNodeIndex;
                     {
@@ -643,6 +646,15 @@ sealed class ApplicationView : Component<ApplicationState>
                         sourceNodeIndex = int.Parse(indexArray[length]);
 
                         sourceNodeParent = temp;
+                    }
+
+                    if (isTryingToMakeRoot)
+                    {
+                        state.ComponentRootElement = sourceNodeParent.Children[sourceNodeIndex];
+                        
+                        state.Selection = new();
+                        
+                        return Task.CompletedTask;
                     }
 
                     VisualElementModel targetNodeParent;
