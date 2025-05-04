@@ -1,4 +1,4 @@
-﻿namespace ReactWithDotNet.VisualDesigner;
+﻿namespace ReactWithDotNet.VisualDesigner.Primitive;
 
 sealed class IconEyeClose: PureComponent
 {
