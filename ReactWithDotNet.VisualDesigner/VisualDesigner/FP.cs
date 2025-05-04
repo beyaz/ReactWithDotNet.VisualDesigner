@@ -1,4 +1,6 @@
-﻿namespace ReactWithDotNet.VisualDesigner;
+﻿global using static ReactWithDotNet.VisualDesigner.FP;
+
+namespace ReactWithDotNet.VisualDesigner;
 
 public sealed class Result
 {
