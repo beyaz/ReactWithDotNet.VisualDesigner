@@ -234,15 +234,3 @@ globalCss: |
     font-weight: normal;
     font-style: normal;
   }
-
-externalComponents:
-  - name: input
-    events:
-      - name: onClick
-        parameters: []
-  - name: heroui/Checkbox
-    events:
-      - name: onValueChange
-        parameters:
-          - name: isSelected
-            type: boolean
