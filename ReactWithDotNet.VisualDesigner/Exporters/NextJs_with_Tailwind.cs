@@ -269,6 +269,11 @@ static class NextJs_with_Tailwind
                 continue;
             }
 
+            if (propertyValue == "\"false\"")
+            {
+                continue;
+            }
+            
             if (propertyValue == "\"true\"")
             {
                 sb.Append($" {propertyName}");
