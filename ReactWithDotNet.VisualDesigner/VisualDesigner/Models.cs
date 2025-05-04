@@ -1,12 +1,5 @@
 ﻿namespace ReactWithDotNet.VisualDesigner.Models;
 
-public sealed record PropertyInfo
-{
-    public string Name { get; init; }
-
-    public IReadOnlyList<string> Suggestions { get; init; }
-}
-
 public sealed record VisualElementModel
 {
     // @formatter:off

@@ -456,23 +456,6 @@ static class ApplicationLogic
             }
         }
         
-        foreach (var propertyInfo in StyleProperties)
-        {
-            var attributeName = propertyInfo.Name;
-
-            if (attributeName == "gap")
-            {
-                for (var i = 1; i < 100; i++)
-                {
-                    items.Add($"{attributeName}: {i * 4}");
-                }
-            }
-
-            foreach (var suggestion in propertyInfo.Suggestions)
-            {
-                items.Add($"{attributeName}: {suggestion}");
-            }
-        }
 
         return items;
     }

@@ -236,5 +236,21 @@ globalCss: |
   }
 
 suggestions:
-  width: ["auto", "fit-content", "max-content", "min-content", "inherit", "initial", "unset", "100%", "75%", "50%", "25%"]
-  height: ["auto", "fit-content", "max-content", "min-content", "inherit", "initial", "unset", "100%", "75%", "50%", "25%"]
+  width: ['auto', 'fit-content', 'max-content', 'min-content', 'inherit', 'initial', 'unset', '100%', '75%', '50%', '25%']
+  height: ['auto', 'fit-content', 'max-content', 'min-content', 'inherit', 'initial', 'unset', '100%', '75%', '50%', '25%']
+  display: ['flex']
+  position: ['static', 'relative', 'absolute', 'fixed', 'sticky', 'inherit', 'initial', 'unset']
+  flex-direction: ['row', 'row-reverse', 'column', 'column-reverse', 'inherit', 'initial', 'unset']
+  justify-content: ['flex-start', 'flex-end', 'center', 'space-between', 'space-around', 'space-evenly', 'inherit', 'initial', 'unset']
+  align-items: ['stretch', 'flex-start', 'flex-end', 'center', 'baseline', 'inherit', 'initial', 'unset']
+  overflow: ['visible', 'hidden', 'scroll', 'auto', 'clip', 'inherit', 'initial', 'unset']
+  visibility:  ['visible', 'hidden', 'collapse', 'inherit', 'initial', 'unset']
+  opacity:  ['0', '0.1', '0.5', '1', 'inherit', 'initial', 'unset']
+  cursor: ['auto', 'default', 'pointer', 'wait', 'text', 'move', 'not-allowed', 'crosshair', 'inherit', 'initial', 'unset']
+  font-size: ['small', 'medium', 'large', 'inherit', 'initial', 'unset', '16px', '1.2rem']
+  font-weight: ['normal', 'bold', 'bolder', 'lighter', '100', '200', '300', 'inherit', 'initial', 'unset']
+  line-height: ['normal', 'inherit', 'initial', 'unset', '1.5', '2']
+  text-align: ['left', 'right', 'center', 'justify', 'inherit', 'initial', 'unset']
+  text-decoration: ['none', 'underline', 'overline', 'line-through', 'inherit', 'initial', 'unset']
+  white-space: ['normal', 'nowrap', 'pre', 'pre-wrap', 'pre-line', 'inherit', 'initial', 'unset']
+  pointer-events: ['auto', 'none', 'inherit', 'initial', 'unset']
