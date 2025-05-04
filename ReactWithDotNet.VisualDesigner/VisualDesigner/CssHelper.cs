@@ -395,6 +395,18 @@ public static class CssHelper
                 ]);
             }
         }
+        
+        // try to handle by spacing scale or arbitrary value
+        {
+            var maybe = TailwindSpacingScale.Try_Convert_From_TailwindClass_to_HtmlStyle(utilityCssClassName);
+            if (maybe.HasValue)
+            {
+                return (pseudo,
+                [
+                    maybe.Value
+                ]);
+            }
+        }
 
         return None;
 
@@ -489,6 +501,111 @@ public static class CssHelper
         return GetPseudoFunction(pseudo).Then(pseudoFunction => pseudoFunction(styleModifiers.ToArray()));
     }
 
+  
+
+    static class TailwindSpacingScale
+    {
+        static readonly (string htmlStyleName, string tailwindPrefix)[] Html_to_TailwindName_Map =
+        [
+            (htmlStyleName: "min-width", tailwindPrefix: "min-w-"),
+            (htmlStyleName: "min-height", tailwindPrefix: "min-h-"),
+            (htmlStyleName: "max-width", tailwindPrefix: "max-w-"),
+            (htmlStyleName: "max-height", tailwindPrefix: "max-h-"),
+
+            // ↔ Width & Height
+            (htmlStyleName: "width", tailwindPrefix: "w-"),
+            (htmlStyleName: "height", tailwindPrefix: "h-"),
+
+            // Padding
+            (htmlStyleName: "padding", tailwindPrefix: "p-"),
+            (htmlStyleName: "padding-top", tailwindPrefix: "pt-"),
+            (htmlStyleName: "padding-right", tailwindPrefix: "pr-"),
+            (htmlStyleName: "padding-bottom", tailwindPrefix: "pb-"),
+            (htmlStyleName: "padding-left", tailwindPrefix: "pl-"),
+            (htmlStyleName: "padding-inline", tailwindPrefix: "px-"),
+            (htmlStyleName: "padding-block", tailwindPrefix: "py-"),
+
+            // Margin
+            (htmlStyleName: "margin", tailwindPrefix: "m-"),
+            (htmlStyleName: "margin-top", tailwindPrefix: "mt-"),
+            (htmlStyleName: "margin-right", tailwindPrefix: "mr-"),
+            (htmlStyleName: "margin-bottom", tailwindPrefix: "mb-"),
+            (htmlStyleName: "margin-left", tailwindPrefix: "ml-"),
+            (htmlStyleName: "margin-inline", tailwindPrefix: "mx-"),
+            (htmlStyleName: "margin-block", tailwindPrefix: "my-"),
+
+            // Gap (for flex/grid gaps)
+            (htmlStyleName: "gap", tailwindPrefix: "gap-"),
+            (htmlStyleName: "row-gap", tailwindPrefix: "gap-y-"),
+            (htmlStyleName: "column-gap", tailwindPrefix: "gap-x-"),
+
+            // Inset (top/right/bottom/left for positioning)
+            (htmlStyleName: "top", tailwindPrefix: "top-"),
+            (htmlStyleName: "right", tailwindPrefix: "right-"),
+            (htmlStyleName: "bottom", tailwindPrefix: "bottom-"),
+            (htmlStyleName: "left", tailwindPrefix: "left-"),
+
+            // Space-between (child spacing in flex)
+            (htmlStyleName: "space-x", tailwindPrefix: "space-x-"),
+            (htmlStyleName: "space-y", tailwindPrefix: "space-y-"),
+
+            // Translate (transform)
+            (htmlStyleName: "translate-x", tailwindPrefix: "translate-x-"),
+            (htmlStyleName: "translate-y", tailwindPrefix: "translate-y-")
+        ];
+
+        public static Maybe<string> Try_Convert_From_HtmlStyle_to_TailwindClass(string name, string value)
+        {
+            foreach (var item in Html_to_TailwindName_Map)
+            {
+                if (item.htmlStyleName == name)
+                {
+                    var maybe = try_Convert_PixelValue_To_SpacingScale_Or_ArbitraryValue(value);
+                    if (maybe.HasValue)
+                    {
+                        return item.tailwindPrefix + maybe.Value;
+                    }
+                }
+            }
+
+            return None;
+            
+            static Maybe<string> try_Convert_PixelValue_To_SpacingScale_Or_ArbitraryValue(string value)
+            {
+                if (!value.EndsWith("px"))
+                {
+                    return None;
+                }
+                    
+                if (TailwindSpacingScaleMap.TryGetValue(value, out var spaceValue))
+                {
+                    return spaceValue.ToString(CultureInfo_en_US);
+                }
+                    
+                return "[" + value + "]";
+            }
+        }
+        
+        public static Maybe<(string htmlStyleName, string htmlStyleValue)> Try_Convert_From_TailwindClass_to_HtmlStyle(string tailwindClass)
+        {
+            foreach (var item in Html_to_TailwindName_Map)
+            {
+                if (tailwindClass.StartsWith(item.tailwindPrefix))
+                {
+                    foreach (var (px,scale) in TailwindSpacingScaleMap)
+                    {
+                        if (tailwindClass == item.tailwindPrefix + scale)
+                        {
+                            return (item.htmlStyleName, px);
+                        }
+                    }
+                }
+            }
+
+            return None;
+        }
+    }
+    
     static Result<string> ConvertToTailwindClass(string name, string value)
     {
         if (value is null)
@@ -531,6 +648,15 @@ public static class CssHelper
             }
         }
 
+        // try to handle by spacing scale or arbitrary value
+        {
+            var maybe = TailwindSpacingScale.Try_Convert_From_HtmlStyle_to_TailwindClass(name, value);
+            if (maybe.HasValue)
+            {
+                return maybe.Value;
+            }
+        }
+        
         var isValueDouble = double.TryParse(value, out var valueAsDouble);
 
         name = name switch
@@ -599,19 +725,7 @@ public static class CssHelper
                 return $"w-[{value}]";
             }
             
-            case "min-width":
-            {
-                if (TailwindSpacingScaleMap.TryGetValue(value, out var spaceValue))
-                {
-                    value = spaceValue.ToString(CultureInfo_en_US);
-                }
-                else
-                {
-                    value = "[" + value + "]";
-                }
-                
-                return $"min-w-{value}";
-            }
+           
 
             case "height":
             {

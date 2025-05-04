@@ -269,6 +269,12 @@ static class NextJs_with_Tailwind
                 continue;
             }
 
+            if (propertyValue == "\"true\"")
+            {
+                sb.Append($" {propertyName}");
+                continue;
+            }
+            
             if (propertyValue != null && propertyValue[0] == '"')
             {
                 sb.Append($" {propertyName}={propertyValue}");
@@ -280,6 +286,8 @@ static class NextJs_with_Tailwind
                 sb.Append($" {propertyName}={propertyValue}");
                 continue;
             }
+
+          
 
             sb.Append($" {propertyName}={{{propertyValue}}}");
         }
@@ -473,7 +481,7 @@ static class NextJs_with_Tailwind
                     node.Properties.Add(new() { Name = name, Value = value });
                     continue;
                 }
-
+                
                 node.Properties.Add(new() { Name = name, Value = '"' + value + '"' });
             }
         }
