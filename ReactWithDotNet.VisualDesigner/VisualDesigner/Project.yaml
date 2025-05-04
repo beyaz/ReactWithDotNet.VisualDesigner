@@ -234,3 +234,7 @@ globalCss: |
     font-weight: normal;
     font-style: normal;
   }
+
+suggestions:
+  width: ["auto", "fit-content", "max-content", "min-content", "inherit", "initial", "unset", "100%", "75%", "50%", "25%"]
+  height: ["auto", "fit-content", "max-content", "min-content", "inherit", "initial", "unset", "100%", "75%", "50%", "25%"]

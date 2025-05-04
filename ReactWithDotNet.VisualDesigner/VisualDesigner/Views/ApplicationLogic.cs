@@ -448,6 +448,14 @@ static class ApplicationLogic
             }
         }
 
+        foreach (var (key, values) in Project.Suggestions)
+        {
+            foreach (var value in values)
+            {
+                items.Add($"{key}: {value}");
+            }
+        }
+        
         foreach (var propertyInfo in StyleProperties)
         {
             var attributeName = propertyInfo.Name;

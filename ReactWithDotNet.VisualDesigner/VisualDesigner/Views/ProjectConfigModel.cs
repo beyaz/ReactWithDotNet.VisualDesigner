@@ -7,4 +7,6 @@ sealed record ProjectConfigModel
     public IReadOnlyDictionary<string, string> Styles { get; init; }
 
     public string GlobalCss { get; init; }
+    
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> Suggestions { get; init; }
 }
