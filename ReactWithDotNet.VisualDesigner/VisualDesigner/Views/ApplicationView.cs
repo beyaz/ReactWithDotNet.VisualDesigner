@@ -1085,11 +1085,11 @@ sealed class ApplicationView : Component<ApplicationState>
                 Element content = value;
                 {
                     var parseResult = TryParsePropertyValue(value);
-                    if (parseResult.success)
+                    if (parseResult.HasValue)
                     {
                         content = new FlexRowCentered
                         {
-                            new span(FontWeight500) { parseResult.name }, ": ", parseResult.value
+                            new span(FontWeight500) { parseResult.Name }, ": ", parseResult.Value
                         };
                     }
                 }
@@ -1126,9 +1126,9 @@ sealed class ApplicationView : Component<ApplicationState>
                             {
                                 var nameValue = CurrentVisualElement.Styles[state.Selection.SelectedStyleIndex.Value];
                                 var parseResult = TryParsePropertyValue(nameValue);
-                                if (parseResult.success)
+                                if (parseResult.HasValue)
                                 {
-                                    var startIndex = nameValue.LastIndexOf(parseResult.value, StringComparison.OrdinalIgnoreCase);
+                                    var startIndex = nameValue.LastIndexOf(parseResult.Value, StringComparison.OrdinalIgnoreCase);
                                     var endIndex = nameValue.Length;
 
                                     jsCode.AppendLine($"document.getElementById('{id}').setSelectionRange({startIndex}, {endIndex});");
@@ -1233,11 +1233,11 @@ sealed class ApplicationView : Component<ApplicationState>
                 Element content = value;
                 {
                     var parseResult = TryParsePropertyValue(value);
-                    if (parseResult.success)
+                    if (parseResult.HasValue)
                     {
                         content = new FlexRowCentered
                         {
-                            new span(FontWeight500) { parseResult.name }, ": ", parseResult.value
+                            new span(FontWeight500) { parseResult.Name }, ": ", parseResult.Value
                         };
                     }
                 }
@@ -1274,9 +1274,9 @@ sealed class ApplicationView : Component<ApplicationState>
                             {
                                 var nameValue = CurrentVisualElement.Properties[location];
                                 var parseResult = TryParsePropertyValue(nameValue);
-                                if (parseResult.success)
+                                if (parseResult.HasValue)
                                 {
-                                    var startIndex = nameValue.LastIndexOf(parseResult.value, StringComparison.OrdinalIgnoreCase);
+                                    var startIndex = nameValue.LastIndexOf(parseResult.Value, StringComparison.OrdinalIgnoreCase);
                                     var endIndex = nameValue.Length;
 
                                     jsCode.AppendLine($"document.getElementById('{id}').setSelectionRange({startIndex}, {endIndex});");

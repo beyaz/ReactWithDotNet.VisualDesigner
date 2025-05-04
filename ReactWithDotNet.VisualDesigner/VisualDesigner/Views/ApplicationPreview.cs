@@ -170,13 +170,13 @@ sealed class ApplicationPreview : Component
                         string bindPropertyValue;
                         {
                             var parseResult = TryParsePropertyValue(property);
-                            if (!parseResult.success)
+                            if (!parseResult.HasValue)
                             {
                                 continue;
                             }
 
-                            var name = parseResult.name;
-                            var value = parseResult.value;
+                            var name = parseResult.Name;
+                            var value = parseResult.Value;
 
                             if (name != "-bind")
                             {
@@ -191,13 +191,13 @@ sealed class ApplicationPreview : Component
                             string name, value;
                             {
                                 var result = TryParsePropertyValue(componentProperty);
-                                if (!result.success)
+                                if (!result.HasValue)
                                 {
                                     continue;
                                 }
 
-                                name  = result.name;
-                                value = result.value;
+                                name  = result.Name;
+                                value = result.Value;
                             }
 
                             if (ClearConnectedValue(bindPropertyValue) == $"props.{name}")
@@ -215,10 +215,10 @@ sealed class ApplicationPreview : Component
             foreach (var property in model.Properties)
             {
                 var parseResult = TryParsePropertyValue(property);
-                if (parseResult.success && parseResult.value is not null)
+                if (parseResult.HasValue && parseResult.Value is not null)
                 {
-                    var name = parseResult.name;
-                    var value = parseResult.value;
+                    var name = parseResult.Name;
+                    var value = parseResult.Value;
 
                     if (name == "-items-source-design-time-count")
                     {

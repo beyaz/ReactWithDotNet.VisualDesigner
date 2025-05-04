@@ -450,9 +450,9 @@ static class Extensions
 
         return new()
         {
-            success = true,
-            name    = name.Trim(),
-            value   = value.Trim(),
+            HasValue = true,
+            Name    = name.Trim(),
+            Value   = value.Trim(),
         };
     }
     
@@ -500,10 +500,10 @@ static class Extensions
         foreach (var property in properties)
         {
             var parseResult = TryParsePropertyValue(property);
-            if (parseResult.success)
+            if (parseResult.HasValue)
             {
-                var name = parseResult.name;
-                var value = parseResult.value;
+                var name = parseResult.Name;
+                var value = parseResult.Value;
                 
                 foreach (var propertyName in propertyNameWithAlias)
                 {
@@ -525,13 +525,14 @@ static class Extensions
 
 sealed class AttributeParseResult
 {
-    public bool success { get; init; }
-    public string name { get; init; }
-    public string value { get; init; }
+    public bool HasValue { get; init; }
+    
+    public string Name { get; init; }
+    public string Value { get; init; }
 
     public static AttributeParseResult Fail=>new()
     {
-        success = false
+        HasValue = false
     };
 }
 
