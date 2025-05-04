@@ -163,9 +163,7 @@ sealed class ApplicationPreview : Component
             {
                 element.Add(model.Text);
 
-                
-
-                tryGetPropValueFromCaller(context, model,  "-bind").HasValue(text=>element.text = text);
+                tryGetPropValueFromCaller(context, model, "-bind").HasValue(text => element.text = text);
             }
 
             foreach (var property in model.Properties)
@@ -282,8 +280,8 @@ sealed class ApplicationPreview : Component
                 var result = model.Styles
                     .Select(CreateDesignerStyleItemFromText)
                     .ConvertAll(designerItem => designerItem.ToStyleModifier())
-                    .Then(styleModifiers=>element.Add(styleModifiers.ToArray()));
-                
+                    .Then(styleModifiers => element.Add(styleModifiers.ToArray()));
+
                 if (result.HasError)
                 {
                     return result.Error;
@@ -322,13 +320,13 @@ sealed class ApplicationPreview : Component
                     // check -show/hide-if
                     {
                         var hideIf = tryGetPropValueFromCaller(context, childModel, "-hide-if");
-                        if (hideIf.HasValue && hideIf.Value=="true")
+                        if (hideIf.HasValue && hideIf.Value == "true")
                         {
                             continue;
                         }
-                        
+
                         var showIf = tryGetPropValueFromCaller(context, childModel, "-show-if");
-                        if (showIf.HasValue && showIf.Value=="false")
+                        if (showIf.HasValue && showIf.Value == "false")
                         {
                             continue;
                         }
@@ -347,58 +345,78 @@ sealed class ApplicationPreview : Component
             }
 
             return element;
-            
+
+            static bool hasProperty(VisualElementModel model, string propertyName)
+            {
+                return tryGetProperty(model, propertyName).HasValue;
+            }
+
+            static Maybe<(string propertyName, string propertyValue)> tryGetProperty(VisualElementModel model, string propertyName)
+            {
+                foreach (var property in model.Properties)
+                {
+                    var parseResult = TryParsePropertyValue(property);
+                    if (!parseResult.HasValue)
+                    {
+                        continue;
+                    }
+
+                    var name = parseResult.Name;
+                    var value = parseResult.Value;
+
+                    if (name != propertyName)
+                    {
+                        continue;
+                    }
+
+                    return (name, value);
+                }
+
+                return None;
+            }
+
             static Maybe<string> tryGetPropValueFromCaller(RenderContext context, VisualElementModel model, string propertyName)
             {
-                if (context.ParentModel is not null)
+                if (context.ParentModel is null)
                 {
-                    foreach (var property in model.Properties)
+                    return None;
+                }
+
+                string propertyValue;
+                {
+                    var maybe = tryGetProperty(model, propertyName);
+                    if (maybe.HasNoValue)
                     {
-                        string propertyValue;
+                        return None;
+                    }
+
+                    propertyValue = maybe.Value.propertyValue;
+                }
+
+                foreach (var caller in context.ParentModel.Properties)
+                {
+                    string callerPropertyName, callerPropertyValue;
+                    {
+                        var result = TryParsePropertyValue(caller);
+                        if (!result.HasValue)
                         {
-                            var parseResult = TryParsePropertyValue(property);
-                            if (!parseResult.HasValue)
-                            {
-                                continue;
-                            }
-
-                            var name = parseResult.Name;
-                            var value = parseResult.Value;
-
-                            if (name != propertyName)
-                            {
-                                continue;
-                            }
-
-                            propertyValue = value;
+                            continue;
                         }
 
-                        foreach (var caller in context.ParentModel.Properties)
+                        callerPropertyName  = result.Name;
+                        callerPropertyValue = result.Value;
+                    }
+
+                    if (ClearConnectedValue(propertyValue) == $"props.{callerPropertyName}")
+                    {
+                        if (ClearConnectedValue(callerPropertyValue).StartsWith("'"))
                         {
-                            string callerPropertyName, callerPropertyValue;
-                            {
-                                var result = TryParsePropertyValue(caller);
-                                if (!result.HasValue)
-                                {
-                                    continue;
-                                }
+                            return ClearConnectedValue(callerPropertyValue).RemoveFromStart("'").RemoveFromEnd("'");
+                        }
 
-                                callerPropertyName  = result.Name;
-                                callerPropertyValue = result.Value;
-                            }
-
-                            if (ClearConnectedValue(propertyValue) == $"props.{callerPropertyName}")
-                            {
-                                if (ClearConnectedValue(callerPropertyValue).StartsWith("'"))
-                                {
-                                    return ClearConnectedValue(callerPropertyValue).RemoveFromStart("'").RemoveFromEnd("'");
-                                }
-
-                                if (callerPropertyValue == "true" || callerPropertyValue == "false")
-                                {
-                                    return callerPropertyValue;
-                                }
-                            }
+                        if (callerPropertyValue == "true" || callerPropertyValue == "false")
+                        {
+                            return callerPropertyValue;
                         }
                     }
                 }
