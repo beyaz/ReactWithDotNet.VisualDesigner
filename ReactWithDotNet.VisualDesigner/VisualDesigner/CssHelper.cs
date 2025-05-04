@@ -135,8 +135,8 @@ public static class CssHelper
             {
                 var attribute = ParseStyleAttibute(designerStyleItem);
 
-                name   = attribute.name;
-                value  = attribute.value;
+                name   = attribute.Name;
+                value  = attribute.Value;
                 pseudo = attribute.Pseudo;
             }
 
@@ -171,8 +171,8 @@ public static class CssHelper
             {
                 var attribute = ParseStyleAttibute(designerStyleItem);
 
-                name   = attribute.name;
-                value  = attribute.value;
+                name   = attribute.Name;
+                value  = attribute.Value;
                 pseudo = attribute.Pseudo;
 
                 designerStyleItem = name;

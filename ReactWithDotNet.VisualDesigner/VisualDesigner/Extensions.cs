@@ -477,7 +477,7 @@ static class Extensions
         {
             return new()
             {
-                name   = nameValueCombined.Trim(),
+                Name   = nameValueCombined.Trim(),
                 Pseudo = pseudo
             };
         }
@@ -488,8 +488,8 @@ static class Extensions
 
         return new()
         {
-            name    = name.Trim(),
-            value   = value.Trim(),
+            Name    = name.Trim(),
+            Value   = value.Trim(),
             Pseudo  = pseudo
         };
     }
@@ -537,20 +537,19 @@ sealed class AttributeParseResult
 
 sealed class StyleAttribute
 {
-    public string name { get; init; }
-    public string value { get; init; }
+    public string Name { get; init; }
+    public string Value { get; init; }
     public string Pseudo { get; init; }
     
     public static implicit operator (string name, string value, string pseudo)(StyleAttribute item)
     {
-        return (item.name, item.value, item.Pseudo);
+        return (item.Name, item.Value, item.Pseudo);
     }
 
     public void Deconstruct(out string name , out string value, out string pseudo)
     {
-        name = this.name;
-        value = this.value;
-        pseudo = this.Pseudo;
-
+        name = Name;
+        value = Value;
+        pseudo = Pseudo;
     }
 }
