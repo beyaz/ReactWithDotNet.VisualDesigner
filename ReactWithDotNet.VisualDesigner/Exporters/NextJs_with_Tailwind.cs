@@ -477,58 +477,6 @@ static class NextJs_with_Tailwind
                     continue;
                 }
 
-                //if (tag == "Image")
-                //{
-                //    value = "/" + value; // todo: fixme
-                //}
-
-                var componentInProject = (await GetComponenUserOrMainVersionAsync(component.ProjectId, tag, userName)).Value;
-                if (componentInProject is not null)
-                {
-                    node.Properties.Add(new() { Name = name, Value = $"()=>invokeLogic('{value}')" });
-                    continue;
-                }
-
-                // process as external
-                {
-                    var isConnectedToExternalComponent = false;
-
-                    foreach (var externalComponent in Project.ExternalComponents.Where(x => x.Name == tag))
-                    {
-                        var @event = externalComponent.Events.FirstOrDefault(e => e.Name == name);
-                        if (@event is not null)
-                        {
-                            isConnectedToExternalComponent = true;
-
-                            if (@event.Parameters.Any())
-                            {
-                                var partPrm = string.Join(", ", @event.Parameters.Select(p => p.Name));
-
-                                node.Properties.Add(new()
-                                {
-                                    Name  = name,
-                                    Value = $"({partPrm})=>invokeLogic('{value}', {partPrm})"
-                                });
-                            }
-                            else
-                            {
-                                node.Properties.Add(new()
-                                {
-                                    Name  = name,
-                                    Value = $"()=>invokeLogic('{value}')"
-                                });
-                            }
-
-                            break;
-                        }
-                    }
-
-                    if (isConnectedToExternalComponent)
-                    {
-                        continue;
-                    }
-                }
-
                 node.Properties.Add(new() { Name = name, Value = '"' + value + '"' });
             }
         }

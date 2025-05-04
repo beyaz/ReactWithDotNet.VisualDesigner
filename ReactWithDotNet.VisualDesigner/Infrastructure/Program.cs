@@ -12,7 +12,7 @@ public class Program
 {
     public static void Main(string[] args)
     {
-        // VisualDesigner.Exporters.NextJs_with_Tailwind.ExportAll(1).GetAwaiter().GetResult();
+        //VisualDesigner.Exporters.NextJs_with_Tailwind.ExportAll(1).GetAwaiter().GetResult();
         
         var builder = WebApplication.CreateBuilder(args);
 
