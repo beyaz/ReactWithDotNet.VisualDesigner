@@ -598,6 +598,20 @@ public static class CssHelper
 
                 return $"w-[{value}]";
             }
+            
+            case "min-width":
+            {
+                if (TailwindSpacingScaleMap.TryGetValue(value, out var spaceValue))
+                {
+                    value = spaceValue.ToString(CultureInfo_en_US);
+                }
+                else
+                {
+                    value = "[" + value + "]";
+                }
+                
+                return $"min-w-{value}";
+            }
 
             case "height":
             {
@@ -620,8 +634,7 @@ public static class CssHelper
             case "max-height":
                 return $"max-h-[{value}]";
 
-            case "min-width":
-                return $"min-w-[{value}]";
+         
 
             case "min-height":
                 return $"min-h-[{value}]";
@@ -855,9 +868,6 @@ public static class CssHelper
 
             case "inset":
             {
-                
-
-
                 if (TailwindSpacingScaleMap.TryGetValue(value, out var insetValue))
                 {
                     value = insetValue.ToString(CultureInfo_en_US);
@@ -866,7 +876,6 @@ public static class CssHelper
                 {
                     value = "[" + value + "]";
                 }
-
                 
                 return $"inset-{value}";
             }
