@@ -1208,6 +1208,44 @@ public static class CssHelper
         return new Exception($"{name}: {value} is not recognized");
     }
 
+    public static StyleAttribute ParseStyleAttibute(string nameValueCombined)
+    {
+        if (string.IsNullOrWhiteSpace(nameValueCombined))
+        {
+            return null;
+        }
+
+        string pseudo = null;
+        
+        TryReadPseudo(nameValueCombined).HasValue(x =>
+        {
+            pseudo = x.Pseudo;
+            
+            nameValueCombined = x.NewText;
+        });
+        
+        var colonIndex = nameValueCombined.IndexOf(':');
+        if (colonIndex < 0)
+        {
+            return new()
+            {
+                Name   = nameValueCombined.Trim(),
+                Pseudo = pseudo
+            };
+        }
+
+        var name = nameValueCombined[..colonIndex];
+
+        var value = nameValueCombined[(colonIndex + 1)..];
+
+        return new()
+        {
+            Name   = name.Trim(),
+            Value  = value.Trim(),
+            Pseudo = pseudo
+        };
+    }
+
     static Maybe<(string Pseudo, string NewText)> TryReadPseudo(string text)
     {
         foreach (var pseudo in MediaQueries.Keys)

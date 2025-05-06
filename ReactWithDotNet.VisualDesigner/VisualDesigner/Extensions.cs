@@ -1,54 +1,9 @@
 ﻿using System.IO;
 using Newtonsoft.Json;
-using YamlDotNet.Core.Events;
-using YamlDotNet.Serialization.NamingConventions;
-using YamlDotNet.Serialization;
 using Formatting = Newtonsoft.Json.Formatting;
 using System.Globalization;
 
 namespace ReactWithDotNet.VisualDesigner;
-
-static class Theme
-{
-    public const string BorderColor = "#d5d5d8";
-    public static string BackgroundColor = "#eff3f8";
-    public static string WindowBackgroundColor = rgba(255, 255, 255, 0.4);
-    public static string text_primary => "#1A2027";
-}
-
-static class YamlHelper
-{
-    public static T DeserializeFromYaml<T>(string yamlContent)
-    {
-        var deserializer = new DeserializerBuilder()
-            .WithNamingConvention(CamelCaseNamingConvention.Instance)
-            .WithNodeTypeResolver(new ReadOnlyCollectionNodeTypeResolver())
-            .Build();
-
-        return deserializer.Deserialize<T>(yamlContent);
-    }
-
-    sealed class ReadOnlyCollectionNodeTypeResolver : INodeTypeResolver
-    {
-        static readonly IReadOnlyDictionary<Type, Type> CustomGenericInterfaceImplementations = new Dictionary<Type, Type>
-        {
-            { typeof(IReadOnlyCollection<>), typeof(List<>) },
-            { typeof(IReadOnlyList<>), typeof(List<>) },
-            { typeof(IReadOnlyDictionary<,>), typeof(Dictionary<,>) }
-        };
-
-        public bool Resolve(NodeEvent nodeEvent, ref Type type)
-        {
-            if (type.IsInterface && type.IsGenericType && CustomGenericInterfaceImplementations.TryGetValue(type.GetGenericTypeDefinition(), out var concreteType))
-            {
-                type = concreteType.MakeGenericType(type.GetGenericArguments());
-                return true;
-            }
-
-            return false;
-        }
-    }
-}
 
 static class Extensions
 {
@@ -456,43 +411,7 @@ static class Extensions
         };
     }
     
-    public static StyleAttribute ParseStyleAttibute(string nameValueCombined)
-    {
-        if (string.IsNullOrWhiteSpace(nameValueCombined))
-        {
-            return null;
-        }
 
-        string pseudo = null;
-        
-        if (nameValueCombined.StartsWith("hover:"))
-        {
-            pseudo            = "hover";
-            nameValueCombined = nameValueCombined.RemoveFromStart("hover:").Trim();
-        }
-        
-        
-        var colonIndex = nameValueCombined.IndexOf(':');
-        if (colonIndex < 0)
-        {
-            return new()
-            {
-                Name   = nameValueCombined.Trim(),
-                Pseudo = pseudo
-            };
-        }
-
-        var name = nameValueCombined[..colonIndex];
-
-        var value = nameValueCombined[(colonIndex + 1)..];
-
-        return new()
-        {
-            Name    = name.Trim(),
-            Value   = value.Trim(),
-            Pseudo  = pseudo
-        };
-    }
     
     
     public static string TryGetPropertyValue(this IReadOnlyList<string> properties, params string[] propertyNameWithAlias)
@@ -517,9 +436,6 @@ static class Extensions
 
         return null;
     }
-
-  
-    
 }
 
 
@@ -536,7 +452,7 @@ sealed class AttributeParseResult
     }
 }
 
-sealed class StyleAttribute
+public sealed class StyleAttribute
 {
     public string Name { get; init; }
     public string Value { get; init; }
