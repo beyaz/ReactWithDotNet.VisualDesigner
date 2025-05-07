@@ -295,6 +295,22 @@ static class Extensions
     
     public static string ClearConnectedValue(string value) => value.RemoveFromStart("{").RemoveFromEnd("}");
     
+    public static string TryClearStringValue(string value)
+    {
+        if (value is null)
+        {
+            return null;
+        }
+
+        if (IsStringValue(value))
+        {
+            return value.Substring(1, value.Length - 2);
+        }
+
+        return value;
+    }
+    
+    
     /// <summary>
     ///     Removes value from start of str
     /// </summary>

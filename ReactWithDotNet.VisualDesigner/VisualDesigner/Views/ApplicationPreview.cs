@@ -231,6 +231,8 @@ sealed class ApplicationPreview : Component
                                 continue;
                             }
 
+                            value = TryClearStringValue(value);
+
                             if (value.StartsWith("https://"))
                             {
                                 elementAsImage.src = value;
