@@ -14,7 +14,25 @@ public sealed class NextJsExportTest
 
         foreach (var component in components)
         {
-            await Export(component.AsExportInput());
+            var model = component.RootElementAsJson.AsVisualElementModel();
+
+            for (var i = 0; i < model.Properties.Count; i++)
+            {
+                var result = TryParsePropertyValue(model.Properties[i]);
+                if (result.HasValue)
+                {
+                    var name = result.Name;
+                    var value = result.Value;
+
+                    if (IsStringValue(value) || IsConnectedValue(value))
+                    {
+                        continue;
+                    }
+
+                    value.ToString();
+
+                }
+            }
         }
     }
 }

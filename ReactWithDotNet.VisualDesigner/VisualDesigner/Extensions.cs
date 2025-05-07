@@ -407,7 +407,7 @@ static class Extensions
         {
             HasValue = true,
             Name    = name.Trim(),
-            Value   = value.Trim(),
+            Value   = value.Trim()
         };
     }
     
