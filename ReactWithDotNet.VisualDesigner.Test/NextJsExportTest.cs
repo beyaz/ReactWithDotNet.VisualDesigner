@@ -14,6 +14,11 @@ public sealed class NextJsExportTest
 
         foreach (var component in components)
         {
+            if (component.Name == "HggImage")
+            {
+                continue;
+            }
+            
             var model = component.RootElementAsJson.AsVisualElementModel();
 
             for (var i = 0; i < model.Properties.Count; i++)

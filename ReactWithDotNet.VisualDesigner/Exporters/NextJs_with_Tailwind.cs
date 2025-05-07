@@ -398,7 +398,7 @@ static class NextJs_with_Tailwind
 
             if (element.Properties.Any(x => x.Contains("alt:")) is false)
             {
-                element.Properties.Add("alt: ?");
+                element.Properties.Add("alt: '?'");
             }
 
             var sizeProperty = element.Properties.FirstOrDefault(x => x.Contains("size:"));
