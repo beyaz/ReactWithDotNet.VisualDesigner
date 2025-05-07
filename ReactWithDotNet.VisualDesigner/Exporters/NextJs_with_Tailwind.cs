@@ -280,7 +280,7 @@ static class NextJs_with_Tailwind
                 continue;
             }
             
-            if (propertyValue != null && propertyValue[0] == '"')
+            if (IsStringValue(propertyValue))
             {
                 sb.Append($" {propertyName}={propertyValue}");
                 continue;
@@ -291,8 +291,6 @@ static class NextJs_with_Tailwind
                 sb.Append($" {propertyName}={propertyValue}");
                 continue;
             }
-
-          
 
             sb.Append($" {propertyName}={{{propertyValue}}}");
         }
