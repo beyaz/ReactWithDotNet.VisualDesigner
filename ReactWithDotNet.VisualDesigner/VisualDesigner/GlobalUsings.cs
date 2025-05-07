@@ -27,3 +27,7 @@ global using static ReactWithDotNet.VisualDesigner.CssHelper;
 
 global using static ReactWithDotNet.Tailwind;
 global using static ReactWithDotNet.VisualDesigner.Mappers.Mapper;
+
+using System.Runtime.CompilerServices;
+
+[assembly: InternalsVisibleTo("ReactWithDotNet.VisualDesigner.Test")]
