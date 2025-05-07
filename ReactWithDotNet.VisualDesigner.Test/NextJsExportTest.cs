@@ -1,4 +1,5 @@
-﻿using static ReactWithDotNet.VisualDesigner.Exporters.NextJs_with_Tailwind;
+﻿using ReactWithDotNet.VisualDesigner.Exporters;
+using static ReactWithDotNet.VisualDesigner.Exporters.NextJs_with_Tailwind;
 
 namespace ReactWithDotNet.VisualDesigner.Test;
 
@@ -8,7 +9,7 @@ public sealed class NextJsExportTest
     [TestMethod]
     public async Task ExportAll()
     {
-        // await NextJs_with_Tailwind.ExportAll(1);
+        await NextJs_with_Tailwind.ExportAll(1);
         
         var components = await GetAllComponentsInProject(1);
 
