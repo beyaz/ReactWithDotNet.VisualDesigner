@@ -92,7 +92,7 @@ public sealed record Maybe<TValue>
 
     public static implicit operator Maybe<TValue>(TValue value)
     {
-        return Some(value);
+        return new() { Value = value, HasValue = value is not null };
     }
 
     public static implicit operator Maybe<TValue>(NoneObject noneObject)
