@@ -7,6 +7,11 @@ namespace ReactWithDotNet.VisualDesigner;
 
 static class Extensions
 {
+    public static Type TryGetHtmlElementTypeByTagName(string tag)
+    {
+        return typeof(svg).Assembly.GetType(nameof(ReactWithDotNet) + "." + tag, false);
+    }
+    
     public static readonly CultureInfo CultureInfo_en_US = new("en-US");
     public static string AsPixel(this double value)
     {

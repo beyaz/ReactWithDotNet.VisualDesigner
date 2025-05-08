@@ -1,7 +1,6 @@
 ﻿using System.IO;
 using System.Reflection;
 using System.Text;
-using ReactWithDotNet.ThirdPartyLibraries.HeroUI;
 
 namespace ReactWithDotNet.VisualDesigner.Views;
 
@@ -93,42 +92,16 @@ sealed class ApplicationPreview : Component
 
         static async Task<Result<Element>> renderElement(RenderContext context, VisualElementModel model, string path)
         {
-            HtmlElement element = new div();
-
-            if (model.Tag == "i")
+            HtmlElement element = null;
             {
-                element = new i();
+                var elementType = TryGetHtmlElementTypeByTagName(model.Tag);
+                if (elementType is not null)
+                {
+                    element = (HtmlElement)Activator.CreateInstance(elementType);
+                }
             }
-            else if (model.Tag == "img")
-            {
-                element = new img { src = DummySrc(500) };
-            }
-            else if (model.Tag == "input")
-            {
-                element = new input();
-            }
-            else if (model.Tag == "svg")
-            {
-                element = new svg();
-            }
-            else if (model.Tag == "rect")
-            {
-                element = new rect();
-            }
-            else if (model.Tag == "circle")
-            {
-                element = new circle();
-            }
-            else if (model.Tag == "path")
-            {
-                element = new path();
-            }
-            else if (model.Tag == "heroui/Checkbox")
-            {
-                return new Checkbox();
-            }
-
-            if (model.Tag.Length > 5)
+            
+            if (element is null)
             {
                 ComponentEntity component;
                 {
@@ -149,6 +122,11 @@ sealed class ApplicationPreview : Component
 
                     return await renderElement(context with { Parent = context, ParentModel = model }, root, path);
                 }
+            }
+
+            if (element is null)
+            {
+                return new ArgumentException($"{model.Tag} is not resolved.");
             }
 
             element.style.Add(UserSelect(none));
@@ -348,10 +326,7 @@ sealed class ApplicationPreview : Component
 
             return element;
 
-            static bool hasProperty(VisualElementModel model, string propertyName)
-            {
-                return tryGetProperty(model, propertyName).HasValue;
-            }
+           
 
             static Maybe<(string propertyName, string propertyValue)> tryGetProperty(VisualElementModel model, string propertyName)
             {
