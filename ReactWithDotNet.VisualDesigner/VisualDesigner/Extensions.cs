@@ -297,6 +297,15 @@ static class Extensions
 
         return (value.StartsWith("'") && value.EndsWith("'")) || (value.StartsWith("\"") && value.EndsWith("\""));
     }
+    public static bool IsStringTemplate(string value)
+    {
+        if (value is null)
+        {
+            return false;
+        }
+
+        return value.StartsWith("`") && value.EndsWith("`");
+    }
     
     public static string ClearConnectedValue(string value) => value.RemoveFromStart("{").RemoveFromEnd("}");
     

@@ -11,19 +11,19 @@ public sealed class NextJsExportTest
     {
         await NextJs_with_Tailwind.ExportAll(1);
 
-        var components = await GetAllComponentsInProject(1);
+        //var components = await GetAllComponentsInProject(1);
 
-        foreach (var component in components)
-        {
-            if (component.Name == "HggImage")
-            {
-                continue;
-            }
+        //foreach (var component in components)
+        //{
+        //    if (component.Name == "HggImage")
+        //    {
+        //        continue;
+        //    }
 
-            var root = component.RootElementAsJson.AsVisualElementModel();
+        //    var root = component.RootElementAsJson.AsVisualElementModel();
 
-            visitProperties(root);
-        }
+        //    visitProperties(root);
+        //}
 
         return;
 

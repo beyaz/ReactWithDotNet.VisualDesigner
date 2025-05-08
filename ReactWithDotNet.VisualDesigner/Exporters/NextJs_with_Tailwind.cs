@@ -240,7 +240,7 @@ static class NextJs_with_Tailwind
             }
         }
 
-        var elementType = TryGetHtmlElementTypeByTagName(nodeTag);
+        var elementType = TryGetHtmlElementTypeByTagName(nodeTag == "Image" ? "img" : (nodeTag == "Link" ? "a": nodeTag));
         
         var tag = nodeTag.Split('/').Last();
 
@@ -273,12 +273,12 @@ static class NextJs_with_Tailwind
                 continue;
             }
 
-            if (propertyValue == "\"false\"")
+            if (propertyValue == "false")
             {
                 continue;
             }
             
-            if (propertyValue == "\"true\"")
+            if (propertyValue == "true")
             {
                 sb.Append($" {propertyName}");
                 continue;
@@ -295,21 +295,36 @@ static class NextJs_with_Tailwind
                 sb.Append($" {propertyName}={propertyValue}");
                 continue;
             }
-
+            
+            if (IsStringTemplate(propertyValue))
+            {
+                sb.Append($" {propertyName}={{{propertyValue}}}");
+                continue;
+            }
+            
             if (elementType.HasValue)
             {
-                var isStringProperty = elementType.Value.GetProperty(propertyName, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance)?.PropertyType == typeof(string);
-                if (isStringProperty)
+                var propertyType = elementType.Value.GetProperty(propertyName, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance)?.PropertyType;
+                if (propertyType is not null)
                 {
-                    if (propertyValue.StartsWith("/") || propertyValue.StartsWith("#"))
+                    if (propertyType == typeof(string))
                     {
-                        sb.Append($" {propertyName}=\"{propertyValue}\"");
+                        var isString = propertyValue.Contains("/") || propertyValue.StartsWith("#") || propertyValue.Split(' ').Length > 1;
+                        if (isString)
+                        {
+                            sb.Append($" {propertyName}=\"{propertyValue}\"");
+                            continue;
+                        }
+                    }
+
+                    if ((propertyType == typeof(UnionProp<string,double?>) || propertyType == typeof(UnionProp<string,double>)) && double.TryParse(propertyValue, out _))
+                    {
+                        sb.Append($" {propertyName}={{{propertyValue}}}");
                         continue;
                     }
                 }
             }
             
-
             sb.Append($" {propertyName}={{{propertyValue}}}");
         }
 
@@ -497,13 +512,7 @@ static class NextJs_with_Tailwind
                     continue;
                 }
                 
-                if (IsConnectedValue(value) || IsStringValue(value))
-                {
-                    node.Properties.Add(new() { Name = name, Value = value });
-                    continue;
-                }
-                
-                node.Properties.Add(new() { Name = name, Value = '"' + value + '"' });
+                node.Properties.Add(new() { Name = name, Value = value  });
             }
         }
 
