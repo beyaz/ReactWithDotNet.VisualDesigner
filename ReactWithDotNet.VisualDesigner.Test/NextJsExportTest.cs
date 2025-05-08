@@ -9,7 +9,7 @@ public sealed class NextJsExportTest
     [TestMethod]
     public async Task ExportAll()
     {
-        await NextJs_with_Tailwind.ExportAll(1);
+         await NextJs_with_Tailwind.ExportAll(1);
         
         var components = await GetAllComponentsInProject(1);
 
@@ -20,8 +20,17 @@ public sealed class NextJsExportTest
                 continue;
             }
             
-            var model = component.RootElementAsJson.AsVisualElementModel();
+            var root = component.RootElementAsJson.AsVisualElementModel();
 
+            visitProperties(root);
+        }
+
+
+
+        static void visitProperties( VisualElementModel model )
+        {
+            var elementType = typeof(svg).Assembly.GetType(nameof(ReactWithDotNet) + "." + model.Tag, false);
+            
             for (var i = 0; i < model.Properties.Count; i++)
             {
                 var result = TryParsePropertyValue(model.Properties[i]);
@@ -35,9 +44,42 @@ public sealed class NextJsExportTest
                         continue;
                     }
 
+                    if (elementType is not null)
+                    {
+                        if (elementType.GetProperty(name)?.PropertyType == typeof(double) ||
+                            elementType.GetProperty(name)?.PropertyType == typeof(UnionProp<string, double>))
+                        {
+                            if (double.TryParse(value, out var _))
+                            {
+                                continue;
+                            }
+                        }
+                    }
+
+
+                    if (name == "w" || name == "h"|| name == "width"|| name == "height"||name == "size"
+                        ||name == "-items-source-design-time-count"
+                        )
+                    {
+                        continue;
+                    }
+                    
+                    if (
+                        name == "xmlns" ||
+                        name == "className" ||name == "class" || name == "href"|| name == "src"|| name == "alt")
+                    {
+                        model.Properties[i] = $"{name}='{value}'";
+                        continue;
+                    }
+
                     value.ToString();
 
                 }
+            }
+
+            foreach (var child in model.Children)
+            {
+                visitProperties(child);
             }
         }
     }
