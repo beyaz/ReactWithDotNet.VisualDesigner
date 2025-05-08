@@ -478,8 +478,8 @@ static class NextJs_with_Tailwind
                     node.Properties.Add(new() { Name = "height", Value = value });
                     continue;
                 }
-
-                if (IsConnectedValue(value) || value.StartsWith("props.") || value.StartsWith("state.") || IsStringValue(value))
+                
+                if (IsConnectedValue(value) || IsStringValue(value))
                 {
                     node.Properties.Add(new() { Name = name, Value = value });
                     continue;
