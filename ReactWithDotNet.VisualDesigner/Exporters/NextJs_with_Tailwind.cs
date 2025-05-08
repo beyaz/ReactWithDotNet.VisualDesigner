@@ -1,5 +1,7 @@
 ﻿using System.IO;
+using System.Reflection;
 using System.Text;
+using System.Xml.Linq;
 
 namespace ReactWithDotNet.VisualDesigner.Exporters;
 
@@ -238,6 +240,8 @@ static class NextJs_with_Tailwind
             }
         }
 
+        var elementType = TryGetHtmlElementTypeByTagName(nodeTag);
+        
         var tag = nodeTag.Split('/').Last();
 
         var indent = new string(' ', indentLevel * 4);
@@ -291,6 +295,20 @@ static class NextJs_with_Tailwind
                 sb.Append($" {propertyName}={propertyValue}");
                 continue;
             }
+
+            if (elementType.HasValue)
+            {
+                var isStringProperty = elementType.Value.GetProperty(propertyName, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance)?.PropertyType == typeof(string);
+                if (isStringProperty)
+                {
+                    if (propertyValue.StartsWith("/") || propertyValue.StartsWith("#"))
+                    {
+                        sb.Append($" {propertyName}=\"{propertyValue}\"");
+                        continue;
+                    }
+                }
+            }
+            
 
             sb.Append($" {propertyName}={{{propertyValue}}}");
         }

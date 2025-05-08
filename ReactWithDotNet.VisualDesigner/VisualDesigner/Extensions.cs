@@ -7,7 +7,7 @@ namespace ReactWithDotNet.VisualDesigner;
 
 static class Extensions
 {
-    public static Type TryGetHtmlElementTypeByTagName(string tag)
+    public static Maybe<Type> TryGetHtmlElementTypeByTagName(string tag)
     {
         return typeof(svg).Assembly.GetType(nameof(ReactWithDotNet) + "." + tag, false);
     }

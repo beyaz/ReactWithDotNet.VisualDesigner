@@ -94,11 +94,10 @@ sealed class ApplicationPreview : Component
         {
             HtmlElement element = null;
             {
-                var elementType = TryGetHtmlElementTypeByTagName(model.Tag);
-                if (elementType is not null)
+                TryGetHtmlElementTypeByTagName(model.Tag).HasValue(elementType =>
                 {
                     element = (HtmlElement)Activator.CreateInstance(elementType);
-                }
+                });
             }
             
             if (element is null)

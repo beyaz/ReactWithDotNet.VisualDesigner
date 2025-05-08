@@ -44,25 +44,25 @@ public sealed class NextJsExportTest
                         continue;
                     }
 
-                    if (elementType is not null)
-                    {
-                        if (elementType.GetProperty(name)?.PropertyType == typeof(double) ||
-                            elementType.GetProperty(name)?.PropertyType == typeof(UnionProp<string, double>))
-                        {
-                            if (double.TryParse(value, out _))
-                            {
-                                continue;
-                            }
-                        }
+                    //if (elementType is not null)
+                    //{
+                    //    if (elementType.GetProperty(name)?.PropertyType == typeof(double) ||
+                    //        elementType.GetProperty(name)?.PropertyType == typeof(UnionProp<string, double>))
+                    //    {
+                    //        if (double.TryParse(value, out _))
+                    //        {
+                    //            continue;
+                    //        }
+                    //    }
 
-                        if (elementType.GetProperty(name, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance)?.PropertyType == typeof(string))
-                        {
-                            if (value.Contains(' ') || value.StartsWith('#'))
-                            {
-                                continue;
-                            }
-                        }
-                    }
+                    //    if (elementType.GetProperty(name, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance)?.PropertyType == typeof(string))
+                    //    {
+                    //        if (value.Contains(' ') || value.StartsWith('#'))
+                    //        {
+                    //            continue;
+                    //        }
+                    //    }
+                    //}
 
                     if (name == "w" || name == "h" || name == "width" || name == "height" || name == "size"
                         || name == "-items-source-design-time-count"
