@@ -280,8 +280,6 @@ static class ApplicationLogic
     {
         var items = new List<string>();
 
-       
-
         string tag = null;
 
         if (state.Selection.VisualElementTreeItemPath.HasValue())
@@ -289,6 +287,24 @@ static class ApplicationLogic
             var selectedVisualItem = FindTreeNodeByTreePath(state.ComponentRootElement, state.Selection.VisualElementTreeItemPath);
 
             tag = selectedVisualItem.Tag;
+        }
+
+        if (tag == "img")
+        {
+            // todo: make this configurable
+            const string publicFolder = @"C:\github\hopgogo\web\enduser-ui\public\";
+
+            foreach (var pattern in new[]{"*.svg", "*.png"})
+            {
+                foreach (var file in Directory.GetFiles(publicFolder, pattern, SearchOption.AllDirectories))
+                {
+                    items.Add($"src: /{file.RemoveFromStart(publicFolder).Replace(Path.DirectorySeparatorChar,'/')}");
+                }    
+            }
+            
+            
+            
+           
         }
 
         if (tag == "a")
