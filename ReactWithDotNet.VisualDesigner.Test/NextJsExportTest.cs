@@ -1,4 +1,5 @@
-﻿using ReactWithDotNet.VisualDesigner.Exporters;
+﻿using System.Reflection;
+using ReactWithDotNet.VisualDesigner.Exporters;
 using static ReactWithDotNet.VisualDesigner.Exporters.NextJs_with_Tailwind;
 
 namespace ReactWithDotNet.VisualDesigner.Test;
@@ -54,6 +55,14 @@ public sealed class NextJsExportTest
                                 continue;
                             }
                         }
+                        
+                        if (elementType.GetProperty(name, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance)?.PropertyType == typeof(string))
+                        {
+                            if (value.Contains(' ') || value.StartsWith('#'))
+                            {
+                                continue;
+                            }
+                        }
                     }
 
 
@@ -65,10 +74,19 @@ public sealed class NextJsExportTest
                     }
                     
                     if (
-                        name == "xmlns" ||
+                        name == "xmlns" || name == "fill" || name == "isAvatar" || 
                         name == "className" ||name == "class" || name == "href"|| name == "src"|| name == "alt")
                     {
                         model.Properties[i] = $"{name}='{value}'";
+                        continue;
+                    }
+                    
+                    if (name == "type" && value == "text")
+                    {
+                        continue;
+                    }
+                    if (name == "stroke-linecap" && value == "square")
+                    {
                         continue;
                     }
 
