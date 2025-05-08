@@ -1101,7 +1101,7 @@ sealed class ApplicationView : Component<ApplicationState>
                     {
                         content = new FlexRowCentered
                         {
-                            new span(FontWeight500) { parseResult.Name }, ": ", parseResult.Value
+                            new span(FontWeight600) { parseResult.Name }, ": ", new span(PaddingLeft(2)){parseResult.Value}
                         };
                     }
                 }
@@ -1249,7 +1249,7 @@ sealed class ApplicationView : Component<ApplicationState>
                     {
                         content = new FlexRowCentered
                         {
-                            new span(FontWeight500) { parseResult.Name }, ": ", parseResult.Value
+                            new span(FontWeight600) { parseResult.Name }, ": ", new span(PaddingLeft(2)){parseResult.Value}
                         };
                     }
                 }
