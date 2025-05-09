@@ -153,12 +153,17 @@ sealed class ApplicationPreview : Component
 
                     if (name == "-items-source-design-time-count")
                     {
-                        var designTimeChildrenCount = double.Parse(value);
-
-                        for (var i = 0; i < designTimeChildrenCount - 1; i++)
+                        var firstChild = model.Children.FirstOrDefault();
+                        if (firstChild is not null)
                         {
-                            model.Children.Add(CloneByUsingJson(model.Children[0]));
+                            var designTimeChildrenCount = double.Parse(value);
+
+                            for (var i = 0; i < designTimeChildrenCount - 1; i++)
+                            {
+                                model.Children.Add(CloneByUsingJson(firstChild));
+                            }
                         }
+                        
 
                         continue;
                     }

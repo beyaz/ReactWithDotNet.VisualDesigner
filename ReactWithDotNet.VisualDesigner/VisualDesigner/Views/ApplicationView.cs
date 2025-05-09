@@ -1354,11 +1354,6 @@ sealed class ApplicationView : Component<ApplicationState>
 
     Result UpdateElementNode(string path, string yaml)
     {
-        if (path.HasNoValue())
-        {
-            return new ArgumentNullException(nameof(path));
-        }
-
         VisualElementModel newModel;
 
         try
@@ -1370,7 +1365,19 @@ sealed class ApplicationView : Component<ApplicationState>
             return exception;
         }
 
-        if (path == "0")
+        if (path.HasNoValue())
+        {
+            state.ComponentRootElement = newModel;
+
+            state.Selection = new()
+            {
+                VisualElementTreeItemPath = "0"
+            };
+
+            return Success;
+        }
+        
+        if (path.HasNoValue() || path == "0")
         {
             state.ComponentRootElement = newModel;
 

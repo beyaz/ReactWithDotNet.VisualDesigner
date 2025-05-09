@@ -260,7 +260,7 @@ static class NextJs_with_Tailwind
 
         var elementType = TryGetHtmlElementTypeByTagName(nodeTag == "Image" ? "img" : (nodeTag == "Link" ? "a": nodeTag));
         
-        var tag = nodeTag.Split('/').Last();
+        var tag = nodeTag.Split(['/','.']).Last();
 
         var indent = new string(' ', indentLevel * 4);
 
@@ -379,7 +379,7 @@ static class NextJs_with_Tailwind
                 var childrenText = node.Children[0].Text + string.Empty;
                 if (bindProperty is not null)
                 {
-                    childrenText = bindProperty.Value;
+                    childrenText = "{" + ClearConnectedValue(bindProperty.Value) + "}";
                 }
 
                 if (IsConnectedValue(childrenText))
