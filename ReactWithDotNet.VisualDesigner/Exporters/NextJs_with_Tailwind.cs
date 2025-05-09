@@ -162,6 +162,11 @@ static class NextJs_with_Tailwind
 
         if (nodeTag is null)
         {
+            if (node.Text.HasValue())
+            {
+                lines.Add($"{Indent(indentLevel)}{AsFinalText(node.Text)}");
+                return lines;
+            }
             return new ArgumentNullException(nameof(nodeTag));
         }
 
@@ -407,7 +412,7 @@ static class NextJs_with_Tailwind
         // Add text content
         if (!string.IsNullOrWhiteSpace(node.Text))
         {
-            lines.Add($"{indent}{{{node.Text})}}");
+            lines.Add($"{indent}{AsFinalText(node.Text)}");
         }
 
         // Add children
@@ -431,6 +436,11 @@ static class NextJs_with_Tailwind
         lines.Add($"{indent}</{tag}>");
 
         return lines;
+    }
+
+    static string AsFinalText(string text)
+    {
+        return $"{{t(\"{text}\")}}";
     }
 
     static async Task<Result<ReactNode>> ConvertVisualElementModelToReactNodeModel(VisualElementModel element)
@@ -575,7 +585,7 @@ static class NextJs_with_Tailwind
         // Add text content
         if (!string.IsNullOrWhiteSpace(element.Text))
         {
-            node.Children.Add(new() { Text = $"{{t(\"{element.Text}\")}}" });
+            node.Children.Add(new() { Text = element.Text });
         }
 
         // Add children
