@@ -288,6 +288,11 @@ static class ApplicationLogic
 
             tag = selectedVisualItem.Tag;
         }
+        
+        items.Add("text: props.userName");
+        items.Add("text: state.userName");
+        items.Add("d-text: 'User Name'");
+        
 
         if (tag == "img")
         {
@@ -325,7 +330,7 @@ static class ApplicationLogic
         
         items.Add("-items-source-design-time-count: 3");
         items.Add("-items-source: {state.userList}");
-        items.Add("-bind: {state.userList}");
+        
         items.Add("-show-if: {state.isSelectedUser}");
         items.Add("-hide-if: {state.isSelectedUser}");
 
