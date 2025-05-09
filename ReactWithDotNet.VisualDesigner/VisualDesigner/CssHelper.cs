@@ -1,6 +1,7 @@
 ﻿using System.Globalization;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using YamlDotNet.Core.Tokens;
 
 namespace ReactWithDotNet.VisualDesigner;
 
@@ -407,7 +408,54 @@ public static class CssHelper
                 ]);
             }
         }
+        
+        // rounded-[?px]
+        {
+            var arbitrary = tryGetArbitraryValue(utilityCssClassName, "rounded");
+            if (arbitrary.HasValue && arbitrary.Value.EndsWith("px"))
+            {
+                return (pseudo,
+                [
+                    ("border-radius", arbitrary.Value)
+                ]);
+            }
+        }
+        
+        // tailwindClass-[color]
+        {
+            var map = new Dictionary<string, string>
+            {
+                { "border", "border" },
+                { "border-t", "border-top" },
+                { "border-b", "border-bottom" },
+                { "border-l", "border-left" },
+                { "border-r", "border-right" },
+                { "bg", "background" },
+                { "text", "color" }
+            };
 
+            foreach (var (tailwindPrefix,styleName) in map)
+            {
+                var arbitrary = tryGetArbitraryValue(utilityCssClassName, tailwindPrefix);
+                if (arbitrary.HasValue)
+                {
+                    var color = arbitrary.Value;
+                    if (Project.Colors.TryGetValue(color, out var realColor))
+                    {
+                        color = realColor;
+                    }
+                
+                    return (pseudo,
+                    [
+                        (styleName, color)
+                    ]);
+                }
+            }
+
+            
+            
+        }
+        
         return None;
 
         static double? hasMatch(string text, string prefix)
@@ -450,13 +498,22 @@ public static class CssHelper
 
         static Maybe<string> tryGetTailwindColor(string colorName, string number)
         {
-            var fieldInfo = typeof(Tailwind).GetField(colorName + number, BindingFlags.IgnoreCase | BindingFlags.Static | BindingFlags.Public);
+            var fieldInfo = typeof(ReactWithDotNet.Tailwind).GetField(colorName + number, BindingFlags.IgnoreCase | BindingFlags.Static | BindingFlags.Public);
             if (fieldInfo != null)
             {
                 return (string)fieldInfo.GetValue(null);
             }
 
             return None;
+        }
+        
+        static Maybe<string> tryGetArbitraryValue(string input, string prefix)
+        {
+            // Örn: prefix = "rounded" --> pattern = ^rounded-\[(.+?)\]$
+            string pattern = $@"^{Regex.Escape(prefix)}-\[(.+?)\]$";
+            var match = Regex.Match(input, pattern);
+
+            return match.Success ? match.Groups[1].Value : None;
         }
     }
     static readonly IReadOnlyDictionary<string, double> TailwindSpacingScaleMap = new Dictionary<string, double>
