@@ -39,18 +39,24 @@ static class NextJs_with_Tailwind
         return await IO.TryWriteToFile(filePath, fileContent);
     }
 
-    public static async Task ExportAll(int projectId)
+    public static async Task<Result> ExportAll(int projectId)
     {
         var components = await GetAllComponentsInProject(projectId);
 
         foreach (var component in components)
         {
-            if (component.Name == "HggImage")
+            if (component.Name == "HggImage" || component.Name == "TailwindPlayground")
             {
                 continue;
             }
-            await Export(component.AsExportInput());
+            var result = await Export(component.AsExportInput());
+            if (result.HasError)
+            {
+                return result.Error;
+            }
         }
+
+        return Success;
     }
 
     static async Task<Result<IReadOnlyList<string>>> CalculateElementTreeTsxCodes(ComponentEntity component)

@@ -1,4 +1,5 @@
-﻿using ReactWithDotNet.VisualDesigner.Exporters;
+﻿using FluentAssertions;
+using ReactWithDotNet.VisualDesigner.Exporters;
 
 namespace ReactWithDotNet.VisualDesigner.Test;
 
@@ -8,7 +9,7 @@ public sealed class NextJsExportTest
     [TestMethod]
     public async Task ExportAll()
     {
-        await NextJs_with_Tailwind.ExportAll(1);
+        (await NextJs_with_Tailwind.ExportAll(1)).Success.Should().BeTrue();
     }
 
     [TestMethod]
