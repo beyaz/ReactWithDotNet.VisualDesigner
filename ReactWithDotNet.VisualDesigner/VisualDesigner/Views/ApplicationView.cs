@@ -275,26 +275,6 @@ sealed class ApplicationView : Component<ApplicationState>
         return Task.CompletedTask;
     }
 
-    Element YamlEditor()
-    {
-        state.SelectedVisualElementAsYamlCode = YamlHelper.SerializeToYaml(CurrentVisualElement);
-        
-        return new Editor
-        {
-            valueBind           = ()=>state.SelectedVisualElementAsYamlCode,
-            defaultLanguage = "yaml",
-            options =
-            {
-                renderLineHighlight = "none",
-                fontFamily          = "consolas, 'IBM Plex Mono Medium', 'Courier New', monospace",
-                fontSize            = 11,
-                minimap             = new { enabled = false },
-                lineNumbers         = "off",
-                unicodeHighlight    = new { showExcludeOptions = false }
-            }
-        };
-    }
-
     Task LayersTabRemoveSelectedItemClicked(MouseEvent e)
     {
         return DeleteSelectedTreeItem();
@@ -331,7 +311,7 @@ sealed class ApplicationView : Component<ApplicationState>
                 new FlexColumn(FlexGrow(1), Padding(7), OverflowXAuto)
                 {
                     Ruler.HorizontalRuler(state.Preview.Width, state.Preview.Scale) + Width(state.Preview.Width) + MarginTop(12) + PaddingLeft(30),
-                    new FlexRow(SizeFull, Width(state.Preview.Width  + 30))
+                    new FlexRow(SizeFull, Width(state.Preview.Width + 30))
                     {
                         Ruler.VerticleRuler(state.Preview.Scale),
                         PartPreview
@@ -487,7 +467,7 @@ sealed class ApplicationView : Component<ApplicationState>
                                 }
                             }
                         }
-                        
+
                         state.SelectedVisualElementAsYamlCodeIsVisible = !state.SelectedVisualElementAsYamlCodeIsVisible;
 
                         return Task.CompletedTask;
@@ -511,62 +491,6 @@ sealed class ApplicationView : Component<ApplicationState>
                 Padding(5, 30)
             }
         };
-    }
-
-    Result UpdateElementNode(string path, string yaml)
-    {
-        if (path.HasNoValue())
-        {
-            return new ArgumentNullException(nameof(path));
-        }
-        
-        VisualElementModel newModel;
-
-        try
-        {
-            newModel = YamlHelper.DeserializeFromYaml<VisualElementModel>(yaml);
-        }
-        catch (Exception exception)
-        {
-            return exception;
-        }
-
-        if (path == "0")
-        {
-            state.ComponentRootElement = newModel;
-            
-            return Success;
-        }
-
-        var isSuccessfullyUpdated = false;
-        
-        var node = state.ComponentRootElement;
-
-        var paths = path.Split(',').Select(int.Parse).ToList();
-        for (var i = 1; i < paths.Count; i++)
-        {
-            var index = paths[i];
-            if (node.Children.Count <= index)
-            {
-                return new Exception($"IndexIsNotValid: {path}");
-            }
-
-            if (i == paths.Count - 1)
-            {
-                node.Children[index]  = newModel;
-                isSuccessfullyUpdated = true;
-                break;
-            }
-            
-            node = node.Children[index];
-        }
-
-        if (!isSuccessfullyUpdated)
-        {
-            return new Exception($"IndexIsNotValid: {path}");
-        }
-        
-        return Success;
     }
 
     async Task<Element> PartLeftPanel()
@@ -670,7 +594,6 @@ sealed class ApplicationView : Component<ApplicationState>
                 },
                 TreeItemMove = (source, target, position) =>
                 {
-                    
                     // root check
                     {
                         if (source == "0")
@@ -722,9 +645,9 @@ sealed class ApplicationView : Component<ApplicationState>
                     if (isTryingToMakeRoot)
                     {
                         state.ComponentRootElement = sourceNodeParent.Children[sourceNodeIndex];
-                        
+
                         state.Selection = new();
-                        
+
                         return Task.CompletedTask;
                     }
 
@@ -1047,7 +970,6 @@ sealed class ApplicationView : Component<ApplicationState>
                     {
                         CurrentVisualElement.Children.Add(model);
 
-
                         CurrentVisualElement.Text = null;
 
                         return Task.CompletedTask;
@@ -1175,7 +1097,7 @@ sealed class ApplicationView : Component<ApplicationState>
                     {
                         content = new FlexRowCentered
                         {
-                            new span(FontWeight600) { parseResult.Name }, ": ", new span(PaddingLeft(2)){parseResult.Value}
+                            new span(FontWeight600) { parseResult.Name }, ": ", new span(PaddingLeft(2)) { parseResult.Value }
                         };
                     }
                 }
@@ -1324,7 +1246,7 @@ sealed class ApplicationView : Component<ApplicationState>
                     {
                         content = new FlexRowCentered
                         {
-                            new span(FontWeight600) { parseResult.Name }, ": ", new span(PaddingLeft(2)){parseResult.Value}
+                            new span(FontWeight600) { parseResult.Name }, ": ", new span(PaddingLeft(2)) { parseResult.Value }
                         };
                     }
                 }
@@ -1430,9 +1352,85 @@ sealed class ApplicationView : Component<ApplicationState>
         };
     }
 
+    Result UpdateElementNode(string path, string yaml)
+    {
+        if (path.HasNoValue())
+        {
+            return new ArgumentNullException(nameof(path));
+        }
+
+        VisualElementModel newModel;
+
+        try
+        {
+            newModel = YamlHelper.DeserializeFromYaml<VisualElementModel>(yaml);
+        }
+        catch (Exception exception)
+        {
+            return exception;
+        }
+
+        if (path == "0")
+        {
+            state.ComponentRootElement = newModel;
+
+            return Success;
+        }
+
+        var isSuccessfullyUpdated = false;
+
+        var node = state.ComponentRootElement;
+
+        var paths = path.Split(',').Select(int.Parse).ToList();
+        for (var i = 1; i < paths.Count; i++)
+        {
+            var index = paths[i];
+            if (node.Children.Count <= index)
+            {
+                return new Exception($"IndexIsNotValid: {path}");
+            }
+
+            if (i == paths.Count - 1)
+            {
+                node.Children[index]  = newModel;
+                isSuccessfullyUpdated = true;
+                break;
+            }
+
+            node = node.Children[index];
+        }
+
+        if (!isSuccessfullyUpdated)
+        {
+            return new Exception($"IndexIsNotValid: {path}");
+        }
+
+        return Success;
+    }
+
     void UpdateZoomInClient()
     {
         Client.RunJavascript($"window.ComponentIndicatorZoom = {state.Preview.Scale}");
+    }
+
+    Element YamlEditor()
+    {
+        state.SelectedVisualElementAsYamlCode = YamlHelper.SerializeToYaml(CurrentVisualElement);
+
+        return new Editor
+        {
+            valueBind       = () => state.SelectedVisualElementAsYamlCode,
+            defaultLanguage = "yaml",
+            options =
+            {
+                renderLineHighlight = "none",
+                fontFamily          = "consolas, 'IBM Plex Mono Medium', 'Courier New', monospace",
+                fontSize            = 11,
+                minimap             = new { enabled = false },
+                lineNumbers         = "off",
+                unicodeHighlight    = new { showExcludeOptions = false }
+            }
+        };
     }
 
     static class Ruler
