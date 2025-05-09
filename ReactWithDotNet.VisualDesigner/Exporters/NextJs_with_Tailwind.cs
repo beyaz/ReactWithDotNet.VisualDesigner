@@ -571,14 +571,7 @@ static class NextJs_with_Tailwind
         {
             return node;
         }
-
-        if (IsConnectedValue(element.Text) || (element.Text + string.Empty).StartsWith("props.") || (element.Text + string.Empty).StartsWith("state."))
-        {
-            node.Children.Add(new() { Text = element.Text });
-
-            return node;
-        }
-
+        
         // Add text content
         if (!string.IsNullOrWhiteSpace(element.Text))
         {
