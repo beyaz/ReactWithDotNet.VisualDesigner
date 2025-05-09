@@ -7,6 +7,15 @@ namespace ReactWithDotNet.VisualDesigner;
 
 static class Extensions
 {
+    public static bool HasNoText(this VisualElementModel model)
+    {
+        return model.Text.HasNoValue();
+    }
+    public static bool HasText(this VisualElementModel model)
+    {
+        return model.Text.HasValue();
+    }
+    
     public static Maybe<Type> TryGetHtmlElementTypeByTagName(string tag)
     {
         return typeof(svg).Assembly.GetType(nameof(ReactWithDotNet) + "." + tag, false);

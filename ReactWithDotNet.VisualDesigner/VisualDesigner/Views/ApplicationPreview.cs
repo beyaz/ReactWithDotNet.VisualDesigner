@@ -136,7 +136,7 @@ sealed class ApplicationPreview : Component
 
             element.onClick = context.OnTreeItemClicked;
 
-            if (model.Text.HasValue())
+            if (model.HasText())
             {
                 element.Add(model.Text);
 

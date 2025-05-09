@@ -576,14 +576,14 @@ static class NextJs_with_Tailwind
             node.Properties.Add(new() { Name = "className", Value = firstLastChar + string.Join(" ", classNames) + firstLastChar });
         }
 
-        var hasSelfClose = element.Children.Count == 0 && element.Text.HasNoValue();
+        var hasSelfClose = element.Children.Count == 0 && element.HasNoText();
         if (hasSelfClose)
         {
             return node;
         }
         
         // Add text content
-        if (!string.IsNullOrWhiteSpace(element.Text))
+        if (element.HasText())
         {
             node.Children.Add(new() { Text = element.Text });
         }

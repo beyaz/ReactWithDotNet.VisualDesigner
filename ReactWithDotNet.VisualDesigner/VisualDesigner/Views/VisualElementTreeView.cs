@@ -325,11 +325,11 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
             {
                 icon = new IconFlexRow() + Size(16) + Color(Gray300);
             }
-            else if (node.Text.HasNoValue() && styles.Count == 1 && hasHeightWithConstantValue)
+            else if (node.HasNoText() && styles.Count == 1 && hasHeightWithConstantValue)
             {
                 icon = new IconSpaceVertical();
             }
-            else if (node.Text.HasNoValue() && styles.Count == 1 && hasWidhtWithConstantValue)
+            else if (node.HasNoText() && styles.Count == 1 && hasWidhtWithConstantValue)
             {
                 icon = new IconSpaceHorizontal();
             }
@@ -342,7 +342,7 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
                 icon = new IconImage() + Size(16) + Color(Gray300);
             }
 
-            if (node.Text.HasValue())
+            if (node.HasText())
             {
                 if (node.Tag[0] == 'h')
                 {
