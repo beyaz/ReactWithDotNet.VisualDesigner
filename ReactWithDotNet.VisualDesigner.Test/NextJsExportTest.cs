@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using Dapper.Contrib.Extensions;
+using FluentAssertions;
 using ReactWithDotNet.VisualDesigner.Exporters;
 
 namespace ReactWithDotNet.VisualDesigner.Test;
@@ -13,51 +14,17 @@ public sealed class NextJsExportTest
     }
 
     [TestMethod]
-    public async Task VisitElements()
+    public async Task FixAll()
     {
-        var components = await GetAllComponentsInProject(1);
+        //var components = await GetAllComponentsInProject(1);
 
-        foreach (var component in components)
-        {
-            if (component.Name == "HggImage")
-            {
-                continue;
-            }
+        //foreach (var component in components)
+        //{
+        //    component.RootElementAsJson = SerializeToJson(component.RootElementAsJson.AsVisualElementModel().Fix());
 
-            var root = component.RootElementAsJson.AsVisualElementModel();
-
-            visitProperties(root);
-        }
-
-        return;
-
-        static void visitProperties(VisualElementModel model)
-        {
-            for (var i = 0; i < model.Properties.Count; i++)
-            {
-                var result = TryParsePropertyValue(model.Properties[i]);
-                if (result.HasValue)
-                {
-                    var name = result.Name;
-                    var value = result.Value;
-
-                    if (name == "-bind")
-                    {
-                        if (model.Text.HasNoValue())
-                        {
-                            ;
-                        }
-                    }
-                    
-
-                    value.ToString();
-                }
-            }
-
-            foreach (var child in model.Children)
-            {
-                visitProperties(child);
-            }
-        }
+        //    DbOperation(db => db.Update(component));
+        //}
     }
+    
+   
 }

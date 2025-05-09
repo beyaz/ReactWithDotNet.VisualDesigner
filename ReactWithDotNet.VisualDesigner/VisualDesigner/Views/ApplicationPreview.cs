@@ -136,11 +136,12 @@ sealed class ApplicationPreview : Component
 
             element.onClick = context.OnTreeItemClicked;
 
-            if (model.HasText())
+            // make clever
+            if (model.HasText()|| model.GetDesignText().HasValue())
             {
-                element.Add(model.Text);
+                element.Add(TryClearStringValue(model.GetDesignText() ??  model.GetText()));
 
-                tryGetPropValueFromCaller(context, model, "-bind").HasValue(text => element.text = text);
+                tryGetPropValueFromCaller(context, model, "-text").HasValue(text => element.text = text);
             }
 
             foreach (var property in model.Properties)
@@ -148,9 +149,16 @@ sealed class ApplicationPreview : Component
                 var parseResult = TryParsePropertyValue(property);
                 if (parseResult.HasValue && parseResult.Value is not null)
                 {
+                    
                     var name = parseResult.Name;
                     var value = parseResult.Value;
 
+                    if (name == "--text" || name == "-text")
+                    {
+                        // todo: do for only html tags
+                        continue;
+                    }
+                    
                     if (name == "-items-source-design-time-count")
                     {
                         var firstChild = model.Children.FirstOrDefault();

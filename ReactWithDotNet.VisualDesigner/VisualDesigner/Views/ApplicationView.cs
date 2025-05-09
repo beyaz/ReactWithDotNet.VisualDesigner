@@ -956,32 +956,6 @@ sealed class ApplicationView : Component<ApplicationState>
             }
         };
 
-        var inputText = new FlexRow(WidthFull, Gap(4), BorderRadius(4), PaddingLeft(4), Background(WhiteSmoke))
-        {
-            new MagicInput
-            {
-                Placeholder = "text..",
-                Name        = string.Empty,
-                Value       = visualElementModel.Text,
-                OnChange = (_, newValue) =>
-                {
-                    var model = HtmlImporter.ConvertToVisualElementModel(newValue);
-                    if (model is not null)
-                    {
-                        CurrentVisualElement.Children.Add(model);
-
-                        CurrentVisualElement.Text = null;
-
-                        return Task.CompletedTask;
-                    }
-
-                    CurrentVisualElement.Text = newValue;
-
-                    return Task.CompletedTask;
-                }
-            }
-        };
-
         var stylesHeader = new FlexRow(WidthFull, AlignItemsCenter)
         {
             new div { Height(1), FlexGrow(1), Background(Gray200) },
@@ -999,8 +973,6 @@ sealed class ApplicationView : Component<ApplicationState>
         return new FlexColumn(BorderLeft(1, dotted, "#d9d9d9"), PaddingX(2), Gap(8), OverflowYAuto, Background(White))
         {
             inputTag,
-
-            inputText,
 
             stylesHeader,
 

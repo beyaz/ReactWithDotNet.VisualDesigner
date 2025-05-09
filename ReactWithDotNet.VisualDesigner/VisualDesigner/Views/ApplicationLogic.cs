@@ -289,9 +289,10 @@ static class ApplicationLogic
             tag = selectedVisualItem.Tag;
         }
         
-        items.Add("text: props.userName");
-        items.Add("text: state.userName");
-        items.Add("d-text: 'User Name'");
+        items.Add("-text: props.userName");
+        items.Add("-text: state.userName");
+        items.Add("-text: 'User Name'");
+        items.Add("--text: 'User Name'");
         
 
         if (tag == "img")

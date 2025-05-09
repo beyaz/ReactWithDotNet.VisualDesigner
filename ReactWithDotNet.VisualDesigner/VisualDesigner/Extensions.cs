@@ -2,19 +2,108 @@
 using Newtonsoft.Json;
 using Formatting = Newtonsoft.Json.Formatting;
 using System.Globalization;
+using YamlDotNet.Core.Tokens;
 
 namespace ReactWithDotNet.VisualDesigner;
 
 static class Extensions
 {
+    
+    //public static VisualElementModel Fix(this VisualElementModel model)
+    //{
+    //    var bindPropertyIndex = -1;
+        
+    //    string bindValue = null;
+        
+    //    for (var i = 0; i < model.Properties.Count; i++)
+    //    {
+    //        var result = TryParsePropertyValue(model.Properties[i]);
+    //        if (result.HasValue)
+    //        {
+    //            var name = result.Name;
+    //            var value = result.Value;
+
+    //            if (name == "-bind")
+    //            {
+    //                bindPropertyIndex = i;
+
+    //                bindValue = value;
+                    
+    //                if (model.Text.HasNoValue())
+    //                {
+    //                    throw new ArgumentException("Text cannot be null");
+    //                }
+    //            }
+    //        }
+    //    }
+
+    //    if (bindPropertyIndex >= 0)
+    //    {
+    //        model.Properties.RemoveAt(bindPropertyIndex);
+            
+    //        model.Properties.Insert(0,$"-text: {ClearConnectedValue(bindValue)}");
+    //        model.Properties.Insert(1,$"--text: '{TryClearStringValue(model.Text)}'");
+
+    //        model.Text = null;
+    //    }
+    //    else if (model.Text.HasValue())
+    //    {
+    //        model.Properties.Insert(0, $"-text: '{TryClearStringValue(model.Text)}'");
+
+    //        model.Text = null;
+    //    }
+
+    //    foreach (var child in model.Children)
+    //    {
+    //        Fix(child);
+    //    }
+
+    //    return model;
+    //}
+    
+    
     public static bool HasNoText(this VisualElementModel model)
     {
-        return model.Text.HasNoValue();
+        return GetText(model).HasNoValue();
     }
     public static bool HasText(this VisualElementModel model)
     {
-        return model.Text.HasValue();
+        return GetText(model).HasValue();
     }
+    public static string GetText(this VisualElementModel model)
+    {
+        foreach (var property in model.Properties)
+        {
+            var result = TryParsePropertyValue(property);
+            if (result.HasValue)
+            {
+                if (result.Name=="-text")
+                {
+                    return result.Value;
+                }
+            }
+        }
+        
+        return null;
+    }
+    
+    public static string GetDesignText(this VisualElementModel model)
+    {
+        foreach (var property in model.Properties)
+        {
+            var result = TryParsePropertyValue(property);
+            if (result.HasValue)
+            {
+                if (result.Name=="--text")
+                {
+                    return result.Value;
+                }
+            }
+        }
+        
+        return null;
+    }
+    
     
     public static Maybe<Type> TryGetHtmlElementTypeByTagName(string tag)
     {

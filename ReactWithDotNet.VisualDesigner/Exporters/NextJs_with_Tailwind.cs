@@ -283,7 +283,8 @@ static class NextJs_with_Tailwind
             node.Properties.Remove(childrenProperty);
         }
 
-        var bindProperty = node.Properties.FirstOrDefault(x => x.Name == "-bind");
+        // todo:rename
+        var bindProperty = node.Properties.FirstOrDefault(x => x.Name == "-text");
         if (bindProperty is not null)
         {
             node.Properties.Remove(bindProperty);
@@ -293,6 +294,12 @@ static class NextJs_with_Tailwind
         {
             var propertyName = reactProperty.Name;
 
+            // todo: give better namig
+            if (propertyName == "-text" || propertyName == "--text")
+            {
+                continue;
+            }
+            
             var propertyValue = reactProperty.Value;
 
             if (propertyName is "-items-source" || propertyName is "-items-source-design-time-count")
@@ -388,7 +395,7 @@ static class NextJs_with_Tailwind
                 var childrenText = node.Children[0].Text + string.Empty;
                 if (bindProperty is not null)
                 {
-                    childrenText = "{" + ClearConnectedValue(bindProperty.Value) + "}";
+                    childrenText = AsFinalText(ClearConnectedValue(bindProperty.Value));
                 }
 
                 if (IsConnectedValue(childrenText))
@@ -440,7 +447,12 @@ static class NextJs_with_Tailwind
 
     static string AsFinalText(string text)
     {
-        return $"{{t(\"{text}\")}}";
+        if (!IsStringValue(text))
+        {
+            return $"{{{text}}}";    
+        }
+        
+        return $"{{t(\"{TryClearStringValue(text)}\")}}";
     }
 
     static async Task<Result<ReactNode>> ConvertVisualElementModelToReactNodeModel(VisualElementModel element)
@@ -585,7 +597,7 @@ static class NextJs_with_Tailwind
         // Add text content
         if (element.HasText())
         {
-            node.Children.Add(new() { Text = element.Text });
+            node.Children.Add(new() { Text = element.GetText() });
         }
 
         // Add children
