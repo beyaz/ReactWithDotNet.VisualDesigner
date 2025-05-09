@@ -474,6 +474,20 @@ sealed class ApplicationView : Component<ApplicationState>
 
                     OnClick(_ =>
                     {
+                        if (state.SelectedVisualElementAsYamlCodeIsVisible)
+                        {
+                            // check has any edit
+                            if (state.SelectedVisualElementAsYamlCode != YamlHelper.SerializeToYaml(CurrentVisualElement))
+                            {
+                                var result = UpdateElementNode(state.Selection.VisualElementTreeItemPath, state.SelectedVisualElementAsYamlCode);
+                                if (result.HasError)
+                                {
+                                    this.FailNotification(result.Error.Message);
+                                    return Task.CompletedTask;
+                                }
+                            }
+                        }
+                        
                         state.SelectedVisualElementAsYamlCodeIsVisible = !state.SelectedVisualElementAsYamlCodeIsVisible;
 
                         return Task.CompletedTask;
@@ -497,6 +511,62 @@ sealed class ApplicationView : Component<ApplicationState>
                 Padding(5, 30)
             }
         };
+    }
+
+    Result UpdateElementNode(string path, string yaml)
+    {
+        if (path.HasNoValue())
+        {
+            return new ArgumentNullException(nameof(path));
+        }
+        
+        VisualElementModel newModel;
+
+        try
+        {
+            newModel = YamlHelper.DeserializeFromYaml<VisualElementModel>(yaml);
+        }
+        catch (Exception exception)
+        {
+            return exception;
+        }
+
+        if (path == "0")
+        {
+            state.ComponentRootElement = newModel;
+            
+            return Success;
+        }
+
+        var isSuccessfullyUpdated = false;
+        
+        var node = state.ComponentRootElement;
+
+        var paths = path.Split(',').Select(int.Parse).ToList();
+        for (var i = 1; i < paths.Count; i++)
+        {
+            var index = paths[i];
+            if (node.Children.Count <= index)
+            {
+                return new Exception($"IndexIsNotValid: {path}");
+            }
+
+            if (i == paths.Count - 1)
+            {
+                node.Children[index]  = newModel;
+                isSuccessfullyUpdated = true;
+                break;
+            }
+            
+            node = node.Children[index];
+        }
+
+        if (!isSuccessfullyUpdated)
+        {
+            return new Exception($"IndexIsNotValid: {path}");
+        }
+        
+        return Success;
     }
 
     async Task<Element> PartLeftPanel()
