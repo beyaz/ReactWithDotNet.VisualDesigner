@@ -51,8 +51,6 @@ public class Result<TValue>
     {
         return new() { Success = true };
     }
-
-    
 }
 
 public sealed class NotNullResult<TValue>
@@ -79,8 +77,6 @@ public sealed class NotNullResult<TValue>
     {
         return new() { HasError = true, Error = failInfo };
     }
-
-   
 }
 
 public sealed record Maybe<TValue>
@@ -88,6 +84,7 @@ public sealed record Maybe<TValue>
     public bool HasNoValue => !HasValue;
 
     public bool HasValue { get; private init; }
+
     public TValue Value { get; init; }
 
     public static implicit operator Maybe<TValue>(TValue value)
@@ -100,8 +97,6 @@ public sealed record Maybe<TValue>
         return new() { HasValue = false };
     }
 
-    
-
     public static Maybe<TValue> Some(TValue value)
     {
         if (value == null)
@@ -110,21 +105,6 @@ public sealed record Maybe<TValue>
         }
 
         return new() { Value = value, HasValue = true };
-    }
-
-    public Maybe<TResult> Bind<TResult>(Func<TValue, Maybe<TResult>> func)
-    {
-        return HasValue ? func(Value) : None;
-    }
-
-    public TValue GetValueOrDefault(TValue defaultValue = default)
-    {
-        return HasValue ? Value : defaultValue;
-    }
-
-    public TResult Match<TResult>(Func<TValue, TResult> onSome, Func<TResult> onNone)
-    {
-        return HasValue ? onSome(Value) : onNone();
     }
 
     public override string ToString()
@@ -144,16 +124,6 @@ public sealed class NoneObject
 
 static class FP
 {
-    public static void HasValue<TValue>(this Maybe<TValue> maybe, Action<TValue> action)
-    {
-        if (maybe.HasNoValue)
-        {
-            return;
-        }
-        
-        action(maybe.Value);
-    }
-    
     public static readonly Result Success = new() { Success = true };
 
     public static NoneObject None => NoneObject.Instance;
@@ -203,6 +173,16 @@ static class FP
         nextAction(values);
 
         return Success;
+    }
+
+    public static void HasValue<TValue>(this Maybe<TValue> maybe, Action<TValue> action)
+    {
+        if (maybe.HasNoValue)
+        {
+            return;
+        }
+
+        action(maybe.Value);
     }
 
     public static Result<B> Then<A, B>(this (A value, Exception exception) result, Func<A, B> convertFunc)
