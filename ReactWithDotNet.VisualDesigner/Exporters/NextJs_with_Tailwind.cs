@@ -156,12 +156,6 @@ static class NextJs_with_Tailwind
 
         if (nodeTag is null)
         {
-            if (node.Text.HasValue())
-            {
-                lines.Add(Indent(indentLevel) + node.Text);
-                return lines;
-            }
-
             return new ArgumentNullException(nameof(nodeTag));
         }
 
