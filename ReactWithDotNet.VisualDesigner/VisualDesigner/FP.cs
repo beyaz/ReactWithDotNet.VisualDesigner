@@ -31,7 +31,7 @@ public class Result<TValue>
 {
     public Exception Error { get; init; }
 
-    public bool HasError { get; init; }
+    public bool HasError => !Success;
 
     public bool Success { get; init; }
 
@@ -44,7 +44,7 @@ public class Result<TValue>
 
     public static implicit operator Result<TValue>(Exception failInfo)
     {
-        return new() { HasError = true, Error = failInfo };
+        return new() { Error = failInfo };
     }
 
     public static implicit operator Result<TValue>(NoneObject noneObject)

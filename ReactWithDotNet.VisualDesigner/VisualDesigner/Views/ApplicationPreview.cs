@@ -314,7 +314,7 @@ sealed class ApplicationPreview : Component
                     var result = await renderElement(context, childModel, childPath);
                     if (result.HasError)
                     {
-                        return result;
+                        return new Exception($"Path: {childPath}", result.Error);
                     }
 
                     childElement = result.Value;

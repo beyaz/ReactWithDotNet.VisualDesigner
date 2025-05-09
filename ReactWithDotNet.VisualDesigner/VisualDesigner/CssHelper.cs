@@ -273,11 +273,11 @@ public static class CssHelper
                     "mt" => "margin-top",
                     "mb" => "margin-bottom",
 
-                    "p"  => "pargin",
-                    "pr" => "pargin-right",
-                    "pl" => "pargin-left",
-                    "pt" => "pargin-top",
-                    "pb" => "pargin-bottom",
+                    "p"  => "padding",
+                    "pr" => "padding-right",
+                    "pl" => "padding-left",
+                    "pt" => "padding-top",
+                    "pb" => "padding-bottom",
 
                     _ => null
                 };
@@ -1094,6 +1094,7 @@ public static class CssHelper
             case "margin-bottom":
             case "gap":
             case "border-radius":
+            case "line-height":
             {
                 if (isValueDouble)
                 {
@@ -1125,6 +1126,7 @@ public static class CssHelper
             case "flex-wrap":
             case "outline":
             case "text-decoration":
+            case "font-style":
             {
                 return (name, value);
             }

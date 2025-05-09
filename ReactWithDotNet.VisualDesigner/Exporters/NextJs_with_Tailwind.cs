@@ -1,7 +1,6 @@
 ﻿using System.IO;
 using System.Reflection;
 using System.Text;
-using System.Xml.Linq;
 
 namespace ReactWithDotNet.VisualDesigner.Exporters;
 
@@ -83,7 +82,26 @@ static class NextJs_with_Tailwind
             component = result.Value;
         }
 
-        var filePath = $"{GetExportFolderPath()}{componentName}.tsx";
+        string filePath, targetComponentName;
+        {
+            targetComponentName = componentName.Split('/').Last();
+
+            filePath = $"{GetExportFolderPath()}{componentName}.tsx";
+
+            if (Path.GetFileNameWithoutExtension(filePath).Contains("."))
+            {
+                var array = Path.GetFileName(filePath).Split('.', StringSplitOptions.RemoveEmptyEntries);
+                if (array.Length != 3)
+                {
+                    return new ArgumentException($"ComponentNameIsInvalid. {componentName}");
+                }
+
+                filePath = Path.Combine(Path.GetDirectoryName(filePath) ?? string.Empty, $"{array[0]}.{array[2]}");
+
+                targetComponentName = array[1];
+            }
+        }
+
 
         string fileNewContent;
         {
@@ -111,7 +129,7 @@ static class NextJs_with_Tailwind
 
             string injectedVersion;
             {
-                var newVersion = InjectRender(fileContentInDirectory, linesToInject);
+                var newVersion = InjectRender(fileContentInDirectory, targetComponentName, linesToInject);
                 if (newVersion.HasError)
                 {
                     return newVersion.Error;
@@ -593,11 +611,20 @@ static class NextJs_with_Tailwind
         return new(' ', indentLevel * 4);
     }
 
-    static Result<string> InjectRender(IReadOnlyList<string> fileContent, IReadOnlyList<string> linesToInject)
+    static Result<string> InjectRender(IReadOnlyList<string> fileContent, string targetComponentName, IReadOnlyList<string> linesToInject)
     {
         var lines = fileContent.ToList();
+        
+        // focus to component code
 
-        var firstReturnLineIndex = lines.FindIndex(l => l == "    return (");
+        var componentDeclerationLineIndex = lines.FindIndex(line=>line.Contains($"function {targetComponentName}("));
+        if (componentDeclerationLineIndex == -1)
+        {
+            return new ArgumentException($"ComponentDeclerationNotFoundInFile. {targetComponentName}");
+        }
+        
+
+        var firstReturnLineIndex = lines.FindIndex(componentDeclerationLineIndex, l => l == "    return (");
         if (firstReturnLineIndex < 0)
         {
             return new InvalidOperationException("No return found");
