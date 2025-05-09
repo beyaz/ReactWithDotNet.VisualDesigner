@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using ReactWithDotNet.VisualDesigner.Exporters;
+﻿using ReactWithDotNet.VisualDesigner.Exporters;
 
 namespace ReactWithDotNet.VisualDesigner.Test;
 
@@ -10,27 +9,29 @@ public sealed class NextJsExportTest
     public async Task ExportAll()
     {
         await NextJs_with_Tailwind.ExportAll(1);
+    }
 
-        //var components = await GetAllComponentsInProject(1);
+    [TestMethod]
+    public async Task VisitElements()
+    {
+        var components = await GetAllComponentsInProject(1);
 
-        //foreach (var component in components)
-        //{
-        //    if (component.Name == "HggImage")
-        //    {
-        //        continue;
-        //    }
+        foreach (var component in components)
+        {
+            if (component.Name == "HggImage")
+            {
+                continue;
+            }
 
-        //    var root = component.RootElementAsJson.AsVisualElementModel();
+            var root = component.RootElementAsJson.AsVisualElementModel();
 
-        //    visitProperties(root);
-        //}
+            visitProperties(root);
+        }
 
         return;
 
         static void visitProperties(VisualElementModel model)
         {
-            var elementType = TryGetHtmlElementTypeByTagName(model.Tag);
-
             for (var i = 0; i < model.Properties.Count; i++)
             {
                 var result = TryParsePropertyValue(model.Properties[i]);
@@ -39,55 +40,14 @@ public sealed class NextJsExportTest
                     var name = result.Name;
                     var value = result.Value;
 
-                    if (IsStringValue(value) || IsConnectedValue(value))
+                    if (name == "-bind")
                     {
-                        continue;
+                        if (model.Text.HasNoValue())
+                        {
+                            ;
+                        }
                     }
-
-                    //if (elementType is not null)
-                    //{
-                    //    if (elementType.GetProperty(name)?.PropertyType == typeof(double) ||
-                    //        elementType.GetProperty(name)?.PropertyType == typeof(UnionProp<string, double>))
-                    //    {
-                    //        if (double.TryParse(value, out _))
-                    //        {
-                    //            continue;
-                    //        }
-                    //    }
-
-                    //    if (elementType.GetProperty(name, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance)?.PropertyType == typeof(string))
-                    //    {
-                    //        if (value.Contains(' ') || value.StartsWith('#'))
-                    //        {
-                    //            continue;
-                    //        }
-                    //    }
-                    //}
-
-                    if (name == "w" || name == "h" || name == "width" || name == "height" || name == "size"
-                        || name == "-items-source-design-time-count"
-                       )
-                    {
-                        continue;
-                    }
-
-                    if (
-                        name == "xmlns" || name == "fill" || name == "isAvatar" ||
-                        name == "className" || name == "class" || name == "href" || name == "src" || name == "alt")
-                    {
-                        model.Properties[i] = $"{name}='{value}'";
-                        continue;
-                    }
-
-                    if (name == "type" && value == "text")
-                    {
-                        continue;
-                    }
-
-                    if (name == "stroke-linecap" && value == "square")
-                    {
-                        continue;
-                    }
+                    
 
                     value.ToString();
                 }
