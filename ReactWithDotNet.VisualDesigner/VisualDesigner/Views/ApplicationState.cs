@@ -49,9 +49,9 @@ public sealed class ApplicationState
     
     public string UserName { get; init; }
     
-    public bool HtmlCodeVisible { get; set; }
+    public bool SelectedVisualElementAsYamlCodeIsVisible { get; set; }
     
-    public string HtmlCode { get; init; }
+    public string SelectedVisualElementAsYamlCode { get; set; }
 
     // @formatter:on
 }

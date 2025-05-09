@@ -275,13 +275,14 @@ sealed class ApplicationView : Component<ApplicationState>
         return Task.CompletedTask;
     }
 
-    Element HtmlEditor()
+    Element YamlEditor()
     {
+        state.SelectedVisualElementAsYamlCode = YamlHelper.SerializeToYaml(CurrentVisualElement);
+        
         return new Editor
         {
-            valueBind                = () => state.HtmlCode,
-            valueBindDebounceTimeout = 500,
-            defaultLanguage          = "html",
+            valueBind           = ()=>state.SelectedVisualElementAsYamlCode,
+            defaultLanguage = "yaml",
             options =
             {
                 renderLineHighlight = "none",
@@ -321,10 +322,10 @@ sealed class ApplicationView : Component<ApplicationState>
 
         Element middle()
         {
-            return state.HtmlCodeVisible ?
+            return state.SelectedVisualElementAsYamlCodeIsVisible ?
                 new(FlexGrow(1), Padding(7), OverflowXAuto)
                 {
-                    HtmlEditor
+                    YamlEditor
                 }
                 :
                 new FlexColumn(FlexGrow(1), Padding(7), OverflowXAuto)
@@ -469,11 +470,11 @@ sealed class ApplicationView : Component<ApplicationState>
                     PositionRelative,
                     new label(PositionAbsolute, Top(-4), Left(8), FontSize10, LineHeight7, Background(Theme.BackgroundColor), PaddingX(4)) { "View" },
 
-                    state.HtmlCodeVisible ? "Design" : "Code",
+                    state.SelectedVisualElementAsYamlCodeIsVisible ? "Design" : "Code",
 
                     OnClick(_ =>
                     {
-                        state.HtmlCodeVisible = !state.HtmlCodeVisible;
+                        state.SelectedVisualElementAsYamlCodeIsVisible = !state.SelectedVisualElementAsYamlCodeIsVisible;
 
                         return Task.CompletedTask;
                     })

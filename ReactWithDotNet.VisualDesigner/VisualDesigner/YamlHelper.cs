@@ -15,6 +15,16 @@ static class YamlHelper
 
         return deserializer.Deserialize<T>(yamlContent);
     }
+    
+    public static string SerializeToYaml<T>(T obj)
+    {
+        var serializer = new SerializerBuilder()
+            .WithNamingConvention(CamelCaseNamingConvention.Instance)
+            .ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitDefaults | DefaultValuesHandling.OmitEmptyCollections)
+            .Build();
+
+        return serializer.Serialize(obj);
+    }
 
     sealed class ReadOnlyCollectionNodeTypeResolver : INodeTypeResolver
     {
