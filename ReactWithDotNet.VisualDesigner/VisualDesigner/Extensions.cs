@@ -569,7 +569,7 @@ static class Extensions
 
 sealed class AttributeParseResult
 {
-    public bool HasValue { get; init; }
+    public required bool HasValue { get; init; }
     
     public string Name { get; init; }
     public string Value { get; init; }
