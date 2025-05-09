@@ -976,6 +976,9 @@ sealed class ApplicationView : Component<ApplicationState>
                     {
                         CurrentVisualElement.Children.Add(model);
 
+
+                        CurrentVisualElement.Text = null;
+
                         return Task.CompletedTask;
                     }
 
