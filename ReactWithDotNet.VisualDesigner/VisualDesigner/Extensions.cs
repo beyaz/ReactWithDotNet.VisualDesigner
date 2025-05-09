@@ -529,13 +529,17 @@ static class Extensions
 
         var name = nameValueCombined[..colonIndex];
 
-        var value = nameValueCombined[(colonIndex + 1)..];
+        var value = nameValueCombined[(colonIndex + 1)..].Trim();
+        if (value == string.Empty)
+        {
+            value = null;
+        }
 
         return new()
         {
             HasValue = true,
             Name    = name.Trim(),
-            Value   = value.Trim()
+            Value   = value
         };
     }
     
