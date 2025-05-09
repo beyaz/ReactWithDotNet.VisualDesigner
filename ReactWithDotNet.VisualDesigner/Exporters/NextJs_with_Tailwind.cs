@@ -45,6 +45,10 @@ static class NextJs_with_Tailwind
 
         foreach (var component in components)
         {
+            if (component.Name == "HggImage")
+            {
+                continue;
+            }
             await Export(component.AsExportInput());
         }
     }
