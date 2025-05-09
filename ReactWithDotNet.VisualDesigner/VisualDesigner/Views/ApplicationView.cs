@@ -1112,6 +1112,7 @@ sealed class ApplicationView : Component<ApplicationState>
                 return new(CursorDefault, Padding(4, 8), BorderRadius(16))
                 {
                     Background(isSelected ? Gray200 : Gray50),
+                    Border(1, solid, Gray100),
 
                     isSelected ? PositionRelative : null,
                     isSelected ? closeIcon : null,
@@ -1260,6 +1261,7 @@ sealed class ApplicationView : Component<ApplicationState>
                 return new(CursorDefault, Padding(4, 8), BorderRadius(16))
                 {
                     Background(isSelected ? Gray200 : Gray50),
+                    Border(1, solid, Gray100),
 
                     isSelected ? PositionRelative : null,
                     isSelected ? closeIcon : null,

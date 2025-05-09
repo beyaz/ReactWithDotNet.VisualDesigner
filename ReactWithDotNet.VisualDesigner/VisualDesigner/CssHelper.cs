@@ -409,15 +409,25 @@ public static class CssHelper
             }
         }
         
-        // rounded-[?px]
+        // tailwindClass-[?px]
         {
-            var arbitrary = tryGetArbitraryValue(utilityCssClassName, "rounded");
-            if (arbitrary.HasValue && arbitrary.Value.EndsWith("px"))
+            var map = new Dictionary<string, string>
             {
-                return (pseudo,
-                [
-                    ("border-radius", arbitrary.Value)
-                ]);
+                { "rounded", "border-radius" },
+                { "h", "height" },
+                { "w", "width" }
+            };
+            
+            foreach (var (tailwindPrefix, styleName) in map)
+            {
+                var arbitrary = tryGetArbitraryValue(utilityCssClassName, tailwindPrefix);
+                if (arbitrary.HasValue && arbitrary.Value.EndsWith("px"))
+                {
+                    return (pseudo,
+                    [
+                        (styleName, arbitrary.Value)
+                    ]);
+                }
             }
         }
         
