@@ -571,6 +571,8 @@ sealed class AttributeParseResult
 {
     public required bool HasValue { get; init; }
     
+    public bool HasNoValue => !HasValue;
+
     public string Name { get; init; }
     public string Value { get; init; }
     

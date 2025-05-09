@@ -240,7 +240,7 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
             var hasFlex = styles.Any(x =>
             {
                 var parseResult = TryParsePropertyValue(x);
-                if (!parseResult.HasValue)
+                if (parseResult.HasNoValue)
                 {
                     return false;
                 }
@@ -256,7 +256,7 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
             var hasFlexDirectionColumn = styles.Any(x =>
             {
                 var parseResult = TryParsePropertyValue(x);
-                if (!parseResult.HasValue)
+                if (parseResult.HasNoValue)
                 {
                     return false;
                 }
@@ -272,7 +272,7 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
             var hasFlexDirectionRow = styles.Any(x =>
             {
                 var parseResult = TryParsePropertyValue(x);
-                if (!parseResult.HasValue)
+                if (parseResult.HasNoValue)
                 {
                     return false;
                 }
@@ -288,7 +288,7 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
             var hasHeightWithConstantValue = styles.Any(x =>
             {
                 var parseResult = TryParsePropertyValue(x);
-                if (!parseResult.HasValue)
+                if (parseResult.HasNoValue)
                 {
                     return false;
                 }
@@ -304,7 +304,7 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
             var hasWidhtWithConstantValue = styles.Any(x =>
             {
                 var parseResult = TryParsePropertyValue(x);
-                if (!parseResult.HasValue)
+                if (parseResult.HasNoValue)
                 {
                     return false;
                 }

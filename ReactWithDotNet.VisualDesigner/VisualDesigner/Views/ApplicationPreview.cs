@@ -345,7 +345,7 @@ sealed class ApplicationPreview : Component
                 foreach (var property in model.Properties)
                 {
                     var parseResult = TryParsePropertyValue(property);
-                    if (!parseResult.HasValue)
+                    if (parseResult.HasNoValue)
                     {
                         continue;
                     }
@@ -387,7 +387,7 @@ sealed class ApplicationPreview : Component
                     string callerPropertyName, callerPropertyValue;
                     {
                         var result = TryParsePropertyValue(caller);
-                        if (!result.HasValue)
+                        if (result.HasNoValue)
                         {
                             continue;
                         }
