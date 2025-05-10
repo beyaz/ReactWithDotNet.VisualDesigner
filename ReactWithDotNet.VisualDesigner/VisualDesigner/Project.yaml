@@ -1,3 +1,11 @@
+globalCss: |
+  @font-face {
+    font-family: 'Host Grotesk';
+    src: url('/wwwroot/fonts/HostGrotesk-Regular.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+  }
+
 colors:
   content-strong: "#0E121B"
   content-sub: "#222530"
@@ -240,15 +248,6 @@ styles:
   justify-between: 'justify-content: space-between;'
   items-center: 'align-items: center;'
 
-
-
-globalCss: |
-  @font-face {
-    font-family: 'Host Grotesk';
-    src: url('/wwwroot/fonts/HostGrotesk-Regular.woff2') format('woff2');
-    font-weight: normal;
-    font-style: normal;
-  }
 
 suggestions:
   width: ['auto', 'fit-content', 'max-content', 'min-content', 'inherit', 'initial', 'unset', '100%', '75%', '50%', '25%']
