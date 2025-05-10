@@ -7,9 +7,9 @@ namespace ReactWithDotNet.VisualDesigner.Views;
 
 static class ApplicationLogic
 {
-    public static readonly ProjectConfigModel Project = DeserializeFromYaml<ProjectConfigModel>(File.ReadAllText($@"{AppDirectory}ReactWithDotNet.VisualDesigner\VisualDesigner\Project.yaml"));
+    public static readonly ProjectConfig Project = DeserializeFromYaml<ProjectConfig>(File.ReadAllText($@"{AppDirectory}ReactWithDotNet.VisualDesigner\VisualDesigner\Project.yaml"));
 
-    public static ProjectConfigModel GetProjectConfig(int projectId)
+    public static ProjectConfig GetProjectConfig(int projectId)
     {
         return Project;
     }

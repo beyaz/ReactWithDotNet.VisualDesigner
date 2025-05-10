@@ -1,6 +1,6 @@
 ﻿namespace ReactWithDotNet.VisualDesigner.Views;
 
-sealed record ProjectConfigModel
+sealed record ProjectConfig
 {
     public IReadOnlyDictionary<string, string> Colors { get; init; }
 
