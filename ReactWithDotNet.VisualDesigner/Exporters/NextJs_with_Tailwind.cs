@@ -532,11 +532,10 @@ static class NextJs_with_Tailwind
         // Add properties
         foreach (var property in element.Properties)
         {
-            var parseResult = TryParsePropertyValue(property);
+            var parseResult = TryParseProperty(property);
             if (parseResult.HasValue)
             {
-                var name = parseResult.Name;
-                var value = parseResult.Value;
+                var (name, value) = parseResult.Value;
 
                 if (name == "class")
                 {
