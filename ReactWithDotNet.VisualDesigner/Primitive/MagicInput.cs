@@ -67,6 +67,7 @@ sealed class MagicInput : Component<MagicInput.State>
                 onBlur = OnBlur,
                 id=Id,
                 autoComplete = "off",
+                spellcheck = "false",
                 style =
                 {
                     OutlineNone,

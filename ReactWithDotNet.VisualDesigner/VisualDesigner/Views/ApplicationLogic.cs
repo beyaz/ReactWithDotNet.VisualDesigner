@@ -254,6 +254,32 @@ static class ApplicationLogic
 
         if (tag == "img")
         {
+            items.AddRange(Cache.AccessValue("image_suggestions", () =>
+            {
+                var returnList = new List<string>();
+
+                var user = GetUser(state.ProjectId, state.UserName);
+                if (user is not null)
+                {
+                    if (user.LocalWorkspacePath.HasValue())
+                    {
+                        var publicFolder = Path.Combine(user.LocalWorkspacePath, "public");
+                        if (Directory.Exists(publicFolder))
+                        {
+                            foreach (var pattern in new[] { "*.svg", "*.png" })
+                            {
+                                foreach (var file in Directory.GetFiles(publicFolder, pattern, SearchOption.AllDirectories))
+                                {
+                                    returnList.Add($"src: {file.RemoveFromStart(publicFolder).Replace(Path.DirectorySeparatorChar, '/')}");
+                                }
+                            }
+                        }
+                    }
+                }
+
+                return returnList;
+            }));
+            
             var user = GetUser(state.ProjectId, state.UserName);
             if (user is not null)
             {
@@ -266,7 +292,7 @@ static class ApplicationLogic
                         {
                             foreach (var file in Directory.GetFiles(publicFolder, pattern, SearchOption.AllDirectories))
                             {
-                                items.Add($"src: /{file.RemoveFromStart(publicFolder).Replace(Path.DirectorySeparatorChar, '/')}");
+                                items.Add($"src: {file.RemoveFromStart(publicFolder).Replace(Path.DirectorySeparatorChar, '/')}");
                             }
                         }
                     }
