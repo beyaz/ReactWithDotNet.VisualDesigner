@@ -1,7 +1,9 @@
 ﻿namespace ReactWithDotNet.VisualDesigner.Primitive;
 
 delegate Task InputChangeHandler( string senderName, string newValue);
-delegate Task InputFocusHandler( string senderName);
+delegate Task InputFocusHandler(string senderName);
+
+delegate Task InputPasteHandler(string text);
 
 sealed class MagicInput : Component<MagicInput.State>
 {
@@ -12,6 +14,9 @@ sealed class MagicInput : Component<MagicInput.State>
     
     [CustomEvent]
     public InputFocusHandler OnFocus { get; init; }
+    
+    [CustomEvent]
+    public InputPasteHandler OnPaste { get; init; }
 
     public IReadOnlyList<string> Suggestions { get; init; } = [];
 
@@ -56,6 +61,7 @@ sealed class MagicInput : Component<MagicInput.State>
                 valueBindDebounceHandler = OnTypingFinished,
                 onKeyDown                = OnKeyDown,
                 onClick                  = OnInputClicked,
+                onPaste = OnPasted,
                 placeholder = Placeholder,
                 onFocus = OnFocused,
                 onBlur = OnBlur,
@@ -80,6 +86,18 @@ sealed class MagicInput : Component<MagicInput.State>
             },
             ViewSuggestions
         };
+    }
+
+    Task OnPasted(ClipboardEvent e)
+    {
+        var value = e.target.value;
+        if (value.HasValue())
+        {
+            DispatchEvent(OnPaste, [value]);    
+        }
+        
+        
+        return Task.CompletedTask;
     }
 
     Task OnBlur(FocusEvent e)

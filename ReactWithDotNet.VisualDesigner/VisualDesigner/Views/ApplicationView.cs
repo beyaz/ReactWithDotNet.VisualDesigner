@@ -974,12 +974,11 @@ sealed class ApplicationView : Component<ApplicationState>
         {
             inputTag,
 
-            stylesHeader,
-
-            viewStyles(CurrentVisualElement.Styles),
-
             propsHeader,
-            viewProps(visualElementModel.Properties)
+            viewProps(visualElementModel.Properties),
+            
+            stylesHeader,
+            viewStyles(CurrentVisualElement.Styles)
         };
 
         Element viewStyles(IReadOnlyList<string> styles)
@@ -1181,6 +1180,23 @@ sealed class ApplicationView : Component<ApplicationState>
                         }
 
                         state.Selection.SelectedPropertyIndex = null;
+
+                        return Task.CompletedTask;
+                    },
+                    OnPaste = (text) =>
+                    {
+                        if (!HtmlImporter.CanImportAsHtml(text))
+                        {
+                            return Task.CompletedTask;
+                        }
+                        
+                        var model = HtmlImporter.ConvertToVisualElementModel(text);
+                        if (model is null)
+                        {
+                            return Task.CompletedTask;
+                        }
+                        
+                        CurrentVisualElement.Children.Add(model);
 
                         return Task.CompletedTask;
                     },
