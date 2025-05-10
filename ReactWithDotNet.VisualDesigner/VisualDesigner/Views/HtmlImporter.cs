@@ -19,7 +19,7 @@ static class HtmlImporter
         return false;
     }
 
-    public static VisualElementModel ConvertToVisualElementModel(string html)
+    public static VisualElementModel ConvertToVisualElementModel(int projectId, string html)
     {
         var htmlDocument = new HtmlDocument
         {
@@ -27,10 +27,10 @@ static class HtmlImporter
         };
         htmlDocument.LoadHtml(html);
 
-        return ConvertToVisualElementModel(htmlDocument.DocumentNode.FirstChild);
+        return ConvertToVisualElementModel(projectId, htmlDocument.DocumentNode.FirstChild);
     }
 
-    static VisualElementModel ConvertToVisualElementModel(HtmlNode htmlNode)
+    static VisualElementModel ConvertToVisualElementModel(int projectId,HtmlNode htmlNode)
     {
         if (htmlNode is null)
         {
