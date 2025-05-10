@@ -46,9 +46,7 @@ static class ApplicationDatabase
     {
         if (Projects is null)
         {
-            const string query = "SELECT * FROM Project";
-
-            DbOperation(connection => { Projects = connection.QueryAsync<ProjectEntity>(query).GetAwaiter().GetResult().ToList(); });
+            DbOperation(connection => { Projects = connection.GetAll<ProjectEntity>().ToList(); });
         }
 
         return Projects;
@@ -61,22 +59,16 @@ static class ApplicationDatabase
     
     public static async Task<ComponentEntity> GetFirstComponentInProject(int projectId)
     {
-        const string query = $"select * from Component WHERE ProjectId = @{nameof(projectId)} LIMIT 1";
-
-        return await DbOperation(async db =>  await db.QueryFirstOrDefaultAsync<ComponentEntity>(query, new{ projectId}));
+        return await DbOperation(async db =>  await db.FirstOrDefaultAsync<ComponentEntity>(x=>x.ProjectId == projectId));
     }
     
     public static async Task<int?> GetFirstProjectId()
     {
-        const string query = "select * from Project LIMIT 1";
-
-        return (await DbOperation(async db =>  await db.QueryFirstOrDefaultAsync<ProjectEntity>(query)))?.Id;
+        return (await DbOperation(async db =>  await db.FirstOrDefaultAsync<ProjectEntity>(x=>true)))?.Id;
     }
     
     public static Task<IEnumerable<ComponentEntity>> GetAllComponentsInProject(int projectId)
     {
-        const string query = $"SELECT * FROM Component WHERE {nameof(ComponentEntity.ProjectId)} = @{nameof(projectId)}";
-
-        return DbOperation(db => db.QueryAsync<ComponentEntity>(query, new{projectId}));
+        return DbOperation(db => db.SelectAsync<ComponentEntity>(x=>x.ProjectId == projectId));
     }
 }
