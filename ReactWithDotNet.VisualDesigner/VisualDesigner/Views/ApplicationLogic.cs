@@ -132,11 +132,11 @@ static class ApplicationLogic
         });
     }
     
-    public static Task<ImmutableList<string>> GetAllComponentNamesInProject(int projectId)
+    public static  Task<ImmutableList<string>> GetAllComponentNamesInProject(int projectId)
     {
-        var query = $"SELECT DISTINCT({nameof(ComponentEntity.Name)}) FROM Component WHERE {nameof(ComponentEntity.ProjectId)} = @{nameof(projectId)}";
-
-        return DbOperation(async db => (await db.QueryAsync<string>(query, new { projectId })).ToImmutableList());
+        return DbOperation(async db => (await db.SelectAsync<ComponentEntity>(x=>x.ProjectId == projectId))
+                               .Select(c => c.Name) 
+                               .Distinct().ToImmutableList());
     }
 
     public static async Task<Result<ComponentEntity>> GetComponentMainVersion(this IDbConnection db, ApplicationState state)
