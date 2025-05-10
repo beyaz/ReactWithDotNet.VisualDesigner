@@ -14,17 +14,30 @@ public sealed class NextJsExportTest
     }
 
     [TestMethod]
-    public async Task FixAll()
+    public void FixAll()
     {
-        //var components = await GetAllComponentsInProject(1);
+        DbOperation(db =>
+        {
+            foreach (var record in db.GetAll<ComponentEntity>())
+            {
+                db.Update(record with
+                {
+                    RootElementAsYaml = SerializeToYaml(DeserializeFromJson<VisualElementModel>(record.RootElementAsJson)),
+                    RootElementAsJson = null
+                });
+            }
+        });
 
-        //foreach (var component in components)
-        //{
-        //    component.RootElementAsJson = SerializeToJson(component.RootElementAsJson.AsVisualElementModel().Fix());
-
-        //    DbOperation(db => db.Update(component));
-        //}
+        DbOperation(db =>
+        {
+            foreach (var record in db.GetAll<ComponentHistoryEntity>())
+            {
+                db.Update(record with
+                {
+                    RootElementAsYaml = SerializeToYaml(DeserializeFromJson<VisualElementModel>(record.RootElementAsJson)),
+                    RootElementAsJson = null
+                });
+            }
+        });
     }
-    
-   
 }

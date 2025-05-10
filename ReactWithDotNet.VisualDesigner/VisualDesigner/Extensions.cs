@@ -315,29 +315,18 @@ static class Extensions
         
         return JsonConvert.DeserializeObject<T>(json);
     }
-    public static VisualElementModel AsVisualElementModel(this string rootElementAsJson)
+    public static VisualElementModel AsVisualElementModel(this string rootElementAsYaml)
     {
-        if (rootElementAsJson is null)
+        if (rootElementAsYaml is null)
         {
             return null;
         }
 
-        var value = DeserializeFromJson<VisualElementModel>(rootElementAsJson);
+        var value = DeserializeFromYaml<VisualElementModel>(rootElementAsYaml);
         
 
         return value;
 
-    }
-    
-    
-    public static T DeserializeFromYaml<T>(string yamlContent) where T : class
-    {
-        if (yamlContent is null)
-        {
-            return null;
-        }
-
-        return YamlHelper.DeserializeFromYaml<T>(yamlContent);
     }
     
     /// <summary>

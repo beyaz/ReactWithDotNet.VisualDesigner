@@ -6,7 +6,7 @@ namespace ReactWithDotNet.VisualDesigner;
 
 static class YamlHelper
 {
-    public static T DeserializeFromYaml<T>(string yamlContent)
+    public static T DeserializeFromYaml<T>(string yamlContent) where T: class
     {
         var deserializer = new DeserializerBuilder()
             .WithNamingConvention(CamelCaseNamingConvention.Instance)

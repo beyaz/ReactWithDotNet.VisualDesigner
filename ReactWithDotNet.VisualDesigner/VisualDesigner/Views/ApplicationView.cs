@@ -190,7 +190,7 @@ sealed class ApplicationView : Component<ApplicationState>
             }
         }
 
-        var componentRootElement = component.RootElementAsJson.AsVisualElementModel();
+        var componentRootElement = component.RootElementAsYaml.AsVisualElementModel();
 
         state = new()
         {
@@ -586,7 +586,7 @@ sealed class ApplicationView : Component<ApplicationState>
                     var sourceNode = FindTreeNodeByTreePath(state.ComponentRootElement, source);
                     var targetNode = FindTreeNodeByTreePath(state.ComponentRootElement, target);
 
-                    var sourceNodeClone = SerializeToJson(sourceNode).AsVisualElementModel();
+                    var sourceNodeClone = SerializeToYaml(sourceNode).AsVisualElementModel();
 
                     targetNode.Children.Add(sourceNodeClone);
 

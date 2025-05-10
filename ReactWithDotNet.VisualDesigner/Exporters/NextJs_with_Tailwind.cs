@@ -61,7 +61,7 @@ static class NextJs_with_Tailwind
 
     static async Task<Result<IReadOnlyList<string>>> CalculateElementTreeTsxCodes(ComponentEntity component)
     {
-        var rootVisualElement = component.RootElementAsJson.AsVisualElementModel();
+        var rootVisualElement = component.RootElementAsYaml.AsVisualElementModel();
 
         ReactNode rootNode;
         {

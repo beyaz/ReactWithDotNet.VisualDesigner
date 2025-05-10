@@ -50,28 +50,28 @@ static class ApplicationLogic
             }
 
             // Check if the user version is the same as the main version
-            if (mainVersion.RootElementAsJson == SerializeToJson(state.ComponentRootElement))
+            if (mainVersion.RootElementAsYaml == SerializeToYaml(state.ComponentRootElement))
             {
                 return Fail($"User ({state.UserName}) has no change to commit.");
             }
 
             userVersion = userVersion with
             {
-                RootElementAsJson = SerializeToJson(state.ComponentRootElement)
+                RootElementAsYaml = SerializeToYaml(state.ComponentRootElement)
             };
 
             await db.InsertAsync(new ComponentHistoryEntity
             {
                 ProjectId         = mainVersion.ProjectId,
                 Name              = mainVersion.Name,
-                RootElementAsJson = mainVersion.RootElementAsJson,
+                RootElementAsYaml = mainVersion.RootElementAsYaml,
                 LastAccessTime    = mainVersion.LastAccessTime,
                 UserName          = userVersion.UserName
             });
 
             mainVersion = mainVersion with
             {
-                RootElementAsJson = userVersion.RootElementAsJson
+                RootElementAsYaml = userVersion.RootElementAsYaml
             };
 
             await db.UpdateAsync(mainVersion);
@@ -118,13 +118,13 @@ static class ApplicationLogic
             }
 
             // Check if the user version is the same as the main version
-            if (mainVersion.RootElementAsJson == SerializeToJson(state.ComponentRootElement))
+            if (mainVersion.RootElementAsYaml == SerializeToYaml(state.ComponentRootElement))
             {
                 return Fail($"User ({state.UserName}) has no change to rollback.");
             }
 
             // restore from main version
-            state.ComponentRootElement = mainVersion.RootElementAsJson.AsVisualElementModel();
+            state.ComponentRootElement = mainVersion.RootElementAsYaml.AsVisualElementModel();
             
             await db.DeleteAsync(userVersion);
 
@@ -537,7 +537,7 @@ static class ApplicationLogic
                     return new InvalidOperationException(state.ComponentName+" Main version cannot be null");
                 }
 
-                if (SerializeToJson(state.ComponentRootElement) == mainVersion.RootElementAsJson)
+                if (SerializeToYaml(state.ComponentRootElement) == mainVersion.RootElementAsYaml)
                 {
                     return Success;
                 }
@@ -545,7 +545,7 @@ static class ApplicationLogic
                 await db.InsertAsync(mainVersion with
                 {
                     Id = 0,
-                    RootElementAsJson = SerializeToJson(state.ComponentRootElement),
+                    RootElementAsYaml = SerializeToYaml(state.ComponentRootElement),
                     UserName = state.UserName
                 });
 
@@ -554,7 +554,7 @@ static class ApplicationLogic
 
             await db.UpdateAsync(userVersion with
             {
-                RootElementAsJson = SerializeToJson(state.ComponentRootElement)
+                RootElementAsYaml = SerializeToYaml(state.ComponentRootElement)
             });
 
             return Success;

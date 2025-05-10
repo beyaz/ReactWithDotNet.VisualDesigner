@@ -115,7 +115,7 @@ sealed class ApplicationPreview : Component
 
                 if (component is not null)
                 {
-                    var root = component.RootElementAsJson.AsVisualElementModel();
+                    var root = component.RootElementAsYaml.AsVisualElementModel();
 
                     root.Children.AddRange(model.Children);
 
