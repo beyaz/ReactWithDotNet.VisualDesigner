@@ -7,7 +7,10 @@ namespace ReactWithDotNet.VisualDesigner;
 
 static class Extensions
 {
-    
+    public static bool IsDouble(this string input)
+    {
+        return double.TryParse(input, out _);
+    }
     
     //public static VisualElementModel Fix(this VisualElementModel model)
     //{
