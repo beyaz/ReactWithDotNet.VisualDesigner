@@ -1,5 +1,6 @@
 ﻿global using FunctionalUtilities;
 global using static FunctionalUtilities.FP;
+using System.Collections;
 
 namespace FunctionalUtilities;
 
@@ -79,7 +80,7 @@ public sealed class NotNullResult<TValue>
     }
 }
 
-public sealed record Maybe<TValue>
+public sealed record Maybe<TValue> : IEnumerable<TValue>
 {
     public bool HasNoValue => !HasValue;
 
@@ -110,6 +111,17 @@ public sealed record Maybe<TValue>
     public override string ToString()
     {
         return HasValue ? $"Some({Value})" : "None";
+    }
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return GetEnumerator();
+    }
+
+    public IEnumerator<TValue> GetEnumerator()
+    {
+        if (HasValue)
+            yield return Value;
     }
 }
 
