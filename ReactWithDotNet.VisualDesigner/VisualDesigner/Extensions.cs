@@ -542,6 +542,33 @@ static class Extensions
             Value   = value
         };
     }
+    public static Maybe<(string Name, string Value)> TryParseProperty(string nameValueCombined)
+    {
+        if (string.IsNullOrWhiteSpace(nameValueCombined))
+        {
+            return None;
+        }
+        
+        var colonIndex = nameValueCombined.IndexOf(':');
+        if (colonIndex < 0)
+        {
+            return None;
+        }
+
+        var name = nameValueCombined[..colonIndex];
+
+        var value = nameValueCombined[(colonIndex + 1)..].Trim();
+        if (value == string.Empty)
+        {
+            value = null;
+        }
+
+        return (
+        
+            Name     : name.Trim(),
+            Value    : value
+        );
+    }
     
     public static bool In<T>(this T item, params T[] list)
     {
