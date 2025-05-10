@@ -73,21 +73,16 @@ static class Extensions
     {
         return GetText(model).HasValue();
     }
+    
     public static string GetText(this VisualElementModel model)
     {
-        foreach (var property in model.Properties)
-        {
-            var result = TryParsePropertyValue(property);
-            if (result.HasValue)
-            {
-                if (result.Name=="-text")
-                {
-                    return result.Value;
-                }
-            }
-        }
-        
-        return null;
+        return model.Properties.Select(TryParseProperty)
+            .Where(x => x.HasValue)
+            .Select(x => x.Value)
+            .Where(x => x.Name == "-text")
+            .Select(x => x.Value)
+            .FirstOrDefault();
+
     }
     
     public static string GetDesignText(this VisualElementModel model)
