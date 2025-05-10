@@ -26,6 +26,8 @@ public sealed record ComponentEntity
     public required string Name { get; init; }
     
     public string RootElementAsJson { get; init; }
+    
+    public string RootElementAsYaml { get; init; }
 
     public required string UserName { get; init; }
     
@@ -47,6 +49,8 @@ public sealed record ComponentHistoryEntity
     public required string Name { get; init; }
     
     public string RootElementAsJson { get; init; }
+    
+    public string RootElementAsYaml { get; init; }
 
     public required string UserName { get; init; }
     
