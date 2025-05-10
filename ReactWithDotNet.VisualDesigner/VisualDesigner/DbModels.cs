@@ -10,7 +10,7 @@ sealed class ProjectEntity
     
     public string Name { get; init; }
     
-    public string OutputDirectory { get; init; }
+    public string ConfigAsYaml { get; init; }
 }
 
 [Table("Component")]
