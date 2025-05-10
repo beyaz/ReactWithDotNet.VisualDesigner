@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using System.Reflection;
 using System.Text;
+using Dommel;
 
 namespace ReactWithDotNet.VisualDesigner.Exporters;
 
@@ -81,6 +82,9 @@ static class NextJs_with_Tailwind
     {
         var (projectId, componentName, userName) = input;
 
+
+        var user = DbOperation(db => db.FirstOrDefault<UserEntity>(x => x.ProjectId == projectId && x.UserName == userName));
+
         ComponentEntity component;
         {
             var result = await GetComponenUserOrMainVersionAsync(projectId, componentName, userName);
@@ -95,8 +99,8 @@ static class NextJs_with_Tailwind
         string filePath, targetComponentName;
         {
             targetComponentName = componentName.Split('/').Last();
-
-            filePath = $"{GetExportFolderPath()}{componentName}.tsx";
+            
+            filePath = Path.Combine(user.LocalWorkspacePath, "src", "components", componentName+".tsx");
 
             if (Path.GetFileNameWithoutExtension(filePath).Contains("."))
             {
@@ -612,10 +616,7 @@ static class NextJs_with_Tailwind
         return node;
     }
 
-    static string GetExportFolderPath()
-    {
-        return "C:\\github\\hopgogo\\web\\enduser-ui\\src\\components\\";
-    }
+    
 
     static string Indent(int indentLevel)
     {

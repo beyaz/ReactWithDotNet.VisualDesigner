@@ -75,6 +75,8 @@ public sealed record UserEntity
     public DateTime LastAccessTime { get; init; }
     
     public string LastStateAsYaml { get; init; }
+
+    public string LocalWorkspacePath { get; init; }
     
     // @formatter:on
 }
