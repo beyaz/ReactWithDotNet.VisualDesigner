@@ -237,39 +237,11 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
             var hasCol = styles.Contains("col") || styles.Contains("flex-col-centered");
             var hasRow = styles.Contains("row") || styles.Contains("flex-row-centered");
 
-            var hasFlex = styles.Any(x => TryParseProperty(x).HasValue(r => r is { Name: "display", Value: "flex" }).IsTrue());
+            var hasFlex = styles.Any(x => TryParseProperty(x).Is("display", "flex"));
 
-            var hasFlexDirectionColumn = styles.Any(x =>
-            {
-                var parseResult = TryParsePropertyValue(x);
-                if (parseResult.HasNoValue)
-                {
-                    return false;
-                }
+            var hasFlexDirectionColumn = styles.Any(x => TryParseProperty(x).Is("flex-direction", "column"));
 
-                if (parseResult.Name == "flex-direction" && parseResult.Value == "column")
-                {
-                    return true;
-                }
-
-                return false;
-            });
-
-            var hasFlexDirectionRow = styles.Any(x =>
-            {
-                var parseResult = TryParsePropertyValue(x);
-                if (parseResult.HasNoValue)
-                {
-                    return false;
-                }
-
-                if (parseResult.Name == "flex-direction" && parseResult.Value == "row")
-                {
-                    return true;
-                }
-
-                return false;
-            });
+            var hasFlexDirectionRow = styles.Any(x => TryParseProperty(x).Is("flex-direction", "row"));
 
             var hasHeightWithConstantValue = styles.Any(x =>
             {

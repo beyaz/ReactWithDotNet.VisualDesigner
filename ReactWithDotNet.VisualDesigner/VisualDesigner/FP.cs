@@ -194,6 +194,27 @@ static class FP
 
         return convertFunc(maybe.Value);
     }
+    
+    public static bool Is<A, B>(this Maybe<(A, B)> maybe, (A a, B b) value)
+    {
+        if (maybe.HasNoValue)
+        {
+            return false;
+        }
+
+        return EqualityComparer<A>.Default.Equals(maybe.Value.Item1, value.a) &&
+               EqualityComparer<B>.Default.Equals(maybe.Value.Item2, value.b);
+    }
+    public static bool Is<A, B>(this Maybe<(A, B)> maybe, A a, B b)
+    {
+        if (maybe.HasNoValue)
+        {
+            return false;
+        }
+
+        return EqualityComparer<A>.Default.Equals(maybe.Value.Item1, a) &&
+               EqualityComparer<B>.Default.Equals(maybe.Value.Item2, b);
+    }
 
     public static Result<B> Then<A, B>(this (A value, Exception exception) result, Func<A, B> convertFunc)
     {
