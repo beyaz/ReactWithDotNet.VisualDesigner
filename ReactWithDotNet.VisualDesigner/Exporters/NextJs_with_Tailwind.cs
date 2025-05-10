@@ -284,21 +284,15 @@ static class NextJs_with_Tailwind
         }
 
         // todo:rename
-        var bindProperty = node.Properties.FirstOrDefault(x => x.Name == "-text");
+        var bindProperty = node.Properties.FirstOrDefault(x => x.Name == Design.Text);
         if (bindProperty is not null)
         {
             node.Properties.Remove(bindProperty);
         }
 
-        foreach (var reactProperty in node.Properties)
+        foreach (var reactProperty in node.Properties.Where(p=>p.Name.NotIn(Design.Text, Design.DesignText)))
         {
             var propertyName = reactProperty.Name;
-
-            // todo: give better namig
-            if (propertyName == "-text" || propertyName == "--text")
-            {
-                continue;
-            }
             
             var propertyValue = reactProperty.Value;
 

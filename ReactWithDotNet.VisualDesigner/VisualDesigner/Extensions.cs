@@ -79,7 +79,7 @@ static class Extensions
         var query = 
             from p in model.Properties
             from v in TryParseProperty(p)
-            where v.Name == "-text"
+            where v.Name == Design.Text
             select v.Value;
 
         return query.FirstOrDefault();
@@ -91,7 +91,7 @@ static class Extensions
         var query = 
             from p in model.Properties
             from v in TryParseProperty(p)
-            where v.Name == "--text"
+            where v.Name == Design.DesignText
             select v.Value;
 
         return query.FirstOrDefault();
@@ -592,4 +592,11 @@ public sealed class StyleAttribute
         value = Value;
         pseudo = Pseudo;
     }
+}
+
+static class Design
+{
+    public const string Text = "-text";
+    
+    public const string DesignText = "--text";
 }

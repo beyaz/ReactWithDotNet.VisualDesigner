@@ -141,17 +141,11 @@ sealed class ApplicationPreview : Component
             {
                 element.Add(TryClearStringValue(model.GetDesignText() ??  model.GetText()));
 
-                tryGetPropValueFromCaller(context, model, "-text").HasValue(text => element.text = text);
+                tryGetPropValueFromCaller(context, model, Design.Text).HasValue(text => element.text = text);
             }
 
-            foreach (var (name, value) in from p in model.Properties from x in TryParseProperty(p) where x.Value is not null select x)
+            foreach (var (name, value) in from p in model.Properties from x in TryParseProperty(p) where x.Name.NotIn(Design.Text, Design.DesignText) select x)
             {
-                if (name == "--text" || name == "-text")
-                {
-                    // todo: do for only html tags
-                    continue;
-                }
-                    
                 if (name == "-items-source-design-time-count")
                 {
                     var firstChild = model.Children.FirstOrDefault();
