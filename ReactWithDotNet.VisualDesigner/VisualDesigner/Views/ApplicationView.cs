@@ -46,9 +46,9 @@ sealed class ApplicationView : Component<ApplicationState>
         // try take from db cache
         {
             var lastUsage = (await GetLastUsageInfoByUserName(userName)).FirstOrDefault();
-            if (lastUsage is not null && lastUsage.StateAsYaml.HasValue())
+            if (lastUsage is not null && lastUsage.LastStateAsYaml.HasValue())
             {
-                state = DeserializeFromYaml<ApplicationState>(lastUsage.StateAsYaml);
+                state = DeserializeFromYaml<ApplicationState>(lastUsage.LastStateAsYaml);
 
                 UpdateZoomInClient();
 
@@ -215,9 +215,9 @@ sealed class ApplicationView : Component<ApplicationState>
         // try take from db cache
         {
             var lastUsage = (await GetLastUsageInfoByUserName(userName)).FirstOrDefault(p => p.ProjectId == projectId);
-            if (lastUsage?.StateAsYaml.HasValue() is true)
+            if (lastUsage?.LastStateAsYaml.HasValue() is true)
             {
-                state = DeserializeFromYaml<ApplicationState>(lastUsage.StateAsYaml);
+                state = DeserializeFromYaml<ApplicationState>(lastUsage.LastStateAsYaml);
 
                 return;
             }

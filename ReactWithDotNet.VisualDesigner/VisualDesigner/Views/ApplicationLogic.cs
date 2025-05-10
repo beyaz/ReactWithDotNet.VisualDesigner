@@ -578,7 +578,7 @@ static class ApplicationLogic
                 await db.UpdateAsync(dbRecord with
                 {
                     LastAccessTime = DateTime.Now,
-                    StateAsYaml = SerializeToYaml(state)
+                    LastStateAsYaml = SerializeToYaml(state)
                 });
             }
             else
@@ -588,7 +588,7 @@ static class ApplicationLogic
                     UserName       = state.UserName,
                     ProjectId      = state.ProjectId,
                     LastAccessTime = DateTime.Now,
-                    StateAsYaml    = SerializeToYaml(state)
+                    LastStateAsYaml    = SerializeToYaml(state)
                 });
             }
         });

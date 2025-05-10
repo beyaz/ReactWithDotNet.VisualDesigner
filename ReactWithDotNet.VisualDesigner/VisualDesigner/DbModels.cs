@@ -74,7 +74,7 @@ public sealed record UserEntity
 
     public DateTime LastAccessTime { get; init; }
     
-    public string StateAsYaml { get; init; }
+    public string LastStateAsYaml { get; init; }
     
     // @formatter:on
 }
