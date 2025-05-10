@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-
 namespace ReactWithDotNet.VisualDesigner.Infrastructure;
 
 public class Program
@@ -14,19 +13,19 @@ public class Program
     public static void Main(string[] args)
     {
         ProcessHelper.KillAllNamedProcess($"{nameof(ReactWithDotNet)}.{nameof(VisualDesigner)}");
-        
+
         var port = NetworkHelper.GetAvailablePort(Config.NextAvailablePortFrom);
-        
+
         if (Config.HideConsoleWindow)
         {
             IgnoreException(ConsoleWindowUtility.HideConsoleWindow);
         }
-        
+
         if (Config.UseUrls)
         {
             Process.Start(Config.BrowserExePath, Config.BrowserExeArguments.Replace("{Port}", port.ToString()));
         }
-        
+
         var builder = WebApplication.CreateBuilder(args);
 
         var services = builder.Services;
@@ -40,7 +39,7 @@ public class Program
             options.Providers.Add<BrotliCompressionProvider>();
             options.Providers.Add<GzipCompressionProvider>();
         });
-        
+
         services.AddHostedService<ApplicationStateSaveService>();
 
         // C O N F I G U R E     A P P L I C A T I O N
