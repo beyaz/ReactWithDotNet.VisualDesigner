@@ -507,34 +507,6 @@ static class Extensions
         return $"{name.Trim()}: {value.Trim()}";
     }
     
-    public static AttributeParseResult TryParsePropertyValue(string nameValueCombined)
-    {
-        if (string.IsNullOrWhiteSpace(nameValueCombined))
-        {
-            return None;
-        }
-        
-        var colonIndex = nameValueCombined.IndexOf(':');
-        if (colonIndex < 0)
-        {
-            return None;
-        }
-
-        var name = nameValueCombined[..colonIndex];
-
-        var value = nameValueCombined[(colonIndex + 1)..].Trim();
-        if (value == string.Empty)
-        {
-            value = null;
-        }
-
-        return new()
-        {
-            HasValue = true,
-            Name    = name.Trim(),
-            Value   = value
-        };
-    }
     public static Maybe<(string Name, string Value)> TryParseProperty(string nameValueCombined)
     {
         if (string.IsNullOrWhiteSpace(nameValueCombined))
@@ -600,22 +572,6 @@ static class Extensions
         }
 
         return null;
-    }
-}
-
-
-sealed class AttributeParseResult
-{
-    public required bool HasValue { get; init; }
-    
-    public bool HasNoValue => !HasValue;
-
-    public string Name { get; init; }
-    public string Value { get; init; }
-    
-    public static implicit operator AttributeParseResult(NoneObject noneObject)
-    {
-        return new() { HasValue = false };
     }
 }
 
