@@ -46,7 +46,7 @@ sealed class ApplicationView : Component<ApplicationState>
         // try take from db cache
         {
             var lastUsage = (await GetLastUsageInfoByUserName(userName)).FirstOrDefault();
-            if (lastUsage is not null)
+            if (lastUsage is not null && lastUsage.StateAsYaml.HasValue())
             {
                 state = DeserializeFromYaml<ApplicationState>(lastUsage.StateAsYaml);
 
@@ -215,7 +215,7 @@ sealed class ApplicationView : Component<ApplicationState>
         // try take from db cache
         {
             var lastUsage = (await GetLastUsageInfoByUserName(userName)).FirstOrDefault(p => p.ProjectId == projectId);
-            if (lastUsage is not null)
+            if (lastUsage?.StateAsYaml.HasValue() is true)
             {
                 state = DeserializeFromYaml<ApplicationState>(lastUsage.StateAsYaml);
 
@@ -302,7 +302,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
         Element middle()
         {
-            return state.SelectedVisualElementAsYamlCodeIsVisible ?
+            return state.MainContentTab.In(MainContentTabs.Code, MainContentTabs.ProjectConfig) ?
                 new(FlexGrow(1), Padding(7), OverflowXAuto)
                 {
                     YamlEditor
@@ -445,33 +445,37 @@ sealed class ApplicationView : Component<ApplicationState>
                 },
 
                 SpaceX(8),
-                new FlexRowCentered(Border(1, solid, Theme.BorderColor), BorderRadius(4), Width(60))
+                new FlexRowCentered(Border(1, solid, Theme.BorderColor), BorderRadius(4))
                 {
                     PositionRelative,
                     new label(PositionAbsolute, Top(-4), Left(8), FontSize10, LineHeight7, Background(Theme.BackgroundColor), PaddingX(4)) { "View" },
 
-                    state.SelectedVisualElementAsYamlCodeIsVisible ? "Design" : "Code",
-
-                    OnClick(_ =>
+                    new FlexRowCentered(Gap(8),PaddingX(4))
                     {
-                        if (state.SelectedVisualElementAsYamlCodeIsVisible)
+                        new FlexRowCentered
                         {
-                            // check has any edit
-                            if (state.SelectedVisualElementAsYamlCode != YamlHelper.SerializeToYaml(CurrentVisualElement))
-                            {
-                                var result = UpdateElementNode(state.Selection.VisualElementTreeItemPath, state.SelectedVisualElementAsYamlCode);
-                                if (result.HasError)
-                                {
-                                    this.FailNotification(result.Error.Message);
-                                    return Task.CompletedTask;
-                                }
-                            }
-                        }
+                            "Design",
+                            OnClick(OnMainContentTabHeaderClicked),
+                            Id((int)MainContentTabs.Design),
+                            When(state.MainContentTab==MainContentTabs.Design, BorderRadius(4),LineHeight7, Padding(4),Border(1,solid,Theme.BorderColor))
+                        },
+                        new FlexRowCentered
+                        {
+                            "Code",
+                            OnClick(OnMainContentTabHeaderClicked),
+                            Id((int)MainContentTabs.Code),
+                            When(state.MainContentTab==MainContentTabs.Code, BorderRadius(4),LineHeight7, Padding(4),Border(1,solid,Theme.BorderColor))
+                        },
+                        new FlexRowCentered
+                        {
+                            "Project",
+                            OnClick(OnMainContentTabHeaderClicked),
+                            Id((int)MainContentTabs.ProjectConfig),
+                            When(state.MainContentTab==MainContentTabs.ProjectConfig, BorderRadius(4),LineHeight7, Padding(4),Border(1,solid,Theme.BorderColor))
+                        },
+                    },
 
-                        state.SelectedVisualElementAsYamlCodeIsVisible = !state.SelectedVisualElementAsYamlCodeIsVisible;
-
-                        return Task.CompletedTask;
-                    })
+                    
                 }
             },
             new FlexRowCentered(Gap(32))
@@ -491,6 +495,61 @@ sealed class ApplicationView : Component<ApplicationState>
                 Padding(5, 30)
             }
         };
+    }
+
+    [StopPropagation]
+    async Task OnMainContentTabHeaderClicked(MouseEvent e)
+    {
+        var tab = Enum.Parse<MainContentTabs>(e.target.id);
+        
+        // has no change
+        if (state.MainContentTab == tab)
+        {
+            return;
+        }
+
+        if (state.MainContentTab == MainContentTabs.Code)
+        {
+            // check has any edit
+            if (state.YamlText != SerializeToYaml(CurrentVisualElement))
+            {
+                var result = UpdateElementNode(state.Selection.VisualElementTreeItemPath, state.YamlText);
+                if (result.HasError)
+                {
+                    this.FailNotification(result.Error.Message);
+                    return;
+                }
+            }
+        }
+        
+        if (state.MainContentTab == MainContentTabs.ProjectConfig)
+        {
+            var result = await DbOperation(async db =>
+            {
+                var project = await db.FirstOrDefaultAsync<ProjectEntity>(x => x.Id == state.ProjectId);
+                if (project is null)
+                {
+                    return Fail("ProjectNotFound");
+                }
+
+                await db.UpdateAsync(project with { ConfigAsYaml = state.YamlText });
+
+                return Success;
+            });
+            
+            if (result.HasError)
+            {
+                this.FailNotification(result.Error.Message);
+            }
+        }
+
+        state.MainContentTab = tab;
+
+        if (tab == MainContentTabs.Design)
+        {
+            state.YamlText = null;
+        }
+
     }
 
     async Task<Element> PartLeftPanel()
@@ -1407,11 +1466,21 @@ sealed class ApplicationView : Component<ApplicationState>
 
     Element YamlEditor()
     {
-        state.SelectedVisualElementAsYamlCode = SerializeToYaml(CurrentVisualElement);
+        state.YamlText = null;
+        
+        if (state.MainContentTab == MainContentTabs.Code)
+        {
+            state.YamlText = SerializeToYaml(CurrentVisualElement);
+        }
+        
+        if (state.MainContentTab == MainContentTabs.ProjectConfig)
+        {
+            state.YamlText = DbOperation(db => db.FirstOrDefault<ProjectEntity>(x => x.Id == state.ProjectId)?.ConfigAsYaml);
+        }
 
         return new Editor
         {
-            valueBind       = () => state.SelectedVisualElementAsYamlCode,
+            valueBind       = () => state.YamlText,
             defaultLanguage = "yaml",
             options =
             {

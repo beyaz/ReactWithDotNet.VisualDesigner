@@ -8,7 +8,7 @@ using Dommel;
 namespace ReactWithDotNet.VisualDesigner.DbModels;
 
 [Table("Project")]
-sealed class ProjectEntity
+sealed record ProjectEntity
 {
     [Key]
     public int Id { get; init; }

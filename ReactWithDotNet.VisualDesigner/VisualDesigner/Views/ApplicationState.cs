@@ -49,11 +49,16 @@ public sealed class ApplicationState
     
     public string UserName { get; init; }
     
-    public bool SelectedVisualElementAsYamlCodeIsVisible { get; set; }
+    public string YamlText { get; set; }
     
-    public string SelectedVisualElementAsYamlCode { get; set; }
+    public MainContentTabs MainContentTab{ get; set; }
 
     // @formatter:on
+}
+
+public enum MainContentTabs
+{
+    Design, Code, ProjectConfig
 }
 
 static class ApplicationStateMemoryCache
