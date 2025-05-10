@@ -1,7 +1,7 @@
 ﻿using System.Collections.Immutable;
 using System.Data;
 using System.IO;
-using Dapper.Contrib.Extensions;
+using Dommel;
 
 namespace ReactWithDotNet.VisualDesigner.Views;
 
@@ -568,11 +568,9 @@ static class ApplicationLogic
             return Task.CompletedTask;
         }
 
-        const string query = $"SELECT * FROM LastUsageInfo WHERE UserName = @{nameof(state.UserName)}";
-
         return DbOperation(async db =>
         {
-            var dbRecords = await db.QueryAsync<UserEntity>(query, new { state.UserName });
+            var dbRecords = await db.SelectAsync<UserEntity>(x=>x.UserName == state.UserName);
 
             var dbRecord = dbRecords.FirstOrDefault(x => x.ProjectId == state.ProjectId);
             if (dbRecord is not null)

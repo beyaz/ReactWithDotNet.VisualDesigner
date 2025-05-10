@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using Dommel;
 using Microsoft.Data.Sqlite;
 
 namespace ReactWithDotNet.VisualDesigner.Views;
@@ -55,9 +56,7 @@ static class ApplicationDatabase
     
     public static async Task<IReadOnlyList<UserEntity>> GetLastUsageInfoByUserName(string userName)
     {
-        const string query = $"SELECT * FROM LastUsageInfo WHERE UserName = @{nameof(userName)} Order BY {nameof(UserEntity.LastAccessTime)} DESC";
-
-        return (await DbOperation(async db =>  await db.QueryAsync<UserEntity>(query, new{ userName}))).ToList();
+        return (await DbOperation(async db =>  await db.SelectAsync<UserEntity>(x=>x.UserName == userName))).ToList();
     }
     
     public static async Task<ComponentEntity> GetFirstComponentInProject(int projectId)
