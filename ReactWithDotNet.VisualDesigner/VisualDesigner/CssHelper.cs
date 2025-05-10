@@ -144,7 +144,7 @@ public static class CssHelper
 
             if (value is not null)
             {
-                var htmlStyle = ToHtmlStyle(name, value);
+                var htmlStyle = ToHtmlStyle(projectId,name, value);
                 if (htmlStyle.HasError)
                 {
                     return htmlStyle.Error;
@@ -250,8 +250,9 @@ public static class CssHelper
         }
 
         // try resolve from project config
+        var project = Project;
         {
-            if (Project.Styles.TryGetValue(utilityCssClassName, out var cssText))
+            if (project.Styles.TryGetValue(utilityCssClassName, out var cssText))
             {
                 var (map, exception) = Style.ParseCssAsDictionary(cssText);
                 if (exception is null)
@@ -391,7 +392,7 @@ public static class CssHelper
         // try read from project config
         {
             var (name, value, _) = ParseStyleAttibute(utilityCssClassName);
-            if (name == "color" && value is not null && Project.Colors.TryGetValue(value, out var realColor))
+            if (name == "color" && value is not null && project.Colors.TryGetValue(value, out var realColor))
             {
                 return (pseudo,
                 [
@@ -453,7 +454,7 @@ public static class CssHelper
                 if (arbitrary.HasValue)
                 {
                     var color = arbitrary.Value;
-                    if (Project.Colors.TryGetValue(color, out var realColor))
+                    if (project.Colors.TryGetValue(color, out var realColor))
                     {
                         color = realColor;
                     }
@@ -1097,7 +1098,7 @@ public static class CssHelper
         return new ArgumentOutOfRangeException($"{pseudoName} not recognized");
     }
 
-    static HtmlStyle ToHtmlStyle(string name, string value)
+    static HtmlStyle ToHtmlStyle(int projectId, string name, string value)
     {
         if (name == null)
         {
@@ -1214,7 +1215,7 @@ public static class CssHelper
                 {
                     for (var i = 0; i < parts.Length; i++)
                     {
-                        if (Project.Colors.TryGetValue(parts[i], out var color))
+                        if (GetProjectConfig(projectId).Colors.TryGetValue(parts[i], out var color))
                         {
                             parts[i] = color;
                         }
@@ -1259,7 +1260,7 @@ public static class CssHelper
             case "background":
             case "color":
             {
-                if (Project.Colors.TryGetValue(value, out var realColor))
+                if (GetProjectConfig(projectId).Colors.TryGetValue(value, out var realColor))
                 {
                     value = realColor;
                 }
