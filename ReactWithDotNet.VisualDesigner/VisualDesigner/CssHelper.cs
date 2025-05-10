@@ -28,7 +28,9 @@ public static class CssHelper
             designerStyleItemText = x.NewText;
         });
 
-        if (pseudo.HasNoValue() && Project.Styles.TryGetValue(designerStyleItemText, out _))
+        var project = GetProjectConfig(projectId);
+        
+        if (pseudo.HasNoValue() && project.Styles.TryGetValue(designerStyleItemText, out _))
         {
             return designerStyleItemText;
         }

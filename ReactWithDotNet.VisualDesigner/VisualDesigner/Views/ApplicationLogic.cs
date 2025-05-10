@@ -9,6 +9,11 @@ static class ApplicationLogic
 {
     public static readonly ProjectConfigModel Project = DeserializeFromYaml<ProjectConfigModel>(File.ReadAllText($@"{AppDirectory}ReactWithDotNet.VisualDesigner\VisualDesigner\Project.yaml"));
 
+    public static ProjectConfigModel GetProjectConfig(int projectId)
+    {
+        return Project;
+    }
+
     public static Task<Result> CommitComponent(ApplicationState state)
     {
         return DbOperation(async db =>
@@ -340,7 +345,9 @@ static class ApplicationLogic
     {
         var items = new List<string>();
 
-        items.AddRange(Project.Styles.Keys);
+        var project = GetProjectConfig(state.ProjectId);
+        
+        items.AddRange(project.Styles.Keys);
         
         for (var i = 1; i <= 10; i++)
         {
@@ -355,7 +362,7 @@ static class ApplicationLogic
         items.Add("flex-row-centered");
         items.Add("flex-col-centered");
 
-        foreach (var colorName in Project.Colors.Select(x => x.Key))
+        foreach (var colorName in project.Colors.Select(x => x.Key))
         {
             items.Add("color: " + colorName);
             items.Add($"border: 1px solid {colorName}");
@@ -376,7 +383,7 @@ static class ApplicationLogic
         items.Add("overflow-x: auto");
         items.Add("overflow-x: visible");
         
-        foreach (var colorName in Project.Colors.Select(x => x.Key))
+        foreach (var colorName in project.Colors.Select(x => x.Key))
         {
             items.Add("bg: " + colorName);
         }
@@ -444,7 +451,7 @@ static class ApplicationLogic
 
             foreach (var name in names)
             {
-                foreach (var (key, _) in Project.Colors)
+                foreach (var (key, _) in project.Colors)
                 {
                     items.Add($"{name}: 1px solid {key}");
                 }
@@ -464,7 +471,7 @@ static class ApplicationLogic
             }
         }
 
-        foreach (var (key, values) in Project.Suggestions)
+        foreach (var (key, values) in project.Suggestions)
         {
             foreach (var value in values)
             {

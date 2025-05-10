@@ -81,7 +81,7 @@ static class HtmlImporter
                 
                 foreach (var className in listOfCssClass)
                 {
-                    var maybe = CssHelper.TryConvertCssUtilityClassToHtmlStyle(className);
+                    var maybe = TryConvertCssUtilityClassToHtmlStyle(className);
                     if (maybe.HasValue)
                     {
                         var pseudo = maybe.Value.Pseudo;
