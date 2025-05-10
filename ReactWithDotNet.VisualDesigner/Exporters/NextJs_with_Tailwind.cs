@@ -283,11 +283,10 @@ static class NextJs_with_Tailwind
             node.Properties.Remove(childrenProperty);
         }
 
-        // todo:rename
-        var bindProperty = node.Properties.FirstOrDefault(x => x.Name == Design.Text);
-        if (bindProperty is not null)
+        var textProperty = node.Properties.FirstOrDefault(x => x.Name == Design.Text);
+        if (textProperty is not null)
         {
-            node.Properties.Remove(bindProperty);
+            node.Properties.Remove(textProperty);
         }
 
         foreach (var reactProperty in node.Properties.Where(p=>p.Name.NotIn(Design.Text, Design.DesignText)))
@@ -387,9 +386,9 @@ static class NextJs_with_Tailwind
             if (node.Children.Count == 1)
             {
                 var childrenText = node.Children[0].Text + string.Empty;
-                if (bindProperty is not null)
+                if (textProperty is not null)
                 {
-                    childrenText = AsFinalText(ClearConnectedValue(bindProperty.Value));
+                    childrenText = AsFinalText(ClearConnectedValue(textProperty.Value));
                 }
 
                 if (IsConnectedValue(childrenText))
