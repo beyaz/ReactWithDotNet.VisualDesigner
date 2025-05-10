@@ -374,20 +374,8 @@ sealed class ApplicationPreview : Component
                     propertyValue = maybe.Value.propertyValue;
                 }
 
-                foreach (var caller in context.ParentModel.Properties)
+                foreach (var (callerPropertyName, callerPropertyValue) in from p in context.ParentModel.Properties from v in TryParseProperty(p) select v)
                 {
-                    string callerPropertyName, callerPropertyValue;
-                    {
-                        var result = TryParsePropertyValue(caller);
-                        if (result.HasNoValue)
-                        {
-                            continue;
-                        }
-
-                        callerPropertyName  = result.Name;
-                        callerPropertyValue = result.Value;
-                    }
-
                     if (ClearConnectedValue(propertyValue) == $"props.{callerPropertyName}")
                     {
                         if (ClearConnectedValue(callerPropertyValue).StartsWith("'"))
