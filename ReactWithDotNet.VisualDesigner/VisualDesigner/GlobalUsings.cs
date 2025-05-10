@@ -29,7 +29,10 @@ global using static ReactWithDotNet.VisualDesigner.YamlHelper;
 
 global using static ReactWithDotNet.Tailwind;
 global using static ReactWithDotNet.VisualDesigner.Mappers.Mapper;
+global using ReactWithDotNet.VisualDesigner.Toolbox;
 
 using System.Runtime.CompilerServices;
+
+
 
 [assembly: InternalsVisibleTo("ReactWithDotNet.VisualDesigner.Test")]

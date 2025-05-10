@@ -1,6 +1,6 @@
 using System.Net.NetworkInformation;
 
-namespace ReactWithDotNet.VisualDesigner.Infrastructure;
+namespace ReactWithDotNet.VisualDesigner.Toolbox;
 
 static class NetworkHelper
 {
