@@ -144,125 +144,117 @@ sealed class ApplicationPreview : Component
                 tryGetPropValueFromCaller(context, model, "-text").HasValue(text => element.text = text);
             }
 
-            foreach (var property in model.Properties)
+            foreach (var (name, value) in model.Properties.Select(TryParseProperty).Where(x=>x.HasValue && x.Value.Value is not null).Select(x=>x.Value))
             {
-                var parseResult = TryParsePropertyValue(property);
-                if (parseResult.HasValue && parseResult.Value is not null)
+                if (name == "--text" || name == "-text")
                 {
+                    // todo: do for only html tags
+                    continue;
+                }
                     
-                    var name = parseResult.Name;
-                    var value = parseResult.Value;
+                if (name == "-items-source-design-time-count")
+                {
+                    var firstChild = model.Children.FirstOrDefault();
+                    if (firstChild is not null)
+                    {
+                        var designTimeChildrenCount = double.Parse(value);
 
-                    if (name == "--text" || name == "-text")
-                    {
-                        // todo: do for only html tags
-                        continue;
-                    }
-                    
-                    if (name == "-items-source-design-time-count")
-                    {
-                        var firstChild = model.Children.FirstOrDefault();
-                        if (firstChild is not null)
+                        for (var i = 0; i < designTimeChildrenCount - 1; i++)
                         {
-                            var designTimeChildrenCount = double.Parse(value);
-
-                            for (var i = 0; i < designTimeChildrenCount - 1; i++)
-                            {
-                                model.Children.Add(CloneByUsingJson(firstChild));
-                            }
+                            model.Children.Add(CloneByUsingJson(firstChild));
                         }
+                    }
                         
 
+                    continue;
+                }
+
+                if (name == "class")
+                {
+                    element.AddClass(value);
+                    continue;
+                }
+
+                if (element is img elementAsImage)
+                {
+                    var isValueDouble = double.TryParse(value, out var valueAsDouble);
+
+                    if (name.Equals("h", StringComparison.OrdinalIgnoreCase) || name.Equals("height", StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (isValueDouble)
+                        {
+                            elementAsImage.height = valueAsDouble + "px";
+                        }
+                        else
+                        {
+                            elementAsImage.height = value;
+                        }
+
                         continue;
                     }
 
-                    if (name == "class")
+                    if (name.Equals("w", StringComparison.OrdinalIgnoreCase) || name.Equals("width", StringComparison.OrdinalIgnoreCase))
                     {
-                        element.AddClass(value);
+                        if (isValueDouble)
+                        {
+                            elementAsImage.width = valueAsDouble + "px";
+                        }
+                        else
+                        {
+                            elementAsImage.width = value;
+                        }
+
                         continue;
                     }
 
-                    if (element is img elementAsImage)
+                    if (name.Equals("src", StringComparison.OrdinalIgnoreCase))
                     {
-                        var isValueDouble = double.TryParse(value, out var valueAsDouble);
-
-                        if (name.Equals("h", StringComparison.OrdinalIgnoreCase) || name.Equals("height", StringComparison.OrdinalIgnoreCase))
+                        if (IsConnectedValue(value))
                         {
-                            if (isValueDouble)
-                            {
-                                elementAsImage.height = valueAsDouble + "px";
-                            }
-                            else
-                            {
-                                elementAsImage.height = value;
-                            }
-
                             continue;
                         }
 
-                        if (name.Equals("w", StringComparison.OrdinalIgnoreCase) || name.Equals("width", StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (isValueDouble)
-                            {
-                                elementAsImage.width = valueAsDouble + "px";
-                            }
-                            else
-                            {
-                                elementAsImage.width = value;
-                            }
+                        var src = TryClearStringValue(value);
 
+                        if (src.StartsWith("https://"))
+                        {
+                            elementAsImage.src = src;
                             continue;
                         }
 
-                        if (name.Equals("src", StringComparison.OrdinalIgnoreCase))
+                        if (src.StartsWith("/"))
                         {
-                            if (IsConnectedValue(value))
-                            {
-                                continue;
-                            }
-
-                            value = TryClearStringValue(value);
-
-                            if (value.StartsWith("https://"))
-                            {
-                                elementAsImage.src = value;
-                                continue;
-                            }
-
-                            if (value.StartsWith("/"))
-                            {
-                                value = value.RemoveFromStart("/");
-                            }
-
-                            elementAsImage.src = Path.Combine(context.ReactContext.wwwroot, value);
-
-                            continue;
+                            src = src.RemoveFromStart("/");
                         }
+
+                        elementAsImage.src = Path.Combine(context.ReactContext.wwwroot, src);
+
+                        continue;
                     }
+                }
 
-                    if (element is input elementAsInput)
+                if (element is input elementAsInput)
+                {
+                    if (name.Equals("type", StringComparison.OrdinalIgnoreCase))
                     {
-                        if (name.Equals("type", StringComparison.OrdinalIgnoreCase))
+                        elementAsInput.type = value;
+                        continue;
+                    }
+                }
+
+                {
+                    var propertyInfo = element.GetType().GetProperty(name, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
+                    if (propertyInfo is not null)
+                    {
+                        if (propertyInfo.PropertyType == typeof(string))
                         {
-                            elementAsInput.type = value;
+                            propertyInfo.SetValue(element, value);
                             continue;
                         }
-                    }
 
-                    {
-                        var propertyInfo = element.GetType().GetProperty(name, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
-                        if (propertyInfo is not null)
+                        if (propertyInfo.PropertyType == typeof(UnionProp<string, double>))
                         {
-                            if (propertyInfo.PropertyType == typeof(string))
-                            {
-                                propertyInfo.SetValue(element, value);
-                                continue;
-                            }
-
-                            if (propertyInfo.PropertyType == typeof(UnionProp<string, double>))
-                            {
-                                propertyInfo.SetValue(element, (UnionProp<string, double>)value);
-                            }
+                            propertyInfo.SetValue(element, (UnionProp<string, double>)value);
                         }
                     }
                 }
