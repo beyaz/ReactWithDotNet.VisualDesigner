@@ -543,7 +543,15 @@ static class Extensions
         };
     }
     
+    public static bool In<T>(this T item, params T[] list)
+    {
+        return list.Contains(item);
+    }
 
+    public static bool NotIn<T>(this T item, params T[] list)
+    {
+        return !list.Contains(item);
+    }
     
     
     public static string TryGetPropertyValue(this IReadOnlyList<string> properties, params string[] propertyNameWithAlias)

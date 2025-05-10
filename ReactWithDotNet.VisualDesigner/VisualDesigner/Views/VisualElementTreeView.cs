@@ -295,7 +295,7 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
 
                 if (double.TryParse(parseResult.Value, out _))
                 {
-                    return parseResult.Name == "h" || parseResult.Name == "height";
+                    return parseResult.Name.In("h", "height");
                 }
 
                 return false;
@@ -311,7 +311,7 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
 
                 if (double.TryParse(parseResult.Value, out _))
                 {
-                    return parseResult.Name == "w" || parseResult.Name == "width";
+                    return parseResult.Name.In("w", "width");
                 }
 
                 return false;
