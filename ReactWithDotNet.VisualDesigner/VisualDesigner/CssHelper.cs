@@ -120,7 +120,7 @@ public static class CssHelper
         }
 
         {
-            var maybe = TryConvertCssUtilityClassToHtmlStyle(designerStyleItem);
+            var maybe = TryConvertCssUtilityClassToHtmlStyle(projectId, designerStyleItem);
             if (maybe.HasValue)
             {
                 return new DesignerStyleItem
@@ -237,7 +237,7 @@ public static class CssHelper
         return (StyleModifier)style;
     }
 
-    public static Maybe<(string Pseudo, (string Name, string Value)[] CssStyles)> TryConvertCssUtilityClassToHtmlStyle(string utilityCssClassName)
+    public static Maybe<(string Pseudo, (string Name, string Value)[] CssStyles)> TryConvertCssUtilityClassToHtmlStyle(int projectId,string utilityCssClassName)
     {
         string pseudo = null;
         {
@@ -250,7 +250,7 @@ public static class CssHelper
         }
 
         // try resolve from project config
-        var project = Project;
+        var project = GetProjectConfig(projectId);
         {
             if (project.Styles.TryGetValue(utilityCssClassName, out var cssText))
             {
