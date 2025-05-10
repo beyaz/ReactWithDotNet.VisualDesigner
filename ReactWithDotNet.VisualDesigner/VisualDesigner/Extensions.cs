@@ -76,33 +76,28 @@ static class Extensions
     
     public static string GetText(this VisualElementModel model)
     {
-        return model.Properties.Select(TryParseProperty)
-            .Where(x => x.HasValue)
-            .Select(x => x.Value)
-            .Where(x => x.Name == "-text")
-            .Select(x => x.Value)
-            .FirstOrDefault();
+        var query = 
+            from p in model.Properties
+            from v in TryParseProperty(p)
+            where v.Name == "-text"
+            select v.Value;
+
+        return query.FirstOrDefault();
 
     }
-    
+
     public static string GetDesignText(this VisualElementModel model)
     {
-        foreach (var property in model.Properties)
-        {
-            var result = TryParsePropertyValue(property);
-            if (result.HasValue)
-            {
-                if (result.Name=="--text")
-                {
-                    return result.Value;
-                }
-            }
-        }
-        
-        return null;
+        var query = 
+            from p in model.Properties
+            from v in TryParseProperty(p)
+            where v.Name == "--text"
+            select v.Value;
+
+        return query.FirstOrDefault();
     }
-    
-    
+
+
     public static Maybe<Type> TryGetHtmlElementTypeByTagName(string tag)
     {
         return typeof(svg).Assembly.GetType(nameof(ReactWithDotNet) + "." + tag, false);
