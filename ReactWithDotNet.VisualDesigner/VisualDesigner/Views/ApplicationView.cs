@@ -1190,7 +1190,7 @@ sealed class ApplicationView : Component<ApplicationState>
                             return Task.CompletedTask;
                         }
                         
-                        var model = HtmlImporter.ConvertToVisualElementModel(text);
+                        var model = HtmlImporter.ConvertToVisualElementModel(state.ProjectId, text);
                         if (model is null)
                         {
                             return Task.CompletedTask;

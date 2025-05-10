@@ -52,7 +52,7 @@ public static class CssHelper
             {
                 string tailwindClassName;
                 {
-                    var result = ConvertToTailwindClass(key, value);
+                    var result = ConvertToTailwindClass(project, key, value);
                     if (result.HasError)
                     {
                         return result.Error;
@@ -676,14 +676,13 @@ public static class CssHelper
         }
     }
     
-    static Result<string> ConvertToTailwindClass(string name, string value)
+    static Result<string> ConvertToTailwindClass(ProjectConfig project,string name, string value)
     {
         if (value is null)
         {
             return new ArgumentNullException(nameof(value));
         }
         
-        var project = Project;
 
         // check is conditional sample: border-width: {props.isSelected} ? 2 : 5
         {
@@ -692,7 +691,7 @@ public static class CssHelper
             {
                 string lefTailwindClass;
                 {
-                    var result = ConvertToTailwindClass(name, conditionalValue.left);
+                    var result = ConvertToTailwindClass(project, name, conditionalValue.left);
                     if (result.HasError)
                     {
                         return result.Error;
@@ -706,7 +705,7 @@ public static class CssHelper
                 if (conditionalValue.right.HasValue())
                 {
                     {
-                        var result = ConvertToTailwindClass(name, conditionalValue.right);
+                        var result = ConvertToTailwindClass(project, name, conditionalValue.right);
                         if (result.HasError)
                         {
                             return result.Error;

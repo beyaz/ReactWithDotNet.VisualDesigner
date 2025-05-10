@@ -125,7 +125,7 @@ static class HtmlImporter
 
         foreach (var child in htmlNode.ChildNodes)
         {
-            var childModel = ConvertToVisualElementModel(child);
+            var childModel = ConvertToVisualElementModel(projectId,child);
             if (childModel is null)
             {
                 continue;
