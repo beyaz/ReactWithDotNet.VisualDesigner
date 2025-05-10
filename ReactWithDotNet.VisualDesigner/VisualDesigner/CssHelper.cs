@@ -1,7 +1,6 @@
 ﻿using System.Globalization;
 using System.Reflection;
 using System.Text.RegularExpressions;
-using YamlDotNet.Core.Tokens;
 
 namespace ReactWithDotNet.VisualDesigner;
 
@@ -508,7 +507,7 @@ public static class CssHelper
 
         static Maybe<string> tryGetTailwindColor(string colorName, string number)
         {
-            var fieldInfo = typeof(ReactWithDotNet.Tailwind).GetField(colorName + number, BindingFlags.IgnoreCase | BindingFlags.Static | BindingFlags.Public);
+            var fieldInfo = typeof(Tailwind).GetField(colorName + number, BindingFlags.IgnoreCase | BindingFlags.Static | BindingFlags.Public);
             if (fieldInfo != null)
             {
                 return (string)fieldInfo.GetValue(null);
