@@ -354,7 +354,7 @@ sealed class ApplicationView : Component<ApplicationState>
             {
                 new h3 { "React Visual Designer" },
 
-                new FlexRowCentered(Gap(16), Border(1, solid, Theme.BorderColor), BorderRadius(4), PaddingX(8))
+                new FlexRowCentered(Gap(16), Border(1, solid, Theme.BorderColor), BorderRadius(4), PaddingX(8),Height(36))
                 {
                     PositionRelative,
                     new label(PositionAbsolute, Top(-4), Left(8), FontSize10, LineHeight7, Background(Theme.BackgroundColor), PaddingX(4)) { "Project" },
@@ -366,7 +366,7 @@ sealed class ApplicationView : Component<ApplicationState>
                 SpaceX(8),
                 new FlexRowCentered
                 {
-                    new FlexRowCentered(Gap(16), Border(1, solid, Theme.BorderColor), BorderRadius(4), PaddingX(8))
+                    new FlexRowCentered(Gap(16), Border(1, solid, Theme.BorderColor), BorderRadius(4), PaddingX(8), Height(36))
                     {
                         PositionRelative,
                         new label(PositionAbsolute, Top(-4), Left(8), FontSize10, LineHeight7, Background(Theme.BackgroundColor), PaddingX(4)) { "Component" },
@@ -445,34 +445,34 @@ sealed class ApplicationView : Component<ApplicationState>
                 },
 
                 SpaceX(8),
-                new FlexRowCentered(Border(1, solid, Theme.BorderColor), BorderRadius(4))
+                new FlexRowCentered(Border(1, solid, Theme.BorderColor), BorderRadius(4), Height(36))
                 {
                     PositionRelative,
                     new label(PositionAbsolute, Top(-4), Left(8), FontSize10, LineHeight7, Background(Theme.BackgroundColor), PaddingX(4)) { "View" },
 
-                    new FlexRowCentered(Gap(8),PaddingX(4))
+                    new FlexRowCentered(Gap(8),Padding(4),LineHeight10)
                     {
-                        new FlexRowCentered
+                        new FlexRowCentered(Padding(4), Border(1,solid,transparent))
                         {
                             "Design",
                             OnClick(OnMainContentTabHeaderClicked),
                             Id((int)MainContentTabs.Design),
-                            When(state.MainContentTab==MainContentTabs.Design, BorderRadius(4),LineHeight7, Padding(4),Border(1,solid,Theme.BorderColor))
+                            When(state.MainContentTab==MainContentTabs.Design, BorderRadius(4), Border(1,solid,Theme.BorderColor))
                         },
-                        new FlexRowCentered
+                        new FlexRowCentered(Padding(4), Border(1,solid,transparent))
                         {
                             "Code",
                             OnClick(OnMainContentTabHeaderClicked),
                             Id((int)MainContentTabs.Code),
-                            When(state.MainContentTab==MainContentTabs.Code, BorderRadius(4),LineHeight7, Padding(4),Border(1,solid,Theme.BorderColor))
+                            When(state.MainContentTab==MainContentTabs.Code, BorderRadius(4), Border(1,solid,Theme.BorderColor))
                         },
-                        new FlexRowCentered
+                        new FlexRowCentered(Padding(4), Border(1,solid,transparent))
                         {
                             "Project",
                             OnClick(OnMainContentTabHeaderClicked),
                             Id((int)MainContentTabs.ProjectConfig),
-                            When(state.MainContentTab==MainContentTabs.ProjectConfig, BorderRadius(4),LineHeight7, Padding(4),Border(1,solid,Theme.BorderColor))
-                        },
+                            When(state.MainContentTab==MainContentTabs.ProjectConfig, BorderRadius(4), Border(1,solid,Theme.BorderColor))
+                        }
                     },
 
                     
@@ -811,7 +811,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
     Element PartMediaSizeButtons()
     {
-        return new FlexRowCentered(Border(1, solid, Theme.BorderColor), BorderRadius(4), PaddingY(2), PaddingX(4))
+        return new FlexRowCentered(Border(1, solid, Theme.BorderColor), BorderRadius(4), PaddingX(4), Height(36))
         {
             PositionRelative,
             new label(PositionAbsolute, Top(-4), Left(8), FontSize10, LineHeight7, Background(Theme.BackgroundColor), PaddingX(4)) { "Width" },
@@ -1349,7 +1349,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
     Element PartScale()
     {
-        return new FlexRowCentered(Border(1, solid, Theme.BorderColor), BorderRadius(4), PaddingY(4))
+        return new FlexRowCentered(Border(1, solid, Theme.BorderColor), BorderRadius(4), Height(36))
         {
             PositionRelative,
             new label(PositionAbsolute, Top(-4), Left(8), FontSize10, LineHeight7, Background(Theme.BackgroundColor), PaddingX(4)) { "Zoom" },
