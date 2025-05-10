@@ -144,7 +144,7 @@ sealed class ApplicationPreview : Component
                 tryGetPropValueFromCaller(context, model, "-text").HasValue(text => element.text = text);
             }
 
-            foreach (var (name, value) in model.Properties.Select(TryParseProperty).Where(x=>x.HasValue && x.Value.Value is not null).Select(x=>x.Value))
+            foreach (var (name, value) in from p in model.Properties from x in TryParseProperty(p) where x.Value is not null select x)
             {
                 if (name == "--text" || name == "-text")
                 {
