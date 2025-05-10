@@ -1407,7 +1407,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
     Element YamlEditor()
     {
-        state.SelectedVisualElementAsYamlCode = YamlHelper.SerializeToYaml(CurrentVisualElement);
+        state.SelectedVisualElementAsYamlCode = SerializeToYaml(CurrentVisualElement);
 
         return new Editor
         {
