@@ -1,5 +1,4 @@
-﻿using Dapper.Contrib.Extensions;
-using FluentAssertions;
+﻿using FluentAssertions;
 using ReactWithDotNet.VisualDesigner.Exporters;
 
 namespace ReactWithDotNet.VisualDesigner.Test;

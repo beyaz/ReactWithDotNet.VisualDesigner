@@ -156,15 +156,11 @@ static class ApplicationLogic
             return new ArgumentException($"ComponentName ({componentName}) is not valid");
         }
 
-        const string sql = $"""
-                            SELECT * 
-                              FROM Component
-                             WHERE {nameof(ComponentEntity.ProjectId)} = @{nameof(projectId)}
-                               AND {nameof(ComponentEntity.Name)}      = @{nameof(componentName)}
-                               AND {nameof(ComponentEntity.UserName)}  IS NULL OR {nameof(ComponentEntity.UserName)} = ''
-                            """;
+        var query = from record in (await db.SelectAsync<ComponentEntity>(x => x.ProjectId == projectId && x.Name == componentName))
+            where record.UserName.HasNoValue()
+            select record;
 
-        return await db.QueryFirstOrDefaultAsync<ComponentEntity>(sql, new { projectId, componentName });
+        return query.FirstOrDefault();
     }
 
     public static async Task<Result<ComponentEntity>> GetComponentUserVersion(this IDbConnection db, int projectId, string componentName, string userName)
