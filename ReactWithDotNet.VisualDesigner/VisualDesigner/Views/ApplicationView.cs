@@ -1064,14 +1064,13 @@ sealed class ApplicationView : Component<ApplicationState>
 
                 Element content = value;
                 {
-                    var parseResult = TryParsePropertyValue(value);
-                    if (parseResult.HasValue)
+                    TryParseProperty(value).HasValue(x =>
                     {
                         content = new FlexRowCentered
                         {
-                            new span(FontWeight600) { parseResult.Name }, ": ", new span(PaddingLeft(2)) { parseResult.Value }
+                            new span(FontWeight600) { x.Name }, ": ", new span(PaddingLeft(2)) { x.Value }
                         };
-                    }
+                    });
                 }
 
                 return new(CursorDefault, Padding(4, 8), BorderRadius(16))
@@ -1106,14 +1105,13 @@ sealed class ApplicationView : Component<ApplicationState>
                             // calculate text selection in edit input
                             {
                                 var nameValue = CurrentVisualElement.Styles[state.Selection.SelectedStyleIndex.Value];
-                                var parseResult = TryParsePropertyValue(nameValue);
-                                if (parseResult.HasValue)
+                                TryParseProperty(nameValue).HasValue(parseResult =>
                                 {
                                     var startIndex = nameValue.LastIndexOf(parseResult.Value, StringComparison.OrdinalIgnoreCase);
                                     var endIndex = nameValue.Length;
 
                                     jsCode.AppendLine($"document.getElementById('{id}').setSelectionRange({startIndex}, {endIndex});");
-                                }
+                                });
                             }
 
                             Client.RunJavascript(jsCode.ToString());
@@ -1213,14 +1211,13 @@ sealed class ApplicationView : Component<ApplicationState>
 
                 Element content = value;
                 {
-                    var parseResult = TryParsePropertyValue(value);
-                    if (parseResult.HasValue)
+                    TryParseProperty(value).HasValue(x =>
                     {
                         content = new FlexRowCentered
                         {
-                            new span(FontWeight600) { parseResult.Name }, ": ", new span(PaddingLeft(2)) { parseResult.Value }
+                            new span(FontWeight600) { x.Name }, ": ", new span(PaddingLeft(2)) { x.Value }
                         };
-                    }
+                    });
                 }
 
                 return new(CursorDefault, Padding(4, 8), BorderRadius(16))
@@ -1255,14 +1252,14 @@ sealed class ApplicationView : Component<ApplicationState>
                             // calculate text selection in edit input
                             {
                                 var nameValue = CurrentVisualElement.Properties[location];
-                                var parseResult = TryParsePropertyValue(nameValue);
-                                if (parseResult.HasValue)
+                                
+                                TryParseProperty(nameValue).HasValue(parseResult =>
                                 {
                                     var startIndex = nameValue.LastIndexOf(parseResult.Value, StringComparison.OrdinalIgnoreCase);
                                     var endIndex = nameValue.Length;
 
                                     jsCode.AppendLine($"document.getElementById('{id}').setSelectionRange({startIndex}, {endIndex});");
-                                }
+                                });
                             }
 
                             Client.RunJavascript(jsCode.ToString());

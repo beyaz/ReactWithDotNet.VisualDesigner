@@ -334,22 +334,8 @@ sealed class ApplicationPreview : Component
 
             static Maybe<(string propertyName, string propertyValue)> tryGetProperty(VisualElementModel model, string propertyName)
             {
-                foreach (var property in model.Properties)
+                foreach (var (name, value) in from p in model.Properties from v in TryParseProperty(p) where v.Name == propertyName select v)
                 {
-                    var parseResult = TryParsePropertyValue(property);
-                    if (parseResult.HasNoValue)
-                    {
-                        continue;
-                    }
-
-                    var name = parseResult.Name;
-                    var value = parseResult.Value;
-
-                    if (name != propertyName)
-                    {
-                        continue;
-                    }
-
                     return (name, value);
                 }
 
