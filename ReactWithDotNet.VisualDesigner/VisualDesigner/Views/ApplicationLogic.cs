@@ -7,12 +7,7 @@ namespace ReactWithDotNet.VisualDesigner.Views;
 
 static class ApplicationLogic
 {
-    public static readonly ProjectConfig Project = DeserializeFromYaml<ProjectConfig>(File.ReadAllText($@"{AppDirectory}ReactWithDotNet.VisualDesigner\VisualDesigner\Project.yaml"));
-
-    public static ProjectConfig GetProjectConfig(int projectId)
-    {
-        return Project;
-    }
+    static readonly CachedObjectMap Cache = new() { Timeout = TimeSpan.FromMinutes(5) };
 
     public static Task<Result> CommitComponent(ApplicationState state)
     {
@@ -25,9 +20,10 @@ static class ApplicationLogic
                 {
                     return result.Error;
                 }
+
                 userVersion = result.Value;
             }
-            
+
             if (userVersion is null)
             {
                 return Fail($"User ({state.UserName}) has no change to commit.");
@@ -43,7 +39,7 @@ static class ApplicationLogic
 
                 mainVersion = result.Value;
             }
-            
+
             if (mainVersion is null)
             {
                 await db.UpdateAsync(userVersion with
@@ -87,60 +83,10 @@ static class ApplicationLogic
         });
     }
 
-    public static Task<Result> RollbackComponent(ApplicationState state)
+    public static Task<ImmutableList<string>> GetAllComponentNamesInProject(int projectId)
     {
-        return DbOperation(async db =>
-        {
-            ComponentEntity userVersion;
-            {
-                var result = await db.GetComponentUserVersion(state.ProjectId, state.ComponentName, state.UserName);
-                if (result.HasError)
-                {
-                    return result.Error;
-                }
-                userVersion = result.Value;
-            }
-            
-            if (userVersion is null)
-            {
-                return Fail($"User ({state.UserName}) has no change to rollback.");
-            }
-
-            ComponentEntity mainVersion;
-            {
-                var result = await db.GetComponentMainVersion(state.ProjectId, state.ComponentName);
-                if (result.HasError)
-                {
-                    return result.Error;
-                }
-
-                mainVersion = result.Value;
-            }
-            
-            if (mainVersion is null)
-            {
-                return Success;
-            }
-
-            // Check if the user version is the same as the main version
-            if (mainVersion.RootElementAsYaml == SerializeToYaml(state.ComponentRootElement))
-            {
-                return Fail($"User ({state.UserName}) has no change to rollback.");
-            }
-
-            // restore from main version
-            state.ComponentRootElement = mainVersion.RootElementAsYaml.AsVisualElementModel();
-            
-            await db.DeleteAsync(userVersion);
-
-            return Success;
-        });
-    }
-    
-    public static  Task<ImmutableList<string>> GetAllComponentNamesInProject(int projectId)
-    {
-        return DbOperation(async db => (await db.SelectAsync<ComponentEntity>(x=>x.ProjectId == projectId))
-                               .Select(c => c.Name) 
+        return DbOperation(async db => (await db.SelectAsync<ComponentEntity>(x => x.ProjectId == projectId))
+                               .Select(c => c.Name)
                                .Distinct().ToImmutableList());
     }
 
@@ -161,7 +107,7 @@ static class ApplicationLogic
             return new ArgumentException($"ComponentName ({componentName}) is not valid");
         }
 
-        var query = 
+        var query =
             from record in await db.SelectAsync<ComponentEntity>(x => x.ProjectId == projectId && x.Name == componentName)
             where record.UserName.HasNoValue()
             select record;
@@ -186,8 +132,7 @@ static class ApplicationLogic
             return new ArgumentException($"UserName ({userName}) is not valid");
         }
 
-        
-        var query = 
+        var query =
             from record in await db.SelectAsync<ComponentEntity>(x => x.ProjectId == projectId && x.Name == componentName && x.UserName == userName)
             select record;
 
@@ -232,6 +177,25 @@ static class ApplicationLogic
         return userVersion;
     }
 
+    public static Task<Result<ComponentEntity>> GetComponenUserOrMainVersion(ApplicationState state)
+    {
+        return DbOperation(async db =>
+        {
+            var userVersion = await db.GetComponentUserVersion(state.ProjectId, state.ComponentName, state.UserName);
+            if (userVersion.HasError)
+            {
+                return userVersion;
+            }
+
+            if (userVersion.Value is not null)
+            {
+                return userVersion.Value;
+            }
+
+            return await db.GetComponentMainVersion(state.ProjectId, state.ComponentName);
+        });
+    }
+
     public static Task<Result<ComponentEntity>> GetComponenUserOrMainVersionAsync(int projectId, string componentName, string userName)
     {
         return DbOperation(async db =>
@@ -250,23 +214,18 @@ static class ApplicationLogic
             return await db.GetComponentMainVersion(projectId, componentName);
         });
     }
-   
-    public static Task<Result<ComponentEntity>> GetComponenUserOrMainVersion(ApplicationState state)
+
+    public static ProjectConfig GetProjectConfig(int projectId)
     {
-        return DbOperation(async db =>
+        return Cache.AccessValue($"{nameof(ProjectConfig)}:{projectId}", () =>
         {
-            var userVersion = await db.GetComponentUserVersion(state.ProjectId, state.ComponentName, state.UserName);
-            if (userVersion.HasError)
+            var configAsYaml = DbOperation(db => db.FirstOrDefault<ProjectEntity>(x => x.Id == projectId))?.ConfigAsYaml;
+            if (configAsYaml.HasNoValue())
             {
-                return userVersion;
+                return new();
             }
 
-            if (userVersion.Value is not null)
-            {
-                return userVersion.Value;
-            }
-
-            return await db.GetComponentMainVersion(state.ProjectId, state.ComponentName);
+            return DeserializeFromYaml<ProjectConfig>(configAsYaml);
         });
     }
 
@@ -287,29 +246,24 @@ static class ApplicationLogic
 
             tag = selectedVisualItem.Tag;
         }
-        
+
         items.Add("-text: props.userName");
         items.Add("-text: state.userName");
         items.Add("-text: 'User Name'");
         items.Add("--text: 'User Name'");
-        
 
         if (tag == "img")
         {
             // todo: make this configurable
             const string publicFolder = @"C:\github\hopgogo\web\enduser-ui\public\";
 
-            foreach (var pattern in new[]{"*.svg", "*.png"})
+            foreach (var pattern in new[] { "*.svg", "*.png" })
             {
                 foreach (var file in Directory.GetFiles(publicFolder, pattern, SearchOption.AllDirectories))
                 {
-                    items.Add($"src: /{file.RemoveFromStart(publicFolder).Replace(Path.DirectorySeparatorChar,'/')}");
-                }    
+                    items.Add($"src: /{file.RemoveFromStart(publicFolder).Replace(Path.DirectorySeparatorChar, '/')}");
+                }
             }
-            
-            
-            
-           
         }
 
         if (tag == "a")
@@ -321,22 +275,20 @@ static class ApplicationLogic
         {
             items.Add("class: ph ph-minus");
             items.Add("class: ph ph-plus");
-        
+
             items.Add("class: ph ph-facebook-logo");
             items.Add("class: ph ph-x-logo");
             items.Add("class: ph ph-instagram-logo");
             items.Add("class: ph ph-linkedin-logo");
         }
-        
+
         items.Add("-items-source-design-time-count: 3");
         items.Add("-items-source: {state.userList}");
-        
+
         items.Add("-show-if: {state.isSelectedUser}");
         items.Add("-hide-if: {state.isSelectedUser}");
 
-
         items.AddRange(GetPropsSuggestions(state));
-        
 
         return items;
     }
@@ -346,14 +298,14 @@ static class ApplicationLogic
         var items = new List<string>();
 
         var project = GetProjectConfig(state.ProjectId);
-        
+
         items.AddRange(project.Styles.Keys);
-        
+
         for (var i = 1; i <= 10; i++)
         {
             items.Add($"z-index: {i}");
         }
-        
+
         for (var i = 1; i <= 100; i++)
         {
             items.Add($"border-radius: {i}");
@@ -367,22 +319,22 @@ static class ApplicationLogic
             items.Add("color: " + colorName);
             items.Add($"border: 1px solid {colorName}");
         }
-        
+
         items.Add("text-decoration: line-through");
         items.Add("text-decoration: underline");
         items.Add("text-decoration: overline");
         items.Add("text-decoration: none");
-            
+
         items.Add("overflow-y: hidden");
         items.Add("overflow-y: scroll");
         items.Add("overflow-y: auto");
         items.Add("overflow-y: visible");
-        
+
         items.Add("overflow-x: hidden");
         items.Add("overflow-x: scroll");
         items.Add("overflow-x: auto");
         items.Add("overflow-x: visible");
-        
+
         foreach (var colorName in project.Colors.Select(x => x.Key))
         {
             items.Add("bg: " + colorName);
@@ -428,7 +380,7 @@ static class ApplicationLogic
                 }
             }
         }
-        
+
         // margins
         {
             string[] names = ["margin", "margin-left", "margin-right", "margin-top", "margin-bottom"];
@@ -457,17 +409,16 @@ static class ApplicationLogic
                 }
             }
         }
-        
+
         // border radius
         {
             for (var i = 1; i <= 48; i++)
             {
                 items.Add($"border-top-left-radius: {i}");
                 items.Add($"border-top-right-radius: {i}");
-                    
+
                 items.Add($"border-bottom-left-radius: {i}");
                 items.Add($"border-bottom-right-radius: {i}");
-                    
             }
         }
 
@@ -478,14 +429,13 @@ static class ApplicationLogic
                 items.Add($"{key}: {value}");
             }
         }
-        
 
         return items;
     }
 
     public static IReadOnlyList<string> GetStyleGroupConditionSuggestions(ApplicationState state)
     {
-        return ["M","SM","MD","LG", "XL", "XXL", "hover", "focus", "active","visited","disabled","checked","first-child","last-child"];
+        return ["M", "SM", "MD", "LG", "XL", "XXL", "hover", "focus", "active", "visited", "disabled", "checked", "first-child", "last-child"];
     }
 
     public static async Task<IReadOnlyList<string>> GetSuggestionsForComponentSelection(ApplicationState state)
@@ -498,13 +448,62 @@ static class ApplicationLogic
         var suggestions = new List<string>(TagNameList);
 
         suggestions.AddRange((await GetAllComponentNamesInProject(state.ProjectId)).Where(name => name != state.ComponentName));
-        
+
         suggestions.Add("heroui/Checkbox");
 
         return suggestions;
     }
 
-    
+    public static Task<Result> RollbackComponent(ApplicationState state)
+    {
+        return DbOperation(async db =>
+        {
+            ComponentEntity userVersion;
+            {
+                var result = await db.GetComponentUserVersion(state.ProjectId, state.ComponentName, state.UserName);
+                if (result.HasError)
+                {
+                    return result.Error;
+                }
+
+                userVersion = result.Value;
+            }
+
+            if (userVersion is null)
+            {
+                return Fail($"User ({state.UserName}) has no change to rollback.");
+            }
+
+            ComponentEntity mainVersion;
+            {
+                var result = await db.GetComponentMainVersion(state.ProjectId, state.ComponentName);
+                if (result.HasError)
+                {
+                    return result.Error;
+                }
+
+                mainVersion = result.Value;
+            }
+
+            if (mainVersion is null)
+            {
+                return Success;
+            }
+
+            // Check if the user version is the same as the main version
+            if (mainVersion.RootElementAsYaml == SerializeToYaml(state.ComponentRootElement))
+            {
+                return Fail($"User ({state.UserName}) has no change to rollback.");
+            }
+
+            // restore from main version
+            state.ComponentRootElement = mainVersion.RootElementAsYaml.AsVisualElementModel();
+
+            await db.DeleteAsync(userVersion);
+
+            return Success;
+        });
+    }
 
     public static Task<Result> TrySaveComponentForUser(ApplicationState state)
     {
@@ -535,7 +534,7 @@ static class ApplicationLogic
 
                 if (mainVersion is null)
                 {
-                    return new InvalidOperationException(state.ComponentName+" Main version cannot be null");
+                    return new InvalidOperationException(state.ComponentName + " Main version cannot be null");
                 }
 
                 if (SerializeToYaml(state.ComponentRootElement) == mainVersion.RootElementAsYaml)
@@ -571,7 +570,7 @@ static class ApplicationLogic
 
         return DbOperation(async db =>
         {
-            var dbRecords = await db.SelectAsync<UserEntity>(x=>x.UserName == state.UserName);
+            var dbRecords = await db.SelectAsync<UserEntity>(x => x.UserName == state.UserName);
 
             var dbRecord = dbRecords.FirstOrDefault(x => x.ProjectId == state.ProjectId);
             if (dbRecord is not null)
