@@ -53,11 +53,11 @@ static class ApplicationDatabase
         return Projects;
     }
     
-    public static async Task<IReadOnlyList<LastUsageInfoEntity>> GetLastUsageInfoByUserName(string userName)
+    public static async Task<IReadOnlyList<UserEntity>> GetLastUsageInfoByUserName(string userName)
     {
-        const string query = $"SELECT * FROM LastUsageInfo WHERE UserName = @{nameof(userName)} Order BY {nameof(LastUsageInfoEntity.LastAccessTime)} DESC";
+        const string query = $"SELECT * FROM LastUsageInfo WHERE UserName = @{nameof(userName)} Order BY {nameof(UserEntity.LastAccessTime)} DESC";
 
-        return (await DbOperation(async db =>  await db.QueryAsync<LastUsageInfoEntity>(query, new{ userName}))).ToList();
+        return (await DbOperation(async db =>  await db.QueryAsync<UserEntity>(query, new{ userName}))).ToList();
     }
     
     public static async Task<ComponentEntity> GetFirstComponentInProject(int projectId)

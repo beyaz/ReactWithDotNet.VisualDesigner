@@ -572,7 +572,7 @@ static class ApplicationLogic
 
         return DbOperation(async db =>
         {
-            var dbRecords = await db.QueryAsync<LastUsageInfoEntity>(query, new { state.UserName });
+            var dbRecords = await db.QueryAsync<UserEntity>(query, new { state.UserName });
 
             var dbRecord = dbRecords.FirstOrDefault(x => x.ProjectId == state.ProjectId);
             if (dbRecord is not null)
@@ -585,7 +585,7 @@ static class ApplicationLogic
             }
             else
             {
-                await db.InsertAsync(new LastUsageInfoEntity
+                await db.InsertAsync(new UserEntity
                 {
                     UserName       = state.UserName,
                     ProjectId      = state.ProjectId,

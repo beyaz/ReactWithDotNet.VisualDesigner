@@ -55,8 +55,8 @@ public sealed record ComponentHistoryEntity
     // @formatter:on
 }
 
-[Table("LastUsageInfo")]
-public sealed record LastUsageInfoEntity
+[Table("User")]
+public sealed record UserEntity
 {
     // @formatter:off
     
