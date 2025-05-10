@@ -2,12 +2,12 @@
 using Newtonsoft.Json;
 using Formatting = Newtonsoft.Json.Formatting;
 using System.Globalization;
-using YamlDotNet.Core.Tokens;
 
 namespace ReactWithDotNet.VisualDesigner;
 
 static class Extensions
 {
+    
     
     //public static VisualElementModel Fix(this VisualElementModel model)
     //{
@@ -573,6 +573,11 @@ static class Extensions
     public static bool In<T>(this T item, params T[] list)
     {
         return list.Contains(item);
+    }
+    
+    public static bool IsTrue(this Maybe<bool> maybe)
+    {
+        return maybe.HasValue && maybe.Value;
     }
 
     public static bool NotIn<T>(this T item, params T[] list)

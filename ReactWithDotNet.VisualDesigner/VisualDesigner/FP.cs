@@ -184,6 +184,16 @@ static class FP
 
         action(maybe.Value);
     }
+    
+    public static Maybe<B> HasValue<A,B>(this Maybe<A> maybe, Func<A, B> convertFunc)
+    {
+        if (maybe.HasNoValue)
+        {
+            return None;
+        }
+
+        return convertFunc(maybe.Value);
+    }
 
     public static Result<B> Then<A, B>(this (A value, Exception exception) result, Func<A, B> convertFunc)
     {
