@@ -83,7 +83,7 @@ static class NextJs_with_Tailwind
         var (projectId, componentName, userName) = input;
 
 
-        var user = DbOperation(db => db.FirstOrDefault<UserEntity>(x => x.ProjectId == projectId && x.UserName == userName));
+        var user = GetUser(projectId, userName);
 
         ComponentEntity component;
         {

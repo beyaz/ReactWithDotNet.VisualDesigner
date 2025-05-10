@@ -10,6 +10,12 @@ static class ApplicationDatabase
 
     static string ConnectionString => $"Data Source={AppDirectory}app.db";
 
+
+    public static UserEntity GetUser(int projectId, string userName)
+    {
+        return DbOperation(db => db.FirstOrDefault<UserEntity>(x => x.ProjectId == projectId && x.UserName == userName));
+    }
+
     static IReadOnlyList<ProjectEntity> Projects { get; set; }
 
     public static void DbOperation(Action<IDbConnection> operation)

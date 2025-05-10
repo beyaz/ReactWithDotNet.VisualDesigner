@@ -254,16 +254,25 @@ static class ApplicationLogic
 
         if (tag == "img")
         {
-            // todo: make this configurable
-            const string publicFolder = @"C:\github\hopgogo\web\enduser-ui\public\";
-
-            foreach (var pattern in new[] { "*.svg", "*.png" })
+            var user = GetUser(state.ProjectId, state.UserName);
+            if (user is not null)
             {
-                foreach (var file in Directory.GetFiles(publicFolder, pattern, SearchOption.AllDirectories))
+                if (user.LocalWorkspacePath.HasValue())
                 {
-                    items.Add($"src: /{file.RemoveFromStart(publicFolder).Replace(Path.DirectorySeparatorChar, '/')}");
+                    var publicFolder = Path.Combine(user.LocalWorkspacePath, "public");
+                    if (Directory.Exists(publicFolder))
+                    {
+                        foreach (var pattern in new[] { "*.svg", "*.png" })
+                        {
+                            foreach (var file in Directory.GetFiles(publicFolder, pattern, SearchOption.AllDirectories))
+                            {
+                                items.Add($"src: /{file.RemoveFromStart(publicFolder).Replace(Path.DirectorySeparatorChar, '/')}");
+                            }
+                        }
+                    }
                 }
             }
+            
         }
 
         if (tag == "a")
