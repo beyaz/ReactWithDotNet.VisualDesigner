@@ -65,7 +65,7 @@ static class NextJs_with_Tailwind
 
         ReactNode rootNode;
         {
-            var result = await ConvertVisualElementModelToReactNodeModel(rootVisualElement);
+            var result = await ConvertVisualElementModelToReactNodeModel(component.ProjectId,rootVisualElement);
             if (result.HasError)
             {
                 return result.Error;
@@ -448,7 +448,7 @@ static class NextJs_with_Tailwind
         return $"{{t(\"{TryClearStringValue(text)}\")}}";
     }
 
-    static async Task<Result<ReactNode>> ConvertVisualElementModelToReactNodeModel(VisualElementModel element)
+    static async Task<Result<ReactNode>> ConvertVisualElementModelToReactNodeModel(int projectId,VisualElementModel element)
     {
         List<string> classNames = [];
 
@@ -556,7 +556,7 @@ static class NextJs_with_Tailwind
         {
             string tailwindClassName;
             {
-                var result = ConvertDesignerStyleItemToTailwindClassName(styleItem);
+                var result = ConvertDesignerStyleItemToTailwindClassName(projectId,styleItem);
                 if (result.HasError)
                 {
                     return result.Error;
@@ -597,7 +597,7 @@ static class NextJs_with_Tailwind
         {
             ReactNode childNode;
             {
-                var result = await ConvertVisualElementModelToReactNodeModel(child);
+                var result = await ConvertVisualElementModelToReactNodeModel(projectId, child);
                 if (result.HasError)
                 {
                     return result.Error;

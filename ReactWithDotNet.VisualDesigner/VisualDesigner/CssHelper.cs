@@ -17,7 +17,7 @@ public static class CssHelper
         { "XXL", XXL }
     };
 
-    public static Result<string> ConvertDesignerStyleItemToTailwindClassName(string designerStyleItemText)
+    public static Result<string> ConvertDesignerStyleItemToTailwindClassName(int projectId, string designerStyleItemText)
     {
         string pseudo = null;
 
