@@ -88,7 +88,23 @@ sealed class ApplicationPreview : Component
 
         var scaleStyle = TransformOrigin("0 0") + Transform($"scale({appState.Preview.Scale / 100})");
 
-        return finalElement + scaleStyle;
+        return new Fragment
+        {
+            new style
+            {
+                GetProjectConfig(projectId).GlobalCss
+            },
+            // phosphor
+            new link
+            {
+                rel = "stylesheet", type = "text/css", href = "https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css"
+            },
+            new link
+            {
+                rel = "stylesheet", type = "text/css", href = "https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css"
+            },
+            finalElement + scaleStyle
+        };
 
         static async Task<Result<Element>> renderElement(RenderContext context, VisualElementModel model, string path)
         {
