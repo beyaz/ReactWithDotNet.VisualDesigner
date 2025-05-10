@@ -185,7 +185,9 @@ public static class CssHelper
                 }
             }
 
-            if (Project.Styles.TryGetValue(designerStyleItem, out var cssText))
+            var project = Project;
+            
+            if (project.Styles.TryGetValue(designerStyleItem, out var cssText))
             {
                 return Style.ParseCssAsDictionary(cssText).Then(styleMap => new DesignerStyleItem
                 {
@@ -195,7 +197,7 @@ public static class CssHelper
                 });
             }
 
-            if (name == "color" && value is not null && Project.Colors.TryGetValue(value, out var realColor))
+            if (name == "color" && value is not null && project.Colors.TryGetValue(value, out var realColor))
             {
                 return new DesignerStyleItem
                 {
@@ -680,6 +682,8 @@ public static class CssHelper
         {
             return new ArgumentNullException(nameof(value));
         }
+        
+        var project = Project;
 
         // check is conditional sample: border-width: {props.isSelected} ? 2 : 5
         {
@@ -744,6 +748,7 @@ public static class CssHelper
             _ => name
         };
 
+        
         switch (name)
         {
             case "transform":
@@ -879,7 +884,7 @@ public static class CssHelper
                 var parts = value.Split(' ', StringSplitOptions.RemoveEmptyEntries);
                 if (parts.Length == 3)
                 {
-                    if (Project.Colors.TryGetValue(parts[2], out var htmlColor))
+                    if (project.Colors.TryGetValue(parts[2], out var htmlColor))
                     {
                         parts[2] = htmlColor;
                     }
@@ -911,7 +916,7 @@ public static class CssHelper
 
             case "color":
             {
-                if (Project.Colors.TryGetValue(value, out var htmlColor))
+                if (project.Colors.TryGetValue(value, out var htmlColor))
                 {
                     value = htmlColor;
                 }
@@ -921,7 +926,7 @@ public static class CssHelper
 
             case "border-color":
             {
-                if (Project.Colors.TryGetValue(value, out var htmlColor))
+                if (project.Colors.TryGetValue(value, out var htmlColor))
                 {
                     value = htmlColor;
                 }
@@ -1007,7 +1012,7 @@ public static class CssHelper
                 var parts = value.Split(' ', StringSplitOptions.RemoveEmptyEntries);
                 if (parts.Length == 3)
                 {
-                    if (Project.Colors.TryGetValue(parts[2], out var htmlColor))
+                    if (project.Colors.TryGetValue(parts[2], out var htmlColor))
                     {
                         parts[2] = htmlColor;
                     }
@@ -1028,7 +1033,7 @@ public static class CssHelper
             case "background":
             case "bg":
             {
-                if (Project.Colors.TryGetValue(value, out var htmlColor))
+                if (project.Colors.TryGetValue(value, out var htmlColor))
                 {
                     value = htmlColor;
                 }
