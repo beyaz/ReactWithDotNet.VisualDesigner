@@ -17,7 +17,7 @@ public sealed class CssHelperTest
     {
         static DesignerStyleItem Call(string designerStyleItem)
         {
-            var result = CreateDesignerStyleItemFromText(designerStyleItem);
+            var result = CreateDesignerStyleItemFromText(1,designerStyleItem);
 
             result.Success.Should().BeTrue();
 

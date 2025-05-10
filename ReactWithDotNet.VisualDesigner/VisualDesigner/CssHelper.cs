@@ -39,7 +39,7 @@ public static class CssHelper
         {
             DesignerStyleItem designerStyleItem;
             {
-                var result = CreateDesignerStyleItemFromText(designerStyleItemText);
+                var result = CreateDesignerStyleItemFromText(projectId, designerStyleItemText);
                 if (result.HasError)
                 {
                     return result.Error;
@@ -103,7 +103,7 @@ public static class CssHelper
         return string.Join(" ", tailwindClassNames.Select(x => pseudo + ":" + x));
     }
 
-    public static NotNullResult<DesignerStyleItem> CreateDesignerStyleItemFromText(string designerStyleItem)
+    public static NotNullResult<DesignerStyleItem> CreateDesignerStyleItemFromText(int projectId, string designerStyleItem)
     {
         // try process from plugin
         {

@@ -256,7 +256,7 @@ sealed class ApplicationPreview : Component
 
             {
                 var result = model.Styles
-                    .Select(CreateDesignerStyleItemFromText)
+                    .Select(x=>CreateDesignerStyleItemFromText(context.ProjectId,x))
                     .ConvertAll(designerItem => designerItem.ToStyleModifier())
                     .Then(styleModifiers => element.Add(styleModifiers.ToArray()));
 
