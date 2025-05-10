@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.IO.Compression;
+using System.Runtime.InteropServices;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.ResponseCompression;
@@ -23,7 +24,12 @@ public class Program
 
         if (Config.UseUrls)
         {
-            Process.Start(Config.BrowserExePath, Config.BrowserExeArguments.Replace("{Port}", port.ToString()));
+            var browserApplicationPath = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? Config.BrowserExePathForWindows
+                : RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? Config.BrowserExePathForMac
+                : RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ? Config.BrowserExePathForLinux
+                : throw new NotSupportedException("Unsupported OS");
+
+            Process.Start(browserApplicationPath, Config.BrowserExeArguments.Replace("{Port}", port.ToString()));
         }
 
         var builder = WebApplication.CreateBuilder(args);

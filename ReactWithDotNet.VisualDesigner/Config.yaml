@@ -1,4 +1,6 @@
-browserExePath: "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe"
+browserExePathForWindows: "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
+browserExePathForMac: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+browserExePathForLinux: "/usr/bin/google-chrome"
 browserExeArguments: "--app=https://localhost:{Port}/"
 hideConsoleWindow: true
 nextAvailablePortFrom: 5005

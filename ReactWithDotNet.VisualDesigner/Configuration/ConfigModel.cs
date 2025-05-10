@@ -1,37 +1,29 @@
 ﻿global using static ReactWithDotNet.VisualDesigner.Configuration.Extensions;
-global using  ReactWithDotNet.VisualDesigner.Configuration;
-
-using System.Diagnostics;
 using System.IO;
-using System.Net.NetworkInformation;
-using System.Runtime.InteropServices;
 
 namespace ReactWithDotNet.VisualDesigner.Configuration;
 
 sealed record ConfigModel
 {
+    // @formatter:off
+
+    public string BrowserExePathForWindows { get; init; }
+    public string BrowserExePathForMac { get; init; }
+    public string BrowserExePathForLinux { get; init; }
+    
     public string BrowserExeArguments { get; init; }
-    public string BrowserExePath { get; init; }
+    
     public bool HideConsoleWindow { get; init; }
+    
     public int NextAvailablePortFrom { get; init; }
+    
     public bool UseUrls { get; init; }
+    
+    // @formatter:on
 }
 
 static class Extensions
 {
-    
-    public static void IgnoreException(Action action)
-    {
-        try
-        {
-            action();
-        }
-        catch (Exception)
-        {
-            // ignored
-        }
-    }
-    
     public static readonly ConfigModel Config = ReadConfig();
 
     static readonly bool IsRunningInVS = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("VisualStudioEdition"));
@@ -50,9 +42,21 @@ static class Extensions
         }
     }
 
+    public static void IgnoreException(Action action)
+    {
+        try
+        {
+            action();
+        }
+        catch (Exception)
+        {
+            // ignored
+        }
+    }
+
     static ConfigModel ReadConfig()
     {
-        var config = YamlHelper.DeserializeFromYaml<ConfigModel>(File.ReadAllText(Path.Combine(AppFolder, "Config.yaml")));
+        var config = DeserializeFromYaml<ConfigModel>(File.ReadAllText(Path.Combine(AppFolder, "Config.yaml")));
 
         if (IsRunningInVS)
         {
@@ -62,6 +66,3 @@ static class Extensions
         return config;
     }
 }
-
-
-
