@@ -40,7 +40,7 @@ sealed class ApplicationPreview : Component
             };
         }
 
-        appState = CloneByUsingJson(appState);
+        appState = CloneByUsingYaml(appState);
 
         var projectId = appState.ProjectId;
 
@@ -155,7 +155,7 @@ sealed class ApplicationPreview : Component
 
                         for (var i = 0; i < designTimeChildrenCount - 1; i++)
                         {
-                            model.Children.Add(CloneByUsingJson(firstChild));
+                            model.Children.Add(CloneByUsingYaml(firstChild));
                         }
                     }
                         

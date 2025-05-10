@@ -1,6 +1,4 @@
 ﻿using System.IO;
-using Newtonsoft.Json;
-using Formatting = Newtonsoft.Json.Formatting;
 using System.Globalization;
 
 namespace ReactWithDotNet.VisualDesigner;
@@ -258,63 +256,16 @@ static class Extensions
         return node;
     }
     
-    public static string JsonPrettify(string json)
-    {
-        if (string.IsNullOrWhiteSpace(json))
-        {
-            return string.Empty;
-        }
-        
-        try
-        {
-            using (var stringReader = new StringReader(json))
-            using (var stringWriter = new StringWriter())
-            {
-                var jsonReader = new JsonTextReader(stringReader);
-                var jsonWriter = new JsonTextWriter(stringWriter) { Formatting = Formatting.Indented };
-                jsonWriter.WriteToken(jsonReader);
-                return stringWriter.ToString();
-            }
-        }
-        catch (Exception)
-        {
-           return json;
-        }
-    }
-
-    public static string SerializeToJson(object obj)
-    {
-        if (obj is null)
-        {
-            return null;
-        }
-        
-        return JsonConvert.SerializeObject(obj, new JsonSerializerSettings
-        {
-            Formatting           = Formatting.Indented,
-            DefaultValueHandling = DefaultValueHandling.Ignore
-        });
-    }
-    
-    public static T CloneByUsingJson<T>(T value) where T : class
+    public static T CloneByUsingYaml<T>(T value) where T : class
     {
         if (value is null)
         {
             return null;
         }
         
-        return DeserializeFromJson<T>(SerializeToJson(value));
+        return DeserializeFromYaml<T>(SerializeToYaml(value));
     }
     
-    public static T DeserializeFromJson<T>(string json) where T : class
-    {
-        if (json is null)
-        {
-            return null;
-        }
-        
-        return JsonConvert.DeserializeObject<T>(json);
-    }
     public static VisualElementModel AsVisualElementModel(this string rootElementAsYaml)
     {
         if (rootElementAsYaml is null)

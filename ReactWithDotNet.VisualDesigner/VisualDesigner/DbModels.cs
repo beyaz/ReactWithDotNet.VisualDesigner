@@ -25,8 +25,6 @@ public sealed record ComponentEntity
     
     public required string Name { get; init; }
     
-    public string RootElementAsJson { get; init; }
-    
     public string RootElementAsYaml { get; init; }
 
     public required string UserName { get; init; }
@@ -47,8 +45,6 @@ public sealed record ComponentHistoryEntity
     public required int ProjectId { get; init; }
     
     public required string Name { get; init; }
-    
-    public string RootElementAsJson { get; init; }
     
     public string RootElementAsYaml { get; init; }
 
@@ -73,7 +69,7 @@ public sealed record LastUsageInfoEntity
 
     public DateTime LastAccessTime { get; init; }
     
-    public string StateAsJson { get; init; }
+    public string StateAsYaml { get; init; }
     
     // @formatter:on
 }

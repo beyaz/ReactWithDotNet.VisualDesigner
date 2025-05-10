@@ -13,31 +13,31 @@ public sealed class NextJsExportTest
         (await NextJs_with_Tailwind.ExportAll(1)).Success.Should().BeTrue();
     }
 
-    [TestMethod]
-    public void FixAll()
-    {
-        DbOperation(db =>
-        {
-            foreach (var record in db.GetAll<ComponentEntity>())
-            {
-                db.Update(record with
-                {
-                    RootElementAsYaml = SerializeToYaml(DeserializeFromJson<VisualElementModel>(record.RootElementAsJson)),
-                    RootElementAsJson = null
-                });
-            }
-        });
+    //[TestMethod]
+    //public void FixAll()
+    //{
+    //    DbOperation(db =>
+    //    {
+    //        foreach (var record in db.GetAll<ComponentEntity>())
+    //        {
+    //            db.Update(record with
+    //            {
+    //                RootElementAsYaml = SerializeToYaml(DeserializeFromJson<VisualElementModel>(record.RootElementAsJson)),
+    //                RootElementAsJson = null
+    //            });
+    //        }
+    //    });
 
-        DbOperation(db =>
-        {
-            foreach (var record in db.GetAll<ComponentHistoryEntity>())
-            {
-                db.Update(record with
-                {
-                    RootElementAsYaml = SerializeToYaml(DeserializeFromJson<VisualElementModel>(record.RootElementAsJson)),
-                    RootElementAsJson = null
-                });
-            }
-        });
-    }
+    //    DbOperation(db =>
+    //    {
+    //        foreach (var record in db.GetAll<ComponentHistoryEntity>())
+    //        {
+    //            db.Update(record with
+    //            {
+    //                RootElementAsYaml = SerializeToYaml(DeserializeFromJson<VisualElementModel>(record.RootElementAsJson)),
+    //                RootElementAsJson = null
+    //            });
+    //        }
+    //    });
+    //}
 }

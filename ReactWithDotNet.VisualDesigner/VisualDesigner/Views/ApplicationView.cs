@@ -48,7 +48,7 @@ sealed class ApplicationView : Component<ApplicationState>
             var lastUsage = (await GetLastUsageInfoByUserName(userName)).FirstOrDefault();
             if (lastUsage is not null)
             {
-                state = DeserializeFromJson<ApplicationState>(lastUsage.StateAsJson);
+                state = DeserializeFromYaml<ApplicationState>(lastUsage.StateAsYaml);
 
                 UpdateZoomInClient();
 
@@ -217,7 +217,7 @@ sealed class ApplicationView : Component<ApplicationState>
             var lastUsage = (await GetLastUsageInfoByUserName(userName)).FirstOrDefault(p => p.ProjectId == projectId);
             if (lastUsage is not null)
             {
-                state = DeserializeFromJson<ApplicationState>(lastUsage.StateAsJson);
+                state = DeserializeFromYaml<ApplicationState>(lastUsage.StateAsYaml);
 
                 return;
             }
