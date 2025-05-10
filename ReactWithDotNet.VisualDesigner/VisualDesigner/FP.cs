@@ -215,6 +215,16 @@ static class FP
         return EqualityComparer<A>.Default.Equals(maybe.Value.Item1, a) &&
                EqualityComparer<B>.Default.Equals(maybe.Value.Item2, b);
     }
+    
+    public static bool Is<A>(this Maybe<A> maybe, Func<A,bool> nextFunc)
+    {
+        if (maybe.HasNoValue)
+        {
+            return false;
+        }
+
+        return nextFunc(maybe.Value);
+    }
 
     public static Result<B> Then<A, B>(this (A value, Exception exception) result, Func<A, B> convertFunc)
     {

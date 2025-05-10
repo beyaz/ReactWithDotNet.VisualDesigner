@@ -243,21 +243,7 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
 
             var hasFlexDirectionRow = styles.Any(x => TryParseProperty(x).Is("flex-direction", "row"));
 
-            var hasHeightWithConstantValue = styles.Any(x =>
-            {
-                var parseResult = TryParsePropertyValue(x);
-                if (parseResult.HasNoValue)
-                {
-                    return false;
-                }
-
-                if (double.TryParse(parseResult.Value, out _))
-                {
-                    return parseResult.Name.In("h", "height");
-                }
-
-                return false;
-            });
+            var hasHeightWithConstantValue = styles.Any(x => TryParseProperty(x).Is(r=>r.Value.IsDouble() &&r.Name.In("h", "height")));
 
             var hasWidhtWithConstantValue = styles.Any(x =>
             {
