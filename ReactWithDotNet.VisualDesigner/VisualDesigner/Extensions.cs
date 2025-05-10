@@ -583,11 +583,11 @@ static class Extensions
     {
         foreach (var property in properties)
         {
-            var parseResult = TryParsePropertyValue(property);
+            var parseResult = TryParseProperty(property);
             if (parseResult.HasValue)
             {
-                var name = parseResult.Name;
-                var value = parseResult.Value;
+                var name = parseResult.Value.Name;
+                var value = parseResult.Value.Value;
                 
                 foreach (var propertyName in propertyNameWithAlias)
                 {
