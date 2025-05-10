@@ -22,6 +22,12 @@
 	  <ProjectReference Include="..\..\ReactWithDotNet\ReactWithDotNet\ReactWithDotNet.csproj" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <None Update="Config.yaml">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	</ItemGroup>
+
 
 	
 	

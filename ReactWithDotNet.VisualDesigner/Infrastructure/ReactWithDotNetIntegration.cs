@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Net.Http.Headers;
 using ReactWithDotNet.UIDesigner;
 
-namespace ReactWithDotNet.WebSite;
+namespace ReactWithDotNet.VisualDesigner.Infrastructure;
 
 public static class ReactWithDotNetIntegration
 {

@@ -2,7 +2,7 @@
 using Dapper.Contrib.Extensions;
 using ReactWithDotNet.ThirdPartyLibraries.MonacoEditorReact;
 using ReactWithDotNet.VisualDesigner.Exporters;
-using Page = ReactWithDotNet.WebSite.Page;
+using Page = ReactWithDotNet.VisualDesigner.Infrastructure.Page;
 
 namespace ReactWithDotNet.VisualDesigner.Views;
 

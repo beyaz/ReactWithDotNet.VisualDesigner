@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http.Extensions;
-using Page = ReactWithDotNet.WebSite.Page;
+using Page = ReactWithDotNet.VisualDesigner.Infrastructure.Page;
 
 namespace ReactWithDotNet.VisualDesigner;
 
@@ -44,7 +44,7 @@ sealed class MainLayout : PureComponent, IPageLayout
             {
                 new meta { charset = "utf-8" },
                 new meta { name    = "viewport", content = "width=device-width, initial-scale=1" },
-                new title { "React with DotNet" },
+                new title { "ReactWithDotNet Visual Designer" },
 
                 new link
                 {

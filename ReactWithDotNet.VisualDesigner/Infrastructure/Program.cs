@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.IO.Compression;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -6,13 +7,25 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 
-namespace ReactWithDotNet.WebSite;
+namespace ReactWithDotNet.VisualDesigner.Infrastructure;
 
 public class Program
 {
     public static void Main(string[] args)
     {
+        ProcessHelper.KillAllNamedProcess($"{nameof(ReactWithDotNet)}.{nameof(VisualDesigner)}");
         
+        var port = NetworkHelper.GetAvailablePort(Config.NextAvailablePortFrom);
+        
+        if (Config.HideConsoleWindow)
+        {
+            IgnoreException(ConsoleWindowUtility.HideConsoleWindow);
+        }
+        
+        if (Config.UseUrls)
+        {
+            Process.Start(Config.BrowserExePath, Config.BrowserExeArguments.Replace("{Port}", port.ToString()));
+        }
         
         var builder = WebApplication.CreateBuilder(args);
 
@@ -58,6 +71,13 @@ public class Program
 
         app.ConfigureReactWithDotNet();
 
-        app.Run();
+        if (Config.UseUrls)
+        {
+            app.Run($"https://*:{port}");
+        }
+        else
+        {
+            app.Run();
+        }
     }
 }
