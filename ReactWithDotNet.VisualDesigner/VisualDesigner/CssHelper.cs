@@ -107,7 +107,7 @@ public static class CssHelper
     {
         // try process from plugin
         {
-            var result = tryProcessByProjectConfig(designerStyleItem);
+            var result = tryProcessByProjectConfig(projectId, designerStyleItem);
             if (result.HasError)
             {
                 return result.Error;
@@ -167,7 +167,7 @@ public static class CssHelper
             };
         }
 
-        static Result<DesignerStyleItem> tryProcessByProjectConfig(string designerStyleItem)
+        static Result<DesignerStyleItem> tryProcessByProjectConfig(int projectId,string designerStyleItem)
         {
             string name, value, pseudo;
             {
@@ -185,7 +185,7 @@ public static class CssHelper
                 }
             }
 
-            var project = Project;
+            var project = GetProjectConfig(projectId);
             
             if (project.Styles.TryGetValue(designerStyleItem, out var cssText))
             {
