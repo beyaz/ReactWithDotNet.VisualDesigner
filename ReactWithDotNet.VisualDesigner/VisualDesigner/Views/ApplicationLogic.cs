@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using System.ComponentModel;
 using System.Data;
 using System.IO;
 using Dommel;
@@ -134,6 +135,20 @@ static class ApplicationLogic
 
         return component;
     }
+    
+    public static async Task<Response<ComponentEntity>> TryFindComponentByComponentName(int projectId, string componentName)
+    {
+        if (componentName.HasNoValue())
+        {
+            return new ArgumentException($"ComponentName: {componentName} is not valid");
+        }
+
+        var query =
+            from record in await DbOperation(db=>db.SelectAsync<ComponentEntity>(x =>x.ProjectId ==projectId && x.Name == componentName))
+            select record;
+
+        return query.FirstOrDefault();
+    }
 
     public static async Task<Result<ComponentEntity>> GetComponentUserVersion(this IDbConnection db, int projectId, string componentName, string userName)
     {
@@ -182,17 +197,19 @@ static class ApplicationLogic
     
     public static Task<Result<VisualElementModel>> GetComponenUserOrMainVersionAsync(int componentId, string userName)
     {
-
         var input = new GetComponentDataInput { ComponentId = componentId, UserName = userName };
 
-
-
         return Pipe(input, GetComponentData, GetRootElementAsYaml, DeserializeFromYaml<VisualElementModel>);
+    }
+    
+    public static Task<Result<VisualElementModel>> GetComponenUserOrMainVersionAsync2(int projectId, string componentName, string userName)
+    {
+        
 
-
-
-
-
+        return Pipe(projectId, componentName,
+                    TryFindComponentByComponentName,
+                    x=>new GetComponentDataInput { ComponentId = x.Id, UserName = userName },
+                    GetComponentData, GetRootElementAsYaml, DeserializeFromYaml<VisualElementModel>);
     }
 
     public static ProjectConfig GetProjectConfig(int projectId)

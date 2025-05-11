@@ -28,7 +28,7 @@ public sealed class Result
     }
 }
 
-public sealed class Response<TValue>:   IEnumerable<TValue>
+public sealed class Response<TValue> : IEnumerable<TValue>
 {
     public Exception Error { get; init; }
 
@@ -47,25 +47,25 @@ public sealed class Response<TValue>:   IEnumerable<TValue>
     {
         return new() { Success = true };
     }
-    
+
     public static implicit operator Response<TValue>(Exception failInfo)
     {
         return new() { Error = failInfo };
-    }
-    
-    IEnumerator IEnumerable.GetEnumerator()
-    {
-        return GetEnumerator();
     }
 
     public IEnumerator<TValue> GetEnumerator()
     {
         if (Success)
+        {
             yield return Value;
+        }
+    }
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return GetEnumerator();
     }
 }
-
-
 
 public class Result<TValue>
 {
@@ -147,6 +147,14 @@ public sealed record Maybe<TValue> : IEnumerable<TValue>
         return new() { Value = value, HasValue = true };
     }
 
+    public IEnumerator<TValue> GetEnumerator()
+    {
+        if (HasValue)
+        {
+            yield return Value;
+        }
+    }
+
     public override string ToString()
     {
         return HasValue ? $"Some({Value})" : "None";
@@ -155,12 +163,6 @@ public sealed record Maybe<TValue> : IEnumerable<TValue>
     IEnumerator IEnumerable.GetEnumerator()
     {
         return GetEnumerator();
-    }
-
-    public IEnumerator<TValue> GetEnumerator()
-    {
-        if (HasValue)
-            yield return Value;
     }
 }
 
@@ -235,8 +237,8 @@ static class FP
 
         action(maybe.Value);
     }
-    
-    public static Maybe<B> HasValue<A,B>(this Maybe<A> maybe, Func<A, B> convertFunc)
+
+    public static Maybe<B> HasValue<A, B>(this Maybe<A> maybe, Func<A, B> convertFunc)
     {
         if (maybe.HasNoValue)
         {
@@ -245,7 +247,7 @@ static class FP
 
         return convertFunc(maybe.Value);
     }
-    
+
     public static bool Is<A, B>(this Maybe<(A, B)> maybe, (A a, B b) value)
     {
         if (maybe.HasNoValue)
@@ -256,6 +258,7 @@ static class FP
         return EqualityComparer<A>.Default.Equals(maybe.Value.Item1, value.a) &&
                EqualityComparer<B>.Default.Equals(maybe.Value.Item2, value.b);
     }
+
     public static bool Is<A, B>(this Maybe<(A, B)> maybe, A a, B b)
     {
         if (maybe.HasNoValue)
@@ -266,8 +269,8 @@ static class FP
         return EqualityComparer<A>.Default.Equals(maybe.Value.Item1, a) &&
                EqualityComparer<B>.Default.Equals(maybe.Value.Item2, b);
     }
-    
-    public static bool Is<A>(this Maybe<A> maybe, Func<A,bool> nextFunc)
+
+    public static bool Is<A>(this Maybe<A> maybe, Func<A, bool> nextFunc)
     {
         if (maybe.HasNoValue)
         {
@@ -275,6 +278,50 @@ static class FP
         }
 
         return nextFunc(maybe.Value);
+    }
+
+    public static async Task<Result<T3>> Pipe<T0, T1, T2, T3>(T0 i0, Func<T0, Task<Response<T1>>> m0, Func<T1, T2> m1, Func<T2, T3> m2)
+    {
+        var response0 = await m0(i0);
+        if (response0.HasError)
+        {
+            return response0.Error;
+        }
+
+        var response1 = m1(response0.Value);
+
+        var response2 = m2(response1);
+
+        return response2;
+    }
+
+    public static async Task<Result<T6>> Pipe<T0, T1, T2, T3, T4, T5, T6>(
+        T0 p0, T1 p1,
+        Func<T0, T1, Task<Response<T2>>> m0,
+        Func<T2, T3> m1,
+        Func<T3, Task<Response<T4>>> m2,
+        Func<T4, T5> m3,
+        Func<T5, T6> m4)
+    {
+        var response0 = await m0(p0, p1);
+        if (response0.HasError)
+        {
+            return response0.Error;
+        }
+
+        var response1 = m1(response0.Value);
+
+        var response2 = await m2(response1);
+        if (response2.HasError)
+        {
+            return response2.Error;
+        }
+
+        var response3 = m3(response2.Value);
+
+        var response4 = m4(response3);
+
+        return response4;
     }
 
     public static Result<B> Then<A, B>(this (A value, Exception exception) result, Func<A, B> convertFunc)
@@ -363,22 +410,5 @@ static class FP
         }
 
         throw result.Error;
-    }
-    
-    
-    public static async Task<Result<D>> Pipe<A,B,C,D>(A input, Func<A, Task<Response<B>>> first, Func<B,C> second, Func<C,D> third)
-    {
-        var response = await first(input);
-        if (response.HasError)
-        {
-            return response.Error;
-        }
-        var b = response.Value;
-
-        var c = second(b);
-
-        var d = third(c);
-
-        return d;
     }
 }
