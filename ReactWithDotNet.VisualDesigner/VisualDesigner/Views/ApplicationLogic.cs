@@ -121,6 +121,26 @@ static class ApplicationLogic
 
         return component;
     }
+    
+    public static async Task<Response<ComponentEntity>> GetComponentByComponentName_NotNull(this IDbConnection db, string componentName)
+    {
+        if (componentName.HasNoValue())
+        {
+            return new ArgumentException($"ComponentName: {componentName} is not valid");
+        }
+
+        var query =
+            from record in await db.SelectAsync<ComponentEntity>(x => x.Name == componentName)
+            select record;
+
+        var component = query.FirstOrDefault();
+        if (component is null)
+        {
+            return new IOException($"ComponentName ({componentName}) is not found");
+        }
+
+        return component;
+    }
 
     public static async Task<Result<ComponentEntity>> GetComponentUserVersion(this IDbConnection db, int projectId, string componentName, string userName)
     {

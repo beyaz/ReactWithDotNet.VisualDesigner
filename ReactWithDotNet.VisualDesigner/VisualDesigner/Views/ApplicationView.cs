@@ -176,7 +176,7 @@ sealed class ApplicationView : Component<ApplicationState>
         int componentId;
         VisualElementModel componentRootElement;
         {
-            var componentResult = await GetComponenUserOrMainVersionAsync(state.ProjectId, componentName, state.UserName);
+            var componentResult = await DbOperation(db => db.GetComponentByComponentName_NotNull(componentName));
             if (componentResult.HasError)
             {
                 this.FailNotification(componentResult.Error.Message);
@@ -184,15 +184,18 @@ sealed class ApplicationView : Component<ApplicationState>
             }
 
             var component = componentResult.Value;
-            if (component is null)
-            {
-                this.FailNotification($"Component not found. @{componentName}");
-                return;
-            }
 
             componentId = component.Id;
-            
-            componentRootElement = component.RootElementAsYaml.AsVisualElementModel();
+
+            var workspace = await Workspace.TryGetUserVersion(componentId, state.UserName);
+            if (workspace is not null)
+            {
+                componentRootElement = workspace.RootElementAsYaml.AsVisualElementModel();
+            }
+            else
+            {
+                componentRootElement = component.RootElementAsYaml.AsVisualElementModel();
+            }
         }
 
         

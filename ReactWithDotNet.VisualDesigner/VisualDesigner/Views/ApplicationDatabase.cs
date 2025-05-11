@@ -68,6 +68,8 @@ static class ApplicationDatabase
         return await DbOperation(async db =>  await db.FirstOrDefaultAsync<ComponentEntity>(x=>x.ProjectId == projectId));
     }
     
+   
+    
     public static async Task<int?> GetFirstProjectId()
     {
         return (await DbOperation(async db =>  await db.FirstOrDefaultAsync<ProjectEntity>(x=>true)))?.Id;
