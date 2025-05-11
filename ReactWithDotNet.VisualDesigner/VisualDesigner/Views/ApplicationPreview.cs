@@ -120,13 +120,13 @@ sealed class ApplicationPreview : Component
             {
                 VisualElementModel componentRootElementModel;
                 {
-                    var result = await GetComponenUserOrMainVersionAsync(context.ProjectId, model.Tag, context.UserName);
+                    var result = await GetComponenUserOrMainVersion(context.ProjectId, model.Tag, context.UserName);
                     if (result.HasError)
                     {
                         return result.Error;
                     }
 
-                    componentRootElementModel = result.Value?.RootElementAsYaml.AsVisualElementModel();
+                    componentRootElementModel = result.Value;
                 }
 
                 if (componentRootElementModel is not null)

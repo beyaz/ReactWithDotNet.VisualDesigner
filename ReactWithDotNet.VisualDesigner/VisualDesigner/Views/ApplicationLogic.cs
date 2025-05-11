@@ -202,10 +202,8 @@ static class ApplicationLogic
         return Pipe(input, GetComponentData, GetRootElementAsYaml, DeserializeFromYaml<VisualElementModel>);
     }
     
-    public static Task<Result<VisualElementModel>> GetComponenUserOrMainVersionAsync2(int projectId, string componentName, string userName)
+    public static Task<Result<VisualElementModel>> GetComponenUserOrMainVersion(int projectId, string componentName, string userName)
     {
-        
-
         return Pipe(projectId, componentName,
                     TryFindComponentByComponentName,
                     x=>new GetComponentDataInput { ComponentId = x.Id, UserName = userName },
