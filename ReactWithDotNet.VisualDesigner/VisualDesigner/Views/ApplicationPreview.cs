@@ -118,22 +118,25 @@ sealed class ApplicationPreview : Component
             
             if (element is null)
             {
-                VisualElementModel componentRootElementModel;
+                if (int.TryParse(model.Tag, out var componentId))
                 {
-                    var result = await GetComponenUserOrMainVersion(context.ProjectId, model.Tag, context.UserName);
-                    if (result.HasError)
+                    VisualElementModel componentRootElementModel;
                     {
-                        return result.Error;
+                        var result = await GetComponenUserOrMainVersionAsync(componentId, context.UserName);
+                        if (result.HasError)
+                        {
+                            return result.Error;
+                        }
+
+                        componentRootElementModel = result.Value;
                     }
 
-                    componentRootElementModel = result.Value;
-                }
+                    if (componentRootElementModel is not null)
+                    {
+                        componentRootElementModel.Children.AddRange(model.Children);
 
-                if (componentRootElementModel is not null)
-                {
-                    componentRootElementModel.Children.AddRange(model.Children);
-
-                    return await renderElement(context with { Parent = context, ParentModel = model }, componentRootElementModel, path);
+                        return await renderElement(context with { Parent = context, ParentModel = model }, componentRootElementModel, path);
+                    }
                 }
             }
 

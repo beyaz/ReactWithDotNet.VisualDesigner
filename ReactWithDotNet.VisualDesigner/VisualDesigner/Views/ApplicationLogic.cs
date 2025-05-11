@@ -1,13 +1,29 @@
 ﻿using System.Collections.Immutable;
 using System.Data;
 using System.IO;
-using Dommel;
 using ReactWithDotNet.VisualDesigner.DataAccess;
 
 namespace ReactWithDotNet.VisualDesigner.Views;
 
 static class ApplicationLogic
 {
+
+    public static string GetTagText(string tag)
+    {
+        if (int.TryParse(tag, out var componentId))
+        {
+            var component = DbOperation(db => db.FirstOrDefault<ComponentEntity>(x => x.Id == componentId));
+            if (component is null)
+            {
+                return tag;
+            }
+
+            return component.Name.Split('/').Last();
+        }
+
+        return tag;
+    }
+    
     public static readonly CachedObjectMap Cache = new() { Timeout = TimeSpan.FromMinutes(5) };
 
     public static Task<Result> CommitComponent(ApplicationState state)
@@ -93,20 +109,6 @@ static class ApplicationLogic
         return component;
     }
 
-    public static Task<Result<VisualElementModel>> GetComponenUserOrMainVersion(int projectId, string componentName, string userName)
-    {
-        return Pipe(projectId, componentName,
-                    TryFindComponentByComponentName,
-                    async x =>
-                    {
-                        if (x is null)
-                        {
-                            return None;
-                        }
-
-                        return await GetComponenUserOrMainVersionAsync(x.Id, userName);
-                    });
-    }
 
     public static Task<Result<VisualElementModel>> GetComponenUserOrMainVersionAsync(int componentId, string userName)
     {

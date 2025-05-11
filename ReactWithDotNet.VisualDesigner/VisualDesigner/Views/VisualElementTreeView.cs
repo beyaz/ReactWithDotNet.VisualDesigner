@@ -322,7 +322,7 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
                 {
                     MarginLeft(4), FontSize13,
 
-                    new span { node.Tag },
+                    new span { GetTagText(node.Tag) },
 
                     icon,
 

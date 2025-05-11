@@ -1,5 +1,4 @@
 ﻿using System.Text;
-using Dommel;
 using ReactWithDotNet.ThirdPartyLibraries.MonacoEditorReact;
 using ReactWithDotNet.VisualDesigner.Exporters;
 using Page = ReactWithDotNet.VisualDesigner.Infrastructure.Page;
@@ -1001,22 +1000,37 @@ sealed class ApplicationView : Component<ApplicationState>
             return new div();
         }
 
-        var inputTag = new FlexRow(WidthFull)
+        Element inputTag;
         {
-            new MagicInput
+            var inputValue = visualElementModel.Tag;
+            if (int.TryParse(inputValue, out var componentId))
             {
-                Name        = string.Empty,
-                Value       = visualElementModel.Tag,
-                Suggestions = await GetTagSuggestions(state),
-                OnChange = (_, newValue) =>
+                var component = await DbOperation(db => db.FirstOrDefaultAsync<ComponentEntity>(x => x.Id == componentId));
+                if (component is null)
                 {
-                    CurrentVisualElement.Tag = newValue;
-
-                    return Task.CompletedTask;
-                },
-                IsTextAlignCenter = true
+                    return new div { $"ComponentNotFound.{componentId}" };
+                }
+                
+                inputValue = component.Name;
             }
-        };
+            
+            inputTag = new FlexRow(WidthFull)
+            {
+                new MagicInput
+                {
+                    Name        = string.Empty,
+                    Value       = inputValue,
+                    Suggestions = await GetTagSuggestions(state),
+                    OnChange = (_, newValue) =>
+                    {
+                        CurrentVisualElement.Tag = newValue;
+
+                        return Task.CompletedTask;
+                    },
+                    IsTextAlignCenter = true
+                }
+            };
+        }
 
         var stylesHeader = new FlexRow(WidthFull, AlignItemsCenter)
         {

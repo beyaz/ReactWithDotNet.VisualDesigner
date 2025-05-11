@@ -288,7 +288,17 @@ static class NextJs_with_Tailwind
 
         var elementType = TryGetHtmlElementTypeByTagName(nodeTag == "Image" ? "img" : (nodeTag == "Link" ? "a": nodeTag));
         
-        var tag = nodeTag.Split(['/','.']).Last();
+        var tag = nodeTag.Split(['/','.']).Last(); // todo: fix
+        if (int.TryParse(nodeTag, out var componentId))
+        {
+            var component=DbOperation(db => db.FirstOrDefault<ComponentEntity>(x => x.Id == componentId));
+            if (component is null)
+            {
+                return new ArgumentNullException($"ComponentNotFound. {componentId}");
+            }
+
+            tag = component.Name.Split(['/','.']).Last(); // todo: fix
+        }
 
         var indent = new string(' ', indentLevel * 4);
 
