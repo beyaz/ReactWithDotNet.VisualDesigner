@@ -12,8 +12,6 @@ sealed record ExportInput
     
     public required int ComponentId { get; init; }
     
-    public required string ComponentName { get; init; }
-
     public required string UserName { get; init; }
     
     public void Deconstruct(out int projectId, out int componentId,  out string userName)

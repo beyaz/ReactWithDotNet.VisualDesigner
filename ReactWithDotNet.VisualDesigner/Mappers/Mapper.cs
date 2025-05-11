@@ -11,7 +11,6 @@ static class Mapper
         {
             ProjectId     = state.ProjectId,
             ComponentId = state.ComponentId,
-            ComponentName = state.ComponentName,
             UserName      = state.UserName
         };
     }
@@ -22,7 +21,6 @@ static class Mapper
         {
             ProjectId     = input.ProjectId,
             ComponentId = input.Id,
-            ComponentName = input.Name,
             UserName      = input.UserName ?? Environment.UserName
         };
     }
