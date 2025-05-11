@@ -213,6 +213,11 @@ sealed class ApplicationView : Component<ApplicationState>
 
             Selection = new()
         };
+
+        if (state.ComponentRootElement is not null)
+        {
+            state.Selection = state.Selection with { VisualElementTreeItemPath = "0" };
+        }
     }
 
     async Task ChangeSelectedProject(int projectId)
