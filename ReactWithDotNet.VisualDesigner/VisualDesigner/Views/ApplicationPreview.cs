@@ -118,7 +118,7 @@ sealed class ApplicationPreview : Component
             
             if (element is null)
             {
-                ComponentEntity component;
+                VisualElementModel componentRootElementModel;
                 {
                     var result = await GetComponenUserOrMainVersionAsync(context.ProjectId, model.Tag, context.UserName);
                     if (result.HasError)
@@ -126,16 +126,14 @@ sealed class ApplicationPreview : Component
                         return result.Error;
                     }
 
-                    component = result.Value;
+                    componentRootElementModel = result.Value?.RootElementAsYaml.AsVisualElementModel();
                 }
 
-                if (component is not null)
+                if (componentRootElementModel is not null)
                 {
-                    var root = component.RootElementAsYaml.AsVisualElementModel();
+                    componentRootElementModel.Children.AddRange(model.Children);
 
-                    root.Children.AddRange(model.Children);
-
-                    return await renderElement(context with { Parent = context, ParentModel = model }, root, path);
+                    return await renderElement(context with { Parent = context, ParentModel = model }, componentRootElementModel, path);
                 }
             }
 
