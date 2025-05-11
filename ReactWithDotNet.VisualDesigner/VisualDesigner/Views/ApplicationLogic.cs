@@ -75,25 +75,7 @@ static class ApplicationLogic
                                .Distinct().ToImmutableList());
     }
 
-    public static async Task<Result<ComponentEntity>> GetComponentMainVersion(this IDbConnection db, int projectId, string componentName)
-    {
-        if (projectId <= 0)
-        {
-            return new ArgumentException($"ProjectId: {projectId} is not valid");
-        }
-
-        if (componentName.HasNoValue())
-        {
-            return new ArgumentException($"ComponentName ({componentName}) is not valid");
-        }
-
-        var query =
-            from record in await db.SelectAsync<ComponentEntity>(x => x.ProjectId == projectId && x.Name == componentName)
-            where record.UserName.HasNoValue()
-            select record;
-
-        return query.FirstOrDefault();
-    }
+    
 
     public static async Task<Result<ComponentEntity>> GetComponentNotNull(this IDbConnection db, int componentId)
     {
