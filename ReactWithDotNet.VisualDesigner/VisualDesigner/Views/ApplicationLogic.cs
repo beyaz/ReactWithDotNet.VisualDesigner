@@ -149,30 +149,6 @@ static class ApplicationLogic
         return query.FirstOrDefault();
     }
 
-    public static async Task<Result<ComponentEntity>> GetComponentUserVersion(this IDbConnection db, int projectId, string componentName, string userName)
-    {
-        if (projectId <= 0)
-        {
-            return new ArgumentException($"ProjectId: {projectId} is not valid");
-        }
-
-        if (componentName.HasNoValue())
-        {
-            return new ArgumentException($"ComponentName ({componentName}) is not valid");
-        }
-
-        if (userName.HasNoValue())
-        {
-            return new ArgumentException($"UserName ({userName}) is not valid");
-        }
-
-        var query =
-            from record in await db.SelectAsync<ComponentEntity>(x => x.ProjectId == projectId && x.Name == componentName && x.UserName == userName)
-            select record;
-
-        return query.FirstOrDefault();
-    }
-   
    
 
     
