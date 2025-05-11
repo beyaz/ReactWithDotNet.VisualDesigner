@@ -13,17 +13,7 @@ static class ApplicationLogic
     {
         return DbOperation(async db =>
         {
-            ComponentEntity userVersion;
-            {
-                var result = await db.GetComponentUserVersion(state.ProjectId, state.ComponentName, state.UserName);
-                if (result.HasError)
-                {
-                    return result.Error;
-                }
-
-                userVersion = result.Value;
-            }
-
+            var userVersion = await db.FirstOrDefaultAsync<ComponentWorkspace>(x => x.ComponentId == state.ComponentId && x.UserName == state.UserName);
             if (userVersion is null)
             {
                 return Fail($"User ({state.UserName}) has no change to commit.");
@@ -31,23 +21,13 @@ static class ApplicationLogic
 
             ComponentEntity mainVersion;
             {
-                var result = await db.GetComponentMainVersion(state.ProjectId, state.ComponentName);
+                var result = await db.GetComponentNotNull(state.ComponentId);
                 if (result.HasError)
                 {
                     return result.Error;
                 }
 
                 mainVersion = result.Value;
-            }
-
-            if (mainVersion is null)
-            {
-                await db.UpdateAsync(userVersion with
-                {
-                    UserName = null
-                });
-
-                return Success;
             }
 
             // Check if the user version is the same as the main version
