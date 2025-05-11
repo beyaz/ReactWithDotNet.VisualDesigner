@@ -8,9 +8,6 @@ namespace ReactWithDotNet.VisualDesigner.Views;
 
 static class ApplicationLogic
 {
-   
-    
-    
     public static readonly CachedObjectMap Cache = new() { Timeout = TimeSpan.FromMinutes(5) };
 
     public static Task<Result> CommitComponent(ApplicationState state)
@@ -34,7 +31,6 @@ static class ApplicationLogic
             {
                 return Fail($"User ({state.UserName}) has no change to commit.");
             }
-
 
             // Check if the user version is the same as the main version
             if (component.RootElementAsYaml == SerializeToYaml(state.ComponentRootElement))
@@ -71,35 +67,12 @@ static class ApplicationLogic
     public static Task<ImmutableList<string>> GetAllComponentNamesInProject(int projectId)
     {
         return Cache.AccessValue(nameof(GetAllComponentNamesInProject) + projectId,
-                                 () => DbOperation(async db => 
+                                 () => DbOperation(async db =>
                                                        (await db.SelectAsync<ComponentEntity>(x => x.ProjectId == projectId))
                                                        .Select(c => c.Name)
                                                        .ToImmutableList()));
-
     }
 
-    
-
-    public static async Task<Result<ComponentEntity>> GetComponentNotNull(this IDbConnection db, int componentId)
-    {
-        if (componentId <= 0)
-        {
-            return new ArgumentException($"ComponentId: {componentId} is not valid");
-        }
-
-        var query =
-            from record in await db.SelectAsync<ComponentEntity>(x => x.Id == componentId)
-            select record;
-
-        var component = query.FirstOrDefault();
-        if (component is null)
-        {
-            return new IOException($"ComponentId ({componentId}) is not found");
-        }
-
-        return component;
-    }
-    
     public static async Task<Result<ComponentEntity>> GetComponentByComponentName_NotNull(this IDbConnection db, string componentName)
     {
         if (componentName.HasNoValue())
@@ -119,35 +92,11 @@ static class ApplicationLogic
 
         return component;
     }
-    
-    public static async Task<Result<ComponentEntity>> TryFindComponentByComponentName(int projectId, string componentName)
-    {
-        if (componentName.HasNoValue())
-        {
-            return new ArgumentException($"ComponentName: {componentName} is not valid");
-        }
 
-        var query =
-            from record in await DbOperation(db=>db.SelectAsync<ComponentEntity>(x =>x.ProjectId ==projectId && x.Name == componentName))
-            select record;
-
-        return query.FirstOrDefault();
-    }
-
-   
-
-    
-    public static Task<Result<VisualElementModel>> GetComponenUserOrMainVersionAsync(int componentId, string userName)
-    {
-        var input = new GetComponentDataInput { ComponentId = componentId, UserName = userName };
-
-        return Pipe(input, GetComponentData, GetRootElementAsYaml, DeserializeFromYaml<VisualElementModel>);
-    }
-    
     public static Task<Result<VisualElementModel>> GetComponenUserOrMainVersion(int projectId, string componentName, string userName)
     {
         return Pipe(projectId, componentName,
-                    TryFindComponentByComponentName, 
+                    TryFindComponentByComponentName,
                     async x =>
                     {
                         if (x is null)
@@ -157,6 +106,13 @@ static class ApplicationLogic
 
                         return await GetComponenUserOrMainVersionAsync(x.Id, userName);
                     });
+    }
+
+    public static Task<Result<VisualElementModel>> GetComponenUserOrMainVersionAsync(int componentId, string userName)
+    {
+        var input = new GetComponentDataInput { ComponentId = componentId, UserName = userName };
+
+        return Pipe(input, GetComponentData, GetRootElementAsYaml, DeserializeFromYaml<VisualElementModel>);
     }
 
     public static ProjectConfig GetProjectConfig(int projectId)
@@ -436,7 +392,6 @@ static class ApplicationLogic
     {
         return DbOperation(async db =>
         {
-            
             ComponentEntity component;
             ComponentWorkspace userVersion;
             {
@@ -455,8 +410,6 @@ static class ApplicationLogic
                 return Fail($"User ({state.UserName}) has no change to rollback.");
             }
 
-           
-
             // Check if the user version is the same as the main version
             if (component.RootElementAsYaml == SerializeToYaml(state.ComponentRootElement))
             {
@@ -470,6 +423,20 @@ static class ApplicationLogic
 
             return Success;
         });
+    }
+
+    public static async Task<Result<ComponentEntity>> TryFindComponentByComponentName(int projectId, string componentName)
+    {
+        if (componentName.HasNoValue())
+        {
+            return new ArgumentException($"ComponentName: {componentName} is not valid");
+        }
+
+        var query =
+            from record in await DbOperation(db => db.SelectAsync<ComponentEntity>(x => x.ProjectId == projectId && x.Name == componentName))
+            select record;
+
+        return query.FirstOrDefault();
     }
 
     public static Task<Result> TrySaveComponentForUser(ApplicationState state)
@@ -488,18 +455,13 @@ static class ApplicationLogic
             var userVersion = await db.FirstOrDefaultAsync<ComponentWorkspace>(x => x.ComponentId == componentId && x.UserName == userName);
             if (userVersion is null)
             {
-                ComponentEntity mainVersion;
+                var component = await db.FirstOrDefaultAsync<ComponentEntity>(x => x.Id == componentId);
+                if (component is null)
                 {
-                    var mainVersionResult = await db.GetComponentNotNull(componentId);
-                    if (mainVersionResult.HasError)
-                    {
-                        return mainVersionResult.Error;
-                    }
-
-                    mainVersion = mainVersionResult.Value;
+                    return new Exception($"ComponentId ({componentId}) is not found");
                 }
 
-                if (SerializeToYaml(state.ComponentRootElement) == mainVersion.RootElementAsYaml)
+                if (SerializeToYaml(state.ComponentRootElement) == component.RootElementAsYaml)
                 {
                     return Success;
                 }
@@ -564,5 +526,4 @@ static class ApplicationLogic
             });
         });
     }
-
 }
