@@ -168,11 +168,7 @@ sealed class MagicInput : Component<MagicInput.State>
                 if (state.Value?.Length > 0 || (state.InitialValue.HasValue() && state.Value.HasNoValue()))
                 {
                     DispatchEvent(OnChange, [Name, state.Value]);
-
-                    return Task.CompletedTask;
                 }
-
-                return Task.CompletedTask;
             }
 
             return Task.CompletedTask;
