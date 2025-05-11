@@ -10,7 +10,7 @@ static class ApplicationLogic
    
     
     
-    static readonly CachedObjectMap Cache = new() { Timeout = TimeSpan.FromMinutes(5) };
+    public static readonly CachedObjectMap Cache = new() { Timeout = TimeSpan.FromMinutes(5) };
 
     public static Task<Result> CommitComponent(ApplicationState state)
     {

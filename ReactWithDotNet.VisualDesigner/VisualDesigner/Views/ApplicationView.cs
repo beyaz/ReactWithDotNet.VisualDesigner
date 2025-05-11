@@ -186,22 +186,17 @@ sealed class ApplicationView : Component<ApplicationState>
             var component = componentResult.Value;
 
             componentId = component.Id;
-            
-            
-            
 
-            var workspace = await TryGetUserVersion(componentId, state.UserName);
-            if (workspace is not null)
+            var userVersion = await TryGetUserVersion(componentId, state.UserName);
+            if (userVersion is not null)
             {
-                componentRootElement = workspace.RootElementAsYaml.AsVisualElementModel();
+                componentRootElement = userVersion.RootElementAsYaml.AsVisualElementModel();
             }
             else
             {
                 componentRootElement = component.RootElementAsYaml.AsVisualElementModel();
             }
         }
-
-        
 
         state = new()
         {
@@ -212,7 +207,7 @@ sealed class ApplicationView : Component<ApplicationState>
             Preview = state.Preview,
 
             ComponentName = componentName,
-            
+
             ComponentId = componentId,
 
             ComponentRootElement = componentRootElement,
@@ -359,6 +354,60 @@ sealed class ApplicationView : Component<ApplicationState>
         return ChangeSelectedComponent(newValue);
     }
 
+    [StopPropagation]
+    async Task OnMainContentTabHeaderClicked(MouseEvent e)
+    {
+        var tab = Enum.Parse<MainContentTabs>(e.target.id);
+
+        // has no change
+        if (state.MainContentTab == tab)
+        {
+            return;
+        }
+
+        if (state.MainContentTab == MainContentTabs.Code)
+        {
+            // check has any edit
+            if (state.YamlText != SerializeToYaml(CurrentVisualElement))
+            {
+                var result = UpdateElementNode(state.Selection.VisualElementTreeItemPath, state.YamlText);
+                if (result.HasError)
+                {
+                    this.FailNotification(result.Error.Message);
+                    return;
+                }
+            }
+        }
+
+        if (state.MainContentTab == MainContentTabs.ProjectConfig)
+        {
+            var result = await DbOperation(async db =>
+            {
+                var project = await db.FirstOrDefaultAsync<ProjectEntity>(x => x.Id == state.ProjectId);
+                if (project is null)
+                {
+                    return Fail("ProjectNotFound");
+                }
+
+                await db.UpdateAsync(project with { ConfigAsYaml = state.YamlText });
+
+                return Success;
+            });
+
+            if (result.HasError)
+            {
+                this.FailNotification(result.Error.Message);
+            }
+        }
+
+        state.MainContentTab = tab;
+
+        if (tab == MainContentTabs.Design)
+        {
+            state.YamlText = null;
+        }
+    }
+
     Element PartApplicationTopPanel()
     {
         return new FlexRow(UserSelect(none))
@@ -367,7 +416,7 @@ sealed class ApplicationView : Component<ApplicationState>
             {
                 new h3 { "React Visual Designer" },
 
-                new FlexRowCentered(Gap(16), Border(1, solid, Theme.BorderColor), BorderRadius(4), PaddingX(8),Height(36))
+                new FlexRowCentered(Gap(16), Border(1, solid, Theme.BorderColor), BorderRadius(4), PaddingX(8), Height(36))
                 {
                     PositionRelative,
                     new label(PositionAbsolute, Top(-4), Left(8), FontSize10, LineHeight7, Background(Theme.BackgroundColor), PaddingX(4)) { "Project" },
@@ -463,32 +512,30 @@ sealed class ApplicationView : Component<ApplicationState>
                     PositionRelative,
                     new label(PositionAbsolute, Top(-4), Left(8), FontSize10, LineHeight7, Background(Theme.BackgroundColor), PaddingX(4)) { "View" },
 
-                    new FlexRowCentered(Gap(8),Padding(4),LineHeight10)
+                    new FlexRowCentered(Gap(8), Padding(4), LineHeight10)
                     {
-                        new FlexRowCentered(Padding(4), Border(1,solid,transparent))
+                        new FlexRowCentered(Padding(4), Border(1, solid, transparent))
                         {
                             "Design",
                             OnClick(OnMainContentTabHeaderClicked),
                             Id((int)MainContentTabs.Design),
-                            When(state.MainContentTab==MainContentTabs.Design, BorderRadius(4), Border(1,solid,Theme.BorderColor))
+                            When(state.MainContentTab == MainContentTabs.Design, BorderRadius(4), Border(1, solid, Theme.BorderColor))
                         },
-                        new FlexRowCentered(Padding(4), Border(1,solid,transparent))
+                        new FlexRowCentered(Padding(4), Border(1, solid, transparent))
                         {
                             "Code",
                             OnClick(OnMainContentTabHeaderClicked),
                             Id((int)MainContentTabs.Code),
-                            When(state.MainContentTab==MainContentTabs.Code, BorderRadius(4), Border(1,solid,Theme.BorderColor))
+                            When(state.MainContentTab == MainContentTabs.Code, BorderRadius(4), Border(1, solid, Theme.BorderColor))
                         },
-                        new FlexRowCentered(Padding(4), Border(1,solid,transparent))
+                        new FlexRowCentered(Padding(4), Border(1, solid, transparent))
                         {
                             "Project",
                             OnClick(OnMainContentTabHeaderClicked),
                             Id((int)MainContentTabs.ProjectConfig),
-                            When(state.MainContentTab==MainContentTabs.ProjectConfig, BorderRadius(4), Border(1,solid,Theme.BorderColor))
+                            When(state.MainContentTab == MainContentTabs.ProjectConfig, BorderRadius(4), Border(1, solid, Theme.BorderColor))
                         }
-                    },
-
-                    
+                    }
                 }
             },
             new FlexRowCentered(Gap(32))
@@ -508,61 +555,6 @@ sealed class ApplicationView : Component<ApplicationState>
                 Padding(5, 30)
             }
         };
-    }
-
-    [StopPropagation]
-    async Task OnMainContentTabHeaderClicked(MouseEvent e)
-    {
-        var tab = Enum.Parse<MainContentTabs>(e.target.id);
-        
-        // has no change
-        if (state.MainContentTab == tab)
-        {
-            return;
-        }
-
-        if (state.MainContentTab == MainContentTabs.Code)
-        {
-            // check has any edit
-            if (state.YamlText != SerializeToYaml(CurrentVisualElement))
-            {
-                var result = UpdateElementNode(state.Selection.VisualElementTreeItemPath, state.YamlText);
-                if (result.HasError)
-                {
-                    this.FailNotification(result.Error.Message);
-                    return;
-                }
-            }
-        }
-        
-        if (state.MainContentTab == MainContentTabs.ProjectConfig)
-        {
-            var result = await DbOperation(async db =>
-            {
-                var project = await db.FirstOrDefaultAsync<ProjectEntity>(x => x.Id == state.ProjectId);
-                if (project is null)
-                {
-                    return Fail("ProjectNotFound");
-                }
-
-                await db.UpdateAsync(project with { ConfigAsYaml = state.YamlText });
-
-                return Success;
-            });
-            
-            if (result.HasError)
-            {
-                this.FailNotification(result.Error.Message);
-            }
-        }
-
-        state.MainContentTab = tab;
-
-        if (tab == MainContentTabs.Design)
-        {
-            state.YamlText = null;
-        }
-
     }
 
     async Task<Element> PartLeftPanel()
@@ -1048,7 +1040,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
             propsHeader,
             viewProps(visualElementModel.Properties),
-            
+
             stylesHeader,
             viewStyles(CurrentVisualElement.Styles)
         };
@@ -1255,19 +1247,19 @@ sealed class ApplicationView : Component<ApplicationState>
 
                         return Task.CompletedTask;
                     },
-                    OnPaste = (text) =>
+                    OnPaste = text =>
                     {
                         if (!HtmlImporter.CanImportAsHtml(text))
                         {
                             return Task.CompletedTask;
                         }
-                        
+
                         var model = HtmlImporter.ConvertToVisualElementModel(state.ProjectId, text);
                         if (model is null)
                         {
                             return Task.CompletedTask;
                         }
-                        
+
                         CurrentVisualElement.Children.Add(model);
 
                         return Task.CompletedTask;
@@ -1340,7 +1332,7 @@ sealed class ApplicationView : Component<ApplicationState>
                             // calculate text selection in edit input
                             {
                                 var nameValue = CurrentVisualElement.Properties[location];
-                                
+
                                 TryParseProperty(nameValue).HasValue(parseResult =>
                                 {
                                     var startIndex = nameValue.LastIndexOf(parseResult.Value, StringComparison.OrdinalIgnoreCase);
@@ -1415,7 +1407,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
         try
         {
-            newModel = YamlHelper.DeserializeFromYaml<VisualElementModel>(yaml);
+            newModel = DeserializeFromYaml<VisualElementModel>(yaml);
         }
         catch (Exception exception)
         {
@@ -1433,7 +1425,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
             return Success;
         }
-        
+
         if (path.HasNoValue() || path == "0")
         {
             state.ComponentRootElement = newModel;
@@ -1480,12 +1472,12 @@ sealed class ApplicationView : Component<ApplicationState>
     Element YamlEditor()
     {
         state.YamlText = null;
-        
+
         if (state.MainContentTab == MainContentTabs.Code)
         {
             state.YamlText = SerializeToYaml(CurrentVisualElement);
         }
-        
+
         if (state.MainContentTab == MainContentTabs.ProjectConfig)
         {
             state.YamlText = DbOperation(db => db.FirstOrDefault<ProjectEntity>(x => x.Id == state.ProjectId)?.ConfigAsYaml);

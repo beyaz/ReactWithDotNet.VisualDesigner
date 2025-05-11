@@ -16,7 +16,13 @@ static class ApplicationDatabase
         return DbOperation(db => db.FirstOrDefault<UserEntity>(x => x.ProjectId == projectId && x.UserName == userName));
     }
 
-    static IReadOnlyList<ProjectEntity> Projects { get; set; }
+    public static IReadOnlyList<ProjectEntity> GetAllProjects()
+    {
+        return Cache.AccessValue(nameof(GetAllProjects), () =>
+        {
+            return DbOperation(connection => connection.GetAll<ProjectEntity>().ToList() );
+        });
+    }
 
     public static void DbOperation(Action<IDbConnection> operation)
     {
@@ -48,15 +54,7 @@ static class ApplicationDatabase
         return await operation(connection);
     }
 
-    public static IReadOnlyList<ProjectEntity> GetAllProjects()
-    {
-        if (Projects is null)
-        {
-            DbOperation(connection => { Projects = connection.GetAll<ProjectEntity>().ToList(); });
-        }
-
-        return Projects;
-    }
+    
     
     public static async Task<IReadOnlyList<UserEntity>> GetLastUsageInfoByUserName(string userName)
     {
