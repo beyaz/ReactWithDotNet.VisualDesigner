@@ -173,7 +173,8 @@ sealed class ApplicationView : Component<ApplicationState>
 
     async Task ChangeSelectedComponent(string componentName)
     {
-        ComponentEntity component;
+        int componentId;
+        VisualElementModel componentRootElement;
         {
             var componentResult = await GetComponenUserOrMainVersionAsync(state.ProjectId, componentName, state.UserName);
             if (componentResult.HasError)
@@ -182,15 +183,19 @@ sealed class ApplicationView : Component<ApplicationState>
                 return;
             }
 
-            component = componentResult.Value;
+            var component = componentResult.Value;
             if (component is null)
             {
                 this.FailNotification($"Component not found. @{componentName}");
                 return;
             }
+
+            componentId = component.Id;
+            
+            componentRootElement = component.RootElementAsYaml.AsVisualElementModel();
         }
 
-        var componentRootElement = component.RootElementAsYaml.AsVisualElementModel();
+        
 
         state = new()
         {
@@ -202,7 +207,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
             ComponentName = componentName,
             
-            ComponentId = component.Id,
+            ComponentId = componentId,
 
             ComponentRootElement = componentRootElement,
 
