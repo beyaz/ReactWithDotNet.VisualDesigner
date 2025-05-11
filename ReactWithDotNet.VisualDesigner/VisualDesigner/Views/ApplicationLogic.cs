@@ -175,24 +175,6 @@ static class ApplicationLogic
    
    
 
-    public static Task<Result<ComponentEntity>> GetComponenUserOrMainVersionAsync(int projectId, string componentName, string userName)
-    {
-        return DbOperation(async db =>
-        {
-            var userVersion = await db.GetComponentUserVersion(projectId, componentName, userName);
-            if (userVersion.HasError)
-            {
-                return userVersion;
-            }
-
-            if (userVersion.Value is not null)
-            {
-                return userVersion;
-            }
-
-            return await db.GetComponentMainVersion(projectId, componentName);
-        });
-    }
     
     public static Task<Result<VisualElementModel>> GetComponenUserOrMainVersionAsync(int componentId, string userName)
     {
