@@ -13,7 +13,7 @@ static class CecilHelper
     
     public static TypeDefinition GetPropsTypeDefinition(ApplicationState state)
     {
-        var searchTypeName = state.ComponentName.Split('/').Last()+"Props";
+        var searchTypeName = "todo";
         
         var assembly = GetAssemblyDefinition(state);
         
@@ -34,7 +34,7 @@ static class CecilHelper
     
     public static TypeDefinition GetStateTypeDefinition(ApplicationState state)
     {
-        var searchTypeName = state.ComponentName.Split('/').Last()+"State";
+        var searchTypeName = "todo";
         
         var assembly = GetAssemblyDefinition(state);
         

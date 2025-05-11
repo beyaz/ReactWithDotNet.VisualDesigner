@@ -438,7 +438,7 @@ sealed class ApplicationView : Component<ApplicationState>
                             "Rollback",
                             OnClick(async _ =>
                             {
-                                if (state.ComponentName.HasNoValue())
+                                if (state.ComponentId <= 0)
                                 {
                                     this.FailNotification("Select any component.");
 
@@ -462,7 +462,7 @@ sealed class ApplicationView : Component<ApplicationState>
                             "Commit",
                             OnClick(async _ =>
                             {
-                                if (state.ComponentName.HasNoValue())
+                                if (state.ComponentId <= 0)
                                 {
                                     this.FailNotification("Select any component.");
 
@@ -486,7 +486,7 @@ sealed class ApplicationView : Component<ApplicationState>
                             "Export",
                             OnClick(async _ =>
                             {
-                                if (state.ComponentName.HasNoValue())
+                                if (state.ComponentId <= 0)
                                 {
                                     this.FailNotification("Select any component.");
 
