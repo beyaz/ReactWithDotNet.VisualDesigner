@@ -2,6 +2,7 @@
 using System.Data;
 using System.IO;
 using Dommel;
+using ReactWithDotNet.VisualDesigner.DataAccess;
 
 namespace ReactWithDotNet.VisualDesigner.Views;
 
@@ -179,20 +180,19 @@ static class ApplicationLogic
         });
     }
     
-    public static async Task<Result<VisualElementModel>> GetComponenUserOrMainVersionAsync(int componentId, string userName)
+    public static Task<Result<VisualElementModel>> GetComponenUserOrMainVersionAsync(int componentId, string userName)
     {
-        var data = await DataAccess.Extensions.GetComponentData(new() { ComponentId = componentId, UserName = userName });
-        if (data.HasError)
-        {
-            return data.Error;
-        }
 
-        if (data.Value.WorkspaceVersion.HasValue)
-        {
-            return DeserializeFromYaml<VisualElementModel>(data.Value.WorkspaceVersion.Value.RootElementAsYaml);
-        }
-        
-        return DeserializeFromYaml<VisualElementModel>(data.Value.Component.RootElementAsYaml);
+        var input = new GetComponentDataInput { ComponentId = componentId, UserName = userName };
+
+
+
+        return Flow(input, GetComponentData, GetRootElementAsYaml, DeserializeFromYaml<VisualElementModel>);
+
+
+
+
+
     }
 
     public static ProjectConfig GetProjectConfig(int projectId)

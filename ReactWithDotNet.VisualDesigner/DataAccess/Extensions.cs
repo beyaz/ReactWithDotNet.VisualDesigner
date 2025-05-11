@@ -20,6 +20,16 @@ record GetComponentDataOutput
 
 static class Extensions
 {
+    public static string GetRootElementAsYaml(GetComponentDataOutput x)
+    {
+        if (x.WorkspaceVersion.HasValue)
+        {
+            return x.WorkspaceVersion.Value.RootElementAsYaml;
+        }
+
+        return x.Component.RootElementAsYaml;
+    }
+    
     public static async Task<Response<GetComponentDataOutput>> GetComponentData(GetComponentDataInput input)
     {
         var output = await DbOperation(async db =>
