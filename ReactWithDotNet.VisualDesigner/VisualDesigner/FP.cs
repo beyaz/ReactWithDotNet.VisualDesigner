@@ -323,6 +323,33 @@ static class FP
 
         return response4;
     }
+    
+    public static async Task<Response<T3>> Pipe<T0, T1, T2, T3>(
+        T0 p0, T1 p1,
+        Func<T0, T1, Task<Response<T2>>> m0,
+        Func<T2, T3> m1)
+    {
+        var response0 = await m0(p0, p1);
+        if (response0.HasError)
+        {
+            return response0.Error;
+        }
+
+        return  m1(response0.Value);
+    }
+    
+    public static Func<T0, Task<Response<T1>>> HasValue<T0, T1>(Func<T0,Task<Response<T1>>> m0)
+    {
+        return async t0 =>
+        {
+            if (t0 is null)
+            {
+                return None;
+            }
+            return await m0(t0);
+        };
+
+    }
 
     public static Result<B> Then<A, B>(this (A value, Exception exception) result, Func<A, B> convertFunc)
     {
