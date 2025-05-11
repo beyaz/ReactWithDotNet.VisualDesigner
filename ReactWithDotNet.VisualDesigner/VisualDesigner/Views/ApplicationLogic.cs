@@ -499,17 +499,7 @@ static class ApplicationLogic
     {
         return DbOperation(async db =>
         {
-            ComponentEntity userVersion;
-            {
-                var result = await db.GetComponentUserVersion(state.ProjectId, state.ComponentName, state.UserName);
-                if (result.HasError)
-                {
-                    return result.Error;
-                }
-
-                userVersion = result.Value;
-            }
-
+            var userVersion = await Workspace.TryGetUserVersion(state);
             if (userVersion is null)
             {
                 return Fail($"User ({state.UserName}) has no change to rollback.");
