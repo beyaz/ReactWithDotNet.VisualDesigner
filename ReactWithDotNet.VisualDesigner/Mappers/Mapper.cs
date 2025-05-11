@@ -15,15 +15,6 @@ static class Mapper
         };
     }
     
-    public static ExportInput AsExportInput(this ComponentEntity input)
-    {
-        return new()
-        {
-            ProjectId     = input.ProjectId,
-            ComponentId = input.Id,
-            UserName      = input.UserName ?? Environment.UserName
-        };
-    }
     
     public static GetComponentDataInput Map(this ApplicationState state)
     {

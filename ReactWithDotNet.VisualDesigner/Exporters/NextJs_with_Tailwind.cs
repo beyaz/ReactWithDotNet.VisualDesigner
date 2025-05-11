@@ -50,7 +50,12 @@ static class NextJs_with_Tailwind
             {
                 continue;
             }
-            var result = await Export(component.AsExportInput());
+            var result = await Export(new ()
+            {
+                ComponentId = component.Id,
+                ProjectId = component.ProjectId,
+                UserName = Environment.UserName
+            });
             if (result.HasError)
             {
                 return result.Error;
