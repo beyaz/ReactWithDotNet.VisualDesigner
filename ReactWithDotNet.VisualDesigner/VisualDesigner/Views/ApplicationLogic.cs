@@ -610,34 +610,39 @@ static class ApplicationLogic
 
     public static Task UpdateLastUsageInfo(ApplicationState state)
     {
-        if (state.ProjectId <= 0)
+        var projectId = state.ProjectId;
+
+        var userName = state.UserName;
+
+        if (projectId <= 0 || userName.HasNoValue())
         {
-            return Task.CompletedTask;
+            return Task.FromResult(Success);
         }
 
         return DbOperation(async db =>
         {
-            var dbRecords = await db.SelectAsync<UserEntity>(x => x.UserName == state.UserName);
-
-            var dbRecord = dbRecords.FirstOrDefault(x => x.ProjectId == state.ProjectId);
+            var dbRecord = await db.FirstOrDefaultAsync<UserEntity>(x => x.ProjectId == projectId && x.UserName == userName);
             if (dbRecord is not null)
             {
-                await db.UpdateAsync(dbRecord with
+                if (dbRecord.LastStateAsYaml != SerializeToYaml(state))
                 {
-                    LastAccessTime = DateTime.Now,
-                    LastStateAsYaml = SerializeToYaml(state)
-                });
+                    await db.UpdateAsync(dbRecord with
+                    {
+                        LastAccessTime = DateTime.Now,
+                        LastStateAsYaml = SerializeToYaml(state)
+                    });
+                }
+
+                return;
             }
-            else
+
+            await db.InsertAsync(new UserEntity
             {
-                await db.InsertAsync(new UserEntity
-                {
-                    UserName        = state.UserName,
-                    ProjectId       = state.ProjectId,
-                    LastAccessTime  = DateTime.Now,
-                    LastStateAsYaml = SerializeToYaml(state)
-                });
-            }
+                UserName        = userName,
+                ProjectId       = projectId,
+                LastAccessTime  = DateTime.Now,
+                LastStateAsYaml = SerializeToYaml(state)
+            });
         });
     }
 
