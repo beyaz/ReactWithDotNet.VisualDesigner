@@ -46,7 +46,7 @@ static class NextJs_with_Tailwind
 
         foreach (var component in components)
         {
-            if (component.Name == "HggImage" || component.Name == "TailwindPlayground")
+            if (component.Name == "/src/components/HggImage")
             {
                 continue;
             }
@@ -115,7 +115,7 @@ static class NextJs_with_Tailwind
         {
             targetComponentName = componentName.Split('/').Last();
             
-            filePath = Path.Combine(user.LocalWorkspacePath, "src", "components", componentName+".tsx");
+            filePath = Path.Combine((user.LocalWorkspacePath+ componentName + ".tsx").Split(new []{'/', Path.DirectorySeparatorChar}));
 
             if (Path.GetFileNameWithoutExtension(filePath).Contains("."))
             {
