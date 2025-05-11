@@ -3,6 +3,7 @@ global using ReactWithDotNet.VisualDesigner.Views;
 global using ReactWithDotNet.VisualDesigner.Models;
 global using ReactWithDotNet.VisualDesigner.DbModels;
 global using Dapper;
+global using Dommel;
 global using System;
 global using ReactWithDotNet.VisualDesigner;
 
