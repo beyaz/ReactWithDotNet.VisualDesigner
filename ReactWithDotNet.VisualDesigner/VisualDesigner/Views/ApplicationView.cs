@@ -201,6 +201,8 @@ sealed class ApplicationView : Component<ApplicationState>
             Preview = state.Preview,
 
             ComponentName = componentName,
+            
+            ComponentId = component.Id,
 
             ComponentRootElement = componentRootElement,
 
