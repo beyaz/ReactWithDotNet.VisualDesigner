@@ -31,8 +31,6 @@ public sealed record ComponentEntity
     
     public string RootElementAsYaml { get; init; }
     
-    public required DateTime LastAccessTime { get; init; }
-    
     // @formatter:on
 }
 

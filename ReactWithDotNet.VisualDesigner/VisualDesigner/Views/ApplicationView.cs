@@ -972,8 +972,7 @@ sealed class ApplicationView : Component<ApplicationState>
                             var newDbRecord = new ComponentEntity
                             {
                                 Name           = newValue,
-                                ProjectId      = state.ProjectId,
-                                LastAccessTime = DateTime.Now
+                                ProjectId      = state.ProjectId
                             };
 
                             await DbOperation(db => db.InsertAsync(newDbRecord));
