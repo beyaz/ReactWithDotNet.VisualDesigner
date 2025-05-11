@@ -87,15 +87,13 @@ static class NextJs_with_Tailwind
 
         VisualElementModel rootVisualElement;
         {
-            var result = await GetComponenUserOrMainVersionAsync(projectId, componentName, userName);
+            var result = await GetComponenUserOrMainVersionAsync(componentId, userName);
             if (result.HasError)
             {
                 return result.Error;
             }
 
-            var component = result.Value;
-            
-            rootVisualElement = component.RootElementAsYaml.AsVisualElementModel();
+            rootVisualElement = result.Value;
         }
         
         
