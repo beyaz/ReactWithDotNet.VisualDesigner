@@ -1,7 +1,6 @@
 ﻿using System.IO;
 using System.Reflection;
 using System.Text;
-using Dommel;
 
 namespace ReactWithDotNet.VisualDesigner.Exporters;
 
@@ -60,13 +59,11 @@ static class NextJs_with_Tailwind
         return Success;
     }
 
-    static async Task<Result<IReadOnlyList<string>>> CalculateElementTreeTsxCodes(ComponentEntity component)
+    static async Task<Result<IReadOnlyList<string>>> CalculateElementTreeTsxCodes(int projectId, VisualElementModel rootVisualElement)
     {
-        var rootVisualElement = component.RootElementAsYaml.AsVisualElementModel();
-
         ReactNode rootNode;
         {
-            var result = await ConvertVisualElementModelToReactNodeModel(component.ProjectId,rootVisualElement);
+            var result = await ConvertVisualElementModelToReactNodeModel(projectId,rootVisualElement);
             if (result.HasError)
             {
                 return result.Error;
@@ -85,7 +82,7 @@ static class NextJs_with_Tailwind
 
         var user = GetUser(projectId, userName);
 
-        ComponentEntity component;
+        VisualElementModel rootVisualElement;
         {
             var result = await GetComponenUserOrMainVersionAsync(projectId, componentName, userName);
             if (result.HasError)
@@ -93,8 +90,12 @@ static class NextJs_with_Tailwind
                 return result.Error;
             }
 
-            component = result.Value;
+            var component = result.Value;
+            
+            rootVisualElement = component.RootElementAsYaml.AsVisualElementModel();
         }
+        
+        
 
         string filePath, targetComponentName;
         {
@@ -132,7 +133,7 @@ static class NextJs_with_Tailwind
 
             IReadOnlyList<string> linesToInject;
             {
-                var result = await CalculateElementTreeTsxCodes(component);
+                var result = await CalculateElementTreeTsxCodes(projectId, rootVisualElement);
                 if (result.HasError)
                 {
                     return result.Error;
