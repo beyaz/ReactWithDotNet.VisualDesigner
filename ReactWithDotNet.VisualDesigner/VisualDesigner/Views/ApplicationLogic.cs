@@ -70,9 +70,12 @@ static class ApplicationLogic
 
     public static Task<ImmutableList<string>> GetAllComponentNamesInProject(int projectId)
     {
-        return DbOperation(async db => (await db.SelectAsync<ComponentEntity>(x => x.ProjectId == projectId))
-                               .Select(c => c.Name)
-                               .Distinct().ToImmutableList());
+        return Cache.AccessValue(nameof(GetAllComponentNamesInProject) + projectId,
+                                 () => DbOperation(async db => 
+                                                       (await db.SelectAsync<ComponentEntity>(x => x.ProjectId == projectId))
+                                                       .Select(c => c.Name)
+                                                       .ToImmutableList()));
+
     }
 
     
