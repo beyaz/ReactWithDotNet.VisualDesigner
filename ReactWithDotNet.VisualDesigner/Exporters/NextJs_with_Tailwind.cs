@@ -16,11 +16,11 @@ sealed record ExportInput
 
     public required string UserName { get; init; }
     
-    public void Deconstruct(out int projectId, out int componentId, out string componentName, out string userName)
+    public void Deconstruct(out int projectId, out int componentId,  out string userName)
     {
         projectId     = ProjectId;
         componentId     = ComponentId;
-        componentName = ComponentName;
+        
         userName      = UserName;
     }
 
@@ -80,7 +80,7 @@ static class NextJs_with_Tailwind
 
     static async Task<Result<(string filePath, string fileContent)>> CalculateExportInfo(ExportInput input)
     {
-        var (projectId,componentId, componentName_, userName) = input;
+        var (projectId,componentId,  userName) = input;
 
 
         var user = GetUser(projectId, userName);
