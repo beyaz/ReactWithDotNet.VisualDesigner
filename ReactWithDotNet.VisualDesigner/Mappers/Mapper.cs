@@ -1,4 +1,5 @@
-﻿using ReactWithDotNet.VisualDesigner.Exporters;
+﻿using ReactWithDotNet.VisualDesigner.DataAccess;
+using ReactWithDotNet.VisualDesigner.Exporters;
 
 namespace ReactWithDotNet.VisualDesigner.Mappers;
 
@@ -22,5 +23,10 @@ static class Mapper
             ComponentName = input.Name,
             UserName      = input.UserName ?? Environment.UserName
         };
+    }
+    
+    public static GetComponentDataInput Map(this ApplicationState state)
+    {
+        return new() { ComponentId = state.ComponentId, UserName = state.UserName };
     }
 }

@@ -5,46 +5,38 @@ using Dommel;
 
 namespace ReactWithDotNet.VisualDesigner.Views;
 
-static class Workspace
-{
-    public static Task<ComponentWorkspace> TryGetUserVersion(int componentId, string userName)
-    {
-        return DbOperation(db => db.FirstOrDefaultAsync<ComponentWorkspace>(x => x.ComponentId == componentId && x.UserName == userName));
-    }
-    
-    public static Task<ComponentWorkspace> TryGetUserVersion(ApplicationState state)
-    {
-        return TryGetUserVersion(state.ComponentId, state.UserName);
-    }
-}
-
 static class ApplicationLogic
 {
+   
+    
+    
     static readonly CachedObjectMap Cache = new() { Timeout = TimeSpan.FromMinutes(5) };
 
     public static Task<Result> CommitComponent(ApplicationState state)
     {
         return DbOperation(async db =>
         {
-            var userVersion = await Workspace.TryGetUserVersion(state);
+            ComponentEntity component;
+            ComponentWorkspace userVersion;
+            {
+                var response = await GetComponentData(state.Map());
+                if (response.HasError)
+                {
+                    return response.Error;
+                }
+
+                component   = response.Value.Component;
+                userVersion = response.Value.WorkspaceVersion.Value;
+            }
+
             if (userVersion is null)
             {
                 return Fail($"User ({state.UserName}) has no change to commit.");
             }
 
-            ComponentEntity mainVersion;
-            {
-                var result = await db.GetComponentNotNull(state.ComponentId);
-                if (result.HasError)
-                {
-                    return result.Error;
-                }
-
-                mainVersion = result.Value;
-            }
 
             // Check if the user version is the same as the main version
-            if (mainVersion.RootElementAsYaml == SerializeToYaml(state.ComponentRootElement))
+            if (component.RootElementAsYaml == SerializeToYaml(state.ComponentRootElement))
             {
                 return Fail($"User ({state.UserName}) has no change to commit.");
             }
@@ -56,18 +48,18 @@ static class ApplicationLogic
 
             await db.InsertAsync(new ComponentHistoryEntity
             {
-                ComponentId       = mainVersion.Id,
-                RootElementAsYaml = mainVersion.RootElementAsYaml,
+                ComponentId       = component.Id,
+                RootElementAsYaml = component.RootElementAsYaml,
                 UserName          = state.UserName,
                 InsertTime        = DateTime.Now
             });
 
-            mainVersion = mainVersion with
+            component = component with
             {
                 RootElementAsYaml = userVersion.RootElementAsYaml
             };
 
-            await db.UpdateAsync(mainVersion);
+            await db.UpdateAsync(component);
 
             await db.DeleteAsync(userVersion);
 
@@ -464,36 +456,35 @@ static class ApplicationLogic
     {
         return DbOperation(async db =>
         {
-            var userVersion = await Workspace.TryGetUserVersion(state);
+            
+            ComponentEntity component;
+            ComponentWorkspace userVersion;
+            {
+                var response = await GetComponentData(state.Map());
+                if (response.HasError)
+                {
+                    return response.Error;
+                }
+
+                component   = response.Value.Component;
+                userVersion = response.Value.WorkspaceVersion.Value;
+            }
+
             if (userVersion is null)
             {
                 return Fail($"User ({state.UserName}) has no change to rollback.");
             }
 
-            ComponentEntity mainVersion;
-            {
-                var result = await db.GetComponentMainVersion(state.ProjectId, state.ComponentName);
-                if (result.HasError)
-                {
-                    return result.Error;
-                }
-
-                mainVersion = result.Value;
-            }
-
-            if (mainVersion is null)
-            {
-                return Success;
-            }
+           
 
             // Check if the user version is the same as the main version
-            if (mainVersion.RootElementAsYaml == SerializeToYaml(state.ComponentRootElement))
+            if (component.RootElementAsYaml == SerializeToYaml(state.ComponentRootElement))
             {
                 return Fail($"User ({state.UserName}) has no change to rollback.");
             }
 
             // restore from main version
-            state.ComponentRootElement = mainVersion.RootElementAsYaml.AsVisualElementModel();
+            state.ComponentRootElement = component.RootElementAsYaml.AsVisualElementModel();
 
             await db.DeleteAsync(userVersion);
 
