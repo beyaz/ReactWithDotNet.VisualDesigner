@@ -45,7 +45,8 @@ sealed class MainLayout : PureComponent, IPageLayout
                 new meta { charset = "utf-8" },
                 new meta { name    = "viewport", content = "width=device-width, initial-scale=1" },
                 new title { "React Visual Designer" },
-
+                new link { rel = "icon", href = $"{Context.wwwroot}/favicon.ico" },
+                
                 new link
                 {
                     rel  = "stylesheet",
