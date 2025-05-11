@@ -5,6 +5,19 @@ using Dommel;
 
 namespace ReactWithDotNet.VisualDesigner.Views;
 
+static class Workspace
+{
+    public static Task<ComponentWorkspace> TryGetUserVersion(int componentId, string userName)
+    {
+        return DbOperation(db => db.FirstOrDefaultAsync<ComponentWorkspace>(x => x.ComponentId == componentId && x.UserName == userName));
+    }
+    
+    public static Task<ComponentWorkspace> TryGetUserVersion(ApplicationState state)
+    {
+        return TryGetUserVersion(state.ComponentId, state.UserName);
+    }
+}
+
 static class ApplicationLogic
 {
     static readonly CachedObjectMap Cache = new() { Timeout = TimeSpan.FromMinutes(5) };
@@ -13,7 +26,7 @@ static class ApplicationLogic
     {
         return DbOperation(async db =>
         {
-            var userVersion = await db.FirstOrDefaultAsync<ComponentWorkspace>(x => x.ComponentId == state.ComponentId && x.UserName == state.UserName);
+            var userVersion = await Workspace.TryGetUserVersion(state);
             if (userVersion is null)
             {
                 return Fail($"User ({state.UserName}) has no change to commit.");
