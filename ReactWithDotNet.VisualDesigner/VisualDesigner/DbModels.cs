@@ -47,15 +47,13 @@ public sealed record ComponentHistoryEntity
     [Key]
     public int Id { get; init; }
     
-    public required int ProjectId { get; init; }
-    
-    public required string Name { get; init; }
+    public required int ComponentId { get; init; }
     
     public string RootElementAsYaml { get; init; }
 
     public required string UserName { get; init; }
     
-     public required DateTime LastAccessTime { get; init; }
+     public required DateTime InsertTime { get; init; }
     
     // @formatter:on
 }

@@ -88,11 +88,10 @@ static class ApplicationLogic
 
             await db.InsertAsync(new ComponentHistoryEntity
             {
-                ProjectId         = mainVersion.ProjectId,
-                Name              = mainVersion.Name,
+                ComponentId       = mainVersion.Id,
                 RootElementAsYaml = mainVersion.RootElementAsYaml,
-                LastAccessTime    = mainVersion.LastAccessTime,
-                UserName          = userVersion.UserName
+                UserName          = state.UserName,
+                InsertTime        = DateTime.Now,
             });
 
             mainVersion = mainVersion with
