@@ -96,7 +96,7 @@ static class ApplicationLogic
         return query.FirstOrDefault();
     }
 
-    public static async Task<Response<ComponentEntity>> GetComponentNotNull(this IDbConnection db, int componentId)
+    public static async Task<Result<ComponentEntity>> GetComponentNotNull(this IDbConnection db, int componentId)
     {
         if (componentId <= 0)
         {
@@ -116,7 +116,7 @@ static class ApplicationLogic
         return component;
     }
     
-    public static async Task<Response<ComponentEntity>> GetComponentByComponentName_NotNull(this IDbConnection db, string componentName)
+    public static async Task<Result<ComponentEntity>> GetComponentByComponentName_NotNull(this IDbConnection db, string componentName)
     {
         if (componentName.HasNoValue())
         {
@@ -136,7 +136,7 @@ static class ApplicationLogic
         return component;
     }
     
-    public static async Task<Response<ComponentEntity>> TryFindComponentByComponentName(int projectId, string componentName)
+    public static async Task<Result<ComponentEntity>> TryFindComponentByComponentName(int projectId, string componentName)
     {
         if (componentName.HasNoValue())
         {

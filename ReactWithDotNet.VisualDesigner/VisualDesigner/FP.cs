@@ -28,44 +28,6 @@ public sealed class Result
     }
 }
 
-public sealed class Response<TValue> : IEnumerable<TValue>
-{
-    public Exception Error { get; init; }
-
-    public bool HasError => !Success;
-
-    public bool Success { get; init; }
-
-    public TValue Value { get; init; }
-
-    public static implicit operator Response<TValue>(TValue value)
-    {
-        return new() { Value = value, Success = true };
-    }
-
-    public static implicit operator Response<TValue>(NoneObject noneObject)
-    {
-        return new() { Success = true };
-    }
-
-    public static implicit operator Response<TValue>(Exception failInfo)
-    {
-        return new() { Error = failInfo };
-    }
-
-    public IEnumerator<TValue> GetEnumerator()
-    {
-        if (Success)
-        {
-            yield return Value;
-        }
-    }
-
-    IEnumerator IEnumerable.GetEnumerator()
-    {
-        return GetEnumerator();
-    }
-}
 
 public class Result<TValue>
 {
@@ -280,7 +242,7 @@ static class FP
         return nextFunc(maybe.Value);
     }
 
-    public static async Task<Result<T3>> Pipe<T0, T1, T2, T3>(T0 i0, Func<T0, Task<Response<T1>>> m0, Func<T1, T2> m1, Func<T2, T3> m2)
+    public static async Task<Result<T3>> Pipe<T0, T1, T2, T3>(T0 i0, Func<T0, Task<Result<T1>>> m0, Func<T1, T2> m1, Func<T2, T3> m2)
     {
         var response0 = await m0(i0);
         if (response0.HasError)
@@ -297,9 +259,9 @@ static class FP
 
     public static async Task<Result<T6>> Pipe<T0, T1, T2, T3, T4, T5, T6>(
         T0 p0, T1 p1,
-        Func<T0, T1, Task<Response<T2>>> m0,
+        Func<T0, T1, Task<Result<T2>>> m0,
         Func<T2, T3> m1,
-        Func<T3, Task<Response<T4>>> m2,
+        Func<T3, Task<Result<T4>>> m2,
         Func<T4, T5> m3,
         Func<T5, T6> m4)
     {
@@ -324,9 +286,9 @@ static class FP
         return response4;
     }
     
-    public static async Task<Response<T3>> Pipe<T0, T1, T2, T3>(
+    public static async Task<Result<T3>> Pipe<T0, T1, T2, T3>(
         T0 p0, T1 p1,
-        Func<T0, T1, Task<Response<T2>>> m0,
+        Func<T0, T1, Task<Result<T2>>> m0,
         Func<T2, T3> m1)
     {
         var response0 = await m0(p0, p1);
@@ -338,7 +300,7 @@ static class FP
         return  m1(response0.Value);
     }
     
-    public static Func<T0, Task<Response<T1>>> HasValue<T0, T1>(Func<T0,Task<Response<T1>>> m0)
+    public static Func<T0, Task<Result<T1>>> HasValue<T0, T1>(Func<T0,Task<Result<T1>>> m0)
     {
         return async t0 =>
         {
