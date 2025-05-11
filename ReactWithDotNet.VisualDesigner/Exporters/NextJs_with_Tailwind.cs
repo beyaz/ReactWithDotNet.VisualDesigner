@@ -80,10 +80,20 @@ static class NextJs_with_Tailwind
 
     static async Task<Result<(string filePath, string fileContent)>> CalculateExportInfo(ExportInput input)
     {
-        var (projectId,componentId, componentName, userName) = input;
+        var (projectId,componentId, componentName_, userName) = input;
 
 
         var user = GetUser(projectId, userName);
+
+        var data = await GetComponentData(new() { ComponentId = componentId, UserName = userName });
+        if (data.HasError)
+        {
+            return data.Error;
+        }
+
+        var componentName = data.Value.Component.Name;
+        
+        
 
         VisualElementModel rootVisualElement;
         {
