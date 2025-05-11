@@ -1,5 +1,4 @@
 ﻿using System.Collections.Immutable;
-using System.ComponentModel;
 using System.Data;
 using System.IO;
 using Dommel;
@@ -205,9 +204,16 @@ static class ApplicationLogic
     public static Task<Result<VisualElementModel>> GetComponenUserOrMainVersion(int projectId, string componentName, string userName)
     {
         return Pipe(projectId, componentName,
-                    TryFindComponentByComponentName,
-                    x=>new GetComponentDataInput { ComponentId = x.Id, UserName = userName },
-                    GetComponentData, GetRootElementAsYaml, DeserializeFromYaml<VisualElementModel>);
+                    TryFindComponentByComponentName, 
+                    async x =>
+                    {
+                        if (x is null)
+                        {
+                            return None;
+                        }
+
+                        return await GetComponenUserOrMainVersionAsync(x.Id, userName);
+                    });
     }
 
     public static ProjectConfig GetProjectConfig(int projectId)

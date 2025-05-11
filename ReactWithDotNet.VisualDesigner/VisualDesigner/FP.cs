@@ -300,6 +300,17 @@ static class FP
         return  m1(response0.Value);
     }
     
+    public static async Task<Result<T3>> Pipe<T0, T1, T2, T3>(T0 p0, T1 p1, Func<T0, T1, Task<Result<T2>>> m0, Func<T2, Task<Result<T3>>> m1)
+    {
+        var response0 = await m0(p0, p1);
+        if (response0.HasError)
+        {
+            return response0.Error;
+        }
+
+        return await m1(response0.Value);
+    }
+    
     public static Func<T0, Task<Result<T1>>> HasValue<T0, T1>(Func<T0,Task<Result<T1>>> m0)
     {
         return async t0 =>
