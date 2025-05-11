@@ -145,45 +145,7 @@ static class ApplicationLogic
 
         return query.FirstOrDefault();
     }
-
-    public static async Task<Result<ComponentEntity>> GetComponentUserVersion(this IDbConnection db, ApplicationState state)
-    {
-        return await db.GetComponentUserVersion(state.ProjectId, state.ComponentName, state.UserName);
-    }
-
-    public static async Task<Result<ComponentEntity>> GetComponentUserVersionNotNull(this IDbConnection db, int projectId, string componentName, string userName)
-    {
-        var userVersionResult = await db.GetComponentUserVersion(projectId, componentName, userName);
-        if (userVersionResult.HasError)
-        {
-            return userVersionResult;
-        }
-
-        var userVersion = userVersionResult.Value;
-        if (userVersion is not null)
-        {
-            return userVersion;
-        }
-
-        var mainVersionResult = await db.GetComponentMainVersion(projectId, componentName);
-        if (mainVersionResult.HasError)
-        {
-            return mainVersionResult;
-        }
-
-        var mainVersion = mainVersionResult.Value;
-
-        userVersion = mainVersion with
-        {
-            Id = 0,
-            UserName = userName
-        };
-
-        await db.InsertAsync(userVersion);
-
-        return userVersion;
-    }
-
+   
     public static Task<Result<ComponentEntity>> GetComponenUserOrMainVersion(ApplicationState state)
     {
         return DbOperation(async db =>
