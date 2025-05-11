@@ -629,23 +629,4 @@ static class ApplicationLogic
         });
     }
 
-    public static Task<Result> UpdateUserVersion(ApplicationState state, Func<ComponentEntity, ComponentEntity> modify)
-    {
-        return DbOperation(async db =>
-        {
-            var userVersionResult = await db.GetComponentUserVersionNotNull(state.ProjectId, state.ComponentName, state.UserName);
-            if (userVersionResult.HasError)
-            {
-                return userVersionResult.Error;
-            }
-
-            var userVersion = userVersionResult.Value;
-
-            userVersion = modify(userVersion);
-
-            await db.UpdateAsync(userVersion);
-
-            return Success;
-        });
-    }
 }
