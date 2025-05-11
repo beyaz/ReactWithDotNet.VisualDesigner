@@ -566,7 +566,8 @@ sealed class ApplicationView : Component<ApplicationState>
             Value             = state.ComponentName,
             OnChange          = (_, componentName) => OnComponentNameChanged(componentName),
             IsTextAlignCenter = true,
-            IsBold            = true
+            IsBold            = true,
+            
         };
 
         var removeIconInLayersTab = CreateIcon(Icon.remove, 16);
