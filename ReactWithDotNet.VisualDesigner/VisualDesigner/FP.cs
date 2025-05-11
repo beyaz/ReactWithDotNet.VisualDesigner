@@ -28,6 +28,75 @@ public sealed class Result
     }
 }
 
+public sealed class Response<TValue>:   IEnumerable<TValue>
+{
+    public Exception Error { get; init; }
+
+    public bool HasError => !Success;
+
+    public bool Success { get; init; }
+
+    public TValue Value { get; init; }
+
+    public static implicit operator Response<TValue>(TValue value)
+    {
+        return new() { Value = value, Success = true };
+    }
+
+    public static implicit operator Response<TValue>(Exception failInfo)
+    {
+        return new() { Error = failInfo };
+    }
+    
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return GetEnumerator();
+    }
+
+    public IEnumerator<TValue> GetEnumerator()
+    {
+        if (Success)
+            yield return Value;
+    }
+}
+
+public sealed class NullableResponse<TValue>: IEnumerable<TValue>
+{
+    public Exception Error { get; init; }
+
+    public bool HasError => !Success;
+
+    public bool Success { get; init; }
+
+    public TValue Value { get; init; }
+
+    public static implicit operator NullableResponse<TValue>(TValue value)
+    {
+        return new() { Value = value, Success = true };
+    }
+
+    public static implicit operator NullableResponse<TValue>(Exception failInfo)
+    {
+        return new() { Error = failInfo };
+    }
+    
+    public static implicit operator NullableResponse<TValue>(NoneObject noneObject)
+    {
+        return new() { Success = true };
+    }
+    
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return GetEnumerator();
+    }
+
+    public IEnumerator<TValue> GetEnumerator()
+    {
+        if (Success)
+            yield return Value;
+    }
+}
+
 public class Result<TValue>
 {
     public Exception Error { get; init; }

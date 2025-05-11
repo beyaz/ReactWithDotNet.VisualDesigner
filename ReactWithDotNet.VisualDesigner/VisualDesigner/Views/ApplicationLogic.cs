@@ -9,6 +9,31 @@ static class ApplicationLogic
 {
     static readonly CachedObjectMap Cache = new() { Timeout = TimeSpan.FromMinutes(5) };
 
+    public static async Task<Response<ComponentEntity>> GetComponent(this IDbConnection db, int projectId, string componentName)
+    {
+        if (projectId <= 0)
+        {
+            return new ArgumentException($"ProjectId: {projectId} is not valid");
+        }
+
+        if (componentName.HasNoValue())
+        {
+            return new ArgumentException($"ComponentName ({componentName}) is not valid");
+        }
+
+        var query =
+            from record in await db.SelectAsync<ComponentEntity>(x => x.ProjectId == projectId && x.Name == componentName)
+            select record;
+
+        var component = query.FirstOrDefault();
+        if (component is null)
+        {
+            return new IOException($"ComponentName ({componentName}) is not found");
+        }
+
+        return component;
+    }
+    
     public static Task<Result> CommitComponent(ApplicationState state)
     {
         return DbOperation(async db =>
@@ -90,10 +115,7 @@ static class ApplicationLogic
                                .Distinct().ToImmutableList());
     }
 
-    public static async Task<Result<ComponentEntity>> GetComponentMainVersion(this IDbConnection db, ApplicationState state)
-    {
-        return await db.GetComponentMainVersion(state.ProjectId, state.ComponentName);
-    }
+  
 
     public static async Task<Result<ComponentEntity>> GetComponentMainVersion(this IDbConnection db, int projectId, string componentName)
     {
