@@ -973,7 +973,6 @@ sealed class ApplicationView : Component<ApplicationState>
                             {
                                 Name           = newValue,
                                 ProjectId      = state.ProjectId,
-                                UserName       = state.UserName,
                                 LastAccessTime = DateTime.Now
                             };
 
