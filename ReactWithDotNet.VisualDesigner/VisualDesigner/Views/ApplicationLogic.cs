@@ -187,7 +187,7 @@ static class ApplicationLogic
 
 
 
-        return Flow(input, GetComponentData, GetRootElementAsYaml, DeserializeFromYaml<VisualElementModel>);
+        return Pipe(input, GetComponentData, GetRootElementAsYaml, DeserializeFromYaml<VisualElementModel>);
 
 
 

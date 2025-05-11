@@ -366,7 +366,7 @@ static class FP
     }
     
     
-    public static async Task<Result<D>> Flow<A,B,C,D>(A input, Func<A, Task<Response<B>>> first, Func<B,C> second, Func<C,D> third)
+    public static async Task<Result<D>> Pipe<A,B,C,D>(A input, Func<A, Task<Response<B>>> first, Func<B,C> second, Func<C,D> third)
     {
         var response = await first(input);
         if (response.HasError)
