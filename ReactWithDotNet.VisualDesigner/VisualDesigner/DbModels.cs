@@ -3,7 +3,6 @@
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Dommel; 
     
 namespace ReactWithDotNet.VisualDesigner.DbModels;
 
@@ -29,6 +28,25 @@ public sealed record ComponentEntity
     public required int ProjectId { get; init; }
     
     public required string Name { get; init; }
+    
+    public string RootElementAsYaml { get; init; }
+
+    public required string UserName { get; init; }
+    
+     public required DateTime LastAccessTime { get; init; }
+    
+    // @formatter:on
+}
+
+[Table("ComponentWorkspace")]
+public sealed record ComponentWorkspace
+{
+    // @formatter:off
+    
+    [Key]
+    public int Id { get; init; }
+    
+    public required int ComponentId { get; init; }
     
     public string RootElementAsYaml { get; init; }
 
