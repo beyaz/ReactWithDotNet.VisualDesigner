@@ -9,31 +9,6 @@ static class ApplicationLogic
 {
     static readonly CachedObjectMap Cache = new() { Timeout = TimeSpan.FromMinutes(5) };
 
-    public static async Task<Response<ComponentEntity>> GetComponent(this IDbConnection db, int projectId, string componentName)
-    {
-        if (projectId <= 0)
-        {
-            return new ArgumentException($"ProjectId: {projectId} is not valid");
-        }
-
-        if (componentName.HasNoValue())
-        {
-            return new ArgumentException($"ComponentName ({componentName}) is not valid");
-        }
-
-        var query =
-            from record in await db.SelectAsync<ComponentEntity>(x => x.ProjectId == projectId && x.Name == componentName)
-            select record;
-
-        var component = query.FirstOrDefault();
-        if (component is null)
-        {
-            return new IOException($"ComponentName ({componentName}) is not found");
-        }
-
-        return component;
-    }
-    
     public static Task<Result> CommitComponent(ApplicationState state)
     {
         return DbOperation(async db =>
@@ -91,7 +66,7 @@ static class ApplicationLogic
                 ComponentId       = mainVersion.Id,
                 RootElementAsYaml = mainVersion.RootElementAsYaml,
                 UserName          = state.UserName,
-                InsertTime        = DateTime.Now,
+                InsertTime        = DateTime.Now
             });
 
             mainVersion = mainVersion with
@@ -114,8 +89,6 @@ static class ApplicationLogic
                                .Distinct().ToImmutableList());
     }
 
-  
-
     public static async Task<Result<ComponentEntity>> GetComponentMainVersion(this IDbConnection db, int projectId, string componentName)
     {
         if (projectId <= 0)
@@ -134,6 +107,26 @@ static class ApplicationLogic
             select record;
 
         return query.FirstOrDefault();
+    }
+
+    public static async Task<Response<ComponentEntity>> GetComponentNotNull(this IDbConnection db, int componentId)
+    {
+        if (componentId <= 0)
+        {
+            return new ArgumentException($"ComponentId: {componentId} is not valid");
+        }
+
+        var query =
+            from record in await db.SelectAsync<ComponentEntity>(x => x.Id == componentId)
+            select record;
+
+        var component = query.FirstOrDefault();
+        if (component is null)
+        {
+            return new IOException($"ComponentId ({componentId}) is not found");
+        }
+
+        return component;
     }
 
     public static async Task<Result<ComponentEntity>> GetComponentUserVersion(this IDbConnection db, int projectId, string componentName, string userName)
@@ -300,7 +293,7 @@ static class ApplicationLogic
 
                 return returnList;
             }));
-            
+
             var user = GetUser(state.ProjectId, state.UserName);
             if (user is not null)
             {
@@ -319,7 +312,6 @@ static class ApplicationLogic
                     }
                 }
             }
-            
         }
 
         if (tag == "a")
@@ -563,34 +555,29 @@ static class ApplicationLogic
 
     public static Task<Result> TrySaveComponentForUser(ApplicationState state)
     {
-        if (state.ProjectId <= 0 || state.ComponentName.HasNoValue())
+        var componentId = state.ComponentId;
+
+        var userName = state.UserName;
+
+        if (componentId <= 0 || userName.HasNoValue())
         {
             return Task.FromResult(Success);
         }
 
         return DbOperation(async db =>
         {
-            var userVersionResult = await db.GetComponentUserVersion(state.ProjectId, state.ComponentName, state.UserName);
-            if (userVersionResult.HasError)
-            {
-                return userVersionResult.Error;
-            }
-
-            var userVersion = userVersionResult.Value;
-
+            var userVersion = await db.FirstOrDefaultAsync<ComponentWorkspace>(x => x.ComponentId == componentId && x.UserName == userName);
             if (userVersion is null)
             {
-                var mainVersionResult = await db.GetComponentMainVersion(state.ProjectId, state.ComponentName);
-                if (mainVersionResult.HasError)
+                ComponentEntity mainVersion;
                 {
-                    return mainVersionResult.Error;
-                }
+                    var mainVersionResult = await db.GetComponentNotNull(componentId);
+                    if (mainVersionResult.HasError)
+                    {
+                        return mainVersionResult.Error;
+                    }
 
-                var mainVersion = mainVersionResult.Value;
-
-                if (mainVersion is null)
-                {
-                    return new InvalidOperationException(state.ComponentName + " Main version cannot be null");
+                    mainVersion = mainVersionResult.Value;
                 }
 
                 if (SerializeToYaml(state.ComponentRootElement) == mainVersion.RootElementAsYaml)
@@ -598,19 +585,23 @@ static class ApplicationLogic
                     return Success;
                 }
 
-                await db.InsertAsync(mainVersion with
+                userVersion = new()
                 {
-                    Id = 0,
+                    ComponentId       = componentId,
                     RootElementAsYaml = SerializeToYaml(state.ComponentRootElement),
-                    UserName = state.UserName
-                });
+                    UserName          = userName,
+                    LastAccessTime    = DateTime.Now
+                };
+
+                await db.InsertAsync(userVersion);
 
                 return Success;
             }
 
             await db.UpdateAsync(userVersion with
             {
-                RootElementAsYaml = SerializeToYaml(state.ComponentRootElement)
+                RootElementAsYaml = SerializeToYaml(state.ComponentRootElement),
+                LastAccessTime = DateTime.Now
             });
 
             return Success;
@@ -641,10 +632,10 @@ static class ApplicationLogic
             {
                 await db.InsertAsync(new UserEntity
                 {
-                    UserName       = state.UserName,
-                    ProjectId      = state.ProjectId,
-                    LastAccessTime = DateTime.Now,
-                    LastStateAsYaml    = SerializeToYaml(state)
+                    UserName        = state.UserName,
+                    ProjectId       = state.ProjectId,
+                    LastAccessTime  = DateTime.Now,
+                    LastStateAsYaml = SerializeToYaml(state)
                 });
             }
         });
