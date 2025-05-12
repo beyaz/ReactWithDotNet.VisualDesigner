@@ -554,31 +554,20 @@ static class NextJs_with_Tailwind
         // Add properties
         foreach (var property in element.Properties)
         {
-            var parseResult = TryParseProperty(property);
-            if (parseResult.HasValue)
+            var (reactProperty, classNameList) = tryConvertToReactProperty(property);
+            if (classNameList.HasValue)
             {
-                var (name, value) = parseResult.Value;
-
-                if (name == "class")
-                {
-                    classNames.AddRange(value.Split(" ", StringSplitOptions.RemoveEmptyEntries));
-                    continue;
-                }
-
-                if (name == "w" || name == "width")
-                {
-                    node.Properties.Add(new() { Name = "width", Value = value });
-                    continue;
-                }
-
-                if (name == "h" || name == "height")
-                {
-                    node.Properties.Add(new() { Name = "height", Value = value });
-                    continue;
-                }
-                
-                node.Properties.Add(new() { Name = name, Value = value  });
+                classNames.AddRange(classNameList.Value);
+                continue;
             }
+            
+            if (reactProperty.HasValue)
+            {
+                node.Properties.Add(reactProperty.Value);
+                continue;
+            }
+            
+            return new Exception($"PropertyParseError: {property}");
         }
 
         foreach (var styleItem in element.Styles)
@@ -639,6 +628,42 @@ static class NextJs_with_Tailwind
         }
 
         return node;
+
+        static (Maybe<ReactProperty> reactProperty, Maybe<IReadOnlyList<string>> classNames) tryConvertToReactProperty(string property)
+        {
+            Maybe<ReactProperty> reactProperty = None;
+            Maybe<IReadOnlyList<string>> classNames = None;
+            
+            var parseResult = TryParseProperty(property);
+            if (parseResult.HasNoValue)
+            {
+                return (reactProperty, classNames);
+            }
+            var (name, value) = parseResult.Value;
+            
+            if (name == "class")
+            {
+                classNames = value.Split(" ", StringSplitOptions.RemoveEmptyEntries);
+                
+                return (reactProperty, classNames);
+            }
+
+            if (name == "w" || name == "width")
+            {
+                reactProperty = new ReactProperty { Name = "width", Value = value };
+                return (reactProperty, classNames);
+            }
+
+            if (name == "h" || name == "height")
+            {
+                reactProperty = new ReactProperty { Name = "height", Value = value };
+                return (reactProperty, classNames);
+            }
+                
+            reactProperty = new ReactProperty { Name = name, Value = value };
+            
+            return (reactProperty, classNames);
+        }
     }
 
     

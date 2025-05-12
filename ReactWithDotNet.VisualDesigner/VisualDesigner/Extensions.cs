@@ -453,6 +453,15 @@ static class Extensions
         {
             return None;
         }
+
+        if (nameValueCombined.StartsWith("..."))
+        {
+            return (
+        
+                Name     : Design.SpreadOperator,
+                Value    : nameValueCombined
+            );
+        }
         
         var colonIndex = nameValueCombined.IndexOf(':');
         if (colonIndex < 0)
@@ -539,4 +548,6 @@ static class Design
     public const string Text = "-text";
     
     public const string DesignText = "--text";
+    
+    public const string SpreadOperator = "--spreadOperator";
 }
