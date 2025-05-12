@@ -1084,6 +1084,34 @@ public static class CssHelper
                 return $"[line-height:{value}]";
             }
             
+            
+        }
+
+        // todo: more clever
+        if (name == "word-wrap" && value == "break-word")
+        {
+            return "break-words";
+        }
+        if (name == "outline-offset")
+        {
+            return "outline-offset-[-1px]";
+        }
+        
+        if (name == "align-self" && value == "stretch")
+        {
+            return "self-stretch";
+        }
+        if (name == "flex" && value == "1 1 1")
+        {
+            return "flex-1";
+        }
+        if (name == "flex" && value == "1 1 0")
+        {
+            return "flex-1";
+        }
+        if (name == "overflow" && value == "hidden")
+        {
+            return "overflow-hidden";
         }
 
         return new InvalidOperationException($"Css not handled. {name}: {value}");
