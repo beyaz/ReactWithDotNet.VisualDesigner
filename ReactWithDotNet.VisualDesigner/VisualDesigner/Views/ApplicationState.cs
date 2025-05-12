@@ -39,7 +39,6 @@ public sealed class ApplicationState
     
     public int ProjectId { get; set; }
     
-    // todo: Remove
     public string ComponentName { get; init; }
     
     public int ComponentId { get; init; }
