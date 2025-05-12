@@ -1234,6 +1234,7 @@ public static class CssHelper
             case "align-self":
             case "flex":
             case "overflow":
+            case "align-content":
             {
                 return (name, value);
             }
