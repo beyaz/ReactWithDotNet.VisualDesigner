@@ -1181,13 +1181,6 @@ public static class CssHelper
             return "outline-offset-[-1px]";
         }
         
-        
-        if (name == "flex" && value == "1 1 1")
-        {
-            return "flex-1";
-        }
-        
-        
 
         return new InvalidOperationException($"Css not handled. {name}: {value}");
     }
