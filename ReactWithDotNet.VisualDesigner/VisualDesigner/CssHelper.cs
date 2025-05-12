@@ -751,6 +751,33 @@ public static class CssHelper
         
         switch (name)
         {
+            
+            case "m":
+            case "mx":
+            case "my":
+            case "ml":
+            case "mr":
+            case "mb":
+            case "mt":
+
+            case "p":
+            case "px":
+            case "py":
+            case "pl":
+            case "pr":
+            case "pb":
+            case "pt":
+            {
+                if (isValueDouble)
+                {
+                    value = valueAsDouble.AsPixel();
+                }
+
+                return $"{name}-[{value}]";
+            }
+            
+            
+            
             case "transform":
             {
                 if (value.StartsWith("rotate("))
@@ -983,29 +1010,7 @@ public static class CssHelper
                 return $"border-[{value}]";
             }
 
-            case "m":
-            case "mx":
-            case "my":
-            case "ml":
-            case "mr":
-            case "mb":
-            case "mt":
-
-            case "p":
-            case "px":
-            case "py":
-            case "pl":
-            case "pr":
-            case "pb":
-            case "pt":
-            {
-                if (isValueDouble)
-                {
-                    value = valueAsDouble.AsPixel();
-                }
-
-                return $"{name}-[{value}]";
-            }
+            
 
             case "border":
             {
