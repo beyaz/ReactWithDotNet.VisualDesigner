@@ -731,26 +731,47 @@ public static class CssHelper
         
         var isValueDouble = double.TryParse(value, out var valueAsDouble);
 
-        name = name switch
-        {
-            "padding"        => "p",
-            "padding-right"  => "pr",
-            "padding-left"   => "pl",
-            "padding-top"    => "pt",
-            "padding-bottom" => "pb",
-
-            "margin"        => "m",
-            "margin-right"  => "mr",
-            "margin-left"   => "ml",
-            "margin-top"    => "mt",
-            "margin-bottom" => "mb",
-
-            _ => name
-        };
-
-        
         switch (name)
         {
+            
+            case "padding":       
+            case "padding-right": 
+            case "padding-left":  
+            case "padding-top":   
+            case "padding-bottom":
+            
+            case "margin":        
+            case "margin-right":  
+            case "margin-left":   
+            case "margin-top":
+            case "margin-bottom":
+            {
+                name = name switch
+                {
+                    "padding"        => "p",
+                    "padding-right"  => "pr",
+                    "padding-left"   => "pl",
+                    "padding-top"    => "pt",
+                    "padding-bottom" => "pb",
+
+                    "margin"        => "m",
+                    "margin-right"  => "mr",
+                    "margin-left"   => "ml",
+                    "margin-top"    => "mt",
+                    "margin-bottom" => "mb",
+
+                    _ => name
+                };
+                
+                if (isValueDouble)
+                {
+                    value = valueAsDouble.AsPixel();
+                }
+
+                return $"{name}-[{value}]";
+            }
+                
+                
             
             case "m":
             case "mx":
