@@ -290,7 +290,7 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
             }
         }
 
-        var foldIcon = new FlexRowCentered(Size(16), PositionAbsolute, Top(4), Left(indent * 16 - 12))
+        var foldIcon = new FlexRowCentered(Size(16), PositionAbsolute, Top(4), Left(indent * 16 - 12), Hover(BorderRadius(36), Background(Gray50)))
         {
             new IconArrowRightOrDown { IsArrowDown = !state.CollapsedNodes.Contains(path) },
 

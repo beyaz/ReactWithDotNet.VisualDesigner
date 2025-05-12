@@ -1147,7 +1147,7 @@ sealed class ApplicationView : Component<ApplicationState>
                 {
                     TryParseProperty(value).HasValue(x =>
                     {
-                        content = new FlexRowCentered
+                        content = new FlexRow(AlignItemsCenter, FlexWrap)
                         {
                             new span(FontWeight600) { x.Name }, ": ", new span(PaddingLeft(2)) { x.Value }
                         };
@@ -1311,7 +1311,7 @@ sealed class ApplicationView : Component<ApplicationState>
                 {
                     TryParseProperty(value).HasValue(x =>
                     {
-                        content = new FlexRowCentered
+                        content = new FlexRow(AlignItemsCenter, FlexWrap)
                         {
                             new span(FontWeight600) { x.Name }, ": ", new span(PaddingLeft(2)) { x.Value }
                         };
