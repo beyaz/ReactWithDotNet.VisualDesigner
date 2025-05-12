@@ -1163,6 +1163,7 @@ public static class CssHelper
                 switch (value)
                 {
                     case "1 1 0%":   return "flex-1";
+                    case "1 1 0":   return "flex-1";
                     case "0 1 auto": return "flex-initial";
                     case "0 0 auto": return "flex-0";
                     case "auto":     return "flex-auto";
@@ -1185,10 +1186,7 @@ public static class CssHelper
         {
             return "flex-1";
         }
-        if (name == "flex" && value == "1 1 0")
-        {
-            return "flex-1";
-        }
+        
         
 
         return new InvalidOperationException($"Css not handled. {name}: {value}");
