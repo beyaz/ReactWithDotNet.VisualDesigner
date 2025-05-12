@@ -1303,6 +1303,8 @@ public static class CssHelper
             case "flex":
             case "overflow":
             case "align-content":
+            case "opacity":
+            case "box-shadow":
             {
                 return (name, value);
             }
