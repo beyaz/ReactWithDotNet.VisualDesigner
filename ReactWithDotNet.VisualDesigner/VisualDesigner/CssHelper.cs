@@ -1110,23 +1110,77 @@ public static class CssHelper
                 return $"[line-height:{value}]";
             }
             
+            case "word-wrap":
+            {
+                switch (value)
+                {
+                    case "break-word": return "break-words";
+                }
+                break;
+            }
+            
+            case "overflow":
+            {
+                switch (value)
+                {
+                    case "auto":    return "overflow-auto";
+                    case "hidden":  return "overflow-hidden";
+                    case "visible": return "overflow-visible";
+                    case "scroll":  return "overflow-scroll";
+                }
+                break;
+            }
+            
+            case "align-self":
+            {
+                switch (value)
+                {
+                    case "auto":     return "self-auto";
+                    case "start":    return "self-start";
+                    case "end":      return "self-end";
+                    case "center":   return "self-center";
+                    case "stretch":  return "self-stretch";
+                    case "baseline": return "self-baseline";
+                }
+                break;
+            }
+            
+            case "outline-offset":
+            {
+                switch (value)
+                {
+                    case "0":   return "outline-offset-0";
+                    case "1px": return "outline-offset-1";
+                    case "2px": return "outline-offset-2";
+                    case "4px": return "outline-offset-4";
+                    case "8px": return "outline-offset-8";
+                }
+                break;
+            }
+            
+            case "flex":
+            {
+                switch (value)
+                {
+                    case "1 1 0%":   return "flex-1";
+                    case "0 1 auto": return "flex-initial";
+                    case "0 0 auto": return "flex-0";
+                    case "auto":     return "flex-auto";
+                    case "none":     return "flex-none";
+                }
+                break;
+            }
             
         }
 
         // todo: more clever
-        if (name == "word-wrap" && value == "break-word")
-        {
-            return "break-words";
-        }
+        
         if (name == "outline-offset")
         {
             return "outline-offset-[-1px]";
         }
         
-        if (name == "align-self" && value == "stretch")
-        {
-            return "self-stretch";
-        }
+        
         if (name == "flex" && value == "1 1 1")
         {
             return "flex-1";
@@ -1135,10 +1189,7 @@ public static class CssHelper
         {
             return "flex-1";
         }
-        if (name == "overflow" && value == "hidden")
-        {
-            return "overflow-hidden";
-        }
+        
 
         return new InvalidOperationException($"Css not handled. {name}: {value}");
     }
