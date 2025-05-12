@@ -340,6 +340,12 @@ static class NextJs_with_Tailwind
                 continue;
             }
             
+            if (propertyName == Design.SpreadOperator)
+            {
+                sb.Append($" {{{propertyValue}}}");
+                continue;
+            }
+            
             if (IsStringValue(propertyValue))
             {
                 sb.Append($" {propertyName}={propertyValue}");
