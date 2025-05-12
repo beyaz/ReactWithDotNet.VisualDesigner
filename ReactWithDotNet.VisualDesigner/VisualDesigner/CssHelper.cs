@@ -1083,6 +1083,7 @@ public static class CssHelper
             {
                 return $"[line-height:{value}]";
             }
+            
         }
 
         return new InvalidOperationException($"Css not handled. {name}: {value}");
@@ -1168,6 +1169,7 @@ public static class CssHelper
             case "gap":
             case "border-radius":
             case "line-height":
+            case "outline-offset":
             {
                 if (isValueDouble)
                 {
@@ -1200,6 +1202,10 @@ public static class CssHelper
             case "outline":
             case "text-decoration":
             case "font-style":
+            case "word-wrap":
+            case "align-self":
+            case "flex":
+            case "overflow":
             {
                 return (name, value);
             }
