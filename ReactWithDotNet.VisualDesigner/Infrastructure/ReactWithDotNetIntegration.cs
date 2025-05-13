@@ -66,7 +66,7 @@ public static class ReactWithDotNetIntegration
                 {
                     var projectLocalWorkspacePath = maybe.Value;
 
-                    var a = await TryFindFile(path, projectLocalWorkspacePath);
+                    var a = await TryFindFileFromWebRequestPath(path, projectLocalWorkspacePath);
                     if (a.HasValue)
                     {
                         await Results.File(a.Value.fileBytes, a.Value.contentType).ExecuteAsync(httpContext);

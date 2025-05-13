@@ -18,9 +18,9 @@ static class ApplicationLogic
         return None;
     }
     
-    public static async Task<Maybe<(string contentType, byte[] fileBytes)>> TryFindFile(string path,string projectLocalWorkspacePath)
+    public static async Task<Maybe<(string contentType, byte[] fileBytes)>> TryFindFileFromWebRequestPath(string requestPath,string projectLocalWorkspacePath)
     {
-        var filePath = Path.Combine(projectLocalWorkspacePath,"public", path.RemoveFromStart("/wwwroot/"));
+        var filePath = Path.Combine(projectLocalWorkspacePath,"public", requestPath.RemoveFromStart("/wwwroot/"));
 
         if (File.Exists(filePath))
         {
