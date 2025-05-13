@@ -683,7 +683,15 @@ static class NextJs_with_Tailwind
         var componentDeclerationLineIndex = lines.FindIndex(line => line.Contains($"function {targetComponentName}("));
         if (componentDeclerationLineIndex == -1)
         {
-            return new ArgumentException($"ComponentDeclerationNotFoundInFile. {targetComponentName}");
+            componentDeclerationLineIndex = lines.FindIndex(line => line.Contains($"const {targetComponentName} "));
+            if (componentDeclerationLineIndex == -1)
+            {
+                componentDeclerationLineIndex = lines.FindIndex(line => line.Contains($"const {targetComponentName}:"));
+                if (componentDeclerationLineIndex == -1)
+                {
+                    return new ArgumentException($"ComponentDeclerationNotFoundInFile. {targetComponentName}");
+                }
+            }
         }
 
         var firstReturnLineIndex = lines.FindIndex(componentDeclerationLineIndex, l => l == "    return (");

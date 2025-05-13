@@ -1027,11 +1027,15 @@ sealed class ApplicationView : Component<ApplicationState>
                     Name        = string.Empty,
                     Value       = inputValue,
                     Suggestions = await GetTagSuggestions(state),
-                    OnChange = (_, newValue) =>
+                    OnChange = async (_, newValue) =>
                     {
+                        foreach (var dbRecord in await TryFindComponentByComponentName(state.ProjectId, newValue))
+                        {
+                            CurrentVisualElement.Tag = dbRecord.Id.ToString();
+                            return;
+                        }
+                        
                         CurrentVisualElement.Tag = newValue;
-
-                        return Task.CompletedTask;
                     },
                     IsTextAlignCenter = true
                 }

@@ -29,7 +29,7 @@ public sealed class Result
 }
 
 
-public class Result<TValue>
+public class Result<TValue>: IEnumerable<TValue>
 {
     public Exception Error { get; init; }
 
@@ -52,6 +52,19 @@ public class Result<TValue>
     public static implicit operator Result<TValue>(NoneObject noneObject)
     {
         return new() { Success = true };
+    }
+    
+    public IEnumerator<TValue> GetEnumerator()
+    {
+        if (Success)
+        {
+            yield return Value;
+        }
+    }
+    
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return GetEnumerator();
     }
 }
 

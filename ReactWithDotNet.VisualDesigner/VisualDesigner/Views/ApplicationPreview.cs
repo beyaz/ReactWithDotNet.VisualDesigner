@@ -238,7 +238,20 @@ sealed class ApplicationPreview : Component
                             src = src.RemoveFromStart("/");
                         }
 
-                        elementAsImage.src = Path.Combine(context.ReactContext.wwwroot, src);
+                        if (File.Exists(Path.Combine(context.ReactContext.wwwroot, src)))
+                        {
+                            elementAsImage.src = Path.Combine(context.ReactContext.wwwroot, src);    
+                        }
+                        else
+                        {
+                            // try find value from caller
+                            foreach (var callerValue in tryGetPropValueFromCaller(context, model, "src"))
+                            {
+                                elementAsImage.src = Path.Combine(context.ReactContext.wwwroot, callerValue.RemoveFromStart("/"));
+                            }
+                            
+                        }
+
 
                         continue;
                     }

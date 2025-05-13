@@ -1056,6 +1056,8 @@ public static class CssHelper
 
                 break;
             }
+
+            case "background-color":
             case "background":
             case "bg":
             {
@@ -1362,6 +1364,7 @@ public static class CssHelper
             }
 
             // c o l o r s
+            case "background-color":
             case "background":
             case "color":
             {
