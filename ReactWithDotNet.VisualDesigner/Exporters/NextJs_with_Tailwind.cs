@@ -50,11 +50,12 @@ static class NextJs_with_Tailwind
             {
                 continue;
             }
-            var result = await Export(new ()
+
+            var result = await Export(new()
             {
                 ComponentId = component.Id,
-                ProjectId = component.ProjectId,
-                UserName = Environment.UserName
+                ProjectId   = component.ProjectId,
+                UserName    = Environment.UserName
             });
             if (result.HasError)
             {
@@ -65,11 +66,21 @@ static class NextJs_with_Tailwind
         return Success;
     }
 
+    static string AsFinalText(string text)
+    {
+        if (!IsStringValue(text))
+        {
+            return $"{{{text}}}";
+        }
+
+        return $"{{t(\"{TryClearStringValue(text)}\")}}";
+    }
+
     static async Task<Result<IReadOnlyList<string>>> CalculateElementTreeTsxCodes(int projectId, VisualElementModel rootVisualElement)
     {
         ReactNode rootNode;
         {
-            var result = await ConvertVisualElementModelToReactNodeModel(projectId,rootVisualElement);
+            var result = await ConvertVisualElementModelToReactNodeModel(projectId, rootVisualElement);
             if (result.HasError)
             {
                 return result.Error;
@@ -83,8 +94,7 @@ static class NextJs_with_Tailwind
 
     static async Task<Result<(string filePath, string fileContent)>> CalculateExportInfo(ExportInput input)
     {
-        var (projectId,componentId,  userName) = input;
-
+        var (projectId, componentId, userName) = input;
 
         var user = GetUser(projectId, userName);
 
@@ -95,8 +105,6 @@ static class NextJs_with_Tailwind
         }
 
         var componentName = data.Value.Component.Name;
-        
-        
 
         VisualElementModel rootVisualElement;
         {
@@ -108,14 +116,12 @@ static class NextJs_with_Tailwind
 
             rootVisualElement = result.Value;
         }
-        
-        
 
         string filePath, targetComponentName;
         {
             targetComponentName = componentName.Split('/').Last();
-            
-            filePath = Path.Combine((user.LocalWorkspacePath+ componentName + ".tsx").Split(new []{'/', Path.DirectorySeparatorChar}));
+
+            filePath = Path.Combine((user.LocalWorkspacePath + componentName + ".tsx").Split(new[] { '/', Path.DirectorySeparatorChar }));
 
             if (Path.GetFileNameWithoutExtension(filePath).Contains("."))
             {
@@ -130,7 +136,6 @@ static class NextJs_with_Tailwind
                 targetComponentName = array[1];
             }
         }
-
 
         string fileNewContent;
         {
@@ -186,6 +191,7 @@ static class NextJs_with_Tailwind
                 lines.Add($"{Indent(indentLevel)}{AsFinalText(node.Text)}");
                 return lines;
             }
+
             return new ArgumentNullException(nameof(nodeTag));
         }
 
@@ -286,18 +292,18 @@ static class NextJs_with_Tailwind
             }
         }
 
-        var elementType = TryGetHtmlElementTypeByTagName(nodeTag == "Image" ? "img" : (nodeTag == "Link" ? "a": nodeTag));
-        
-        var tag = nodeTag.Split(['/','.']).Last(); // todo: fix
+        var elementType = TryGetHtmlElementTypeByTagName(nodeTag == "Image" ? "img" : nodeTag == "Link" ? "a" : nodeTag);
+
+        var tag = nodeTag.Split(['/', '.']).Last(); // todo: fix
         if (int.TryParse(nodeTag, out var componentId))
         {
-            var component=DbOperation(db => db.FirstOrDefault<ComponentEntity>(x => x.Id == componentId));
+            var component = DbOperation(db => db.FirstOrDefault<ComponentEntity>(x => x.Id == componentId));
             if (component is null)
             {
                 return new ArgumentNullException($"ComponentNotFound. {componentId}");
             }
 
-            tag = component.Name.Split(['/','.']).Last(); // todo: fix
+            tag = component.Name.Split(['/', '.']).Last(); // todo: fix
         }
 
         var indent = new string(' ', indentLevel * 4);
@@ -318,10 +324,10 @@ static class NextJs_with_Tailwind
             node.Properties.Remove(textProperty);
         }
 
-        foreach (var reactProperty in node.Properties.Where(p=>p.Name.NotIn(Design.Text, Design.DesignText)))
+        foreach (var reactProperty in node.Properties.Where(p => p.Name.NotIn(Design.Text, Design.DesignText)))
         {
             var propertyName = reactProperty.Name;
-            
+
             var propertyValue = reactProperty.Value;
 
             if (propertyName is "-items-source" || propertyName is "-items-source-design-time-count")
@@ -333,19 +339,19 @@ static class NextJs_with_Tailwind
             {
                 continue;
             }
-            
+
             if (propertyValue == "true")
             {
                 sb.Append($" {propertyName}");
                 continue;
             }
-            
+
             if (propertyName == Design.SpreadOperator)
             {
                 sb.Append($" {{{propertyValue}}}");
                 continue;
             }
-            
+
             if (IsStringValue(propertyValue))
             {
                 sb.Append($" {propertyName}={propertyValue}");
@@ -357,13 +363,13 @@ static class NextJs_with_Tailwind
                 sb.Append($" {propertyName}={propertyValue}");
                 continue;
             }
-            
+
             if (IsStringTemplate(propertyValue))
             {
                 sb.Append($" {propertyName}={{{propertyValue}}}");
                 continue;
             }
-            
+
             if (elementType.HasValue)
             {
                 var propertyType = elementType.Value.GetProperty(propertyName, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance)?.PropertyType;
@@ -379,14 +385,14 @@ static class NextJs_with_Tailwind
                         }
                     }
 
-                    if ((propertyType == typeof(UnionProp<string,double?>) || propertyType == typeof(UnionProp<string,double>)) && double.TryParse(propertyValue, out _))
+                    if ((propertyType == typeof(UnionProp<string, double?>) || propertyType == typeof(UnionProp<string, double>)) && double.TryParse(propertyValue, out _))
                     {
                         sb.Append($" {propertyName}={{{propertyValue}}}");
                         continue;
                     }
                 }
             }
-            
+
             sb.Append($" {propertyName}={{{propertyValue}}}");
         }
 
@@ -473,17 +479,7 @@ static class NextJs_with_Tailwind
         return lines;
     }
 
-    static string AsFinalText(string text)
-    {
-        if (!IsStringValue(text))
-        {
-            return $"{{{text}}}";    
-        }
-        
-        return $"{{t(\"{TryClearStringValue(text)}\")}}";
-    }
-
-    static async Task<Result<ReactNode>> ConvertVisualElementModelToReactNodeModel(int projectId,VisualElementModel element)
+    static async Task<Result<ReactNode>> ConvertVisualElementModelToReactNodeModel(int projectId, VisualElementModel element)
     {
         List<string> classNames = [];
 
@@ -566,13 +562,13 @@ static class NextJs_with_Tailwind
                 classNames.AddRange(classNameList.Value);
                 continue;
             }
-            
+
             if (reactProperty.HasValue)
             {
                 node.Properties.Add(reactProperty.Value);
                 continue;
             }
-            
+
             return new Exception($"PropertyParseError: {property}");
         }
 
@@ -580,7 +576,7 @@ static class NextJs_with_Tailwind
         {
             string tailwindClassName;
             {
-                var result = ConvertDesignerStyleItemToTailwindClassName(projectId,styleItem);
+                var result = ConvertDesignerStyleItemToTailwindClassName(projectId, styleItem);
                 if (result.HasError)
                 {
                     return result.Error;
@@ -609,7 +605,7 @@ static class NextJs_with_Tailwind
         {
             return node;
         }
-        
+
         // Add text content
         if (element.HasText())
         {
@@ -639,18 +635,19 @@ static class NextJs_with_Tailwind
         {
             Maybe<ReactProperty> reactProperty = None;
             Maybe<IReadOnlyList<string>> classNames = None;
-            
+
             var parseResult = TryParseProperty(property);
             if (parseResult.HasNoValue)
             {
                 return (reactProperty, classNames);
             }
+
             var (name, value) = parseResult.Value;
-            
+
             if (name == "class")
             {
                 classNames = value.Split(" ", StringSplitOptions.RemoveEmptyEntries);
-                
+
                 return (reactProperty, classNames);
             }
 
@@ -665,14 +662,12 @@ static class NextJs_with_Tailwind
                 reactProperty = new ReactProperty { Name = "height", Value = value };
                 return (reactProperty, classNames);
             }
-                
+
             reactProperty = new ReactProperty { Name = name, Value = value };
-            
+
             return (reactProperty, classNames);
         }
     }
-
-    
 
     static string Indent(int indentLevel)
     {
@@ -682,15 +677,14 @@ static class NextJs_with_Tailwind
     static Result<string> InjectRender(IReadOnlyList<string> fileContent, string targetComponentName, IReadOnlyList<string> linesToInject)
     {
         var lines = fileContent.ToList();
-        
+
         // focus to component code
 
-        var componentDeclerationLineIndex = lines.FindIndex(line=>line.Contains($"function {targetComponentName}("));
+        var componentDeclerationLineIndex = lines.FindIndex(line => line.Contains($"function {targetComponentName}("));
         if (componentDeclerationLineIndex == -1)
         {
             return new ArgumentException($"ComponentDeclerationNotFoundInFile. {targetComponentName}");
         }
-        
 
         var firstReturnLineIndex = lines.FindIndex(componentDeclerationLineIndex, l => l == "    return (");
         if (firstReturnLineIndex < 0)
