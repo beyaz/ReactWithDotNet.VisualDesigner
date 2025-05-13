@@ -1,5 +1,7 @@
 ﻿global using static ReactWithDotNet.VisualDesigner.Configuration.Extensions;
+using System.Diagnostics;
 using System.IO;
+using System.Runtime.InteropServices;
 
 namespace ReactWithDotNet.VisualDesigner.Configuration;
 
@@ -7,9 +9,7 @@ sealed record ConfigModel
 {
     // @formatter:off
 
-    public string BrowserExePathForWindows { get; init; }
-    public string BrowserExePathForMac { get; init; }
-    public string BrowserExePathForLinux { get; init; }
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> Browsers { get; init; }
     
     public string BrowserExeArguments { get; init; }
     
@@ -24,6 +24,39 @@ sealed record ConfigModel
 
 static class Extensions
 {
+    public static void TryStartBrowser(int port)
+    {
+        IReadOnlyList<string> browserApplicationPaths = null;
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                browserApplicationPaths = Config.Browsers["windows"];
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                browserApplicationPaths = Config.Browsers["mac"];
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                browserApplicationPaths = Config.Browsers["linux"];
+            }
+
+            if (browserApplicationPaths is null)
+            {
+                return;
+            }
+        }
+        
+        foreach (var applicationFilePath in browserApplicationPaths)
+        {
+            if (File.Exists(applicationFilePath))
+            {
+                IgnoreException(() => Process.Start(applicationFilePath, Config.BrowserExeArguments.Replace("{Port}", port.ToString())));
+                return;
+            }
+        }
+    }
+    
     public static readonly ConfigModel Config = ReadConfig();
 
     static readonly bool IsRunningInVS = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("VisualStudioEdition"));

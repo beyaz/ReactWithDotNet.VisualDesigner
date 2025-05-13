@@ -1,6 +1,12 @@
-browserExePathForWindows: "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
-browserExePathForMac: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
-browserExePathForLinux: "/usr/bin/google-chrome"
+browsers:
+  'windows':
+    - 'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe'
+    - 'C:\Program Files\Google\Chrome\Application\chrome.exe'
+    - 'C:\Program Files\Mozilla Firefox\firefox.exe'
+  'mac':
+    - '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
+  'linux':
+    - '/usr/bin/google-chrome'
 browserExeArguments: "--app=https://localhost:{Port}/"
 hideConsoleWindow: true
 nextAvailablePortFrom: 5005

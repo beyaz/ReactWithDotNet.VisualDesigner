@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.IO;
 using System.IO.Compression;
 using System.Runtime.InteropServices;
 using Microsoft.AspNetCore.Builder;
@@ -11,6 +12,7 @@ namespace ReactWithDotNet.VisualDesigner.Infrastructure;
 
 public class Program
 {
+    
     public static void Main(string[] args)
     {
         ProcessHelper.KillAllNamedProcess($"{nameof(ReactWithDotNet)}.{nameof(VisualDesigner)}");
@@ -21,16 +23,10 @@ public class Program
         {
             IgnoreException(ConsoleWindowUtility.HideConsoleWindow);
         }
+        
+        
 
-        if (Config.UseUrls)
-        {
-            var browserApplicationPath = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? Config.BrowserExePathForWindows
-                : RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? Config.BrowserExePathForMac
-                : RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ? Config.BrowserExePathForLinux
-                : throw new NotSupportedException("Unsupported OS");
-
-            Process.Start(browserApplicationPath, Config.BrowserExeArguments.Replace("{Port}", port.ToString()));
-        }
+        
 
         var builder = WebApplication.CreateBuilder(args);
 
@@ -75,6 +71,11 @@ public class Program
         app.UseResponseCompression();
 
         app.ConfigureReactWithDotNet();
+        
+        if (Config.UseUrls)
+        {
+            TryStartBrowser(port);
+        }
 
         if (Config.UseUrls)
         {
