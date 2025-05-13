@@ -18,6 +18,8 @@ sealed record ConfigModel
     public int NextAvailablePortFrom { get; init; }
     
     public bool UseUrls { get; init; }
+
+    public string ConnectionString { get; init; }
     
     // @formatter:on
 }
