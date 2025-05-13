@@ -8,6 +8,16 @@ namespace ReactWithDotNet.VisualDesigner.Views;
 static class ApplicationLogic
 {
 
+    public static Maybe<string> GetUserLastAccessedProjectLocalWorkspacePath()
+    {
+        foreach (var user in DbOperation(db=> from user in db.Select<UserEntity>(x=>x.UserName == Environment.UserName) orderby user.LastAccessTime descending select user))
+        {
+            return user.LocalWorkspacePath;
+        }
+
+        return None;
+    }
+
     public static string GetTagText(string tag)
     {
         if (int.TryParse(tag, out var componentId))
