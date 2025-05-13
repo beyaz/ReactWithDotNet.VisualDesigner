@@ -59,16 +59,13 @@ public static class ReactWithDotNetIntegration
         {
             var path = httpContext.Request.Path.Value ?? string.Empty;
 
-            if (path.StartsWith("/wwwroot/"))
+            foreach (var localFilePath in TryFindFilePathFromWebRequestPath(path))
             {
-                foreach (var projectLocalWorkspacePath in GetUserLastAccessedProjectLocalWorkspacePath())
+                foreach (var (contentType, fileBytes) in await TryConvertLocalFilePathToFileContentResultData(localFilePath))
                 {
-                    foreach (var (contentType, fileBytes) in await TryFindFileFromWebRequestPath(path, projectLocalWorkspacePath))
-                    {
-                        await Results.File(fileBytes, contentType).ExecuteAsync(httpContext);
+                    await Results.File(fileBytes, contentType).ExecuteAsync(httpContext);
 
-                        return;
-                    }
+                    return;
                 }
             }
 

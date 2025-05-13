@@ -8,6 +8,28 @@ namespace ReactWithDotNet.VisualDesigner.Views;
 static class ApplicationLogic
 {
 
+    public static Maybe<string> TryFindFilePathFromWebRequestPath(string requestPath)
+    {
+        
+        if (requestPath.StartsWith("/wwwroot/"))
+        {
+            foreach (var projectLocalWorkspacePath in GetUserLastAccessedProjectLocalWorkspacePath())
+            {
+                var filePath = Path.Combine(projectLocalWorkspacePath,"public", requestPath.RemoveFromStart("/wwwroot/"));
+
+                if (File.Exists(filePath))
+                {
+                    return filePath;
+                }
+
+                return None;
+            }
+        }
+        
+
+        return None;
+    }
+    
     public static Maybe<string> GetUserLastAccessedProjectLocalWorkspacePath()
     {
         foreach (var user in DbOperation(db=> from user in db.Select<UserEntity>(x=>x.UserName == Environment.UserName) orderby user.LastAccessTime descending select user))
@@ -18,10 +40,10 @@ static class ApplicationLogic
         return None;
     }
     
-    public static async Task<Maybe<(string contentType, byte[] fileBytes)>> TryFindFileFromWebRequestPath(string requestPath,string projectLocalWorkspacePath)
+   
+    
+    public static async Task<Maybe<(string contentType, byte[] fileBytes)>> TryConvertLocalFilePathToFileContentResultData(string filePath)
     {
-        var filePath = Path.Combine(projectLocalWorkspacePath,"public", requestPath.RemoveFromStart("/wwwroot/"));
-
         if (File.Exists(filePath))
         {
             var ext = Path.GetExtension(filePath).ToLowerInvariant();
