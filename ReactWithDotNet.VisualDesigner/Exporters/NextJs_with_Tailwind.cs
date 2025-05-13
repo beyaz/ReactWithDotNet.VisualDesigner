@@ -121,7 +121,7 @@ static class NextJs_with_Tailwind
         {
             targetComponentName = componentName.Split('/').Last();
 
-            filePath = Path.Combine((user.LocalWorkspacePath + componentName + ".tsx").Split(new[] { '/', Path.DirectorySeparatorChar }));
+            filePath = Path.Combine(user.LocalWorkspacePath, Path.Combine((componentName + ".tsx").Split(new[] { '/', Path.DirectorySeparatorChar })));
 
             if (Path.GetFileNameWithoutExtension(filePath).Contains("."))
             {
