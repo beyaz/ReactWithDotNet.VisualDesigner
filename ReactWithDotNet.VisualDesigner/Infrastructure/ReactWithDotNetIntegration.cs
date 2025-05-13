@@ -61,29 +61,41 @@ public static class ReactWithDotNetIntegration
 
             if (path.StartsWith("/wwwroot/"))
             {
-                // todo: make this configurable
-                const string publicFolder = @"C:\github\hopgogo\web\enduser-ui\public\";
-
-                var filePath = Path.Combine(publicFolder, path.RemoveFromStart("/wwwroot/"));
-
-                if (File.Exists(filePath))
+                string projectLocalWorkspacePath = null;
                 {
-                    var ext = Path.GetExtension(filePath).ToLowerInvariant();
-                    var contentType = ext switch
+                    foreach (var user in DbOperation(db=> from user in db.Select<UserEntity>(x=>x.UserName == Environment.UserName) orderby user.LastAccessTime descending select user))
                     {
-                        ".jpg" or ".jpeg" => "image/jpeg",
-                        ".png"            => "image/png",
-                        ".gif"            => "image/gif",
-                        ".svg"            => "image/svg+xml",
-                        _                 => "application/octet-stream"
-                    };
-
-                    var fileBytes = await File.ReadAllBytesAsync(filePath);
-
-                    await Results.File(fileBytes, contentType).ExecuteAsync(httpContext);
-
-                    return;
+                        projectLocalWorkspacePath = user.LocalWorkspacePath;
+                        break;
+                    }
                 }
+                
+                if (projectLocalWorkspacePath is not null)
+                {
+                    var filePath = Path.Combine(projectLocalWorkspacePath,"public", path.RemoveFromStart("/wwwroot/"));
+
+                    if (File.Exists(filePath))
+                    {
+                        var ext = Path.GetExtension(filePath).ToLowerInvariant();
+                        var contentType = ext switch
+                        {
+                            ".jpg" or ".jpeg" => "image/jpeg",
+                            ".png"            => "image/png",
+                            ".gif"            => "image/gif",
+                            ".svg"            => "image/svg+xml",
+                            _                 => "application/octet-stream"
+                        };
+
+                        var fileBytes = await File.ReadAllBytesAsync(filePath);
+
+                        await Results.File(fileBytes, contentType).ExecuteAsync(httpContext);
+
+                        return;
+                    }
+                }
+                
+
+              
             }
 
             await next();
