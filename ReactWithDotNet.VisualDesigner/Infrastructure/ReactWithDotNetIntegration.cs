@@ -61,29 +61,15 @@ public static class ReactWithDotNetIntegration
 
             if (path.StartsWith("/wwwroot/"))
             {
-
                 var maybe= GetUserLastAccessedProjectLocalWorkspacePath();
                 if (maybe.HasValue)
                 {
                     var projectLocalWorkspacePath = maybe.Value;
-                    
-                    var filePath = Path.Combine(projectLocalWorkspacePath,"public", path.RemoveFromStart("/wwwroot/"));
 
-                    if (File.Exists(filePath))
+                    var a = await TryFindFile(path, projectLocalWorkspacePath);
+                    if (a.HasValue)
                     {
-                        var ext = Path.GetExtension(filePath).ToLowerInvariant();
-                        var contentType = ext switch
-                        {
-                            ".jpg" or ".jpeg" => "image/jpeg",
-                            ".png"            => "image/png",
-                            ".gif"            => "image/gif",
-                            ".svg"            => "image/svg+xml",
-                            _                 => "application/octet-stream"
-                        };
-
-                        var fileBytes = await File.ReadAllBytesAsync(filePath);
-
-                        await Results.File(fileBytes, contentType).ExecuteAsync(httpContext);
+                        await Results.File(a.Value.fileBytes, a.Value.contentType).ExecuteAsync(httpContext);
 
                         return;
                     }
@@ -92,6 +78,8 @@ public static class ReactWithDotNetIntegration
 
             await next();
         });
+
+        
     }
 
     static Task HandleReactWithDotNetRequest(HttpContext httpContext)

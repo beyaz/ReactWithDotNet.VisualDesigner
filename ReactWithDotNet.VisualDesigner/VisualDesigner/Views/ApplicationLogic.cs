@@ -17,6 +17,30 @@ static class ApplicationLogic
 
         return None;
     }
+    
+    public static async Task<Maybe<(string contentType, byte[] fileBytes)>> TryFindFile(string path,string projectLocalWorkspacePath)
+    {
+        var filePath = Path.Combine(projectLocalWorkspacePath,"public", path.RemoveFromStart("/wwwroot/"));
+
+        if (File.Exists(filePath))
+        {
+            var ext = Path.GetExtension(filePath).ToLowerInvariant();
+            var contentType = ext switch
+            {
+                ".jpg" or ".jpeg" => "image/jpeg",
+                ".png"            => "image/png",
+                ".gif"            => "image/gif",
+                ".svg"            => "image/svg+xml",
+                _                 => "application/octet-stream"
+            };
+
+            var fileBytes = await File.ReadAllBytesAsync(filePath);
+
+            return (contentType,fileBytes);
+        }
+
+        return None;
+    }
 
     public static string GetTagText(string tag)
     {
