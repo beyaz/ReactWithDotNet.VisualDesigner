@@ -61,17 +61,12 @@ public static class ReactWithDotNetIntegration
 
             if (path.StartsWith("/wwwroot/"))
             {
-                string projectLocalWorkspacePath = null;
+
+                var maybe= GetUserLastAccessedProjectLocalWorkspacePath();
+                if (maybe.HasValue)
                 {
-                    foreach (var user in DbOperation(db=> from user in db.Select<UserEntity>(x=>x.UserName == Environment.UserName) orderby user.LastAccessTime descending select user))
-                    {
-                        projectLocalWorkspacePath = user.LocalWorkspacePath;
-                        break;
-                    }
-                }
-                
-                if (projectLocalWorkspacePath is not null)
-                {
+                    var projectLocalWorkspacePath = maybe.Value;
+                    
                     var filePath = Path.Combine(projectLocalWorkspacePath,"public", path.RemoveFromStart("/wwwroot/"));
 
                     if (File.Exists(filePath))
@@ -93,9 +88,6 @@ public static class ReactWithDotNetIntegration
                         return;
                     }
                 }
-                
-
-              
             }
 
             await next();
