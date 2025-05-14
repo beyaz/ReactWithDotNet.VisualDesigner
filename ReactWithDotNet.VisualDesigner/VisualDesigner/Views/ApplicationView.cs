@@ -604,7 +604,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
                 new FlexRowCentered(WidthFull)
                 {
-                    removeIconInLayersTab,
+                    removeIconInLayersTab + When(state.LeftTab != LeftTabs.ElementTree, VisibilityCollapse),
 
                     new FlexRow(JustifyContentSpaceEvenly,WidthFull, PaddingX(4))
                     {
@@ -630,7 +630,7 @@ sealed class ApplicationView : Component<ApplicationState>
                         
                     },
 
-                    addIconInLayersTab
+                    addIconInLayersTab + When(state.LeftTab != LeftTabs.ElementTree, VisibilityCollapse)
                 }
             },
 

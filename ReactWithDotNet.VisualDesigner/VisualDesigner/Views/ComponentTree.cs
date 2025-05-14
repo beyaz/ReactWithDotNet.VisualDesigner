@@ -186,7 +186,7 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
             {
                 When(node.ComponentName == ComponentName, Background(Blue100), BorderRadius(3)),
 
-                When(node.HasNoChild(), UserSelect(none)),
+                UserSelect(none),
 
                 PositionRelative,
 
