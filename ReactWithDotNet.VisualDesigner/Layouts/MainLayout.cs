@@ -33,7 +33,6 @@ sealed class MainLayout : PureComponent, IPageLayout
             // Global Styles
             Margin(0),
             Color(Theme.text_primary),
-            FontFamily("'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'"),
             WebkitFontSmoothingAntialiased,
             MozOsxFontSmoothingGrayScale,
             FontWeight400,
