@@ -23,98 +23,91 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
         return Task.CompletedTask;
     }
 
-   
-
-    
     async Task InitializeState()
     {
-        
-        var allNodes = ListOf(from x in await DbOperation(db => db.SelectAsync<ComponentEntity>(x => x.ProjectId == ProjectId))
-                                         orderby x.Name descending
-                                         select new NodeModel
-                                         {
-                                             ComponentId   = x.Id,
-                                             ComponentName = x.Name,
-                                             Names = x.Name.Split('/',StringSplitOptions.RemoveEmptyEntries)
-                                         });
-
-        var rootNode = new NodeModel
-        {
-            Path = "0"
-        };
-        
-        foreach (var item in allNodes)
-        {
-            openPath(rootNode, item.ComponentName);
-            
-            append(rootNode, item);
-        }
-
-        
-        
         state = new()
         {
             ProjectId = ProjectId,
             
-            RootNode = rootNode
+            RootNode = await createRootNode()
         };
 
-
-
-
-        static void append(NodeModel rootNode, NodeModel node)
+        async Task<NodeModel> createRootNode()
         {
-            var names = node.Names.SkipLast(1).ToList();
-
-            var parent = rootNode;
-            
-            foreach (var name in names)
+            var rootNode = new NodeModel
             {
-                parent = parent.Children.First(x => x.Label == name);
-            }
-            
-            parent.Children.Add(node);
-            
-        }
+                Path = "0"
+            };
         
-        static void openPath(NodeModel rootNode, string componentName)
-        {
-            var names = componentName.Split('/', StringSplitOptions.RemoveEmptyEntries).SkipLast(1).ToList();
-            
-            var node = rootNode;
-
-            for (var i = 0; i < names.Count; i++)
+            foreach (var item in from x in await DbOperation(db => db.SelectAsync<ComponentEntity>(x => x.ProjectId == ProjectId))
+                     orderby x.Name descending
+                     select new NodeModel
+                     {
+                         ComponentId   = x.Id,
+                         ComponentName = x.Name,
+                         Names         = x.Name.Split('/',StringSplitOptions.RemoveEmptyEntries)
+                     })
             {
-                var name = names[i];
+                openPath(rootNode, item.ComponentName);
+            
+                append(rootNode, item);
+            }
+
+            return rootNode;
+            
+            static void append(NodeModel rootNode, NodeModel node)
+            {
+                var names = node.Names.SkipLast(1).ToList();
+
+                var parent = rootNode;
+            
+                foreach (var name in names)
+                {
+                    parent = parent.Children.First(x => x.Label == name);
+                }
+            
+                parent.Children.Add(node);
+            
+            }
+        
+            static void openPath(NodeModel rootNode, string componentName)
+            {
+                var names = componentName.Split('/', StringSplitOptions.RemoveEmptyEntries).SkipLast(1).ToList();
+            
+                var node = rootNode;
+
+                for (var i = 0; i < names.Count; i++)
+                {
+                    var name = names[i];
                 
-                var hasAlreadyNamedChild = false;
+                    var hasAlreadyNamedChild = false;
 
-                foreach (var child in node.Children)
-                {
-                    if (child.Label == name)
+                    foreach (var child in node.Children)
                     {
-                        node = child;
+                        if (child.Label == name)
+                        {
+                            node = child;
                         
-                        hasAlreadyNamedChild = true;
-                        break;
+                            hasAlreadyNamedChild = true;
+                            break;
+                        }
                     }
+
+                    if (hasAlreadyNamedChild)
+                    {
+                        continue;
+                    }
+
+                    node.Children.Add(new()
+                    {
+                        Path  = $"{node.Path}_{i}",
+                        Label = name
+                    });
+
+                    node = node.Children[^1];
                 }
-
-                if (hasAlreadyNamedChild)
-                {
-                    continue;
-                }
-
-                node.Children.Add(new()
-                {
-                    Path          = $"{node.Path}_{i}",
-                    Label         = name
-                });
-
-                node = node.Children[^1];
             }
         }
-        
     }
 
 
