@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using Microsoft.CodeAnalysis;
 using ReactWithDotNet.ThirdPartyLibraries.MonacoEditorReact;
 using ReactWithDotNet.VisualDesigner.Exporters;
 using Page = ReactWithDotNet.VisualDesigner.Infrastructure.Page;
@@ -1171,6 +1172,11 @@ sealed class ApplicationView : Component<ApplicationState>
                     OnClick([StopPropagation](e) =>
                     {
                         var styleIndex = int.Parse(e.currentTarget.id);
+                        if (styleIndex == state.Selection?.SelectedStyleIndex)
+                        {
+                            state.Selection = state.Selection with { SelectedStyleIndex = null };
+                            return Task.CompletedTask;
+                        }
 
                         state.Selection = new()
                         {
@@ -1334,16 +1340,21 @@ sealed class ApplicationView : Component<ApplicationState>
                     Id("PROPS-" + index),
                     OnClick([StopPropagation](e) =>
                     {
-                        var location = int.Parse(e.currentTarget.id.RemoveFromStart("PROPS-"));
-
+                        var propertyIndex = int.Parse(e.currentTarget.id.RemoveFromStart("PROPS-"));
+                        if (propertyIndex == state.Selection?.SelectedPropertyIndex)
+                        {
+                            state.Selection = state.Selection with { SelectedPropertyIndex = null };
+                            return Task.CompletedTask;
+                        }
+                        
                         state.Selection = new()
                         {
                             VisualElementTreeItemPath = state.Selection.VisualElementTreeItemPath,
 
-                            SelectedPropertyIndex = location
+                            SelectedPropertyIndex = propertyIndex
                         };
 
-                        var id = "PROPS-INPUT-EDITOR-" + location;
+                        var id = "PROPS-INPUT-EDITOR-" + propertyIndex;
 
                         // calculate js code for focus to input editor
                         {
@@ -1353,7 +1364,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
                             // calculate text selection in edit input
                             {
-                                var nameValue = CurrentVisualElement.Properties[location];
+                                var nameValue = CurrentVisualElement.Properties[propertyIndex];
 
                                 TryParseProperty(nameValue).HasValue(parseResult =>
                                 {
