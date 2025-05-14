@@ -128,6 +128,7 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
         }
     }
 
+    [StopPropagation]
     Task OnTreeItemClicked(MouseEvent e)
     {
         var selectedPath = e.currentTarget.id;
@@ -144,6 +145,10 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
         if (node.ComponentName.HasValue())
         {
             DispatchEvent(SelectionChanged, [node.ComponentName]);
+        }
+        else
+        {
+            return ToggleFold(e);
         }
 
         return Task.CompletedTask;
