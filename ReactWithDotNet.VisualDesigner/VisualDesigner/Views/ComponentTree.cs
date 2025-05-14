@@ -4,7 +4,6 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
 {
     public int ProjectId { get; init; }
 
-    public string SelectedPath { get; init; }
 
     [CustomEvent]
     public Func<string, Task> SelectionChanged { get; init; }
