@@ -1,12 +1,13 @@
-﻿using Microsoft.AspNetCore.Components;
-
-namespace ReactWithDotNet.VisualDesigner.Views;
-
-
+﻿namespace ReactWithDotNet.VisualDesigner.Views;
 
 sealed class ComponentTreeView : Component<ComponentTreeView.State>
 {
     public int ProjectId { get; init; }
+
+    public string SelectedPath { get; init; }
+
+    [CustomEvent]
+    public Func<string, Task> SelectionChanged { get; init; }
 
     protected override Task constructor()
     {
@@ -19,8 +20,22 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
         {
             return InitializeState();
         }
-        
+
         return Task.CompletedTask;
+    }
+
+    protected override Element render()
+    {
+        if (state.RootNode is null)
+        {
+            return new FlexRowCentered(SizeFull) { "Empty" };
+        }
+
+        return new div(CursorDefault, Padding(5), TabIndex(0), OutlineNone)
+        {
+            ToVisual(state.RootNode, 0, "0"),
+            WidthFull, HeightFull
+        };
     }
 
     async Task InitializeState()
@@ -28,7 +43,7 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
         state = new()
         {
             ProjectId = ProjectId,
-            
+
             RootNode = await createRootNode()
         };
 
@@ -38,48 +53,47 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
             {
                 Path = "0"
             };
-        
+
             foreach (var item in from x in await DbOperation(db => db.SelectAsync<ComponentEntity>(x => x.ProjectId == ProjectId))
                      orderby x.Name descending
                      select new NodeModel
                      {
                          ComponentId   = x.Id,
                          ComponentName = x.Name,
-                         Names         = x.Name.Split('/',StringSplitOptions.RemoveEmptyEntries)
+                         Names         = x.Name.Split('/', StringSplitOptions.RemoveEmptyEntries)
                      })
             {
                 openPath(rootNode, item.ComponentName);
-            
+
                 append(rootNode, item);
             }
 
             return rootNode;
-            
+
             static void append(NodeModel rootNode, NodeModel node)
             {
                 var names = node.Names.SkipLast(1).ToList();
 
                 var parent = rootNode;
-            
+
                 foreach (var name in names)
                 {
                     parent = parent.Children.First(x => x.Label == name);
                 }
-            
-                parent.Children.Add(node with { Label = node.Names.Last()});
-            
+
+                parent.Children.Add(node with { Label = node.Names.Last() });
             }
-        
+
             static void openPath(NodeModel rootNode, string componentName)
             {
                 var names = componentName.Split('/', StringSplitOptions.RemoveEmptyEntries).SkipLast(1).ToList();
-            
+
                 var node = rootNode;
 
                 for (var i = 0; i < names.Count; i++)
                 {
                     var name = names[i];
-                
+
                     var hasAlreadyNamedChild = false;
 
                     foreach (var child in node.Children)
@@ -87,7 +101,7 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
                         if (child.Label == name)
                         {
                             node = child;
-                        
+
                             hasAlreadyNamedChild = true;
                             break;
                         }
@@ -110,160 +124,11 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
         }
     }
 
-
-    [CustomEvent]
-    public OnTreeItemCopyPaste CopyPaste { get; init; }
-
-    public VisualElementModel Model { get; init; }
-
-    [CustomEvent]
-    public Func<Task> MouseLeave { get; init; }
-
-    [CustomEvent]
-    public OnTreeItemDelete OnDelete { get; init; }
-
-    [CustomEvent]
-    public Func<Task> OnHideInDesignerToggle { get; init; }
-
-    public string SelectedPath { get; init; }
-
-    [CustomEvent]
-    public Func<string, Task> SelectionChanged { get; init; }
-
-    [CustomEvent]
-    public OnTreeItemHover TreeItemHover { get; init; }
-
-    [CustomEvent]
-    public OnTreeItemMove TreeItemMove { get; init; }
-
-    protected override Element render()
-    {
-        if (state.RootNode is null)
-        {
-            return new FlexRowCentered(SizeFull) { "Empty" };
-        }
-
-        return new div(CursorDefault, Padding(5), OnMouseLeave(OnMouseLeaveHandler), OnKeyDown(On_Key_Down), TabIndex(0), OutlineNone)
-        {
-            ToVisual(state.RootNode, 0, "0"),
-            WidthFull, HeightFull
-        };
-    }
-
-    [KeyboardEventCallOnly("CTRL+c", "CTRL+v", "Delete")]
-    Task On_Key_Down(KeyboardEvent e)
-    {
-        if (e.key == "Delete")
-        {
-            DispatchEvent(OnDelete, []);
-            return Task.CompletedTask;
-        }
-
-        if (e.key == "c")
-        {
-            state.CopiedTreeItemPath = SelectedPath;
-            return Task.CompletedTask;
-        }
-
-        if (e.key == "v" && state.CopiedTreeItemPath.HasValue())
-        {
-            DispatchEvent(CopyPaste, [state.CopiedTreeItemPath, SelectedPath]);
-
-            state.CopiedTreeItemPath = null;
-        }
-
-        return Task.CompletedTask;
-    }
-
-    Task OnDragEntered(DragEvent e)
-    {
-        state.CurrentDragOveredPath = e.currentTarget.id;
-        return Task.CompletedTask;
-    }
-
-    Task OnDragStarted(DragEvent e)
-    {
-        state.DragStartedTreeItemPath = e.currentTarget.id;
-
-        return Task.CompletedTask;
-    }
-
-    Task OnDroped(DragEvent e)
-    {
-        var treeItemPathTarget = e.currentTarget.id;
-
-        if (treeItemPathTarget != state.DragStartedTreeItemPath)
-        {
-            DispatchEvent(TreeItemMove, [state.DragStartedTreeItemPath, treeItemPathTarget, state.DragPosition]);
-        }
-
-        state.CurrentDragOveredPath = null;
-
-        state.DragStartedTreeItemPath = null;
-
-        state.CollapsedNodes.Clear();
-
-        return Task.CompletedTask;
-    }
-
-    [DebounceTimeout(300)]
-    Task OnMouseEnterHandler(MouseEvent e)
-    {
-        var selectedPath = e.currentTarget.id;
-
-        DispatchEvent(TreeItemHover, [selectedPath]);
-
-        return Task.CompletedTask;
-    }
-
-    [DebounceTimeout(300)]
-    Task OnMouseLeaveHandler(MouseEvent e)
-    {
-        DispatchEvent(MouseLeave, []);
-
-        return Task.CompletedTask;
-    }
-
     Task OnTreeItemClicked(MouseEvent e)
     {
         var selectedPath = e.currentTarget.id;
 
         DispatchEvent(SelectionChanged, [selectedPath]);
-
-        return Task.CompletedTask;
-    }
-
-    Task Toggle_HideInDesigner(MouseEvent e)
-    {
-        DispatchEvent(OnHideInDesignerToggle, []);
-
-        return Task.CompletedTask;
-    }
-
-    Task ToggleDragPositionAfter(DragEvent e)
-    {
-        if (state.DragPosition == DragPosition.After)
-        {
-            state.DragPosition = DragPosition.Inside;
-        }
-        else
-        {
-            state.DragPosition = DragPosition.After;
-        }
-
-        return Task.CompletedTask;
-    }
-
-    Task ToggleDragPositionBefore(DragEvent e)
-    {
-        if (state.DragPosition == DragPosition.Before)
-        {
-            state.DragPosition = DragPosition.Inside;
-        }
-        else
-        {
-            state.DragPosition = DragPosition.Before;
-        }
 
         return Task.CompletedTask;
     }
@@ -287,44 +152,6 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
 
     IReadOnlyList<Element> ToVisual(NodeModel node, int indent, string path)
     {
-        var isSelected = SelectedPath == path;
-
-        var isDragHoveredElement = path == state.CurrentDragOveredPath && path != state.DragStartedTreeItemPath;
-
-        Element beforePositionElement = null;
-        if (isDragHoveredElement)
-        {
-            beforePositionElement = new FlexRow(WidthFull, Height(6), DraggableTrue)
-            {
-                OnDragEnter(ToggleDragPositionBefore),
-                OnDragLeave(ToggleDragPositionBefore),
-
-                BorderBottomLeftRadius(16), BorderTopLeftRadius(16),
-
-                When(state.DragPosition == DragPosition.Before, Background(Blue300)),
-
-                PositionAbsolute, Top(0)
-            };
-        }
-
-        Element afterPositionElement = null;
-        if (isDragHoveredElement)
-        {
-            afterPositionElement = new FlexRow(WidthFull, Height(6), DraggableTrue)
-            {
-                OnDragEnter(ToggleDragPositionAfter),
-                OnDragLeave(ToggleDragPositionAfter),
-
-                BorderBottomLeftRadius(16), BorderTopLeftRadius(16),
-
-                When(state.DragPosition == DragPosition.After, Background(Blue300)),
-
-                PositionAbsolute, Bottom(0)
-            };
-        }
-
-        Element  icon = new IconText() + Size(16) + Color(Gray300);
-
         var foldIcon = new FlexRowCentered(Size(16), PositionAbsolute, Top(4), Left(indent * 16 - 12), Hover(BorderRadius(36), Background(Gray50)))
         {
             new IconArrowRightOrDown { IsArrowDown = !state.CollapsedNodes.Contains(path) },
@@ -337,37 +164,20 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
             foldIcon = null;
         }
 
-        Element eyeIcon = null;
-
         var returnList = new List<Element>
         {
-            new FlexColumn(PaddingLeft(indent * 16), Id(path), OnClick(OnTreeItemClicked), OnMouseEnter(OnMouseEnterHandler))
+            new FlexColumn(PaddingLeft(indent * 16), Id(path), OnClick(OnTreeItemClicked))
             {
                 PositionRelative,
 
                 foldIcon,
 
-                beforePositionElement,
-
                 new FlexRow(Gap(4), AlignItemsCenter)
                 {
                     MarginLeft(4), FontSize13,
 
-                    new span { GetTagText(node.Label) },
-
-                    icon
-                },
-
-                state.DragStartedTreeItemPath.HasNoValue() && isSelected ? Background(Blue100) + BorderRadius(3) : null,
-
-                state.DragStartedTreeItemPath.HasNoValue() && !isSelected ? Hover(Background(Blue50), BorderRadius(3)) : null,
-
-                DraggableTrue,
-                OnDragStart(OnDragStarted),
-                OnDragEnter(OnDragEntered),
-                OnDrop(OnDroped),
-
-                afterPositionElement
+                    new span { GetTagText(node.Label) }
+                }
             }
         };
 
@@ -395,32 +205,28 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
     {
         public List<string> CollapsedNodes { get; init; } = [];
 
-        public string CopiedTreeItemPath { get; set; }
-
-        public string CurrentDragOveredPath { get; set; }
-
-        public DragPosition DragPosition { get; set; }
-
-        public string DragStartedTreeItemPath { get; set; }
         public int ProjectId { get; init; }
-        public NodeModel RootNode { get; set; }
+
+        public NodeModel RootNode { get; init; }
     }
 
     internal record NodeModel
     {
-        public string Path { get; init; }
-        
+        public List<NodeModel> Children { get; init; } = [];
+
         public int? ComponentId { get; init; }
 
         public string ComponentName { get; init; }
-        
-        public IReadOnlyList<string> Names { get; init; } = [];
 
         public string Label { get; init; }
 
-        public List<NodeModel> Children { get; init; } = [];
-        
-        public bool HasNoChild() => Children.Count == 0;
+        public IReadOnlyList<string> Names { get; init; } = [];
 
+        public string Path { get; init; }
+
+        public bool HasNoChild()
+        {
+            return Children.Count == 0;
+        }
     }
 }
