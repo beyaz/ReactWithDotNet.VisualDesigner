@@ -230,7 +230,6 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
         }
 
         Element icon = null;
-
         {
             var styles = node.Styles;
 

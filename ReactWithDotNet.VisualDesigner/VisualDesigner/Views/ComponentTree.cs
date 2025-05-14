@@ -170,12 +170,12 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
     {
         var foldIcon = new FlexRowCentered(Size(16), PositionAbsolute, Top(4), Left(indent * 16 - 12), Hover(BorderRadius(36), Background(Gray50)))
         {
-            new IconArrowRightOrDown { IsArrowDown = !state.CollapsedNodes.Contains(path) },
+            new IconArrowRightOrDown { IsArrowDown = !state.CollapsedNodes.Contains(node.Path) },
 
             Id(node.Path),
             OnClick(ToggleFold)
         };
-        if (path == "0" || node.HasNoChild())
+        if (node.Path == "0" || node.HasNoChild())
         {
             foldIcon = null;
         }
@@ -184,6 +184,8 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
         {
             new FlexColumn(PaddingLeft(indent * 16), Id(node.Path), OnClick(OnTreeItemClicked))
             {
+                When(node.ComponentName == ComponentName, Background(Blue100), BorderRadius(3)),
+                
                 PositionRelative,
 
                 foldIcon,
@@ -192,7 +194,7 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
                 {
                     MarginLeft(4), FontSize13,
 
-                    new span { GetTagText(node.Label) }
+                    new span { node.Label }
                 }
             }
         };
@@ -202,7 +204,7 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
             return returnList;
         }
 
-        if (state.CollapsedNodes.Contains(path))
+        if (state.CollapsedNodes.Contains(node.Path))
         {
             return returnList;
         }
