@@ -5,7 +5,7 @@ delegate Task ComponentSelectionChanged(string componentName);
 sealed class ComponentTreeView : Component<ComponentTreeView.State>
 {
     public string ComponentName { get; init; }
-    
+
     public int ProjectId { get; init; }
 
     [CustomEvent]
@@ -35,7 +35,7 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
 
         return new div(CursorDefault, Padding(5), TabIndex(0), OutlineNone)
         {
-            ToVisual(state.RootNode, 0, "0"),
+            ToVisual(state.RootNode, 0),
             WidthFull, HeightFull
         };
     }
@@ -85,7 +85,7 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
                     parent = parent.Children.First(x => x.Label == name);
                 }
 
-                parent.Children.Add(node with { Label = node.Names.Last(), Path = $"{parent.Path}_{parent.Children.Count}"});
+                parent.Children.Add(node with { Label = node.Names.Last(), Path = $"{parent.Path}_{parent.Children.Count}" });
             }
 
             static void openPath(NodeModel rootNode, string componentName)
@@ -131,9 +131,9 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
     Task OnTreeItemClicked(MouseEvent e)
     {
         var selectedPath = e.currentTarget.id;
-        
+
         var node = state.RootNode;
-        
+
         foreach (var item in selectedPath.Split('_', StringSplitOptions.RemoveEmptyEntries).Skip(1))
         {
             var index = int.Parse(item);
@@ -143,7 +143,7 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
 
         if (node.ComponentName.HasValue())
         {
-            DispatchEvent(SelectionChanged, [node.ComponentName]);    
+            DispatchEvent(SelectionChanged, [node.ComponentName]);
         }
 
         return Task.CompletedTask;
@@ -166,7 +166,7 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
         return Task.CompletedTask;
     }
 
-    IReadOnlyList<Element> ToVisual(NodeModel node, int indent, string path)
+    IReadOnlyList<Element> ToVisual(NodeModel node, int indent)
     {
         var foldIcon = new FlexRowCentered(Size(16), PositionAbsolute, Top(4), Left(indent * 16 - 12), Hover(BorderRadius(36), Background(Gray50)))
         {
@@ -185,7 +185,9 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
             new FlexColumn(PaddingLeft(indent * 16), Id(node.Path), OnClick(OnTreeItemClicked))
             {
                 When(node.ComponentName == ComponentName, Background(Blue100), BorderRadius(3)),
-                
+
+                When(node.HasNoChild(), UserSelect(none)),
+
                 PositionRelative,
 
                 foldIcon,
@@ -213,7 +215,7 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
         {
             var child = node.Children[i];
 
-            returnList.AddRange(ToVisual(child, indent + 1, $"{path},{i}"));
+            returnList.AddRange(ToVisual(child, indent + 1));
         }
 
         return returnList;
