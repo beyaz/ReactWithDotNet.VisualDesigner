@@ -53,9 +53,16 @@ public sealed class ApplicationState
     
     public string YamlText { get; set; }
     
-    public MainContentTabs MainContentTab{ get; set; }
+    public LeftTabs LeftTab  { get; set; }
+    
+    public MainContentTabs MainContentTab  { get; set; }
 
     // @formatter:on
+}
+
+public enum LeftTabs
+{
+    Components, ElementTree
 }
 
 public enum MainContentTabs

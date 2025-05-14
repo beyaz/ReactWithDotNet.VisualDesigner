@@ -1,5 +1,4 @@
 ﻿using System.Text;
-using Microsoft.CodeAnalysis;
 using ReactWithDotNet.ThirdPartyLibraries.MonacoEditorReact;
 using ReactWithDotNet.VisualDesigner.Exporters;
 using Page = ReactWithDotNet.VisualDesigner.Infrastructure.Page;
@@ -607,15 +606,35 @@ sealed class ApplicationView : Component<ApplicationState>
                 {
                     removeIconInLayersTab,
 
-                    new FlexRowCentered(WidthFull)
+                    new FlexRow(JustifyContentSpaceEvenly,WidthFull, PaddingX(4))
                     {
-                        new IconLayers() + Size(18) + Color(Gray500)
+                        new FlexRowCentered(WidthFull, Hover(Background(Gray50), BorderRadius(36)))
+                        {
+                            new IconReact() + Size(24) + Color(state.LeftTab == LeftTabs.Components ? Gray500 : Gray200),
+                            OnClick([StopPropagation](_) =>
+                            {
+                                state.LeftTab = LeftTabs.Components;
+                                return Task.CompletedTask;
+                            })
+                        },
+                        new FlexRowCentered(WidthFull, Hover(Background(Gray50), BorderRadius(36)))
+                        {
+                            new IconLayers() + Size(18) + Color(state.LeftTab == LeftTabs.ElementTree ? Gray500 : Gray200),
+                            OnClick([StopPropagation](_) =>
+                            {
+                                state.LeftTab = LeftTabs.ElementTree;
+                                return Task.CompletedTask;
+                            })
+                        }
+                       
+                        
                     },
 
                     addIconInLayersTab
                 }
             },
 
+            state.LeftTab == LeftTabs.ElementTree ?
             new VisualElementTreeView
             {
                 Model = state.ComponentRootElement,
@@ -817,6 +836,7 @@ sealed class ApplicationView : Component<ApplicationState>
                     return Task.CompletedTask;
                 }
             }
+            : null
         };
     }
 
