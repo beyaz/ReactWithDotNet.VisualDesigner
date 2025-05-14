@@ -94,10 +94,8 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
 
                 var node = rootNode;
 
-                for (var i = 0; i < names.Count; i++)
+                foreach (var name in names)
                 {
-                    var name = names[i];
-
                     var hasAlreadyNamedChild = false;
 
                     foreach (var child in node.Children)
