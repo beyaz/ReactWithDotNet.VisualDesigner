@@ -4,6 +4,8 @@
 
 sealed class ComponentTreeView : Component<ComponentTreeView.State>
 {
+    public int ProjectId { get; init; }
+    
     [CustomEvent]
     public OnTreeItemCopyPaste CopyPaste { get; init; }
 
