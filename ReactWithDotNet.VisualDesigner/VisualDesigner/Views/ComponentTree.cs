@@ -5,6 +5,7 @@ delegate Task ComponentSelectionChanged(string componentName);
 sealed class ComponentTreeView : Component<ComponentTreeView.State>
 {
     public string ComponentName { get; init; }
+    
     public int ProjectId { get; init; }
 
     [CustomEvent]
