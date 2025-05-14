@@ -1,12 +1,14 @@
 ﻿namespace ReactWithDotNet.VisualDesigner.Views;
 
+delegate Task ComponentSelectionChanged(string componentName);
+
 sealed class ComponentTreeView : Component<ComponentTreeView.State>
 {
+    public string ComponentName { get; init; }
     public int ProjectId { get; init; }
 
-
     [CustomEvent]
-    public Func<string, Task> SelectionChanged { get; init; }
+    public ComponentSelectionChanged SelectionChanged { get; init; }
 
     protected override Task constructor()
     {
@@ -15,7 +17,7 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
 
     protected override Task OverrideStateFromPropsBeforeRender()
     {
-        if (ProjectId != state.ProjectId)
+        if (ProjectId != state.ProjectId || ComponentName != state.ComponentName)
         {
             return InitializeState();
         }
@@ -25,7 +27,7 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
 
     protected override Element render()
     {
-        if (state.RootNode is null)
+        if (state.RootNode is null || state.ComponentName.HasNoValue())
         {
             return new FlexRowCentered(SizeFull) { "Empty" };
         }
@@ -42,6 +44,8 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
         state = new()
         {
             ProjectId = ProjectId,
+
+            ComponentName = ComponentName,
 
             RootNode = await createRootNode()
         };
@@ -203,6 +207,8 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
     internal class State
     {
         public List<string> CollapsedNodes { get; init; } = [];
+
+        public string ComponentName { get; init; }
 
         public int ProjectId { get; init; }
 
