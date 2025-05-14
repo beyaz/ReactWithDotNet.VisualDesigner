@@ -28,7 +28,7 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
 
     protected override Element render()
     {
-        if (state.RootNode is null || state.ComponentName.HasNoValue())
+        if (state.RootNode is null)
         {
             return new FlexRowCentered(SizeFull) { "Empty" };
         }
@@ -85,7 +85,7 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
                     parent = parent.Children.First(x => x.Label == name);
                 }
 
-                parent.Children.Add(node with { Label = node.Names.Last() });
+                parent.Children.Add(node with { Label = node.Names.Last(), Path = $"{parent.Path}_{parent.Children.Count}"});
             }
 
             static void openPath(NodeModel rootNode, string componentName)
@@ -118,7 +118,7 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
 
                     node.Children.Add(new()
                     {
-                        Path  = $"{node.Path}_{i}",
+                        Path  = $"{node.Path}_{node.Children.Count}",
                         Label = name
                     });
 
@@ -131,8 +131,20 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
     Task OnTreeItemClicked(MouseEvent e)
     {
         var selectedPath = e.currentTarget.id;
+        
+        var node = state.RootNode;
+        
+        foreach (var item in selectedPath.Split('_', StringSplitOptions.RemoveEmptyEntries).Skip(1))
+        {
+            var index = int.Parse(item);
 
-        DispatchEvent(SelectionChanged, [selectedPath]);
+            node = node.Children[index];
+        }
+
+        if (node.ComponentName.HasValue())
+        {
+            DispatchEvent(SelectionChanged, [node.ComponentName]);    
+        }
 
         return Task.CompletedTask;
     }
@@ -160,7 +172,7 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
         {
             new IconArrowRightOrDown { IsArrowDown = !state.CollapsedNodes.Contains(path) },
 
-            Id(path),
+            Id(node.Path),
             OnClick(ToggleFold)
         };
         if (path == "0" || node.HasNoChild())
@@ -170,7 +182,7 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
 
         var returnList = new List<Element>
         {
-            new FlexColumn(PaddingLeft(indent * 16), Id(path), OnClick(OnTreeItemClicked))
+            new FlexColumn(PaddingLeft(indent * 16), Id(node.Path), OnClick(OnTreeItemClicked))
             {
                 PositionRelative,
 
