@@ -5,7 +5,34 @@
 sealed class ComponentTreeView : Component<ComponentTreeView.State>
 {
     public int ProjectId { get; init; }
+
+    protected override Task constructor()
+    {
+        return InitializeState();
+    }
+
+    protected override Task OverrideStateFromPropsBeforeRender()
+    {
+        if (ProjectId != state.ProjectId)
+        {
+            return InitializeState();
+        }
+        
+        return Task.CompletedTask;
+    }
+
+    Task InitializeState()
+    {
+
+        state = new()
+        {
+            ProjectId = ProjectId
+        };
+        
+    return Task.CompletedTask;
+    }
     
+
     [CustomEvent]
     public OnTreeItemCopyPaste CopyPaste { get; init; }
 
@@ -365,5 +392,6 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
         public DragPosition DragPosition { get; set; }
 
         public string DragStartedTreeItemPath { get; set; }
+        public int ProjectId { get; init; }
     }
 }
