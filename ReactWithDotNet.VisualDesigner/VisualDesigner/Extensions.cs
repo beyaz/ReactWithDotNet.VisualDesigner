@@ -9,6 +9,8 @@ static class Extensions
     {
         return double.TryParse(input, out _);
     }
+
+    public static List<T> ListOf<T>(IEnumerable<T> enumerable) => enumerable.ToList();
     
     //public static VisualElementModel Fix(this VisualElementModel model)
     //{

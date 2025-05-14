@@ -1,4 +1,6 @@
-﻿namespace ReactWithDotNet.VisualDesigner.Views;
+﻿using Microsoft.AspNetCore.Components;
+
+namespace ReactWithDotNet.VisualDesigner.Views;
 
 
 
@@ -21,17 +23,100 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
         return Task.CompletedTask;
     }
 
-    Task InitializeState()
-    {
+   
 
-        state = new()
+    
+    async Task InitializeState()
+    {
+        
+        var allNodes = ListOf(from x in await DbOperation(db => db.SelectAsync<ComponentEntity>(x => x.ProjectId == ProjectId))
+                                         orderby x.Name descending
+                                         select new NodeModel
+                                         {
+                                             ComponentId   = x.Id,
+                                             ComponentName = x.Name,
+                                             Names = x.Name.Split('/',StringSplitOptions.RemoveEmptyEntries)
+                                         });
+
+        var rootNode = new NodeModel
         {
-            ProjectId = ProjectId
+            Path = "0"
         };
         
-    return Task.CompletedTask;
+        foreach (var item in allNodes)
+        {
+            openPath(rootNode, item.ComponentName);
+            
+            append(rootNode, item);
+        }
+
+        
+        
+        state = new()
+        {
+            ProjectId = ProjectId,
+            
+            RootNode = rootNode
+        };
+
+
+
+
+        static void append(NodeModel rootNode, NodeModel node)
+        {
+            var names = node.Names.SkipLast(1).ToList();
+
+            var parent = rootNode;
+            
+            foreach (var name in names)
+            {
+                parent = parent.Children.First(x => x.Label == name);
+            }
+            
+            parent.Children.Add(node);
+            
+        }
+        
+        static void openPath(NodeModel rootNode, string componentName)
+        {
+            var names = componentName.Split('/', StringSplitOptions.RemoveEmptyEntries).SkipLast(1).ToList();
+            
+            var node = rootNode;
+
+            for (var i = 0; i < names.Count; i++)
+            {
+                var name = names[i];
+                
+                var hasAlreadyNamedChild = false;
+
+                foreach (var child in node.Children)
+                {
+                    if (child.Label == name)
+                    {
+                        node = child;
+                        
+                        hasAlreadyNamedChild = true;
+                        break;
+                    }
+                }
+
+                if (hasAlreadyNamedChild)
+                {
+                    continue;
+                }
+
+                node.Children.Add(new()
+                {
+                    Path          = $"{node.Path}_{i}",
+                    Label         = name
+                });
+
+                node = node.Children[^1];
+            }
+        }
+        
     }
-    
+
 
     [CustomEvent]
     public OnTreeItemCopyPaste CopyPaste { get; init; }
@@ -393,5 +478,22 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
 
         public string DragStartedTreeItemPath { get; set; }
         public int ProjectId { get; init; }
+        public NodeModel RootNode { get; set; }
+    }
+
+    internal record NodeModel
+    {
+        public string Path { get; init; }
+        
+        public int? ComponentId { get; init; }
+
+        public string ComponentName { get; init; }
+        
+        public IReadOnlyList<string> Names { get; init; } = [];
+
+        public string Label { get; init; }
+
+        public List<NodeModel> Children { get; init; } = [];
+
     }
 }

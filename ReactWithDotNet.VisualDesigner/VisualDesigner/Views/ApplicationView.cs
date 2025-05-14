@@ -836,7 +836,7 @@ sealed class ApplicationView : Component<ApplicationState>
                     return Task.CompletedTask;
                 }
             }
-            : null
+            : new ComponentTreeView{ ProjectId = state.ProjectId}
         };
     }
 
