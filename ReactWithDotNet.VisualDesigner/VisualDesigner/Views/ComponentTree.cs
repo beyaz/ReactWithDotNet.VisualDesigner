@@ -18,7 +18,7 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
 
     protected override Task OverrideStateFromPropsBeforeRender()
     {
-        if (ProjectId != state.ProjectId || ComponentName != state.ComponentName)
+        if (ProjectId != state.ProjectId)
         {
             return InitializeState();
         }
@@ -40,16 +40,18 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
         };
     }
 
+    
     async Task InitializeState()
     {
         state = new()
         {
             ProjectId = ProjectId,
 
-            ComponentName = ComponentName,
-
-            RootNode = await createRootNode()
+            RootNode = await createRootNode(),
+            
+            CollapsedNodes = []
         };
+        return;
 
         async Task<NodeModel> createRootNode()
         {
@@ -224,9 +226,7 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
 
     internal class State
     {
-        public List<string> CollapsedNodes { get; init; } = [];
-
-        public string ComponentName { get; init; }
+        public required List<string> CollapsedNodes { get; init; }
 
         public int ProjectId { get; init; }
 
