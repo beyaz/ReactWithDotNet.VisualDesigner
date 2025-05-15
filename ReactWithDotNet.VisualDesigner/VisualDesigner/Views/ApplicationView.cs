@@ -1089,6 +1089,8 @@ sealed class ApplicationView : Component<ApplicationState>
             propsHeader,
             viewProps(visualElementModel.Properties),
 
+            SpaceY(16),
+            
             stylesHeader,
             viewStyles(CurrentVisualElement.Styles)
         };
