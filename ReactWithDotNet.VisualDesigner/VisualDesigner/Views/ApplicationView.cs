@@ -1444,7 +1444,7 @@ sealed class ApplicationView : Component<ApplicationState>
                 {
                     OnClick(_ =>
                     {
-                        if (state.Preview.Scale >= 100)
+                        if (state.Preview.Scale >= 200)
                         {
                             return Task.CompletedTask;
                         }
