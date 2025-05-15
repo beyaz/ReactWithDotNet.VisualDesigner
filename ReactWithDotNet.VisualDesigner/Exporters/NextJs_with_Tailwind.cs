@@ -4,6 +4,11 @@ using System.Text;
 
 namespace ReactWithDotNet.VisualDesigner.Exporters;
 
+sealed record ExportOutput
+{
+    public bool HasChange { get; init; }
+}
+
 sealed record ExportInput
 {
     // @formatter:off
@@ -27,17 +32,37 @@ sealed record ExportInput
 
 static class NextJs_with_Tailwind
 {
-    public static async Task<Result> Export(ExportInput input)
+    public static async Task<Result<ExportOutput>> Export(ExportInput input)
     {
-        var result = await CalculateExportInfo(input);
-        if (result.HasError)
+        string filePath;
+        string fileContent;
         {
-            return result.Error;
+            var result = await CalculateExportInfo(input);
+            if (result.HasError)
+            {
+                return result.Error;
+            }
+
+            (filePath, fileContent) = result.Value;
         }
 
-        var (filePath, fileContent) = result.Value;
+        foreach (var fileContentAtDisk in await IO.TryReadFile(filePath))
+        {
+            if (fileContentAtDisk == fileContent)
+            {
+                return new ExportOutput();
+            }
+        }
 
-        return await IO.TryWriteToFile(filePath, fileContent);
+        {
+            var result = await IO.TryWriteToFile(filePath, fileContent);
+            if (result.HasError)
+            {
+                return result.Error;
+            }
+        }
+        
+        return new ExportOutput { HasChange = true };
     }
 
     public static async Task<Result> ExportAll(int projectId)
@@ -141,7 +166,7 @@ static class NextJs_with_Tailwind
         {
             string[] fileContentInDirectory;
             {
-                var result = await IO.TryReadFile(filePath);
+                var result = await IO.TryReadFileAllLines(filePath);
                 if (result.HasError)
                 {
                     return result.Error;
@@ -717,11 +742,23 @@ static class NextJs_with_Tailwind
 
     class IO
     {
-        public static async Task<Result<string[]>> TryReadFile(string filePath)
+        public static async Task<Result<string[]>> TryReadFileAllLines(string filePath)
         {
             try
             {
                 return await File.ReadAllLinesAsync(filePath);
+            }
+            catch (Exception exception)
+            {
+                return exception;
+            }
+        }
+        
+        public static async Task<Result<string>> TryReadFile(string filePath)
+        {
+            try
+            {
+                return await File.ReadAllTextAsync(filePath);
             }
             catch (Exception exception)
             {
