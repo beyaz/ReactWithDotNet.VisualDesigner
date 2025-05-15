@@ -220,6 +220,8 @@ sealed class ApplicationPreview : Component
 
                     if (name.Equals("src", StringComparison.OrdinalIgnoreCase))
                     {
+                        elementAsImage.src = DummySrc(500);
+                        
                         if (IsConnectedValue(value))
                         {
                             continue;
@@ -232,12 +234,14 @@ sealed class ApplicationPreview : Component
                             elementAsImage.src = src;
                             continue;
                         }
-
+                        
+                        
                         if (src.StartsWith("/"))
                         {
                             src = src.RemoveFromStart("/");
                         }
-
+                        
+                        
                         if (File.Exists(Path.Combine(context.ReactContext.wwwroot, src)))
                         {
                             elementAsImage.src = Path.Combine(context.ReactContext.wwwroot, src);    
