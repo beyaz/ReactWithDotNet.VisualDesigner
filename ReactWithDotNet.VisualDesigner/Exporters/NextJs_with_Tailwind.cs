@@ -46,14 +46,23 @@ static class NextJs_with_Tailwind
             (filePath, fileContent) = result.Value;
         }
 
-        foreach (var fileContentAtDisk in await IO.TryReadFile(filePath))
+        string fileContentAtDisk;
         {
-            if (fileContentAtDisk == fileContent)
+            var result = await IO.TryReadFile(filePath);
+            if (result.HasError)
             {
-                return new ExportOutput();
+                return result.Error;
             }
+
+            fileContentAtDisk = result.Value;
         }
 
+        if (fileContentAtDisk == fileContent)
+        {
+            return new ExportOutput();
+        }
+
+        // write to file system
         {
             var result = await IO.TryWriteToFile(filePath, fileContent);
             if (result.HasError)
@@ -61,7 +70,7 @@ static class NextJs_with_Tailwind
                 return result.Error;
             }
         }
-        
+
         return new ExportOutput { HasChange = true };
     }
 
@@ -742,23 +751,23 @@ static class NextJs_with_Tailwind
 
     class IO
     {
-        public static async Task<Result<string[]>> TryReadFileAllLines(string filePath)
+        public static async Task<Result<string>> TryReadFile(string filePath)
         {
             try
             {
-                return await File.ReadAllLinesAsync(filePath);
+                return await File.ReadAllTextAsync(filePath);
             }
             catch (Exception exception)
             {
                 return exception;
             }
         }
-        
-        public static async Task<Result<string>> TryReadFile(string filePath)
+
+        public static async Task<Result<string[]>> TryReadFileAllLines(string filePath)
         {
             try
             {
-                return await File.ReadAllTextAsync(filePath);
+                return await File.ReadAllLinesAsync(filePath);
             }
             catch (Exception exception)
             {
