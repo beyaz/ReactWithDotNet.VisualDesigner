@@ -33,7 +33,7 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
             return new FlexRowCentered(SizeFull) { "Empty" };
         }
 
-        return new FlexColumn(SizeFull, CursorDefault,OutlineNone,TabIndex(0))
+        return new FlexColumn(SizeFull, CursorDefault, OutlineNone, TabIndex(0))
         {
             new FlexColumn(WidthFull)
             {
@@ -54,11 +54,9 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
                         }
                     }
                 },
-                new div(WidthFull, BorderBottom(1, dotted, "#d9d9d9")),
-            
-                
+                new div(WidthFull, BorderBottom(1, dotted, "#d9d9d9"))
             },
-            
+
             ToVisual(state.RootNode, 0)
         };
     }
@@ -128,24 +126,27 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
         }
     }
 
-    void CalculateRootNode()
+    async Task CalculateRootNode()
     {
         state = state with
         {
-            RootNode = CalculateRootNodeFrom(state.AllNodes.Where(x => x.ComponentName.Contains(state.FilterText ?? string.Empty, StringComparison.OrdinalIgnoreCase)))
+            RootNode = CalculateRootNodeFrom((await GetAllNodes()).Where(x => x.ComponentName.Contains(state.FilterText ?? string.Empty, StringComparison.OrdinalIgnoreCase)))
         };
     }
 
-    async Task<IEnumerable<NodeModel>> GetAllNodesFromDb()
+    async Task<IReadOnlyList<NodeModel>> GetAllNodes()
     {
-        return from x in await DbOperation(db => db.SelectAsync<ComponentEntity>(x => x.ProjectId == ProjectId))
-            orderby x.Name descending
-            select new NodeModel
-            {
-                ComponentId   = x.Id,
-                ComponentName = x.Name,
-                Names         = x.Name.Split('/', StringSplitOptions.RemoveEmptyEntries)
-            };
+        return await Cache.AccessValue($"{nameof(ComponentTreeView)}-{nameof(GetAllNodes)}-{ProjectId}", async () =>
+        {
+            return ListFrom(from x in await DbOperation(db => db.SelectAsync<ComponentEntity>(x => x.ProjectId == ProjectId))
+                            orderby x.Name descending
+                            select new NodeModel
+                            {
+                                ComponentId   = x.Id,
+                                ComponentName = x.Name,
+                                Names         = x.Name.Split('/', StringSplitOptions.RemoveEmptyEntries)
+                            });
+        });
     }
 
     async Task InitializeState()
@@ -154,21 +155,17 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
         {
             ProjectId = ProjectId,
 
-            AllNodes = ListFrom(await GetAllNodesFromDb()),
-
             CollapsedNodes = [],
-            
+
             FilterText = state?.FilterText
         };
 
-        CalculateRootNode();
+        await CalculateRootNode();
     }
 
-    Task OnFilterTextTypeFinished()
+    async Task OnFilterTextTypeFinished()
     {
-        CalculateRootNode();
-
-        return Task.CompletedTask;
+        await CalculateRootNode();
     }
 
     [StopPropagation]
@@ -271,7 +268,6 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
 
     internal record State
     {
-        public IReadOnlyList<NodeModel> AllNodes { get; init; }
         public required List<string> CollapsedNodes { get; init; }
 
         public string FilterText { get; init; }
