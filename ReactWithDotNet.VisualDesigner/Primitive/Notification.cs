@@ -33,12 +33,6 @@ static class NotificationHelper
 
                 new[]
                 {
-                    Color(rgb(50, 50, 50)),
-                    FontSize15,
-                    FontFamily("Inter"),
-                    FontWeight400,
-                    LineHeight(20.02),
-
                     OverflowAuto,
                     WordWrapBreakWord
                 }
@@ -71,7 +65,7 @@ static class NotificationHelper
             {
                 cmp.Client.ListenEvent<PublishNotification>(OnMessageUpdated);
 
-                return CompletedTask;;
+                return CompletedTask;
             };
 
             return new FlexRowCentered(PositionFixed, WidthAuto, Zindex2, Bottom(24), Right(0))
