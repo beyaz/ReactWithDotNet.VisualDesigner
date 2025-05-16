@@ -571,8 +571,7 @@ sealed class ApplicationView : Component<ApplicationState>
             Value             = state.ComponentName,
             OnChange          = (_, componentName) => OnComponentNameChanged(componentName),
             IsTextAlignCenter = true,
-            IsBold            = true,
-            
+            IsBold            = true
         };
 
         var removeIconInLayersTab = CreateIcon(Icon.remove, 16);
@@ -603,7 +602,7 @@ sealed class ApplicationView : Component<ApplicationState>
             {
                 removeIconInLayersTab + When(state.LeftTab != LeftTabs.ElementTree, VisibilityCollapse),
 
-                new FlexRow(JustifyContentSpaceEvenly,WidthFull, PaddingX(4))
+                new FlexRow(JustifyContentSpaceEvenly, WidthFull, PaddingX(4))
                 {
                     new FlexRowCentered(WidthFull, Hover(Background(Gray50), BorderRadius(36)))
                     {
@@ -623,8 +622,6 @@ sealed class ApplicationView : Component<ApplicationState>
                             return Task.CompletedTask;
                         })
                     }
-                       
-                        
                 },
 
                 addIconInLayersTab + When(state.LeftTab != LeftTabs.ElementTree, VisibilityCollapse)
@@ -835,19 +832,19 @@ sealed class ApplicationView : Component<ApplicationState>
 
         var componentTree = new ComponentTreeView
         {
-            ProjectId        = state.ProjectId, 
+            ProjectId        = state.ProjectId,
             ComponentName    = state.ComponentName,
             SelectionChanged = ChangeSelectedComponent
-        }+ When(state.LeftTab != LeftTabs.Components, DisplayNone);
-        
-        return new FlexColumn(WidthFull, AlignItemsCenter,OverflowAuto, BorderRight(1, dotted, "#d9d9d9"), Background(White))
+        } + When(state.LeftTab != LeftTabs.Components, DisplayNone);
+
+        return new FlexColumn(WidthFull, AlignItemsCenter, OverflowAuto, BorderRight(1, dotted, "#d9d9d9"), Background(White))
         {
             componentSelector,
-            
+
             tabButtons,
 
             elementTree,
-            
+
             componentTree
         };
     }
@@ -1009,8 +1006,8 @@ sealed class ApplicationView : Component<ApplicationState>
 
                             var newDbRecord = new ComponentEntity
                             {
-                                Name           = newValue,
-                                ProjectId      = state.ProjectId
+                                Name      = newValue,
+                                ProjectId = state.ProjectId
                             };
 
                             await DbOperation(db => db.InsertAsync(newDbRecord));
@@ -1049,10 +1046,10 @@ sealed class ApplicationView : Component<ApplicationState>
                 {
                     return new div { $"ComponentNotFound.{componentId}" };
                 }
-                
+
                 inputValue = component.Name;
             }
-            
+
             inputTag = new FlexRow(WidthFull)
             {
                 new MagicInput
@@ -1067,7 +1064,7 @@ sealed class ApplicationView : Component<ApplicationState>
                             CurrentVisualElement.Tag = dbRecord.Id.ToString();
                             return;
                         }
-                        
+
                         CurrentVisualElement.Tag = newValue;
                     },
                     IsTextAlignCenter = true
@@ -1097,7 +1094,7 @@ sealed class ApplicationView : Component<ApplicationState>
             viewProps(visualElementModel.Properties),
 
             SpaceY(16),
-            
+
             stylesHeader,
             viewStyles(CurrentVisualElement.Styles)
         };
@@ -1380,7 +1377,7 @@ sealed class ApplicationView : Component<ApplicationState>
                             state.Selection = state.Selection with { SelectedPropertyIndex = null };
                             return Task.CompletedTask;
                         }
-                        
+
                         state.Selection = new()
                         {
                             VisualElementTreeItemPath = state.Selection.VisualElementTreeItemPath,
