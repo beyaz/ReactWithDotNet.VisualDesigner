@@ -837,15 +837,18 @@ sealed class ApplicationView : Component<ApplicationState>
             SelectionChanged = ChangeSelectedComponent
         } + When(state.LeftTab != LeftTabs.Components, DisplayNone);
 
-        return new FlexColumn(WidthFull, AlignItemsCenter, OverflowAuto, BorderRight(1, dotted, "#d9d9d9"), Background(White))
+        return new FlexColumn(SizeFull, AlignItemsCenter, BorderRight(1, dotted, "#d9d9d9"), Background(White))
         {
             componentSelector,
 
             tabButtons,
 
-            elementTree,
+            new FlexColumn(WidthFull, Flex(1), OverflowAuto)
+            {
+                elementTree,
 
-            componentTree
+                componentTree
+            }
         };
     }
 
