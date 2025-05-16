@@ -26,9 +26,9 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
         return Task.CompletedTask;
     }
 
-    protected override Element render()
+    protected override async Task<Element> renderAsync()
     {
-        if (state.RootNode is null)
+        if (ProjectId is 0 || ComponentName.HasNoValue())
         {
             return new FlexRowCentered(SizeFull) { "Empty" };
         }
@@ -57,7 +57,7 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
                 new div(WidthFull, BorderBottom(1, dotted, "#d9d9d9"))
             },
 
-            ToVisual(state.RootNode, 0)
+            ToVisual(await CalculateRootNode(), 0)
         };
     }
 
@@ -126,12 +126,9 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
         }
     }
 
-    async Task CalculateRootNode()
+    async Task<NodeModel> CalculateRootNode()
     {
-        state = state with
-        {
-            RootNode = CalculateRootNodeFrom((await GetAllNodes()).Where(x => x.ComponentName.Contains(state.FilterText ?? string.Empty, StringComparison.OrdinalIgnoreCase)))
-        };
+        return CalculateRootNodeFrom((await GetAllNodes()).Where(x => x.ComponentName.Contains(state.FilterText ?? string.Empty, StringComparison.OrdinalIgnoreCase)));
     }
 
     async Task<IReadOnlyList<NodeModel>> GetAllNodes()
@@ -169,11 +166,11 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
     }
 
     [StopPropagation]
-    Task OnTreeItemClicked(MouseEvent e)
+    async Task OnTreeItemClicked(MouseEvent e)
     {
         var selectedPath = e.currentTarget.id;
 
-        var node = state.RootNode;
+        var node = await CalculateRootNode();
 
         foreach (var item in selectedPath.Split('_', StringSplitOptions.RemoveEmptyEntries).Skip(1))
         {
@@ -188,10 +185,8 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
         }
         else
         {
-            return ToggleFold(e);
+            await ToggleFold(e);
         }
-
-        return Task.CompletedTask;
     }
 
     [StopPropagation]
@@ -273,8 +268,6 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
         public string FilterText { get; init; }
 
         public int ProjectId { get; init; }
-
-        public NodeModel RootNode { get; init; }
 
         public IReadOnlyList<NodeModel> VisibleNodes { get; init; }
     }
