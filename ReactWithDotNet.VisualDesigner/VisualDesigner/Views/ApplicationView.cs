@@ -374,7 +374,7 @@ sealed class ApplicationView : Component<ApplicationState>
         if (sameNamedComponent is not null)
         {
             state = state with { ComponentName = component.Name };
-            
+
             this.FailNotification("Has already same named component.");
             return;
         }
@@ -386,17 +386,15 @@ sealed class ApplicationView : Component<ApplicationState>
             ComponentRootElementAsYaml = component.RootElementAsYaml,
             InsertTime                 = DateTime.Now,
             UserName                   = state.UserName
-
         }));
-        
-        
+
         await DbOperation(db => db.UpdateAsync(component with
         {
             Name = userEnteredComponentName
         }));
-        
+
         Cache.Clear();
-        
+
         this.SuccessNotification("Component name updated.");
     }
 
@@ -452,6 +450,33 @@ sealed class ApplicationView : Component<ApplicationState>
         {
             state.YamlText = null;
         }
+    }
+
+    async Task OnDeleteSelectedComponentClicked(MouseEvent e)
+    {
+        await DbOperation(async db =>
+        {
+            var component = await db.FirstOrDefaultAsync<ComponentEntity>(x => x.Id == state.ComponentId);
+            if (component is not null)
+            {
+                await db.InsertAsync(new ComponentHistoryEntity
+                {
+                    ComponentId                = component.Id,
+                    ComponentName              = component.Name,
+                    ComponentRootElementAsYaml = component.RootElementAsYaml,
+                    InsertTime                 = DateTime.Now,
+                    UserName                   = state.UserName
+                });
+
+                await db.DeleteAsync(component);
+            }
+        });
+
+        Cache.Clear();
+
+        await ChangeSelectedProject(state.ProjectId);
+
+        this.SuccessNotification("Component deleted.");
     }
 
     Element PartApplicationTopPanel()
@@ -885,7 +910,9 @@ sealed class ApplicationView : Component<ApplicationState>
         {
             new FlexRow(WidthFull, AlignItemsCenter, Gap(4), PaddingLeft(8))
             {
-                new IconDelete()+Size(16) + Color(Theme.text_primary) + Hover(Color(Blue300)),  componentNameEditor
+                new IconDelete() + Size(16) + Color(Theme.text_primary) + Hover(Color(Blue300)) + OnClick(OnDeleteSelectedComponentClicked),
+
+                componentNameEditor
             },
 
             tabButtons,
@@ -1061,7 +1088,7 @@ sealed class ApplicationView : Component<ApplicationState>
                             };
 
                             await DbOperation(db => db.InsertAsync(newDbRecord));
-                            
+
                             Cache.Clear();
 
                             await OnComponentNameChanged(newValue);
