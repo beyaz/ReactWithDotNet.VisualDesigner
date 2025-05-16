@@ -466,6 +466,8 @@ sealed class ApplicationView : Component<ApplicationState>
                 }
 
                 await db.UpdateAsync(project with { ConfigAsYaml = state.YamlText });
+                
+                Cache.Clear();
 
                 return Success;
             });
