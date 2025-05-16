@@ -25,12 +25,6 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
 
         return Task.CompletedTask;
     }
-    
-    Task OnFilterTextTypeFinished()
-    {
-       
-        return Task.CompletedTask;
-    }
 
     protected override Element render()
     {
@@ -39,114 +33,142 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
             return new FlexRowCentered(SizeFull) { "Empty" };
         }
 
-        return new div(CursorDefault, Padding(5), TabIndex(0), OutlineNone)
+        return new FlexColumn(SizeFull, CursorDefault,OutlineNone,TabIndex(0))
         {
-            new FlexRow(AlignItemsCenter, WidthFull, Gap(8), PaddingX(4) )
+            new FlexColumn(WidthFull)
             {
-                new IconFilter() + Size(16) + Color(Gray300),
-                new input
+                new FlexRow(AlignItemsCenter, WidthFull, Gap(8), PaddingX(8))
                 {
-                    type = "text",
-                    valueBind = ()=>state.FilterText,
-                    valueBindDebounceTimeout = 400,
-                    valueBindDebounceHandler = OnFilterTextTypeFinished,
-                    autoFocus = true,
-                    style =
+                    new IconFilter() + Size(16) + Color(Gray300),
+                    new input
                     {
-                        FlexGrow(1),
-                        Focus(OutlineNone)
+                        type                     = "text",
+                        valueBind                = () => state.FilterText,
+                        valueBindDebounceTimeout = 400,
+                        valueBindDebounceHandler = OnFilterTextTypeFinished,
+                        autoFocus                = true,
+                        style =
+                        {
+                            FlexGrow(1),
+                            Focus(OutlineNone)
+                        }
                     }
-                }
+                },
+                new div(WidthFull, BorderBottom(1, dotted, "#d9d9d9")),
+            
+                
             },
-            ToVisual(state.RootNode, 0),
-            WidthFull, HeightFull
+            
+            ToVisual(state.RootNode, 0)
         };
     }
 
-    
+    static NodeModel CalculateRootNodeFrom(IEnumerable<NodeModel> nodes)
+    {
+        var rootNode = new NodeModel
+        {
+            Path = "0"
+        };
+
+        foreach (var item in nodes)
+        {
+            openPath(rootNode, item.ComponentName);
+
+            append(rootNode, item);
+        }
+
+        return rootNode;
+
+        static void append(NodeModel rootNode, NodeModel node)
+        {
+            var names = node.Names.SkipLast(1).ToList();
+
+            var parent = rootNode;
+
+            foreach (var name in names)
+            {
+                parent = parent.Children.First(x => x.Label == name);
+            }
+
+            parent.Children.Add(node with { Label = node.Names.Last(), Path = $"{parent.Path}_{parent.Children.Count}" });
+        }
+
+        static void openPath(NodeModel rootNode, string componentName)
+        {
+            var names = componentName.Split('/', StringSplitOptions.RemoveEmptyEntries).SkipLast(1).ToList();
+
+            var node = rootNode;
+
+            foreach (var name in names)
+            {
+                var hasAlreadyNamedChild = false;
+
+                foreach (var child in node.Children.Where(x => x.Label == name))
+                {
+                    node = child;
+
+                    hasAlreadyNamedChild = true;
+
+                    break;
+                }
+
+                if (hasAlreadyNamedChild)
+                {
+                    continue;
+                }
+
+                node.Children.Add(new()
+                {
+                    Path  = $"{node.Path}_{node.Children.Count}",
+                    Label = name
+                });
+
+                node = node.Children[^1];
+            }
+        }
+    }
+
+    void CalculateRootNode()
+    {
+        state = state with
+        {
+            RootNode = CalculateRootNodeFrom(state.AllNodes.Where(x => x.ComponentName.Contains(state.FilterText ?? string.Empty, StringComparison.OrdinalIgnoreCase)))
+        };
+    }
+
+    async Task<IEnumerable<NodeModel>> GetAllNodesFromDb()
+    {
+        return from x in await DbOperation(db => db.SelectAsync<ComponentEntity>(x => x.ProjectId == ProjectId))
+            orderby x.Name descending
+            select new NodeModel
+            {
+                ComponentId   = x.Id,
+                ComponentName = x.Name,
+                Names         = x.Name.Split('/', StringSplitOptions.RemoveEmptyEntries)
+            };
+    }
+
     async Task InitializeState()
     {
         state = new()
         {
             ProjectId = ProjectId,
 
-            RootNode = await createRootNode(),
+            AllNodes = ListFrom(await GetAllNodesFromDb()),
+
+            CollapsedNodes = [],
             
-            CollapsedNodes = []
+            FilterText = state?.FilterText
         };
-        return;
 
-        async Task<NodeModel> createRootNode()
-        {
-            var rootNode = new NodeModel
-            {
-                Path = "0"
-            };
+        CalculateRootNode();
+    }
 
-            foreach (var item in from x in await DbOperation(db => db.SelectAsync<ComponentEntity>(x => x.ProjectId == ProjectId))
-                     orderby x.Name descending
-                     select new NodeModel
-                     {
-                         ComponentId   = x.Id,
-                         ComponentName = x.Name,
-                         Names         = x.Name.Split('/', StringSplitOptions.RemoveEmptyEntries)
-                     })
-            {
-                openPath(rootNode, item.ComponentName);
+    Task OnFilterTextTypeFinished()
+    {
+        CalculateRootNode();
 
-                append(rootNode, item);
-            }
-
-            return rootNode;
-
-            static void append(NodeModel rootNode, NodeModel node)
-            {
-                var names = node.Names.SkipLast(1).ToList();
-
-                var parent = rootNode;
-
-                foreach (var name in names)
-                {
-                    parent = parent.Children.First(x => x.Label == name);
-                }
-
-                parent.Children.Add(node with { Label = node.Names.Last(), Path = $"{parent.Path}_{parent.Children.Count}" });
-            }
-
-            static void openPath(NodeModel rootNode, string componentName)
-            {
-                var names = componentName.Split('/', StringSplitOptions.RemoveEmptyEntries).SkipLast(1).ToList();
-
-                var node = rootNode;
-
-                foreach (var name in names)
-                {
-                    var hasAlreadyNamedChild = false;
-
-                    foreach (var child in node.Children.Where(x => x.Label == name))
-                    {
-                        node = child;
-
-                        hasAlreadyNamedChild = true;
-
-                        break;
-                    }
-
-                    if (hasAlreadyNamedChild)
-                    {
-                        continue;
-                    }
-
-                    node.Children.Add(new()
-                    {
-                        Path  = $"{node.Path}_{node.Children.Count}",
-                        Label = name
-                    });
-
-                    node = node.Children[^1];
-                }
-            }
-        }
+        return Task.CompletedTask;
     }
 
     [StopPropagation]
@@ -247,15 +269,18 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
         return returnList;
     }
 
-    internal class State
+    internal record State
     {
+        public IReadOnlyList<NodeModel> AllNodes { get; init; }
         public required List<string> CollapsedNodes { get; init; }
+
+        public string FilterText { get; init; }
 
         public int ProjectId { get; init; }
 
         public NodeModel RootNode { get; init; }
-        
-        public string FilterText { get; init; }
+
+        public IReadOnlyList<NodeModel> VisibleNodes { get; init; }
     }
 
     internal record NodeModel

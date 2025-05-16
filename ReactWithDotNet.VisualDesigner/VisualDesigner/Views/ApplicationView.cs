@@ -634,7 +634,6 @@ sealed class ApplicationView : Component<ApplicationState>
                 }
             },
 
-            state.LeftTab == LeftTabs.ElementTree ?
             new VisualElementTreeView
             {
                 Model = state.ComponentRootElement,
@@ -835,13 +834,16 @@ sealed class ApplicationView : Component<ApplicationState>
 
                     return Task.CompletedTask;
                 }
-            }
-            : new ComponentTreeView
+            } + When(state.LeftTab != LeftTabs.ElementTree, DisplayNone),
+            
+            new ComponentTreeView
             {
-                ProjectId = state.ProjectId, 
-                ComponentName = state.ComponentName,
+                ProjectId        = state.ProjectId, 
+                ComponentName    = state.ComponentName,
                 SelectionChanged = ChangeSelectedComponent
-            }
+            }+ When(state.LeftTab != LeftTabs.Components, DisplayNone)
+            
+             
         };
     }
 
