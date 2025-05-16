@@ -567,10 +567,10 @@ sealed class ApplicationView : Component<ApplicationState>
         {
             Name = string.Empty,
 
-            Suggestions       = await GetSuggestionsForComponentSelection(state),
-            Value             = state.ComponentName,
-            OnChange          = (_, componentName) => OnComponentNameChanged(componentName),
-            IsBold            = true
+            Suggestions = await GetSuggestionsForComponentSelection(state),
+            Value       = state.ComponentName,
+            OnChange    = (_, componentName) => OnComponentNameChanged(componentName),
+            IsBold      = true
         };
 
         var removeIconInLayersTab = CreateIcon(Icon.remove, 16);
@@ -838,9 +838,10 @@ sealed class ApplicationView : Component<ApplicationState>
 
         return new FlexColumn(SizeFull, AlignItemsCenter, BorderRight(1, dotted, "#d9d9d9"), Background(White))
         {
-            new FlexRow(WidthFull, AlignItemsCenter)
+            new FlexRow(WidthFull, AlignItemsCenter, Gap(4), PaddingLeft(1))
             {
-                SpaceX(8), componentSelector
+                new IconSave() + Size(16) + Color(Gray300) + Hover(Color(Blue400)),
+                componentSelector
             },
 
             tabButtons,
