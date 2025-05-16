@@ -57,7 +57,10 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
                 new div(WidthFull, BorderBottom(1, dotted, "#d9d9d9"))
             },
 
-            ToVisual(await CalculateRootNode(), 0)
+            new FlexColumn(Flex(1), OverflowAuto)
+            {
+                ToVisual(await CalculateRootNode(), 0)
+            }
         };
     }
 
