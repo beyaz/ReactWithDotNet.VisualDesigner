@@ -110,12 +110,9 @@ sealed class ApplicationPreview : Component
         {
             HtmlElement element = null;
             {
-                TryGetHtmlElementTypeByTagName(model.Tag).HasValue(elementType =>
-                {
-                    element = (HtmlElement)Activator.CreateInstance(elementType);
-                });
+                TryGetHtmlElementTypeByTagName(model.Tag).HasValue(elementType => { element = (HtmlElement)Activator.CreateInstance(elementType); });
             }
-            
+
             if (element is null)
             {
                 if (int.TryParse(model.Tag, out var componentId))
@@ -154,9 +151,9 @@ sealed class ApplicationPreview : Component
             element.onClick = context.OnTreeItemClicked;
 
             // make clever
-            if (model.HasText()|| model.GetDesignText().HasValue())
+            if (model.HasText() || model.GetDesignText().HasValue())
             {
-                element.Add(TryClearStringValue(model.GetDesignText() ??  model.GetText()));
+                element.Add(TryClearStringValue(model.GetDesignText() ?? model.GetText()));
 
                 tryGetPropValueFromCaller(context, model, Design.Text).HasValue(text => element.text = text);
             }
@@ -175,7 +172,6 @@ sealed class ApplicationPreview : Component
                             model.Children.Add(CloneByUsingYaml(firstChild));
                         }
                     }
-                        
 
                     continue;
                 }
@@ -220,8 +216,34 @@ sealed class ApplicationPreview : Component
 
                     if (name.Equals("src", StringComparison.OrdinalIgnoreCase))
                     {
-                        elementAsImage.src = DummySrc(500);
-                        
+                        // try initialize dummy src
+                        {
+                            foreach (var width in model.Properties.TryGetPropertyValue("width", "w"))
+                            {
+                                if (int.TryParse(width, out var widthAsNumber))
+                                {
+                                    foreach (var height in model.Properties.TryGetPropertyValue("height", "h"))
+                                    {
+                                        if (int.TryParse(height, out var heightAsNumber))
+                                        {
+                                            elementAsImage.src = DummySrc(widthAsNumber, heightAsNumber);
+                                        }
+                                    }
+                                }
+                            }
+
+                            if (elementAsImage.src.HasNoValue())
+                            {
+                                foreach (var size in model.Properties.TryGetPropertyValue("size"))
+                                {
+                                    if (int.TryParse(size, out var sizeAsNumber))
+                                    {
+                                        elementAsImage.src = DummySrc(sizeAsNumber);
+                                    }
+                                }
+                            }
+                        }
+
                         if (IsConnectedValue(value))
                         {
                             continue;
@@ -234,17 +256,15 @@ sealed class ApplicationPreview : Component
                             elementAsImage.src = src;
                             continue;
                         }
-                        
-                        
+
                         if (src.StartsWith("/"))
                         {
                             src = src.RemoveFromStart("/");
                         }
-                        
-                        
+
                         if (File.Exists(Path.Combine(context.ReactContext.wwwroot, src)))
                         {
-                            elementAsImage.src = Path.Combine(context.ReactContext.wwwroot, src);    
+                            elementAsImage.src = Path.Combine(context.ReactContext.wwwroot, src);
                         }
                         else
                         {
@@ -253,9 +273,7 @@ sealed class ApplicationPreview : Component
                             {
                                 elementAsImage.src = Path.Combine(context.ReactContext.wwwroot, callerValue.RemoveFromStart("/"));
                             }
-                            
                         }
-
 
                         continue;
                     }
@@ -290,7 +308,7 @@ sealed class ApplicationPreview : Component
 
             {
                 var result = model.Styles
-                    .Select(x=>CreateDesignerStyleItemFromText(context.ProjectId,x))
+                    .Select(x => CreateDesignerStyleItemFromText(context.ProjectId, x))
                     .ConvertAll(designerItem => designerItem.ToStyleModifier())
                     .Then(styleModifiers => element.Add(styleModifiers.ToArray()));
 
@@ -357,8 +375,6 @@ sealed class ApplicationPreview : Component
             }
 
             return element;
-
-           
 
             static Maybe<(string propertyName, string propertyValue)> tryGetProperty(VisualElementModel model, string propertyName)
             {
