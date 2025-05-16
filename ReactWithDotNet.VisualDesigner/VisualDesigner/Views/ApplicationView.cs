@@ -570,7 +570,6 @@ sealed class ApplicationView : Component<ApplicationState>
             Suggestions       = await GetSuggestionsForComponentSelection(state),
             Value             = state.ComponentName,
             OnChange          = (_, componentName) => OnComponentNameChanged(componentName),
-            IsTextAlignCenter = true,
             IsBold            = true
         };
 
@@ -839,7 +838,10 @@ sealed class ApplicationView : Component<ApplicationState>
 
         return new FlexColumn(SizeFull, AlignItemsCenter, BorderRight(1, dotted, "#d9d9d9"), Background(White))
         {
-            componentSelector,
+            new FlexRow(WidthFull, AlignItemsCenter)
+            {
+                SpaceX(8), componentSelector
+            },
 
             tabButtons,
 
