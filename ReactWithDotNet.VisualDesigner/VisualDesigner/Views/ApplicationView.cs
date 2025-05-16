@@ -309,7 +309,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
         async Task<Element> left()
         {
-            return await PartLeftPanel() + BorderBottomLeftRadius(8) + OverflowAuto;
+            return await PartLeftPanel() + BorderBottomLeftRadius(8);
         }
 
         Element middle()
@@ -595,7 +595,7 @@ sealed class ApplicationView : Component<ApplicationState>
             addIconInLayersTab.Add(VisibilityCollapse);
         }
 
-        return new FlexColumn(WidthFull, AlignItemsCenter, BorderRight(1, dotted, "#d9d9d9"), Background(White))
+        return new FlexColumn(WidthFull, AlignItemsCenter,OverflowAuto, BorderRight(1, dotted, "#d9d9d9"), Background(White))
         {
             componentSelector,
             new FlexRow(WidthFull, FontWeightBold, AlignItemsCenter, Padding(8, 4), JustifyContentSpaceAround, BorderBottom(1, dotted, "#d9d9d9"), BorderTop(1, dotted, "#d9d9d9"))
