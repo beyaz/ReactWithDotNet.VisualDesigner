@@ -364,3 +364,30 @@ sealed class IconFilter : PureComponent
         };
     }
 }
+
+sealed class IconDelete : PureComponent
+{
+    protected override Element render()
+    {
+        return new svg(ViewBox(0, 0, 24, 24), Fill(none), svg.Size(24), Stroke("currentColor"), StrokeWidth("1"), StrokeLinecap("round"), StrokeLinejoin("round"))
+        {
+            new polyline(polyline.Points("3 6 5 6 21 6")),
+            new path
+            {
+                d = "M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"
+            },
+            new path
+            {
+                d = "M10 11v6"
+            },
+            new path
+            {
+                d = "M14 11v6"
+            },
+            new path
+            {
+                d = "M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"
+            }
+        };
+    }
+}

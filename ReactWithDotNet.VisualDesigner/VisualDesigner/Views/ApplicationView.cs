@@ -885,7 +885,7 @@ sealed class ApplicationView : Component<ApplicationState>
         {
             new FlexRow(WidthFull, AlignItemsCenter, Gap(4), PaddingLeft(8))
             {
-                componentNameEditor
+                new IconDelete()+Size(16) + Color(Theme.text_primary) + Hover(Color(Blue300)),  componentNameEditor
             },
 
             tabButtons,
