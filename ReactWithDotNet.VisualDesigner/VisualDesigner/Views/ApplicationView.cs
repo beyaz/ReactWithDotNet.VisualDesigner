@@ -594,7 +594,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
     Element PartLeftPanel()
     {
-        var componentSelector = new input
+        var componentNameEditor = new input
         {
             type                     = "text",
             valueBind                = () => state.ComponentName,
@@ -874,7 +874,7 @@ sealed class ApplicationView : Component<ApplicationState>
         {
             new FlexRow(WidthFull, AlignItemsCenter, Gap(4), PaddingLeft(8))
             {
-                componentSelector
+                componentNameEditor
             },
 
             tabButtons,
@@ -1050,6 +1050,8 @@ sealed class ApplicationView : Component<ApplicationState>
                             };
 
                             await DbOperation(db => db.InsertAsync(newDbRecord));
+                            
+                            Cache.Clear();
 
                             await OnComponentNameChanged(newValue);
 
