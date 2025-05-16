@@ -353,3 +353,14 @@ sealed class IconArrowRightOrDown : PureComponent
         return arrowDown + Transition("all", 400) + Transform(IsArrowDown ? "rotate(0deg)" : "rotate(-90deg)");
     }
 }
+
+sealed class IconFilter : PureComponent
+{
+    protected override Element render()
+    {
+        return new svg( ViewBox(0, 0, 24, 24), Fill(none), svg.Size(24), Stroke("currentColor"), StrokeWidth("2"), StrokeLinecap("round"), StrokeLinejoin("round"))
+        {
+            new polygon(polygon.Points("22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"))
+        };
+    }
+}

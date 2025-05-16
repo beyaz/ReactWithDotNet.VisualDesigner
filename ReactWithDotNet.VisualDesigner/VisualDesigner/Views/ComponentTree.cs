@@ -25,6 +25,12 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
 
         return Task.CompletedTask;
     }
+    
+    Task OnFilterTextTypeFinished()
+    {
+       
+        return Task.CompletedTask;
+    }
 
     protected override Element render()
     {
@@ -35,6 +41,23 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
 
         return new div(CursorDefault, Padding(5), TabIndex(0), OutlineNone)
         {
+            new FlexRow(AlignItemsCenter, WidthFull, Gap(8), PaddingX(4) )
+            {
+                new IconFilter() + Size(16) + Color(Gray300),
+                new input
+                {
+                    type = "text",
+                    valueBind = ()=>state.FilterText,
+                    valueBindDebounceTimeout = 400,
+                    valueBindDebounceHandler = OnFilterTextTypeFinished,
+                    autoFocus = true,
+                    style =
+                    {
+                        FlexGrow(1),
+                        Focus(OutlineNone)
+                    }
+                }
+            },
             ToVisual(state.RootNode, 0),
             WidthFull, HeightFull
         };
@@ -231,6 +254,8 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
         public int ProjectId { get; init; }
 
         public NodeModel RootNode { get; init; }
+        
+        public string FilterText { get; init; }
     }
 
     internal record NodeModel
