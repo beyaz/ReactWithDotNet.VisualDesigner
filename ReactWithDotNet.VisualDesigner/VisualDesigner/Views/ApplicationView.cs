@@ -235,27 +235,7 @@ sealed class ApplicationView : Component<ApplicationState>
             }
         }
 
-        state = new()
-        {
-            UserName = state.UserName,
-
-            ProjectId = projectId,
-
-            Preview = state.Preview,
-
-            Selection = new()
-        };
-
-        // try select first component
-        {
-            var component = await GetFirstComponentInProject(projectId);
-            if (component is null)
-            {
-                return;
-            }
-
-            await ChangeSelectedComponent(component.Name);
-        }
+        await InitializeStateWithFirstComponentInProject(projectId);
     }
 
     Task DeleteSelectedTreeItem()
@@ -285,6 +265,31 @@ sealed class ApplicationView : Component<ApplicationState>
         state.Selection = new();
 
         return Task.CompletedTask;
+    }
+
+    async Task InitializeStateWithFirstComponentInProject(int projectId)
+    {
+        state = new()
+        {
+            UserName = state.UserName,
+
+            ProjectId = projectId,
+
+            Preview = state.Preview,
+
+            Selection = new()
+        };
+
+        // try select first component
+        {
+            var component = await GetFirstComponentInProject(projectId);
+            if (component is null)
+            {
+                return;
+            }
+
+            await ChangeSelectedComponent(component.Name);
+        }
     }
 
     Task LayersTabRemoveSelectedItemClicked(MouseEvent e)
@@ -398,6 +403,33 @@ sealed class ApplicationView : Component<ApplicationState>
         this.SuccessNotification("Component name updated.");
     }
 
+    async Task OnDeleteSelectedComponentClicked(MouseEvent e)
+    {
+        await DbOperation(async db =>
+        {
+            var component = await db.FirstOrDefaultAsync<ComponentEntity>(x => x.Id == state.ComponentId);
+            if (component is not null)
+            {
+                await db.InsertAsync(new ComponentHistoryEntity
+                {
+                    ComponentId                = component.Id,
+                    ComponentName              = component.Name,
+                    ComponentRootElementAsYaml = component.RootElementAsYaml,
+                    InsertTime                 = DateTime.Now,
+                    UserName                   = state.UserName
+                });
+
+                await db.DeleteAsync(component);
+            }
+        });
+
+        Cache.Clear();
+
+        await InitializeStateWithFirstComponentInProject(state.ProjectId);
+
+        this.SuccessNotification("Component deleted.");
+    }
+
     [StopPropagation]
     async Task OnMainContentTabHeaderClicked(MouseEvent e)
     {
@@ -450,33 +482,6 @@ sealed class ApplicationView : Component<ApplicationState>
         {
             state.YamlText = null;
         }
-    }
-
-    async Task OnDeleteSelectedComponentClicked(MouseEvent e)
-    {
-        await DbOperation(async db =>
-        {
-            var component = await db.FirstOrDefaultAsync<ComponentEntity>(x => x.Id == state.ComponentId);
-            if (component is not null)
-            {
-                await db.InsertAsync(new ComponentHistoryEntity
-                {
-                    ComponentId                = component.Id,
-                    ComponentName              = component.Name,
-                    ComponentRootElementAsYaml = component.RootElementAsYaml,
-                    InsertTime                 = DateTime.Now,
-                    UserName                   = state.UserName
-                });
-
-                await db.DeleteAsync(component);
-            }
-        });
-
-        Cache.Clear();
-
-        await ChangeSelectedProject(state.ProjectId);
-
-        this.SuccessNotification("Component deleted.");
     }
 
     Element PartApplicationTopPanel()
