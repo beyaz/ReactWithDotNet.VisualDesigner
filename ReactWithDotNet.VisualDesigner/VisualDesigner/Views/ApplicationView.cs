@@ -595,255 +595,260 @@ sealed class ApplicationView : Component<ApplicationState>
             addIconInLayersTab.Add(VisibilityCollapse);
         }
 
-        return new FlexColumn(WidthFull, AlignItemsCenter,OverflowAuto, BorderRight(1, dotted, "#d9d9d9"), Background(White))
+        var tabButtons = new FlexRow(WidthFull, FontWeightBold, AlignItemsCenter, Padding(8, 4), JustifyContentSpaceAround, BorderBottom(1, dotted, "#d9d9d9"), BorderTop(1, dotted, "#d9d9d9"))
         {
-            componentSelector,
-            new FlexRow(WidthFull, FontWeightBold, AlignItemsCenter, Padding(8, 4), JustifyContentSpaceAround, BorderBottom(1, dotted, "#d9d9d9"), BorderTop(1, dotted, "#d9d9d9"))
+            Color(Gray300), CursorDefault, UserSelect(none),
+
+            new FlexRowCentered(WidthFull)
             {
-                Color(Gray300), CursorDefault, UserSelect(none),
+                removeIconInLayersTab + When(state.LeftTab != LeftTabs.ElementTree, VisibilityCollapse),
 
-                new FlexRowCentered(WidthFull)
+                new FlexRow(JustifyContentSpaceEvenly,WidthFull, PaddingX(4))
                 {
-                    removeIconInLayersTab + When(state.LeftTab != LeftTabs.ElementTree, VisibilityCollapse),
-
-                    new FlexRow(JustifyContentSpaceEvenly,WidthFull, PaddingX(4))
+                    new FlexRowCentered(WidthFull, Hover(Background(Gray50), BorderRadius(36)))
                     {
-                        new FlexRowCentered(WidthFull, Hover(Background(Gray50), BorderRadius(36)))
+                        new IconReact() + Size(24) + Color(state.LeftTab == LeftTabs.Components ? Gray500 : Gray200),
+                        OnClick([StopPropagation](_) =>
                         {
-                            new IconReact() + Size(24) + Color(state.LeftTab == LeftTabs.Components ? Gray500 : Gray200),
-                            OnClick([StopPropagation](_) =>
-                            {
-                                state.LeftTab = LeftTabs.Components;
-                                return Task.CompletedTask;
-                            })
-                        },
-                        new FlexRowCentered(WidthFull, Hover(Background(Gray50), BorderRadius(36)))
+                            state.LeftTab = LeftTabs.Components;
+                            return Task.CompletedTask;
+                        })
+                    },
+                    new FlexRowCentered(WidthFull, Hover(Background(Gray50), BorderRadius(36)))
+                    {
+                        new IconLayers() + Size(18) + Color(state.LeftTab == LeftTabs.ElementTree ? Gray500 : Gray200),
+                        OnClick([StopPropagation](_) =>
                         {
-                            new IconLayers() + Size(18) + Color(state.LeftTab == LeftTabs.ElementTree ? Gray500 : Gray200),
-                            OnClick([StopPropagation](_) =>
-                            {
-                                state.LeftTab = LeftTabs.ElementTree;
-                                return Task.CompletedTask;
-                            })
-                        }
+                            state.LeftTab = LeftTabs.ElementTree;
+                            return Task.CompletedTask;
+                        })
+                    }
                        
                         
-                    },
+                },
 
-                    addIconInLayersTab + When(state.LeftTab != LeftTabs.ElementTree, VisibilityCollapse)
-                }
+                addIconInLayersTab + When(state.LeftTab != LeftTabs.ElementTree, VisibilityCollapse)
+            }
+        };
+
+        var elementTree = new VisualElementTreeView
+        {
+            Model = state.ComponentRootElement,
+
+            SelectedPath = state.Selection.VisualElementTreeItemPath,
+
+            TreeItemHover = treeItemPath =>
+            {
+                state.Selection.VisualElementTreeItemPathHover = treeItemPath;
+
+                return Task.CompletedTask;
+            },
+            OnHideInDesignerToggle = () =>
+            {
+                CurrentVisualElement.HideInDesigner = !CurrentVisualElement.HideInDesigner;
+
+                return Task.CompletedTask;
+            },
+            MouseLeave = () =>
+            {
+                state.Selection.VisualElementTreeItemPathHover = null;
+                return Task.CompletedTask;
+            },
+            SelectionChanged = treeItemPath =>
+            {
+                state.Selection = new()
+                {
+                    VisualElementTreeItemPath = treeItemPath
+                };
+
+                return Task.CompletedTask;
             },
 
-            new VisualElementTreeView
+            OnDelete = DeleteSelectedTreeItem,
+
+            CopyPaste = (source, target) =>
             {
-                Model = state.ComponentRootElement,
+                var sourceNode = FindTreeNodeByTreePath(state.ComponentRootElement, source);
+                var targetNode = FindTreeNodeByTreePath(state.ComponentRootElement, target);
 
-                SelectedPath = state.Selection.VisualElementTreeItemPath,
+                var sourceNodeClone = SerializeToYaml(sourceNode).AsVisualElementModel();
 
-                TreeItemHover = treeItemPath =>
-                {
-                    state.Selection.VisualElementTreeItemPathHover = treeItemPath;
+                targetNode.Children.Add(sourceNodeClone);
 
-                    return Task.CompletedTask;
-                },
-                OnHideInDesignerToggle = () =>
+                return Task.CompletedTask;
+            },
+            TreeItemMove = (source, target, position) =>
+            {
+                // root check
                 {
-                    CurrentVisualElement.HideInDesigner = !CurrentVisualElement.HideInDesigner;
-
-                    return Task.CompletedTask;
-                },
-                MouseLeave = () =>
-                {
-                    state.Selection.VisualElementTreeItemPathHover = null;
-                    return Task.CompletedTask;
-                },
-                SelectionChanged = treeItemPath =>
-                {
-                    state.Selection = new()
+                    if (source == "0")
                     {
-                        VisualElementTreeItemPath = treeItemPath
-                    };
+                        this.FailNotification("Root node cannot move.");
 
-                    return Task.CompletedTask;
-                },
+                        return Task.CompletedTask;
+                    }
+                }
 
-                OnDelete = DeleteSelectedTreeItem,
-
-                CopyPaste = (source, target) =>
+                // parent - child control
                 {
-                    var sourceNode = FindTreeNodeByTreePath(state.ComponentRootElement, source);
-                    var targetNode = FindTreeNodeByTreePath(state.ComponentRootElement, target);
-
-                    var sourceNodeClone = SerializeToYaml(sourceNode).AsVisualElementModel();
-
-                    targetNode.Children.Add(sourceNodeClone);
-
-                    return Task.CompletedTask;
-                },
-                TreeItemMove = (source, target, position) =>
-                {
-                    // root check
+                    if (target.StartsWith(source, StringComparison.OrdinalIgnoreCase))
                     {
-                        if (source == "0")
-                        {
-                            this.FailNotification("Root node cannot move.");
+                        this.FailNotification("Parent node cannot add to child.");
 
-                            return Task.CompletedTask;
-                        }
+                        return Task.CompletedTask;
+                    }
+                }
+
+                // same target control
+                {
+                    if (source == target)
+                    {
+                        return Task.CompletedTask;
+                    }
+                }
+
+                var isTryingToMakeRoot = target == "0" && position == DragPosition.Before;
+
+                VisualElementModel sourceNodeParent;
+                int sourceNodeIndex;
+                {
+                    var temp = state.ComponentRootElement;
+
+                    var indexArray = source.Split(',');
+
+                    var length = indexArray.Length - 1;
+                    for (var i = 1; i < length; i++)
+                    {
+                        temp = temp.Children[int.Parse(indexArray[i])];
                     }
 
-                    // parent - child control
-                    {
-                        if (target.StartsWith(source, StringComparison.OrdinalIgnoreCase))
-                        {
-                            this.FailNotification("Parent node cannot add to child.");
+                    sourceNodeIndex = int.Parse(indexArray[length]);
 
-                            return Task.CompletedTask;
-                        }
+                    sourceNodeParent = temp;
+                }
+
+                if (isTryingToMakeRoot)
+                {
+                    state.ComponentRootElement = sourceNodeParent.Children[sourceNodeIndex];
+
+                    state.Selection = new();
+
+                    return Task.CompletedTask;
+                }
+
+                VisualElementModel targetNodeParent;
+                int targetNodeIndex;
+                {
+                    var temp = state.ComponentRootElement;
+
+                    var indexArray = target.Split(',');
+
+                    var length = indexArray.Length - 1;
+                    for (var i = 1; i < length; i++)
+                    {
+                        temp = temp.Children[int.Parse(indexArray[i])];
                     }
 
-                    // same target control
+                    targetNodeIndex = int.Parse(indexArray[length]);
+
+                    targetNodeParent = temp;
+                }
+
+                if (position == DragPosition.Inside)
+                {
+                    var sourceNode = sourceNodeParent.Children[sourceNodeIndex];
+
+                    var targetNode = targetNodeParent.Children[targetNodeIndex];
+
+                    if (targetNode.Children.Count > 0)
                     {
-                        if (source == target)
-                        {
-                            return Task.CompletedTask;
-                        }
+                        this.FailNotification("Select valid location");
+
+                        return Task.CompletedTask;
                     }
 
-                    var isTryingToMakeRoot = target == "0" && position == DragPosition.Before;
+                    // remove from source
+                    sourceNodeParent.Children.RemoveAt(sourceNodeIndex);
 
-                    VisualElementModel sourceNodeParent;
-                    int sourceNodeIndex;
+                    if (targetNode.HasNoChild())
                     {
-                        var temp = state.ComponentRootElement;
-
-                        var indexArray = source.Split(',');
-
-                        var length = indexArray.Length - 1;
-                        for (var i = 1; i < length; i++)
-                        {
-                            temp = temp.Children[int.Parse(indexArray[i])];
-                        }
-
-                        sourceNodeIndex = int.Parse(indexArray[length]);
-
-                        sourceNodeParent = temp;
-                    }
-
-                    if (isTryingToMakeRoot)
-                    {
-                        state.ComponentRootElement = sourceNodeParent.Children[sourceNodeIndex];
+                        targetNode.Children.Add(sourceNode);
 
                         state.Selection = new();
 
                         return Task.CompletedTask;
                     }
+                }
 
-                    VisualElementModel targetNodeParent;
-                    int targetNodeIndex;
+                // is same parent
+                if (sourceNodeParent == targetNodeParent)
+                {
+                    if (position == DragPosition.After && sourceNodeIndex - targetNodeIndex == 1)
                     {
-                        var temp = state.ComponentRootElement;
-
-                        var indexArray = target.Split(',');
-
-                        var length = indexArray.Length - 1;
-                        for (var i = 1; i < length; i++)
-                        {
-                            temp = temp.Children[int.Parse(indexArray[i])];
-                        }
-
-                        targetNodeIndex = int.Parse(indexArray[length]);
-
-                        targetNodeParent = temp;
+                        return Task.CompletedTask;
                     }
 
-                    if (position == DragPosition.Inside)
+                    if (position == DragPosition.Before && targetNodeIndex - sourceNodeIndex == 1)
                     {
-                        var sourceNode = sourceNodeParent.Children[sourceNodeIndex];
+                        return Task.CompletedTask;
+                    }
+                }
 
-                        var targetNode = targetNodeParent.Children[targetNodeIndex];
+                {
+                    var sourceNode = sourceNodeParent.Children[sourceNodeIndex];
 
-                        if (targetNode.Children.Count > 0)
+                    // remove from source
+                    sourceNodeParent.Children.RemoveAt(sourceNodeIndex);
+
+                    if (sourceNodeParent == targetNodeParent)
+                    {
+                        // is adding end
+                        if (position == DragPosition.After && targetNodeIndex == targetNodeParent.Children.Count)
                         {
-                            this.FailNotification("Select valid location");
-
-                            return Task.CompletedTask;
-                        }
-
-                        // remove from source
-                        sourceNodeParent.Children.RemoveAt(sourceNodeIndex);
-
-                        if (targetNode.HasNoChild())
-                        {
-                            targetNode.Children.Add(sourceNode);
+                            targetNodeParent.Children.Insert(targetNodeIndex, sourceNode);
 
                             state.Selection = new();
 
                             return Task.CompletedTask;
                         }
-                    }
 
-                    // is same parent
-                    if (sourceNodeParent == targetNodeParent)
-                    {
-                        if (position == DragPosition.After && sourceNodeIndex - targetNodeIndex == 1)
+                        if (position == DragPosition.After && targetNodeIndex == 0)
                         {
-                            return Task.CompletedTask;
+                            targetNodeIndex++;
                         }
 
-                        if (position == DragPosition.Before && targetNodeIndex - sourceNodeIndex == 1)
+                        if (position == DragPosition.Before && targetNodeIndex == targetNodeParent.Children.Count)
                         {
-                            return Task.CompletedTask;
+                            targetNodeIndex--;
                         }
                     }
 
-                    {
-                        var sourceNode = sourceNodeParent.Children[sourceNodeIndex];
+                    // insert into target
+                    targetNodeParent.Children.Insert(targetNodeIndex, sourceNode);
 
-                        // remove from source
-                        sourceNodeParent.Children.RemoveAt(sourceNodeIndex);
-
-                        if (sourceNodeParent == targetNodeParent)
-                        {
-                            // is adding end
-                            if (position == DragPosition.After && targetNodeIndex == targetNodeParent.Children.Count)
-                            {
-                                targetNodeParent.Children.Insert(targetNodeIndex, sourceNode);
-
-                                state.Selection = new();
-
-                                return Task.CompletedTask;
-                            }
-
-                            if (position == DragPosition.After && targetNodeIndex == 0)
-                            {
-                                targetNodeIndex++;
-                            }
-
-                            if (position == DragPosition.Before && targetNodeIndex == targetNodeParent.Children.Count)
-                            {
-                                targetNodeIndex--;
-                            }
-                        }
-
-                        // insert into target
-                        targetNodeParent.Children.Insert(targetNodeIndex, sourceNode);
-
-                        state.Selection = new();
-                    }
-
-                    return Task.CompletedTask;
+                    state.Selection = new();
                 }
-            } + When(state.LeftTab != LeftTabs.ElementTree, DisplayNone),
+
+                return Task.CompletedTask;
+            }
+        } + When(state.LeftTab != LeftTabs.ElementTree, DisplayNone);
+
+        var componentTree = new ComponentTreeView
+        {
+            ProjectId        = state.ProjectId, 
+            ComponentName    = state.ComponentName,
+            SelectionChanged = ChangeSelectedComponent
+        }+ When(state.LeftTab != LeftTabs.Components, DisplayNone);
+        
+        return new FlexColumn(WidthFull, AlignItemsCenter,OverflowAuto, BorderRight(1, dotted, "#d9d9d9"), Background(White))
+        {
+            componentSelector,
             
-            new ComponentTreeView
-            {
-                ProjectId        = state.ProjectId, 
-                ComponentName    = state.ComponentName,
-                SelectionChanged = ChangeSelectedComponent
-            }+ When(state.LeftTab != LeftTabs.Components, DisplayNone)
+            tabButtons,
+
+            elementTree,
             
-             
+            componentTree
         };
     }
 
