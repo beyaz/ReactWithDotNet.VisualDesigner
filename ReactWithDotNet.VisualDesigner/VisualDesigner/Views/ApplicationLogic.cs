@@ -475,6 +475,15 @@ static class ApplicationLogic
                 return Fail($"User ({state.UserName}) has no change to rollback.");
             }
 
+            await db.InsertAsync(new ComponentHistoryEntity
+            {
+                ComponentId                = component.Id,
+                ComponentName              = component.Name,
+                ComponentRootElementAsYaml = SerializeToYaml(state.ComponentRootElement),
+                InsertTime                 = DateTime.Now,
+                UserName                   = state.UserName
+            });
+
             // restore from main version
             state.ComponentRootElement = component.RootElementAsYaml.AsVisualElementModel();
 
