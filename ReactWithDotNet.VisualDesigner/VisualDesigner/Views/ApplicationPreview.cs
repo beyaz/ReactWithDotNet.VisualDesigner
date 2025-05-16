@@ -249,33 +249,41 @@ sealed class ApplicationPreview : Component
                             continue;
                         }
 
-                        var src = TryClearStringValue(value);
+                        calculateSrcFromValue(context, model, value).HasValue(src => { elementAsImage.src = src; });
+                        continue;
 
-                        if (src.StartsWith("https://"))
+                        static Maybe<string> calculateSrcFromValue(RenderContext context, VisualElementModel model, string value)
                         {
-                            elementAsImage.src = src;
-                            continue;
-                        }
+                            var src = TryClearStringValue(value);
 
-                        if (src.StartsWith("/"))
-                        {
-                            src = src.RemoveFromStart("/");
-                        }
+                            if (src.StartsWith("https://"))
+                            {
+                                return src;
+                            }
 
-                        if (File.Exists(Path.Combine(context.ReactContext.wwwroot, src)))
-                        {
-                            elementAsImage.src = Path.Combine(context.ReactContext.wwwroot, src);
-                        }
-                        else
-                        {
+                            if (src.StartsWith("/"))
+                            {
+                                var srcUnderWwwRoot = "/wwwroot" + src;
+
+                                foreach (var localFilePath in TryFindFilePathFromWebRequestPath(srcUnderWwwRoot))
+                                {
+                                    if (File.Exists(localFilePath))
+                                    {
+                                        return srcUnderWwwRoot;
+                                    }
+                                }
+
+                                return None;
+                            }
+
                             // try find value from caller
                             foreach (var callerValue in tryGetPropValueFromCaller(context, model, "src"))
                             {
-                                elementAsImage.src = Path.Combine(context.ReactContext.wwwroot, callerValue.RemoveFromStart("/"));
+                                return calculateSrcFromValue(context, model, callerValue);
                             }
-                        }
 
-                        continue;
+                            return None;
+                        }
                     }
                 }
 
