@@ -30,7 +30,7 @@ public sealed record ApplicationSelectionState
     // @formatter:on
 }
 
-public sealed class ApplicationState
+public sealed record ApplicationState
 {
     // @formatter:off
 

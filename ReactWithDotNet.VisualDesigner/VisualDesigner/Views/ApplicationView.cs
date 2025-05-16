@@ -307,9 +307,9 @@ sealed class ApplicationView : Component<ApplicationState>
             }
         };
 
-        async Task<Element> left()
+        Element left()
         {
-            return await PartLeftPanel() + BorderBottomLeftRadius(8);
+            return PartLeftPanel() + BorderBottomLeftRadius(8);
         }
 
         Element middle()
@@ -356,6 +356,37 @@ sealed class ApplicationView : Component<ApplicationState>
     Task OnComponentNameChanged(string newValue)
     {
         return ChangeSelectedComponent(newValue);
+    }
+
+    async Task OnComponentNameTypeFinished()
+    {
+        var userEnteredComponentName = state.ComponentName.Trim();
+
+        var component = await DbOperation(db => db.FirstOrDefaultAsync<ComponentEntity>(x => x.Id == state.ComponentId));
+
+        // has no change
+        if (component.Name.Trim() == userEnteredComponentName)
+        {
+            return;
+        }
+
+        var sameNamedComponent = await DbOperation(db => db.FirstOrDefaultAsync<ComponentEntity>(x => x.Name == userEnteredComponentName));
+        if (sameNamedComponent is not null)
+        {
+            state = state with { ComponentName = component.Name };
+            
+            this.FailNotification("Has already same named component.");
+            return;
+        }
+
+        await DbOperation(db => db.UpdateAsync(component with
+        {
+            Name = userEnteredComponentName
+        }));
+        
+        Cache.Clear();
+        
+        this.SuccessNotification("Component name updated.");
     }
 
     [StopPropagation]
@@ -561,16 +592,19 @@ sealed class ApplicationView : Component<ApplicationState>
         };
     }
 
-    async Task<Element> PartLeftPanel()
+    Element PartLeftPanel()
     {
-        var componentSelector = new MagicInput
+        var componentSelector = new input
         {
-            Name = string.Empty,
-
-            Suggestions = await GetSuggestionsForComponentSelection(state),
-            Value       = state.ComponentName,
-            OnChange    = (_, componentName) => OnComponentNameChanged(componentName),
-            IsBold      = true
+            type                     = "text",
+            valueBind                = () => state.ComponentName,
+            valueBindDebounceTimeout = 800,
+            valueBindDebounceHandler = OnComponentNameTypeFinished,
+            style =
+            {
+                FlexGrow(1),
+                Focus(OutlineNone)
+            }
         };
 
         var removeIconInLayersTab = CreateIcon(Icon.remove, 16);
@@ -838,9 +872,8 @@ sealed class ApplicationView : Component<ApplicationState>
 
         return new FlexColumn(SizeFull, AlignItemsCenter, BorderRight(1, dotted, "#d9d9d9"), Background(White))
         {
-            new FlexRow(WidthFull, AlignItemsCenter, Gap(4), PaddingLeft(1))
+            new FlexRow(WidthFull, AlignItemsCenter, Gap(4), PaddingLeft(8))
             {
-                new IconSave() + Size(16) + Color(Gray300) + Hover(Color(Blue400)),
                 componentSelector
             },
 
