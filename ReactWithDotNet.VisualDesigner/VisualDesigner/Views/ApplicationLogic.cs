@@ -117,10 +117,11 @@ static class ApplicationLogic
 
             await db.InsertAsync(new ComponentHistoryEntity
             {
-                ComponentId       = component.Id,
-                RootElementAsYaml = component.RootElementAsYaml,
-                UserName          = state.UserName,
-                InsertTime        = DateTime.Now
+                ComponentId                = component.Id,
+                ComponentName              = component.Name,
+                ComponentRootElementAsYaml = component.RootElementAsYaml,
+                UserName                   = state.UserName,
+                InsertTime                 = DateTime.Now
             });
 
             component = component with

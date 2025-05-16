@@ -63,7 +63,9 @@ public sealed record ComponentHistoryEntity
     
     public required int ComponentId { get; init; }
     
-    public string RootElementAsYaml { get; init; }
+    public required string ComponentName { get; init; }
+    
+    public required string ComponentRootElementAsYaml { get; init; }
 
     public required string UserName { get; init; }
     

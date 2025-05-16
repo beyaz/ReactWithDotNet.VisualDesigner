@@ -379,6 +379,17 @@ sealed class ApplicationView : Component<ApplicationState>
             return;
         }
 
+        await DbOperation(db => db.InsertAsync(new ComponentHistoryEntity
+        {
+            ComponentId                = component.Id,
+            ComponentName              = component.Name,
+            ComponentRootElementAsYaml = component.RootElementAsYaml,
+            InsertTime                 = DateTime.Now,
+            UserName                   = state.UserName
+
+        }));
+        
+        
         await DbOperation(db => db.UpdateAsync(component with
         {
             Name = userEnteredComponentName
