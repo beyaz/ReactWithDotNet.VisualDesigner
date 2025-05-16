@@ -501,8 +501,7 @@ static class Extensions
         return !list.Contains(item);
     }
     
-    
-    public static string TryGetPropertyValue(this IReadOnlyList<string> properties, params string[] propertyNameWithAlias)
+    public static Maybe<string> TryGetPropertyValue(this IReadOnlyList<string> properties, params string[] propertyNameWithAlias)
     {
         foreach (var property in properties)
         {
@@ -522,7 +521,7 @@ static class Extensions
             }
         }
 
-        return null;
+        return None;
     }
 }
 

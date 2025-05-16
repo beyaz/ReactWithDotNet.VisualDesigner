@@ -561,22 +561,20 @@ static class NextJs_with_Tailwind
             {
                 // width
                 {
-                    var propertyValue = element.Properties.TryGetPropertyValue("width", "w");
-                    if (propertyValue is not null)
+                    foreach (var propertyValue in element.Properties.TryGetPropertyValue("width", "w"))
                     {
-                        if (element.Styles.TryGetPropertyValue("width", "w") is null)
+                        if (element.Styles.TryGetPropertyValue("width", "w").HasNoValue)
                         {
                             element.Styles.Add($"width: {propertyValue}");
-                        }
+                        }   
                     }
                 }
 
                 // height
                 {
-                    var propertyValue = element.Properties.TryGetPropertyValue("height", "h");
-                    if (propertyValue is not null)
+                    foreach (var propertyValue in element.Properties.TryGetPropertyValue("height", "h"))
                     {
-                        if (element.Styles.TryGetPropertyValue("height", "h") is null)
+                        if (element.Styles.TryGetPropertyValue("height", "h").HasNoValue)
                         {
                             element.Styles.Add($"height: {propertyValue}");
                         }
