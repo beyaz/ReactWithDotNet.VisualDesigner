@@ -79,14 +79,11 @@ static class HtmlImporter
 
                 List<string> remainigClassNames = [];
 
-                foreach (var className in listOfCssClass)
+                foreach (var (className, styles) in from className in listOfCssClass select processClassName(projectId, className))
                 {
-                    processClassName(projectId, className).Then((x, y) =>
-                    {
-                        x.HasValue(n => remainigClassNames.Add(n));
+                    model.Styles.AddRange(styles);
 
-                        model.Styles.AddRange(y);
-                    });
+                    className.HasValue(n => remainigClassNames.Add(n));
                 }
 
                 if (remainigClassNames.Count == 0)
