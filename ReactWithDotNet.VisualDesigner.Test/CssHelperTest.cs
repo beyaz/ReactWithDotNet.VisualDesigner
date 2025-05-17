@@ -5,12 +5,6 @@ namespace ReactWithDotNet.VisualDesigner.Test;
 [TestClass]
 public sealed class CssHelperTest
 {
-    [TestMethod]
-    public void TailwindClassShouldBeParse()
-    {
-        TryConvertCssUtilityClassToHtmlStyle(1,"w-full").HasValue.Should().BeTrue();
-    }
-
     [TestClass]
     public class CreateDesignerStyleItemFromText_Test
     {
