@@ -30,7 +30,7 @@ static class HtmlImporter
         return ConvertToVisualElementModel(projectId, htmlDocument.DocumentNode.FirstChild);
     }
 
-    static VisualElementModel ConvertToVisualElementModel(int projectId,HtmlNode htmlNode)
+    static VisualElementModel ConvertToVisualElementModel(int projectId, HtmlNode htmlNode)
     {
         if (htmlNode is null)
         {
@@ -78,7 +78,7 @@ static class HtmlImporter
                 var listOfCssClass = attributeValue.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
                 List<string> remainigClassNames = [];
-                
+
                 foreach (var className in listOfCssClass)
                 {
                     var maybe = TryConvertCssUtilityClassToHtmlStyle(projectId, className);
@@ -86,22 +86,22 @@ static class HtmlImporter
                     {
                         var pseudo = maybe.Value.Pseudo;
                         var styles = maybe.Value.RawHtmlStyles;
-                        
+
                         foreach (var (name, value) in styles)
                         {
                             if (pseudo.HasValue())
                             {
-                                model.Styles.Add(pseudo +":"+ name + ": " + value);
+                                model.Styles.Add(pseudo + ":" + name + ": " + value);
                             }
                             else
                             {
                                 model.Styles.Add(name + ": " + value);
                             }
                         }
-                        
+
                         continue;
                     }
-                    
+
                     remainigClassNames.Add(className);
                 }
 
@@ -125,7 +125,7 @@ static class HtmlImporter
 
         foreach (var child in htmlNode.ChildNodes)
         {
-            var childModel = ConvertToVisualElementModel(projectId,child);
+            var childModel = ConvertToVisualElementModel(projectId, child);
             if (childModel is null)
             {
                 continue;
