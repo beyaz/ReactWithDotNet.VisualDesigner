@@ -54,7 +54,7 @@ public sealed class NextJsExportTest
                     { "-XXL", "-xxl" },
                     { "-M", "-m" },
                     { "-S", "-s" },
-                    { "-XS", "-xs" },
+                    { "-XS", "-xs" }
                 };
 
                 foreach (var (key, value) in map)
