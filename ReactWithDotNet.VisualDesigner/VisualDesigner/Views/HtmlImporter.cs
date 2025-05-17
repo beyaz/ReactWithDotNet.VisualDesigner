@@ -81,6 +81,8 @@ static class HtmlImporter
 
                 foreach (var className in listOfCssClass)
                 {
+                    
+                    
                     var maybe = TryConvertCssUtilityClassToHtmlStyle(projectId, className);
                     if (maybe.HasValue)
                     {
@@ -103,6 +105,33 @@ static class HtmlImporter
                     }
 
                     remainigClassNames.Add(className);
+
+                    static (string className, IReadOnlyList<string> styles) processClassName(int projectId, string className)
+                    {
+                        foreach (var designerStyleItem in TryConvertCssUtilityClassToHtmlStyle(projectId, className))
+                        {
+                            var returnStyles = new List<string>();
+                            
+                            var pseudo = designerStyleItem.Pseudo;
+                            var styles = designerStyleItem.RawHtmlStyles;
+
+                            foreach (var (name, value) in styles)
+                            {
+                                if (pseudo.HasValue())
+                                {
+                                    returnStyles.Add(pseudo + ":" + name + ": " + value);
+                                }
+                                else
+                                {
+                                    returnStyles.Add(name + ": " + value);
+                                }
+                            }
+
+                            return (null, returnStyles);
+                        }
+
+                        return (className, []);
+                    }
                 }
 
                 if (remainigClassNames.Count == 0)

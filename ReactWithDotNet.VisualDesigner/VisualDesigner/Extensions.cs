@@ -17,6 +17,7 @@ static class Extensions
         return items.ToDictionary(x => x.key, x => x.value);
     }
     
+    
     //public static VisualElementModel Fix(this VisualElementModel model)
     //{
     //    var bindPropertyIndex = -1;
