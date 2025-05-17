@@ -16,7 +16,11 @@ static class Extensions
     {
         return items.ToDictionary(x => x.key, x => x.value);
     }
-    
+
+    public static void Then<A, B>(this (A a, B b) tuple, Action<A, B> nextAction)
+    {
+        nextAction(tuple.a, tuple.b);
+    }
     
     //public static VisualElementModel Fix(this VisualElementModel model)
     //{

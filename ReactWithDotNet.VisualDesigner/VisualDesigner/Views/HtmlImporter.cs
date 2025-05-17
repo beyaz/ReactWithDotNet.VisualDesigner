@@ -81,57 +81,15 @@ static class HtmlImporter
 
                 foreach (var className in listOfCssClass)
                 {
-                    
-                    
-                    var maybe = TryConvertCssUtilityClassToHtmlStyle(projectId, className);
-                    if (maybe.HasValue)
+                    processClassName(projectId, className).Then((x, y) =>
                     {
-                        var pseudo = maybe.Value.Pseudo;
-                        var styles = maybe.Value.RawHtmlStyles;
-
-                        foreach (var (name, value) in styles)
+                        if (x.HasValue())
                         {
-                            if (pseudo.HasValue())
-                            {
-                                model.Styles.Add(pseudo + ":" + name + ": " + value);
-                            }
-                            else
-                            {
-                                model.Styles.Add(name + ": " + value);
-                            }
+                            remainigClassNames.Add(x);
                         }
 
-                        continue;
-                    }
-
-                    remainigClassNames.Add(className);
-
-                    static (string className, IReadOnlyList<string> styles) processClassName(int projectId, string className)
-                    {
-                        foreach (var designerStyleItem in TryConvertCssUtilityClassToHtmlStyle(projectId, className))
-                        {
-                            var returnStyles = new List<string>();
-                            
-                            var pseudo = designerStyleItem.Pseudo;
-                            var styles = designerStyleItem.RawHtmlStyles;
-
-                            foreach (var (name, value) in styles)
-                            {
-                                if (pseudo.HasValue())
-                                {
-                                    returnStyles.Add(pseudo + ":" + name + ": " + value);
-                                }
-                                else
-                                {
-                                    returnStyles.Add(name + ": " + value);
-                                }
-                            }
-
-                            return (null, returnStyles);
-                        }
-
-                        return (className, []);
-                    }
+                        model.Styles.AddRange(y);
+                    });
                 }
 
                 if (remainigClassNames.Count == 0)
@@ -140,6 +98,34 @@ static class HtmlImporter
                 }
 
                 attributeValue = string.Join(" ", remainigClassNames);
+                
+                
+                static (string className, IReadOnlyList<string> styles) processClassName(int projectId, string className)
+                {
+                    foreach (var designerStyleItem in TryConvertCssUtilityClassToHtmlStyle(projectId, className))
+                    {
+                        var returnStyles = new List<string>();
+                            
+                        var pseudo = designerStyleItem.Pseudo;
+                        var styles = designerStyleItem.RawHtmlStyles;
+
+                        foreach (var (name, value) in styles)
+                        {
+                            if (pseudo.HasValue())
+                            {
+                                returnStyles.Add(pseudo + ":" + name + ": " + value);
+                            }
+                            else
+                            {
+                                returnStyles.Add(name + ": " + value);
+                            }
+                        }
+
+                        return (null, returnStyles);
+                    }
+
+                    return (className, []);
+                }
             }
 
             model.Properties.Add(attributeName + ": " + attributeValue);
