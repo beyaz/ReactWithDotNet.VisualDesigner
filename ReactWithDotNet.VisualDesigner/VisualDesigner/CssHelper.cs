@@ -1465,11 +1465,23 @@ public sealed record DesignerStyleItem
 
     public static implicit operator DesignerStyleItem((string Pseudo, (string Name, string Value)[] RawHtmlStyles) tuple)
     {
-        return new()
+        return new ()
         {
             Pseudo        = tuple.Pseudo,
             RawHtmlStyles = tuple.RawHtmlStyles.ToDictionary(x => x.Name, x => x.Value)
         };
+    }
+
+    public DesignerStyleItem((string Pseudo, (string Name, string Value)[] RawHtmlStyles) tuple)
+    {
+        Pseudo        = tuple.Pseudo;
+
+        RawHtmlStyles = tuple.RawHtmlStyles.ToDictionary(x => x.Name, x => x.Value);
+    }
+
+    public DesignerStyleItem()
+    {
+        
     }
 }
 
