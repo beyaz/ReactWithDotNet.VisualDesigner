@@ -279,6 +279,16 @@ public static class CssHelper
                             }
                         }
                     }
+                    
+                    if (cssAttributeValue == "translateY(50%)")
+                    {
+                        return "transform translate-y-1/2";
+                    }
+                    
+                    if (cssAttributeValue == "translateY(-50%)")
+                    {
+                        return "transform -translate-y-1/2";
+                    }
 
                     break;
                 }
@@ -624,6 +634,7 @@ public static class CssHelper
                 {
                     switch (cssAttributeValue)
                     {
+                        case "1":   return "flex-1";
                         case "1 1 0%":   return "flex-1";
                         case "1 1 0":    return "flex-1";
                         case "0 1 auto": return "flex-initial";
@@ -1272,6 +1283,7 @@ public static class CssHelper
             case "align-content":
             case "opacity":
             case "box-shadow":
+            case "white-space":
             {
                 return (name, value);
             }
