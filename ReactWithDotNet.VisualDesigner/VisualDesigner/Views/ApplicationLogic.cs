@@ -493,11 +493,11 @@ static class ApplicationLogic
         });
     }
 
-    public static async Task<Result<ComponentEntity>> TryFindComponentByComponentName(int projectId, string componentName)
+    public static async Task<Maybe<ComponentEntity>> TryFindComponentByComponentName(int projectId, string componentName)
     {
         if (componentName.HasNoValue())
         {
-            return new ArgumentException($"ComponentName: {componentName} is not valid");
+            return None;
         }
 
         var query =
