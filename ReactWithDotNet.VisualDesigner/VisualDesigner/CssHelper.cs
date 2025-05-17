@@ -194,7 +194,6 @@ public static class CssHelper
 
             // TRY TO HANDLE BY PROJECT CONFIG
             {
-
                 foreach (var className in tryConvert_HtmlCssStyle_to_ProjectDefinedCssClass(projectId, cssAttributeName, cssAttributeValue))
                 {
                     return className;
@@ -202,8 +201,6 @@ public static class CssHelper
             }
 
             var isValueDouble = double.TryParse(cssAttributeValue, out var valueAsDouble);
-
-            
 
             switch (cssAttributeName)
             {
