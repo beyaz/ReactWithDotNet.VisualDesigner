@@ -417,11 +417,6 @@ public static class CssHelper
 
                 case "color":
                 {
-                    if (project.Colors.TryGetValue(cssAttributeValue, out var htmlColor))
-                    {
-                        cssAttributeValue = htmlColor;
-                    }
-
                     return $"text-[{cssAttributeValue}]";
                 }
 
