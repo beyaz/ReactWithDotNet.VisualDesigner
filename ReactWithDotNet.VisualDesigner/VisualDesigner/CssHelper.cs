@@ -674,10 +674,9 @@ public static class CssHelper
 
         // try to handle by spacing scale or arbitrary value
         {
-            var maybe = TailwindSpacingScale.Try_Convert_From_HtmlStyle_to_TailwindClass(name, value);
-            if (maybe.HasValue)
+            foreach (var item in TailwindSpacingScale.Try_Convert_From_HtmlStyle_to_TailwindClass(name, value))
             {
-                return maybe.Value;
+                return item;
             }
         }
 
