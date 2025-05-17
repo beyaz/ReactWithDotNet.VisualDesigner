@@ -139,6 +139,507 @@ public static class CssHelper
         }
 
         return string.Join(" ", tailwindClassNames.Select(x => pseudo + ":" + x));
+
+        static Result<string> ConvertToTailwindClass(ProjectConfig project, string name, string value)
+        {
+            if (value is null)
+            {
+                return new ArgumentNullException(nameof(value));
+            }
+
+            // check is conditional sample: border-width: {props.isSelected} ? 2 : 5
+            {
+                var conditionalValue = TextParser.TryParseConditionalValue(value);
+                if (conditionalValue.success)
+                {
+                    string lefTailwindClass;
+                    {
+                        var result = ConvertToTailwindClass(project, name, conditionalValue.left);
+                        if (result.HasError)
+                        {
+                            return result.Error;
+                        }
+
+                        lefTailwindClass = result.Value;
+                    }
+
+                    var rightTailwindClass = string.Empty;
+
+                    if (conditionalValue.right.HasValue())
+                    {
+                        {
+                            var result = ConvertToTailwindClass(project, name, conditionalValue.right);
+                            if (result.HasError)
+                            {
+                                return result.Error;
+                            }
+
+                            rightTailwindClass = result.Value;
+                        }
+                    }
+
+                    return "${" + $"{ClearConnectedValue(conditionalValue.condition)} ? '{lefTailwindClass}' : '{rightTailwindClass}'" + '}';
+                }
+            }
+
+            // try to handle by spacing scale or arbitrary value
+            {
+                foreach (var item in TailwindSpacingScale.Try_Convert_From_HtmlStyle_to_TailwindClass(name, value))
+                {
+                    return item;
+                }
+            }
+
+            var isValueDouble = double.TryParse(value, out var valueAsDouble);
+
+            switch (name)
+            {
+                case "padding":
+                case "padding-right":
+                case "padding-left":
+                case "padding-top":
+                case "padding-bottom":
+
+                case "margin":
+                case "margin-right":
+                case "margin-left":
+                case "margin-top":
+                case "margin-bottom":
+                {
+                    name = name switch
+                    {
+                        "padding"        => "p",
+                        "padding-right"  => "pr",
+                        "padding-left"   => "pl",
+                        "padding-top"    => "pt",
+                        "padding-bottom" => "pb",
+
+                        "margin"        => "m",
+                        "margin-right"  => "mr",
+                        "margin-left"   => "ml",
+                        "margin-top"    => "mt",
+                        "margin-bottom" => "mb",
+
+                        _ => name
+                    };
+
+                    if (isValueDouble)
+                    {
+                        value = valueAsDouble.AsPixel();
+                    }
+
+                    return $"{name}-[{value}]";
+                }
+
+                case "m":
+                case "mx":
+                case "my":
+                case "ml":
+                case "mr":
+                case "mb":
+                case "mt":
+
+                case "p":
+                case "px":
+                case "py":
+                case "pl":
+                case "pr":
+                case "pb":
+                case "pt":
+                {
+                    if (isValueDouble)
+                    {
+                        value = valueAsDouble.AsPixel();
+                    }
+
+                    return $"{name}-[{value}]";
+                }
+
+                case "transform":
+                {
+                    if (value.StartsWith("rotate("))
+                    {
+                        var parts = value.Split("()".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+                        if (parts.Length == 2)
+                        {
+                            var sign = parts[1][0] == '-' ? "-" : "";
+                            if (parts[1].EndsWith("deg"))
+                            {
+                                return $"{sign}rotate-{value.RemoveFromEnd("deg")}";
+                            }
+                        }
+                    }
+
+                    break;
+                }
+                case "outline":
+                {
+                    return $"{name}-{value}";
+                }
+
+                case "text-decoration":
+                {
+                    return $"{value}";
+                }
+
+                case "text-align":
+                {
+                    return $"text-{value}";
+                }
+
+                case "width":
+                {
+                    if (value == "fit-content")
+                    {
+                        return "w-fit";
+                    }
+
+                    if (value == "100%")
+                    {
+                        return "w-full";
+                    }
+
+                    return $"w-[{value}]";
+                }
+
+                case "height":
+                {
+                    if (value == "fit-content")
+                    {
+                        return "h-fit";
+                    }
+
+                    if (value == "100%")
+                    {
+                        return "h-full";
+                    }
+
+                    return $"h-[{value}]";
+                }
+
+                case "max-width":
+                    return $"max-w-[{value}]";
+
+                case "max-height":
+                    return $"max-h-[{value}]";
+
+                case "min-height":
+                    return $"min-h-[{value}]";
+
+                case "z-index":
+                    return $"z-[{value}]";
+
+                case "overflow-y":
+                case "overflow-x":
+                    return $"{name}-{value}";
+
+                case "border-top-left-radius":
+                    return $"rounded-tl-[{value}]";
+
+                case "border-top-right-radius":
+                    return $"rounded-tr-[{value}]";
+
+                case "border-bottom-left-radius":
+                    return $"rounded-bl-[{value}]";
+
+                case "border-bottom-right-radius":
+                    return $"rounded-br-[{value}]";
+
+                case "flex-grow":
+                    return $"flex-grow-[{value}]";
+
+                case "flex-wrap":
+                {
+                    if (value == "wrap")
+                    {
+                        return "flex-wrap";
+                    }
+
+                    if (value == "nowrap")
+                    {
+                        return "flex-nowrap";
+                    }
+
+                    break;
+                }
+
+                case "border-bottom-width":
+                    return $"border-b-[{value}]";
+
+                case "border-top-width":
+                    return $"border-t-[{value}]";
+
+                case "border-left-width":
+                    return $"border-l-[{value}]";
+
+                case "border-right-width":
+                    return $"border-r-[{value}]";
+
+                case "border-top":
+                case "border-right":
+                case "border-left":
+                case "border-bottom":
+                {
+                    var direction = name.Split('-', StringSplitOptions.RemoveEmptyEntries).Last();
+
+                    var parts = value.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                    if (parts.Length == 3)
+                    {
+                        if (project.Colors.TryGetValue(parts[2], out var htmlColor))
+                        {
+                            parts[2] = htmlColor;
+                        }
+
+                        var directionShortName = direction switch
+                        {
+                            "top"    => "t",
+                            "bottom" => "b",
+                            "right"  => "r",
+                            "left"   => "l",
+                            _        => null
+                        };
+
+                        if (directionShortName is null)
+                        {
+                            return new ArgumentOutOfRangeException(direction);
+                        }
+
+                        return $"border-{directionShortName}-[{parts[0]}]" +
+                               $" [border-{direction}-style:{parts[1]}]" +
+                               $" [border-{direction}-color:{parts[2]}]";
+                    }
+
+                    return new ArgumentOutOfRangeException(direction);
+                }
+
+                case "display":
+                    return $"{value}";
+
+                case "color":
+                {
+                    if (project.Colors.TryGetValue(value, out var htmlColor))
+                    {
+                        value = htmlColor;
+                    }
+
+                    return $"text-[{value}]";
+                }
+
+                case "border-color":
+                {
+                    if (project.Colors.TryGetValue(value, out var htmlColor))
+                    {
+                        value = htmlColor;
+                    }
+
+                    return $"border-[{value}]";
+                }
+
+                case "gap":
+                    return $"gap-[{value}]";
+
+                case "size":
+                    return $"size-[{value}]";
+
+                case "bottom":
+                case "top":
+                case "left":
+                case "right":
+                    return $"{name}-[{value}]";
+
+                case "flex-direction":
+                {
+                    if (value == "column")
+                    {
+                        return "flex-col";
+                    }
+
+                    if (value == "row")
+                    {
+                        return "flex";
+                    }
+
+                    break;
+                }
+
+                case "align-items":
+                    return $"items-{value.RemoveFromStart("align-")}";
+
+                case "justify-content":
+                    return $"justify-{value.Split('-').Last()}";
+
+                case "border-radius":
+                    return $"rounded-[{value}]";
+
+                case "font-size":
+                    return $"[font-size:{value}]";
+
+                case "border-width":
+                {
+                    if (isValueDouble)
+                    {
+                        value = valueAsDouble.AsPixel();
+                    }
+
+                    return $"border-[{value}]";
+                }
+
+                case "border":
+                {
+                    var parts = value.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                    if (parts.Length == 3)
+                    {
+                        if (project.Colors.TryGetValue(parts[2], out var htmlColor))
+                        {
+                            parts[2] = htmlColor;
+                        }
+
+                        if (parts[0] == "1px" && parts[1] == "solid")
+                        {
+                            return "border " +
+                                   $"border-[{parts[2]}]";
+                        }
+
+                        return $"border-[{parts[0]}] " +
+                               $"border-[{parts[1]}] " +
+                               $"border-[{parts[2]}]";
+                    }
+
+                    break;
+                }
+
+                case "background-color":
+                case "background":
+                case "bg":
+                {
+                    if (project.Colors.TryGetValue(value, out var htmlColor))
+                    {
+                        value = htmlColor;
+                    }
+
+                    return $"bg-[{value}]";
+                }
+                case "position":
+                    return $"{value}";
+
+                case "border-style":
+                {
+                    return $"border-{value}";
+                }
+
+                case "cursor":
+                {
+                    return $"cursor-{value}";
+                }
+
+                case "inset":
+                {
+                    if (TailwindSpacingScaleMap.TryGetValue(value, out var insetValue))
+                    {
+                        value = insetValue.ToString(CultureInfo_en_US);
+                    }
+                    else
+                    {
+                        value = "[" + value + "]";
+                    }
+
+                    return $"inset-{value}";
+                }
+
+                case "font-family":
+                {
+                    return $"font-[{value}]";
+                }
+                case "font-style":
+                {
+                    return $"[font-style:{value}]";
+                }
+                case "font-weight":
+                {
+                    return $"[font-weight:{value}]";
+                }
+                case "line-height":
+                {
+                    return $"[line-height:{value}]";
+                }
+
+                case "word-wrap":
+                {
+                    switch (value)
+                    {
+                        case "break-word": return "break-words";
+                    }
+
+                    break;
+                }
+
+                case "overflow":
+                {
+                    switch (value)
+                    {
+                        case "auto":    return "overflow-auto";
+                        case "hidden":  return "overflow-hidden";
+                        case "visible": return "overflow-visible";
+                        case "scroll":  return "overflow-scroll";
+                    }
+
+                    break;
+                }
+
+                case "align-self":
+                {
+                    switch (value)
+                    {
+                        case "auto":     return "self-auto";
+                        case "start":    return "self-start";
+                        case "end":      return "self-end";
+                        case "center":   return "self-center";
+                        case "stretch":  return "self-stretch";
+                        case "baseline": return "self-baseline";
+                    }
+
+                    break;
+                }
+
+                case "outline-offset":
+                {
+                    switch (value)
+                    {
+                        case "0":   return "outline-offset-0";
+                        case "1px": return "outline-offset-1";
+                        case "2px": return "outline-offset-2";
+                        case "4px": return "outline-offset-4";
+                        case "8px": return "outline-offset-8";
+                    }
+
+                    break;
+                }
+
+                case "flex":
+                {
+                    switch (value)
+                    {
+                        case "1 1 0%":   return "flex-1";
+                        case "1 1 0":    return "flex-1";
+                        case "0 1 auto": return "flex-initial";
+                        case "0 0 auto": return "flex-0";
+                        case "auto":     return "flex-auto";
+                        case "none":     return "flex-none";
+                    }
+
+                    break;
+                }
+            }
+
+            // todo: more clever
+
+            if (name == "outline-offset")
+            {
+                return "outline-offset-[-1px]";
+            }
+
+            return new InvalidOperationException($"Css not handled. {name}: {value}");
+        }
     }
 
     public static NotNullResult<DesignerStyleItem> CreateDesignerStyleItemFromText(int projectId, string designerStyleItem)
@@ -370,7 +871,6 @@ public static class CssHelper
                     Pseudo        = pseudo,
                     RawHtmlStyles = MapFrom([(styleName, numberSuffix.Value * 4 + "px")]),
                     OriginalText  = utilityCssClassName
-                    
                 };
             }
         }
@@ -453,7 +953,6 @@ public static class CssHelper
                         RawHtmlStyles = MapFrom([("background", tailwindColor.Value)]),
                         OriginalText  = utilityCssClassName
                     };
-                    
                 }
             }
         }
@@ -628,507 +1127,6 @@ public static class CssHelper
     static Result<StyleModifier> ApplyPseudo(string pseudo, IReadOnlyList<StyleModifier> styleModifiers)
     {
         return GetPseudoFunction(pseudo).Then(pseudoFunction => pseudoFunction(styleModifiers.ToArray()));
-    }
-
-    static Result<string> ConvertToTailwindClass(ProjectConfig project, string name, string value)
-    {
-        if (value is null)
-        {
-            return new ArgumentNullException(nameof(value));
-        }
-
-        // check is conditional sample: border-width: {props.isSelected} ? 2 : 5
-        {
-            var conditionalValue = TextParser.TryParseConditionalValue(value);
-            if (conditionalValue.success)
-            {
-                string lefTailwindClass;
-                {
-                    var result = ConvertToTailwindClass(project, name, conditionalValue.left);
-                    if (result.HasError)
-                    {
-                        return result.Error;
-                    }
-
-                    lefTailwindClass = result.Value;
-                }
-
-                var rightTailwindClass = string.Empty;
-
-                if (conditionalValue.right.HasValue())
-                {
-                    {
-                        var result = ConvertToTailwindClass(project, name, conditionalValue.right);
-                        if (result.HasError)
-                        {
-                            return result.Error;
-                        }
-
-                        rightTailwindClass = result.Value;
-                    }
-                }
-
-                return "${" + $"{ClearConnectedValue(conditionalValue.condition)} ? '{lefTailwindClass}' : '{rightTailwindClass}'" + '}';
-            }
-        }
-
-        // try to handle by spacing scale or arbitrary value
-        {
-            foreach (var item in TailwindSpacingScale.Try_Convert_From_HtmlStyle_to_TailwindClass(name, value))
-            {
-                return item;
-            }
-        }
-
-        var isValueDouble = double.TryParse(value, out var valueAsDouble);
-
-        switch (name)
-        {
-            case "padding":
-            case "padding-right":
-            case "padding-left":
-            case "padding-top":
-            case "padding-bottom":
-
-            case "margin":
-            case "margin-right":
-            case "margin-left":
-            case "margin-top":
-            case "margin-bottom":
-            {
-                name = name switch
-                {
-                    "padding"        => "p",
-                    "padding-right"  => "pr",
-                    "padding-left"   => "pl",
-                    "padding-top"    => "pt",
-                    "padding-bottom" => "pb",
-
-                    "margin"        => "m",
-                    "margin-right"  => "mr",
-                    "margin-left"   => "ml",
-                    "margin-top"    => "mt",
-                    "margin-bottom" => "mb",
-
-                    _ => name
-                };
-
-                if (isValueDouble)
-                {
-                    value = valueAsDouble.AsPixel();
-                }
-
-                return $"{name}-[{value}]";
-            }
-
-            case "m":
-            case "mx":
-            case "my":
-            case "ml":
-            case "mr":
-            case "mb":
-            case "mt":
-
-            case "p":
-            case "px":
-            case "py":
-            case "pl":
-            case "pr":
-            case "pb":
-            case "pt":
-            {
-                if (isValueDouble)
-                {
-                    value = valueAsDouble.AsPixel();
-                }
-
-                return $"{name}-[{value}]";
-            }
-
-            case "transform":
-            {
-                if (value.StartsWith("rotate("))
-                {
-                    var parts = value.Split("()".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
-                    if (parts.Length == 2)
-                    {
-                        var sign = parts[1][0] == '-' ? "-" : "";
-                        if (parts[1].EndsWith("deg"))
-                        {
-                            return $"{sign}rotate-{value.RemoveFromEnd("deg")}";
-                        }
-                    }
-                }
-
-                break;
-            }
-            case "outline":
-            {
-                return $"{name}-{value}";
-            }
-
-            case "text-decoration":
-            {
-                return $"{value}";
-            }
-
-            case "text-align":
-            {
-                return $"text-{value}";
-            }
-
-            case "width":
-            {
-                if (value == "fit-content")
-                {
-                    return "w-fit";
-                }
-
-                if (value == "100%")
-                {
-                    return "w-full";
-                }
-
-                return $"w-[{value}]";
-            }
-
-            case "height":
-            {
-                if (value == "fit-content")
-                {
-                    return "h-fit";
-                }
-
-                if (value == "100%")
-                {
-                    return "h-full";
-                }
-
-                return $"h-[{value}]";
-            }
-
-            case "max-width":
-                return $"max-w-[{value}]";
-
-            case "max-height":
-                return $"max-h-[{value}]";
-
-            case "min-height":
-                return $"min-h-[{value}]";
-
-            case "z-index":
-                return $"z-[{value}]";
-
-            case "overflow-y":
-            case "overflow-x":
-                return $"{name}-{value}";
-
-            case "border-top-left-radius":
-                return $"rounded-tl-[{value}]";
-
-            case "border-top-right-radius":
-                return $"rounded-tr-[{value}]";
-
-            case "border-bottom-left-radius":
-                return $"rounded-bl-[{value}]";
-
-            case "border-bottom-right-radius":
-                return $"rounded-br-[{value}]";
-
-            case "flex-grow":
-                return $"flex-grow-[{value}]";
-
-            case "flex-wrap":
-            {
-                if (value == "wrap")
-                {
-                    return "flex-wrap";
-                }
-
-                if (value == "nowrap")
-                {
-                    return "flex-nowrap";
-                }
-
-                break;
-            }
-
-            case "border-bottom-width":
-                return $"border-b-[{value}]";
-
-            case "border-top-width":
-                return $"border-t-[{value}]";
-
-            case "border-left-width":
-                return $"border-l-[{value}]";
-
-            case "border-right-width":
-                return $"border-r-[{value}]";
-
-            case "border-top":
-            case "border-right":
-            case "border-left":
-            case "border-bottom":
-            {
-                var direction = name.Split('-', StringSplitOptions.RemoveEmptyEntries).Last();
-
-                var parts = value.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-                if (parts.Length == 3)
-                {
-                    if (project.Colors.TryGetValue(parts[2], out var htmlColor))
-                    {
-                        parts[2] = htmlColor;
-                    }
-
-                    var directionShortName = direction switch
-                    {
-                        "top"    => "t",
-                        "bottom" => "b",
-                        "right"  => "r",
-                        "left"   => "l",
-                        _        => null
-                    };
-
-                    if (directionShortName is null)
-                    {
-                        return new ArgumentOutOfRangeException(direction);
-                    }
-
-                    return $"border-{directionShortName}-[{parts[0]}]" +
-                           $" [border-{direction}-style:{parts[1]}]" +
-                           $" [border-{direction}-color:{parts[2]}]";
-                }
-
-                return new ArgumentOutOfRangeException(direction);
-            }
-
-            case "display":
-                return $"{value}";
-
-            case "color":
-            {
-                if (project.Colors.TryGetValue(value, out var htmlColor))
-                {
-                    value = htmlColor;
-                }
-
-                return $"text-[{value}]";
-            }
-
-            case "border-color":
-            {
-                if (project.Colors.TryGetValue(value, out var htmlColor))
-                {
-                    value = htmlColor;
-                }
-
-                return $"border-[{value}]";
-            }
-
-            case "gap":
-                return $"gap-[{value}]";
-
-            case "size":
-                return $"size-[{value}]";
-
-            case "bottom":
-            case "top":
-            case "left":
-            case "right":
-                return $"{name}-[{value}]";
-
-            case "flex-direction":
-            {
-                if (value == "column")
-                {
-                    return "flex-col";
-                }
-
-                if (value == "row")
-                {
-                    return "flex";
-                }
-
-                break;
-            }
-
-            case "align-items":
-                return $"items-{value.RemoveFromStart("align-")}";
-
-            case "justify-content":
-                return $"justify-{value.Split('-').Last()}";
-
-            case "border-radius":
-                return $"rounded-[{value}]";
-
-            case "font-size":
-                return $"[font-size:{value}]";
-
-            case "border-width":
-            {
-                if (isValueDouble)
-                {
-                    value = valueAsDouble.AsPixel();
-                }
-
-                return $"border-[{value}]";
-            }
-
-            case "border":
-            {
-                var parts = value.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-                if (parts.Length == 3)
-                {
-                    if (project.Colors.TryGetValue(parts[2], out var htmlColor))
-                    {
-                        parts[2] = htmlColor;
-                    }
-
-                    if (parts[0] == "1px" && parts[1] == "solid")
-                    {
-                        return "border " +
-                               $"border-[{parts[2]}]";
-                    }
-
-                    return $"border-[{parts[0]}] " +
-                           $"border-[{parts[1]}] " +
-                           $"border-[{parts[2]}]";
-                }
-
-                break;
-            }
-
-            case "background-color":
-            case "background":
-            case "bg":
-            {
-                if (project.Colors.TryGetValue(value, out var htmlColor))
-                {
-                    value = htmlColor;
-                }
-
-                return $"bg-[{value}]";
-            }
-            case "position":
-                return $"{value}";
-
-            case "border-style":
-            {
-                return $"border-{value}";
-            }
-
-            case "cursor":
-            {
-                return $"cursor-{value}";
-            }
-
-            case "inset":
-            {
-                if (TailwindSpacingScaleMap.TryGetValue(value, out var insetValue))
-                {
-                    value = insetValue.ToString(CultureInfo_en_US);
-                }
-                else
-                {
-                    value = "[" + value + "]";
-                }
-
-                return $"inset-{value}";
-            }
-
-            case "font-family":
-            {
-                return $"font-[{value}]";
-            }
-            case "font-style":
-            {
-                return $"[font-style:{value}]";
-            }
-            case "font-weight":
-            {
-                return $"[font-weight:{value}]";
-            }
-            case "line-height":
-            {
-                return $"[line-height:{value}]";
-            }
-
-            case "word-wrap":
-            {
-                switch (value)
-                {
-                    case "break-word": return "break-words";
-                }
-
-                break;
-            }
-
-            case "overflow":
-            {
-                switch (value)
-                {
-                    case "auto":    return "overflow-auto";
-                    case "hidden":  return "overflow-hidden";
-                    case "visible": return "overflow-visible";
-                    case "scroll":  return "overflow-scroll";
-                }
-
-                break;
-            }
-
-            case "align-self":
-            {
-                switch (value)
-                {
-                    case "auto":     return "self-auto";
-                    case "start":    return "self-start";
-                    case "end":      return "self-end";
-                    case "center":   return "self-center";
-                    case "stretch":  return "self-stretch";
-                    case "baseline": return "self-baseline";
-                }
-
-                break;
-            }
-
-            case "outline-offset":
-            {
-                switch (value)
-                {
-                    case "0":   return "outline-offset-0";
-                    case "1px": return "outline-offset-1";
-                    case "2px": return "outline-offset-2";
-                    case "4px": return "outline-offset-4";
-                    case "8px": return "outline-offset-8";
-                }
-
-                break;
-            }
-
-            case "flex":
-            {
-                switch (value)
-                {
-                    case "1 1 0%":   return "flex-1";
-                    case "1 1 0":    return "flex-1";
-                    case "0 1 auto": return "flex-initial";
-                    case "0 0 auto": return "flex-0";
-                    case "auto":     return "flex-auto";
-                    case "none":     return "flex-none";
-                }
-
-                break;
-            }
-        }
-
-        // todo: more clever
-
-        if (name == "outline-offset")
-        {
-            return "outline-offset-[-1px]";
-        }
-
-        return new InvalidOperationException($"Css not handled. {name}: {value}");
     }
 
     static Result<Func<StyleModifier[], StyleModifier>> GetPseudoFunction(string pseudoName)
@@ -1482,31 +1480,29 @@ public static class CssHelper
 
 public sealed record DesignerStyleItem
 {
-    public string Pseudo { get; init; }
-
-    public IReadOnlyDictionary<string, string> RawHtmlStyles { get; init; }
-    
-    public string OriginalText { get; init; }
-
-    public static implicit operator DesignerStyleItem((string Pseudo, (string Name, string Value)[] RawHtmlStyles) tuple)
-    {
-        return new ()
-        {
-            Pseudo        = tuple.Pseudo,
-            RawHtmlStyles = tuple.RawHtmlStyles.ToDictionary(x => x.Name, x => x.Value)
-        };
-    }
-
     public DesignerStyleItem((string Pseudo, (string Name, string Value)[] RawHtmlStyles) tuple)
     {
-        Pseudo        = tuple.Pseudo;
+        Pseudo = tuple.Pseudo;
 
         RawHtmlStyles = tuple.RawHtmlStyles.ToDictionary(x => x.Name, x => x.Value);
     }
 
     public DesignerStyleItem()
     {
-        
+    }
+
+    public string OriginalText { get; init; }
+    public string Pseudo { get; init; }
+
+    public IReadOnlyDictionary<string, string> RawHtmlStyles { get; init; }
+
+    public static implicit operator DesignerStyleItem((string Pseudo, (string Name, string Value)[] RawHtmlStyles) tuple)
+    {
+        return new()
+        {
+            Pseudo        = tuple.Pseudo,
+            RawHtmlStyles = tuple.RawHtmlStyles.ToDictionary(x => x.Name, x => x.Value)
+        };
     }
 }
 
