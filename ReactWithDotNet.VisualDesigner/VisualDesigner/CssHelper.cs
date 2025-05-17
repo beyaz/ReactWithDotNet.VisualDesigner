@@ -495,13 +495,12 @@ public static class CssHelper
 
         // try to handle by spacing scale or arbitrary value
         {
-            var maybe = TailwindSpacingScale.Try_Convert_From_TailwindClass_to_HtmlStyle(utilityCssClassName);
-            if (maybe.HasValue)
+            foreach (var (htmlStyleName, htmlStyleValue) in TailwindSpacingScale.Try_Convert_From_TailwindClass_to_HtmlStyle(utilityCssClassName))
             {
                 return new DesignerStyleItem
                 {
                     Pseudo        = pseudo,
-                    RawHtmlStyles = MapFrom([(maybe.Value.htmlStyleName, maybe.Value.htmlStyleValue)]),
+                    RawHtmlStyles = MapFrom([(htmlStyleName, htmlStyleValue)]),
                     OriginalText  = utilityCssClassName
                 };
             }
