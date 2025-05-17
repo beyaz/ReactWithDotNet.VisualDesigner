@@ -86,11 +86,11 @@ public static class CssHelper
                 designerStyleItem = result.Value;
             }
 
-            foreach (var (key, value) in designerStyleItem.RawHtmlStyles)
+            foreach (var (cssAttributeName, cssAttributeValue) in designerStyleItem.RawHtmlStyles)
             {
                 string tailwindClassName;
                 {
-                    var result = ConvertToTailwindClass(project, key, value);
+                    var result = ConvertToTailwindClass(project, cssAttributeName, cssAttributeValue);
                     if (result.HasError)
                     {
                         return result.Error;
@@ -140,21 +140,21 @@ public static class CssHelper
 
         return string.Join(" ", tailwindClassNames.Select(x => pseudo + ":" + x));
 
-        static Result<string> ConvertToTailwindClass(ProjectConfig project, string name, string value)
+        static Result<string> ConvertToTailwindClass(ProjectConfig project, string cssAttributeName, string cssAttributeValue)
         {
-            if (value is null)
+            if (cssAttributeValue is null)
             {
-                return new ArgumentNullException(nameof(value));
+                return new ArgumentNullException(nameof(cssAttributeValue));
             }
 
             // check is conditional sample: border-width: {props.isSelected} ? 2 : 5
             {
-                var conditionalValue = TextParser.TryParseConditionalValue(value);
+                var conditionalValue = TextParser.TryParseConditionalValue(cssAttributeValue);
                 if (conditionalValue.success)
                 {
                     string lefTailwindClass;
                     {
-                        var result = ConvertToTailwindClass(project, name, conditionalValue.left);
+                        var result = ConvertToTailwindClass(project, cssAttributeName, conditionalValue.left);
                         if (result.HasError)
                         {
                             return result.Error;
@@ -168,7 +168,7 @@ public static class CssHelper
                     if (conditionalValue.right.HasValue())
                     {
                         {
-                            var result = ConvertToTailwindClass(project, name, conditionalValue.right);
+                            var result = ConvertToTailwindClass(project, cssAttributeName, conditionalValue.right);
                             if (result.HasError)
                             {
                                 return result.Error;
@@ -184,15 +184,15 @@ public static class CssHelper
 
             // try to handle by spacing scale or arbitrary value
             {
-                foreach (var item in TailwindSpacingScale.Try_Convert_From_HtmlStyle_to_TailwindClass(name, value))
+                foreach (var item in TailwindSpacingScale.Try_Convert_From_HtmlStyle_to_TailwindClass(cssAttributeName, cssAttributeValue))
                 {
                     return item;
                 }
             }
 
-            var isValueDouble = double.TryParse(value, out var valueAsDouble);
+            var isValueDouble = double.TryParse(cssAttributeValue, out var valueAsDouble);
 
-            switch (name)
+            switch (cssAttributeName)
             {
                 case "padding":
                 case "padding-right":
@@ -206,7 +206,7 @@ public static class CssHelper
                 case "margin-top":
                 case "margin-bottom":
                 {
-                    name = name switch
+                    cssAttributeName = cssAttributeName switch
                     {
                         "padding"        => "p",
                         "padding-right"  => "pr",
@@ -220,15 +220,15 @@ public static class CssHelper
                         "margin-top"    => "mt",
                         "margin-bottom" => "mb",
 
-                        _ => name
+                        _ => cssAttributeName
                     };
 
                     if (isValueDouble)
                     {
-                        value = valueAsDouble.AsPixel();
+                        cssAttributeValue = valueAsDouble.AsPixel();
                     }
 
-                    return $"{name}-[{value}]";
+                    return $"{cssAttributeName}-[{cssAttributeValue}]";
                 }
 
                 case "m":
@@ -249,23 +249,23 @@ public static class CssHelper
                 {
                     if (isValueDouble)
                     {
-                        value = valueAsDouble.AsPixel();
+                        cssAttributeValue = valueAsDouble.AsPixel();
                     }
 
-                    return $"{name}-[{value}]";
+                    return $"{cssAttributeName}-[{cssAttributeValue}]";
                 }
 
                 case "transform":
                 {
-                    if (value.StartsWith("rotate("))
+                    if (cssAttributeValue.StartsWith("rotate("))
                     {
-                        var parts = value.Split("()".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+                        var parts = cssAttributeValue.Split("()".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
                         if (parts.Length == 2)
                         {
                             var sign = parts[1][0] == '-' ? "-" : "";
                             if (parts[1].EndsWith("deg"))
                             {
-                                return $"{sign}rotate-{value.RemoveFromEnd("deg")}";
+                                return $"{sign}rotate-{cssAttributeValue.RemoveFromEnd("deg")}";
                             }
                         }
                     }
@@ -274,88 +274,88 @@ public static class CssHelper
                 }
                 case "outline":
                 {
-                    return $"{name}-{value}";
+                    return $"{cssAttributeName}-{cssAttributeValue}";
                 }
 
                 case "text-decoration":
                 {
-                    return $"{value}";
+                    return $"{cssAttributeValue}";
                 }
 
                 case "text-align":
                 {
-                    return $"text-{value}";
+                    return $"text-{cssAttributeValue}";
                 }
 
                 case "width":
                 {
-                    if (value == "fit-content")
+                    if (cssAttributeValue == "fit-content")
                     {
                         return "w-fit";
                     }
 
-                    if (value == "100%")
+                    if (cssAttributeValue == "100%")
                     {
                         return "w-full";
                     }
 
-                    return $"w-[{value}]";
+                    return $"w-[{cssAttributeValue}]";
                 }
 
                 case "height":
                 {
-                    if (value == "fit-content")
+                    if (cssAttributeValue == "fit-content")
                     {
                         return "h-fit";
                     }
 
-                    if (value == "100%")
+                    if (cssAttributeValue == "100%")
                     {
                         return "h-full";
                     }
 
-                    return $"h-[{value}]";
+                    return $"h-[{cssAttributeValue}]";
                 }
 
                 case "max-width":
-                    return $"max-w-[{value}]";
+                    return $"max-w-[{cssAttributeValue}]";
 
                 case "max-height":
-                    return $"max-h-[{value}]";
+                    return $"max-h-[{cssAttributeValue}]";
 
                 case "min-height":
-                    return $"min-h-[{value}]";
+                    return $"min-h-[{cssAttributeValue}]";
 
                 case "z-index":
-                    return $"z-[{value}]";
+                    return $"z-[{cssAttributeValue}]";
 
                 case "overflow-y":
                 case "overflow-x":
-                    return $"{name}-{value}";
+                    return $"{cssAttributeName}-{cssAttributeValue}";
 
                 case "border-top-left-radius":
-                    return $"rounded-tl-[{value}]";
+                    return $"rounded-tl-[{cssAttributeValue}]";
 
                 case "border-top-right-radius":
-                    return $"rounded-tr-[{value}]";
+                    return $"rounded-tr-[{cssAttributeValue}]";
 
                 case "border-bottom-left-radius":
-                    return $"rounded-bl-[{value}]";
+                    return $"rounded-bl-[{cssAttributeValue}]";
 
                 case "border-bottom-right-radius":
-                    return $"rounded-br-[{value}]";
+                    return $"rounded-br-[{cssAttributeValue}]";
 
                 case "flex-grow":
-                    return $"flex-grow-[{value}]";
+                    return $"flex-grow-[{cssAttributeValue}]";
 
                 case "flex-wrap":
                 {
-                    if (value == "wrap")
+                    if (cssAttributeValue == "wrap")
                     {
                         return "flex-wrap";
                     }
 
-                    if (value == "nowrap")
+                    if (cssAttributeValue == "nowrap")
                     {
                         return "flex-nowrap";
                     }
@@ -364,25 +364,25 @@ public static class CssHelper
                 }
 
                 case "border-bottom-width":
-                    return $"border-b-[{value}]";
+                    return $"border-b-[{cssAttributeValue}]";
 
                 case "border-top-width":
-                    return $"border-t-[{value}]";
+                    return $"border-t-[{cssAttributeValue}]";
 
                 case "border-left-width":
-                    return $"border-l-[{value}]";
+                    return $"border-l-[{cssAttributeValue}]";
 
                 case "border-right-width":
-                    return $"border-r-[{value}]";
+                    return $"border-r-[{cssAttributeValue}]";
 
                 case "border-top":
                 case "border-right":
                 case "border-left":
                 case "border-bottom":
                 {
-                    var direction = name.Split('-', StringSplitOptions.RemoveEmptyEntries).Last();
+                    var direction = cssAttributeName.Split('-', StringSplitOptions.RemoveEmptyEntries).Last();
 
-                    var parts = value.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                    var parts = cssAttributeValue.Split(' ', StringSplitOptions.RemoveEmptyEntries);
                     if (parts.Length == 3)
                     {
                         if (project.Colors.TryGetValue(parts[2], out var htmlColor))
@@ -413,48 +413,48 @@ public static class CssHelper
                 }
 
                 case "display":
-                    return $"{value}";
+                    return $"{cssAttributeValue}";
 
                 case "color":
                 {
-                    if (project.Colors.TryGetValue(value, out var htmlColor))
+                    if (project.Colors.TryGetValue(cssAttributeValue, out var htmlColor))
                     {
-                        value = htmlColor;
+                        cssAttributeValue = htmlColor;
                     }
 
-                    return $"text-[{value}]";
+                    return $"text-[{cssAttributeValue}]";
                 }
 
                 case "border-color":
                 {
-                    if (project.Colors.TryGetValue(value, out var htmlColor))
+                    if (project.Colors.TryGetValue(cssAttributeValue, out var htmlColor))
                     {
-                        value = htmlColor;
+                        cssAttributeValue = htmlColor;
                     }
 
-                    return $"border-[{value}]";
+                    return $"border-[{cssAttributeValue}]";
                 }
 
                 case "gap":
-                    return $"gap-[{value}]";
+                    return $"gap-[{cssAttributeValue}]";
 
                 case "size":
-                    return $"size-[{value}]";
+                    return $"size-[{cssAttributeValue}]";
 
                 case "bottom":
                 case "top":
                 case "left":
                 case "right":
-                    return $"{name}-[{value}]";
+                    return $"{cssAttributeName}-[{cssAttributeValue}]";
 
                 case "flex-direction":
                 {
-                    if (value == "column")
+                    if (cssAttributeValue == "column")
                     {
                         return "flex-col";
                     }
 
-                    if (value == "row")
+                    if (cssAttributeValue == "row")
                     {
                         return "flex";
                     }
@@ -463,30 +463,30 @@ public static class CssHelper
                 }
 
                 case "align-items":
-                    return $"items-{value.RemoveFromStart("align-")}";
+                    return $"items-{cssAttributeValue.RemoveFromStart("align-")}";
 
                 case "justify-content":
-                    return $"justify-{value.Split('-').Last()}";
+                    return $"justify-{cssAttributeValue.Split('-').Last()}";
 
                 case "border-radius":
-                    return $"rounded-[{value}]";
+                    return $"rounded-[{cssAttributeValue}]";
 
                 case "font-size":
-                    return $"[font-size:{value}]";
+                    return $"[font-size:{cssAttributeValue}]";
 
                 case "border-width":
                 {
                     if (isValueDouble)
                     {
-                        value = valueAsDouble.AsPixel();
+                        cssAttributeValue = valueAsDouble.AsPixel();
                     }
 
-                    return $"border-[{value}]";
+                    return $"border-[{cssAttributeValue}]";
                 }
 
                 case "border":
                 {
-                    var parts = value.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                    var parts = cssAttributeValue.Split(' ', StringSplitOptions.RemoveEmptyEntries);
                     if (parts.Length == 3)
                     {
                         if (project.Colors.TryGetValue(parts[2], out var htmlColor))
@@ -512,60 +512,60 @@ public static class CssHelper
                 case "background":
                 case "bg":
                 {
-                    if (project.Colors.TryGetValue(value, out var htmlColor))
+                    if (project.Colors.TryGetValue(cssAttributeValue, out var htmlColor))
                     {
-                        value = htmlColor;
+                        cssAttributeValue = htmlColor;
                     }
 
-                    return $"bg-[{value}]";
+                    return $"bg-[{cssAttributeValue}]";
                 }
                 case "position":
-                    return $"{value}";
+                    return $"{cssAttributeValue}";
 
                 case "border-style":
                 {
-                    return $"border-{value}";
+                    return $"border-{cssAttributeValue}";
                 }
 
                 case "cursor":
                 {
-                    return $"cursor-{value}";
+                    return $"cursor-{cssAttributeValue}";
                 }
 
                 case "inset":
                 {
-                    if (TailwindSpacingScaleMap.TryGetValue(value, out var insetValue))
+                    if (TailwindSpacingScaleMap.TryGetValue(cssAttributeValue, out var insetValue))
                     {
-                        value = insetValue.ToString(CultureInfo_en_US);
+                        cssAttributeValue = insetValue.ToString(CultureInfo_en_US);
                     }
                     else
                     {
-                        value = "[" + value + "]";
+                        cssAttributeValue = "[" + cssAttributeValue + "]";
                     }
 
-                    return $"inset-{value}";
+                    return $"inset-{cssAttributeValue}";
                 }
 
                 case "font-family":
                 {
-                    return $"font-[{value}]";
+                    return $"font-[{cssAttributeValue}]";
                 }
                 case "font-style":
                 {
-                    return $"[font-style:{value}]";
+                    return $"[font-style:{cssAttributeValue}]";
                 }
                 case "font-weight":
                 {
-                    return $"[font-weight:{value}]";
+                    return $"[font-weight:{cssAttributeValue}]";
                 }
                 case "line-height":
                 {
-                    return $"[line-height:{value}]";
+                    return $"[line-height:{cssAttributeValue}]";
                 }
 
                 case "word-wrap":
                 {
-                    switch (value)
+                    switch (cssAttributeValue)
                     {
                         case "break-word": return "break-words";
                     }
@@ -575,7 +575,7 @@ public static class CssHelper
 
                 case "overflow":
                 {
-                    switch (value)
+                    switch (cssAttributeValue)
                     {
                         case "auto":    return "overflow-auto";
                         case "hidden":  return "overflow-hidden";
@@ -588,7 +588,7 @@ public static class CssHelper
 
                 case "align-self":
                 {
-                    switch (value)
+                    switch (cssAttributeValue)
                     {
                         case "auto":     return "self-auto";
                         case "start":    return "self-start";
@@ -603,7 +603,7 @@ public static class CssHelper
 
                 case "outline-offset":
                 {
-                    switch (value)
+                    switch (cssAttributeValue)
                     {
                         case "0":   return "outline-offset-0";
                         case "1px": return "outline-offset-1";
@@ -617,7 +617,7 @@ public static class CssHelper
 
                 case "flex":
                 {
-                    switch (value)
+                    switch (cssAttributeValue)
                     {
                         case "1 1 0%":   return "flex-1";
                         case "1 1 0":    return "flex-1";
@@ -633,12 +633,12 @@ public static class CssHelper
 
             // todo: more clever
 
-            if (name == "outline-offset")
+            if (cssAttributeName == "outline-offset")
             {
                 return "outline-offset-[-1px]";
             }
 
-            return new InvalidOperationException($"Css not handled. {name}: {value}");
+            return new InvalidOperationException($"Css not handled. {cssAttributeName}: {cssAttributeValue}");
         }
     }
 
