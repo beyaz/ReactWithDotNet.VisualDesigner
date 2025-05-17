@@ -90,7 +90,7 @@ public static class CssHelper
             {
                 string tailwindClassName;
                 {
-                    var result = ConvertToTailwindClass(project, cssAttributeName, cssAttributeValue);
+                    var result = ConvertToTailwindClass(projectId, cssAttributeName, cssAttributeValue);
                     if (result.HasError)
                     {
                         return result.Error;
@@ -140,12 +140,14 @@ public static class CssHelper
 
         return string.Join(" ", tailwindClassNames.Select(x => pseudo + ":" + x));
 
-        static Result<string> ConvertToTailwindClass(ProjectConfig project, string cssAttributeName, string cssAttributeValue)
+        static Result<string> ConvertToTailwindClass(int projectId, string cssAttributeName, string cssAttributeValue)
         {
             if (cssAttributeValue is null)
             {
                 return new ArgumentNullException(nameof(cssAttributeValue));
             }
+
+            var project = GetProjectConfig(projectId);
 
             // check is conditional sample: border-width: {props.isSelected} ? 2 : 5
             {
@@ -154,7 +156,7 @@ public static class CssHelper
                 {
                     string lefTailwindClass;
                     {
-                        var result = ConvertToTailwindClass(project, cssAttributeName, conditionalValue.left);
+                        var result = ConvertToTailwindClass(projectId, cssAttributeName, conditionalValue.left);
                         if (result.HasError)
                         {
                             return result.Error;
@@ -168,7 +170,7 @@ public static class CssHelper
                     if (conditionalValue.right.HasValue())
                     {
                         {
-                            var result = ConvertToTailwindClass(project, cssAttributeName, conditionalValue.right);
+                            var result = ConvertToTailwindClass(projectId, cssAttributeName, conditionalValue.right);
                             if (result.HasError)
                             {
                                 return result.Error;
@@ -190,7 +192,18 @@ public static class CssHelper
                 }
             }
 
+            // TRY TO HANDLE BY PROJECT CONFIG
+            {
+
+                foreach (var className in tryConvert_HtmlCssStyle_to_ProjectDefinedCssClass(projectId, cssAttributeName, cssAttributeValue))
+                {
+                    return className;
+                }
+            }
+
             var isValueDouble = double.TryParse(cssAttributeValue, out var valueAsDouble);
+
+            
 
             switch (cssAttributeName)
             {
@@ -634,6 +647,24 @@ public static class CssHelper
             }
 
             return new InvalidOperationException($"Css not handled. {cssAttributeName}: {cssAttributeValue}");
+
+            static Maybe<string> tryConvert_HtmlCssStyle_to_ProjectDefinedCssClass(int projectId, string cssAttributeName, string cssAttributeValue)
+            {
+                return Cache.AccessValue($"{nameof(tryConvert_HtmlCssStyle_to_ProjectDefinedCssClass)}-{projectId}-{cssAttributeName}-{cssAttributeValue}", () =>
+                {
+                    var project = GetProjectConfig(projectId);
+
+                    foreach (var (key, value) in project.Styles)
+                    {
+                        if (value == $"{cssAttributeName}: {cssAttributeValue};")
+                        {
+                            return (Maybe<string>)key;
+                        }
+                    }
+
+                    return None;
+                });
+            }
         }
     }
 
