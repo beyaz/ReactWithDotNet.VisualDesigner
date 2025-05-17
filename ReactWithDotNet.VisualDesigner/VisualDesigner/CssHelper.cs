@@ -158,14 +158,9 @@ public static class CssHelper
         }
 
         {
-            var maybe = TryConvertCssUtilityClassToHtmlStyle(projectId, designerStyleItem);
-            if (maybe.HasValue)
+            foreach (var item in TryConvertCssUtilityClassToHtmlStyle(projectId, designerStyleItem))
             {
-                return new DesignerStyleItem
-                {
-                    Pseudo        = maybe.Value.Pseudo,
-                    RawHtmlStyles = maybe.Value.CssStyles.ToDictionary(x => x.Name, x => x.Value)
-                };
+                return item;
             }
         }
 
@@ -313,7 +308,7 @@ public static class CssHelper
         return (StyleModifier)style;
     }
 
-    public static Maybe<(string Pseudo, (string Name, string Value)[] CssStyles)> TryConvertCssUtilityClassToHtmlStyle(int projectId, string utilityCssClassName)
+    public static Maybe<DesignerStyleItem> TryConvertCssUtilityClassToHtmlStyle(int projectId, string utilityCssClassName)
     {
         string pseudo = null;
         {
@@ -333,7 +328,12 @@ public static class CssHelper
                 var (map, exception) = Style.ParseCssAsDictionary(cssText);
                 if (exception is null)
                 {
-                    return (pseudo, map.Select(x => (x.Key, x.Value)).ToArray());
+                    return new DesignerStyleItem
+                    {
+                        Pseudo        = pseudo,
+                        RawHtmlStyles = map,
+                        OriginalText  = utilityCssClassName
+                    };
                 }
             }
         }
@@ -365,7 +365,13 @@ public static class CssHelper
                     return None;
                 }
 
-                return (pseudo, [(styleName, numberSuffix.Value * 4 + "px")]);
+                return new DesignerStyleItem
+                {
+                    Pseudo        = pseudo,
+                    RawHtmlStyles = MapFrom([(styleName, numberSuffix.Value * 4 + "px")]),
+                    OriginalText  = utilityCssClassName
+                    
+                };
             }
         }
 
@@ -386,10 +392,12 @@ public static class CssHelper
 
             if (fontWeightMap.TryGetValue(utilityCssClassName, out var weightAsNumber))
             {
-                return (pseudo,
-                [
-                    ("font-weight", weightAsNumber)
-                ]);
+                return new DesignerStyleItem
+                {
+                    Pseudo        = pseudo,
+                    RawHtmlStyles = MapFrom([("font-weight", weightAsNumber)]),
+                    OriginalText  = utilityCssClassName
+                };
             }
         }
 
@@ -404,10 +412,12 @@ public static class CssHelper
 
             if (fontFamilyMap.TryGetValue(utilityCssClassName, out var value))
             {
-                return (pseudo,
-                [
-                    ("font-family", value)
-                ]);
+                return new DesignerStyleItem
+                {
+                    Pseudo        = pseudo,
+                    RawHtmlStyles = MapFrom([("font-family", value)]),
+                    OriginalText  = utilityCssClassName
+                };
             }
         }
 
@@ -419,10 +429,12 @@ public static class CssHelper
                 var tailwindColor = tryGetTailwindColor(color, number);
                 if (tailwindColor.HasValue)
                 {
-                    return (pseudo,
-                    [
-                        ("color", tailwindColor.Value)
-                    ]);
+                    return new DesignerStyleItem
+                    {
+                        Pseudo        = pseudo,
+                        RawHtmlStyles = MapFrom([("color", tailwindColor.Value)]),
+                        OriginalText  = utilityCssClassName
+                    };
                 }
             }
         }
@@ -435,10 +447,13 @@ public static class CssHelper
                 var tailwindColor = tryGetTailwindColor(color, number);
                 if (tailwindColor.HasValue)
                 {
-                    return (pseudo,
-                    [
-                        ("background", tailwindColor.Value)
-                    ]);
+                    return new DesignerStyleItem
+                    {
+                        Pseudo        = pseudo,
+                        RawHtmlStyles = MapFrom([("background", tailwindColor.Value)]),
+                        OriginalText  = utilityCssClassName
+                    };
+                    
                 }
             }
         }
@@ -455,10 +470,12 @@ public static class CssHelper
 
             if (map.TryGetValue(utilityCssClassName, out var value))
             {
-                return (pseudo,
-                [
-                    ("text-decoration-line", value)
-                ]);
+                return new DesignerStyleItem
+                {
+                    Pseudo        = pseudo,
+                    RawHtmlStyles = MapFrom([("text-decoration-line", value)]),
+                    OriginalText  = utilityCssClassName
+                };
             }
         }
 
@@ -467,10 +484,12 @@ public static class CssHelper
             var (name, value, _) = ParseStyleAttibute(utilityCssClassName);
             if (name == "color" && value is not null && project.Colors.TryGetValue(value, out var realColor))
             {
-                return (pseudo,
-                [
-                    ("color", realColor)
-                ]);
+                return new DesignerStyleItem
+                {
+                    Pseudo        = pseudo,
+                    RawHtmlStyles = MapFrom([("color", realColor)]),
+                    OriginalText  = utilityCssClassName
+                };
             }
         }
 
@@ -479,10 +498,12 @@ public static class CssHelper
             var maybe = TailwindSpacingScale.Try_Convert_From_TailwindClass_to_HtmlStyle(utilityCssClassName);
             if (maybe.HasValue)
             {
-                return (pseudo,
-                [
-                    maybe.Value
-                ]);
+                return new DesignerStyleItem
+                {
+                    Pseudo        = pseudo,
+                    RawHtmlStyles = MapFrom([(maybe.Value.htmlStyleName, maybe.Value.htmlStyleValue)]),
+                    OriginalText  = utilityCssClassName
+                };
             }
         }
 
@@ -500,10 +521,12 @@ public static class CssHelper
                 var arbitrary = tryGetArbitraryValue(utilityCssClassName, tailwindPrefix);
                 if (arbitrary.HasValue && arbitrary.Value.EndsWith("px"))
                 {
-                    return (pseudo,
-                    [
-                        (styleName, arbitrary.Value)
-                    ]);
+                    return new DesignerStyleItem
+                    {
+                        Pseudo        = pseudo,
+                        RawHtmlStyles = MapFrom([(styleName, arbitrary.Value)]),
+                        OriginalText  = utilityCssClassName
+                    };
                 }
             }
         }
@@ -532,10 +555,12 @@ public static class CssHelper
                         color = realColor;
                     }
 
-                    return (pseudo,
-                    [
-                        (styleName, color)
-                    ]);
+                    return new DesignerStyleItem
+                    {
+                        Pseudo        = pseudo,
+                        RawHtmlStyles = MapFrom([(styleName, color)]),
+                        OriginalText  = utilityCssClassName
+                    };
                 }
             }
         }
@@ -1462,6 +1487,8 @@ public sealed record DesignerStyleItem
     public string Pseudo { get; init; }
 
     public IReadOnlyDictionary<string, string> RawHtmlStyles { get; init; }
+    
+    public string OriginalText { get; init; }
 
     public static implicit operator DesignerStyleItem((string Pseudo, (string Name, string Value)[] RawHtmlStyles) tuple)
     {

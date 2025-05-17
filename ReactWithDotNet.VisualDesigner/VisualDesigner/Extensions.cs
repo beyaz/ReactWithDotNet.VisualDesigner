@@ -11,6 +11,11 @@ static class Extensions
     }
 
     public static List<T> ListFrom<T>(IEnumerable<T> enumerable) => enumerable.ToList();
+
+    public static IReadOnlyDictionary<string, string> MapFrom((string key, string value)[] items)
+    {
+        return items.ToDictionary(x => x.key, x => x.value);
+    }
     
     //public static VisualElementModel Fix(this VisualElementModel model)
     //{

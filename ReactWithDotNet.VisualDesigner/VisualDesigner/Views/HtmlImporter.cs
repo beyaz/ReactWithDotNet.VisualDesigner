@@ -85,7 +85,7 @@ static class HtmlImporter
                     if (maybe.HasValue)
                     {
                         var pseudo = maybe.Value.Pseudo;
-                        var styles = maybe.Value.CssStyles;
+                        var styles = maybe.Value.RawHtmlStyles;
                         
                         foreach (var (name, value) in styles)
                         {
