@@ -49,7 +49,12 @@ public sealed class NextJsExportTest
             {
                 var map = new Dictionary<string, string>
                 {
-                    { "-L", "-l" }
+                    { "-L", "-l" },
+                    { "-XL", "-xl" },
+                    { "-XXL", "-xxl" },
+                    { "-M", "-m" },
+                    { "-S", "-s" },
+                    { "-XS", "-xs" },
                 };
 
                 foreach (var (key, value) in map)
