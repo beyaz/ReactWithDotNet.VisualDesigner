@@ -17,6 +17,44 @@ public static class CssHelper
         { "XXL", XXL }
     };
 
+    static readonly IReadOnlyDictionary<string, double> TailwindSpacingScaleMap = new Dictionary<string, double>
+    {
+        { "0px", 0 },
+        { "2px", 0.5 },
+        { "4px", 1 },
+        { "6px", 1.5 },
+        { "8px", 2 },
+        { "10px", 2.5 },
+        { "12px", 3 },
+        { "14px", 3.5 },
+        { "16px", 4 },
+        { "20px", 5 },
+        { "24px", 6 },
+        { "28px", 7 },
+        { "32px", 8 },
+        { "36px", 9 },
+        { "40px", 10 },
+        { "44px", 11 },
+        { "48px", 12 },
+        { "56px", 14 },
+        { "64px", 16 },
+        { "80px", 20 },
+        { "96px", 24 },
+        { "112px", 28 },
+        { "128px", 32 },
+        { "144px", 36 },
+        { "160px", 40 },
+        { "176px", 44 },
+        { "192px", 48 },
+        { "208px", 52 },
+        { "224px", 56 },
+        { "240px", 60 },
+        { "256px", 64 },
+        { "288px", 72 },
+        { "320px", 80 },
+        { "384px", 96 }
+    };
+
     public static Result<string> ConvertDesignerStyleItemToTailwindClassName(int projectId, string designerStyleItemText)
     {
         string pseudo = null;
@@ -29,7 +67,7 @@ public static class CssHelper
         });
 
         var project = GetProjectConfig(projectId);
-        
+
         if (pseudo.HasNoValue() && project.Styles.TryGetValue(designerStyleItemText, out _))
         {
             return designerStyleItemText;
@@ -144,7 +182,7 @@ public static class CssHelper
 
             if (value is not null)
             {
-                var htmlStyle = ToHtmlStyle(projectId,name, value);
+                var htmlStyle = ToHtmlStyle(projectId, name, value);
                 if (htmlStyle.HasError)
                 {
                     return htmlStyle.Error;
@@ -167,7 +205,7 @@ public static class CssHelper
             };
         }
 
-        static Result<DesignerStyleItem> tryProcessByProjectConfig(int projectId,string designerStyleItem)
+        static Result<DesignerStyleItem> tryProcessByProjectConfig(int projectId, string designerStyleItem)
         {
             string name, value, pseudo;
             {
@@ -186,7 +224,7 @@ public static class CssHelper
             }
 
             var project = GetProjectConfig(projectId);
-            
+
             if (project.Styles.TryGetValue(designerStyleItem, out var cssText))
             {
                 return Style.ParseCssAsDictionary(cssText).Then(styleMap => new DesignerStyleItem
@@ -214,6 +252,44 @@ public static class CssHelper
         }
     }
 
+    public static StyleAttribute ParseStyleAttibute(string nameValueCombined)
+    {
+        if (string.IsNullOrWhiteSpace(nameValueCombined))
+        {
+            return null;
+        }
+
+        string pseudo = null;
+
+        TryReadPseudo(nameValueCombined).HasValue(x =>
+        {
+            pseudo = x.Pseudo;
+
+            nameValueCombined = x.NewText;
+        });
+
+        var colonIndex = nameValueCombined.IndexOf(':');
+        if (colonIndex < 0)
+        {
+            return new()
+            {
+                Name   = nameValueCombined.Trim(),
+                Pseudo = pseudo
+            };
+        }
+
+        var name = nameValueCombined[..colonIndex];
+
+        var value = nameValueCombined[(colonIndex + 1)..];
+
+        return new()
+        {
+            Name   = name.Trim(),
+            Value  = value.Trim(),
+            Pseudo = pseudo
+        };
+    }
+
     public static Result<StyleModifier> ToStyleModifier(this DesignerStyleItem designerStyleItem)
     {
         if (designerStyleItem is null)
@@ -237,14 +313,14 @@ public static class CssHelper
         return (StyleModifier)style;
     }
 
-    public static Maybe<(string Pseudo, (string Name, string Value)[] CssStyles)> TryConvertCssUtilityClassToHtmlStyle(int projectId,string utilityCssClassName)
+    public static Maybe<(string Pseudo, (string Name, string Value)[] CssStyles)> TryConvertCssUtilityClassToHtmlStyle(int projectId, string utilityCssClassName)
     {
         string pseudo = null;
         {
             TryReadPseudo(utilityCssClassName).HasValue(x =>
             {
                 pseudo = x.Pseudo;
-                
+
                 utilityCssClassName = x.NewText;
             });
         }
@@ -261,9 +337,6 @@ public static class CssHelper
                 }
             }
         }
-       
-        
-
 
         foreach (var prefix in "m,mt,mb,mr,ml,p,pt,pb,pl,pr".Split(','))
         {
@@ -400,7 +473,7 @@ public static class CssHelper
                 ]);
             }
         }
-        
+
         // try to handle by spacing scale or arbitrary value
         {
             var maybe = TailwindSpacingScale.Try_Convert_From_TailwindClass_to_HtmlStyle(utilityCssClassName);
@@ -412,7 +485,7 @@ public static class CssHelper
                 ]);
             }
         }
-        
+
         // tailwindClass-[?px]
         {
             var map = new Dictionary<string, string>
@@ -421,7 +494,7 @@ public static class CssHelper
                 { "h", "height" },
                 { "w", "width" }
             };
-            
+
             foreach (var (tailwindPrefix, styleName) in map)
             {
                 var arbitrary = tryGetArbitraryValue(utilityCssClassName, tailwindPrefix);
@@ -434,7 +507,7 @@ public static class CssHelper
                 }
             }
         }
-        
+
         // tailwindClass-[color]
         {
             var map = new Dictionary<string, string>
@@ -448,7 +521,7 @@ public static class CssHelper
                 { "text", "color" }
             };
 
-            foreach (var (tailwindPrefix,styleName) in map)
+            foreach (var (tailwindPrefix, styleName) in map)
             {
                 var arbitrary = tryGetArbitraryValue(utilityCssClassName, tailwindPrefix);
                 if (arbitrary.HasValue)
@@ -458,18 +531,15 @@ public static class CssHelper
                     {
                         color = realColor;
                     }
-                
+
                     return (pseudo,
                     [
                         (styleName, color)
                     ]);
                 }
             }
-
-            
-            
         }
-        
+
         return None;
 
         static double? hasMatch(string text, string prefix)
@@ -520,170 +590,28 @@ public static class CssHelper
 
             return None;
         }
-        
+
         static Maybe<string> tryGetArbitraryValue(string input, string prefix)
         {
             // Örn: prefix = "rounded" --> pattern = ^rounded-\[(.+?)\]$
-            string pattern = $@"^{Regex.Escape(prefix)}-\[(.+?)\]$";
+            var pattern = $@"^{Regex.Escape(prefix)}-\[(.+?)\]$";
             var match = Regex.Match(input, pattern);
 
             return match.Success ? match.Groups[1].Value : None;
         }
     }
-    static readonly IReadOnlyDictionary<string, double> TailwindSpacingScaleMap = new Dictionary<string, double>
-    {
-        { "0px", 0 },
-        { "2px", 0.5 },
-        { "4px", 1 },
-        { "6px", 1.5 },
-        { "8px", 2 },
-        { "10px", 2.5 },
-        { "12px", 3 },
-        { "14px", 3.5 },
-        { "16px", 4 },
-        { "20px", 5 },
-        { "24px", 6 },
-        { "28px", 7 },
-        { "32px", 8 },
-        { "36px", 9 },
-        { "40px", 10 },
-        { "44px", 11 },
-        { "48px", 12 },
-        { "56px", 14 },
-        { "64px", 16 },
-        { "80px", 20 },
-        { "96px", 24 },
-        { "112px", 28 },
-        { "128px", 32 },
-        { "144px", 36 },
-        { "160px", 40 },
-        { "176px", 44 },
-        { "192px", 48 },
-        { "208px", 52 },
-        { "224px", 56 },
-        { "240px", 60 },
-        { "256px", 64 },
-        { "288px", 72 },
-        { "320px", 80 },
-        { "384px", 96 }
-    };
+
     static Result<StyleModifier> ApplyPseudo(string pseudo, IReadOnlyList<StyleModifier> styleModifiers)
     {
         return GetPseudoFunction(pseudo).Then(pseudoFunction => pseudoFunction(styleModifiers.ToArray()));
     }
 
-  
-
-    static class TailwindSpacingScale
-    {
-        static readonly (string htmlStyleName, string tailwindPrefix)[] Html_to_TailwindName_Map =
-        [
-            (htmlStyleName: "min-width", tailwindPrefix: "min-w-"),
-            (htmlStyleName: "min-height", tailwindPrefix: "min-h-"),
-            (htmlStyleName: "max-width", tailwindPrefix: "max-w-"),
-            (htmlStyleName: "max-height", tailwindPrefix: "max-h-"),
-
-            // ↔ Width & Height
-            (htmlStyleName: "width", tailwindPrefix: "w-"),
-            (htmlStyleName: "height", tailwindPrefix: "h-"),
-
-            // Padding
-            (htmlStyleName: "padding", tailwindPrefix: "p-"),
-            (htmlStyleName: "padding-top", tailwindPrefix: "pt-"),
-            (htmlStyleName: "padding-right", tailwindPrefix: "pr-"),
-            (htmlStyleName: "padding-bottom", tailwindPrefix: "pb-"),
-            (htmlStyleName: "padding-left", tailwindPrefix: "pl-"),
-            (htmlStyleName: "padding-inline", tailwindPrefix: "px-"),
-            (htmlStyleName: "padding-block", tailwindPrefix: "py-"),
-
-            // Margin
-            (htmlStyleName: "margin", tailwindPrefix: "m-"),
-            (htmlStyleName: "margin-top", tailwindPrefix: "mt-"),
-            (htmlStyleName: "margin-right", tailwindPrefix: "mr-"),
-            (htmlStyleName: "margin-bottom", tailwindPrefix: "mb-"),
-            (htmlStyleName: "margin-left", tailwindPrefix: "ml-"),
-            (htmlStyleName: "margin-inline", tailwindPrefix: "mx-"),
-            (htmlStyleName: "margin-block", tailwindPrefix: "my-"),
-
-            // Gap (for flex/grid gaps)
-            (htmlStyleName: "gap", tailwindPrefix: "gap-"),
-            (htmlStyleName: "row-gap", tailwindPrefix: "gap-y-"),
-            (htmlStyleName: "column-gap", tailwindPrefix: "gap-x-"),
-
-            // Inset (top/right/bottom/left for positioning)
-            (htmlStyleName: "top", tailwindPrefix: "top-"),
-            (htmlStyleName: "right", tailwindPrefix: "right-"),
-            (htmlStyleName: "bottom", tailwindPrefix: "bottom-"),
-            (htmlStyleName: "left", tailwindPrefix: "left-"),
-
-            // Space-between (child spacing in flex)
-            (htmlStyleName: "space-x", tailwindPrefix: "space-x-"),
-            (htmlStyleName: "space-y", tailwindPrefix: "space-y-"),
-
-            // Translate (transform)
-            (htmlStyleName: "translate-x", tailwindPrefix: "translate-x-"),
-            (htmlStyleName: "translate-y", tailwindPrefix: "translate-y-")
-        ];
-
-        public static Maybe<string> Try_Convert_From_HtmlStyle_to_TailwindClass(string name, string value)
-        {
-            foreach (var item in Html_to_TailwindName_Map)
-            {
-                if (item.htmlStyleName == name)
-                {
-                    var maybe = try_Convert_PixelValue_To_SpacingScale_Or_ArbitraryValue(value);
-                    if (maybe.HasValue)
-                    {
-                        return item.tailwindPrefix + maybe.Value;
-                    }
-                }
-            }
-
-            return None;
-            
-            static Maybe<string> try_Convert_PixelValue_To_SpacingScale_Or_ArbitraryValue(string value)
-            {
-                if (!value.EndsWith("px"))
-                {
-                    return None;
-                }
-                    
-                if (TailwindSpacingScaleMap.TryGetValue(value, out var spaceValue))
-                {
-                    return spaceValue.ToString(CultureInfo_en_US);
-                }
-                    
-                return "[" + value + "]";
-            }
-        }
-        
-        public static Maybe<(string htmlStyleName, string htmlStyleValue)> Try_Convert_From_TailwindClass_to_HtmlStyle(string tailwindClass)
-        {
-            foreach (var item in Html_to_TailwindName_Map)
-            {
-                if (tailwindClass.StartsWith(item.tailwindPrefix))
-                {
-                    foreach (var (px,scale) in TailwindSpacingScaleMap)
-                    {
-                        if (tailwindClass == item.tailwindPrefix + scale)
-                        {
-                            return (item.htmlStyleName, px);
-                        }
-                    }
-                }
-            }
-
-            return None;
-        }
-    }
-    
-    static Result<string> ConvertToTailwindClass(ProjectConfig project,string name, string value)
+    static Result<string> ConvertToTailwindClass(ProjectConfig project, string name, string value)
     {
         if (value is null)
         {
             return new ArgumentNullException(nameof(value));
         }
-        
 
         // check is conditional sample: border-width: {props.isSelected} ? 2 : 5
         {
@@ -728,21 +656,20 @@ public static class CssHelper
                 return maybe.Value;
             }
         }
-        
+
         var isValueDouble = double.TryParse(value, out var valueAsDouble);
 
         switch (name)
         {
-            
-            case "padding":       
-            case "padding-right": 
-            case "padding-left":  
-            case "padding-top":   
+            case "padding":
+            case "padding-right":
+            case "padding-left":
+            case "padding-top":
             case "padding-bottom":
-            
-            case "margin":        
-            case "margin-right":  
-            case "margin-left":   
+
+            case "margin":
+            case "margin-right":
+            case "margin-left":
             case "margin-top":
             case "margin-bottom":
             {
@@ -762,7 +689,7 @@ public static class CssHelper
 
                     _ => name
                 };
-                
+
                 if (isValueDouble)
                 {
                     value = valueAsDouble.AsPixel();
@@ -770,9 +697,7 @@ public static class CssHelper
 
                 return $"{name}-[{value}]";
             }
-                
-                
-            
+
             case "m":
             case "mx":
             case "my":
@@ -796,9 +721,7 @@ public static class CssHelper
 
                 return $"{name}-[{value}]";
             }
-            
-            
-            
+
             case "transform":
             {
                 if (value.StartsWith("rotate("))
@@ -845,8 +768,6 @@ public static class CssHelper
 
                 return $"w-[{value}]";
             }
-            
-           
 
             case "height":
             {
@@ -868,8 +789,6 @@ public static class CssHelper
 
             case "max-height":
                 return $"max-h-[{value}]";
-
-         
 
             case "min-height":
                 return $"min-h-[{value}]";
@@ -902,11 +821,12 @@ public static class CssHelper
                 {
                     return "flex-wrap";
                 }
-                
+
                 if (value == "nowrap")
                 {
                     return "flex-nowrap";
                 }
+
                 break;
             }
 
@@ -1031,8 +951,6 @@ public static class CssHelper
                 return $"border-[{value}]";
             }
 
-            
-
             case "border":
             {
                 var parts = value.Split(' ', StringSplitOptions.RemoveEmptyEntries);
@@ -1091,7 +1009,7 @@ public static class CssHelper
                 {
                     value = "[" + value + "]";
                 }
-                
+
                 return $"inset-{value}";
             }
 
@@ -1111,16 +1029,17 @@ public static class CssHelper
             {
                 return $"[line-height:{value}]";
             }
-            
+
             case "word-wrap":
             {
                 switch (value)
                 {
                     case "break-word": return "break-words";
                 }
+
                 break;
             }
-            
+
             case "overflow":
             {
                 switch (value)
@@ -1130,9 +1049,10 @@ public static class CssHelper
                     case "visible": return "overflow-visible";
                     case "scroll":  return "overflow-scroll";
                 }
+
                 break;
             }
-            
+
             case "align-self":
             {
                 switch (value)
@@ -1144,9 +1064,10 @@ public static class CssHelper
                     case "stretch":  return "self-stretch";
                     case "baseline": return "self-baseline";
                 }
+
                 break;
             }
-            
+
             case "outline-offset":
             {
                 switch (value)
@@ -1157,32 +1078,32 @@ public static class CssHelper
                     case "4px": return "outline-offset-4";
                     case "8px": return "outline-offset-8";
                 }
+
                 break;
             }
-            
+
             case "flex":
             {
                 switch (value)
                 {
                     case "1 1 0%":   return "flex-1";
-                    case "1 1 0":   return "flex-1";
+                    case "1 1 0":    return "flex-1";
                     case "0 1 auto": return "flex-initial";
                     case "0 0 auto": return "flex-0";
                     case "auto":     return "flex-auto";
                     case "none":     return "flex-none";
                 }
+
                 break;
             }
-            
         }
 
         // todo: more clever
-        
+
         if (name == "outline-offset")
         {
             return "outline-offset-[-1px]";
         }
-        
 
         return new InvalidOperationException($"Css not handled. {name}: {value}");
     }
@@ -1391,44 +1312,6 @@ public static class CssHelper
         return new Exception($"{name}: {value} is not recognized");
     }
 
-    public static StyleAttribute ParseStyleAttibute(string nameValueCombined)
-    {
-        if (string.IsNullOrWhiteSpace(nameValueCombined))
-        {
-            return null;
-        }
-
-        string pseudo = null;
-        
-        TryReadPseudo(nameValueCombined).HasValue(x =>
-        {
-            pseudo = x.Pseudo;
-            
-            nameValueCombined = x.NewText;
-        });
-        
-        var colonIndex = nameValueCombined.IndexOf(':');
-        if (colonIndex < 0)
-        {
-            return new()
-            {
-                Name   = nameValueCombined.Trim(),
-                Pseudo = pseudo
-            };
-        }
-
-        var name = nameValueCombined[..colonIndex];
-
-        var value = nameValueCombined[(colonIndex + 1)..];
-
-        return new()
-        {
-            Name   = name.Trim(),
-            Value  = value.Trim(),
-            Pseudo = pseudo
-        };
-    }
-
     static Maybe<(string Pseudo, string NewText)> TryReadPseudo(string text)
     {
         foreach (var pseudo in MediaQueries.Keys)
@@ -1443,6 +1326,109 @@ public static class CssHelper
         }
 
         return None;
+    }
+
+    static class TailwindSpacingScale
+    {
+        static readonly (string htmlStyleName, string tailwindPrefix)[] Html_to_TailwindName_Map =
+        [
+            (htmlStyleName: "min-width", tailwindPrefix: "min-w-"),
+            (htmlStyleName: "min-height", tailwindPrefix: "min-h-"),
+            (htmlStyleName: "max-width", tailwindPrefix: "max-w-"),
+            (htmlStyleName: "max-height", tailwindPrefix: "max-h-"),
+
+            // ↔ Width & Height
+            (htmlStyleName: "width", tailwindPrefix: "w-"),
+            (htmlStyleName: "height", tailwindPrefix: "h-"),
+
+            // Padding
+            (htmlStyleName: "padding", tailwindPrefix: "p-"),
+            (htmlStyleName: "padding-top", tailwindPrefix: "pt-"),
+            (htmlStyleName: "padding-right", tailwindPrefix: "pr-"),
+            (htmlStyleName: "padding-bottom", tailwindPrefix: "pb-"),
+            (htmlStyleName: "padding-left", tailwindPrefix: "pl-"),
+            (htmlStyleName: "padding-inline", tailwindPrefix: "px-"),
+            (htmlStyleName: "padding-block", tailwindPrefix: "py-"),
+
+            // Margin
+            (htmlStyleName: "margin", tailwindPrefix: "m-"),
+            (htmlStyleName: "margin-top", tailwindPrefix: "mt-"),
+            (htmlStyleName: "margin-right", tailwindPrefix: "mr-"),
+            (htmlStyleName: "margin-bottom", tailwindPrefix: "mb-"),
+            (htmlStyleName: "margin-left", tailwindPrefix: "ml-"),
+            (htmlStyleName: "margin-inline", tailwindPrefix: "mx-"),
+            (htmlStyleName: "margin-block", tailwindPrefix: "my-"),
+
+            // Gap (for flex/grid gaps)
+            (htmlStyleName: "gap", tailwindPrefix: "gap-"),
+            (htmlStyleName: "row-gap", tailwindPrefix: "gap-y-"),
+            (htmlStyleName: "column-gap", tailwindPrefix: "gap-x-"),
+
+            // Inset (top/right/bottom/left for positioning)
+            (htmlStyleName: "top", tailwindPrefix: "top-"),
+            (htmlStyleName: "right", tailwindPrefix: "right-"),
+            (htmlStyleName: "bottom", tailwindPrefix: "bottom-"),
+            (htmlStyleName: "left", tailwindPrefix: "left-"),
+
+            // Space-between (child spacing in flex)
+            (htmlStyleName: "space-x", tailwindPrefix: "space-x-"),
+            (htmlStyleName: "space-y", tailwindPrefix: "space-y-"),
+
+            // Translate (transform)
+            (htmlStyleName: "translate-x", tailwindPrefix: "translate-x-"),
+            (htmlStyleName: "translate-y", tailwindPrefix: "translate-y-")
+        ];
+
+        public static Maybe<string> Try_Convert_From_HtmlStyle_to_TailwindClass(string name, string value)
+        {
+            foreach (var item in Html_to_TailwindName_Map)
+            {
+                if (item.htmlStyleName == name)
+                {
+                    var maybe = try_Convert_PixelValue_To_SpacingScale_Or_ArbitraryValue(value);
+                    if (maybe.HasValue)
+                    {
+                        return item.tailwindPrefix + maybe.Value;
+                    }
+                }
+            }
+
+            return None;
+
+            static Maybe<string> try_Convert_PixelValue_To_SpacingScale_Or_ArbitraryValue(string value)
+            {
+                if (!value.EndsWith("px"))
+                {
+                    return None;
+                }
+
+                if (TailwindSpacingScaleMap.TryGetValue(value, out var spaceValue))
+                {
+                    return spaceValue.ToString(CultureInfo_en_US);
+                }
+
+                return "[" + value + "]";
+            }
+        }
+
+        public static Maybe<(string htmlStyleName, string htmlStyleValue)> Try_Convert_From_TailwindClass_to_HtmlStyle(string tailwindClass)
+        {
+            foreach (var item in Html_to_TailwindName_Map)
+            {
+                if (tailwindClass.StartsWith(item.tailwindPrefix))
+                {
+                    foreach (var (px, scale) in TailwindSpacingScaleMap)
+                    {
+                        if (tailwindClass == item.tailwindPrefix + scale)
+                        {
+                            return (item.htmlStyleName, px);
+                        }
+                    }
+                }
+            }
+
+            return None;
+        }
     }
 
     static class TextParser
