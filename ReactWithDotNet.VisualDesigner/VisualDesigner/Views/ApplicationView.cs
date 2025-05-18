@@ -665,8 +665,16 @@ sealed class ApplicationView : Component<ApplicationState>
                                     this.FailNotification(result.Error.Message);
                                     return;
                                 }
-
-                                this.SuccessNotification("OK");
+                                
+                                if (result.Value.HasChange is false)
+                                {
+                                    this.SuccessNotification("File already same.");
+                                }
+                                else
+                                {
+                                    this.SuccessNotification("File updated.");
+                                }
+                               
                             })
                         }
                     }
