@@ -466,7 +466,7 @@ sealed class ApplicationView : Component<ApplicationState>
                 }
 
                 await db.UpdateAsync(project with { ConfigAsYaml = state.YamlText });
-                
+
                 Cache.Clear();
 
                 return Success;
@@ -1244,14 +1244,22 @@ sealed class ApplicationView : Component<ApplicationState>
                 };
             }
 
-            FlexRowCentered attributeItem(int index, string value)
+            Element attributeItem(int index, string value)
             {
                 var isSelected = index == state.Selection.SelectedStyleIndex;
 
-                var closeIcon = new FlexRowCentered(Size(20), PositionAbsolute, Top(-8), Right(-8), Padding(4), Background(White),
-                                                    Border(0.5, solid, Theme.BorderColor), BorderRadius(24))
+                var closeIcon = new FlexRowCentered
                 {
-                    Color(Gray500), Hover(Color(Blue300), BorderColor(Blue300)),
+                    Size(20),
+                    Padding(4),
+                    PositionAbsolute, Top(-8), Right(-8),
+
+                    Background(White),
+                    Border(0.5, solid, Theme.BorderColor),
+                    BorderRadius(24),
+
+                    Color(Gray500),
+                    Hover(Color(Blue300), BorderColor(Blue300)),
 
                     new IconClose() + Size(16),
 
@@ -1276,7 +1284,7 @@ sealed class ApplicationView : Component<ApplicationState>
                     });
                 }
 
-                return new(CursorDefault, Padding(4, 8), BorderRadius(16), UserSelect(none))
+                return new FlexRowCentered(CursorDefault, Padding(4, 8), BorderRadius(16), UserSelect(none))
                 {
                     Background(isSelected ? Gray200 : Gray50),
                     Border(1, solid, Gray100),
