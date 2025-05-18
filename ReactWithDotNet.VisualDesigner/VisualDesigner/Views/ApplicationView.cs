@@ -1443,7 +1443,7 @@ sealed class ApplicationView : Component<ApplicationState>
                             {
                                 StyleItemDragDrop = state.StyleItemDragDrop with
                                 {
-                                    StartItemIndex = int.Parse(e.target.id)
+                                    StartItemIndex = int.Parse(e.currentTarget.id)
                                 }
                             };
                             return Task.CompletedTask;
@@ -1611,6 +1611,11 @@ sealed class ApplicationView : Component<ApplicationState>
                     isSelected = false;
                 }
 
+                static int getPropertyIndex(ShadowHtmlElement htmlElement)
+                {
+                    return int.Parse(htmlElement.id.RemoveFromStart("PROPS-"));
+                }
+
                 var propertyItem = new FlexRowCentered(CursorDefault, Padding(4, 8), BorderRadius(16))
                 {
                     Background(isSelected ? Gray200 : Gray50),
@@ -1623,7 +1628,7 @@ sealed class ApplicationView : Component<ApplicationState>
                     Id("PROPS-" + index),
                     OnClick([StopPropagation](e) =>
                     {
-                        var propertyIndex = int.Parse(e.currentTarget.id.RemoveFromStart("PROPS-"));
+                        var propertyIndex = getPropertyIndex(e.currentTarget);
                         if (propertyIndex == state.Selection?.SelectedPropertyIndex)
                         {
                             state.Selection = state.Selection with { SelectedPropertyIndex = null };
@@ -1673,7 +1678,7 @@ sealed class ApplicationView : Component<ApplicationState>
                             {
                                 PropertyItemDragDrop = state.PropertyItemDragDrop with
                                 {
-                                    StartItemIndex = int.Parse(e.currentTarget.id)
+                                    StartItemIndex = getPropertyIndex(e.currentTarget)
                                 }
                             };
                             return Task.CompletedTask;
@@ -1684,7 +1689,7 @@ sealed class ApplicationView : Component<ApplicationState>
                             {
                                 PropertyItemDragDrop = state.PropertyItemDragDrop with
                                 {
-                                    EndItemIndex = int.Parse(e.currentTarget.id)
+                                    EndItemIndex = getPropertyIndex(e.currentTarget)
                                 }
                             };
                             return Task.CompletedTask;
