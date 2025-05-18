@@ -72,7 +72,7 @@ sealed class ApplicationView : Component<ApplicationState>
             },
 
             Selection = new(),
-            
+
             StyleItemDragDrop = new()
         };
 
@@ -115,6 +115,19 @@ sealed class ApplicationView : Component<ApplicationState>
                     BoxShadow(0, 30, 30, 0, rgba(69, 42, 124, 0.15))
                 },
                 NotificationHost
+            }
+        };
+    }
+
+    static Element CreateDropLocationElement(bool onMouseOver, Modifier[] modifiers)
+    {
+        return new FlexRowCentered(Size(24))
+        {
+            new div(Size(16), BorderRadius(32), Background(Blue200))
+            {
+                When(onMouseOver, Size(24) + Border(1, dotted, Blue600)),
+
+                modifiers
             }
         };
     }
@@ -217,7 +230,7 @@ sealed class ApplicationView : Component<ApplicationState>
             ComponentRootElement = componentRootElement,
 
             Selection = new(),
-            
+
             StyleItemDragDrop = new()
         };
 
@@ -285,7 +298,7 @@ sealed class ApplicationView : Component<ApplicationState>
             Preview = state.Preview,
 
             Selection = new(),
-            
+
             StyleItemDragDrop = new()
         };
 
@@ -493,6 +506,35 @@ sealed class ApplicationView : Component<ApplicationState>
         {
             state.YamlText = null;
         }
+    }
+
+    Task OnStyleItemDropLocationDroped(DragEvent _)
+    {
+        var dd = state.StyleItemDragDrop;
+
+        if (dd.StartItemIndex.HasValue)
+        {
+            if (dd.EndItemIndex.HasValue)
+            {
+                CurrentVisualElement.Styles.MoveItemRelativeTo(dd.StartItemIndex.Value, dd.EndItemIndex.Value, dd.Position == AttibuteDragPosition.Before);
+            }
+        }
+
+        state = state with { StyleItemDragDrop = new() };
+
+        return Task.CompletedTask;
+    }
+
+    Task OnStyleItemDropLocationLeaved(DragEvent _)
+    {
+        state = state with
+        {
+            StyleItemDragDrop = state.StyleItemDragDrop with
+            {
+                Position = null
+            }
+        };
+        return Task.CompletedTask;
     }
 
     Element PartApplicationTopPanel()
@@ -1255,8 +1297,6 @@ sealed class ApplicationView : Component<ApplicationState>
 
             Element attributeItem(int index, string value)
             {
-                
-
                 var closeIcon = new FlexRowCentered
                 {
                     Size(20),
@@ -1294,12 +1334,12 @@ sealed class ApplicationView : Component<ApplicationState>
                 }
 
                 var isSelected = index == state.Selection.SelectedStyleIndex;
-                
+
                 if (state.StyleItemDragDrop.StartItemIndex == index)
                 {
                     isSelected = false;
                 }
-                
+
                 var styleItem = new FlexRowCentered(CursorDefault, Padding(4, 8), BorderRadius(16), UserSelect(none))
                 {
                     Background(isSelected ? Gray200 : Gray50),
@@ -1378,12 +1418,11 @@ sealed class ApplicationView : Component<ApplicationState>
                             return Task.CompletedTask;
                         })
                     }
-                    
                 };
 
                 if (state.StyleItemDragDrop.EndItemIndex == index)
                 {
-                    var dragPositionBefore = CreateDropLocationElement(state.StyleItemDragDrop.Position == AttibuteDragPosition.Before, 
+                    var dragPositionBefore = CreateDropLocationElement(state.StyleItemDragDrop.Position == AttibuteDragPosition.Before,
                     [
                         OnDragEnter(_ =>
                         {
@@ -1394,7 +1433,7 @@ sealed class ApplicationView : Component<ApplicationState>
                         OnDrop(OnStyleItemDropLocationDroped)
                     ]);
 
-                    var dragPositionAfter = CreateDropLocationElement(state.StyleItemDragDrop.Position == AttibuteDragPosition.After, 
+                    var dragPositionAfter = CreateDropLocationElement(state.StyleItemDragDrop.Position == AttibuteDragPosition.After,
                     [
                         OnDragEnter(_ =>
                         {
@@ -1404,17 +1443,17 @@ sealed class ApplicationView : Component<ApplicationState>
                         OnDragLeave(OnStyleItemDropLocationLeaved),
                         OnDrop(OnStyleItemDropLocationDroped)
                     ]);
-                    
+
                     return new FlexRowCentered(Gap(8))
                     {
                         dragPositionBefore,
-                        
+
                         styleItem,
-                        
+
                         dragPositionAfter
                     };
                 }
-                
+
                 return styleItem;
             }
         }
@@ -1588,50 +1627,6 @@ sealed class ApplicationView : Component<ApplicationState>
                 };
             }
         }
-    }
-
-    Task OnStyleItemDropLocationLeaved(DragEvent _)
-    {
-        state = state with
-        {
-            StyleItemDragDrop = state.StyleItemDragDrop with
-            {
-                Position = null
-            }
-        };
-        return Task.CompletedTask;
-    }
-
-    static Element CreateDropLocationElement(bool onMouseOver, Modifier[] modifiers)
-    {
-        return new FlexRowCentered(Size(24))
-        {
-            new div(Size(16), BorderRadius(32), Background(Blue200))
-            {
-                When(onMouseOver, Size(24) + Border(1, dotted, Blue600)),
-
-                modifiers
-            }
-        };
-    }
-
-    Task OnStyleItemDropLocationDroped(DragEvent _)
-    {
-        var dd = state.StyleItemDragDrop;
-
-        if (dd.StartItemIndex.HasValue)
-        {
-            
-            if (dd.EndItemIndex.HasValue)
-            {
-                
-                CurrentVisualElement.Styles.MoveItemRelativeTo(dd.StartItemIndex.Value, dd.EndItemIndex.Value,dd.Position == AttibuteDragPosition.Before);
-            }
-        }
-
-        state = state with { StyleItemDragDrop = new() };
-
-        return Task.CompletedTask;
     }
 
     Element PartScale()
