@@ -4,6 +4,7 @@
 		<LangVersion>preview</LangVersion>
 		<TargetFramework>net8.0</TargetFramework>
 		<NoWarn>CS8981</NoWarn>
+		<ApplicationIcon>wwwroot\favicon.ico</ApplicationIcon>
 	</PropertyGroup>
 
 	<ItemGroup>
