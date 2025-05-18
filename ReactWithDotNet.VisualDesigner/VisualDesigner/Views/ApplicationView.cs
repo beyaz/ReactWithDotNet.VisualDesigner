@@ -511,6 +511,35 @@ sealed class ApplicationView : Component<ApplicationState>
         }
     }
 
+    Task OnPropertyItemDropLocationDroped(DragEvent _)
+    {
+        var dd = state.PropertyItemDragDrop;
+
+        if (dd.StartItemIndex.HasValue)
+        {
+            if (dd.EndItemIndex.HasValue)
+            {
+                CurrentVisualElement.Properties.MoveItemRelativeTo(dd.StartItemIndex.Value, dd.EndItemIndex.Value, dd.Position == AttibuteDragPosition.Before);
+            }
+        }
+
+        state = state with { PropertyItemDragDrop = new() };
+
+        return Task.CompletedTask;
+    }
+
+    Task OnPropertyItemDropLocationLeaved(DragEvent _)
+    {
+        state = state with
+        {
+            PropertyItemDragDrop = state.PropertyItemDragDrop with
+            {
+                Position = null
+            }
+        };
+        return Task.CompletedTask;
+    }
+
     Task OnStyleItemDropLocationDroped(DragEvent _)
     {
         var dd = state.StyleItemDragDrop;
@@ -1550,8 +1579,6 @@ sealed class ApplicationView : Component<ApplicationState>
 
             Element attributeItem(int index, string value)
             {
-                
-
                 var closeIcon = CreateAttributeItemCloseIcon(OnClick([StopPropagation](_) =>
                 {
                     CurrentVisualElement.Properties.RemoveAt(state.Selection.SelectedPropertyIndex!.Value);
@@ -1573,12 +1600,12 @@ sealed class ApplicationView : Component<ApplicationState>
                 }
 
                 var isSelected = index == state.Selection.SelectedPropertyIndex;
-                
+
                 if (state.PropertyItemDragDrop.StartItemIndex == index)
                 {
                     isSelected = false;
                 }
-                
+
                 var propertyItem = new FlexRowCentered(CursorDefault, Padding(4, 8), BorderRadius(16))
                 {
                     Background(isSelected ? Gray200 : Gray50),
@@ -1631,7 +1658,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
                         return Task.CompletedTask;
                     }),
-                    
+
                     // Drag Drop Operation
                     {
                         DraggableTrue,
@@ -1660,6 +1687,39 @@ sealed class ApplicationView : Component<ApplicationState>
                     }
                 };
 
+                if (state.PropertyItemDragDrop.EndItemIndex == index)
+                {
+                    var dropLocationBefore = CreateDropLocationElement(state.PropertyItemDragDrop.Position == AttibuteDragPosition.Before,
+                    [
+                        OnDragEnter(_ =>
+                        {
+                            state = state with { PropertyItemDragDrop = state.PropertyItemDragDrop with { Position = AttibuteDragPosition.Before } };
+                            return Task.CompletedTask;
+                        }),
+                        OnDragLeave(OnPropertyItemDropLocationLeaved),
+                        OnDrop(OnPropertyItemDropLocationDroped)
+                    ]);
+
+                    var dropLocationAfter = CreateDropLocationElement(state.PropertyItemDragDrop.Position == AttibuteDragPosition.After,
+                    [
+                        OnDragEnter(_ =>
+                        {
+                            state = state with { PropertyItemDragDrop = state.PropertyItemDragDrop with { Position = AttibuteDragPosition.After } };
+                            return Task.CompletedTask;
+                        }),
+                        OnDragLeave(OnPropertyItemDropLocationLeaved),
+                        OnDrop(OnPropertyItemDropLocationDroped)
+                    ]);
+
+                    return new FlexRowCentered(Gap(8))
+                    {
+                        dropLocationBefore,
+
+                        propertyItem,
+
+                        dropLocationAfter
+                    };
+                }
 
                 return propertyItem;
             }
