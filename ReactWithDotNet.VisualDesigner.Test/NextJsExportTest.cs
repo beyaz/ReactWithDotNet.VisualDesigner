@@ -33,13 +33,13 @@ public sealed class NextJsExportTest
 
         static async Task fix(VisualElementModel model)
         {
-            var index = model.Styles.IndexOf("border: 1px solid border-soft");
+            var index = model.Styles.IndexOf("border: 1px solid border-sub");
             if (index >= 0)
             {
-                model.Styles.Insert(index, "border-soft");
+                model.Styles.Insert(index, "border-sub");
                 model.Styles.Insert(index, "border");
 
-                model.Styles.Remove("border: 1px solid border-soft");
+                model.Styles.Remove("border: 1px solid border-sub");
             }
 
             foreach (var child in model.Children)
