@@ -135,10 +135,10 @@ static class HtmlImporter
                 var propertyInfo = element.GetType().GetProperty(attributeName.Replace("-",""), BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
                 if (propertyInfo is not null)
                 {
+                    attributeName = propertyInfo.Name;
+                    
                     if (propertyInfo.PropertyType == typeof(string))
                     {
-                        attributeName = propertyInfo.Name;
-                        
                         attributeValue = "'"+  attributeValue + "'";
                     }
                 }
