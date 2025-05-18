@@ -1548,9 +1548,9 @@ sealed class ApplicationView : Component<ApplicationState>
                 };
             }
 
-            FlexRowCentered attributeItem(int index, string value)
+            Element attributeItem(int index, string value)
             {
-                var isSelected = index == state.Selection.SelectedPropertyIndex;
+                
 
                 var closeIcon = CreateAttributeItemCloseIcon(OnClick([StopPropagation](_) =>
                 {
@@ -1572,7 +1572,14 @@ sealed class ApplicationView : Component<ApplicationState>
                     });
                 }
 
-                return new(CursorDefault, Padding(4, 8), BorderRadius(16))
+                var isSelected = index == state.Selection.SelectedPropertyIndex;
+                
+                if (state.PropertyItemDragDrop.StartItemIndex == index)
+                {
+                    isSelected = false;
+                }
+                
+                var propertyItem = new FlexRowCentered(CursorDefault, Padding(4, 8), BorderRadius(16))
                 {
                     Background(isSelected ? Gray200 : Gray50),
                     Border(1, solid, Gray100),
@@ -1625,6 +1632,9 @@ sealed class ApplicationView : Component<ApplicationState>
                         return Task.CompletedTask;
                     })
                 };
+
+
+                return propertyItem;
             }
         }
     }
