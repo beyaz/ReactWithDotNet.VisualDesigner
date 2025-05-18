@@ -1430,7 +1430,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
                 if (state.StyleItemDragDrop.EndItemIndex == index)
                 {
-                    var dragPositionBefore = CreateDropLocationElement(state.StyleItemDragDrop.Position == AttibuteDragPosition.Before,
+                    var dropLocationBefore = CreateDropLocationElement(state.StyleItemDragDrop.Position == AttibuteDragPosition.Before,
                     [
                         OnDragEnter(_ =>
                         {
@@ -1441,7 +1441,7 @@ sealed class ApplicationView : Component<ApplicationState>
                         OnDrop(OnStyleItemDropLocationDroped)
                     ]);
 
-                    var dragPositionAfter = CreateDropLocationElement(state.StyleItemDragDrop.Position == AttibuteDragPosition.After,
+                    var dropLocationAfter = CreateDropLocationElement(state.StyleItemDragDrop.Position == AttibuteDragPosition.After,
                     [
                         OnDragEnter(_ =>
                         {
@@ -1454,11 +1454,11 @@ sealed class ApplicationView : Component<ApplicationState>
 
                     return new FlexRowCentered(Gap(8))
                     {
-                        dragPositionBefore,
+                        dropLocationBefore,
 
                         styleItem,
 
-                        dragPositionAfter
+                        dropLocationAfter
                     };
                 }
 
