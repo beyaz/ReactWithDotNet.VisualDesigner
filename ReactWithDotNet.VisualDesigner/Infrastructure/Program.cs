@@ -1,7 +1,4 @@
-using System.Diagnostics;
-using System.IO;
 using System.IO.Compression;
-using System.Runtime.InteropServices;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.ResponseCompression;
@@ -12,21 +9,11 @@ namespace ReactWithDotNet.VisualDesigner.Infrastructure;
 
 public class Program
 {
-    
     public static void Main(string[] args)
     {
         ProcessHelper.KillAllNamedProcess($"{nameof(ReactWithDotNet)}.{nameof(VisualDesigner)}");
 
         var port = NetworkHelper.GetAvailablePort(Config.NextAvailablePortFrom);
-
-        if (Config.HideConsoleWindow)
-        {
-            IgnoreException(ConsoleWindowUtility.HideConsoleWindow);
-        }
-        
-        
-
-        
 
         var builder = WebApplication.CreateBuilder(args);
 
@@ -71,10 +58,15 @@ public class Program
         app.UseResponseCompression();
 
         app.ConfigureReactWithDotNet();
-        
+
         if (Config.UseUrls)
         {
             TryStartBrowser(port);
+        }
+
+        if (Config.HideConsoleWindow)
+        {
+            Task.Delay(TimeSpan.FromSeconds(1)).ContinueWith(_ => IgnoreException(ConsoleWindowUtility.HideConsoleWindow));
         }
 
         if (Config.UseUrls)
