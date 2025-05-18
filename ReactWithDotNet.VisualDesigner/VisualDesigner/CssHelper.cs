@@ -1284,6 +1284,7 @@ public static class CssHelper
             case "opacity":
             case "box-shadow":
             case "white-space":
+            case "visibility":
             {
                 return (name, value);
             }
