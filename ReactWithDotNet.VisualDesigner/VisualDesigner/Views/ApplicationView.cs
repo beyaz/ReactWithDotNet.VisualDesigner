@@ -73,7 +73,8 @@ sealed class ApplicationView : Component<ApplicationState>
 
             Selection = new(),
 
-            StyleItemDragDrop = new()
+            StyleItemDragDrop = new(),
+            PropertyItemDragDrop = new()
         };
 
         var projectId = await GetFirstProjectId();
@@ -231,7 +232,8 @@ sealed class ApplicationView : Component<ApplicationState>
 
             Selection = new(),
 
-            StyleItemDragDrop = new()
+            StyleItemDragDrop = new(),
+            PropertyItemDragDrop = new()
         };
 
         if (state.ComponentRootElement is not null)
@@ -299,7 +301,8 @@ sealed class ApplicationView : Component<ApplicationState>
 
             Selection = new(),
 
-            StyleItemDragDrop = new()
+            StyleItemDragDrop = new(),
+            PropertyItemDragDrop = new()
         };
 
         // try select first component

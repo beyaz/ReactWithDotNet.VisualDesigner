@@ -58,6 +58,8 @@ public sealed record ApplicationState
     public MainContentTabs MainContentTab  { get; set; }
     
     public required AttibuteDragDropData StyleItemDragDrop { get; init; }
+    
+    public required AttibuteDragDropData PropertyItemDragDrop { get; init; }
 
     // @formatter:on
 }
