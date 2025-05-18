@@ -302,7 +302,7 @@ sealed class ApplicationPreview : Component
                     {
                         if (propertyInfo.PropertyType == typeof(string))
                         {
-                            propertyInfo.SetValue(element, value);
+                            propertyInfo.SetValue(element, TryClearStringValue(value));
                             continue;
                         }
 
