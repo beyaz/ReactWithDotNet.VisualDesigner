@@ -1,12 +1,12 @@
 {
-  "profiles": {
-    "ReactWithDotNet.VisualDesigner": {
-      "commandName": "Project",
-      "launchBrowser": true,
-      "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
-      },
-      "applicationUrl": "https://localhost:55962;http://localhost:55963"
+    "profiles": {
+        "ReactWithDotNet.VisualDesigner": {
+            "commandName": "Project",
+            "launchBrowser": true,
+            "environmentVariables": {
+                "ASPNETCORE_ENVIRONMENT": "Development"
+            },
+            "applicationUrl": "https://localhost:55962;http://localhost:55963"
+        }
     }
-  }
 }
