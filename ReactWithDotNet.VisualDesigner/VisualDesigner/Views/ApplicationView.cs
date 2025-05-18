@@ -1276,7 +1276,7 @@ sealed class ApplicationView : Component<ApplicationState>
                     });
                 }
 
-                return new(CursorDefault, Padding(4, 8), BorderRadius(16))
+                return new(CursorDefault, Padding(4, 8), BorderRadius(16), UserSelect(none))
                 {
                     Background(isSelected ? Gray200 : Gray50),
                     Border(1, solid, Gray100),
