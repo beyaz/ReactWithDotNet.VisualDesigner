@@ -33,46 +33,18 @@ public sealed class NextJsExportTest
 
         static async Task fix(VisualElementModel model)
         {
-            for (var i = 0; i < model.Styles.Count; i++)
+            var index = model.Styles.IndexOf("border: 1px solid border-soft");
+            if (index >= 0)
             {
-                model.Styles[i] = fixStyle(model.Styles[i]);
+                model.Styles.Insert(index, "border-soft");
+                model.Styles.Insert(index, "border");
+
+                model.Styles.Remove("border: 1px solid border-soft");
             }
 
             foreach (var child in model.Children)
             {
                 await fix(child);
-            }
-
-            return;
-
-            static string fixStyle(string style)
-            {
-                if (style.StartsWith("subTitle-"))
-                {
-                    return "subtitle-"+style.RemoveFromStart("subTitle-");
-                }
-
-                return style;
-                
-                //var map = new Dictionary<string, string>
-                //{
-                //    { "-L", "-l" },
-                //    { "-XL", "-xl" },
-                //    { "-XXL", "-xxl" },
-                //    { "-M", "-m" },
-                //    { "-S", "-s" },
-                //    { "-XS", "-xs" }
-                //};
-
-                //foreach (var (key, value) in map)
-                //{
-                //    if (style.EndsWith(key))
-                //    {
-                //        return style.RemoveFromEnd(key) + value;
-                //    }
-                //}
-
-                //return style;
             }
         }
     }
