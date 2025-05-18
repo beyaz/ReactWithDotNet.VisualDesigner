@@ -1630,7 +1630,34 @@ sealed class ApplicationView : Component<ApplicationState>
                         }
 
                         return Task.CompletedTask;
-                    })
+                    }),
+                    
+                    // Drag Drop Operation
+                    {
+                        DraggableTrue,
+                        OnDragStart(e =>
+                        {
+                            state = state with
+                            {
+                                PropertyItemDragDrop = state.PropertyItemDragDrop with
+                                {
+                                    StartItemIndex = int.Parse(e.target.id)
+                                }
+                            };
+                            return Task.CompletedTask;
+                        }),
+                        OnDragEnter(e =>
+                        {
+                            state = state with
+                            {
+                                PropertyItemDragDrop = state.PropertyItemDragDrop with
+                                {
+                                    EndItemIndex = int.Parse(e.currentTarget.id)
+                                }
+                            };
+                            return Task.CompletedTask;
+                        })
+                    }
                 };
 
 
