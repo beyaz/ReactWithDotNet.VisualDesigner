@@ -34,7 +34,11 @@ sealed class ApplicationView : Component<ApplicationState>
             var userLastState = GetUserLastState(userName);
             if (userLastState is not null)
             {
-                state = userLastState;
+                state = userLastState with
+                {
+                    StyleItemDragDrop = new(),
+                    PropertyItemDragDrop = new()
+                };
 
                 UpdateZoomInClient();
 
@@ -49,7 +53,8 @@ sealed class ApplicationView : Component<ApplicationState>
             {
                 state = DeserializeFromYaml<ApplicationState>(lastUsage.LastStateAsYaml) with
                 {
-                    StyleItemDragDrop = new()
+                    StyleItemDragDrop = new(),
+                    PropertyItemDragDrop = new()
                 };
 
                 UpdateZoomInClient();
@@ -1668,7 +1673,7 @@ sealed class ApplicationView : Component<ApplicationState>
                             {
                                 PropertyItemDragDrop = state.PropertyItemDragDrop with
                                 {
-                                    StartItemIndex = int.Parse(e.target.id)
+                                    StartItemIndex = int.Parse(e.currentTarget.id)
                                 }
                             };
                             return Task.CompletedTask;
