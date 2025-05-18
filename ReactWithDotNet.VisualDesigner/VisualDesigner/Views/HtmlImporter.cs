@@ -1,4 +1,5 @@
-﻿using HtmlAgilityPack;
+﻿using System.Reflection;
+using HtmlAgilityPack;
 
 namespace ReactWithDotNet.VisualDesigner;
 
@@ -51,6 +52,14 @@ static class HtmlImporter
         {
             Tag = htmlNode.Name
         };
+        
+        HtmlElement element = null;
+        {
+            TryGetHtmlElementTypeByTagName(model.Tag).HasValue(elementType =>
+            {
+                element = (HtmlElement)Activator.CreateInstance(elementType);
+            });
+        }
 
         foreach (var attribute in htmlNode.Attributes)
         {
@@ -121,6 +130,20 @@ static class HtmlImporter
                 }
             }
 
+            if (element is not null)
+            {
+                var propertyInfo = element.GetType().GetProperty(attributeName.Replace("-",""), BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
+                if (propertyInfo is not null)
+                {
+                    if (propertyInfo.PropertyType == typeof(string))
+                    {
+                        attributeName = propertyInfo.Name;
+                        
+                        attributeValue = "'"+  attributeValue + "'";
+                    }
+                }
+            }
+            
             model.Properties.Add(attributeName + ": " + attributeValue);
         }
 
