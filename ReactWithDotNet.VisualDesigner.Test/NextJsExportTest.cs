@@ -47,25 +47,32 @@ public sealed class NextJsExportTest
 
             static string fixStyle(string style)
             {
-                var map = new Dictionary<string, string>
+                if (style.StartsWith("subTitle-"))
                 {
-                    { "-L", "-l" },
-                    { "-XL", "-xl" },
-                    { "-XXL", "-xxl" },
-                    { "-M", "-m" },
-                    { "-S", "-s" },
-                    { "-XS", "-xs" }
-                };
-
-                foreach (var (key, value) in map)
-                {
-                    if (style.EndsWith(key))
-                    {
-                        return style.RemoveFromEnd(key) + value;
-                    }
+                    return "subtitle-"+style.RemoveFromStart("subTitle-");
                 }
 
                 return style;
+                
+                //var map = new Dictionary<string, string>
+                //{
+                //    { "-L", "-l" },
+                //    { "-XL", "-xl" },
+                //    { "-XXL", "-xxl" },
+                //    { "-M", "-m" },
+                //    { "-S", "-s" },
+                //    { "-XS", "-xs" }
+                //};
+
+                //foreach (var (key, value) in map)
+                //{
+                //    if (style.EndsWith(key))
+                //    {
+                //        return style.RemoveFromEnd(key) + value;
+                //    }
+                //}
+
+                //return style;
             }
         }
     }
