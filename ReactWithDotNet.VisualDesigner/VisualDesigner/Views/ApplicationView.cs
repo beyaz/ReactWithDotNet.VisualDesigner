@@ -73,7 +73,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
             Selection = new(),
 
-            StyleItemDragDrop = new(),
+            StyleItemDragDrop    = new(),
             PropertyItemDragDrop = new()
         };
 
@@ -232,7 +232,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
             Selection = new(),
 
-            StyleItemDragDrop = new(),
+            StyleItemDragDrop    = new(),
             PropertyItemDragDrop = new()
         };
 
@@ -301,7 +301,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
             Selection = new(),
 
-            StyleItemDragDrop = new(),
+            StyleItemDragDrop    = new(),
             PropertyItemDragDrop = new()
         };
 
@@ -1239,6 +1239,27 @@ sealed class ApplicationView : Component<ApplicationState>
             viewStyles(CurrentVisualElement.Styles)
         };
 
+        static Element CreateAttributeItemCloseIcon(params Modifier[] modifiers)
+        {
+            return new FlexRowCentered
+            {
+                Size(20),
+                Padding(4),
+                PositionAbsolute, Top(-8), Right(-8),
+
+                Background(White),
+                Border(0.5, solid, Theme.BorderColor),
+                BorderRadius(24),
+
+                Color(Gray500),
+                Hover(Color(Blue300), BorderColor(Blue300)),
+
+                new IconClose() + Size(16),
+
+                modifiers
+            };
+        }
+
         Element viewStyles(IReadOnlyList<string> styles)
         {
             return new FlexColumn(WidthFull, Gap(4))
@@ -1300,30 +1321,14 @@ sealed class ApplicationView : Component<ApplicationState>
 
             Element attributeItem(int index, string value)
             {
-                var closeIcon = new FlexRowCentered
+                var closeIcon = CreateAttributeItemCloseIcon(OnClick([StopPropagation](_) =>
                 {
-                    Size(20),
-                    Padding(4),
-                    PositionAbsolute, Top(-8), Right(-8),
+                    CurrentVisualElement.Styles.RemoveAt(state.Selection.SelectedStyleIndex!.Value);
 
-                    Background(White),
-                    Border(0.5, solid, Theme.BorderColor),
-                    BorderRadius(24),
+                    state.Selection.SelectedStyleIndex = null;
 
-                    Color(Gray500),
-                    Hover(Color(Blue300), BorderColor(Blue300)),
-
-                    new IconClose() + Size(16),
-
-                    OnClick([StopPropagation](_) =>
-                    {
-                        CurrentVisualElement.Styles.RemoveAt(state.Selection.SelectedStyleIndex!.Value);
-
-                        state.Selection.SelectedStyleIndex = null;
-
-                        return Task.CompletedTask;
-                    })
-                };
+                    return Task.CompletedTask;
+                }));
 
                 Element content = value;
                 {
@@ -1547,22 +1552,14 @@ sealed class ApplicationView : Component<ApplicationState>
             {
                 var isSelected = index == state.Selection.SelectedPropertyIndex;
 
-                var closeIcon = new FlexRowCentered(Size(20), PositionAbsolute, Top(-8), Right(-8), Padding(4), Background(White),
-                                                    Border(0.5, solid, Theme.BorderColor), BorderRadius(24))
+                var closeIcon = CreateAttributeItemCloseIcon(OnClick([StopPropagation](_) =>
                 {
-                    Color(Gray500), Hover(Color(Blue300), BorderColor(Blue300)),
+                    CurrentVisualElement.Properties.RemoveAt(state.Selection.SelectedPropertyIndex!.Value);
 
-                    new IconClose() + Size(16),
+                    state.Selection.SelectedPropertyIndex = null;
 
-                    OnClick([StopPropagation](_) =>
-                    {
-                        CurrentVisualElement.Properties.RemoveAt(state.Selection.SelectedPropertyIndex!.Value);
-
-                        state.Selection.SelectedPropertyIndex = null;
-
-                        return Task.CompletedTask;
-                    })
-                };
+                    return Task.CompletedTask;
+                }));
 
                 Element content = value;
                 {
