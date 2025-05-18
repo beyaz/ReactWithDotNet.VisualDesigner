@@ -1351,88 +1351,59 @@ sealed class ApplicationView : Component<ApplicationState>
 
                         return Task.CompletedTask;
                     }),
-                    
-                    DraggableTrue,
-                    OnDragStart(e =>
+
+                    // Drag Drop Operation
                     {
-                        state = state with
+                        DraggableTrue,
+                        OnDragStart(e =>
                         {
-                            StyleItemDragDrop = state.StyleItemDragDrop with
+                            state = state with
                             {
-                                StartItemIndex = int.Parse(e.target.id)
-                            }
-                        };
-                        return Task.CompletedTask;
-                    }),
-                    OnDragEnter(e =>
-                    {
-                        state = state with
+                                StyleItemDragDrop = state.StyleItemDragDrop with
+                                {
+                                    StartItemIndex = int.Parse(e.target.id)
+                                }
+                            };
+                            return Task.CompletedTask;
+                        }),
+                        OnDragEnter(e =>
                         {
-                            StyleItemDragDrop = state.StyleItemDragDrop with
+                            state = state with
                             {
-                                EndItemIndex = int.Parse(e.currentTarget.id)
-                            }
-                        };
-                        return Task.CompletedTask;
-                    })
+                                StyleItemDragDrop = state.StyleItemDragDrop with
+                                {
+                                    EndItemIndex = int.Parse(e.currentTarget.id)
+                                }
+                            };
+                            return Task.CompletedTask;
+                        })
+                    }
                     
                 };
 
                 if (state.StyleItemDragDrop.EndItemIndex == index)
                 {
-                    var dragPositionBefore = new FlexRowCentered(Size(24))
-                    {
-                        new div(Size(16), BorderRadius(32), Background(Blue200))
+                    var dragPositionBefore = CreateDropLocationElement(state.StyleItemDragDrop.Position == AttibuteDragPosition.Before, 
+                    [
+                        OnDragEnter(_ =>
                         {
-                            When(state.StyleItemDragDrop.Position == AttibuteDragPosition.Before,
-                                 Size(24) + Border(1, dotted, Blue600)),
+                            state = state with { StyleItemDragDrop = state.StyleItemDragDrop with { Position = AttibuteDragPosition.Before } };
+                            return Task.CompletedTask;
+                        }),
+                        OnDragLeave(OnStyleItemDropLocationLeaved),
+                        OnDrop(OnStyleItemDropLocationDroped)
+                    ]);
 
-                            OnDragEnter(_ =>
-                            {
-                                state = state with
-                                {
-                                    StyleItemDragDrop = state.StyleItemDragDrop with
-                                    {
-                                        Position = AttibuteDragPosition.Before
-                                    }
-                                };
-                                return Task.CompletedTask;
-                            }),
-                            OnDragLeave(_ =>
-                            {
-                                state = state with
-                                {
-                                    StyleItemDragDrop = state.StyleItemDragDrop with
-                                    {
-                                        Position = null
-                                    }
-                                };
-                                return Task.CompletedTask;
-                            }),
-                            OnDrop(OnStyleItemDroped)
-                        }
-                    };
-
-                    var dragPositionAfter = new FlexRowCentered(Size(24))
-                    {
-                        new div(Size(16), BorderRadius(32), Background(Blue200))
+                    var dragPositionAfter = CreateDropLocationElement(state.StyleItemDragDrop.Position == AttibuteDragPosition.After, 
+                    [
+                        OnDragEnter(_ =>
                         {
-                            When(state.StyleItemDragDrop.Position == AttibuteDragPosition.After,
-                                 Size(24) + Border(1, dotted, Blue600)),
-
-                            OnDragEnter(_ =>
-                            {
-                                state = state with { StyleItemDragDrop = state.StyleItemDragDrop with { Position = AttibuteDragPosition.After } };
-                                return Task.CompletedTask;
-                            }),
-                            OnDragLeave(_ =>
-                            {
-                                state = state with { StyleItemDragDrop = state.StyleItemDragDrop with { Position = null } };
-                                return Task.CompletedTask;
-                            }),
-                            OnDrop(OnStyleItemDroped)
-                        }
-                    };
+                            state = state with { StyleItemDragDrop = state.StyleItemDragDrop with { Position = AttibuteDragPosition.After } };
+                            return Task.CompletedTask;
+                        }),
+                        OnDragLeave(OnStyleItemDropLocationLeaved),
+                        OnDrop(OnStyleItemDropLocationDroped)
+                    ]);
                     
                     return new FlexRowCentered(Gap(8))
                     {
@@ -1619,7 +1590,32 @@ sealed class ApplicationView : Component<ApplicationState>
         }
     }
 
-    Task OnStyleItemDroped(DragEvent _)
+    Task OnStyleItemDropLocationLeaved(DragEvent _)
+    {
+        state = state with
+        {
+            StyleItemDragDrop = state.StyleItemDragDrop with
+            {
+                Position = null
+            }
+        };
+        return Task.CompletedTask;
+    }
+
+    static Element CreateDropLocationElement(bool onMouseOver, Modifier[] modifiers)
+    {
+        return new FlexRowCentered(Size(24))
+        {
+            new div(Size(16), BorderRadius(32), Background(Blue200))
+            {
+                When(onMouseOver, Size(24) + Border(1, dotted, Blue600)),
+
+                modifiers
+            }
+        };
+    }
+
+    Task OnStyleItemDropLocationDroped(DragEvent _)
     {
         var dd = state.StyleItemDragDrop;
 
