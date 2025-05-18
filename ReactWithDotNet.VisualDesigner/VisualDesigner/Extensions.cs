@@ -1,10 +1,44 @@
-﻿using System.IO;
-using System.Globalization;
+﻿using System.Globalization;
 
 namespace ReactWithDotNet.VisualDesigner;
 
 static class Extensions
 {
+    
+    /// <summary>
+    /// Bir öğeyi, listede başka bir öğenin önüne veya arkasına taşır.
+    /// Drag-and-drop gibi işlemler için idealdir.
+    /// </summary>
+    public static void MoveItemRelativeTo<T>(this List<T> list, int sourceIndex, int targetIndex, bool insertBefore)
+    {
+        if (list == null || sourceIndex == targetIndex || sourceIndex < 0 || targetIndex < 0 ||
+            sourceIndex >= list.Count || targetIndex >= list.Count)
+        {
+            return;
+        }
+
+        var item = list[sourceIndex];
+        
+        list.RemoveAt(sourceIndex);
+
+        if (sourceIndex < targetIndex)
+            targetIndex--;
+
+        int insertIndex = insertBefore ? targetIndex : targetIndex + 1;
+
+        if (insertIndex > list.Count)
+        {
+            insertIndex = list.Count;
+        }
+
+        if (insertIndex < 0)
+        {
+            insertIndex          = 0;
+        }
+
+        list.Insert(insertIndex, item);
+    }
+    
     public static bool IsDouble(this string input)
     {
         return double.TryParse(input, out _);
@@ -16,7 +50,7 @@ static class Extensions
     {
         return items.ToDictionary(x => x.key, x => x.value);
     }
-
+    
     public static void Then<A, B>(this (A a, B b) tuple, Action<A, B> nextAction)
     {
         nextAction(tuple.a, tuple.b);

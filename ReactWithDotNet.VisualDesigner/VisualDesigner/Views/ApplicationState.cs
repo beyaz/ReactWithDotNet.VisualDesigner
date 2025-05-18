@@ -56,8 +56,23 @@ public sealed record ApplicationState
     public LeftTabs LeftTab  { get; set; }
     
     public MainContentTabs MainContentTab  { get; set; }
+    
+    public required AttibuteDragDropData StyleItemDragDrop { get; init; }
 
     // @formatter:on
+}
+
+public sealed record AttibuteDragDropData
+{
+    public int? StartItemIndex { get; init; }
+    public int? EndItemIndex { get; init; }
+    public AttibuteDragPosition? Position { get; init; }
+}
+
+public enum AttibuteDragPosition
+{
+    Before,
+    After
 }
 
 public enum LeftTabs

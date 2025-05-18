@@ -47,7 +47,10 @@ sealed class ApplicationView : Component<ApplicationState>
             var lastUsage = (await GetLastUsageInfoByUserName(userName)).FirstOrDefault();
             if (lastUsage is not null && lastUsage.LastStateAsYaml.HasValue())
             {
-                state = DeserializeFromYaml<ApplicationState>(lastUsage.LastStateAsYaml);
+                state = DeserializeFromYaml<ApplicationState>(lastUsage.LastStateAsYaml) with
+                {
+                    StyleItemDragDrop = new()
+                };
 
                 UpdateZoomInClient();
 
@@ -68,7 +71,9 @@ sealed class ApplicationView : Component<ApplicationState>
                 Scale  = 100
             },
 
-            Selection = new()
+            Selection = new(),
+            
+            StyleItemDragDrop = new()
         };
 
         var projectId = await GetFirstProjectId();
@@ -211,7 +216,9 @@ sealed class ApplicationView : Component<ApplicationState>
 
             ComponentRootElement = componentRootElement,
 
-            Selection = new()
+            Selection = new(),
+            
+            StyleItemDragDrop = new()
         };
 
         if (state.ComponentRootElement is not null)
@@ -277,7 +284,9 @@ sealed class ApplicationView : Component<ApplicationState>
 
             Preview = state.Preview,
 
-            Selection = new()
+            Selection = new(),
+            
+            StyleItemDragDrop = new()
         };
 
         // try select first component
@@ -1246,7 +1255,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
             Element attributeItem(int index, string value)
             {
-                var isSelected = index == state.Selection.SelectedStyleIndex;
+                
 
                 var closeIcon = new FlexRowCentered
                 {
@@ -1284,7 +1293,14 @@ sealed class ApplicationView : Component<ApplicationState>
                     });
                 }
 
-                return new FlexRowCentered(CursorDefault, Padding(4, 8), BorderRadius(16), UserSelect(none))
+                var isSelected = index == state.Selection.SelectedStyleIndex;
+                
+                if (state.StyleItemDragDrop.StartItemIndex == index)
+                {
+                    isSelected = false;
+                }
+                
+                var styleItem = new FlexRowCentered(CursorDefault, Padding(4, 8), BorderRadius(16), UserSelect(none))
                 {
                     Background(isSelected ? Gray200 : Gray50),
                     Border(1, solid, Gray100),
@@ -1334,8 +1350,101 @@ sealed class ApplicationView : Component<ApplicationState>
                         }
 
                         return Task.CompletedTask;
+                    }),
+                    
+                    DraggableTrue,
+                    OnDragStart(e =>
+                    {
+                        state = state with
+                        {
+                            StyleItemDragDrop = state.StyleItemDragDrop with
+                            {
+                                StartItemIndex = int.Parse(e.target.id)
+                            }
+                        };
+                        return Task.CompletedTask;
+                    }),
+                    OnDragEnter(e =>
+                    {
+                        state = state with
+                        {
+                            StyleItemDragDrop = state.StyleItemDragDrop with
+                            {
+                                EndItemIndex = int.Parse(e.currentTarget.id)
+                            }
+                        };
+                        return Task.CompletedTask;
                     })
+                    
                 };
+
+                if (state.StyleItemDragDrop.EndItemIndex == index)
+                {
+                    var dragPositionBefore = new FlexRowCentered(Size(24))
+                    {
+                        new div(Size(16), BorderRadius(32), Background(Blue200))
+                        {
+                            When(state.StyleItemDragDrop.Position == AttibuteDragPosition.Before,
+                                 Size(24) + Border(1, dotted, Blue600)),
+
+                            OnDragEnter(_ =>
+                            {
+                                state = state with
+                                {
+                                    StyleItemDragDrop = state.StyleItemDragDrop with
+                                    {
+                                        Position = AttibuteDragPosition.Before
+                                    }
+                                };
+                                return Task.CompletedTask;
+                            }),
+                            OnDragLeave(_ =>
+                            {
+                                state = state with
+                                {
+                                    StyleItemDragDrop = state.StyleItemDragDrop with
+                                    {
+                                        Position = null
+                                    }
+                                };
+                                return Task.CompletedTask;
+                            }),
+                            OnDrop(OnStyleItemDroped)
+                        }
+                    };
+
+                    var dragPositionAfter = new FlexRowCentered(Size(24))
+                    {
+                        new div(Size(16), BorderRadius(32), Background(Blue200))
+                        {
+                            When(state.StyleItemDragDrop.Position == AttibuteDragPosition.After,
+                                 Size(24) + Border(1, dotted, Blue600)),
+
+                            OnDragEnter(_ =>
+                            {
+                                state = state with { StyleItemDragDrop = state.StyleItemDragDrop with { Position = AttibuteDragPosition.After } };
+                                return Task.CompletedTask;
+                            }),
+                            OnDragLeave(_ =>
+                            {
+                                state = state with { StyleItemDragDrop = state.StyleItemDragDrop with { Position = null } };
+                                return Task.CompletedTask;
+                            }),
+                            OnDrop(OnStyleItemDroped)
+                        }
+                    };
+                    
+                    return new FlexRowCentered(Gap(8))
+                    {
+                        dragPositionBefore,
+                        
+                        styleItem,
+                        
+                        dragPositionAfter
+                    };
+                }
+                
+                return styleItem;
             }
         }
 
@@ -1508,6 +1617,25 @@ sealed class ApplicationView : Component<ApplicationState>
                 };
             }
         }
+    }
+
+    Task OnStyleItemDroped(DragEvent _)
+    {
+        var dd = state.StyleItemDragDrop;
+
+        if (dd.StartItemIndex.HasValue)
+        {
+            
+            if (dd.EndItemIndex.HasValue)
+            {
+                
+                CurrentVisualElement.Styles.MoveItemRelativeTo(dd.StartItemIndex.Value, dd.EndItemIndex.Value,dd.Position == AttibuteDragPosition.Before);
+            }
+        }
+
+        state = state with { StyleItemDragDrop = new() };
+
+        return Task.CompletedTask;
     }
 
     Element PartScale()
