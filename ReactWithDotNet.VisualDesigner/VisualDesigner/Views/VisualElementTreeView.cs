@@ -229,65 +229,7 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
             };
         }
 
-        Element icon = null;
-        {
-            var styles = node.Styles;
-
-            var hasCol = styles.Contains("col") || styles.Contains("flex-col-centered");
-            var hasRow = styles.Contains("row") || styles.Contains("flex-row-centered");
-
-            var hasFlex = styles.Any(x => TryParseProperty(x).Is("display", "flex"));
-
-            var hasFlexDirectionColumn = styles.Any(x => TryParseProperty(x).Is("flex-direction", "column"));
-
-            var hasFlexDirectionRow = styles.Any(x => TryParseProperty(x).Is("flex-direction", "row"));
-
-            var hasHeightWithConstantValue = styles.Any(x => TryParseProperty(x).Is(r=>r.Value.IsDouble() &&r.Name.In("h", "height")));
-
-            var hasWidhtWithConstantValue = styles.Any(x => TryParseProperty(x).Is(r=>r.Value.IsDouble() &&r.Name.In("w", "width")));
-               
-
-            if (hasFlexDirectionColumn || hasCol)
-            {
-                icon = new IconFlexColumn() + Size(16) + Color(Gray300);
-            }
-            else if (hasFlexDirectionRow || hasFlex || hasRow)
-            {
-                icon = new IconFlexRow() + Size(16) + Color(Gray300);
-            }
-            else if (node.HasNoText() && styles.Count == 1 && hasHeightWithConstantValue)
-            {
-                icon = new IconSpaceVertical();
-            }
-            else if (node.HasNoText() && styles.Count == 1 && hasWidhtWithConstantValue)
-            {
-                icon = new IconSpaceHorizontal();
-            }
-        }
-
-        if (icon is null)
-        {
-            if (node.Tag == "img")
-            {
-                icon = new IconImage() + Size(16) + Color(Gray300);
-            }
-
-            if (node.HasText())
-            {
-                if (node.Tag[0] == 'h')
-                {
-                    icon = new IconHeader() + Size(16) + Color(Gray300);
-                }
-                else if (node.Tag == "a")
-                {
-                    icon = new IconLink() + Size(16) + Color(Gray300);
-                }
-                else
-                {
-                    icon = new IconText() + Size(16) + Color(Gray300);
-                }
-            }
-        }
+        var icon = calculateVisualElementIcon(node);
 
         var foldIcon = new FlexRowCentered(Size(16), PositionAbsolute, Top(4), Left(indent * 16 - 12), Hover(BorderRadius(36), Background(Gray50)))
         {
@@ -362,6 +304,71 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
         }
 
         return returnList;
+
+        static Element calculateVisualElementIcon(VisualElementModel node)
+        {
+            Element icon = null;
+            {
+                var styles = node.Styles;
+
+                var hasCol = styles.Contains("col") || styles.Contains("flex-col-centered");
+                var hasRow = styles.Contains("row") || styles.Contains("flex-row-centered");
+
+                var hasFlex = styles.Any(x => TryParseProperty(x).Is("display", "flex"));
+
+                var hasFlexDirectionColumn = styles.Any(x => TryParseProperty(x).Is("flex-direction", "column"));
+
+                var hasFlexDirectionRow = styles.Any(x => TryParseProperty(x).Is("flex-direction", "row"));
+
+                var hasHeightWithConstantValue = styles.Any(x => TryParseProperty(x).Is(r=>r.Value.IsDouble() &&r.Name.In("h", "height")));
+
+                var hasWidhtWithConstantValue = styles.Any(x => TryParseProperty(x).Is(r=>r.Value.IsDouble() &&r.Name.In("w", "width")));
+               
+
+                if (hasFlexDirectionColumn || hasCol)
+                {
+                    icon = new IconFlexColumn() + Size(16) + Color(Gray300);
+                }
+                else if (hasFlexDirectionRow || hasFlex || hasRow)
+                {
+                    icon = new IconFlexRow() + Size(16) + Color(Gray300);
+                }
+                else if (node.HasNoText() && styles.Count == 1 && hasHeightWithConstantValue)
+                {
+                    icon = new IconSpaceVertical();
+                }
+                else if (node.HasNoText() && styles.Count == 1 && hasWidhtWithConstantValue)
+                {
+                    icon = new IconSpaceHorizontal();
+                }
+            }
+
+            if (icon is null)
+            {
+                if (node.Tag == "img")
+                {
+                    icon = new IconImage() + Size(16) + Color(Gray300);
+                }
+
+                if (node.HasText())
+                {
+                    if (node.Tag[0] == 'h')
+                    {
+                        icon = new IconHeader() + Size(16) + Color(Gray300);
+                    }
+                    else if (node.Tag == "a")
+                    {
+                        icon = new IconLink() + Size(16) + Color(Gray300);
+                    }
+                    else
+                    {
+                        icon = new IconText() + Size(16) + Color(Gray300);
+                    }
+                }
+            }
+
+            return icon;
+        }
     }
 
     internal class State
