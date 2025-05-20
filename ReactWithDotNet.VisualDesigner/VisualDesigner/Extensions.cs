@@ -5,6 +5,16 @@ namespace ReactWithDotNet.VisualDesigner;
 static class Extensions
 {
     
+    public   static Maybe<int> TryReadTagAsDesignerComponentId(VisualElementModel model)
+    {
+        if (int.TryParse(model.Tag, out var componentId))
+        {
+            return componentId;
+        }
+
+        return None;
+    }
+    
     /// <summary>
     /// Bir öğeyi, listede başka bir öğenin önüne veya arkasına taşır.
     /// Drag-and-drop gibi işlemler için idealdir.

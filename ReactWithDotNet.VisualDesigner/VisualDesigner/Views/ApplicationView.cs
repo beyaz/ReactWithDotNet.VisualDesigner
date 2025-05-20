@@ -665,7 +665,7 @@ sealed class ApplicationView : Component<ApplicationState>
                                     this.FailNotification(result.Error.Message);
                                     return;
                                 }
-                                
+
                                 if (result.Value.HasChange is false)
                                 {
                                     this.SuccessNotification("File already same.");
@@ -674,7 +674,6 @@ sealed class ApplicationView : Component<ApplicationState>
                                 {
                                     this.SuccessNotification("File updated.");
                                 }
-                               
                             })
                         }
                     }
@@ -1221,7 +1220,8 @@ sealed class ApplicationView : Component<ApplicationState>
         Element inputTag;
         {
             var inputValue = visualElementModel.Tag;
-            if (int.TryParse(inputValue, out var componentId))
+
+            foreach (var componentId in TryReadTagAsDesignerComponentId(visualElementModel))
             {
                 var component = await DbOperation(db => db.FirstOrDefaultAsync<ComponentEntity>(x => x.Id == componentId));
                 if (component is null)

@@ -327,6 +327,11 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
                 return new IconText() + Size(16) + Color(Gray300);
             }
 
+            if (TryReadTagAsDesignerComponentId(node).Any())
+            {
+                return new IconReact() + Size(16) + Color(Gray300);
+            }
+
             var styles = node.Styles;
 
             var hasCol = styles.Contains("col") || styles.Contains("flex-col-centered");
