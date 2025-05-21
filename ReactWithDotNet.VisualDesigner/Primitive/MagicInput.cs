@@ -1,28 +1,34 @@
 ﻿namespace ReactWithDotNet.VisualDesigner.Primitive;
 
-delegate Task InputChangeHandler( string senderName, string newValue);
+delegate Task InputChangeHandler(string senderName, string newValue);
+
 delegate Task InputFocusHandler(string senderName);
 
 delegate Task InputPasteHandler(string text);
 
 sealed class MagicInput : Component<MagicInput.State>
 {
+    public bool AutoFocus { get; init; }
+
+    public bool FitContent { get; init; }
+    public string Id { get; set; }
+
+    public bool IsBold { get; init; }
+    public bool IsTextAlignCenter { get; init; }
+    public bool IsTextAlignRight { get; init; }
     public required string Name { get; init; }
-    
+
     [CustomEvent]
     public InputChangeHandler OnChange { get; init; }
-    
+
     [CustomEvent]
     public InputFocusHandler OnFocus { get; init; }
-    
-    [CustomEvent]
-    public InputPasteHandler OnPaste { get; init; }
+
+    public string Placeholder { get; init; }
 
     public IReadOnlyList<string> Suggestions { get; init; } = [];
 
     public string Value { get; init; }
-
-    public bool FitContent { get; init; }
 
     protected override Task constructor()
     {
@@ -41,14 +47,6 @@ sealed class MagicInput : Component<MagicInput.State>
         return Task.CompletedTask;
     }
 
-    public bool IsBold { get; init; }
-    public bool IsTextAlignRight { get; init; }
-    public string Placeholder { get; init; }
-    public bool IsTextAlignCenter { get; init; }
-
-    public bool AutoFocus { get; init; }
-    public string Id { get; set; }
-
     protected override Element render()
     {
         return new FlexColumn(FitContent is false ? WidthFull : null)
@@ -61,13 +59,12 @@ sealed class MagicInput : Component<MagicInput.State>
                 valueBindDebounceHandler = OnTypingFinished,
                 onKeyDown                = OnKeyDown,
                 onClick                  = OnInputClicked,
-                onPaste = OnPasted,
-                placeholder = Placeholder,
-                onFocus = OnFocused,
-                onBlur = OnBlur,
-                id=Id,
-                autoComplete = "off",
-                spellCheck = "false",
+                placeholder              = Placeholder,
+                onFocus                  = OnFocused,
+                onBlur                   = OnBlur,
+                id                       = Id,
+                autoComplete             = "off",
+                spellCheck               = "false",
                 style =
                 {
                     OutlineNone,
@@ -89,28 +86,30 @@ sealed class MagicInput : Component<MagicInput.State>
         };
     }
 
-    Task OnPasted(ClipboardEvent e)
+    Task CloseSuggestion()
     {
-        var value = e.target.value;
-        if (value.HasValue())
-        {
-            DispatchEvent(OnPaste, [value]);    
-        }
-        
-        
+        state.ShowSuggestions = false;
+
         return Task.CompletedTask;
+    }
+
+    void InitializeState()
+    {
+        state = new()
+        {
+            InitialName = Name,
+
+            InitialValue = Value,
+
+            Value = Value,
+
+            FilteredSuggestions = Suggestions ?? []
+        };
     }
 
     Task OnBlur(FocusEvent e)
     {
         Client.GotoMethod(500, CloseSuggestion);
-
-        return Task.CompletedTask;
-    }
-    
-    Task CloseSuggestion()
-    {
-        state.ShowSuggestions = false;
 
         return Task.CompletedTask;
     }
@@ -121,20 +120,6 @@ sealed class MagicInput : Component<MagicInput.State>
         DispatchEvent(OnFocus, [Name]);
 
         return Task.CompletedTask;
-    }
-
-    void InitializeState()
-    {
-        state = new()
-        {
-            InitialName = Name,
-            
-            InitialValue = Value,
-
-            Value = Value,
-
-            FilteredSuggestions = Suggestions ?? []
-        };
     }
 
     [StopPropagation]
@@ -208,6 +193,7 @@ sealed class MagicInput : Component<MagicInput.State>
                 {
                     DispatchEvent(OnChange, [Name, state.Value]);
                 }
+
                 return Task.CompletedTask;
             }
 
@@ -215,10 +201,10 @@ sealed class MagicInput : Component<MagicInput.State>
             {
                 state.Value = suggestions[state.SelectedSuggestionOffset.Value];
 
-                DispatchEvent(OnChange, [Name,state.Value]);
+                DispatchEvent(OnChange, [Name, state.Value]);
             }
         }
-        
+
         if (e.key == "ArrowRight")
         {
             if (state.SelectedSuggestionOffset is not null)
@@ -255,7 +241,7 @@ sealed class MagicInput : Component<MagicInput.State>
 
         state.SelectedSuggestionOffset = null;
 
-        state.FilteredSuggestions = Suggestions.Where(x => x.Replace(" ",string.Empty).Contains((state.Value + string.Empty).Replace(" ",string.Empty), StringComparison.OrdinalIgnoreCase))
+        state.FilteredSuggestions = Suggestions.Where(x => x.Replace(" ", string.Empty).Contains((state.Value + string.Empty).Replace(" ", string.Empty), StringComparison.OrdinalIgnoreCase))
             .Take(5).ToList();
 
         return Task.CompletedTask;
@@ -278,15 +264,15 @@ sealed class MagicInput : Component<MagicInput.State>
         return new FlexColumn(PositionRelative, SizeFull)
         {
             Zindex3,
-            new FlexColumn(PositionAbsolute, Top(4),  HeightAuto, Background(White), BoxShadow(0, 6, 6, 0, rgba(22, 45, 61, .06)), Padding(5), BorderRadius(5))
+            new FlexColumn(PositionAbsolute, Top(4), HeightAuto, Background(White), BoxShadow(0, 6, 6, 0, rgba(22, 45, 61, .06)), Padding(5), BorderRadius(5))
             {
                 Zindex4,
                 IsTextAlignRight ? Right(0) : null,
                 IsTextAlignCenter ? Right(none) : null,
-                
+
                 suggestions.Take(5).Select(ToOption)
             },
-            
+
             IsTextAlignCenter ? AlignItemsCenter : null
         };
 
@@ -313,9 +299,9 @@ sealed class MagicInput : Component<MagicInput.State>
     {
         public IReadOnlyList<string> FilteredSuggestions { get; set; }
 
-        public string InitialValue { get; init; }
-        
         public required string InitialName { get; init; }
+
+        public string InitialValue { get; init; }
 
         public int? SelectedSuggestionOffset { get; set; }
 

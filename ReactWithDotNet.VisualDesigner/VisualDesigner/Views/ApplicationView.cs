@@ -1581,8 +1581,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
                         return Task.CompletedTask;
                     },
-                    OnPaste = TryImportHtml,
-                    Value   = value
+                    Value = value
                 };
             }
 
