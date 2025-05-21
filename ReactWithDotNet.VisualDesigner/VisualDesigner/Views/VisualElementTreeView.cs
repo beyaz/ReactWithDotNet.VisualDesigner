@@ -35,6 +35,9 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
 
     [CustomEvent]
     public Func<string, Task> SelectionChanged { get; init; }
+    
+    [CustomEvent]
+    public Func<string, Task> NavigateToComponent { get; init; }
 
     [CustomEvent]
     public OnTreeItemHover TreeItemHover { get; init; }
@@ -249,6 +252,8 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
             eyeIcon = null;
         }
 
+        var isDesignerComponent = TryReadTagAsDesignerComponentId(node).Any();
+        
         var returnList = new List<Element>
         {
             new FlexColumn(PaddingLeft(indent * 16), Id(path), OnClick(OnTreeItemClicked), OnMouseEnter(OnMouseEnterHandler))
@@ -282,7 +287,9 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
                 OnDragEnter(OnDragEntered),
                 OnDrop(OnDroped),
 
-                afterPositionElement
+                afterPositionElement,
+                
+                When(isDesignerComponent, OnDoubleClick(OnDoubleClicked))
             }
         };
 
@@ -369,6 +376,16 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
 
             return null;
         }
+    }
+
+    [StopPropagation]
+    Task OnDoubleClicked(MouseEvent e)
+    {
+        var selectedPath = e.currentTarget.id;
+
+        DispatchEvent(NavigateToComponent, [selectedPath]);
+
+        return Task.CompletedTask;
     }
 
     internal class State

@@ -196,20 +196,23 @@ sealed class ApplicationView : Component<ApplicationState>
 
     async Task ChangeSelectedComponent(string componentName)
     {
-        int componentId;
+        var componentResult = await DbOperation(db => db.GetComponentByComponentName_NotNull(componentName));
+        if (componentResult.HasError)
+        {
+            this.FailNotification(componentResult.Error.Message);
+            return;
+        }
+
+        var component = componentResult.Value;
+
+        await ChangeSelectedComponent(component.Id, component);
+    }
+    async Task ChangeSelectedComponent(int componentId, ComponentEntity component)
+    {
+        component ??= await DbOperation(db => db.FirstOrDefaultAsync<ComponentEntity>(x => x.Id == componentId));
+        
         VisualElementModel componentRootElement;
         {
-            var componentResult = await DbOperation(db => db.GetComponentByComponentName_NotNull(componentName));
-            if (componentResult.HasError)
-            {
-                this.FailNotification(componentResult.Error.Message);
-                return;
-            }
-
-            var component = componentResult.Value;
-
-            componentId = component.Id;
-
             var userVersion = await TryGetUserVersion(componentId, state.UserName);
             if (userVersion is not null)
             {
@@ -229,7 +232,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
             Preview = state.Preview,
 
-            ComponentName = componentName,
+            ComponentName = component.Name,
 
             ComponentId = componentId,
 
@@ -1009,6 +1012,17 @@ sealed class ApplicationView : Component<ApplicationState>
                     state.Selection = new();
                 }
 
+                return Task.CompletedTask;
+            },
+            
+            NavigateToComponent = path =>
+            {
+                var node = FindTreeNodeByTreePath(state.ComponentRootElement, path);
+                foreach (var componentId in TryReadTagAsDesignerComponentId(node))
+                {
+                    return ChangeSelectedComponent(componentId, null);
+                }
+                
                 return Task.CompletedTask;
             }
         } + When(state.LeftTab != LeftTabs.ElementTree, DisplayNone);
