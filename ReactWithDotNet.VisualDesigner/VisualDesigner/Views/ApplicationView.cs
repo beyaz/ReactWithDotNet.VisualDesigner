@@ -707,6 +707,13 @@ sealed class ApplicationView : Component<ApplicationState>
                             OnClick(OnMainContentTabHeaderClicked),
                             Id((int)MainContentTabs.ProjectConfig),
                             When(state.MainContentTab == MainContentTabs.ProjectConfig, BorderRadius(4), Border(1, solid, Theme.BorderColor))
+                        },
+                        new FlexRowCentered(Padding(4), Border(1, solid, transparent))
+                        {
+                            "Import Html",
+                            OnClick(OnMainContentTabHeaderClicked),
+                            Id((int)MainContentTabs.ImportHtml),
+                            When(state.MainContentTab == MainContentTabs.ImportHtml, BorderRadius(4), Border(1, solid, Theme.BorderColor))
                         }
                     }
                 }
