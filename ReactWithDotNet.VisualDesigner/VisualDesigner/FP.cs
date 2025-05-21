@@ -156,7 +156,7 @@ static class FP
 
     public static NoneObject None => NoneObject.Instance;
 
-    public static Result<IReadOnlyList<B>> ConvertAll<A, B>(this IEnumerable<NotNullResult<A>> response, Func<A, Result<B>> convertFunc)
+    public static Result<IReadOnlyList<B>> ConvertAll<A, B>(this IEnumerable<Result<A>> response, Func<A, Result<B>> convertFunc)
     {
         List<B> values = [];
 

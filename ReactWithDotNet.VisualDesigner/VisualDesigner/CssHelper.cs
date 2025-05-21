@@ -676,7 +676,7 @@ public static class CssHelper
         }
     }
 
-    public static NotNullResult<DesignerStyleItem> CreateDesignerStyleItemFromText(int projectId, string designerStyleItem)
+    public static Result<DesignerStyleItem> CreateDesignerStyleItemFromText(int projectId, string designerStyleItem)
     {
         // try process from plugin
         {
