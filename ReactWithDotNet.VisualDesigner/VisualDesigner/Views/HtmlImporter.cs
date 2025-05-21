@@ -79,7 +79,7 @@ static class HtmlImporter
                 {
                     foreach (var (key, value) in designerStyleItem.RawHtmlStyles)
                     {
-                        if (key == htmlAttributeName && value == htmlAttributeValue)
+                        if (key == htmlAttributeName && TryClearStringValue(value) == TryClearStringValue(htmlAttributeValue))
                         {
                             return true;
                         }
