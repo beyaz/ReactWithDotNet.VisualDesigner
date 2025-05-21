@@ -1790,6 +1790,13 @@ sealed class ApplicationView : Component<ApplicationState>
 
     Task TryImportHtml(string htmlText)
     {
+        if (htmlText.HasNoValue())
+        {
+            return Task.CompletedTask;
+        }
+
+        htmlText = htmlText.Trim();
+        
         if (!HtmlImporter.CanImportAsHtml(htmlText))
         {
             return Task.CompletedTask;
