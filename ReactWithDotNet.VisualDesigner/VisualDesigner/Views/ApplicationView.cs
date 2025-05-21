@@ -1619,11 +1619,6 @@ sealed class ApplicationView : Component<ApplicationState>
                     isSelected = false;
                 }
 
-                static int getPropertyIndex(ShadowHtmlElement htmlElement)
-                {
-                    return int.Parse(htmlElement.id.RemoveFromStart("PROPS-"));
-                }
-
                 var propertyItem = new FlexRowCentered(CursorDefault, Padding(4, 8), BorderRadius(16))
                 {
                     Background(isSelected ? Gray200 : Gray50),
@@ -1740,6 +1735,11 @@ sealed class ApplicationView : Component<ApplicationState>
                 }
 
                 return propertyItem;
+
+                static int getPropertyIndex(ShadowHtmlElement htmlElement)
+                {
+                    return int.Parse(htmlElement.id.RemoveFromStart("PROPS-"));
+                }
             }
         }
     }
