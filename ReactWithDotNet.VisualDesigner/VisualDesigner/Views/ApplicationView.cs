@@ -26,6 +26,8 @@ sealed class ApplicationView : Component<ApplicationState>
                 VisualElementTreeItemPath = treeItemPath
             };
 
+            state.LeftTab = LeftTabs.ElementTree;
+
             return Task.CompletedTask;
         });
 
