@@ -31,6 +31,66 @@ static class HtmlImporter
         return ConvertToVisualElementModel(projectId, htmlDocument.DocumentNode.FirstChild);
     }
 
+    static void ArrangeAccordingToProject(int projectId, List<string> designerStyles)
+    {
+        var project = GetProjectConfig(projectId);
+
+        foreach (var (className, css) in project.Styles)
+        {
+            var response = Style.ParseCssAsDictionary(css);
+            if (response.exception is not null)
+            {
+                continue;
+            }
+
+            var htmlStyleAttributes = response.value;
+
+            if (hasFullMatch(projectId, designerStyles, htmlStyleAttributes))
+            {
+                foreach (var (htmlAttributeName, htmlAttributeValue) in htmlStyleAttributes)
+                {
+                    designerStyles.RemoveAll(x => hasMatch(projectId, x, htmlAttributeName, htmlAttributeValue));
+                }
+
+                designerStyles.Add(className);
+            }
+        }
+
+        return;
+
+        static bool hasFullMatch(int projectId, IReadOnlyList<string> designerStyles, IReadOnlyDictionary<string, string> htmlStyleAttributes)
+        {
+            foreach (var (htmlAttributeName, htmlAttributeValue) in htmlStyleAttributes)
+            {
+                if (!designerStyles.Any(x => hasMatch(projectId, x, htmlAttributeName, htmlAttributeValue)))
+                {
+                    return false;
+                }
+            }
+
+            return false;
+        }
+
+        static bool hasMatch(int projectId, string designerStyleText, string htmlAttributeName, string htmlAttributeValue)
+        {
+            foreach (var designerStyleItem in CreateDesignerStyleItemFromText(projectId, designerStyleText))
+            {
+                if (designerStyleItem.RawHtmlStyles.Count == 1)
+                {
+                    foreach (var (key, value) in designerStyleItem.RawHtmlStyles)
+                    {
+                        if (key == htmlAttributeName && value == htmlAttributeValue)
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            return false;
+        }
+    }
+
     static VisualElementModel ConvertToVisualElementModel(int projectId, HtmlNode htmlNode)
     {
         if (htmlNode is null)
@@ -52,13 +112,10 @@ static class HtmlImporter
         {
             Tag = htmlNode.Name
         };
-        
+
         HtmlElement element = null;
         {
-            TryGetHtmlElementTypeByTagName(model.Tag).HasValue(elementType =>
-            {
-                element = (HtmlElement)Activator.CreateInstance(elementType);
-            });
+            TryGetHtmlElementTypeByTagName(model.Tag).HasValue(elementType => { element = (HtmlElement)Activator.CreateInstance(elementType); });
         }
 
         foreach (var attribute in htmlNode.Attributes)
@@ -132,18 +189,18 @@ static class HtmlImporter
 
             if (element is not null)
             {
-                var propertyInfo = element.GetType().GetProperty(attributeName.Replace("-",""), BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
+                var propertyInfo = element.GetType().GetProperty(attributeName.Replace("-", ""), BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
                 if (propertyInfo is not null)
                 {
                     attributeName = propertyInfo.Name;
-                    
+
                     if (propertyInfo.PropertyType == typeof(string))
                     {
-                        attributeValue = "'"+  attributeValue + "'";
+                        attributeValue = "'" + attributeValue + "'";
                     }
                 }
             }
-            
+
             model.Properties.Add(attributeName + ": " + attributeValue);
         }
 
@@ -165,45 +222,8 @@ static class HtmlImporter
             model.Children.Add(childModel);
         }
 
+        ArrangeAccordingToProject(projectId, model.Styles);
+
         return model;
-    }
-
-    static void ArrangeAccordingToProject(int proectId,List<string> designerStyles)
-    {
-        var project = GetProjectConfig(proectId);
-
-        foreach (var (className, css) in project.Styles)
-        {
-            var response = Style.ParseCssAsDictionary(css);
-            if (response.exception is not null)
-            {
-                continue;
-            }
-            
-            foreach (var (attributeName, attributeValue) in response.value)
-            {
-                
-            }
-        }
-
-        static void hasFullMatch(IReadOnlyList<string> designerStyles,IReadOnlyDictionary<string,string> htmlStyleAttributes)
-        {
-            foreach (var (htmlAttributeName, htmlAttributeValue) in htmlStyleAttributes)
-            {
-                
-            }
-        }
-        
-        //static void hasMatch(int projectId, string designerStyleText,string htmlAttributeName, string htmlAttributeValue)
-        //{
-        //    foreach (var x in CreateDesignerStyleItemFromText(projectId, designerStyleText))
-        //    {
-        //        var item = ;
-        //        if (item is null)
-        //        {
-        //            continue;
-        //        }
-        //    }
-        //}
     }
 }
