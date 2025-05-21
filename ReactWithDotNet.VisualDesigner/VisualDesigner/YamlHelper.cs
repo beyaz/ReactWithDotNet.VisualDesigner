@@ -37,7 +37,7 @@ static class YamlHelper
 
         public bool Resolve(NodeEvent nodeEvent, ref Type type)
         {
-            if (type.IsInterface && type.IsGenericType && CustomGenericInterfaceImplementations.TryGetValue(type.GetGenericTypeDefinition(), out var concreteType))
+            if (type is { IsInterface: true, IsGenericType: true } && CustomGenericInterfaceImplementations.TryGetValue(type.GetGenericTypeDefinition(), out var concreteType))
             {
                 type = concreteType.MakeGenericType(type.GetGenericArguments());
                 return true;
