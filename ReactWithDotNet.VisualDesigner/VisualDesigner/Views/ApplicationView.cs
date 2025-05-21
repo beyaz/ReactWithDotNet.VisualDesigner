@@ -349,7 +349,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
         Element middle()
         {
-            return state.MainContentTab.In(MainContentTabs.Code, MainContentTabs.ProjectConfig) ?
+            return state.MainContentTab.In(MainContentTabs.Code, MainContentTabs.ProjectConfig, MainContentTabs.ImportHtml) ?
                 new(FlexGrow(1), Padding(7), OverflowXAuto)
                 {
                     YamlEditor
@@ -484,7 +484,7 @@ sealed class ApplicationView : Component<ApplicationState>
                 }
             }
         }
-        
+
         if (state.MainContentTab == MainContentTabs.ImportHtml)
         {
             await TryImportHtml(state.MainContentText);
@@ -1582,7 +1582,7 @@ sealed class ApplicationView : Component<ApplicationState>
                         return Task.CompletedTask;
                     },
                     OnPaste = TryImportHtml,
-                    Value = value
+                    Value   = value
                 };
             }
 
@@ -1740,25 +1740,6 @@ sealed class ApplicationView : Component<ApplicationState>
         }
     }
 
-
-    Task TryImportHtml(string htmlText)
-    {
-        if (!HtmlImporter.CanImportAsHtml(htmlText))
-        {
-            return Task.CompletedTask;
-        }
-
-        var model = HtmlImporter.ConvertToVisualElementModel(GetProjectConfig(state.ProjectId), htmlText);
-        if (model is null)
-        {
-            return Task.CompletedTask;
-        }
-
-        CurrentVisualElement.Children.Add(model);
-
-        return Task.CompletedTask;
-    }
-    
     Element PartScale()
     {
         return new FlexRowCentered(Border(1, solid, Theme.BorderColor), BorderRadius(4), Height(36))
@@ -1806,6 +1787,24 @@ sealed class ApplicationView : Component<ApplicationState>
                 }
             }
         };
+    }
+
+    Task TryImportHtml(string htmlText)
+    {
+        if (!HtmlImporter.CanImportAsHtml(htmlText))
+        {
+            return Task.CompletedTask;
+        }
+
+        var model = HtmlImporter.ConvertToVisualElementModel(GetProjectConfig(state.ProjectId), htmlText);
+        if (model is null)
+        {
+            return Task.CompletedTask;
+        }
+
+        CurrentVisualElement.Children.Add(model);
+
+        return Task.CompletedTask;
     }
 
     Result UpdateElementNode(string path, string yaml)
@@ -1893,7 +1892,7 @@ sealed class ApplicationView : Component<ApplicationState>
         return new Editor
         {
             valueBind       = () => state.MainContentText,
-            defaultLanguage = "yaml",
+            defaultLanguage = state.MainContentTab == MainContentTabs.ImportHtml ? "html" : "yaml",
             options =
             {
                 renderLineHighlight = "none",
