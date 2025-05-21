@@ -484,6 +484,11 @@ sealed class ApplicationView : Component<ApplicationState>
                 }
             }
         }
+        
+        if (state.MainContentTab == MainContentTabs.ImportHtml)
+        {
+            await TryImportHtml(state.YamlText);
+        }
 
         if (state.MainContentTab == MainContentTabs.ProjectConfig)
         {
