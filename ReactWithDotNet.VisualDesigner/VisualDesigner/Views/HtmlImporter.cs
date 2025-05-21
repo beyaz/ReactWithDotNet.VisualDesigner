@@ -67,7 +67,7 @@ static class HtmlImporter
                 }
             }
 
-            return false;
+            return true;
         }
 
         static bool hasMatch(ProjectConfig project, string designerStyleText, string htmlAttributeName, string htmlAttributeValue)

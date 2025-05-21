@@ -1,4 +1,6 @@
-﻿namespace ReactWithDotNet.VisualDesigner.Test;
+﻿using FluentAssertions;
+
+namespace ReactWithDotNet.VisualDesigner.Test;
 
 [TestClass]
 public sealed class HtmlImporterTest
@@ -20,7 +22,13 @@ public sealed class HtmlImporterTest
         };
 
         var model = HtmlImporter.ConvertToVisualElementModel(project, html);
-        
+        model.Styles.Should().AllBeEquivalentTo(new string[]
+        {
+            "color: #222530",
+            "word-wrap: break-word",
+            "ABC"
+        });
+
 
 
     }
