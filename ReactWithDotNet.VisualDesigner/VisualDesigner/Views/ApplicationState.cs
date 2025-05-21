@@ -51,7 +51,7 @@ public sealed record ApplicationState
     
     public string UserName { get; init; }
     
-    public string YamlText { get; set; }
+    public string MainContentText { get; set; }
     
     public LeftTabs LeftTab  { get; set; }
     

@@ -474,9 +474,9 @@ sealed class ApplicationView : Component<ApplicationState>
         if (state.MainContentTab == MainContentTabs.Code)
         {
             // check has any edit
-            if (state.YamlText != SerializeToYaml(CurrentVisualElement))
+            if (state.MainContentText != SerializeToYaml(CurrentVisualElement))
             {
-                var result = UpdateElementNode(state.Selection.VisualElementTreeItemPath, state.YamlText);
+                var result = UpdateElementNode(state.Selection.VisualElementTreeItemPath, state.MainContentText);
                 if (result.HasError)
                 {
                     this.FailNotification(result.Error.Message);
@@ -487,7 +487,7 @@ sealed class ApplicationView : Component<ApplicationState>
         
         if (state.MainContentTab == MainContentTabs.ImportHtml)
         {
-            await TryImportHtml(state.YamlText);
+            await TryImportHtml(state.MainContentText);
         }
 
         if (state.MainContentTab == MainContentTabs.ProjectConfig)
@@ -500,7 +500,7 @@ sealed class ApplicationView : Component<ApplicationState>
                     return Fail("ProjectNotFound");
                 }
 
-                await db.UpdateAsync(project with { ConfigAsYaml = state.YamlText });
+                await db.UpdateAsync(project with { ConfigAsYaml = state.MainContentText });
 
                 Cache.Clear();
 
@@ -517,7 +517,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
         if (tab == MainContentTabs.Design)
         {
-            state.YamlText = null;
+            state.MainContentText = null;
         }
     }
 
@@ -1878,21 +1878,21 @@ sealed class ApplicationView : Component<ApplicationState>
 
     Element YamlEditor()
     {
-        state.YamlText = null;
+        state.MainContentText = null;
 
         if (state.MainContentTab == MainContentTabs.Code)
         {
-            state.YamlText = SerializeToYaml(CurrentVisualElement);
+            state.MainContentText = SerializeToYaml(CurrentVisualElement);
         }
 
         if (state.MainContentTab == MainContentTabs.ProjectConfig)
         {
-            state.YamlText = DbOperation(db => db.FirstOrDefault<ProjectEntity>(x => x.Id == state.ProjectId)?.ConfigAsYaml);
+            state.MainContentText = DbOperation(db => db.FirstOrDefault<ProjectEntity>(x => x.Id == state.ProjectId)?.ConfigAsYaml);
         }
 
         return new Editor
         {
-            valueBind       = () => state.YamlText,
+            valueBind       = () => state.MainContentText,
             defaultLanguage = "yaml",
             options =
             {
