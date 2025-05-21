@@ -1569,23 +1569,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
                         return Task.CompletedTask;
                     },
-                    OnPaste = text =>
-                    {
-                        if (!HtmlImporter.CanImportAsHtml(text))
-                        {
-                            return Task.CompletedTask;
-                        }
-
-                        var model = HtmlImporter.ConvertToVisualElementModel(GetProjectConfig(state.ProjectId), text);
-                        if (model is null)
-                        {
-                            return Task.CompletedTask;
-                        }
-
-                        CurrentVisualElement.Children.Add(model);
-
-                        return Task.CompletedTask;
-                    },
+                    OnPaste = TryImportHtml,
                     Value = value
                 };
             }
@@ -1744,6 +1728,25 @@ sealed class ApplicationView : Component<ApplicationState>
         }
     }
 
+
+    Task TryImportHtml(string htmlText)
+    {
+        if (!HtmlImporter.CanImportAsHtml(htmlText))
+        {
+            return Task.CompletedTask;
+        }
+
+        var model = HtmlImporter.ConvertToVisualElementModel(GetProjectConfig(state.ProjectId), htmlText);
+        if (model is null)
+        {
+            return Task.CompletedTask;
+        }
+
+        CurrentVisualElement.Children.Add(model);
+
+        return Task.CompletedTask;
+    }
+    
     Element PartScale()
     {
         return new FlexRowCentered(Border(1, solid, Theme.BorderColor), BorderRadius(4), Height(36))
