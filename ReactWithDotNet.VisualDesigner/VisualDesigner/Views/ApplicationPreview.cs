@@ -68,6 +68,7 @@ sealed class ApplicationPreview : Component
             var renderContext = new RenderContext
             {
                 ProjectId          = projectId,
+                Project = GetProjectConfig(projectId),
                 UserName           = userName,
                 OnTreeItemClicked  = OnItemClick,
                 ReactContext       = Context,
@@ -316,7 +317,7 @@ sealed class ApplicationPreview : Component
 
             {
                 var result = model.Styles
-                    .Select(x => CreateDesignerStyleItemFromText(context.ProjectId, x))
+                    .Select(x => CreateDesignerStyleItemFromText(context.Project, x))
                     .ConvertAll(designerItem => designerItem.ToStyleModifier())
                     .Then(styleModifiers => element.Add(styleModifiers.ToArray()));
 
@@ -470,5 +471,7 @@ sealed class ApplicationPreview : Component
         public required ReactContext ReactContext { get; init; }
 
         public required string UserName { get; init; }
+        
+        public ProjectConfig Project { get; init; }
     }
 }

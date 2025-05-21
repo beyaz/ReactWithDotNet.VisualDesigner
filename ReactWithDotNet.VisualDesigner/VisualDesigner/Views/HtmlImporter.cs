@@ -20,7 +20,7 @@ static class HtmlImporter
         return false;
     }
 
-    public static VisualElementModel ConvertToVisualElementModel(int projectId, string html)
+    public static VisualElementModel ConvertToVisualElementModel(ProjectConfig project, string html)
     {
         var htmlDocument = new HtmlDocument
         {
@@ -28,12 +28,11 @@ static class HtmlImporter
         };
         htmlDocument.LoadHtml(html);
 
-        return ConvertToVisualElementModel(projectId, htmlDocument.DocumentNode.FirstChild);
+        return ConvertToVisualElementModel(project, htmlDocument.DocumentNode.FirstChild);
     }
 
-    static void ArrangeAccordingToProject(int projectId, List<string> designerStyles)
+    static void ArrangeAccordingToProject(ProjectConfig project, List<string> designerStyles)
     {
-        var project = GetProjectConfig(projectId);
 
         foreach (var (className, css) in project.Styles)
         {
@@ -45,11 +44,11 @@ static class HtmlImporter
 
             var htmlStyleAttributes = response.value;
 
-            if (hasFullMatch(projectId, designerStyles, htmlStyleAttributes))
+            if (hasFullMatch(project, designerStyles, htmlStyleAttributes))
             {
                 foreach (var (htmlAttributeName, htmlAttributeValue) in htmlStyleAttributes)
                 {
-                    designerStyles.RemoveAll(x => hasMatch(projectId, x, htmlAttributeName, htmlAttributeValue));
+                    designerStyles.RemoveAll(x => hasMatch(project, x, htmlAttributeName, htmlAttributeValue));
                 }
 
                 designerStyles.Add(className);
@@ -58,11 +57,11 @@ static class HtmlImporter
 
         return;
 
-        static bool hasFullMatch(int projectId, IReadOnlyList<string> designerStyles, IReadOnlyDictionary<string, string> htmlStyleAttributes)
+        static bool hasFullMatch(ProjectConfig project, IReadOnlyList<string> designerStyles, IReadOnlyDictionary<string, string> htmlStyleAttributes)
         {
             foreach (var (htmlAttributeName, htmlAttributeValue) in htmlStyleAttributes)
             {
-                if (!designerStyles.Any(x => hasMatch(projectId, x, htmlAttributeName, htmlAttributeValue)))
+                if (!designerStyles.Any(x => hasMatch(project, x, htmlAttributeName, htmlAttributeValue)))
                 {
                     return false;
                 }
@@ -71,9 +70,9 @@ static class HtmlImporter
             return false;
         }
 
-        static bool hasMatch(int projectId, string designerStyleText, string htmlAttributeName, string htmlAttributeValue)
+        static bool hasMatch(ProjectConfig project, string designerStyleText, string htmlAttributeName, string htmlAttributeValue)
         {
-            foreach (var designerStyleItem in CreateDesignerStyleItemFromText(projectId, designerStyleText))
+            foreach (var designerStyleItem in CreateDesignerStyleItemFromText(project, designerStyleText))
             {
                 if (designerStyleItem.RawHtmlStyles.Count == 1)
                 {
@@ -91,7 +90,7 @@ static class HtmlImporter
         }
     }
 
-    static VisualElementModel ConvertToVisualElementModel(int projectId, HtmlNode htmlNode)
+    static VisualElementModel ConvertToVisualElementModel(ProjectConfig project, HtmlNode htmlNode)
     {
         if (htmlNode is null)
         {
@@ -145,7 +144,7 @@ static class HtmlImporter
 
                 List<string> remainigClassNames = [];
 
-                foreach (var (className, styles) in from className in listOfCssClass select processClassName(projectId, className))
+                foreach (var (className, styles) in from className in listOfCssClass select processClassName(project, className))
                 {
                     model.Styles.AddRange(styles);
 
@@ -159,9 +158,9 @@ static class HtmlImporter
 
                 attributeValue = string.Join(" ", remainigClassNames);
 
-                static (Maybe<string> className, IReadOnlyList<string> styles) processClassName(int projectId, string className)
+                static (Maybe<string> className, IReadOnlyList<string> styles) processClassName(ProjectConfig project, string className)
                 {
-                    foreach (var designerStyleItem in TryConvertCssUtilityClassToHtmlStyle(projectId, className))
+                    foreach (var designerStyleItem in TryConvertCssUtilityClassToHtmlStyle(project, className))
                     {
                         var returnStyles = new List<string>();
 
@@ -204,7 +203,7 @@ static class HtmlImporter
             model.Properties.Add(attributeName + ": " + attributeValue);
         }
 
-        ArrangeAccordingToProject(projectId, model.Styles);
+        ArrangeAccordingToProject(project, model.Styles);
         
         if (htmlNode.ChildNodes.Count == 1 && htmlNode.ChildNodes[0].NodeType == HtmlNodeType.Text && htmlNode.ChildNodes[0].InnerText.HasValue())
         {
@@ -215,7 +214,7 @@ static class HtmlImporter
 
         foreach (var child in htmlNode.ChildNodes)
         {
-            var childModel = ConvertToVisualElementModel(projectId, child);
+            var childModel = ConvertToVisualElementModel(project, child);
             if (childModel is null)
             {
                 continue;

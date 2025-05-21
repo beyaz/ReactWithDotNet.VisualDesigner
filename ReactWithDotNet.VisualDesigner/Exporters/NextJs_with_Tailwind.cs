@@ -110,11 +110,11 @@ static class NextJs_with_Tailwind
         return $"{{t(\"{TryClearStringValue(text)}\")}}";
     }
 
-    static async Task<Result<IReadOnlyList<string>>> CalculateElementTreeTsxCodes(int projectId, VisualElementModel rootVisualElement)
+    static async Task<Result<IReadOnlyList<string>>> CalculateElementTreeTsxCodes(ProjectConfig project, VisualElementModel rootVisualElement)
     {
         ReactNode rootNode;
         {
-            var result = await ConvertVisualElementModelToReactNodeModel(projectId, rootVisualElement);
+            var result = await ConvertVisualElementModelToReactNodeModel(project, rootVisualElement);
             if (result.HasError)
             {
                 return result.Error;
@@ -131,6 +131,8 @@ static class NextJs_with_Tailwind
         var (projectId, componentId, userName) = input;
 
         var user = GetUser(projectId, userName);
+        
+        var project = GetProjectConfig(projectId);
 
         var data = await GetComponentData(new() { ComponentId = componentId, UserName = userName });
         if (data.HasError)
@@ -186,7 +188,7 @@ static class NextJs_with_Tailwind
 
             IReadOnlyList<string> linesToInject;
             {
-                var result = await CalculateElementTreeTsxCodes(projectId, rootVisualElement);
+                var result = await CalculateElementTreeTsxCodes(project, rootVisualElement);
                 if (result.HasError)
                 {
                     return result.Error;
@@ -513,7 +515,7 @@ static class NextJs_with_Tailwind
         return lines;
     }
 
-    static async Task<Result<ReactNode>> ConvertVisualElementModelToReactNodeModel(int projectId, VisualElementModel element)
+    static async Task<Result<ReactNode>> ConvertVisualElementModelToReactNodeModel(ProjectConfig project, VisualElementModel element)
     {
         List<string> classNames = [];
 
@@ -608,7 +610,7 @@ static class NextJs_with_Tailwind
         {
             string tailwindClassName;
             {
-                var result = ConvertDesignerStyleItemToTailwindClassName(projectId, styleItem);
+                var result = ConvertDesignerStyleItemToTailwindClassName(project, styleItem);
                 if (result.HasError)
                 {
                     return result.Error;
@@ -649,7 +651,7 @@ static class NextJs_with_Tailwind
         {
             ReactNode childNode;
             {
-                var result = await ConvertVisualElementModelToReactNodeModel(projectId, child);
+                var result = await ConvertVisualElementModelToReactNodeModel(project, child);
                 if (result.HasError)
                 {
                     return result.Error;

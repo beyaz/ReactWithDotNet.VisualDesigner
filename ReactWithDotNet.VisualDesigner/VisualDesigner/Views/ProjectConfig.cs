@@ -1,7 +1,9 @@
 ﻿namespace ReactWithDotNet.VisualDesigner.Views;
 
-sealed record ProjectConfig
+public sealed record ProjectConfig
 {
+    public string Name { get; init; }
+    
     public IReadOnlyDictionary<string, string> Colors { get; init; } = new Dictionary<string, string>();
 
     public string GlobalCss { get; init; }

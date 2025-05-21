@@ -55,7 +55,7 @@ public static class CssHelper
         { "384px", 96 }
     };
 
-    public static Result<string> ConvertDesignerStyleItemToTailwindClassName(int projectId, string designerStyleItemText)
+    public static Result<string> ConvertDesignerStyleItemToTailwindClassName(ProjectConfig project, string designerStyleItemText)
     {
         string pseudo = null;
 
@@ -65,9 +65,7 @@ public static class CssHelper
 
             designerStyleItemText = x.NewText;
         });
-
-        var project = GetProjectConfig(projectId);
-
+        
         if (pseudo.HasNoValue() && project.Styles.TryGetValue(designerStyleItemText, out _))
         {
             return designerStyleItemText;
@@ -77,7 +75,7 @@ public static class CssHelper
         {
             DesignerStyleItem designerStyleItem;
             {
-                var result = CreateDesignerStyleItemFromText(projectId, designerStyleItemText);
+                var result = CreateDesignerStyleItemFromText(project, designerStyleItemText);
                 if (result.HasError)
                 {
                     return result.Error;
@@ -90,7 +88,7 @@ public static class CssHelper
             {
                 string tailwindClassName;
                 {
-                    var result = ConvertToTailwindClass(projectId, cssAttributeName, cssAttributeValue);
+                    var result = ConvertToTailwindClass(project, cssAttributeName, cssAttributeValue);
                     if (result.HasError)
                     {
                         return result.Error;
@@ -140,15 +138,13 @@ public static class CssHelper
 
         return string.Join(" ", tailwindClassNames.Select(x => pseudo + ":" + x));
 
-        static Result<string> ConvertToTailwindClass(int projectId, string cssAttributeName, string cssAttributeValue)
+        static Result<string> ConvertToTailwindClass(ProjectConfig project, string cssAttributeName, string cssAttributeValue)
         {
             if (cssAttributeValue is null)
             {
                 return new ArgumentNullException(nameof(cssAttributeValue));
             }
-
-            var project = GetProjectConfig(projectId);
-
+            
             // check is conditional sample: border-width: {props.isSelected} ? 2 : 5
             {
                 var conditionalValue = TextParser.TryParseConditionalValue(cssAttributeValue);
@@ -156,7 +152,7 @@ public static class CssHelper
                 {
                     string lefTailwindClass;
                     {
-                        var result = ConvertToTailwindClass(projectId, cssAttributeName, conditionalValue.left);
+                        var result = ConvertToTailwindClass(project, cssAttributeName, conditionalValue.left);
                         if (result.HasError)
                         {
                             return result.Error;
@@ -170,7 +166,7 @@ public static class CssHelper
                     if (conditionalValue.right.HasValue())
                     {
                         {
-                            var result = ConvertToTailwindClass(projectId, cssAttributeName, conditionalValue.right);
+                            var result = ConvertToTailwindClass(project, cssAttributeName, conditionalValue.right);
                             if (result.HasError)
                             {
                                 return result.Error;
@@ -194,7 +190,7 @@ public static class CssHelper
 
             // TRY TO HANDLE BY PROJECT CONFIG
             {
-                foreach (var className in tryConvert_HtmlCssStyle_to_ProjectDefinedCssClass(projectId, cssAttributeName, cssAttributeValue))
+                foreach (var className in tryConvert_HtmlCssStyle_to_ProjectDefinedCssClass(project, cssAttributeName, cssAttributeValue))
                 {
                     return className;
                 }
@@ -656,12 +652,10 @@ public static class CssHelper
 
             return new InvalidOperationException($"Css not handled. {cssAttributeName}: {cssAttributeValue}");
 
-            static Maybe<string> tryConvert_HtmlCssStyle_to_ProjectDefinedCssClass(int projectId, string cssAttributeName, string cssAttributeValue)
+            static Maybe<string> tryConvert_HtmlCssStyle_to_ProjectDefinedCssClass(ProjectConfig project, string cssAttributeName, string cssAttributeValue)
             {
-                return Cache.AccessValue($"{nameof(tryConvert_HtmlCssStyle_to_ProjectDefinedCssClass)}-{projectId}-{cssAttributeName}-{cssAttributeValue}", () =>
+                return Cache.AccessValue($"{nameof(tryConvert_HtmlCssStyle_to_ProjectDefinedCssClass)}-{project.Name}-{cssAttributeName}-{cssAttributeValue}", () =>
                 {
-                    var project = GetProjectConfig(projectId);
-
                     foreach (var (key, value) in project.Styles)
                     {
                         if (value == $"{cssAttributeName}: {cssAttributeValue};")
@@ -676,11 +670,11 @@ public static class CssHelper
         }
     }
 
-    public static Result<DesignerStyleItem> CreateDesignerStyleItemFromText(int projectId, string designerStyleItem)
+    public static Result<DesignerStyleItem> CreateDesignerStyleItemFromText(ProjectConfig project, string designerStyleItem)
     {
         // try process from plugin
         {
-            var result = tryProcessByProjectConfig(projectId, designerStyleItem);
+            var result = tryProcessByProjectConfig(project, designerStyleItem);
             if (result.HasError)
             {
                 return result.Error;
@@ -693,7 +687,7 @@ public static class CssHelper
         }
 
         {
-            foreach (var item in TryConvertCssUtilityClassToHtmlStyle(projectId, designerStyleItem))
+            foreach (var item in TryConvertCssUtilityClassToHtmlStyle(project, designerStyleItem))
             {
                 return item;
             }
@@ -712,7 +706,7 @@ public static class CssHelper
 
             if (value is not null)
             {
-                var htmlStyle = ToHtmlStyle(projectId, name, value);
+                var htmlStyle = ToHtmlStyle(project, name, value);
                 if (htmlStyle.HasError)
                 {
                     return htmlStyle.Error;
@@ -735,7 +729,7 @@ public static class CssHelper
             };
         }
 
-        static Result<DesignerStyleItem> tryProcessByProjectConfig(int projectId, string designerStyleItem)
+        static Result<DesignerStyleItem> tryProcessByProjectConfig(ProjectConfig project, string designerStyleItem)
         {
             string name, value, pseudo;
             {
@@ -752,9 +746,7 @@ public static class CssHelper
                     designerStyleItem += ":" + value;
                 }
             }
-
-            var project = GetProjectConfig(projectId);
-
+            
             if (project.Styles.TryGetValue(designerStyleItem, out var cssText))
             {
                 return Style.ParseCssAsDictionary(cssText).Then(styleMap => new DesignerStyleItem
@@ -843,7 +835,7 @@ public static class CssHelper
         return (StyleModifier)style;
     }
 
-    public static Maybe<DesignerStyleItem> TryConvertCssUtilityClassToHtmlStyle(int projectId, string utilityCssClassName)
+    public static Maybe<DesignerStyleItem> TryConvertCssUtilityClassToHtmlStyle(ProjectConfig project, string utilityCssClassName)
     {
         string pseudo = null;
         {
@@ -856,7 +848,6 @@ public static class CssHelper
         }
 
         // try resolve from project config
-        var project = GetProjectConfig(projectId);
         {
             if (project.Styles.TryGetValue(utilityCssClassName, out var cssText))
             {
@@ -1173,7 +1164,7 @@ public static class CssHelper
         return new ArgumentOutOfRangeException($"{pseudoName} not recognized");
     }
 
-    static HtmlStyle ToHtmlStyle(int projectId, string name, string value)
+    static HtmlStyle ToHtmlStyle(ProjectConfig project, string name, string value)
     {
         if (name == null)
         {
@@ -1300,7 +1291,7 @@ public static class CssHelper
                 {
                     for (var i = 0; i < parts.Length; i++)
                     {
-                        if (GetProjectConfig(projectId).Colors.TryGetValue(parts[i], out var color))
+                        if (project.Colors.TryGetValue(parts[i], out var color))
                         {
                             parts[i] = color;
                         }
@@ -1346,7 +1337,7 @@ public static class CssHelper
             case "background":
             case "color":
             {
-                if (GetProjectConfig(projectId).Colors.TryGetValue(value, out var realColor))
+                if (project.Colors.TryGetValue(value, out var realColor))
                 {
                     value = realColor;
                 }
