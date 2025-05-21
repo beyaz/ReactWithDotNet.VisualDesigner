@@ -16,7 +16,7 @@ public sealed class HtmlImporterTest
         {
             Styles = new Dictionary<string, string>
             {
-                { "ABC", "font-size: 16px; font-family: Host Grotesk; font-weight: 400; line-height: 24px;" }
+                { "ABC", "font-size: 16px; font-family: \"Host Grotesk\"; font-weight: 400; line-height: 24px;" }
             }
         };
 

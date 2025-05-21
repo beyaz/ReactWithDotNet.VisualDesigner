@@ -33,7 +33,6 @@ static class HtmlImporter
 
     static void ArrangeAccordingToProject(ProjectConfig project, List<string> designerStyles)
     {
-
         foreach (var (className, css) in project.Styles)
         {
             var response = Style.ParseCssAsDictionary(css);
@@ -204,7 +203,7 @@ static class HtmlImporter
         }
 
         ArrangeAccordingToProject(project, model.Styles);
-        
+
         if (htmlNode.ChildNodes.Count == 1 && htmlNode.ChildNodes[0].NodeType == HtmlNodeType.Text && htmlNode.ChildNodes[0].InnerText.HasValue())
         {
             model.Properties.Add($"-text: '{htmlNode.ChildNodes[0].InnerText.Trim()}'");
@@ -222,8 +221,6 @@ static class HtmlImporter
 
             model.Children.Add(childModel);
         }
-
-     
 
         return model;
 
