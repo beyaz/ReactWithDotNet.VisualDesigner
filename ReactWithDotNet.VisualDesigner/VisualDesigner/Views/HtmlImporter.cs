@@ -204,6 +204,8 @@ static class HtmlImporter
             model.Properties.Add(attributeName + ": " + attributeValue);
         }
 
+        ArrangeAccordingToProject(projectId, model.Styles);
+        
         if (htmlNode.ChildNodes.Count == 1 && htmlNode.ChildNodes[0].NodeType == HtmlNodeType.Text && htmlNode.ChildNodes[0].InnerText.HasValue())
         {
             model.Properties.Add($"-text: '{htmlNode.ChildNodes[0].InnerText.Trim()}'");
@@ -222,7 +224,7 @@ static class HtmlImporter
             model.Children.Add(childModel);
         }
 
-        ArrangeAccordingToProject(projectId, model.Styles);
+     
 
         return model;
     }
