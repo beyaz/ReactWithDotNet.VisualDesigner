@@ -7,79 +7,6 @@ namespace ReactWithDotNet.VisualDesigner.Views;
 
 static class ApplicationLogic
 {
-
-    public static Maybe<string> TryFindFilePathFromWebRequestPath(string requestPath)
-    {
-        
-        if (requestPath.StartsWith("/wwwroot/"))
-        {
-            foreach (var projectLocalWorkspacePath in GetUserLastAccessedProjectLocalWorkspacePath())
-            {
-                var filePath = Path.Combine(projectLocalWorkspacePath,"public", requestPath.RemoveFromStart("/wwwroot/"));
-
-                if (File.Exists(filePath))
-                {
-                    return filePath;
-                }
-
-                return None;
-            }
-        }
-        
-
-        return None;
-    }
-    
-    public static Maybe<string> GetUserLastAccessedProjectLocalWorkspacePath()
-    {
-        foreach (var user in DbOperation(db=> from user in db.Select<UserEntity>(x=>x.UserName == Environment.UserName) orderby user.LastAccessTime descending select user))
-        {
-            return user.LocalWorkspacePath;
-        }
-
-        return None;
-    }
-    
-   
-    
-    public static async Task<Maybe<(string contentType, byte[] fileBytes)>> TryConvertLocalFilePathToFileContentResultData(string filePath)
-    {
-        if (File.Exists(filePath))
-        {
-            var ext = Path.GetExtension(filePath).ToLowerInvariant();
-            var contentType = ext switch
-            {
-                ".jpg" or ".jpeg" => "image/jpeg",
-                ".png"            => "image/png",
-                ".gif"            => "image/gif",
-                ".svg"            => "image/svg+xml",
-                _                 => "application/octet-stream"
-            };
-
-            var fileBytes = await File.ReadAllBytesAsync(filePath);
-
-            return (contentType,fileBytes);
-        }
-
-        return None;
-    }
-
-    public static string GetTagText(string tag)
-    {
-        if (int.TryParse(tag, out var componentId))
-        {
-            var component = DbOperation(db => db.FirstOrDefault<ComponentEntity>(x => x.Id == componentId));
-            if (component is null)
-            {
-                return tag;
-            }
-
-            return component.Name.Split('/').Last();
-        }
-
-        return tag;
-    }
-    
     public static readonly CachedObjectMap Cache = new() { Timeout = TimeSpan.FromMinutes(5) };
 
     public static Task<Result> CommitComponent(ApplicationState state)
@@ -165,7 +92,6 @@ static class ApplicationLogic
 
         return component;
     }
-
 
     public static Task<Result<VisualElementModel>> GetComponenUserOrMainVersionAsync(int componentId, string userName)
     {
@@ -426,16 +352,6 @@ static class ApplicationLogic
         return items;
     }
 
-    public static IReadOnlyList<string> GetStyleGroupConditionSuggestions(ApplicationState state)
-    {
-        return ["M", "SM", "MD", "LG", "XL", "XXL", "hover", "focus", "active", "visited", "disabled", "checked", "first-child", "last-child"];
-    }
-
-    public static async Task<IReadOnlyList<string>> GetSuggestionsForComponentSelection(ApplicationState state)
-    {
-        return (await GetAllComponentNamesInProject(state.ProjectId)).Where(name => name != state.ComponentName).ToList();
-    }
-
     public static async Task<IReadOnlyList<string>> GetTagSuggestions(ApplicationState state)
     {
         var suggestions = new List<string>(TagNameList);
@@ -445,6 +361,32 @@ static class ApplicationLogic
         suggestions.Add("heroui/Checkbox");
 
         return suggestions;
+    }
+
+    public static string GetTagText(string tag)
+    {
+        if (int.TryParse(tag, out var componentId))
+        {
+            var component = DbOperation(db => db.FirstOrDefault<ComponentEntity>(x => x.Id == componentId));
+            if (component is null)
+            {
+                return tag;
+            }
+
+            return component.Name.Split('/').Last();
+        }
+
+        return tag;
+    }
+
+    public static Maybe<string> GetUserLastAccessedProjectLocalWorkspacePath()
+    {
+        foreach (var user in DbOperation(db => from user in db.Select<UserEntity>(x => x.UserName == Environment.UserName) orderby user.LastAccessTime descending select user))
+        {
+            return user.LocalWorkspacePath;
+        }
+
+        return None;
     }
 
     public static Task<Result> RollbackComponent(ApplicationState state)
@@ -493,6 +435,28 @@ static class ApplicationLogic
         });
     }
 
+    public static async Task<Maybe<(string contentType, byte[] fileBytes)>> TryConvertLocalFilePathToFileContentResultData(string filePath)
+    {
+        if (File.Exists(filePath))
+        {
+            var ext = Path.GetExtension(filePath).ToLowerInvariant();
+            var contentType = ext switch
+            {
+                ".jpg" or ".jpeg" => "image/jpeg",
+                ".png"            => "image/png",
+                ".gif"            => "image/gif",
+                ".svg"            => "image/svg+xml",
+                _                 => "application/octet-stream"
+            };
+
+            var fileBytes = await File.ReadAllBytesAsync(filePath);
+
+            return (contentType, fileBytes);
+        }
+
+        return None;
+    }
+
     public static async Task<Maybe<ComponentEntity>> TryFindComponentByComponentName(int projectId, string componentName)
     {
         if (componentName.HasNoValue())
@@ -505,6 +469,26 @@ static class ApplicationLogic
             select record;
 
         return query.FirstOrDefault();
+    }
+
+    public static Maybe<string> TryFindFilePathFromWebRequestPath(string requestPath)
+    {
+        if (requestPath.StartsWith("/wwwroot/"))
+        {
+            foreach (var projectLocalWorkspacePath in GetUserLastAccessedProjectLocalWorkspacePath())
+            {
+                var filePath = Path.Combine(projectLocalWorkspacePath, "public", requestPath.RemoveFromStart("/wwwroot/"));
+
+                if (File.Exists(filePath))
+                {
+                    return filePath;
+                }
+
+                return None;
+            }
+        }
+
+        return None;
     }
 
     public static Task<Result> TrySaveComponentForUser(ApplicationState state)
