@@ -25,7 +25,6 @@ public sealed class HtmlImporterTest
         model.Styles.Should().BeEquivalentTo(new List<string>
         {
             "color: #222530",
-            "word-wrap: break-word",
             "ABC"
         });
     }

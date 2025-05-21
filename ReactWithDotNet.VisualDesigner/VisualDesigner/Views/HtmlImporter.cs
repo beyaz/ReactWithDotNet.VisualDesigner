@@ -127,7 +127,7 @@ static class HtmlImporter
                 var (map, _) = Style.ParseCssAsDictionary(attributeValue);
                 if (map != null)
                 {
-                    foreach (var item in map)
+                    foreach (var item in map.Where(skipWordWrap))
                     {
                         model.Styles.Add(item.Key + ": " + item.Value);
                     }
@@ -226,5 +226,15 @@ static class HtmlImporter
      
 
         return model;
+
+        static bool skipWordWrap(KeyValuePair<string, string> htmlStyleAttribute)
+        {
+            if (htmlStyleAttribute.Key == "word-wrap" && htmlStyleAttribute.Value == "break-word")
+            {
+                return false;
+            }
+
+            return true;
+        }
     }
 }
