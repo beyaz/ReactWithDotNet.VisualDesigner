@@ -254,10 +254,8 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
             return returnList;
         }
 
-        for (var i = 0; i < node.Children.Count; i++)
+        foreach (var child in node.Children)
         {
-            var child = node.Children[i];
-
             returnList.AddRange(ToVisual(child, indent + 1));
         }
 

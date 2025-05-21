@@ -1,6 +1,5 @@
 ﻿global using static ReactWithDotNet.VisualDesigner.DataAccess.Extensions;
 using System.IO;
-using Dommel;
 
 namespace ReactWithDotNet.VisualDesigner.DataAccess;
 
