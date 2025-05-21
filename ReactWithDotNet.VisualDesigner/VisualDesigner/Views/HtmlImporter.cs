@@ -167,4 +167,43 @@ static class HtmlImporter
 
         return model;
     }
+
+    static void ArrangeAccordingToProject(int proectId,List<string> designerStyles)
+    {
+        var project = GetProjectConfig(proectId);
+
+        foreach (var (className, css) in project.Styles)
+        {
+            var response = Style.ParseCssAsDictionary(css);
+            if (response.exception is not null)
+            {
+                continue;
+            }
+            
+            foreach (var (attributeName, attributeValue) in response.value)
+            {
+                
+            }
+        }
+
+        static void hasFullMatch(IReadOnlyList<string> designerStyles,IReadOnlyDictionary<string,string> htmlStyleAttributes)
+        {
+            foreach (var (htmlAttributeName, htmlAttributeValue) in htmlStyleAttributes)
+            {
+                
+            }
+        }
+        
+        //static void hasMatch(int projectId, string designerStyleText,string htmlAttributeName, string htmlAttributeValue)
+        //{
+        //    foreach (var x in CreateDesignerStyleItemFromText(projectId, designerStyleText))
+        //    {
+        //        var item = ;
+        //        if (item is null)
+        //        {
+        //            continue;
+        //        }
+        //    }
+        //}
+    }
 }
