@@ -362,7 +362,12 @@ public static class CssHelper
                     return $"rounded-br-[{cssAttributeValue}]";
 
                 case "flex-grow":
-                    return $"flex-grow-[{cssAttributeValue}]";
+                    return cssAttributeValue switch
+                    {
+                        "0" => "grow-0",
+                        "1" => "grow",
+                        _   => $"flex-grow-[{cssAttributeValue}]"
+                    };
 
                 case "flex-wrap":
                 {
