@@ -533,7 +533,7 @@ public static class CssHelper
                         cssAttributeValue = htmlColor;
                     }
 
-                    return $"bg-[{cssAttributeValue}]";
+                    return $"bg-[{cssAttributeValue.Replace(" ","")}]";
                 }
                 case "position":
                     return $"{cssAttributeValue}";
@@ -546,6 +546,16 @@ public static class CssHelper
                 case "cursor":
                 {
                     return $"cursor-{cssAttributeValue}";
+                }
+                
+                case "user-select":
+                {
+                    if (cssAttributeValue == "none")
+                    {
+                        return "select-none";
+                    }
+
+                    break;
                 }
 
                 case "inset":
@@ -1281,6 +1291,7 @@ public static class CssHelper
             case "box-shadow":
             case "white-space":
             case "visibility":
+            case "user-select":
             {
                 return (name, value);
             }
