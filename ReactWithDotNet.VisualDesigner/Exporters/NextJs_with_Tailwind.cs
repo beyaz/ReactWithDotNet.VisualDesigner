@@ -123,7 +123,7 @@ static class NextJs_with_Tailwind
             rootNode = result.Value;
         }
 
-        ArrangeImageAndLinkTags(rootNode);
+        rootNode = ArrangeImageAndLinkTags(rootNode);
 
         return ConvertReactNodeModelToTsxCode(rootNode, null, 2);
     }
@@ -703,13 +703,11 @@ static class NextJs_with_Tailwind
         return new(' ', indentLevel * 4);
     }
 
-    static void ArrangeImageAndLinkTags(ReactNode node)
+    static ReactNode ArrangeImageAndLinkTags(ReactNode node)
     {
-        
-        
         if (node.Tag == "img")
         {
-            node.Tag = "Image";
+            node = node with { Tag = "Image" };
             if (!(node.Properties.Any(x=>x.Name =="width") && node.Properties.Any(x=>x.Name =="height")))
             {
                 node.Properties.Add(new(){ Name = "fill", Value = "true"});
@@ -718,10 +716,15 @@ static class NextJs_with_Tailwind
         
         if (node.Tag == "a")
         {
-            node.Tag = "Link";
+            node = node with { Tag = "Link" };
         }
         
-        node.Children.ForEach(ArrangeImageAndLinkTags);
+        for (var i = 0; i < node.Children.Count; i++)
+        {
+            node.Children[i] = ArrangeImageAndLinkTags(node.Children[i]);
+        }
+
+        return node;
 
     }
     static Result<string> InjectRender(IReadOnlyList<string> fileContent, string targetComponentName, IReadOnlyList<string> linesToInject)
@@ -812,7 +815,7 @@ static class NextJs_with_Tailwind
 
         public List<ReactProperty> Properties { get; } = [];
 
-        public string Tag { get; set; }
+        public string Tag { get; init; }
 
         public string Text { get; init; }
         
