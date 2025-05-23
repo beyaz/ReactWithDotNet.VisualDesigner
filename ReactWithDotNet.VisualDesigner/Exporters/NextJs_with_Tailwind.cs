@@ -123,6 +123,8 @@ static class NextJs_with_Tailwind
             rootNode = result.Value;
         }
 
+        ArrangeImageAndLinkTags(rootNode);
+
         return ConvertReactNodeModelToTsxCode(rootNode, null, 2);
     }
 
@@ -328,7 +330,7 @@ static class NextJs_with_Tailwind
             }
         }
 
-        var elementType = TryGetHtmlElementTypeByTagName(nodeTag == "Image" ? "img" : nodeTag == "Link" ? "a" : nodeTag);
+        var elementType = TryGetHtmlElementTypeByTagName(nodeTag == "Image" ? "img" : (nodeTag == "Link" ? "a": nodeTag));
 
         var tag = nodeTag.Split(['/', '.']).Last(); // todo: fix
         if (int.TryParse(nodeTag, out var componentId))
@@ -531,8 +533,6 @@ static class NextJs_with_Tailwind
 
         if (tag == "img")
         {
-            tag = "Image";
-
             if (element.Properties.Any(x => x.Contains("alt:")) is false)
             {
                 element.Properties.Add("alt: \"?\"");
@@ -546,17 +546,6 @@ static class NextJs_with_Tailwind
                 element.Properties.Add(sizeProperty.Replace("size:", "width:"));
 
                 element.Properties.Add(sizeProperty.Replace("size:", "height:"));
-            }
-            else
-            {
-                var hasNoWidthDecleration = element.Properties.Any(x => x.Contains("w:") || x.Contains("width:")) is false;
-                var hasNoHeightDecleration = element.Properties.Any(x => x.Contains("h:") || x.Contains("height:")) is false;
-                var hasNoFilltDecleration = element.Properties.Any(x => x.Contains("fill:")) is false;
-
-                if (hasNoWidthDecleration && hasNoHeightDecleration && hasNoFilltDecleration)
-                {
-                    element.Properties.Add("fill: {true}");
-                }
             }
 
             // try to add width and height to default style
@@ -708,6 +697,27 @@ static class NextJs_with_Tailwind
         return new(' ', indentLevel * 4);
     }
 
+    static void ArrangeImageAndLinkTags(ReactNode node)
+    {
+        
+        
+        if (node.Tag == "img")
+        {
+            node.Tag = "Image";
+            if (!(node.Properties.Any(x=>x.Name =="width") && node.Properties.Any(x=>x.Name =="height")))
+            {
+                node.Properties.Add(new(){ Name = "fill", Value = "true"});
+            }
+        }
+        
+        if (node.Tag == "a")
+        {
+            node.Tag = "Link";
+        }
+        
+        node.Children.ForEach(ArrangeImageAndLinkTags);
+
+    }
     static Result<string> InjectRender(IReadOnlyList<string> fileContent, string targetComponentName, IReadOnlyList<string> linesToInject)
     {
         var lines = fileContent.ToList();
@@ -796,7 +806,7 @@ static class NextJs_with_Tailwind
 
         public List<ReactProperty> Properties { get; } = [];
 
-        public string Tag { get; init; }
+        public string Tag { get; set; }
 
         public string Text { get; init; }
     }
