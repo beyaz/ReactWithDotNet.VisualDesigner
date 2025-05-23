@@ -1,6 +1,7 @@
 ﻿using System.Collections.Immutable;
 using System.Data;
 using System.IO;
+using System.Reflection;
 using ReactWithDotNet.VisualDesigner.DataAccess;
 
 namespace ReactWithDotNet.VisualDesigner.Views;
@@ -131,6 +132,24 @@ static class ApplicationLogic
 
             tag = selectedVisualItem.Tag;
         }
+
+        if (tag != null)
+        {
+            items.AddRange(Cache.AccessValue($"{nameof(GetPropSuggestions)}-{tag}", () =>
+            {
+                var returnList = new List<string>();
+                foreach (var htmlElementType in TryGetHtmlElementTypeByTagName(tag))
+                {
+                    foreach (var propertyInfo in htmlElementType.GetProperties(BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance))
+                    {
+                        items.Add($"{propertyInfo.Name}: ");
+                    }
+                }
+
+                return returnList;
+            }));
+        }
+       
 
         items.Add("-text: props.userName");
         items.Add("-text: state.userName");
