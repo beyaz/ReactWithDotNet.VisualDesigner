@@ -251,6 +251,10 @@ sealed class ApplicationPreview : Component
                         }
 
                         calculateSrcFromValue(context, model, value).HasValue(src => { elementAsImage.src = src; });
+                        if (elementAsImage.src.HasNoValue())
+                        {
+                            elementAsImage.src = DummySrc(500);
+                        }
                         continue;
 
                         static Maybe<string> calculateSrcFromValue(RenderContext context, VisualElementModel model, string value)

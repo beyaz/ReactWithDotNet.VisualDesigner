@@ -142,7 +142,7 @@ static class ApplicationLogic
                 {
                     foreach (var propertyInfo in htmlElementType.GetProperties(BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance))
                     {
-                        items.Add($"{propertyInfo.Name}: ");
+                        returnList.Add($"{propertyInfo.Name}: {propertyInfo.PropertyType.Name}");
                     }
                 }
 
@@ -204,21 +204,9 @@ static class ApplicationLogic
             }
         }
 
-        if (tag == "a")
-        {
-            items.Add("href: ");
-        }
+     
 
-        if (tag == "i")
-        {
-            items.Add("class: ph ph-minus");
-            items.Add("class: ph ph-plus");
-
-            items.Add("class: ph ph-facebook-logo");
-            items.Add("class: ph ph-x-logo");
-            items.Add("class: ph ph-instagram-logo");
-            items.Add("class: ph ph-linkedin-logo");
-        }
+       
 
         items.Add("-items-source-design-time-count: 3");
         items.Add("-items-source: {state.userList}");
