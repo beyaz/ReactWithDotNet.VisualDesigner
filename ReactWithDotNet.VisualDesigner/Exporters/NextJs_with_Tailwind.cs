@@ -568,8 +568,15 @@ static class NextJs_with_Tailwind
                 }
             }
         }
+        
+        
 
-        var node = new ReactNode { Tag = tag };
+        var node = new ReactNode
+        {
+            Tag = tag,
+            
+            HtmlElementType = TryGetHtmlElementTypeByTagName(tag)
+        };
 
         // Add properties
         foreach (var property in element.Properties)
@@ -627,7 +634,11 @@ static class NextJs_with_Tailwind
         // Add text content
         if (element.HasText())
         {
-            node.Children.Add(new() { Text = element.GetText() });
+            node.Children.Add(new()
+            {
+                Text = element.GetText(),
+                HtmlElementType = None
+            });
         }
 
         // Add children
@@ -804,6 +815,8 @@ static class NextJs_with_Tailwind
         public string Tag { get; set; }
 
         public string Text { get; init; }
+        
+        public required Maybe<Type> HtmlElementType { get; init; }
     }
 
     record ReactProperty
