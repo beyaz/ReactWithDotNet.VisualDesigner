@@ -525,12 +525,7 @@ static class NextJs_with_Tailwind
 
         // Open tag
         var tag = element.Tag;
-
-        if (tag == "a")
-        {
-            tag = "Link";
-        }
-
+        
         if (tag == "img")
         {
             if (element.Properties.Any(x => x.Contains("alt:")) is false)
