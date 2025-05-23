@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Collections.Immutable;
+using System.IO;
 using System.Reflection;
 using System.Text;
 
@@ -634,11 +635,14 @@ static class NextJs_with_Tailwind
         // Add text content
         if (element.HasText())
         {
-            node.Children.Add(new()
+            node = node with
             {
-                Text = element.GetText(),
-                HtmlElementType = None
-            });
+                Children = node.Children.Add(new()
+                {
+                    Text            = element.GetText(),
+                    HtmlElementType = None
+                })
+            };
         }
 
         // Add children
@@ -655,7 +659,10 @@ static class NextJs_with_Tailwind
                 childNode = result.Value;
             }
 
-            node.Children.Add(childNode);
+            node = node with
+            {
+                Children = node.Children.Add(childNode)
+            };
         }
 
         return node;
@@ -718,13 +725,11 @@ static class NextJs_with_Tailwind
         {
             node = node with { Tag = "Link" };
         }
-        
-        for (var i = 0; i < node.Children.Count; i++)
-        {
-            node.Children[i] = ArrangeImageAndLinkTags(node.Children[i]);
-        }
 
-        return node;
+        return node with
+        {
+            Children = node.Children.Select(ArrangeImageAndLinkTags).ToImmutableList()
+        };
 
     }
     static Result<string> InjectRender(IReadOnlyList<string> fileContent, string targetComponentName, IReadOnlyList<string> linesToInject)
@@ -811,7 +816,7 @@ static class NextJs_with_Tailwind
 
     record ReactNode
     {
-        public List<ReactNode> Children { get; } = [];
+        public ImmutableList<ReactNode> Children { get; init; } = [];
 
         public List<ReactProperty> Properties { get; } = [];
 
