@@ -101,6 +101,28 @@ static class NextJs_with_Tailwind
         return Success;
     }
 
+    static ReactNode ArrangeImageAndLinkTags(ReactNode node)
+    {
+        if (node.Tag == "img")
+        {
+            node = node with { Tag = "Image" };
+            if (!(node.Properties.Any(x => x.Name == "width") && node.Properties.Any(x => x.Name == "height")))
+            {
+                node = node with { Properties = node.Properties.Add(new() { Name = "fill", Value = "true" }) };
+            }
+        }
+
+        if (node.Tag == "a")
+        {
+            node = node with { Tag = "Link" };
+        }
+
+        return node with
+        {
+            Children = node.Children.Select(ArrangeImageAndLinkTags).ToImmutableList()
+        };
+    }
+
     static string AsFinalText(string text)
     {
         if (!IsStringValue(text))
@@ -134,7 +156,7 @@ static class NextJs_with_Tailwind
         var (projectId, componentId, userName) = input;
 
         var user = GetUser(projectId, userName);
-        
+
         var project = GetProjectConfig(projectId);
 
         var data = await GetComponentData(new() { ComponentId = componentId, UserName = userName });
@@ -239,7 +261,7 @@ static class NextJs_with_Tailwind
 
         if (showIf is not null)
         {
-            node.Properties.Remove(showIf);
+            node = node with { Properties = node.Properties.Remove(showIf) };
 
             lines.Add($"{Indent(indentLevel)}{{{ClearConnectedValue(showIf.Value)} && (");
             indentLevel++;
@@ -265,7 +287,7 @@ static class NextJs_with_Tailwind
 
         if (hideIf is not null)
         {
-            node.Properties.Remove(hideIf);
+            node = node with { Properties = node.Properties.Remove(hideIf) };
 
             lines.Add($"{Indent(indentLevel)}{{!{ClearConnectedValue(hideIf.Value)} && (");
             indentLevel++;
@@ -294,7 +316,7 @@ static class NextJs_with_Tailwind
             var itemsSource = parentNode?.Properties.FirstOrDefault(x => x.Name is "-items-source");
             if (itemsSource is not null)
             {
-                parentNode.Properties.Remove(itemsSource);
+                parentNode = parentNode with { Properties = parentNode.Properties.Remove(itemsSource) };
 
                 lines.Add($"{Indent(indentLevel)}{{");
                 indentLevel++;
@@ -333,7 +355,7 @@ static class NextJs_with_Tailwind
 
         var elementType = node.HtmlElementType;
 
-        var tag = nodeTag.Split(['/', '.']).Last(); // todo: fix
+        var tag = nodeTag.Split(['/', '.']).Last();
         if (int.TryParse(nodeTag, out var componentId))
         {
             var component = DbOperation(db => db.FirstOrDefault<ComponentEntity>(x => x.Id == componentId));
@@ -342,7 +364,7 @@ static class NextJs_with_Tailwind
                 return new ArgumentNullException($"ComponentNotFound. {componentId}");
             }
 
-            tag = component.Name.Split(['/', '.']).Last(); // todo: fix
+            tag = component.Name.Split(['/', '.']).Last();
         }
 
         var indent = new string(' ', indentLevel * 4);
@@ -354,13 +376,13 @@ static class NextJs_with_Tailwind
         var childrenProperty = node.Properties.FirstOrDefault(x => x.Name == "children");
         if (childrenProperty is not null)
         {
-            node.Properties.Remove(childrenProperty);
+            node = node with { Properties = node.Properties.Remove(childrenProperty) };
         }
 
         var textProperty = node.Properties.FirstOrDefault(x => x.Name == Design.Text);
         if (textProperty is not null)
         {
-            node.Properties.Remove(textProperty);
+            node = node with { Properties = node.Properties.Remove(textProperty) };
         }
 
         foreach (var reactProperty in node.Properties.Where(p => p.Name.NotIn(Design.Text, Design.DesignText)))
@@ -526,7 +548,7 @@ static class NextJs_with_Tailwind
 
         // Open tag
         var tag = element.Tag;
-        
+
         if (tag == "img")
         {
             if (element.Properties.Any(x => x.Contains("alt:")) is false)
@@ -553,7 +575,7 @@ static class NextJs_with_Tailwind
                         if (element.Styles.TryGetPropertyValue("width", "w").HasNoValue)
                         {
                             element.Styles.Add($"width: {propertyValue}");
-                        }   
+                        }
                     }
                 }
 
@@ -569,13 +591,11 @@ static class NextJs_with_Tailwind
                 }
             }
         }
-        
-        
 
         var node = new ReactNode
         {
             Tag = tag,
-            
+
             HtmlElementType = TryGetHtmlElementTypeByTagName(tag)
         };
 
@@ -591,7 +611,7 @@ static class NextJs_with_Tailwind
 
             if (reactProperty.HasValue)
             {
-                node.Properties.Add(reactProperty.Value);
+                node = node with { Properties = node.Properties.Add(reactProperty.Value) };
                 continue;
             }
 
@@ -623,7 +643,7 @@ static class NextJs_with_Tailwind
         {
             var firstLastChar = classNameShouldBeTemplateLiteral ? "`" : "\"";
 
-            node.Properties.Add(new() { Name = "className", Value = firstLastChar + string.Join(" ", classNames) + firstLastChar });
+            node = node with { Properties = node.Properties.Add(new() { Name = "className", Value = firstLastChar + string.Join(" ", classNames) + firstLastChar }) };
         }
 
         var hasSelfClose = element.Children.Count == 0 && element.HasNoText();
@@ -710,28 +730,6 @@ static class NextJs_with_Tailwind
         return new(' ', indentLevel * 4);
     }
 
-    static ReactNode ArrangeImageAndLinkTags(ReactNode node)
-    {
-        if (node.Tag == "img")
-        {
-            node = node with { Tag = "Image" };
-            if (!(node.Properties.Any(x=>x.Name =="width") && node.Properties.Any(x=>x.Name =="height")))
-            {
-                node.Properties.Add(new(){ Name = "fill", Value = "true"});
-            }
-        }
-        
-        if (node.Tag == "a")
-        {
-            node = node with { Tag = "Link" };
-        }
-
-        return node with
-        {
-            Children = node.Children.Select(ArrangeImageAndLinkTags).ToImmutableList()
-        };
-
-    }
     static Result<string> InjectRender(IReadOnlyList<string> fileContent, string targetComponentName, IReadOnlyList<string> linesToInject)
     {
         var lines = fileContent.ToList();
@@ -818,13 +816,13 @@ static class NextJs_with_Tailwind
     {
         public ImmutableList<ReactNode> Children { get; init; } = [];
 
-        public List<ReactProperty> Properties { get; } = [];
+        public required Maybe<Type> HtmlElementType { get; init; }
+
+        public ImmutableList<ReactProperty> Properties { get; init; } = [];
 
         public string Tag { get; init; }
 
         public string Text { get; init; }
-        
-        public required Maybe<Type> HtmlElementType { get; init; }
     }
 
     record ReactProperty
