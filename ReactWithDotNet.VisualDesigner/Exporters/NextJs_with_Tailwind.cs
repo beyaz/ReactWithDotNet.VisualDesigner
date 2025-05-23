@@ -827,7 +827,7 @@ static class NextJs_with_Tailwind
 
     record ReactProperty
     {
-        public string Name { get; init; }
-        public string Value { get; init; }
+        public required string Name { get; init; }
+        public required string Value { get; init; }
     }
 }
