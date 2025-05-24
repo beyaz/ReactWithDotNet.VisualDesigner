@@ -502,23 +502,19 @@ public static class CssHelper
 
                 case "border":
                 {
-                    var parts = cssAttributeValue.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-                    if (parts.Length == 3)
+                    foreach (var (width, style, _color) in TryParseBorderCss(cssAttributeValue))
                     {
-                        if (project.Colors.TryGetValue(parts[2], out var htmlColor))
-                        {
-                            parts[2] = htmlColor;
-                        }
-
-                        if (parts[0] == "1px" && parts[1] == "solid")
+                        var color = project.Colors.GetValueOrDefault(_color, _color);
+                        
+                        if (width == "1px" && style == "solid")
                         {
                             return "border " +
-                                   $"border-[{parts[2]}]";
+                                   $"border-[{color}]";
                         }
-
-                        return $"border-[{parts[0]}] " +
-                               $"border-[{parts[1]}] " +
-                               $"border-[{parts[2]}]";
+                        
+                        return $"border-[{width}] " +
+                               $"border-[{style}] " +
+                               $"border-[{color}]";
                     }
 
                     break;
