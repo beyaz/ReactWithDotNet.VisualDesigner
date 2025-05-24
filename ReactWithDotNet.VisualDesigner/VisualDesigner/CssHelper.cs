@@ -1484,6 +1484,29 @@ public static class CssHelper
 
         public static Maybe<string> Try_Convert_From_HtmlStyle_to_TailwindClass(string name, string value)
         {
+            // padding: 6px 12px => py-1.5 px-3
+            // margin: 6px 12px => my-1.5 mx-3
+            foreach (var (htmlStyleName, tailwindPrefix) in new[] { (htmlStyleName: "padding", tailwindPrefix: "p"), (htmlStyleName: "margin", tailwindPrefix: "m") })
+            {
+                if (name == htmlStyleName)
+                {
+                    if (value.Contains(" "))
+                    {
+                        var parts = value.Split(" ", StringSplitOptions.RemoveEmptyEntries);
+                        if (parts.Length == 2)
+                        {
+                            foreach (var y in try_Convert_PixelValue_To_SpacingScale_Or_ArbitraryValue(parts[0]))
+                            {
+                                foreach (var x in try_Convert_PixelValue_To_SpacingScale_Or_ArbitraryValue(parts[1]))
+                                {
+                                    return $"{tailwindPrefix}y-{y} {tailwindPrefix}x-{x}";
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
             foreach (var item in Html_to_TailwindName_Map)
             {
                 if (item.htmlStyleName == name)
