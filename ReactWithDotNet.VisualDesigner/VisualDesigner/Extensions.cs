@@ -5,6 +5,34 @@ namespace ReactWithDotNet.VisualDesigner;
 static class Extensions
 {
     
+    public static Maybe<(string width, string style, string color)> TryParseBorderCss(string text)
+    {
+        var parts = text.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length != 3)
+        {
+            return None;
+        }
+                        
+        List<string> borderStyles = ["solid", "dashed", "dotted", "double", "none"];
+                        
+        var width = parts[0];
+                        
+        foreach (var borderStyle in borderStyles)
+        {
+            if (parts[1] == borderStyle)
+            {
+                return (width, borderStyle, parts[2]);
+            }
+                            
+            if (parts[2] == borderStyle)
+            {
+                return (width, borderStyle, parts[1]);
+            }
+        }
+                        
+        return None;
+    }
+    
     public   static Maybe<int> TryReadTagAsDesignerComponentId(VisualElementModel model)
     {
         if (int.TryParse(model.Tag, out var componentId))
