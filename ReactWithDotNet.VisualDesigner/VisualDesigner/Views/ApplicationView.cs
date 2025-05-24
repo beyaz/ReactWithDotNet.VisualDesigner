@@ -1824,7 +1824,15 @@ sealed class ApplicationView : Component<ApplicationState>
             return Task.CompletedTask;
         }
 
-        CurrentVisualElement.Children.Add(model);
+        if (CurrentVisualElement is null)
+        {
+            state.ComponentRootElement = model;
+        }
+        else
+        {
+            CurrentVisualElement.Children.Add(model);
+        }
+        
 
         return Task.CompletedTask;
     }
