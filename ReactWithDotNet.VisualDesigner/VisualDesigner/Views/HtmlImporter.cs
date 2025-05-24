@@ -233,6 +233,7 @@ static class HtmlImporter
 
             return true;
         }
+
         static bool skipJustifyContentFlexStart(KeyValuePair<string, string> htmlStyleAttribute)
         {
             if (htmlStyleAttribute.Key == "justify-content" && htmlStyleAttribute.Value == "flex-start")
@@ -245,25 +246,24 @@ static class HtmlImporter
 
         static IReadOnlyDictionary<string, string> tryMergeForShorthandDeclerations(IReadOnlyDictionary<string, string> inlineStyleMap)
         {
-            foreach (var func in new[]{fixPaddingAndMargin})
+            foreach (var func in new[] { fixPaddingAndMargin })
             {
                 inlineStyleMap = func(inlineStyleMap);
             }
 
             return inlineStyleMap;
-            
-            static IReadOnlyDictionary<string, string>  fixPaddingAndMargin(IReadOnlyDictionary<string, string> inlineStyleMap)
+
+            static IReadOnlyDictionary<string, string> fixPaddingAndMargin(IReadOnlyDictionary<string, string> inlineStyleMap)
             {
                 var map = new Dictionary<string, string>(inlineStyleMap);
 
-
-                foreach (var prefix in new []{"padding", "margin"})
+                foreach (var prefix in new[] { "padding", "margin" })
                 {
                     map.TryGetValue(prefix, out var value);
-            
+
                     map.TryGetValue($"{prefix}-top", out var top);
                     map.TryGetValue($"{prefix}-bottom", out var bottom);
-            
+
                     map.TryGetValue($"{prefix}-left", out var left);
                     map.TryGetValue($"{prefix}-right", out var right);
 
@@ -287,12 +287,9 @@ static class HtmlImporter
                         }
                     }
                 }
-                
-               
 
                 return map;
             }
         }
-        
     }
 }
