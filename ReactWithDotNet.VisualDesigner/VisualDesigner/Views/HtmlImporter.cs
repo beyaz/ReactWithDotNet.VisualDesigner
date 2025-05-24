@@ -126,7 +126,7 @@ static class HtmlImporter
                 var (map, _) = Style.ParseCssAsDictionary(attributeValue);
                 if (map != null)
                 {
-                    foreach (var item in map.Where(skipWordWrap))
+                    foreach (var item in map.Where(skipWordWrap).Where(skipJustifyContentFlexStart))
                     {
                         model.Styles.Add(item.Key + ": " + item.Value);
                     }
@@ -227,6 +227,15 @@ static class HtmlImporter
         static bool skipWordWrap(KeyValuePair<string, string> htmlStyleAttribute)
         {
             if (htmlStyleAttribute.Key == "word-wrap" && htmlStyleAttribute.Value == "break-word")
+            {
+                return false;
+            }
+
+            return true;
+        }
+        static bool skipJustifyContentFlexStart(KeyValuePair<string, string> htmlStyleAttribute)
+        {
+            if (htmlStyleAttribute.Key == "justify-content" && htmlStyleAttribute.Value == "flex-start")
             {
                 return false;
             }
