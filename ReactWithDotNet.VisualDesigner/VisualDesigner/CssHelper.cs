@@ -502,9 +502,31 @@ public static class CssHelper
 
                 case "border":
                 {
-                    foreach (var (width, style, _color) in TryParseBorderCss(cssAttributeValue))
+                    foreach (var (width, style, color) in TryParseBorderCss(cssAttributeValue))
                     {
-                        var color = project.Colors.GetValueOrDefault(_color, _color);
+                        bool isNamedColor;
+                        string namedColor = null;
+                        {
+                            isNamedColor = project.Colors.TryGetValue(color, out _);
+                            if (isNamedColor)
+                            {
+                                namedColor = color;    
+                            }
+                            else
+                            {
+                                foreach (var (name, htmlColor) in project.Colors)
+                                {
+                                    if (htmlColor == color)
+                                    {
+                                        isNamedColor = true;
+                                        namedColor   = name;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        
+                        
 
                         var items = new List<string>();
                         if (width == "1px")
@@ -521,7 +543,15 @@ public static class CssHelper
                             items.Add($"border-{style}");
                         }
 
-                        items.Add($"border-[{color}]");
+                        if (isNamedColor)
+                        {
+                            items.Add($"border-{namedColor}");
+                        }
+                        else
+                        {
+                            items.Add($"border-[{color}]");
+                        }
+                        
 
                         return string.Join(" ", items);
                     }
