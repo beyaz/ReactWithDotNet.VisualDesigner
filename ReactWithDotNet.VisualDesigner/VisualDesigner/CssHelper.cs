@@ -505,16 +505,25 @@ public static class CssHelper
                     foreach (var (width, style, _color) in TryParseBorderCss(cssAttributeValue))
                     {
                         var color = project.Colors.GetValueOrDefault(_color, _color);
-                        
-                        if (width == "1px" && style == "solid")
+
+                        var items = new List<string>();
+                        if (width == "1px")
                         {
-                            return "border " +
-                                   $"border-[{color}]";
+                            items.Add("border");
                         }
-                        
-                        return $"border-[{width}] " +
-                               $"border-[{style}] " +
-                               $"border-[{color}]";
+                        else
+                        {
+                            items.Add($"border-[{width}]");
+                        }
+
+                        if (style != "solid")
+                        {
+                            items.Add($"border-{style}");
+                        }
+
+                        items.Add($"border-[{color}]");
+
+                        return string.Join(" ", items);
                     }
 
                     break;
