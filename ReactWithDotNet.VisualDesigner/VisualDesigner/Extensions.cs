@@ -14,6 +14,14 @@ static class Extensions
 
         return None;
     }
+
+    public static void RemoveAll<TKey, TValue>(this Dictionary<TKey, TValue> dictionary, params TKey[] keys)
+    {
+        foreach (var key in keys)
+        {
+            dictionary.Remove(key);
+        }
+    }
     
     /// <summary>
     /// Bir öğeyi, listede başka bir öğenin önüne veya arkasına taşır.
@@ -49,10 +57,7 @@ static class Extensions
         list.Insert(insertIndex, item);
     }
     
-    public static bool IsDouble(this string input)
-    {
-        return double.TryParse(input, out _);
-    }
+    
 
     public static List<T> ListFrom<T>(IEnumerable<T> enumerable) => enumerable.ToList();
 
@@ -161,6 +166,11 @@ static class Extensions
     public static string AsPixel(this double value)
     {
         return value.ToString(CultureInfo_en_US) + "px";
+    }
+    
+    public static bool IsDouble(this string value)
+    {
+        return double.TryParse(value, CultureInfo_en_US, out _);
     }
     
     public static bool HasNoChild(this VisualElementModel model)

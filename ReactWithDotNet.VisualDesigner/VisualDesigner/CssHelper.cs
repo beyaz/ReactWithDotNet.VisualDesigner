@@ -65,7 +65,7 @@ public static class CssHelper
 
             designerStyleItemText = x.NewText;
         });
-        
+
         if (pseudo.HasNoValue() && project.Styles.TryGetValue(designerStyleItemText, out _))
         {
             return designerStyleItemText;
@@ -144,7 +144,7 @@ public static class CssHelper
             {
                 return new ArgumentNullException(nameof(cssAttributeValue));
             }
-            
+
             // check is conditional sample: border-width: {props.isSelected} ? 2 : 5
             {
                 var conditionalValue = TextParser.TryParseConditionalValue(cssAttributeValue);
@@ -275,12 +275,12 @@ public static class CssHelper
                             }
                         }
                     }
-                    
+
                     if (cssAttributeValue == "translateY(50%)")
                     {
                         return "transform translate-y-1/2";
                     }
-                    
+
                     if (cssAttributeValue == "translateY(-50%)")
                     {
                         return "transform -translate-y-1/2";
@@ -533,7 +533,7 @@ public static class CssHelper
                         cssAttributeValue = htmlColor;
                     }
 
-                    return $"bg-[{cssAttributeValue.Replace(" ","")}]";
+                    return $"bg-[{cssAttributeValue.Replace(" ", "")}]";
                 }
                 case "position":
                     return $"{cssAttributeValue}";
@@ -547,7 +547,7 @@ public static class CssHelper
                 {
                     return $"cursor-{cssAttributeValue}";
                 }
-                
+
                 case "user-select":
                 {
                     if (cssAttributeValue == "none")
@@ -645,7 +645,7 @@ public static class CssHelper
                 {
                     switch (cssAttributeValue)
                     {
-                        case "1":   return "flex-1";
+                        case "1":        return "flex-1";
                         case "1 1 0%":   return "flex-1";
                         case "1 1 0":    return "flex-1";
                         case "0 1 auto": return "flex-initial";
@@ -761,7 +761,7 @@ public static class CssHelper
                     designerStyleItem += ":" + value;
                 }
             }
-            
+
             if (project.Styles.TryGetValue(designerStyleItem, out var cssText))
             {
                 return Style.ParseCssAsDictionary(cssText).Then(styleMap => new DesignerStyleItem
@@ -1191,6 +1191,18 @@ public static class CssHelper
             throw new ArgumentNullException(nameof(value));
         }
 
+        value = value.Trim();
+
+        foreach (var newValue in tryFixValuesForShorthandDeclerations(name, value))
+        {
+            value = newValue;
+        }
+
+        if (value is null)
+        {
+            throw new ArgumentNullException(nameof(value));
+        }
+
         var isValueDouble = double.TryParse(value, out var valueAsDouble);
 
         name = name switch
@@ -1374,6 +1386,33 @@ public static class CssHelper
         }
 
         return new Exception($"{name}: {value} is not recognized");
+
+        static Maybe<string> tryFixValuesForShorthandDeclerations(string name, string value)
+        {
+            foreach (var newValue in tryFixPaddingAndMarginShorthandDecleration(name, value))
+            {
+                return newValue;
+            }
+
+            return None;
+
+            static Maybe<string> tryFixPaddingAndMarginShorthandDecleration(string name, string value)
+            {
+                if ((name == "padding" || name == "margin") && value.Contains(" "))
+                {
+                    var parts = value.Split(" ", StringSplitOptions.RemoveEmptyEntries);
+                    if (parts.Length == 2)
+                    {
+                        if (parts[0].IsDouble() && parts[1].IsDouble())
+                        {
+                            return $"{parts[0]}px {parts[1]}px";
+                        }
+                    }
+                }
+
+                return None;
+            }
+        }
     }
 
     static Maybe<(string Pseudo, string NewText)> TryReadPseudo(string text)

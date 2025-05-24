@@ -126,7 +126,7 @@ static class HtmlImporter
                 var (map, _) = Style.ParseCssAsDictionary(attributeValue);
                 if (map != null)
                 {
-                    foreach (var item in map.Where(skipWordWrap).Where(skipJustifyContentFlexStart))
+                    foreach (var item in tryMergeForShorthandDeclerations(map).Where(skipWordWrap).Where(skipJustifyContentFlexStart))
                     {
                         model.Styles.Add(item.Key + ": " + item.Value);
                     }
@@ -242,5 +242,57 @@ static class HtmlImporter
 
             return true;
         }
+
+        static IReadOnlyDictionary<string, string> tryMergeForShorthandDeclerations(IReadOnlyDictionary<string, string> inlineStyleMap)
+        {
+            foreach (var func in new[]{fixPaddingAndMargin})
+            {
+                inlineStyleMap = func(inlineStyleMap);
+            }
+
+            return inlineStyleMap;
+            
+            static IReadOnlyDictionary<string, string>  fixPaddingAndMargin(IReadOnlyDictionary<string, string> inlineStyleMap)
+            {
+                var map = new Dictionary<string, string>(inlineStyleMap);
+
+
+                foreach (var prefix in new []{"padding", "margin"})
+                {
+                    map.TryGetValue(prefix, out var value);
+            
+                    map.TryGetValue($"{prefix}-top", out var top);
+                    map.TryGetValue($"{prefix}-bottom", out var bottom);
+            
+                    map.TryGetValue($"{prefix}-left", out var left);
+                    map.TryGetValue($"{prefix}-right", out var right);
+
+                    if (value is null)
+                    {
+                        if (top.HasValue() && top == bottom)
+                        {
+                            if (left.HasValue() && left == right)
+                            {
+                                if (left == top)
+                                {
+                                    map.RemoveAll($"{prefix}-top", $"{prefix}-bottom", $"{prefix}-left", $"{prefix}-right");
+                                    map.Add(prefix, left);
+                                }
+                                else
+                                {
+                                    map.RemoveAll($"{prefix}-top", $"{prefix}-bottom", $"{prefix}-left", $"{prefix}-right");
+                                    map.Add(prefix, $"{top} {right}");
+                                }
+                            }
+                        }
+                    }
+                }
+                
+               
+
+                return map;
+            }
+        }
+        
     }
 }
