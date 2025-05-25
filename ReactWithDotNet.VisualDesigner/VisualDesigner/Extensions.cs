@@ -5,6 +5,66 @@ namespace ReactWithDotNet.VisualDesigner;
 
 static class Extensions
 {
+    public class IO
+    {
+        public static async Task<Result<string>> TryReadFile(string filePath)
+        {
+            try
+            {
+                return await File.ReadAllTextAsync(filePath);
+            }
+            catch (Exception exception)
+            {
+                return exception;
+            }
+        }
+
+        public static async Task<Result<string[]>> TryReadFileAllLines(string filePath)
+        {
+            try
+            {
+                return await File.ReadAllLinesAsync(filePath);
+            }
+            catch (Exception exception)
+            {
+                return exception;
+            }
+        }
+
+        public static async Task<Result> TryWriteToFile(string filePath, string fileContent)
+        {
+            try
+            {
+                await File.WriteAllTextAsync(filePath, fileContent);
+            }
+            catch (Exception exception)
+            {
+                return exception;
+            }
+
+            return Success;
+        }
+    }
+    public static Result<int> GetComponentDeclerationLineIndex(IReadOnlyList<string> fileContent, string targetComponentName)
+    {
+        var lines = fileContent.ToList();
+        
+        var componentDeclerationLineIndex = lines.FindIndex(line => line.Contains($"function {targetComponentName}("));
+        if (componentDeclerationLineIndex == -1)
+        {
+            componentDeclerationLineIndex = lines.FindIndex(line => line.Contains($"const {targetComponentName} "));
+            if (componentDeclerationLineIndex == -1)
+            {
+                componentDeclerationLineIndex = lines.FindIndex(line => line.Contains($"const {targetComponentName}:"));
+                if (componentDeclerationLineIndex == -1)
+                {
+                    return new ArgumentException($"ComponentDeclerationNotFoundInFile. {targetComponentName}");
+                }
+            }
+        }
+
+        return componentDeclerationLineIndex;
+    }
     
     public static Result<(string filePath, string targetComponentName)> GetComponentFileLocation(string componentName, string userLocalWorkspacePath)
     {

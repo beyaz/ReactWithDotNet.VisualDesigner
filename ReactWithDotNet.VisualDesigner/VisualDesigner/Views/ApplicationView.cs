@@ -209,10 +209,11 @@ sealed class ApplicationView : Component<ApplicationState>
 
         await ChangeSelectedComponent(component.Id, component);
     }
+
     async Task ChangeSelectedComponent(int componentId, ComponentEntity component)
     {
         component ??= await DbOperation(db => db.FirstOrDefaultAsync<ComponentEntity>(x => x.Id == componentId));
-        
+
         VisualElementModel componentRootElement;
         {
             var userVersion = await TryGetUserVersion(componentId, state.UserName);
@@ -297,6 +298,55 @@ sealed class ApplicationView : Component<ApplicationState>
         state.Selection = new();
 
         return Task.CompletedTask;
+    }
+
+    async Task FocusToCurrentComponentInIde(MouseEvent e)
+    {
+        if (state.UserName.HasNoValue())
+        {
+            this.FailNotification("UserName has no value");
+            return;
+        }
+
+        var user = await DbOperation(db => db.FirstOrDefaultAsync<UserEntity>(x => x.UserName == state.UserName));
+        if (user is null)
+        {
+            this.FailNotification($"UserNotFound {state.UserName}");
+            return;
+        }
+
+        if (user.LocalWorkspacePath.HasNoValue())
+        {
+            this.FailNotification("UserLocalWorkspacePathShouldBeSet");
+            return;
+        }
+
+        var location = GetComponentFileLocation(state.ComponentName, user.LocalWorkspacePath);
+        if (location.HasError)
+        {
+            this.FailNotification(location.Error.Message);
+            return;
+        }
+
+        var fileContent = await IO.TryReadFileAllLines(location.Value.filePath);
+        if (fileContent.HasError)
+        {
+            this.FailNotification(fileContent.Error.Message);
+            return;
+        }
+
+        var lineIndex = GetComponentDeclerationLineIndex(fileContent.Value, location.Value.targetComponentName);
+        if (lineIndex.HasError)
+        {
+            this.FailNotification(lineIndex.Error.Message);
+            return;
+        }
+
+        var exception = IdeBridge.OpenWebStormEditor(location.Value.filePath, lineIndex.Value + 1);
+        if (exception is not null)
+        {
+            this.FailNotification(exception.Message);
+        }
     }
 
     async Task InitializeStateWithFirstComponentInProject(int projectId)
@@ -691,7 +741,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
                 SpaceX(8),
                 new IconFocus() + Color(Gray500) + Hover(Color(Blue300)) + OnClick(FocusToCurrentComponentInIde),
-                
+
                 SpaceX(8),
                 new FlexRowCentered(Border(1, solid, Theme.BorderColor), BorderRadius(4), Height(36))
                 {
@@ -748,13 +798,6 @@ sealed class ApplicationView : Component<ApplicationState>
                 Padding(5, 30)
             }
         };
-    }
-
-    Task FocusToCurrentComponentInIde(MouseEvent e)
-    {
-        e
-        
-        return Task.CompletedTask;
     }
 
     Element PartLeftPanel()
@@ -1026,7 +1069,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
                 return Task.CompletedTask;
             },
-            
+
             NavigateToComponent = path =>
             {
                 var node = FindTreeNodeByTreePath(state.ComponentRootElement, path);
@@ -1034,7 +1077,7 @@ sealed class ApplicationView : Component<ApplicationState>
                 {
                     return ChangeSelectedComponent(componentId, null);
                 }
-                
+
                 return Task.CompletedTask;
             }
         } + When(state.LeftTab != LeftTabs.ElementTree, DisplayNone);
@@ -1822,7 +1865,7 @@ sealed class ApplicationView : Component<ApplicationState>
         }
 
         htmlText = htmlText.Trim();
-        
+
         if (!HtmlImporter.CanImportAsHtml(htmlText))
         {
             return Task.CompletedTask;
@@ -1842,7 +1885,6 @@ sealed class ApplicationView : Component<ApplicationState>
         {
             CurrentVisualElement.Children.Add(model);
         }
-        
 
         return Task.CompletedTask;
     }

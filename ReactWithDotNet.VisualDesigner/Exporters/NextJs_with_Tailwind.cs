@@ -1,5 +1,4 @@
 ﻿using System.Collections.Immutable;
-using System.IO;
 using System.Reflection;
 using System.Text;
 
@@ -727,19 +726,15 @@ static class NextJs_with_Tailwind
         var lines = fileContent.ToList();
 
         // focus to component code
-
-        var componentDeclerationLineIndex = lines.FindIndex(line => line.Contains($"function {targetComponentName}("));
-        if (componentDeclerationLineIndex == -1)
+        int componentDeclerationLineIndex;
         {
-            componentDeclerationLineIndex = lines.FindIndex(line => line.Contains($"const {targetComponentName} "));
-            if (componentDeclerationLineIndex == -1)
+            var result = GetComponentDeclerationLineIndex(fileContent, targetComponentName);
+            if (result.HasError)
             {
-                componentDeclerationLineIndex = lines.FindIndex(line => line.Contains($"const {targetComponentName}:"));
-                if (componentDeclerationLineIndex == -1)
-                {
-                    return new ArgumentException($"ComponentDeclerationNotFoundInFile. {targetComponentName}");
-                }
+                return result.Error;
             }
+
+            componentDeclerationLineIndex = result.Value;
         }
 
         var firstReturnLineIndex = lines.FindIndex(componentDeclerationLineIndex, l => l == "    return (");
@@ -761,47 +756,6 @@ static class NextJs_with_Tailwind
         var injectedFileContent = string.Join(Environment.NewLine, lines);
 
         return injectedFileContent;
-    }
-
-    class IO
-    {
-        public static async Task<Result<string>> TryReadFile(string filePath)
-        {
-            try
-            {
-                return await File.ReadAllTextAsync(filePath);
-            }
-            catch (Exception exception)
-            {
-                return exception;
-            }
-        }
-
-        public static async Task<Result<string[]>> TryReadFileAllLines(string filePath)
-        {
-            try
-            {
-                return await File.ReadAllLinesAsync(filePath);
-            }
-            catch (Exception exception)
-            {
-                return exception;
-            }
-        }
-
-        public static async Task<Result> TryWriteToFile(string filePath, string fileContent)
-        {
-            try
-            {
-                await File.WriteAllTextAsync(filePath, fileContent);
-            }
-            catch (Exception exception)
-            {
-                return exception;
-            }
-
-            return Success;
-        }
     }
 
     record ReactNode
