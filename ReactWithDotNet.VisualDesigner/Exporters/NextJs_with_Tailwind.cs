@@ -180,22 +180,14 @@ static class NextJs_with_Tailwind
 
         string filePath, targetComponentName;
         {
-            targetComponentName = componentName.Split('/').Last();
-
-            filePath = Path.Combine(user.LocalWorkspacePath, Path.Combine((componentName + ".tsx").Split(new[] { '/', Path.DirectorySeparatorChar })));
-
-            if (Path.GetFileNameWithoutExtension(filePath).Contains("."))
+            var result = GetComponentFileLocation(user.LocalWorkspacePath, componentName);
+            if (result.HasError)
             {
-                var array = Path.GetFileName(filePath).Split('.', StringSplitOptions.RemoveEmptyEntries);
-                if (array.Length != 3)
-                {
-                    return new ArgumentException($"ComponentNameIsInvalid. {componentName}");
-                }
-
-                filePath = Path.Combine(Path.GetDirectoryName(filePath) ?? string.Empty, $"{array[0]}.{array[2]}");
-
-                targetComponentName = array[1];
+                return result;
             }
+
+            filePath            = result.Value.filePath;
+            targetComponentName = result.Value.targetComponentName;
         }
 
         string fileNewContent;

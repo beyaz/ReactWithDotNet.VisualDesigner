@@ -1,9 +1,32 @@
 ﻿using System.Globalization;
+using System.IO;
 
 namespace ReactWithDotNet.VisualDesigner;
 
 static class Extensions
 {
+    
+    public static Result<(string filePath, string targetComponentName)> GetComponentFileLocation(string componentName, string userLocalWorkspacePath)
+    {
+        var targetComponentName = componentName.Split('/').Last();
+
+        var filePath = Path.Combine(userLocalWorkspacePath, Path.Combine((componentName + ".tsx").Split(new[] { '/', Path.DirectorySeparatorChar })));
+
+        if (Path.GetFileNameWithoutExtension(filePath).Contains("."))
+        {
+            var array = Path.GetFileName(filePath).Split('.', StringSplitOptions.RemoveEmptyEntries);
+            if (array.Length != 3)
+            {
+                return new ArgumentException($"ComponentNameIsInvalid. {componentName}");
+            }
+
+            filePath = Path.Combine(Path.GetDirectoryName(filePath) ?? string.Empty, $"{array[0]}.{array[2]}");
+
+            targetComponentName = array[1];
+        }
+            
+        return (filePath, targetComponentName);
+    }
     
     public static Maybe<(string width, string style, string color)> TryParseBorderCss(string text)
     {

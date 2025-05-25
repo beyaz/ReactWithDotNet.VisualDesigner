@@ -690,6 +690,9 @@ sealed class ApplicationView : Component<ApplicationState>
                 },
 
                 SpaceX(8),
+                new IconFocus() + Color(Gray500) + Hover(Color(Blue300)) + OnClick(FocusToCurrentComponentInIde),
+                
+                SpaceX(8),
                 new FlexRowCentered(Border(1, solid, Theme.BorderColor), BorderRadius(4), Height(36))
                 {
                     PositionRelative,
@@ -745,6 +748,13 @@ sealed class ApplicationView : Component<ApplicationState>
                 Padding(5, 30)
             }
         };
+    }
+
+    Task FocusToCurrentComponentInIde(MouseEvent e)
+    {
+        e
+        
+        return Task.CompletedTask;
     }
 
     Element PartLeftPanel()

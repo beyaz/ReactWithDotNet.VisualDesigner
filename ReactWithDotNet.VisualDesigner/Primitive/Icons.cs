@@ -391,3 +391,36 @@ sealed class IconDelete : PureComponent
         };
     }
 }
+
+sealed class IconFocus : PureComponent
+{
+    protected override Element render()
+    {
+        return new svg(ViewBox(0, 0, 24, 24), Fill(none), svg.Size(24))
+        {
+            new circle
+            {
+                cx          = 12,
+                cy          = 12,
+                r           = 10,
+                stroke      = "currentColor",
+                strokeWidth = 1
+            },
+            new circle
+            {
+                cx          = 12,
+                cy          = 12,
+                r           = 6,
+                stroke      = "currentColor",
+                strokeWidth = 1
+            },
+            new circle
+            {
+                cx   = 12,
+                cy   = 12,
+                r    = 1.5,
+                fill = "currentColor"
+            }
+        };
+    }
+}
