@@ -342,7 +342,7 @@ sealed class ApplicationView : Component<ApplicationState>
             return;
         }
 
-        var exception = IdeBridge.OpenWebStormEditor(location.Value.filePath, lineIndex.Value + 1);
+        var exception = IdeBridge.OpenEditor(location.Value.filePath, lineIndex.Value + 1);
         if (exception is not null)
         {
             this.FailNotification(exception.Message);

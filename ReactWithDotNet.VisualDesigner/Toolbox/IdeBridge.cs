@@ -4,7 +4,7 @@ namespace ReactWithDotNet.VisualDesigner.Toolbox;
 
 static class IdeBridge
 {
-    public static Exception OpenWebStormEditor(string filePath, int lineNumber)
+    public static Exception OpenEditor(string filePath, int lineNumber)
     {
         // try webstorm
         {
@@ -63,28 +63,6 @@ static class IdeBridge
         }
 
         return new("EditorNotFound");
-    }
-
-    public static (bool fail, Exception exception) OpenWebStormEditor(string webstormExeFilePath, string filePath, int lineNumber)
-    {
-        try
-        {
-            var startInfo = new ProcessStartInfo
-            {
-                FileName        = webstormExeFilePath,
-                Arguments       = $"--line {lineNumber} \"{filePath}\"",
-                UseShellExecute = false,
-                CreateNoWindow  = true
-            };
-
-            Process.Start(startInfo);
-
-            return default;
-        }
-        catch (Exception exception)
-        {
-            return (fail: true, exception);
-        }
     }
 
     static (string FilePath, bool Success, Exception Exception) FindRunningProcessExecutablePath(string processName)
