@@ -443,9 +443,10 @@ public static class CssHelper
 
                 case "border-color":
                 {
-                    if (project.Colors.TryGetValue(cssAttributeValue, out var htmlColor))
+                    var isNamedColor = project.Colors.ContainsKey(cssAttributeValue);
+                    if (isNamedColor)
                     {
-                        cssAttributeValue = htmlColor;
+                        return $"border-{cssAttributeValue}";
                     }
 
                     return $"border-[{cssAttributeValue}]";
