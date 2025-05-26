@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.IO;
 
 namespace ReactWithDotNet.VisualDesigner.Toolbox;
 
@@ -48,6 +49,33 @@ static class IdeBridge
                         FileName        = exeFilePath,
                         Arguments       = $"--goto \"{filePath}:{lineNumber}\"",
                         UseShellExecute = true,
+                        CreateNoWindow  = true
+                    };
+
+                    Process.Start(startInfo);
+
+                    return null;
+                }
+                catch (Exception exception)
+                {
+                    return exception;
+                }
+            }
+        }
+
+        // try visual studio
+        {
+            var vsOpenFileAtLineExeFilePath = Path.Combine(Path.GetDirectoryName(typeof(IdeBridge).Assembly.Location) ?? string.Empty, @"VsOpenFileAtLine.exe");
+
+            if (File.Exists(vsOpenFileAtLineExeFilePath))
+            {
+                try
+                {
+                    var startInfo = new ProcessStartInfo
+                    {
+                        FileName        = vsOpenFileAtLineExeFilePath,
+                        Arguments       = $"{filePath} {lineNumber}",
+                        UseShellExecute = false,
                         CreateNoWindow  = true
                     };
 
