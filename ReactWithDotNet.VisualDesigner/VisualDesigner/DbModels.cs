@@ -31,6 +31,8 @@ public sealed record ComponentEntity
     
     public string RootElementAsYaml { get; init; }
     
+    public required string ConfigAsYaml { get; init; }
+    
     // @formatter:on
 }
 
@@ -64,6 +66,8 @@ public sealed record ComponentHistoryEntity
     public required int ComponentId { get; init; }
     
     public required string ComponentName { get; init; }
+    
+    public required string ConfigAsYaml { get; init; }
     
     public required string ComponentRootElementAsYaml { get; init; }
 
