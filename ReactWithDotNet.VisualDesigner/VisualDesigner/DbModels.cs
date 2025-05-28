@@ -31,7 +31,7 @@ public sealed record ComponentEntity
     
     public string RootElementAsYaml { get; init; }
     
-    public required string ConfigAsYaml { get; init; }
+    public string ConfigAsYaml { get; init; }
     
     // @formatter:on
 }
@@ -67,13 +67,13 @@ public sealed record ComponentHistoryEntity
     
     public required string ComponentName { get; init; }
     
-    public required string ConfigAsYaml { get; init; }
+    public string ConfigAsYaml { get; init; }
     
     public required string ComponentRootElementAsYaml { get; init; }
 
     public required string UserName { get; init; }
     
-     public required DateTime InsertTime { get; init; }
+    public required DateTime InsertTime { get; init; }
     
     // @formatter:on
 }
