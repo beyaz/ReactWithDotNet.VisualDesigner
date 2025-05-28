@@ -10,7 +10,7 @@ static class ApplicationLogic
 {
     public static readonly CachedObjectMap Cache = new() { Timeout = TimeSpan.FromMinutes(5) };
 
-    public static Task<Response> CommitComponent(ApplicationState state)
+    public static Task<Result> CommitComponent(ApplicationState state)
     {
         return DbOperation(async db =>
         {
@@ -74,7 +74,7 @@ static class ApplicationLogic
                                                        .ToImmutableList()));
     }
 
-    public static async Task<Response<ComponentEntity>> GetComponentByComponentName_NotNull(this IDbConnection db, string componentName)
+    public static async Task<Result<ComponentEntity>> GetComponentByComponentName_NotNull(this IDbConnection db, string componentName)
     {
         if (componentName.HasNoValue())
         {
@@ -94,7 +94,7 @@ static class ApplicationLogic
         return component;
     }
 
-    public static Task<Response<VisualElementModel>> GetComponenUserOrMainVersionAsync(int componentId, string userName)
+    public static Task<Result<VisualElementModel>> GetComponenUserOrMainVersionAsync(int componentId, string userName)
     {
         var input = new GetComponentDataInput { ComponentId = componentId, UserName = userName };
 
@@ -401,7 +401,7 @@ static class ApplicationLogic
         return None;
     }
 
-    public static Task<Response> RollbackComponent(ApplicationState state)
+    public static Task<Result> RollbackComponent(ApplicationState state)
     {
         return DbOperation(async db =>
         {
@@ -503,7 +503,7 @@ static class ApplicationLogic
         return None;
     }
 
-    public static Task<Response> TrySaveComponentForUser(ApplicationState state)
+    public static Task<Result> TrySaveComponentForUser(ApplicationState state)
     {
         var componentId = state.ComponentId;
 

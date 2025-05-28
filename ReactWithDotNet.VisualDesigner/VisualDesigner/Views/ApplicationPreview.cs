@@ -107,7 +107,7 @@ sealed class ApplicationPreview : Component
             finalElement + scaleStyle
         };
 
-        static async Task<Response<Element>> renderElement(RenderContext context, VisualElementModel model, string path)
+        static async Task<Result<Element>> renderElement(RenderContext context, VisualElementModel model, string path)
         {
             HtmlElement element = null;
             {

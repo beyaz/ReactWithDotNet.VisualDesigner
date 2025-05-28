@@ -29,7 +29,7 @@ static class Extensions
         return x.Component.RootElementAsYaml;
     }
     
-    public static async Task<Response<GetComponentDataOutput>> GetComponentData(GetComponentDataInput input)
+    public static async Task<Result<GetComponentDataOutput>> GetComponentData(GetComponentDataInput input)
     {
         var output = await DbOperation(async db =>
         {

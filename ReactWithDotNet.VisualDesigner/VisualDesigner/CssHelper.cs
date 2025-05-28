@@ -55,7 +55,7 @@ public static class CssHelper
         { "384px", 96 }
     };
 
-    public static Response<string> ConvertDesignerStyleItemToTailwindClassName(ProjectConfig project, string designerStyleItemText)
+    public static Result<string> ConvertDesignerStyleItemToTailwindClassName(ProjectConfig project, string designerStyleItemText)
     {
         string pseudo = null;
 
@@ -138,7 +138,7 @@ public static class CssHelper
 
         return string.Join(" ", tailwindClassNames.Select(x => pseudo + ":" + x));
 
-        static Response<string> ConvertToTailwindClass(ProjectConfig project, string cssAttributeName, string cssAttributeValue)
+        static Result<string> ConvertToTailwindClass(ProjectConfig project, string cssAttributeName, string cssAttributeValue)
         {
             if (cssAttributeValue is null)
             {
@@ -721,7 +721,7 @@ public static class CssHelper
         }
     }
 
-    public static Response<DesignerStyleItem> CreateDesignerStyleItemFromText(ProjectConfig project, string designerStyleItem)
+    public static Result<DesignerStyleItem> CreateDesignerStyleItemFromText(ProjectConfig project, string designerStyleItem)
     {
         // try process from plugin
         {
@@ -780,7 +780,7 @@ public static class CssHelper
             };
         }
 
-        static Response<DesignerStyleItem> tryProcessByProjectConfig(ProjectConfig project, string designerStyleItem)
+        static Result<DesignerStyleItem> tryProcessByProjectConfig(ProjectConfig project, string designerStyleItem)
         {
             string name, value, pseudo;
             {
@@ -863,7 +863,7 @@ public static class CssHelper
         };
     }
 
-    public static Response<StyleModifier> ToStyleModifier(this DesignerStyleItem designerStyleItem)
+    public static Result<StyleModifier> ToStyleModifier(this DesignerStyleItem designerStyleItem)
     {
         if (designerStyleItem is null)
         {
@@ -1200,12 +1200,12 @@ public static class CssHelper
         }
     }
 
-    static Response<StyleModifier> ApplyPseudo(string pseudo, IReadOnlyList<StyleModifier> styleModifiers)
+    static Result<StyleModifier> ApplyPseudo(string pseudo, IReadOnlyList<StyleModifier> styleModifiers)
     {
         return GetPseudoFunction(pseudo).Then(pseudoFunction => pseudoFunction(styleModifiers.ToArray()));
     }
 
-    static Response<Func<StyleModifier[], StyleModifier>> GetPseudoFunction(string pseudoName)
+    static Result<Func<StyleModifier[], StyleModifier>> GetPseudoFunction(string pseudoName)
     {
         if (MediaQueries.TryGetValue(pseudoName, out var func))
         {
@@ -1647,7 +1647,7 @@ public sealed record DesignerStyleItem
     }
 }
 
-public sealed class HtmlStyle : Response<Dictionary<string, string>>
+public sealed class HtmlStyle : Result<Dictionary<string, string>>
 {
     public static implicit operator HtmlStyle((string Name, string Value) item)
     {
