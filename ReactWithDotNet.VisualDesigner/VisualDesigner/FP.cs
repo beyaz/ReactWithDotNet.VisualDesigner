@@ -4,7 +4,7 @@ using System.Collections;
 
 namespace FunctionalUtilities;
 
-public sealed class Response
+public sealed record Response
 {
     public Exception Error { get; init; }
 
@@ -28,7 +28,7 @@ public sealed class Response
     }
 }
 
-
+// todo: make record
 public class Response<TValue>: IEnumerable<TValue>
 {
     public Exception Error { get; init; }
