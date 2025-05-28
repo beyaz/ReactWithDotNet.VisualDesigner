@@ -567,6 +567,32 @@ sealed class ApplicationView : Component<ApplicationState>
                 this.FailNotification(result.Error.Message);
             }
         }
+        
+        if (state.MainContentTab == MainContentTabs.ComponentConfig)
+        {
+            var result = await DbOperation(async db =>
+            {
+                var component = await db.FirstOrDefaultAsync<ComponentEntity>(x => x.Id == state.ComponentId);
+                if (component is null)
+                {
+                    return Fail("ComponentNotFound");
+                }
+
+                if (component.ConfigAsYaml != state.MainContentText)
+                {
+                    await db.UpdateAsync(component with { ConfigAsYaml = state.MainContentText });
+
+                    Cache.Clear();
+                }
+
+                return Success;
+            });
+
+            if (result.HasError)
+            {
+                this.FailNotification(result.Error.Message);
+            }
+        }
 
         state.MainContentTab = tab;
 
@@ -777,6 +803,13 @@ sealed class ApplicationView : Component<ApplicationState>
                             OnClick(OnMainContentTabHeaderClicked),
                             Id((int)MainContentTabs.ImportHtml),
                             When(state.MainContentTab == MainContentTabs.ImportHtml, BorderRadius(4), Border(1, solid, Theme.BorderColor))
+                        },
+                        new FlexRowCentered(Padding(4), Border(1, solid, transparent))
+                        {
+                            "Config",
+                            OnClick(OnMainContentTabHeaderClicked),
+                            Id((int)MainContentTabs.ComponentConfig),
+                            When(state.MainContentTab == MainContentTabs.ComponentConfig, BorderRadius(4), Border(1, solid, Theme.BorderColor))
                         }
                     }
                 }
