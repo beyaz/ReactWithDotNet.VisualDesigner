@@ -11,9 +11,9 @@ public enum ResultType
 
 public sealed record Result
 {
-    public ResultType ResultType { get; init; }
+    public required ResultType ResultType { get; init; }
     
-    public string Message { get; init; }
+    public required string Message { get; init; }
 }
 
 public sealed record Response
