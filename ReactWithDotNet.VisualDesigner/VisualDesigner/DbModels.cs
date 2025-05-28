@@ -1,9 +1,5 @@
-﻿
-
-
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using YamlDotNet.Serialization;
 
 namespace ReactWithDotNet.VisualDesigner.DbModels;
 
@@ -33,9 +29,6 @@ public sealed record ComponentEntity
     public string RootElementAsYaml { get; init; }
     
     public string ConfigAsYaml { get; init; }
-    
-    [YamlIgnore]
-    public string ExportFilePath=>DeserializeFromYaml<Dictionary<string,string>>(ConfigAsYaml)["exportFilePath"];
 
     // @formatter:on
 }

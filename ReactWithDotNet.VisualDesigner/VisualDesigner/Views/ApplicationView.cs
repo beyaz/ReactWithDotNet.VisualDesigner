@@ -570,23 +570,7 @@ sealed class ApplicationView : Component<ApplicationState>
         
         if (state.MainContentTab == MainContentTabs.ComponentConfig)
         {
-            var result = await DbOperation(async db =>
-            {
-                var component = await db.FirstOrDefaultAsync<ComponentEntity>(x => x.Id == state.ComponentId);
-                if (component is null)
-                {
-                    return Fail("ComponentNotFound");
-                }
-
-                if (component.ConfigAsYaml != state.MainContentText)
-                {
-                    await db.UpdateAsync(component with { ConfigAsYaml = state.MainContentText });
-
-                    Cache.Clear();
-                }
-
-                return Success;
-            });
+            var result = await UpdateComponentConfig(state.ComponentId, state.MainContentText, state.UserName);
 
             if (result.HasError)
             {
@@ -600,6 +584,85 @@ sealed class ApplicationView : Component<ApplicationState>
         {
             state.MainContentText = null;
         }
+    }
+
+    static async Task<Result> UpdateComponentConfig(int componentId, string componentConfigAsYamlNewValue, string userName)
+    {
+        var component = await DbOperation(db=>db.FirstOrDefaultAsync<ComponentEntity>(x => x.Id == componentId));
+        if (component is null)
+        {
+            return new Exception("ComponentNotFound");
+        }
+
+        if (component.ConfigAsYaml == componentConfigAsYamlNewValue)
+        {
+            return Success;
+        }
+
+        string name = string.Empty;
+        string exportFilePath= string.Empty;
+        {
+            var config = DeserializeFromYaml<Dictionary<string, string>>(componentConfigAsYamlNewValue);
+            {
+                foreach (var item in config.TryGetComponentName())
+                {
+                    name = item;
+                }
+                
+                if (name.HasNoValue())
+                {
+                    return new Exception("NameMustBeEntered"); 
+                }
+            }
+            {
+                foreach (var item in config.TryGetComponentExportFilePath())
+                {
+                    exportFilePath = item;
+                }
+                
+                if (exportFilePath.HasNoValue())
+                {
+                    return new Exception("ExportFilePathMustBeEnteredCorrectly"); 
+                }
+            }
+        }
+        
+        
+        
+
+        // check name & export file path
+        {
+
+            foreach (var item in (await DbOperation(db=>db.GetAllAsync<ComponentEntity>())).Where(x=>x.Id != component.Id))
+            {
+                if (item.GetName() == name && item.GetExportFilePath() == exportFilePath)
+                {
+                    return new Exception("Has already same named component.");      
+                }
+            }
+                        
+
+            await DbOperation(db => db.InsertAsync(new ComponentHistoryEntity
+            {
+                ComponentId                = component.Id,
+                ComponentName              = component.Name,
+                ConfigAsYaml = component.ConfigAsYaml,
+                ComponentRootElementAsYaml = component.RootElementAsYaml,
+                InsertTime                 = DateTime.Now,
+                UserName                   = userName
+            }));
+
+            await DbOperation(db => db.UpdateAsync(component with
+            {
+                ConfigAsYaml = componentConfigAsYamlNewValue
+            }));
+
+            Cache.Clear();
+
+            //todo:  this.SuccessNotification("Component name updated.");
+        }
+
+        return Success;
     }
 
     Task OnPropertyItemDropLocationDroped(DragEvent _)

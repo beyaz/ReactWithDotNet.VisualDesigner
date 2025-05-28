@@ -5,6 +5,8 @@ namespace ReactWithDotNet.VisualDesigner;
 
 static class Extensions
 {
+    
+    
     public class IO
     {
         public static async Task<Result<string>> TryReadFile(string filePath)
