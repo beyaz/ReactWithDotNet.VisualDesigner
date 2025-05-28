@@ -571,10 +571,15 @@ sealed class ApplicationView : Component<ApplicationState>
         if (state.MainContentTab == MainContentTabs.ComponentConfig)
         {
             var result = await UpdateComponentConfig(state.ComponentId, state.MainContentText, state.UserName);
-
             if (result.HasError)
             {
                 this.FailNotification(result.Error.Message);
+                return;
+            }
+
+            if (result.Value.HasValue())
+            {
+                 this.SuccessNotification(result.Value);
             }
         }
 
@@ -586,7 +591,7 @@ sealed class ApplicationView : Component<ApplicationState>
         }
     }
 
-    static async Task<Result> UpdateComponentConfig(int componentId, string componentConfigAsYamlNewValue, string userName)
+    static async Task<Result<string>> UpdateComponentConfig(int componentId, string componentConfigAsYamlNewValue, string userName)
     {
         var component = await DbOperation(db=>db.FirstOrDefaultAsync<ComponentEntity>(x => x.Id == componentId));
         if (component is null)
@@ -596,7 +601,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
         if (component.ConfigAsYaml == componentConfigAsYamlNewValue)
         {
-            return Success;
+            return string.Empty;
         }
 
         string name = string.Empty;
@@ -658,11 +663,9 @@ sealed class ApplicationView : Component<ApplicationState>
             }));
 
             Cache.Clear();
-
-            //todo:  this.SuccessNotification("Component name updated.");
         }
 
-        return Success;
+        return "Component name updated.";
     }
 
     Task OnPropertyItemDropLocationDroped(DragEvent _)
