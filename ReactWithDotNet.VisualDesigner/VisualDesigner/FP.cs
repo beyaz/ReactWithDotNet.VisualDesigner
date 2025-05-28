@@ -4,8 +4,22 @@ using System.Collections;
 
 namespace FunctionalUtilities;
 
+public enum ResultType
+{
+    Error, Trace, UserMessage
+}
+
+public sealed record Result
+{
+    public ResultType ResultType { get; init; }
+    
+    public string Message { get; init; }
+}
+
 public sealed record Response
 {
+    public IReadOnlyList<Result> Results { get; init; } = [];
+    
     public Exception Error { get; init; }
 
     public bool HasError { get; init; }
