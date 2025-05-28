@@ -19,13 +19,37 @@ public sealed class NextJsExportTest
         {
             foreach (var record in db.GetAll<ComponentEntity>())
             {
-                var root = DeserializeFromYaml<VisualElementModel>(record.RootElementAsYaml);
 
-                await fix(root);
+                string outputFilePath = string.Empty;
+                string name = string.Empty;
+                {
+                    var path = record.Name + ".txt";
+
+                    var fileName = Path.GetFileNameWithoutExtension(path);
+                
+                    if (fileName.Contains("."))
+                    {
+                        outputFilePath = Path.GetDirectoryName(path).Replace('\\','/') + "/" + fileName.Split('.', StringSplitOptions.RemoveEmptyEntries).First() + ".tsx";
+                        name           = fileName.Split('.', StringSplitOptions.RemoveEmptyEntries).Last();
+                    }
+                    else
+                    {
+                        name = fileName;
+                        outputFilePath = Path.GetDirectoryName(path).Replace('\\','/') + "/" + fileName + ".tsx";
+                    }
+                }
+                
+                
+               
+                
 
                 await db.UpdateAsync(record with
                 {
-                    RootElementAsYaml = SerializeToYaml(root)
+                    ConfigAsYaml = SerializeToYaml(new Dictionary<string,string>
+                    {
+                        {"name", name},
+                        {"exportFilePath", outputFilePath}
+                    })
                 });
             }
         });
