@@ -586,7 +586,7 @@ sealed class ApplicationView : Component<ApplicationState>
         }
     }
 
-    static async Task<Result> UpdateComponentConfig(int componentId, string componentConfigAsYamlNewValue, string userName)
+    static async Task<Response> UpdateComponentConfig(int componentId, string componentConfigAsYamlNewValue, string userName)
     {
         var component = await DbOperation(db=>db.FirstOrDefaultAsync<ComponentEntity>(x => x.Id == componentId));
         if (component is null)
@@ -1985,7 +1985,7 @@ sealed class ApplicationView : Component<ApplicationState>
         return Task.CompletedTask;
     }
 
-    Result UpdateElementNode(string path, string yaml)
+    Response UpdateElementNode(string path, string yaml)
     {
         VisualElementModel newModel;
 

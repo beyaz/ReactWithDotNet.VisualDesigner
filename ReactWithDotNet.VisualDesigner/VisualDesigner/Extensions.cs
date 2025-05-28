@@ -9,7 +9,7 @@ static class Extensions
     
     public class IO
     {
-        public static async Task<Result<string>> TryReadFile(string filePath)
+        public static async Task<Response<string>> TryReadFile(string filePath)
         {
             try
             {
@@ -21,7 +21,7 @@ static class Extensions
             }
         }
 
-        public static async Task<Result<string[]>> TryReadFileAllLines(string filePath)
+        public static async Task<Response<string[]>> TryReadFileAllLines(string filePath)
         {
             try
             {
@@ -33,7 +33,7 @@ static class Extensions
             }
         }
 
-        public static async Task<Result> TryWriteToFile(string filePath, string fileContent)
+        public static async Task<Response> TryWriteToFile(string filePath, string fileContent)
         {
             try
             {
@@ -47,7 +47,7 @@ static class Extensions
             return Success;
         }
     }
-    public static Result<int> GetComponentDeclerationLineIndex(IReadOnlyList<string> fileContent, string targetComponentName)
+    public static Response<int> GetComponentDeclerationLineIndex(IReadOnlyList<string> fileContent, string targetComponentName)
     {
         var lines = fileContent.ToList();
         
@@ -68,7 +68,7 @@ static class Extensions
         return componentDeclerationLineIndex;
     }
     
-    public static Result<(string filePath, string targetComponentName)> GetComponentFileLocation(string componentName, string userLocalWorkspacePath)
+    public static Response<(string filePath, string targetComponentName)> GetComponentFileLocation(string componentName, string userLocalWorkspacePath)
     {
         var targetComponentName = componentName.Split('/').Last();
 

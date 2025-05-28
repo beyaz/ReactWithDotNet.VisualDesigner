@@ -4,7 +4,7 @@ using System.Collections;
 
 namespace FunctionalUtilities;
 
-public sealed class Result
+public sealed class Response
 {
     public Exception Error { get; init; }
 
@@ -12,24 +12,24 @@ public sealed class Result
 
     public bool Success { get; init; }
 
-    public static Result<T> From<T>(T value)
+    public static Response<T> From<T>(T value)
     {
         return new() { Success = true, Value = value };
     }
 
-    public static implicit operator Result(Exception failInfo)
+    public static implicit operator Response(Exception failInfo)
     {
         return new() { HasError = true, Error = failInfo };
     }
 
-    public static implicit operator Result(NoneObject noneObject)
+    public static implicit operator Response(NoneObject noneObject)
     {
         return new() { Success = true };
     }
 }
 
 
-public class Result<TValue>: IEnumerable<TValue>
+public class Response<TValue>: IEnumerable<TValue>
 {
     public Exception Error { get; init; }
 
@@ -39,17 +39,17 @@ public class Result<TValue>: IEnumerable<TValue>
 
     public TValue Value { get; init; }
 
-    public static implicit operator Result<TValue>(TValue value)
+    public static implicit operator Response<TValue>(TValue value)
     {
         return new() { Value = value, Success = true };
     }
 
-    public static implicit operator Result<TValue>(Exception failInfo)
+    public static implicit operator Response<TValue>(Exception failInfo)
     {
         return new() { Error = failInfo };
     }
 
-    public static implicit operator Result<TValue>(NoneObject noneObject)
+    public static implicit operator Response<TValue>(NoneObject noneObject)
     {
         return new() { Success = true };
     }
@@ -126,11 +126,11 @@ public sealed class NoneObject
 
 static class FP
 {
-    public static readonly Result Success = new() { Success = true };
+    public static readonly Response Success = new() { Success = true };
 
     public static NoneObject None => NoneObject.Instance;
 
-    public static Result<IReadOnlyList<B>> ConvertAll<A, B>(this IEnumerable<Result<A>> response, Func<A, Result<B>> convertFunc)
+    public static Response<IReadOnlyList<B>> ConvertAll<A, B>(this IEnumerable<Response<A>> response, Func<A, Response<B>> convertFunc)
     {
         List<B> values = [];
 
@@ -153,12 +153,12 @@ static class FP
         return values;
     }
 
-    public static Result Fail(string message)
+    public static Response Fail(string message)
     {
         return new() { Success = false, HasError = true, Error = new(message) };
     }
 
-    public static Result FoldThen<A>(this IEnumerable<Result<IReadOnlyList<A>>> response, Action<IReadOnlyList<A>> nextAction)
+    public static Response FoldThen<A>(this IEnumerable<Response<IReadOnlyList<A>>> response, Action<IReadOnlyList<A>> nextAction)
     {
         List<A> values = [];
 
@@ -229,7 +229,7 @@ static class FP
         return nextFunc(maybe.Value);
     }
 
-    public static async Task<Result<T3>> Pipe<T0, T1, T2, T3>(T0 i0, Func<T0, Task<Result<T1>>> m0, Func<T1, T2> m1, Func<T2, T3> m2)
+    public static async Task<Response<T3>> Pipe<T0, T1, T2, T3>(T0 i0, Func<T0, Task<Response<T1>>> m0, Func<T1, T2> m1, Func<T2, T3> m2)
     {
         var response0 = await m0(i0);
         if (response0.HasError)
@@ -244,11 +244,11 @@ static class FP
         return response2;
     }
 
-    public static async Task<Result<T6>> Pipe<T0, T1, T2, T3, T4, T5, T6>(
+    public static async Task<Response<T6>> Pipe<T0, T1, T2, T3, T4, T5, T6>(
         T0 p0, T1 p1,
-        Func<T0, T1, Task<Result<T2>>> m0,
+        Func<T0, T1, Task<Response<T2>>> m0,
         Func<T2, T3> m1,
-        Func<T3, Task<Result<T4>>> m2,
+        Func<T3, Task<Response<T4>>> m2,
         Func<T4, T5> m3,
         Func<T5, T6> m4)
     {
@@ -273,9 +273,9 @@ static class FP
         return response4;
     }
     
-    public static async Task<Result<T3>> Pipe<T0, T1, T2, T3>(
+    public static async Task<Response<T3>> Pipe<T0, T1, T2, T3>(
         T0 p0, T1 p1,
-        Func<T0, T1, Task<Result<T2>>> m0,
+        Func<T0, T1, Task<Response<T2>>> m0,
         Func<T2, T3> m1)
     {
         var response0 = await m0(p0, p1);
@@ -287,7 +287,7 @@ static class FP
         return  m1(response0.Value);
     }
     
-    public static async Task<Result<T3>> Pipe<T0, T1, T2, T3>(T0 p0, T1 p1, Func<T0, T1, Task<Result<T2>>> m0, Func<T2, Task<Result<T3>>> m1)
+    public static async Task<Response<T3>> Pipe<T0, T1, T2, T3>(T0 p0, T1 p1, Func<T0, T1, Task<Response<T2>>> m0, Func<T2, Task<Response<T3>>> m1)
     {
         var response0 = await m0(p0, p1);
         if (response0.HasError)
@@ -298,7 +298,7 @@ static class FP
         return await m1(response0.Value);
     }
     
-    public static Func<T0, Task<Result<T1>>> HasValue<T0, T1>(Func<T0,Task<Result<T1>>> m0)
+    public static Func<T0, Task<Response<T1>>> HasValue<T0, T1>(Func<T0,Task<Response<T1>>> m0)
     {
         return async t0 =>
         {
@@ -311,7 +311,7 @@ static class FP
 
     }
 
-    public static Result<B> Then<A, B>(this (A value, Exception exception) result, Func<A, B> convertFunc)
+    public static Response<B> Then<A, B>(this (A value, Exception exception) result, Func<A, B> convertFunc)
     {
         if (result.exception is not null)
         {
@@ -321,29 +321,29 @@ static class FP
         return convertFunc(result.value);
     }
 
-    public static Result<B> Then<A, B>(this Result<A> result, Func<A, B> convertFunc)
+    public static Response<B> Then<A, B>(this Response<A> response, Func<A, B> convertFunc)
     {
-        if (result.HasError)
+        if (response.HasError)
         {
-            return result.Error;
+            return response.Error;
         }
 
-        return convertFunc(result.Value);
+        return convertFunc(response.Value);
     }
 
-    public static Result Then<A>(this Result<A> result, Action<A> action)
+    public static Response Then<A>(this Response<A> response, Action<A> action)
     {
-        if (result.HasError)
+        if (response.HasError)
         {
-            return result.Error;
+            return response.Error;
         }
 
-        action(result.Value);
+        action(response.Value);
 
         return None;
     }
 
-    public static async Task<Result<TValue>> Then<TValue>(this Task<Result<TValue>> response, Action<TValue> nextAction)
+    public static async Task<Response<TValue>> Then<TValue>(this Task<Response<TValue>> response, Action<TValue> nextAction)
     {
         var value = await response;
 
@@ -355,7 +355,7 @@ static class FP
         return value;
     }
 
-    public static Result<B> Then<A, B>(this IEnumerable<Result<A>> response, Func<IReadOnlyList<A>, B> nextAction)
+    public static Response<B> Then<A, B>(this IEnumerable<Response<A>> response, Func<IReadOnlyList<A>, B> nextAction)
     {
         List<A> values = [];
 
@@ -372,12 +372,12 @@ static class FP
         return nextAction(values);
     }
 
-    public static Result<IReadOnlyList<TValue>> ToReadOnlyList<TValue>(this Result<TValue> result)
+    public static Response<IReadOnlyList<TValue>> ToReadOnlyList<TValue>(this Response<TValue> response)
     {
-        return result.Then(x => (IReadOnlyList<TValue>) [x]);
+        return response.Then(x => (IReadOnlyList<TValue>) [x]);
     }
 
-    public static async Task<TValue> Unwrap<TValue>(this Task<Result<TValue>> responseTask)
+    public static async Task<TValue> Unwrap<TValue>(this Task<Response<TValue>> responseTask)
     {
         var response = await responseTask;
 
@@ -389,13 +389,13 @@ static class FP
         throw response.Error;
     }
 
-    public static TValue Unwrap<TValue>(Result<TValue> result)
+    public static TValue Unwrap<TValue>(Response<TValue> response)
     {
-        if (result.Success)
+        if (response.Success)
         {
-            return result.Value;
+            return response.Value;
         }
 
-        throw result.Error;
+        throw response.Error;
     }
 }

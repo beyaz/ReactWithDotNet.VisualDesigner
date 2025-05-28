@@ -32,7 +32,7 @@ sealed record ExportInput
 
 static class NextJs_with_Tailwind
 {
-    public static async Task<Result<ExportOutput>> Export(ExportInput input)
+    public static async Task<Response<ExportOutput>> Export(ExportInput input)
     {
         string filePath;
         string fileContent;
@@ -74,7 +74,7 @@ static class NextJs_with_Tailwind
         return new ExportOutput { HasChange = true };
     }
 
-    public static async Task<Result> ExportAll(int projectId)
+    public static async Task<Response> ExportAll(int projectId)
     {
         var components = await GetAllComponentsInProject(projectId);
 
@@ -132,7 +132,7 @@ static class NextJs_with_Tailwind
         return $"{{t(\"{TryClearStringValue(text)}\")}}";
     }
 
-    static async Task<Result<IReadOnlyList<string>>> CalculateElementTreeTsxCodes(ProjectConfig project, VisualElementModel rootVisualElement)
+    static async Task<Response<IReadOnlyList<string>>> CalculateElementTreeTsxCodes(ProjectConfig project, VisualElementModel rootVisualElement)
     {
         ReactNode rootNode;
         {
@@ -150,7 +150,7 @@ static class NextJs_with_Tailwind
         return ConvertReactNodeModelToTsxCode(rootNode, null, 2);
     }
 
-    static async Task<Result<(string filePath, string fileContent)>> CalculateExportInfo(ExportInput input)
+    static async Task<Response<(string filePath, string fileContent)>> CalculateExportInfo(ExportInput input)
     {
         var (projectId, componentId, userName) = input;
 
@@ -230,7 +230,7 @@ static class NextJs_with_Tailwind
         return (filePath, fileNewContent);
     }
 
-    static Result<IReadOnlyList<string>> ConvertReactNodeModelToTsxCode(ReactNode node, ReactNode parentNode, int indentLevel)
+    static Response<IReadOnlyList<string>> ConvertReactNodeModelToTsxCode(ReactNode node, ReactNode parentNode, int indentLevel)
     {
         List<string> lines = [];
 
@@ -531,7 +531,7 @@ static class NextJs_with_Tailwind
         return lines;
     }
 
-    static async Task<Result<ReactNode>> ConvertVisualElementModelToReactNodeModel(ProjectConfig project, VisualElementModel element)
+    static async Task<Response<ReactNode>> ConvertVisualElementModelToReactNodeModel(ProjectConfig project, VisualElementModel element)
     {
         List<string> classNames = [];
 
@@ -721,7 +721,7 @@ static class NextJs_with_Tailwind
         return new(' ', indentLevel * 4);
     }
 
-    static Result<string> InjectRender(IReadOnlyList<string> fileContent, string targetComponentName, IReadOnlyList<string> linesToInject)
+    static Response<string> InjectRender(IReadOnlyList<string> fileContent, string targetComponentName, IReadOnlyList<string> linesToInject)
     {
         var lines = fileContent.ToList();
 
