@@ -862,12 +862,15 @@ sealed class ApplicationView : Component<ApplicationState>
         };
     }
 
+    
+    
     Element PartLeftPanel()
     {
+        
         var componentNameEditor = new input
         {
             type     = "text",
-            value    = state.ComponentName,
+            value    = GetComponentName(state.ProjectId, state.ComponentId),
             disabled = true,
             style =
             {
@@ -1145,8 +1148,8 @@ sealed class ApplicationView : Component<ApplicationState>
 
         var componentTree = new ComponentTreeView
         {
-            ProjectId        = state.ProjectId,
-            ComponentName    = state.ComponentName,
+            ProjectId     = state.ProjectId,
+            ComponentId   = state.ComponentId,
             SelectionChanged = ChangeSelectedComponent
         } + When(state.LeftTab != LeftTabs.Components, DisplayNone);
 

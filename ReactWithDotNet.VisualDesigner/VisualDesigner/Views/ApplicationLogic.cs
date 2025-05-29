@@ -10,6 +10,16 @@ static class ApplicationLogic
 {
     public static readonly CachedObjectMap Cache = new() { Timeout = TimeSpan.FromMinutes(5) };
 
+    public static IReadOnlyList<ComponentEntity> GetAllComponentsInProjectFromCache(int projectId)
+    {
+        return Cache.AccessValue(nameof(GetAllComponentsInProjectFromCache) + projectId, () => GetAllComponentsInProject(projectId).GetAwaiter().GetResult().ToList());
+    }
+    
+    public static string GetComponentName(int projectId, int componentId)
+    {
+        return GetAllComponentsInProjectFromCache(projectId).FirstOrDefault(x => x.Id == componentId).GetName();
+    }
+    
     public static Task<Result> CommitComponent(ApplicationState state)
     {
         return DbOperation(async db =>

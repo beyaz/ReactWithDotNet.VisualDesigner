@@ -4,12 +4,14 @@ delegate Task ComponentSelectionChanged(string componentName);
 
 sealed class ComponentTreeView : Component<ComponentTreeView.State>
 {
-    public string ComponentName { get; init; }
-
+    public required int ComponentId { get; init; }
+    
     public int ProjectId { get; init; }
 
     [CustomEvent]
     public ComponentSelectionChanged SelectionChanged { get; init; }
+
+  
 
     protected override Task constructor()
     {
@@ -28,7 +30,7 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
 
     protected override async Task<Element> renderAsync()
     {
-        if (ProjectId is 0 || ComponentName.HasNoValue())
+        if (ProjectId is 0 || ComponentId is 0)
         {
             return new FlexRowCentered(SizeFull) { "Empty" };
         }
@@ -227,7 +229,7 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
         {
             new FlexColumn(PaddingLeft(indent * 16), Id(node.Path), OnClick(OnTreeItemClicked))
             {
-                When(node.ComponentName == ComponentName, Background(Blue100), BorderRadius(3)),
+                When(node.ComponentId == ComponentId, Background(Blue100), BorderRadius(3)),
 
                 UserSelect(none),
 
