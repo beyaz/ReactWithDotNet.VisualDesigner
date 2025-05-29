@@ -523,8 +523,6 @@ sealed class ApplicationView : Component<ApplicationState>
         return ChangeSelectedComponent(newValue);
     }
 
-    
-
     async Task OnDeleteSelectedComponentClicked(MouseEvent e)
     {
         await DbOperation(async db =>
@@ -532,11 +530,18 @@ sealed class ApplicationView : Component<ApplicationState>
             var component = await db.FirstOrDefaultAsync<ComponentEntity>(x => x.Id == state.ComponentId);
             if (component is not null)
             {
+                var componentWorkspace = await db.FirstOrDefaultAsync<ComponentWorkspace>(x => x.ComponentId == component.Id);
+                if (componentWorkspace is not null)
+                {
+                    await db.DeleteAsync(componentWorkspace);
+                }
+
                 await db.InsertAsync(new ComponentHistoryEntity
                 {
                     ComponentId                = component.Id,
                     ComponentName              = component.Name,
                     ComponentRootElementAsYaml = component.RootElementAsYaml,
+                    ConfigAsYaml               = component.ConfigAsYaml,
                     InsertTime                 = DateTime.Now,
                     UserName                   = state.UserName
                 });
@@ -861,8 +866,8 @@ sealed class ApplicationView : Component<ApplicationState>
     {
         var componentNameEditor = new input
         {
-            type                     = "text",
-            value                = state.ComponentName,
+            type     = "text",
+            value    = state.ComponentName,
             disabled = true,
             style =
             {
