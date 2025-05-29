@@ -271,18 +271,10 @@ sealed class ApplicationView : Component<ApplicationState>
         return Task.CompletedTask;
     }
 
-    async Task ChangeSelectedComponent(string componentName)
+    
+    Task ChangeSelectedComponent(int componentId)
     {
-        var componentResult = await DbOperation(db => db.GetComponentByComponentName_NotNull(componentName));
-        if (componentResult.HasError)
-        {
-            this.FailNotification(componentResult.Error.Message);
-            return;
-        }
-
-        var component = componentResult.Value;
-
-        await ChangeSelectedComponent(component.Id, component);
+        return ChangeSelectedComponent(componentId, null);
     }
 
     async Task ChangeSelectedComponent(int componentId, ComponentEntity component)
@@ -448,7 +440,7 @@ sealed class ApplicationView : Component<ApplicationState>
                 return;
             }
 
-            await ChangeSelectedComponent(component.Name);
+            await ChangeSelectedComponent(component.Id, component);
         }
     }
 
@@ -518,10 +510,7 @@ sealed class ApplicationView : Component<ApplicationState>
         return Task.CompletedTask;
     }
 
-    Task OnComponentNameChanged(string newValue)
-    {
-        return ChangeSelectedComponent(newValue);
-    }
+    
 
     async Task OnDeleteSelectedComponentClicked(MouseEvent e)
     {
@@ -1338,7 +1327,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
                             Cache.Clear();
 
-                            await OnComponentNameChanged(newValue);
+                            await ChangeSelectedComponent(newDbRecord.Id);
 
                             state.IsProjectSettingsPopupVisible = false;
                         }

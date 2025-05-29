@@ -1,6 +1,6 @@
 ﻿namespace ReactWithDotNet.VisualDesigner.Views;
 
-delegate Task ComponentSelectionChanged(string componentName);
+delegate Task ComponentSelectionChanged(int componentId);
 
 sealed class ComponentTreeView : Component<ComponentTreeView.State>
 {
@@ -184,9 +184,9 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
             node = node.Children[index];
         }
 
-        if (node.ComponentName.HasValue())
+        if (node.ComponentId.HasValue)
         {
-            DispatchEvent(SelectionChanged, [node.ComponentName]);
+            DispatchEvent(SelectionChanged, [node.ComponentId.Value]);
         }
         else
         {
