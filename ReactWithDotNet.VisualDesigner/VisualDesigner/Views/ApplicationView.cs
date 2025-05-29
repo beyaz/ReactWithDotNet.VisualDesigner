@@ -746,7 +746,7 @@ sealed class ApplicationView : Component<ApplicationState>
                 },
 
                 // A C T I O N S
-                SpaceX(8),
+               
                 new FlexRowCentered
                 {
                     new FlexRowCentered(Gap(16), Border(1, solid, Theme.BorderColor), BorderRadius(4), PaddingX(8), Height(36))
@@ -834,10 +834,10 @@ sealed class ApplicationView : Component<ApplicationState>
                     }
                 },
 
-                SpaceX(8),
+               
                 new IconFocus() + Color(Gray500) + Hover(Color(Blue300)) + OnClick(FocusToCurrentComponentInIde),
 
-                SpaceX(8),
+         
                 new FlexRowCentered(Border(1, solid, Theme.BorderColor), BorderRadius(4), Height(36))
                 {
                     PositionRelative,
