@@ -2069,6 +2069,11 @@ sealed class ApplicationView : Component<ApplicationState>
         {
             state.MainContentText = DbOperation(db => db.FirstOrDefault<ProjectEntity>(x => x.Id == state.ProjectId)?.ConfigAsYaml);
         }
+        
+        if (state.MainContentTab == MainContentTabs.ComponentConfig)
+        {
+            state.MainContentText = DbOperation(db => db.FirstOrDefault<ComponentEntity>(x => x.Id == state.ComponentId)?.ConfigAsYaml);
+        }
 
         return new Editor
         {
