@@ -276,13 +276,13 @@ sealed class MagicInput : Component<MagicInput.State>
             IsTextAlignCenter ? AlignItemsCenter : null
         };
 
-        Element ToOption(string code, int index)
+        Element ToOption(string text, int index)
         {
             return new div(BorderRadius(4), OnClick(OnSuggestionItemClicked))
             {
                 Data("INDEX", index),
 
-                code,
+                text,
                 PaddingLeft(5),
                 Color(rgb(0, 6, 36)),
                 WhiteSpaceNoWrap,
