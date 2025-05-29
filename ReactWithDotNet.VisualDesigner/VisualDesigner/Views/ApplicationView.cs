@@ -523,45 +523,7 @@ sealed class ApplicationView : Component<ApplicationState>
         return ChangeSelectedComponent(newValue);
     }
 
-    async Task OnComponentNameTypeFinished()
-    {
-        var userEnteredComponentName = state.ComponentName.Trim();
-
-        var component = await DbOperation(db => db.FirstOrDefaultAsync<ComponentEntity>(x => x.Id == state.ComponentId));
-
-        // has no change
-        if (component.Name.Trim() == userEnteredComponentName)
-        {
-            return;
-        }
-
-        var sameNamedComponent = await DbOperation(db => db.FirstOrDefaultAsync<ComponentEntity>(x => x.Name == userEnteredComponentName));
-        if (sameNamedComponent is not null)
-        {
-            state = state with { ComponentName = component.Name };
-
-            this.FailNotification("Has already same named component.");
-            return;
-        }
-
-        await DbOperation(db => db.InsertAsync(new ComponentHistoryEntity
-        {
-            ComponentId                = component.Id,
-            ComponentName              = component.Name,
-            ComponentRootElementAsYaml = component.RootElementAsYaml,
-            InsertTime                 = DateTime.Now,
-            UserName                   = state.UserName
-        }));
-
-        await DbOperation(db => db.UpdateAsync(component with
-        {
-            Name = userEnteredComponentName
-        }));
-
-        Cache.Clear();
-
-        this.SuccessNotification("Component name updated.");
-    }
+    
 
     async Task OnDeleteSelectedComponentClicked(MouseEvent e)
     {
@@ -900,9 +862,8 @@ sealed class ApplicationView : Component<ApplicationState>
         var componentNameEditor = new input
         {
             type                     = "text",
-            valueBind                = () => state.ComponentName,
-            valueBindDebounceTimeout = 800,
-            valueBindDebounceHandler = OnComponentNameTypeFinished,
+            value                = state.ComponentName,
+            disabled = true,
             style =
             {
                 FlexGrow(1),
