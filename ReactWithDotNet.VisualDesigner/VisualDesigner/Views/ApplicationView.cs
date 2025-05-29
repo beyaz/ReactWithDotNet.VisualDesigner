@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using ReactWithDotNet.ThirdPartyLibraries.MonacoEditorReact;
 using ReactWithDotNet.VisualDesigner.Exporters;
+using static ReactWithDotNet.VisualDesigner.ComponentEntityExtensions;
 using Page = ReactWithDotNet.VisualDesigner.Infrastructure.Page;
 
 namespace ReactWithDotNet.VisualDesigner.Views;
@@ -1372,16 +1373,18 @@ sealed class ApplicationView : Component<ApplicationState>
                 {
                     Name        = string.Empty,
                     Value       = inputValue,
-                    Suggestions = await GetTagSuggestions(state),
-                    OnChange = async (_, newValue) =>
+                    Suggestions = GetTagSuggestions(state),
+                    OnChange = (_, newValue) =>
                     {
-                        foreach (var dbRecord in await TryFindComponentByComponentName(state.ProjectId, newValue))
+                        foreach (var dbRecord in TryFindComponentByComponentNameWithExportFilePath(state.ProjectId, newValue))
                         {
                             CurrentVisualElement.Tag = dbRecord.Id.ToString();
-                            return;
+                            return Task.CompletedTask;
                         }
 
                         CurrentVisualElement.Tag = newValue;
+                        
+                        return Task.CompletedTask;
                     },
                     IsTextAlignCenter = true
                 }

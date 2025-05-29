@@ -374,13 +374,13 @@ static class ApplicationLogic
         return items;
     }
 
-    public static async Task<IReadOnlyList<string>> GetTagSuggestions(ApplicationState state)
+    public static IReadOnlyList<string> GetTagSuggestions(ApplicationState state)
     {
         var suggestions = new List<string>(TagNameList);
-
-        suggestions.AddRange((await GetAllComponentNamesInProject(state.ProjectId)).Where(name => name != state.ComponentName));
-
-        suggestions.Add("heroui/Checkbox");
+        
+        suggestions.AddRange(from x in GetAllComponentsInProjectFromCache(state.ProjectId) 
+                             where x.Id != state.ComponentId 
+                             select x.GetNameWithExportFilePath());
 
         return suggestions;
     }
@@ -479,19 +479,6 @@ static class ApplicationLogic
         return None;
     }
 
-    public static async Task<Maybe<ComponentEntity>> TryFindComponentByComponentName(int projectId, string componentName)
-    {
-        if (componentName.HasNoValue())
-        {
-            return None;
-        }
-
-        var query =
-            from record in await DbOperation(db => db.SelectAsync<ComponentEntity>(x => x.ProjectId == projectId && x.Name == componentName))
-            select record;
-
-        return query.FirstOrDefault();
-    }
 
     public static Maybe<string> TryFindFilePathFromWebRequestPath(string requestPath)
     {
