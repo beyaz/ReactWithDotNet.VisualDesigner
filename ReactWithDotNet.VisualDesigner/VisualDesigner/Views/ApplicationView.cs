@@ -587,7 +587,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
         if (tab == MainContentTabs.Design)
         {
-            state.MainContentText = null;
+            state = state with { MainContentText = null };
         }
     }
 
@@ -2058,22 +2058,16 @@ sealed class ApplicationView : Component<ApplicationState>
 
     Element YamlEditor()
     {
-        state.MainContentText = null;
-
-        if (state.MainContentTab == MainContentTabs.Code)
+        state = state with
         {
-            state.MainContentText = SerializeToYaml(CurrentVisualElement);
-        }
-
-        if (state.MainContentTab == MainContentTabs.ProjectConfig)
-        {
-            state.MainContentText = DbOperation(db => db.FirstOrDefault<ProjectEntity>(x => x.Id == state.ProjectId)?.ConfigAsYaml);
-        }
-        
-        if (state.MainContentTab == MainContentTabs.ComponentConfig)
-        {
-            state.MainContentText = DbOperation(db => db.FirstOrDefault<ComponentEntity>(x => x.Id == state.ComponentId)?.ConfigAsYaml);
-        }
+            MainContentText = state.MainContentTab switch
+            {
+                MainContentTabs.Code            => SerializeToYaml(CurrentVisualElement),
+                MainContentTabs.ProjectConfig   => DbOperation(db => db.FirstOrDefault<ProjectEntity>(x => x.Id == state.ProjectId)?.ConfigAsYaml),
+                MainContentTabs.ComponentConfig => DbOperation(db => db.FirstOrDefault<ComponentEntity>(x => x.Id == state.ComponentId)?.ConfigAsYaml),
+                _                               => null
+            }
+        };
 
         return new Editor
         {

@@ -51,7 +51,7 @@ public sealed record ApplicationState
     
     public string UserName { get; init; }
     
-    public string MainContentText { get; set; }
+    public string MainContentText { get; init; }
     
     public LeftTabs LeftTab  { get; set; }
     
