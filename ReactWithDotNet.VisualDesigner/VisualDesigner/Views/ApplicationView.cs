@@ -39,7 +39,8 @@ sealed class ApplicationView : Component<ApplicationState>
                 state = userLastState with
                 {
                     StyleItemDragDrop = new(),
-                    PropertyItemDragDrop = new()
+                    PropertyItemDragDrop = new(),
+                    MainContentTab = MainContentTabs.Design
                 };
 
                 UpdateZoomInClient();
@@ -56,7 +57,8 @@ sealed class ApplicationView : Component<ApplicationState>
                 state = DeserializeFromYaml<ApplicationState>(lastUsage.LastStateAsYaml) with
                 {
                     StyleItemDragDrop = new(),
-                    PropertyItemDragDrop = new()
+                    PropertyItemDragDrop = new(),
+                    MainContentTab = MainContentTabs.Design
                 };
 
                 UpdateZoomInClient();
@@ -81,7 +83,8 @@ sealed class ApplicationView : Component<ApplicationState>
             Selection = new(),
 
             StyleItemDragDrop    = new(),
-            PropertyItemDragDrop = new()
+            PropertyItemDragDrop = new(),
+            MainContentTab       = MainContentTabs.Design
         };
 
         var projectId = await GetFirstProjectId();
@@ -404,7 +407,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
         Element middle()
         {
-            return state.MainContentTab.In(MainContentTabs.Code, MainContentTabs.ProjectConfig, MainContentTabs.ImportHtml) ?
+            return state.MainContentTab.In(MainContentTabs.Code, MainContentTabs.ProjectConfig, MainContentTabs.ImportHtml, MainContentTabs.ComponentConfig) ?
                 new(FlexGrow(1), Padding(7), OverflowXAuto)
                 {
                     YamlEditor
@@ -840,7 +843,7 @@ sealed class ApplicationView : Component<ApplicationState>
                     PositionRelative,
                     new label(PositionAbsolute, Top(-4), Left(8), FontSize10, LineHeight7, Background(Theme.BackgroundColor), PaddingX(4)) { "View" },
 
-                    new FlexRowCentered(Gap(8), Padding(4), LineHeight10)
+                    new FlexRowCentered(Gap(8), Padding(4), LineHeight10, WhiteSpaceNoWrap)
                     {
                         new FlexRowCentered(Padding(4), Border(1, solid, transparent))
                         {
