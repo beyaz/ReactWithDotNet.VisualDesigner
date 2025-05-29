@@ -169,6 +169,78 @@ sealed class ApplicationView : Component<ApplicationState>
         return null;
     }
 
+    static async Task<Result<string>> UpdateComponentConfig(int componentId, string componentConfigAsYamlNewValue, string userName)
+    {
+        var component = await DbOperation(db => db.FirstOrDefaultAsync<ComponentEntity>(x => x.Id == componentId));
+        if (component is null)
+        {
+            return new Exception("ComponentNotFound");
+        }
+
+        if (component.ConfigAsYaml == componentConfigAsYamlNewValue)
+        {
+            return string.Empty;
+        }
+
+        var name = string.Empty;
+        var exportFilePath = string.Empty;
+        {
+            var config = DeserializeFromYaml<Dictionary<string, string>>(componentConfigAsYamlNewValue);
+            {
+                foreach (var item in config.TryGetComponentName())
+                {
+                    name = item;
+                }
+
+                if (name.HasNoValue())
+                {
+                    return new Exception("NameMustBeEntered");
+                }
+            }
+            {
+                foreach (var item in config.TryGetComponentExportFilePath())
+                {
+                    exportFilePath = item;
+                }
+
+                if (exportFilePath.HasNoValue())
+                {
+                    return new Exception("ExportFilePathMustBeEnteredCorrectly");
+                }
+            }
+        }
+
+        // check name & export file path
+        {
+            foreach (var item in (await DbOperation(db => db.GetAllAsync<ComponentEntity>())).Where(x => x.Id != component.Id))
+            {
+                if (item.GetName() == name && item.GetExportFilePath() == exportFilePath)
+                {
+                    return new Exception("Has already same named component.");
+                }
+            }
+
+            await DbOperation(db => db.InsertAsync(new ComponentHistoryEntity
+            {
+                ComponentId                = component.Id,
+                ComponentName              = component.Name,
+                ConfigAsYaml               = component.ConfigAsYaml,
+                ComponentRootElementAsYaml = component.RootElementAsYaml,
+                InsertTime                 = DateTime.Now,
+                UserName                   = userName
+            }));
+
+            await DbOperation(db => db.UpdateAsync(component with
+            {
+                ConfigAsYaml = componentConfigAsYamlNewValue
+            }));
+
+            Cache.Clear();
+        }
+
+        return "Component name updated.";
+    }
+
     Task AddNewLayerClicked(MouseEvent e)
     {
         // add as root
@@ -570,7 +642,7 @@ sealed class ApplicationView : Component<ApplicationState>
                 this.FailNotification(result.Error.Message);
             }
         }
-        
+
         if (state.MainContentTab == MainContentTabs.ComponentConfig)
         {
             var result = await UpdateComponentConfig(state.ComponentId, state.MainContentText, state.UserName);
@@ -582,7 +654,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
             if (result.Value.HasValue())
             {
-                 this.SuccessNotification(result.Value);
+                this.SuccessNotification(result.Value);
             }
         }
 
@@ -592,83 +664,6 @@ sealed class ApplicationView : Component<ApplicationState>
         {
             state = state with { MainContentText = null };
         }
-    }
-
-    static async Task<Result<string>> UpdateComponentConfig(int componentId, string componentConfigAsYamlNewValue, string userName)
-    {
-        var component = await DbOperation(db=>db.FirstOrDefaultAsync<ComponentEntity>(x => x.Id == componentId));
-        if (component is null)
-        {
-            return new Exception("ComponentNotFound");
-        }
-
-        if (component.ConfigAsYaml == componentConfigAsYamlNewValue)
-        {
-            return string.Empty;
-        }
-
-        string name = string.Empty;
-        string exportFilePath= string.Empty;
-        {
-            var config = DeserializeFromYaml<Dictionary<string, string>>(componentConfigAsYamlNewValue);
-            {
-                foreach (var item in config.TryGetComponentName())
-                {
-                    name = item;
-                }
-                
-                if (name.HasNoValue())
-                {
-                    return new Exception("NameMustBeEntered"); 
-                }
-            }
-            {
-                foreach (var item in config.TryGetComponentExportFilePath())
-                {
-                    exportFilePath = item;
-                }
-                
-                if (exportFilePath.HasNoValue())
-                {
-                    return new Exception("ExportFilePathMustBeEnteredCorrectly"); 
-                }
-            }
-        }
-        
-        
-        
-
-        // check name & export file path
-        {
-
-            foreach (var item in (await DbOperation(db=>db.GetAllAsync<ComponentEntity>())).Where(x=>x.Id != component.Id))
-            {
-                if (item.GetName() == name && item.GetExportFilePath() == exportFilePath)
-                {
-                    return new Exception("Has already same named component.");      
-                }
-            }
-                        
-
-            await DbOperation(db => db.InsertAsync(new ComponentHistoryEntity
-            {
-                ComponentId                = component.Id,
-                ComponentName              = component.Name,
-                ConfigAsYaml = component.ConfigAsYaml,
-                ComponentRootElementAsYaml = component.RootElementAsYaml,
-                InsertTime                 = DateTime.Now,
-                UserName                   = userName
-            }));
-
-            await DbOperation(db => db.UpdateAsync(component with
-            {
-                ConfigAsYaml = componentConfigAsYamlNewValue
-            }));
-
-            Cache.Clear();
-        }
-
-        return "Component name updated.";
     }
 
     Task OnPropertyItemDropLocationDroped(DragEvent _)
@@ -746,7 +741,7 @@ sealed class ApplicationView : Component<ApplicationState>
                 },
 
                 // A C T I O N S
-               
+
                 new FlexRowCentered
                 {
                     new FlexRowCentered(Gap(16), Border(1, solid, Theme.BorderColor), BorderRadius(4), PaddingX(8), Height(36))
@@ -834,10 +829,8 @@ sealed class ApplicationView : Component<ApplicationState>
                     }
                 },
 
-               
                 new IconFocus() + Color(Gray500) + Hover(Color(Blue300)) + OnClick(FocusToCurrentComponentInIde),
 
-         
                 new FlexRowCentered(Border(1, solid, Theme.BorderColor), BorderRadius(4), Height(36))
                 {
                     PositionRelative,
