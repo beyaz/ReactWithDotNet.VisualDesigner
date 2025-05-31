@@ -460,7 +460,7 @@ static class NextJs_with_Tailwind
 
             if (childrenProperty is not null)
             {
-                sb.Append(">");
+                sb.Append('>');
                 lines.Add(sb.ToString());
 
                 lines.Add($"{Indent(indentLevel + 1)}{childrenProperty.Value}");
@@ -484,7 +484,7 @@ static class NextJs_with_Tailwind
 
                 if (IsConnectedValue(childrenText))
                 {
-                    sb.Append(">");
+                    sb.Append('>');
                     lines.Add(sb.ToString());
 
                     lines.Add($"{Indent(indentLevel + 1)}{childrenText}");
@@ -497,7 +497,7 @@ static class NextJs_with_Tailwind
             }
         }
 
-        sb.Append(">");
+        sb.Append('>');
         lines.Add(sb.ToString());
 
         // Add text content

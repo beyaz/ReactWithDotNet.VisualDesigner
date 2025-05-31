@@ -865,10 +865,7 @@ public static class CssHelper
 
     public static Result<StyleModifier> ToStyleModifier(this DesignerStyleItem designerStyleItem)
     {
-        if (designerStyleItem is null)
-        {
-            throw new ArgumentNullException(nameof(designerStyleItem));
-        }
+        ArgumentNullException.ThrowIfNull(designerStyleItem);
 
         var style = new Style();
 
@@ -1217,15 +1214,9 @@ public static class CssHelper
 
     static HtmlStyle ToHtmlStyle(ProjectConfig project, string name, string value)
     {
-        if (name == null)
-        {
-            throw new ArgumentNullException(nameof(name));
-        }
+        ArgumentNullException.ThrowIfNull(name);
 
-        if (value is null)
-        {
-            throw new ArgumentNullException(nameof(value));
-        }
+        ArgumentNullException.ThrowIfNull(value);
 
         value = value.Trim();
 
@@ -1234,10 +1225,7 @@ public static class CssHelper
             value = newValue;
         }
 
-        if (value is null)
-        {
-            throw new ArgumentNullException(nameof(value));
-        }
+        ArgumentNullException.ThrowIfNull(value);
 
         var isValueDouble = double.TryParse(value, out var valueAsDouble);
 
