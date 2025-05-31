@@ -22,9 +22,12 @@ sealed class ApplicationView : Component<ApplicationState>
 
         Client.ListenEvent("Change_VisualElementTreeItemPath", treeItemPath =>
         {
-            state.Selection = new()
+            state = state with
             {
-                VisualElementTreeItemPath = treeItemPath
+                Selection = new()
+                {
+                    VisualElementTreeItemPath = treeItemPath
+                }
             };
 
             state = state with { LeftTab = LeftTabs.ElementTree };
@@ -252,13 +255,14 @@ sealed class ApplicationView : Component<ApplicationState>
                 ComponentRootElement = new()
                 {
                     Tag = "div"
+                },
+                Selection = new()
+                {
+                    VisualElementTreeItemPath = "0"
                 }
             };
 
-            state.Selection = new()
-            {
-                VisualElementTreeItemPath = "0"
-            };
+            
 
             return Task.CompletedTask;
         }
@@ -318,7 +322,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
         if (state.ComponentRootElement is not null)
         {
-            state.Selection = state.Selection with { VisualElementTreeItemPath = "0" };
+            state = state with { Selection = state.Selection with { VisualElementTreeItemPath = "0" } };
         }
     }
 
@@ -364,7 +368,7 @@ sealed class ApplicationView : Component<ApplicationState>
             node.Children.RemoveAt(int.Parse(intArray[^1]));
         }
 
-        state.Selection = new();
+        state = state with { Selection = new() };
 
         return Task.CompletedTask;
     }
@@ -934,7 +938,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
             TreeItemHover = treeItemPath =>
             {
-                state.Selection = state.Selection with { VisualElementTreeItemPathHover = treeItemPath };
+                state = state with { Selection = state.Selection with { VisualElementTreeItemPathHover = treeItemPath } };
 
                 return Task.CompletedTask;
             },
@@ -946,14 +950,17 @@ sealed class ApplicationView : Component<ApplicationState>
             },
             MouseLeave = () =>
             {
-                state.Selection = state.Selection with { VisualElementTreeItemPathHover = null };
+                state = state with { Selection = state.Selection with { VisualElementTreeItemPathHover = null } };
                 return Task.CompletedTask;
             },
             SelectionChanged = treeItemPath =>
             {
-                state.Selection = new()
+                state = state with
                 {
-                    VisualElementTreeItemPath = treeItemPath
+                    Selection = new()
+                    {
+                        VisualElementTreeItemPath = treeItemPath
+                    }
                 };
 
                 return Task.CompletedTask;
@@ -1024,9 +1031,11 @@ sealed class ApplicationView : Component<ApplicationState>
 
                 if (isTryingToMakeRoot)
                 {
-                    state = state with { ComponentRootElement = sourceNodeParent.Children[sourceNodeIndex] };
-
-                    state.Selection = new();
+                    state = state with
+                    {
+                        ComponentRootElement = sourceNodeParent.Children[sourceNodeIndex],
+                        Selection = new()
+                    };
 
                     return Task.CompletedTask;
                 }
@@ -1069,7 +1078,7 @@ sealed class ApplicationView : Component<ApplicationState>
                     {
                         targetNode.Children.Add(sourceNode);
 
-                        state.Selection = new();
+                        state = state with { Selection = new() };
 
                         return Task.CompletedTask;
                     }
@@ -1102,7 +1111,7 @@ sealed class ApplicationView : Component<ApplicationState>
                         {
                             targetNodeParent.Children.Insert(targetNodeIndex, sourceNode);
 
-                            state.Selection = new();
+                            state = state with { Selection = new() };
 
                             return Task.CompletedTask;
                         }
@@ -1121,7 +1130,7 @@ sealed class ApplicationView : Component<ApplicationState>
                     // insert into target
                     targetNodeParent.Children.Insert(targetNodeIndex, sourceNode);
 
-                    state.Selection = new();
+                    state = state with { Selection = new() };
                 }
 
                 return Task.CompletedTask;
@@ -1457,7 +1466,7 @@ sealed class ApplicationView : Component<ApplicationState>
                         styles.Select((value, index) => attributeItem(index, value)),
                         OnClick([StopPropagation](_) =>
                         {
-                            state.Selection = state.Selection with { SelectedStyleIndex = null };
+                            state = state with { Selection = state.Selection with { SelectedStyleIndex = null } };
 
                             return Task.CompletedTask;
                         })
@@ -1493,7 +1502,7 @@ sealed class ApplicationView : Component<ApplicationState>
                             CurrentVisualElement.Styles.Add(newValue);
                         }
 
-                        state.Selection = state.Selection with { SelectedStyleIndex = null };
+                        state = state with { Selection = state.Selection with { SelectedStyleIndex = null } };
 
                         return Task.CompletedTask;
                     },
@@ -1507,7 +1516,7 @@ sealed class ApplicationView : Component<ApplicationState>
                 {
                     CurrentVisualElement.Styles.RemoveAt(state.Selection.SelectedStyleIndex!.Value);
 
-                    state.Selection = state.Selection with { SelectedStyleIndex = null };
+                    state = state with { Selection = state.Selection with { SelectedStyleIndex = null } };
 
                     return Task.CompletedTask;
                 }));
@@ -1543,17 +1552,20 @@ sealed class ApplicationView : Component<ApplicationState>
                     OnClick([StopPropagation](e) =>
                     {
                         var styleIndex = int.Parse(e.currentTarget.id);
-                        if (styleIndex == state.Selection?.SelectedStyleIndex)
+                        if (styleIndex == state.Selection.SelectedStyleIndex)
                         {
-                            state.Selection = state.Selection with { SelectedStyleIndex = null };
+                            state = state with { Selection = state.Selection with { SelectedStyleIndex = null } };
                             return Task.CompletedTask;
                         }
 
-                        state.Selection = new()
+                        state = state with
                         {
-                            VisualElementTreeItemPath = state.Selection.VisualElementTreeItemPath,
+                            Selection = new()
+                            {
+                                VisualElementTreeItemPath = state.Selection.VisualElementTreeItemPath,
 
-                            SelectedStyleIndex = styleIndex
+                                SelectedStyleIndex = styleIndex
+                            }
                         };
 
                         const string id = "style_editor";
@@ -1566,7 +1578,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
                             // calculate text selection in edit input
                             {
-                                var nameValue = CurrentVisualElement.Styles[state.Selection.SelectedStyleIndex.Value];
+                                var nameValue = CurrentVisualElement.Styles[styleIndex];
                                 TryParseProperty(nameValue).HasValue(parseResult =>
                                 {
                                     var startIndex = nameValue.LastIndexOf(parseResult.Value, StringComparison.OrdinalIgnoreCase);
@@ -1662,7 +1674,7 @@ sealed class ApplicationView : Component<ApplicationState>
                     {
                         OnClick(_ =>
                         {
-                            state.Selection = state.Selection with { SelectedPropertyIndex = null };
+                            state = state with { Selection = state.Selection with { SelectedPropertyIndex = null } };
 
                             return Task.CompletedTask;
                         }),
@@ -1705,7 +1717,7 @@ sealed class ApplicationView : Component<ApplicationState>
                             CurrentVisualElement.Properties.Add(newValue);
                         }
 
-                        state.Selection = state.Selection with { SelectedPropertyIndex = null };
+                        state = state with { Selection = state.Selection with { SelectedPropertyIndex = null } };
 
                         return Task.CompletedTask;
                     },
@@ -1719,7 +1731,7 @@ sealed class ApplicationView : Component<ApplicationState>
                 {
                     CurrentVisualElement.Properties.RemoveAt(state.Selection.SelectedPropertyIndex!.Value);
 
-                    state.Selection = state.Selection with { SelectedPropertyIndex = null };
+                    state = state with { Selection = state.Selection with { SelectedPropertyIndex = null } };
 
                     return Task.CompletedTask;
                 }));
@@ -1755,17 +1767,26 @@ sealed class ApplicationView : Component<ApplicationState>
                     OnClick([StopPropagation](e) =>
                     {
                         var propertyIndex = getPropertyIndex(e.currentTarget);
-                        if (propertyIndex == state.Selection?.SelectedPropertyIndex)
+                        if (propertyIndex == state.Selection.SelectedPropertyIndex)
                         {
-                            state.Selection = state.Selection with { SelectedPropertyIndex = null };
+                            state = state with
+                            {
+                                Selection = state.Selection with
+                                {
+                                    SelectedPropertyIndex = null
+                                }
+                            };
                             return Task.CompletedTask;
                         }
 
-                        state.Selection = new()
+                        state = state with
                         {
-                            VisualElementTreeItemPath = state.Selection.VisualElementTreeItemPath,
+                            Selection = new()
+                            {
+                                VisualElementTreeItemPath = state.Selection.VisualElementTreeItemPath,
 
-                            SelectedPropertyIndex = propertyIndex
+                                SelectedPropertyIndex = propertyIndex
+                            }
                         };
 
                         var id = "PROPS-INPUT-EDITOR-" + propertyIndex;
@@ -1963,12 +1984,15 @@ sealed class ApplicationView : Component<ApplicationState>
 
         if (path.HasNoValue())
         {
-            state = state with { ComponentRootElement = newModel };
-
-            state.Selection = new()
+            state = state with
             {
-                VisualElementTreeItemPath = "0"
+                ComponentRootElement = newModel,
+                Selection = new()
+                {
+                    VisualElementTreeItemPath = "0"
+                }
             };
+
 
             return Success;
         }
