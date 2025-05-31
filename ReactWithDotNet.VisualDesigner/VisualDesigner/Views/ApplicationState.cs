@@ -23,7 +23,7 @@ public sealed record ApplicationSelectionState
     
     public string VisualElementTreeItemPathHover { get; set; }
     
-    public int? SelectedStyleIndex { get; set; }
+    public int? SelectedStyleIndex { get; init; }
     
     public int? SelectedPropertyIndex { get; set; }
     

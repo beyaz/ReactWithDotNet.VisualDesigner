@@ -1457,7 +1457,7 @@ sealed class ApplicationView : Component<ApplicationState>
                         styles.Select((value, index) => attributeItem(index, value)),
                         OnClick([StopPropagation](_) =>
                         {
-                            state.Selection.SelectedStyleIndex = null;
+                            state.Selection = state.Selection with { SelectedStyleIndex = null };
 
                             return Task.CompletedTask;
                         })
@@ -1493,7 +1493,7 @@ sealed class ApplicationView : Component<ApplicationState>
                             CurrentVisualElement.Styles.Add(newValue);
                         }
 
-                        state.Selection.SelectedStyleIndex = null;
+                        state.Selection = state.Selection with { SelectedStyleIndex = null };
 
                         return Task.CompletedTask;
                     },
@@ -1507,7 +1507,7 @@ sealed class ApplicationView : Component<ApplicationState>
                 {
                     CurrentVisualElement.Styles.RemoveAt(state.Selection.SelectedStyleIndex!.Value);
 
-                    state.Selection.SelectedStyleIndex = null;
+                    state.Selection = state.Selection with { SelectedStyleIndex = null };
 
                     return Task.CompletedTask;
                 }));
