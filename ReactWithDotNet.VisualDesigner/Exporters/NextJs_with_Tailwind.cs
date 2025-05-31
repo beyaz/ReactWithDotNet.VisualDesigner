@@ -427,7 +427,7 @@ static class NextJs_with_Tailwind
                 {
                     if (propertyType == typeof(string))
                     {
-                        var isString = propertyValue.Contains("/") || propertyValue.StartsWith("#") || propertyValue.Split(' ').Length > 1;
+                        var isString = propertyValue.Contains('/') || propertyValue.StartsWith("#") || propertyValue.Split(' ').Length > 1;
                         if (isString)
                         {
                             sb.Append($" {propertyName}=\"{propertyValue}\"");

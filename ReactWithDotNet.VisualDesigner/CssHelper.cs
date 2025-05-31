@@ -1422,7 +1422,7 @@ public static class CssHelper
 
             static Maybe<string> tryFixPaddingAndMarginShorthandDecleration(string name, string value)
             {
-                if ((name == "padding" || name == "margin") && value.Contains(" "))
+                if ((name == "padding" || name == "margin") && value.Contains(' '))
                 {
                     var parts = value.Split(" ", StringSplitOptions.RemoveEmptyEntries);
                     if (parts.Length == 2)
@@ -1514,7 +1514,7 @@ public static class CssHelper
             {
                 if (name == htmlStyleName)
                 {
-                    if (value.Contains(" "))
+                    if (value.Contains(' '))
                     {
                         var parts = value.Split(" ", StringSplitOptions.RemoveEmptyEntries);
                         if (parts.Length == 2)
