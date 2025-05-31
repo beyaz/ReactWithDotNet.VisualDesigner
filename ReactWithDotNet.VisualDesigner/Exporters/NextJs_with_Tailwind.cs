@@ -118,7 +118,7 @@ static class NextJs_with_Tailwind
 
         return node with
         {
-            Children = node.Children.Select(ArrangeImageAndLinkTags).ToImmutableList()
+            Children = [..node.Children.Select(ArrangeImageAndLinkTags)]
         };
     }
 

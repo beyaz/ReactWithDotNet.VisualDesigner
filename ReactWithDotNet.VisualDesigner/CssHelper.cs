@@ -1199,7 +1199,7 @@ public static class CssHelper
 
     static Result<StyleModifier> ApplyPseudo(string pseudo, IReadOnlyList<StyleModifier> styleModifiers)
     {
-        return GetPseudoFunction(pseudo).Then(pseudoFunction => pseudoFunction(styleModifiers.ToArray()));
+        return GetPseudoFunction(pseudo).Then(pseudoFunction => pseudoFunction([.. styleModifiers]));
     }
 
     static Result<Func<StyleModifier[], StyleModifier>> GetPseudoFunction(string pseudoName)
