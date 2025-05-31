@@ -1705,7 +1705,7 @@ sealed class ApplicationView : Component<ApplicationState>
                             CurrentVisualElement.Properties.Add(newValue);
                         }
 
-                        state.Selection.SelectedPropertyIndex = null;
+                        state.Selection = state.Selection with { SelectedPropertyIndex = null };
 
                         return Task.CompletedTask;
                     },
@@ -1719,7 +1719,7 @@ sealed class ApplicationView : Component<ApplicationState>
                 {
                     CurrentVisualElement.Properties.RemoveAt(state.Selection.SelectedPropertyIndex!.Value);
 
-                    state.Selection.SelectedPropertyIndex = null;
+                    state.Selection = state.Selection with { SelectedPropertyIndex = null };
 
                     return Task.CompletedTask;
                 }));
