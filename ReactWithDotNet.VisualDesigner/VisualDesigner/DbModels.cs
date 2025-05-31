@@ -24,7 +24,7 @@ public sealed record ComponentEntity
     
     public required int ProjectId { get; init; }
     
-    public required string Name { get; init; }
+    public  string Name { get; init; }
     
     public string RootElementAsYaml { get; init; }
     

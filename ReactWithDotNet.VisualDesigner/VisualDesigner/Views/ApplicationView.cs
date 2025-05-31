@@ -173,6 +173,7 @@ sealed class ApplicationView : Component<ApplicationState>
         return null;
     }
 
+    // todo: redesign
     static async Task<Result<string>> UpdateComponentConfig(int componentId, string componentConfigAsYamlNewValue, string userName)
     {
         var component = await DbOperation(db => db.FirstOrDefaultAsync<ComponentEntity>(x => x.Id == componentId));
@@ -243,6 +244,66 @@ sealed class ApplicationView : Component<ApplicationState>
         }
 
         return "Component name updated.";
+    }
+    
+    // todo: redesign
+    async Task<Result<string>> CreateNewComponent(string componentConfigAsYamlNewValue)
+    {
+        var name = string.Empty;
+        var exportFilePath = string.Empty;
+        {
+            var config = DeserializeFromYaml<Dictionary<string, string>>(componentConfigAsYamlNewValue);
+            {
+                foreach (var item in config.TryGetComponentName())
+                {
+                    name = item;
+                }
+
+                if (name.HasNoValue())
+                {
+                    return new Exception("NameMustBeEntered");
+                }
+            }
+            {
+                foreach (var item in config.TryGetComponentExportFilePath())
+                {
+                    exportFilePath = item;
+                }
+
+                if (exportFilePath.HasNoValue())
+                {
+                    return new Exception("ExportFilePathMustBeEnteredCorrectly");
+                }
+            }
+        }
+
+        // check name & export file path
+        {
+            foreach (var item in await DbOperation(db => db.GetAllAsync<ComponentEntity>()))
+            {
+                if (item.GetName() == name && item.GetExportFilePath() == exportFilePath)
+                {
+                    return new Exception("Has already same named component.");
+                }
+            }
+
+            var newDbRecord = new ComponentEntity
+            {
+                ProjectId = state.ProjectId,
+                ConfigAsYaml = componentConfigAsYamlNewValue
+            };
+
+            newDbRecord = newDbRecord with
+            {
+                Id = (int)(long)await DbOperation(db => db.InsertAsync(newDbRecord))
+            };
+
+            Cache.Clear();
+
+            await ChangeSelectedComponent(newDbRecord.Id);
+        }
+
+        return "Component created.";
     }
 
     Task AddNewLayerClicked(MouseEvent e)
@@ -477,7 +538,11 @@ sealed class ApplicationView : Component<ApplicationState>
 
         Element middle()
         {
-            return state.MainContentTab.In(MainContentTabs.Code, MainContentTabs.ProjectConfig, MainContentTabs.ImportHtml, MainContentTabs.ComponentConfig) ?
+            return state.MainContentTab.In(MainContentTabs.Code, 
+                                           MainContentTabs.ProjectConfig, 
+                                           MainContentTabs.ImportHtml, 
+                                           MainContentTabs.ComponentConfig,
+                                           MainContentTabs.NewComponentConfig) ?
                 new(FlexGrow(1), Padding(7), OverflowXAuto)
                 {
                     YamlEditor
@@ -614,6 +679,21 @@ sealed class ApplicationView : Component<ApplicationState>
         if (state.MainContentTab == MainContentTabs.ComponentConfig)
         {
             var result = await UpdateComponentConfig(state.ComponentId, state.MainContentText, state.UserName);
+            if (result.HasError)
+            {
+                this.FailNotification(result.Error.Message);
+                return;
+            }
+
+            if (result.Value.HasValue())
+            {
+                this.SuccessNotification(result.Value);
+            }
+        }
+        
+        if (state.MainContentTab == MainContentTabs.NewComponentConfig)
+        {
+            var result = await CreateNewComponent(state.MainContentText);
             if (result.HasError)
             {
                 this.FailNotification(result.Error.Message);
@@ -841,7 +921,7 @@ sealed class ApplicationView : Component<ApplicationState>
                             "Config",
                             OnClick(OnMainContentTabHeaderClicked),
                             Id((int)MainContentTabs.ComponentConfig),
-                            When(state.MainContentTab == MainContentTabs.ComponentConfig, BorderRadius(4), Border(1, solid, Theme.BorderColor))
+                            When(state.MainContentTab.In(MainContentTabs.ComponentConfig, MainContentTabs.NewComponentConfig), BorderRadius(4), Border(1, solid, Theme.BorderColor))
                         }
                     }
                 }
@@ -1298,60 +1378,24 @@ sealed class ApplicationView : Component<ApplicationState>
 
             new FlexRowCentered
             {
-                new IconPlus() + Size(24) + Color(state.IsProjectSettingsPopupVisible ? Gray600 : Gray300) + Hover(Color(Gray600)),
+                new IconPlus() + Size(24) + Color(state.MainContentTab == MainContentTabs.NewComponentConfig ? Gray600 : Gray300) + Hover(Color(Gray600)),
 
                 OnClick(_ =>
                 {
-                    state = state with { IsProjectSettingsPopupVisible = !state.IsProjectSettingsPopupVisible };
+                    if (state.MainContentTab == MainContentTabs.NewComponentConfig)
+                    {
+                        state = state with { MainContentTab = MainContentTabs.Design };
+                        
+                        return Task.CompletedTask;
+                    }
+                    
+                    state = state with
+                    {
+                        MainContentTab = MainContentTabs.NewComponentConfig
+                    };
 
                     return Task.CompletedTask;
-                }),
-
-                state.IsProjectSettingsPopupVisible ? PositionRelative : null,
-                state.IsProjectSettingsPopupVisible ? new FlexColumn(PositionAbsolute, Top(24), Left(16), Zindex2)
-                {
-                    Background(White), Border(Solid(1, Theme.BorderColor)), BorderRadius(4), Padding(8),
-
-                    Width(300),
-
-                    new MagicInput
-                    {
-                        Placeholder = "New component name",
-                        Name        = string.Empty,
-                        Value       = string.Empty,
-                        AutoFocus   = true,
-                        OnChange = async (_, newValue) =>
-                        {
-                            if (newValue.HasNoValue())
-                            {
-                                this.FailNotification("Component name is empty.");
-
-                                return;
-                            }
-
-                            if ((await GetAllComponentNamesInProject(state.ProjectId)).Any(name => name == newValue))
-                            {
-                                this.FailNotification("Has already same named component.");
-
-                                return;
-                            }
-
-                            var newDbRecord = new ComponentEntity
-                            {
-                                Name      = newValue,
-                                ProjectId = state.ProjectId
-                            };
-
-                            await DbOperation(db => db.InsertAsync(newDbRecord));
-
-                            Cache.Clear();
-
-                            await ChangeSelectedComponent(newDbRecord.Id);
-
-                            state = state with { IsProjectSettingsPopupVisible = false };
-                        }
-                    }
-                } : null
+                })
             }
         };
     }
@@ -2064,10 +2108,18 @@ sealed class ApplicationView : Component<ApplicationState>
         {
             MainContentText = state.MainContentTab switch
             {
-                MainContentTabs.Code            => SerializeToYaml(CurrentVisualElement),
-                MainContentTabs.ProjectConfig   => DbOperation(db => db.FirstOrDefault<ProjectEntity>(x => x.Id == state.ProjectId)?.ConfigAsYaml),
+                MainContentTabs.Code => SerializeToYaml(CurrentVisualElement),
+
+                MainContentTabs.ProjectConfig => DbOperation(db => db.FirstOrDefault<ProjectEntity>(x => x.Id == state.ProjectId)?.ConfigAsYaml),
+
                 MainContentTabs.ComponentConfig => DbOperation(db => db.FirstOrDefault<ComponentEntity>(x => x.Id == state.ComponentId)?.ConfigAsYaml),
-                _                               => null
+
+                MainContentTabs.NewComponentConfig =>
+                    """
+                    name: write component name here
+                    exportFilePath: write export file path here
+                    """,
+                _ => null
             }
         };
 
