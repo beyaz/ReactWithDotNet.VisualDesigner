@@ -68,10 +68,9 @@ static class Extensions
         return componentDeclerationLineIndex;
     }
     
-    public static Result<(string filePath, string targetComponentName)> GetComponentFileLocation(int componentId, string userLocalWorkspacePath)
+    public static async Task<Result<(string filePath, string targetComponentName)>> GetComponentFileLocation(int componentId, string userLocalWorkspacePath)
     {
-        // todo: await
-        var component = DbOperation(db => db.FirstOrDefault<ComponentEntity>(x => x.Id == componentId));
+        var component = await DbOperation(db => db.FirstOrDefaultAsync<ComponentEntity>(x => x.Id == componentId));
 
         return (Path.Combine(userLocalWorkspacePath, Path.Combine(component.GetExportFilePath().Split(new[] { '/', Path.DirectorySeparatorChar }))), component.GetName());
     }

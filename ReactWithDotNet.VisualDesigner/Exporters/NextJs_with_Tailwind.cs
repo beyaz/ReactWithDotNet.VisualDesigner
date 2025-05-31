@@ -164,8 +164,6 @@ static class NextJs_with_Tailwind
             return data.Error;
         }
 
-        var componentName = data.Value.Component.Name;
-
         VisualElementModel rootVisualElement;
         {
             var result = await GetComponenUserOrMainVersionAsync(componentId, userName);
@@ -179,7 +177,7 @@ static class NextJs_with_Tailwind
 
         string filePath, targetComponentName;
         {
-            var result = GetComponentFileLocation(componentId, user.LocalWorkspacePath);
+            var result = await GetComponentFileLocation(componentId, user.LocalWorkspacePath);
             if (result.HasError)
             {
                 return result;
