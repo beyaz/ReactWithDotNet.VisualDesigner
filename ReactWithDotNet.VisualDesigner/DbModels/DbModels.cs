@@ -24,8 +24,6 @@ public sealed record ComponentEntity
     
     public required int ProjectId { get; init; }
     
-    public  string Name { get; init; }
-    
     public string RootElementAsYaml { get; init; }
     
     public string ConfigAsYaml { get; init; }
@@ -61,9 +59,6 @@ public sealed record ComponentHistoryEntity
     public int Id { get; init; }
     
     public required int ComponentId { get; init; }
-    
-    // todo: remove
-    public string ComponentName { get; init; }
     
     public string ConfigAsYaml { get; init; }
     
