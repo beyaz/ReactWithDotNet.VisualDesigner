@@ -1,5 +1,4 @@
-﻿using System.ComponentModel;
-using System.Text;
+﻿using System.Text;
 using ReactWithDotNet.ThirdPartyLibraries.MonacoEditorReact;
 using ReactWithDotNet.VisualDesigner.Exporters;
 using static ReactWithDotNet.VisualDesigner.ComponentEntityExtensions;
@@ -596,12 +595,17 @@ sealed class ApplicationView : Component<ApplicationState>
             var component = await Store.TryGetComponent(state.ComponentId);
             if (component is not null)
             {
-                var componentWorkspace = await db.FirstOrDefaultAsync<ComponentWorkspace>(x => x.ComponentId == component.Id);
-                if (componentWorkspace is not null)
+                // validate other users working on component
                 {
-                    await db.DeleteAsync(componentWorkspace);
+                    var workingUserNames = (await Store.GetComponentWorkspaces(component.Id)).Select(x => x.UserName).ToList();
+                
+                    if (workingUserNames.Any())
+                    {
+                        this.FailNotification($"Users working on component. They should commit or rollback the component.{string.Join(", ", workingUserNames)}");
+                        return;
+                    }
                 }
-
+               
                 await db.InsertAsync(new ComponentHistoryEntity
                 {
                     ComponentId                = component.Id,

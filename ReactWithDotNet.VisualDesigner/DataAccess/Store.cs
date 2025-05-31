@@ -32,6 +32,11 @@ static class Store
         return await DbOperation(db => db.FirstOrDefaultAsync<ComponentWorkspace>(x => x.ComponentId == componentId && x.UserName == userName));
     }
     
+    public static Task<IEnumerable<ComponentWorkspace>> GetComponentWorkspaces(int componentId)
+    {
+        return DbOperation(db => db.SelectAsync<ComponentWorkspace>(x => x.ComponentId == componentId));
+    }
+    
     public static async Task<ComponentEntity> TryGetComponent(int componentId)
     {
         return await DbOperation(db => db.FirstOrDefaultAsync<ComponentEntity>(x => x.Id == componentId));
