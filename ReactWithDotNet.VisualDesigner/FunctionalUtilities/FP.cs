@@ -300,18 +300,7 @@ static class FP
         return await m1(response0.Value);
     }
     
-    public static Func<T0, Task<Result<T1>>> HasValue<T0, T1>(Func<T0,Task<Result<T1>>> m0)
-    {
-        return async t0 =>
-        {
-            if (t0 is null)
-            {
-                return None;
-            }
-            return await m0(t0);
-        };
 
-    }
 
     public static Result<B> Then<A, B>(this (A value, Exception exception) result, Func<A, B> convertFunc)
     {
