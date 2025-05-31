@@ -389,7 +389,7 @@ sealed class ApplicationView : Component<ApplicationState>
             return;
         }
 
-        var location = GetComponentFileLocation(state.ComponentName, user.LocalWorkspacePath);
+        var location = GetComponentFileLocation(state.ComponentId, user.LocalWorkspacePath);
         if (location.HasError)
         {
             this.FailNotification(location.Error.Message);

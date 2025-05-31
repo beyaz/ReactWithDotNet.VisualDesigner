@@ -179,7 +179,7 @@ static class NextJs_with_Tailwind
 
         string filePath, targetComponentName;
         {
-            var result = GetComponentFileLocation(componentName, user.LocalWorkspacePath);
+            var result = GetComponentFileLocation(componentId, user.LocalWorkspacePath);
             if (result.HasError)
             {
                 return result;
