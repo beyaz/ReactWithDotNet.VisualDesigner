@@ -50,6 +50,11 @@ static class Store
         return await DbOperation(db => db.FirstOrDefaultAsync<UserEntity>(x => x.ProjectId == projectId && x.UserName == userName));
     }
     
+    public static Task<IEnumerable<UserEntity>> GetUserByUserName(string userName)
+    {
+        return DbOperation(db => db.SelectAsync<UserEntity>(x => x.UserName == userName));
+    }
+    
     public static async Task<ComponentWorkspace> TryGetComponentWorkspace(int componentId, string userName)
     {
         return await DbOperation(db => db.FirstOrDefaultAsync<ComponentWorkspace>(x => x.ComponentId == componentId && x.UserName == userName));

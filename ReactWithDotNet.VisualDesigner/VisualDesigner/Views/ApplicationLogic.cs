@@ -366,9 +366,10 @@ static class ApplicationLogic
         return tag;
     }
 
-    public static Maybe<string> GetUserLastAccessedProjectLocalWorkspacePath()
+    public static async Task<Maybe<string>> GetUserLastAccessedProjectLocalWorkspacePath()
     {
-        foreach (var user in DbOperation(db => from user in db.Select<UserEntity>(x => x.UserName == Environment.UserName) orderby user.LastAccessTime descending select user))
+        
+        foreach (var user in from user in  await Store.GetUserByUserName(Environment.UserName) orderby user.LastAccessTime descending select user)
         {
             return user.LocalWorkspacePath;
         }
@@ -445,11 +446,11 @@ static class ApplicationLogic
     }
 
 
-    public static Maybe<string> TryFindFilePathFromWebRequestPath(string requestPath)
+    public static async Task<Maybe<string>> TryFindFilePathFromWebRequestPath(string requestPath)
     {
         if (requestPath.StartsWith("/wwwroot/"))
         {
-            foreach (var projectLocalWorkspacePath in GetUserLastAccessedProjectLocalWorkspacePath())
+            foreach (var projectLocalWorkspacePath in await GetUserLastAccessedProjectLocalWorkspacePath())
             {
                 var filePath = Path.Combine(projectLocalWorkspacePath, "public", requestPath.RemoveFromStart("/wwwroot/"));
 

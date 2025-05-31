@@ -59,7 +59,7 @@ public static class ReactWithDotNetIntegration
         {
             var path = httpContext.Request.Path.Value ?? string.Empty;
 
-            foreach (var localFilePath in TryFindFilePathFromWebRequestPath(path))
+            foreach (var localFilePath in await TryFindFilePathFromWebRequestPath(path))
             {
                 foreach (var (contentType, fileBytes) in await TryConvertLocalFilePathToFileContentResultData(localFilePath))
                 {

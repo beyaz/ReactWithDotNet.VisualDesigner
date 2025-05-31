@@ -6,16 +6,7 @@ namespace ReactWithDotNet.VisualDesigner.Views;
 static class ApplicationDatabase
 {
     static string ConnectionString => Config.ConnectionString;
-
-  
-
-    public static T DbOperation<T>(Func<IDbConnection, T> operation)
-    {
-        using IDbConnection connection = new SqliteConnection(ConnectionString);
-
-        return operation(connection);
-    }
-
+    
 
     public static async Task<T> DbOperation<T>(Func<IDbConnection, Task<T>> operation)
     {

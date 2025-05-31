@@ -250,14 +250,14 @@ sealed class ApplicationPreview : Component
                             continue;
                         }
 
-                        calculateSrcFromValue(context, model, value).HasValue(src => { elementAsImage.src = src; });
+                        (await calculateSrcFromValue(context, model, value)).HasValue(src => { elementAsImage.src = src; });
                         if (elementAsImage.src.HasNoValue())
                         {
                             elementAsImage.src = DummySrc(500);
                         }
                         continue;
 
-                        static Maybe<string> calculateSrcFromValue(RenderContext context, VisualElementModel model, string value)
+                        static async Task<Maybe<string>> calculateSrcFromValue(RenderContext context, VisualElementModel model, string value)
                         {
                             var src = TryClearStringValue(value);
 
@@ -270,7 +270,7 @@ sealed class ApplicationPreview : Component
                             {
                                 var srcUnderWwwRoot = "/wwwroot" + src;
 
-                                foreach (var localFilePath in TryFindFilePathFromWebRequestPath(srcUnderWwwRoot))
+                                foreach (var localFilePath in await TryFindFilePathFromWebRequestPath(srcUnderWwwRoot))
                                 {
                                     if (File.Exists(localFilePath))
                                     {
@@ -284,7 +284,7 @@ sealed class ApplicationPreview : Component
                             // try find value from caller
                             foreach (var callerValue in tryGetPropValueFromCaller(context, model, "src"))
                             {
-                                return calculateSrcFromValue(context, model, callerValue);
+                                return (await calculateSrcFromValue(context, model, callerValue));
                             }
 
                             return None;
