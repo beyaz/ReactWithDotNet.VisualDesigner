@@ -8,6 +8,8 @@ namespace ReactWithDotNet.VisualDesigner.Views;
 
 sealed class ApplicationView : Component<ApplicationState>
 {
+    static readonly IReadOnlyList<string> MediaSizes = ["M", "SM", "MD", "LG", "XL", "XXL"];
+
     enum Icon
     {
         add,
@@ -55,7 +57,6 @@ sealed class ApplicationView : Component<ApplicationState>
 
         // try take from db cache
         {
-            
             var lastUsage = (await Store.GetUserByUserName(userName)).FirstOrDefault();
             if (lastUsage is not null && lastUsage.LastStateAsYaml.HasValue())
             {
@@ -245,67 +246,6 @@ sealed class ApplicationView : Component<ApplicationState>
 
         return "Component name updated.";
     }
-    
-    // todo: redesign
-    async Task<Result<string>> CreateNewComponent(string componentConfigAsYamlNewValue)
-    {
-        var name = string.Empty;
-        var exportFilePath = string.Empty;
-        {
-            var config = DeserializeFromYaml<Dictionary<string, string>>(componentConfigAsYamlNewValue);
-            {
-                foreach (var item in config.TryGetComponentName())
-                {
-                    name = item;
-                }
-
-                if (name.HasNoValue())
-                {
-                    return new Exception("NameMustBeEntered");
-                }
-            }
-            {
-                foreach (var item in config.TryGetComponentExportFilePath())
-                {
-                    exportFilePath = item;
-                }
-
-                if (exportFilePath.HasNoValue())
-                {
-                    return new Exception("ExportFilePathMustBeEnteredCorrectly");
-                }
-            }
-        }
-
-        // check name & export file path
-        {
-            
-            foreach (var item in await  Store.GetAllComponentsInProject(state.ProjectId))
-            {
-                if (item.GetName() == name && item.GetExportFilePath() == exportFilePath)
-                {
-                    return new Exception("Has already same named component.");
-                }
-            }
-
-            var newDbRecord = new ComponentEntity
-            {
-                ProjectId = state.ProjectId,
-                ConfigAsYaml = componentConfigAsYamlNewValue
-            };
-
-            newDbRecord = newDbRecord with
-            {
-                Id = (int)await Store.Insert(newDbRecord)
-            };
-
-            Cache.Clear();
-
-            await ChangeSelectedComponent(newDbRecord.Id);
-        }
-
-        return "Component created.";
-    }
 
     Task AddNewLayerClicked(MouseEvent e)
     {
@@ -324,8 +264,6 @@ sealed class ApplicationView : Component<ApplicationState>
                 }
             };
 
-            
-
             return Task.CompletedTask;
         }
 
@@ -341,7 +279,6 @@ sealed class ApplicationView : Component<ApplicationState>
         return Task.CompletedTask;
     }
 
-    
     Task ChangeSelectedComponent(int componentId)
     {
         return ChangeSelectedComponent(componentId, null);
@@ -404,6 +341,66 @@ sealed class ApplicationView : Component<ApplicationState>
         }
 
         await InitializeStateWithFirstComponentInProject(projectId);
+    }
+
+    // todo: redesign
+    async Task<Result<string>> CreateNewComponent(string componentConfigAsYamlNewValue)
+    {
+        var name = string.Empty;
+        var exportFilePath = string.Empty;
+        {
+            var config = DeserializeFromYaml<Dictionary<string, string>>(componentConfigAsYamlNewValue);
+            {
+                foreach (var item in config.TryGetComponentName())
+                {
+                    name = item;
+                }
+
+                if (name.HasNoValue())
+                {
+                    return new Exception("NameMustBeEntered");
+                }
+            }
+            {
+                foreach (var item in config.TryGetComponentExportFilePath())
+                {
+                    exportFilePath = item;
+                }
+
+                if (exportFilePath.HasNoValue())
+                {
+                    return new Exception("ExportFilePathMustBeEnteredCorrectly");
+                }
+            }
+        }
+
+        // check name & export file path
+        {
+            foreach (var item in await Store.GetAllComponentsInProject(state.ProjectId))
+            {
+                if (item.GetName() == name && item.GetExportFilePath() == exportFilePath)
+                {
+                    return new Exception("Has already same named component.");
+                }
+            }
+
+            var newDbRecord = new ComponentEntity
+            {
+                ProjectId    = state.ProjectId,
+                ConfigAsYaml = componentConfigAsYamlNewValue
+            };
+
+            newDbRecord = newDbRecord with
+            {
+                Id = (int)await Store.Insert(newDbRecord)
+            };
+
+            Cache.Clear();
+
+            await ChangeSelectedComponent(newDbRecord.Id);
+        }
+
+        return "Component created.";
     }
 
     Task DeleteSelectedTreeItem()
@@ -539,9 +536,9 @@ sealed class ApplicationView : Component<ApplicationState>
 
         Element middle()
         {
-            return state.MainContentTab.In(MainContentTabs.Code, 
-                                           MainContentTabs.ProjectConfig, 
-                                           MainContentTabs.ImportHtml, 
+            return state.MainContentTab.In(MainContentTabs.Code,
+                                           MainContentTabs.ProjectConfig,
+                                           MainContentTabs.ImportHtml,
                                            MainContentTabs.ComponentConfig,
                                            MainContentTabs.NewComponentConfig) ?
                 new(FlexGrow(1), Padding(7), OverflowXAuto)
@@ -580,15 +577,13 @@ sealed class ApplicationView : Component<ApplicationState>
                     "LG"  => 1024,
                     "XL"  => 1280,
                     "XXL" => 1536,
-                    _     => throw new ArgumentOutOfRangeException()
+                    _     => throw new ArgumentOutOfRangeException(e.currentTarget.data["value"])
                 }
             }
         };
 
         return Task.CompletedTask;
     }
-
-    
 
     async Task OnDeleteSelectedComponentClicked(MouseEvent e)
     {
@@ -598,18 +593,18 @@ sealed class ApplicationView : Component<ApplicationState>
             this.FailNotification("ComponentNotFound");
             return;
         }
-       
+
         // validate other users working on component
         {
             var workingUserNames = (await Store.GetComponentWorkspaces(component.Id)).Select(x => x.UserName).ToList();
-                
+
             if (workingUserNames.Count > 0)
             {
                 this.FailNotification($"Users working on component. They should commit or rollback the component.{string.Join(", ", workingUserNames)}");
                 return;
             }
         }
-               
+
         await Store.Insert(new ComponentHistoryEntity
         {
             ComponentId                = component.Id,
@@ -672,17 +667,14 @@ sealed class ApplicationView : Component<ApplicationState>
                 await Store.Update(project with { ConfigAsYaml = state.MainContentText });
 
                 Cache.Clear();
-                
+
                 this.SuccessNotification("Project config updated.");
             }
-
-           
-
         }
 
         if (state.MainContentTab == MainContentTabs.ComponentConfig)
         {
-            var result = await UpdateComponentConfig(state.ProjectId,state.ComponentId, state.MainContentText, state.UserName);
+            var result = await UpdateComponentConfig(state.ProjectId, state.ComponentId, state.MainContentText, state.UserName);
             if (result.HasError)
             {
                 this.FailNotification(result.Error.Message);
@@ -694,7 +686,7 @@ sealed class ApplicationView : Component<ApplicationState>
                 this.SuccessNotification(result.Value);
             }
         }
-        
+
         if (state.MainContentTab == MainContentTabs.NewComponentConfig)
         {
             var result = await CreateNewComponent(state.MainContentText);
@@ -949,11 +941,8 @@ sealed class ApplicationView : Component<ApplicationState>
         };
     }
 
-    
-    
     Element PartLeftPanel()
     {
-        
         var componentNameEditor = new input
         {
             type     = "text",
@@ -1240,8 +1229,8 @@ sealed class ApplicationView : Component<ApplicationState>
 
         var componentTree = new ComponentTreeView
         {
-            ProjectId     = state.ProjectId,
-            ComponentId   = state.ComponentId,
+            ProjectId        = state.ProjectId,
+            ComponentId      = state.ComponentId,
             SelectionChanged = ChangeSelectedComponent
         } + When(state.LeftTab != LeftTabs.Components, DisplayNone);
 
@@ -1302,7 +1291,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
                 new FlexRow(JustifyContentSpaceAround, AlignItemsCenter, Gap(16))
                 {
-                    new[] { "M", "SM", "MD", "LG", "XL", "XXL" }.Select(x => new FlexRowCentered
+                    MediaSizes.Select(x => new FlexRowCentered
                     {
                         x,
                         FontSize16,
@@ -1389,10 +1378,10 @@ sealed class ApplicationView : Component<ApplicationState>
                     if (state.MainContentTab == MainContentTabs.NewComponentConfig)
                     {
                         state = state with { MainContentTab = MainContentTabs.Design };
-                        
+
                         return Task.CompletedTask;
                     }
-                    
+
                     state = state with
                     {
                         MainContentTab = MainContentTabs.NewComponentConfig
@@ -1449,7 +1438,7 @@ sealed class ApplicationView : Component<ApplicationState>
                         }
 
                         CurrentVisualElement.Tag = newValue;
-                        
+
                         return Task.CompletedTask;
                     },
                     IsTextAlignCenter = true
@@ -2059,7 +2048,6 @@ sealed class ApplicationView : Component<ApplicationState>
                 }
             };
 
-
             return Success;
         }
 
@@ -2266,11 +2254,11 @@ sealed class ApplicationView : Component<ApplicationState>
                 }
             };
 
-            IReadOnlyList<Element> createTenPoints()
+            static IReadOnlyList<Element> createTenPoints()
             {
                 var returnList = new List<Element>();
 
-                var miniStep = 10;
+                const int miniStep = 10;
 
                 var cursor = 0;
                 var distance = miniStep;
