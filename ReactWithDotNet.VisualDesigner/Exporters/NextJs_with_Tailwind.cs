@@ -80,7 +80,7 @@ static class NextJs_with_Tailwind
 
         foreach (var component in components)
         {
-            if (component.Name == "/src/components/HggImage")
+            if (component.GetName() == "HggImage")
             {
                 continue;
             }
@@ -344,7 +344,7 @@ static class NextJs_with_Tailwind
 
         var elementType = node.HtmlElementType;
 
-        var tag = nodeTag.Split(['/', '.']).Last();
+        var tag = nodeTag;
         if (int.TryParse(nodeTag, out var componentId))
         {
             var component = DbOperation(db => db.FirstOrDefault<ComponentEntity>(x => x.Id == componentId));
@@ -353,7 +353,7 @@ static class NextJs_with_Tailwind
                 return new ArgumentNullException($"ComponentNotFound. {componentId}");
             }
 
-            tag = component.Name.Split(['/', '.']).Last();
+            tag = component.GetName();
         }
 
         var indent = new string(' ', indentLevel * 4);
