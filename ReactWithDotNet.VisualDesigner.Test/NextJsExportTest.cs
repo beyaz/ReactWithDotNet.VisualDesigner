@@ -11,5 +11,4 @@ public sealed class NextJsExportTest
     {
         (await NextJs_with_Tailwind.ExportAll(1)).Success.Should().BeTrue();
     }
-
 }
