@@ -175,7 +175,6 @@ sealed class ApplicationView : Component<ApplicationState>
         return null;
     }
 
-    // todo: redesign
     static async Task<Result<string>> UpdateComponentConfig(int projectId, int componentId, string componentConfigAsYamlNewValue, string userName)
     {
         var component = await Store.TryGetComponent(componentId);
@@ -343,7 +342,6 @@ sealed class ApplicationView : Component<ApplicationState>
         await InitializeStateWithFirstComponentInProject(projectId);
     }
 
-    // todo: redesign
     async Task<Result<string>> CreateNewComponent(string componentConfigAsYamlNewValue)
     {
         var name = string.Empty;
