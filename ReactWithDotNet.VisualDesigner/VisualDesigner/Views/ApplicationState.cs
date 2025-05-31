@@ -2,7 +2,7 @@
 
 namespace ReactWithDotNet.VisualDesigner.Views;
 
-public sealed class ApplicationPreviewInfo
+public sealed record ApplicationPreviewInfo
 {
     // @formatter:off
     
