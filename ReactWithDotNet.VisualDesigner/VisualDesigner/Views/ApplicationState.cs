@@ -43,9 +43,9 @@ public sealed record ApplicationState
     
     public VisualElementModel ComponentRootElement { get; init; }
     
-    public bool IsProjectSettingsPopupVisible { get; set; }
+    public bool IsProjectSettingsPopupVisible { get; init; }
     
-    public required ApplicationSelectionState Selection { get; set; }
+    public required ApplicationSelectionState Selection { get; init; }
     
     public string UserName { get; init; }
     
