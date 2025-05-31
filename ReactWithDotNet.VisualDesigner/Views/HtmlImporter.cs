@@ -35,13 +35,17 @@ static class HtmlImporter
     {
         foreach (var (className, css) in project.Styles)
         {
-            var response = Style.ParseCssAsDictionary(css);
-            if (response.exception is not null)
+            IReadOnlyDictionary<string, string> htmlStyleAttributes;
             {
-                continue;
-            }
+                var (value, exception) = Style.ParseCssAsDictionary(css);
+                if (exception is not null)
+                {
+                    continue;
+                }
 
-            var htmlStyleAttributes = response.value;
+                htmlStyleAttributes = value;
+            }
+           
 
             if (hasFullMatch(project, designerStyles, htmlStyleAttributes))
             {

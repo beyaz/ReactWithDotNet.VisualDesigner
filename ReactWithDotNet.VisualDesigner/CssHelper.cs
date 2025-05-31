@@ -1531,14 +1531,14 @@ public static class CssHelper
                 }
             }
 
-            foreach (var item in Html_to_TailwindName_Map)
+            foreach (var (htmlStyleName, tailwindPrefix) in Html_to_TailwindName_Map)
             {
-                if (item.htmlStyleName == name)
+                if (htmlStyleName == name)
                 {
                     var maybe = try_Convert_PixelValue_To_SpacingScale_Or_ArbitraryValue(value);
                     if (maybe.HasValue)
                     {
-                        return item.tailwindPrefix + maybe.Value;
+                        return tailwindPrefix + maybe.Value;
                     }
                 }
             }
@@ -1563,15 +1563,15 @@ public static class CssHelper
 
         public static Maybe<(string htmlStyleName, string htmlStyleValue)> Try_Convert_From_TailwindClass_to_HtmlStyle(string tailwindClass)
         {
-            foreach (var item in Html_to_TailwindName_Map)
+            foreach (var (htmlStyleName, tailwindPrefix) in Html_to_TailwindName_Map)
             {
-                if (tailwindClass.StartsWith(item.tailwindPrefix))
+                if (tailwindClass.StartsWith(tailwindPrefix))
                 {
                     foreach (var (px, scale) in TailwindSpacingScaleMap)
                     {
-                        if (tailwindClass == item.tailwindPrefix + scale)
+                        if (tailwindClass == tailwindPrefix + scale)
                         {
-                            return (item.htmlStyleName, px);
+                            return (htmlStyleName, px);
                         }
                     }
                 }
