@@ -695,11 +695,13 @@ public static class CssHelper
                 }
             }
 
-            // todo: more clever
-
             if (cssAttributeName == "outline-offset")
             {
-                return "outline-offset-[-1px]";
+                if (cssAttributeValue == "-1px")
+                {
+                    return "outline-offset-[-1px]";
+                }
+               
             }
 
             return new InvalidOperationException($"Css not handled. {cssAttributeName}: {cssAttributeValue}");
