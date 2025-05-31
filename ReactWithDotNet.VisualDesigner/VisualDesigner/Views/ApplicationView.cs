@@ -55,7 +55,8 @@ sealed class ApplicationView : Component<ApplicationState>
 
         // try take from db cache
         {
-            var lastUsage = (await GetLastUsageInfoByUserName(userName)).FirstOrDefault();
+            
+            var lastUsage = (await Store.GetUserByUserName(userName)).FirstOrDefault();
             if (lastUsage is not null && lastUsage.LastStateAsYaml.HasValue())
             {
                 state = DeserializeFromYaml<ApplicationState>(lastUsage.LastStateAsYaml) with

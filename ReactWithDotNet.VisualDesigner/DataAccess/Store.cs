@@ -1,4 +1,7 @@
-﻿namespace ReactWithDotNet.VisualDesigner.DataAccess;
+﻿using System.Data;
+using Microsoft.Data.Sqlite;
+
+namespace ReactWithDotNet.VisualDesigner.DataAccess;
 
 static class Store
 {
@@ -97,4 +100,14 @@ static class Store
     {
         return DbOperation(connection => connection.GetAllAsync<ProjectEntity>());
     }
+    
+    static async Task<T> DbOperation<T>(Func<IDbConnection, Task<T>> operation)
+    {
+        
+        using IDbConnection connection = new SqliteConnection(ConnectionString);
+
+        return await operation(connection);
+    }
+    
+    static string ConnectionString => Config.ConnectionString;
 }
