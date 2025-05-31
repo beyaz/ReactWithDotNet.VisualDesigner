@@ -613,7 +613,7 @@ sealed class ApplicationView : Component<ApplicationState>
             }
         }
 
-        state.MainContentTab = tab;
+        state = state with { MainContentTab = tab };
 
         if (tab == MainContentTabs.Design)
         {
