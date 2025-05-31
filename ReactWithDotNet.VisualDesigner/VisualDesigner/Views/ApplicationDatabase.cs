@@ -24,10 +24,7 @@ static class ApplicationDatabase
         return await operation(connection);
     }
 
-    public static Task<IEnumerable<ComponentEntity>> GetAllComponentsInProject(int projectId)
-    {
-        return DbOperation(db => db.SelectAsync<ComponentEntity>(x => x.ProjectId == projectId));
-    }
+    
 
     public static IReadOnlyList<ProjectEntity> GetAllProjects()
     {

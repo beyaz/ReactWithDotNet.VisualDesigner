@@ -9,7 +9,7 @@ static class ApplicationLogic
 
     public static IReadOnlyList<ComponentEntity> GetAllComponentsInProjectFromCache(int projectId)
     {
-        return Cache.AccessValue(nameof(GetAllComponentsInProjectFromCache) + projectId, () => GetAllComponentsInProject(projectId).GetAwaiter().GetResult().ToList());
+        return Cache.AccessValue(nameof(GetAllComponentsInProjectFromCache) + projectId, () => Store.GetAllComponentsInProject(projectId).GetAwaiter().GetResult().ToList());
     }
     
     public static string GetComponentName(int projectId, int componentId)

@@ -76,7 +76,7 @@ static class NextJs_with_Tailwind
 
     public static async Task<Result> ExportAll(int projectId)
     {
-        var components = await GetAllComponentsInProject(projectId);
+        var components = await Store.GetAllComponentsInProject(projectId);
 
         foreach (var component in components)
         {

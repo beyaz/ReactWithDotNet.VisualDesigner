@@ -2,6 +2,11 @@
 
 static class Store
 {
+    public static Task<IEnumerable<ComponentEntity>> GetAllComponentsInProject(int projectId)
+    {
+        return DbOperation(db => db.SelectAsync<ComponentEntity>(x => x.ProjectId == projectId));
+    }
+    
     public static async Task<long> Insert(UserEntity entity)
     {
         return (long)await DbOperation(db => db.InsertAsync(entity));
