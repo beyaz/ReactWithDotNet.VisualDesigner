@@ -27,7 +27,7 @@ sealed class ApplicationView : Component<ApplicationState>
                 VisualElementTreeItemPath = treeItemPath
             };
 
-            state.LeftTab = LeftTabs.ElementTree;
+            state = state with { LeftTab = LeftTabs.ElementTree };
 
             return Task.CompletedTask;
         });
@@ -902,7 +902,7 @@ sealed class ApplicationView : Component<ApplicationState>
                         new IconReact() + Size(24) + Color(state.LeftTab == LeftTabs.Components ? Gray500 : Gray200),
                         OnClick([StopPropagation](_) =>
                         {
-                            state.LeftTab = LeftTabs.Components;
+                            state = state with { LeftTab = LeftTabs.Components };
                             return Task.CompletedTask;
                         })
                     },
@@ -911,7 +911,7 @@ sealed class ApplicationView : Component<ApplicationState>
                         new IconLayers() + Size(18) + Color(state.LeftTab == LeftTabs.ElementTree ? Gray500 : Gray200),
                         OnClick([StopPropagation](_) =>
                         {
-                            state.LeftTab = LeftTabs.ElementTree;
+                            state = state with { LeftTab = LeftTabs.ElementTree };
                             return Task.CompletedTask;
                         })
                     }

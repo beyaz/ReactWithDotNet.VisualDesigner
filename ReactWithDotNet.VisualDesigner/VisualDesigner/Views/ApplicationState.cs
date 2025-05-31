@@ -51,9 +51,9 @@ public sealed record ApplicationState
     
     public string MainContentText { get; init; }
     
-    public LeftTabs LeftTab  { get; set; }
+    public LeftTabs LeftTab  { get; init; }
     
-    public MainContentTabs MainContentTab  { get; set; }
+    public MainContentTabs MainContentTab  { get; init; }
     
     public required AttibuteDragDropData StyleItemDragDrop { get; init; }
     
