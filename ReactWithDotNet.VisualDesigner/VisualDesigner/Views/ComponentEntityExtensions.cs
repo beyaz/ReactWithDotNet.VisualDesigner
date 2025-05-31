@@ -1,6 +1,6 @@
 ﻿using System.IO;
 
-namespace ReactWithDotNet.VisualDesigner;
+namespace ReactWithDotNet.VisualDesigner.Views;
 
 static class ComponentConfigReservedName
 {

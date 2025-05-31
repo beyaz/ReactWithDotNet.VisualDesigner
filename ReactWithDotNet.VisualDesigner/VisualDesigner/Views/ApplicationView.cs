@@ -1,7 +1,7 @@
 ﻿using System.Text;
 using ReactWithDotNet.ThirdPartyLibraries.MonacoEditorReact;
 using ReactWithDotNet.VisualDesigner.Exporters;
-using static ReactWithDotNet.VisualDesigner.ComponentEntityExtensions;
+using static ReactWithDotNet.VisualDesigner.Views.ComponentEntityExtensions;
 using Page = ReactWithDotNet.VisualDesigner.Infrastructure.Page;
 
 namespace ReactWithDotNet.VisualDesigner.Views;
@@ -603,7 +603,7 @@ sealed class ApplicationView : Component<ApplicationState>
         {
             var workingUserNames = (await Store.GetComponentWorkspaces(component.Id)).Select(x => x.UserName).ToList();
                 
-            if (workingUserNames.Any())
+            if (workingUserNames.Count > 0)
             {
                 this.FailNotification($"Users working on component. They should commit or rollback the component.{string.Join(", ", workingUserNames)}");
                 return;
