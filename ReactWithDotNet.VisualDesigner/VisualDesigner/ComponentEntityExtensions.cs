@@ -2,8 +2,17 @@
 
 namespace ReactWithDotNet.VisualDesigner;
 
+static class ComponentConfigReservedName
+{
+    public static readonly string ExportFilePath = "exportFilePath";
+    
+    public static readonly string Name = "name";
+}
+
 static class ComponentEntityExtensions
 {
+    
+    
     public static string GetNameWithExportFilePath(this ComponentEntity componentEntity)
     {
         var exportFilePath = GetExportFilePath(componentEntity);
@@ -77,7 +86,7 @@ static class ComponentEntityExtensions
 
     public static Maybe<string> TryGetComponentExportFilePath(this IReadOnlyDictionary<string, string> componentConfig)
     {
-        if (componentConfig.TryGetValue("exportFilePath", out var value))
+        if (componentConfig.TryGetValue(ComponentConfigReservedName.ExportFilePath, out var value))
         {
             return value;
         }
@@ -87,7 +96,7 @@ static class ComponentEntityExtensions
 
     public static Maybe<string> TryGetComponentName(this IReadOnlyDictionary<string, string> componentConfig)
     {
-        if (componentConfig.TryGetValue("name", out var value))
+        if (componentConfig.TryGetValue(ComponentConfigReservedName.Name, out var value))
         {
             return value;
         }
@@ -97,7 +106,7 @@ static class ComponentEntityExtensions
 
     public static Maybe<string> TryGetExportFilePath(this ComponentEntity componentEntity)
     {
-        if (DeserializeFromYaml<Dictionary<string, string>>(componentEntity.ConfigAsYaml).TryGetValue("exportFilePath", out var value))
+        if (DeserializeFromYaml<Dictionary<string, string>>(componentEntity.ConfigAsYaml).TryGetValue(ComponentConfigReservedName.ExportFilePath, out var value))
         {
             return value;
         }
@@ -107,7 +116,7 @@ static class ComponentEntityExtensions
 
     public static Maybe<string> TryGetName(this ComponentEntity componentEntity)
     {
-        if (DeserializeFromYaml<Dictionary<string, string>>(componentEntity.ConfigAsYaml).TryGetValue("name", out var value))
+        if (DeserializeFromYaml<Dictionary<string, string>>(componentEntity.ConfigAsYaml).TryGetValue(ComponentConfigReservedName.Name, out var value))
         {
             return value;
         }
