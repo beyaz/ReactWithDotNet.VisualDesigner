@@ -225,14 +225,14 @@ sealed class ApplicationView : Component<ApplicationState>
                 }
             }
 
-            await DbOperation(db => db.InsertAsync(new ComponentHistoryEntity
+            await Store.Insert(new ComponentHistoryEntity
             {
                 ComponentId                = component.Id,
                 ConfigAsYaml               = component.ConfigAsYaml,
                 ComponentRootElementAsYaml = component.RootElementAsYaml,
                 InsertTime                 = DateTime.Now,
                 UserName                   = userName
-            }));
+            });
 
             await DbOperation(db => db.UpdateAsync(component with
             {
@@ -606,7 +606,7 @@ sealed class ApplicationView : Component<ApplicationState>
                     }
                 }
                
-                await db.InsertAsync(new ComponentHistoryEntity
+                await Store.Insert(new ComponentHistoryEntity
                 {
                     ComponentId                = component.Id,
                     ComponentRootElementAsYaml = component.RootElementAsYaml,

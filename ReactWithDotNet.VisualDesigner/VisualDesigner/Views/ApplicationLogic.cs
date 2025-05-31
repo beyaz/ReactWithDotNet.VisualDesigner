@@ -50,7 +50,7 @@ static class ApplicationLogic
                 RootElementAsYaml = SerializeToYaml(state.ComponentRootElement)
             };
 
-            await db.InsertAsync(new ComponentHistoryEntity
+            await Store.Insert(new ComponentHistoryEntity
             {
                 ComponentId                = component.Id,
                 ConfigAsYaml             = component.ConfigAsYaml,
@@ -407,7 +407,7 @@ static class ApplicationLogic
                 return new Exception($"User ({state.UserName}) has no change to rollback.");
             }
 
-            await db.InsertAsync(new ComponentHistoryEntity
+            await Store.Insert(new ComponentHistoryEntity
             {
                 ComponentId                = component.Id,
                 ConfigAsYaml              = component.ConfigAsYaml,
