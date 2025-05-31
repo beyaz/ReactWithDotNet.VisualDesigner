@@ -30,7 +30,7 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
         return Task.CompletedTask;
     }
 
-    protected override async Task<Element> renderAsync()
+    protected override Element render()
     {
         if (ProjectId is 0 || ComponentId is 0)
         {
@@ -63,7 +63,7 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
 
             new FlexColumn(Flex(1), OverflowAuto)
             {
-                ToVisual(await CalculateRootNode(), 0)
+                ToVisual(CalculateRootNode(), 0)
             }
         };
     }
@@ -133,9 +133,9 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
         }
     }
 
-    async Task<NodeModel> CalculateRootNode()
+    NodeModel CalculateRootNode()
     {
-        return CalculateRootNodeFrom((await GetAllNodes()).Where(hasMatch));
+        return CalculateRootNodeFrom(GetAllNodes().Where(hasMatch));
 
         bool hasMatch(NodeModel node)
         {
@@ -156,22 +156,20 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
         }
     }
 
-    async Task<IReadOnlyList<NodeModel>> GetAllNodes()
+    IReadOnlyList<NodeModel> GetAllNodes()
     {
-        return await Cache.AccessValue($"{nameof(ComponentTreeView)}-{nameof(GetAllNodes)}-{ProjectId}", async () =>
-        {
-            return ListFrom(from x in await DbOperation(db => db.SelectAsync<ComponentEntity>(x => x.ProjectId == ProjectId))
-                            orderby x.GetName() descending
-                            select new NodeModel
-                            {
-                                ComponentId    = x.Id,
-                                Names          = (Path.GetDirectoryName(x.GetExportFilePath()) +"/" +x.GetName()).Split(['/', '\\'], StringSplitOptions.RemoveEmptyEntries),
-                                ExportFilePath = x.GetExportFilePath()
-                            });
-        });
+        return Cache.AccessValue($"{nameof(ComponentTreeView)}-{nameof(GetAllNodes)}-{ProjectId}",
+                                 () => ListFrom(from x in GetAllComponentsInProjectFromCache(ProjectId)
+                                                orderby x.GetName() descending
+                                                select new NodeModel
+                                                {
+                                                    ComponentId    = x.Id,
+                                                    Names          = (Path.GetDirectoryName(x.GetExportFilePath()) + "/" + x.GetName()).Split(['/', '\\'], StringSplitOptions.RemoveEmptyEntries),
+                                                    ExportFilePath = x.GetExportFilePath()
+                                                }));
     }
 
-    async Task InitializeState()
+    Task InitializeState()
     {
         state = new()
         {
@@ -182,12 +180,15 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
             FilterText = state?.FilterText
         };
 
-        await CalculateRootNode();
+        CalculateRootNode();
+        
+        return Task.CompletedTask;
     }
 
-    async Task OnFilterTextTypeFinished()
+     Task OnFilterTextTypeFinished()
     {
-        await CalculateRootNode();
+         CalculateRootNode();
+        return Task.CompletedTask;
     }
 
     [StopPropagation]
@@ -195,7 +196,7 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
     {
         var selectedPath = e.currentTarget.id;
 
-        var node = await CalculateRootNode();
+        var node = CalculateRootNode();
 
         foreach (var item in selectedPath.Split('_', StringSplitOptions.RemoveEmptyEntries).Skip(1))
         {

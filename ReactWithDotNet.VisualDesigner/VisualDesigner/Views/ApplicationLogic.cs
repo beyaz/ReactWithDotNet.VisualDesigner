@@ -379,48 +379,45 @@ static class ApplicationLogic
 
     public static async Task<Result<ApplicationState>> RollbackComponent(ApplicationState state)
     {
-        return await DbOperation<Result<ApplicationState>>(async db =>
+        ComponentEntity component;
+        ComponentWorkspace userVersion;
         {
-            ComponentEntity component;
-            ComponentWorkspace userVersion;
+            var response = await GetComponentData(state.Map());
+            if (response.HasError)
             {
-                var response = await GetComponentData(state.Map());
-                if (response.HasError)
-                {
-                    return response.Error;
-                }
-
-                component   = response.Value.Component;
-                userVersion = response.Value.WorkspaceVersion.Value;
+                return response.Error;
             }
 
-            if (userVersion is null)
-            {
-                return new Exception($"User ({state.UserName}) has no change to rollback.");
-            }
+            component   = response.Value.Component;
+            userVersion = response.Value.WorkspaceVersion.Value;
+        }
 
-            // Check if the user version is the same as the main version
-            if (component.RootElementAsYaml == SerializeToYaml(state.ComponentRootElement))
-            {
-                return new Exception($"User ({state.UserName}) has no change to rollback.");
-            }
+        if (userVersion is null)
+        {
+            return new Exception($"User ({state.UserName}) has no change to rollback.");
+        }
 
-            await Store.Insert(new ComponentHistoryEntity
-            {
-                ComponentId                = component.Id,
-                ConfigAsYaml              = component.ConfigAsYaml,
-                ComponentRootElementAsYaml = SerializeToYaml(state.ComponentRootElement),
-                InsertTime                 = DateTime.Now,
-                UserName                   = state.UserName
-            });
+        // Check if the user version is the same as the main version
+        if (component.RootElementAsYaml == SerializeToYaml(state.ComponentRootElement))
+        {
+            return new Exception($"User ({state.UserName}) has no change to rollback.");
+        }
 
-            // restore from main version
-            state = state with { ComponentRootElement = component.RootElementAsYaml.AsVisualElementModel() };
-
-            await db.DeleteAsync(userVersion);
-
-            return state;
+        await Store.Insert(new ComponentHistoryEntity
+        {
+            ComponentId                = component.Id,
+            ConfigAsYaml               = component.ConfigAsYaml,
+            ComponentRootElementAsYaml = SerializeToYaml(state.ComponentRootElement),
+            InsertTime                 = DateTime.Now,
+            UserName                   = state.UserName
         });
+
+        // restore from main version
+        state = state with { ComponentRootElement = component.RootElementAsYaml.AsVisualElementModel() };
+
+        await Store.Delete(userVersion);
+
+        return state;
     }
 
     public static async Task<Maybe<(string contentType, byte[] fileBytes)>> TryConvertLocalFilePathToFileContentResultData(string filePath)

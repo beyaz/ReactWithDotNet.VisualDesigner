@@ -2,6 +2,18 @@
 
 static class Store
 {
+    
+    public static async Task<ComponentEntity> GetFirstComponentInProject(int projectId)
+    {
+        return await DbOperation(async db => await db.FirstOrDefaultAsync<ComponentEntity>(x => x.ProjectId == projectId));
+    }
+
+    public static async Task<int?> GetFirstProjectId()
+    {
+        return (await DbOperation(async db => await db.FirstOrDefaultAsync<ProjectEntity>(x => true)))?.Id;
+    }
+    
+    
     public static Task<IEnumerable<ComponentEntity>> GetAllComponentsInProject(int projectId)
     {
         return DbOperation(db => db.SelectAsync<ComponentEntity>(x => x.ProjectId == projectId));
@@ -11,7 +23,10 @@ static class Store
     {
         return (long)await DbOperation(db => db.InsertAsync(entity));
     }
-    
+    public static async Task<long> Insert(ComponentEntity entity)
+    {
+        return (long)await DbOperation(db => db.InsertAsync(entity));
+    }
     public static Task Delete(ComponentEntity entity)
     {
         return DbOperation(db => db.DeleteAsync(entity));
@@ -34,7 +49,10 @@ static class Store
     {
         return await DbOperation(db => db.UpdateAsync(entity));
     }
-    
+    public static async Task<bool> Update(ProjectEntity entity)
+    {
+        return await DbOperation(db => db.UpdateAsync(entity));
+    }
     public static async Task<bool> Update(UserEntity entity)
     {
         return await DbOperation(db => db.UpdateAsync(entity));

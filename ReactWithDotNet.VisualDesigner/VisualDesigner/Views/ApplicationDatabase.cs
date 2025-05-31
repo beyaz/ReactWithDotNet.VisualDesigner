@@ -22,15 +22,7 @@ static class ApplicationDatabase
         return Cache.AccessValue(nameof(GetAllProjects), () => Store.GetAllProjects().GetAwaiter().GetResult().ToList());
     }
 
-    public static async Task<ComponentEntity> GetFirstComponentInProject(int projectId)
-    {
-        return await DbOperation(async db => await db.FirstOrDefaultAsync<ComponentEntity>(x => x.ProjectId == projectId));
-    }
-
-    public static async Task<int?> GetFirstProjectId()
-    {
-        return (await DbOperation(async db => await db.FirstOrDefaultAsync<ProjectEntity>(x => true)))?.Id;
-    }
+   
 
     public static async Task<IReadOnlyList<UserEntity>> GetLastUsageInfoByUserName(string userName)
     {

@@ -91,7 +91,7 @@ sealed class ApplicationView : Component<ApplicationState>
             MainContentTab       = MainContentTabs.Design
         };
 
-        var projectId = await GetFirstProjectId();
+        var projectId = await Store.GetFirstProjectId();
         if (projectId.HasValue)
         {
             await ChangeSelectedProject(projectId.Value);
@@ -234,10 +234,10 @@ sealed class ApplicationView : Component<ApplicationState>
                 UserName                   = userName
             });
 
-            await DbOperation(db => db.UpdateAsync(component with
+            await Store.Update(component with
             {
                 ConfigAsYaml = componentConfigAsYamlNewValue
-            }));
+            });
 
             Cache.Clear();
         }
@@ -295,7 +295,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
             newDbRecord = newDbRecord with
             {
-                Id = (int)(long)await DbOperation(db => db.InsertAsync(newDbRecord))
+                Id = (int)await Store.Insert(newDbRecord)
             };
 
             Cache.Clear();
@@ -442,7 +442,7 @@ sealed class ApplicationView : Component<ApplicationState>
             return;
         }
 
-        var user = await DbOperation(db => db.FirstOrDefaultAsync<UserEntity>(x => x.UserName == state.UserName));
+        var user = await Store.TryGetUser(state.ProjectId, state.UserName);
         if (user is null)
         {
             this.FailNotification($"UserNotFound {state.UserName}");
@@ -501,7 +501,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
         // try select first component
         {
-            var component = await GetFirstComponentInProject(projectId);
+            var component = await Store.GetFirstComponentInProject(projectId);
             if (component is null)
             {
                 return;
@@ -659,25 +659,24 @@ sealed class ApplicationView : Component<ApplicationState>
 
         if (state.MainContentTab == MainContentTabs.ProjectConfig)
         {
-            var result = await DbOperation(async db =>
+            var project = await Store.TryGetProject(state.ProjectId);
+            if (project is null)
             {
-                var project = await db.FirstOrDefaultAsync<ProjectEntity>(x => x.Id == state.ProjectId);
-                if (project is null)
-                {
-                    return Fail("ProjectNotFound");
-                }
+                this.FailNotification("ProjectNotFound");
+                return;
+            }
 
-                await db.UpdateAsync(project with { ConfigAsYaml = state.MainContentText });
+            if (project.ConfigAsYaml != state.MainContentText)
+            {
+                await Store.Update(project with { ConfigAsYaml = state.MainContentText });
 
                 Cache.Clear();
-
-                return Success;
-            });
-
-            if (result.HasError)
-            {
-                this.FailNotification(result.Error.Message);
+                
+                this.SuccessNotification("Project config updated.");
             }
+
+           
+
         }
 
         if (state.MainContentTab == MainContentTabs.ComponentConfig)
