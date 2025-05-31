@@ -7,12 +7,7 @@ static class ApplicationDatabase
 {
     static string ConnectionString => Config.ConnectionString;
 
-    public static void DbOperation(Action<IDbConnection> operation)
-    {
-        using IDbConnection connection = new SqliteConnection(ConnectionString);
-
-        operation(connection);
-    }
+  
 
     public static T DbOperation<T>(Func<IDbConnection, T> operation)
     {
