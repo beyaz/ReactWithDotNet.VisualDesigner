@@ -1,4 +1,6 @@
-﻿namespace ReactWithDotNet.VisualDesigner.Primitive;
+﻿using System.Reflection;
+
+namespace ReactWithDotNet.VisualDesigner.Primitive;
 
 delegate Task InputChangeHandler(string senderName, string newValue);
 
@@ -17,6 +19,8 @@ sealed class MagicInput : Component<MagicInput.State>
     public bool IsTextAlignCenter { get; init; }
     public bool IsTextAlignRight { get; init; }
     public required string Name { get; init; }
+    
+    public Func<string,Element> ItemRender { get; set; }
 
     [CustomEvent]
     public InputChangeHandler OnChange { get; init; }
@@ -247,6 +251,8 @@ sealed class MagicInput : Component<MagicInput.State>
         return Task.CompletedTask;
     }
 
+    
+    
     Element ViewSuggestions()
     {
         if (state.ShowSuggestions is false)
@@ -282,7 +288,7 @@ sealed class MagicInput : Component<MagicInput.State>
             {
                 Data("INDEX", index),
 
-                text,
+                ItemRender is not null ? ItemRender(text) : text,
                 PaddingLeft(5),
                 Color(rgb(0, 6, 36)),
                 WhiteSpaceNoWrap,
