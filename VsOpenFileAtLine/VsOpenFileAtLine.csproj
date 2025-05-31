@@ -11,8 +11,4 @@
 	  <PackageReference Include="envdte" Version="17.14.40260" />
 	</ItemGroup>
 
-	<Target Name="CopyVsOpenFileAtLineOutput" AfterTargets="Build">
-		<Exec Command="xcopy $(TargetDir)*.* $(SolutionDir)ReactWithDotNet.VisualDesigner\bin\$(ConfigurationName)\net8.0\ /Y /S /E" />
-	</Target>
-
 </Project>

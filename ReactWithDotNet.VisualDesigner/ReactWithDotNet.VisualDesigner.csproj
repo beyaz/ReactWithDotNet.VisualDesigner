@@ -20,12 +20,13 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <None Update="Config.yaml">
-	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-	  </None>
+		<None Update="Config.yaml">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
 	</ItemGroup>
 
+	<Target Name="CopyVsOpenFileAtLineOutput" AfterTargets="Build">
+		<Exec Command="xcopy $(SolutionDir)\VsOpenFileAtLine\bin\$(ConfigurationName)\net48\*.* $(TargetDir) /Y /S /E" />
+	</Target>
 
-	
-	
 </Project>
