@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using HtmlAgilityPack;
 
-namespace ReactWithDotNet.VisualDesigner;
+namespace ReactWithDotNet.VisualDesigner.Views;
 
 static class HtmlImporter
 {

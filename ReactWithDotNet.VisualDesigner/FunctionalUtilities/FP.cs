@@ -1,8 +1,8 @@
-﻿global using FunctionalUtilities;
-global using static FunctionalUtilities.FP;
+﻿global using ReactWithDotNet.VisualDesigner.FunctionalUtilities;
+global using static ReactWithDotNet.VisualDesigner.FunctionalUtilities.FP;
 using System.Collections;
 
-namespace FunctionalUtilities;
+namespace ReactWithDotNet.VisualDesigner.FunctionalUtilities;
 
 
 
