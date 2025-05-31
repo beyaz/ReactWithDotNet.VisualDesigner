@@ -1,5 +1,4 @@
-﻿using System.Collections.Immutable;
-using System.IO;
+﻿using System.IO;
 using System.Reflection;
 using ReactWithDotNet.VisualDesigner.DataAccess;
 
@@ -72,15 +71,6 @@ static class ApplicationLogic
 
             return Success;
         });
-    }
-
-    public static Task<ImmutableList<string>> GetAllComponentNamesInProject(int projectId)
-    {
-        return Cache.AccessValue(nameof(GetAllComponentNamesInProject) + projectId,
-                                 () => DbOperation(async db =>
-                                                       (await db.SelectAsync<ComponentEntity>(x => x.ProjectId == projectId))
-                                                       .Select(c => c.Name)
-                                                       .ToImmutableList()));
     }
 
     public static Task<Result<VisualElementModel>> GetComponenUserOrMainVersionAsync(int componentId, string userName)
