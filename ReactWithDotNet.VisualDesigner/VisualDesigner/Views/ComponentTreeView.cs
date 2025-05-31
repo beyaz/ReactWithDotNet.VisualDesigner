@@ -1,4 +1,6 @@
-﻿namespace ReactWithDotNet.VisualDesigner.Views;
+﻿using System.IO;
+
+namespace ReactWithDotNet.VisualDesigner.Views;
 
 delegate Task ComponentSelectionChanged(int componentId);
 
@@ -75,7 +77,7 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
 
         foreach (var item in nodes)
         {
-            openPath(rootNode, item.ComponentName);
+            openPath(rootNode, item.ExportFilePath);
 
             append(rootNode, item);
         }
@@ -133,7 +135,25 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
 
     async Task<NodeModel> CalculateRootNode()
     {
-        return CalculateRootNodeFrom((await GetAllNodes()).Where(x => x.ComponentName.Contains(state.FilterText ?? string.Empty, StringComparison.OrdinalIgnoreCase)));
+        return CalculateRootNodeFrom((await GetAllNodes()).Where(hasMatch));
+
+        bool hasMatch(NodeModel node)
+        {
+            if (node.Label?.Contains(state.FilterText ?? string.Empty, StringComparison.OrdinalIgnoreCase) is true)
+            {
+                return true;
+            }
+            
+            foreach (var path in node.Names)
+            {
+                if (path.Contains(state.FilterText ?? string.Empty, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
     }
 
     async Task<IReadOnlyList<NodeModel>> GetAllNodes()
@@ -141,12 +161,12 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
         return await Cache.AccessValue($"{nameof(ComponentTreeView)}-{nameof(GetAllNodes)}-{ProjectId}", async () =>
         {
             return ListFrom(from x in await DbOperation(db => db.SelectAsync<ComponentEntity>(x => x.ProjectId == ProjectId))
-                            orderby x.Name descending
+                            orderby x.GetName() descending
                             select new NodeModel
                             {
-                                ComponentId   = x.Id,
-                                ComponentName = x.Name,
-                                Names         = x.Name.Split('/', StringSplitOptions.RemoveEmptyEntries)
+                                ComponentId    = x.Id,
+                                Names          = (Path.GetDirectoryName(x.GetExportFilePath()) +"/" +x.GetName()).Split(['/', '\\'], StringSplitOptions.RemoveEmptyEntries),
+                                ExportFilePath = x.GetExportFilePath()
                             });
         });
     }
@@ -281,13 +301,13 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
 
         public int? ComponentId { get; init; }
 
-        public string ComponentName { get; init; }
-
         public string Label { get; init; }
 
         public IReadOnlyList<string> Names { get; init; } = [];
 
         public string Path { get; init; }
+        
+        public string ExportFilePath { get; init; }
 
         public bool HasNoChild()
         {
