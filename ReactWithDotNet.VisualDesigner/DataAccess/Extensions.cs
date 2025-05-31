@@ -37,7 +37,7 @@ static class Extensions
             return new GetComponentDataOutput
             {
                 Component        = await Store.TryGetComponent(input.ComponentId),
-                WorkspaceVersion = await db.FirstOrDefaultAsync<ComponentWorkspace>(x => x.ComponentId == input.ComponentId && x.UserName == input.UserName)
+                WorkspaceVersion = await Store.TryGetComponentWorkspace(input.ComponentId ,input.UserName)
             };
         });
 
@@ -49,8 +49,5 @@ static class Extensions
         return output;
     }
     
-    public static Task<ComponentWorkspace> TryGetUserVersion(int componentId, string userName)
-    {
-        return DbOperation(db => db.FirstOrDefaultAsync<ComponentWorkspace>(x => x.ComponentId == componentId && x.UserName == userName));
-    }
+    
 }

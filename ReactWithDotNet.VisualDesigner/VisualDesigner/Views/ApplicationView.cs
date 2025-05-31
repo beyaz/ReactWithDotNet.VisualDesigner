@@ -352,7 +352,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
         VisualElementModel componentRootElement;
         {
-            var userVersion = await TryGetUserVersion(componentId, state.UserName);
+            var userVersion = await Store.TryGetComponentWorkspace(componentId, state.UserName);
             if (userVersion is not null)
             {
                 componentRootElement = userVersion.RootElementAsYaml.AsVisualElementModel();
