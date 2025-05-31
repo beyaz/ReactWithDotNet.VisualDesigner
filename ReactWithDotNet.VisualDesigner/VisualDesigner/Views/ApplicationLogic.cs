@@ -449,7 +449,7 @@ static class ApplicationLogic
             });
 
             // restore from main version
-            state.ComponentRootElement = component.RootElementAsYaml.AsVisualElementModel();
+            state = state with { ComponentRootElement = component.RootElementAsYaml.AsVisualElementModel() };
 
             await db.DeleteAsync(userVersion);
 

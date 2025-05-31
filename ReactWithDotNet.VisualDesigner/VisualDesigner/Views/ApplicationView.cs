@@ -247,9 +247,12 @@ sealed class ApplicationView : Component<ApplicationState>
         // add as root
         if (state.ComponentRootElement is null)
         {
-            state.ComponentRootElement = new()
+            state = state with
             {
-                Tag = "div"
+                ComponentRootElement = new()
+                {
+                    Tag = "div"
+                }
             };
 
             state.Selection = new()
@@ -347,7 +350,7 @@ sealed class ApplicationView : Component<ApplicationState>
         var intArray = state.Selection.VisualElementTreeItemPath.Split(',');
         if (intArray.Length == 1)
         {
-            state.ComponentRootElement = null;
+            state = state with { ComponentRootElement = null };
         }
         else
         {
@@ -1021,7 +1024,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
                 if (isTryingToMakeRoot)
                 {
-                    state.ComponentRootElement = sourceNodeParent.Children[sourceNodeIndex];
+                    state = state with { ComponentRootElement = sourceNodeParent.Children[sourceNodeIndex] };
 
                     state.Selection = new();
 
@@ -1935,7 +1938,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
         if (CurrentVisualElement is null)
         {
-            state.ComponentRootElement = model;
+            state = state with { ComponentRootElement = model };
         }
         else
         {
@@ -1960,7 +1963,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
         if (path.HasNoValue())
         {
-            state.ComponentRootElement = newModel;
+            state = state with { ComponentRootElement = newModel };
 
             state.Selection = new()
             {
@@ -1972,7 +1975,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
         if (path.HasNoValue() || path == "0")
         {
-            state.ComponentRootElement = newModel;
+            state = state with { ComponentRootElement = newModel };
 
             return Success;
         }

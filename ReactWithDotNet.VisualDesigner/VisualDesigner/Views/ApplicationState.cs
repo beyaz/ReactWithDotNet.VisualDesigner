@@ -41,7 +41,7 @@ public sealed record ApplicationState
     
     public int ComponentId { get; init; }
     
-    public VisualElementModel ComponentRootElement { get; set; }
+    public VisualElementModel ComponentRootElement { get; init; }
     
     public bool IsProjectSettingsPopupVisible { get; set; }
     
