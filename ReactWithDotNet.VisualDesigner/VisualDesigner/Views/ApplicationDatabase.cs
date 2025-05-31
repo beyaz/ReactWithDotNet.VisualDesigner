@@ -16,12 +16,6 @@ static class ApplicationDatabase
         return operation(connection);
     }
 
-    public static async Task DbOperation(Func<IDbConnection, Task> operation)
-    {
-        using IDbConnection connection = new SqliteConnection(ConnectionString);
-
-        await operation(connection);
-    }
 
     public static async Task<T> DbOperation<T>(Func<IDbConnection, Task<T>> operation)
     {

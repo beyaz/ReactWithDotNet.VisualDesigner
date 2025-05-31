@@ -17,59 +17,56 @@ static class ApplicationLogic
         return GetAllComponentsInProjectFromCache(projectId).FirstOrDefault(x => x.Id == componentId).GetName();
     }
     
-    public static Task<Result> CommitComponent(ApplicationState state)
+    public static async Task<Result> CommitComponent(ApplicationState state)
     {
-        return DbOperation(async db =>
+        ComponentEntity component;
+        ComponentWorkspace userVersion;
         {
-            ComponentEntity component;
-            ComponentWorkspace userVersion;
+            var response = await GetComponentData(state.Map());
+            if (response.HasError)
             {
-                var response = await GetComponentData(state.Map());
-                if (response.HasError)
-                {
-                    return response.Error;
-                }
-
-                component   = response.Value.Component;
-                userVersion = response.Value.WorkspaceVersion.Value;
+                return response.Error;
             }
 
-            if (userVersion is null)
-            {
-                return Fail($"User ({state.UserName}) has no change to commit.");
-            }
+            component   = response.Value.Component;
+            userVersion = response.Value.WorkspaceVersion.Value;
+        }
 
-            // Check if the user version is the same as the main version
-            if (component.RootElementAsYaml == SerializeToYaml(state.ComponentRootElement))
-            {
-                return Fail($"User ({state.UserName}) has no change to commit.");
-            }
+        if (userVersion is null)
+        {
+            return Fail($"User ({state.UserName}) has no change to commit.");
+        }
 
-            userVersion = userVersion with
-            {
-                RootElementAsYaml = SerializeToYaml(state.ComponentRootElement)
-            };
+        // Check if the user version is the same as the main version
+        if (component.RootElementAsYaml == SerializeToYaml(state.ComponentRootElement))
+        {
+            return Fail($"User ({state.UserName}) has no change to commit.");
+        }
 
-            await Store.Insert(new ComponentHistoryEntity
-            {
-                ComponentId                = component.Id,
-                ConfigAsYaml             = component.ConfigAsYaml,
-                ComponentRootElementAsYaml = component.RootElementAsYaml,
-                UserName                   = state.UserName,
-                InsertTime                 = DateTime.Now
-            });
+        userVersion = userVersion with
+        {
+            RootElementAsYaml = SerializeToYaml(state.ComponentRootElement)
+        };
 
-            component = component with
-            {
-                RootElementAsYaml = userVersion.RootElementAsYaml
-            };
-
-            await db.UpdateAsync(component);
-
-            await db.DeleteAsync(userVersion);
-
-            return Success;
+        await Store.Insert(new ComponentHistoryEntity
+        {
+            ComponentId                = component.Id,
+            ConfigAsYaml               = component.ConfigAsYaml,
+            ComponentRootElementAsYaml = component.RootElementAsYaml,
+            UserName                   = state.UserName,
+            InsertTime                 = DateTime.Now
         });
+
+        component = component with
+        {
+            RootElementAsYaml = userVersion.RootElementAsYaml
+        };
+
+        await Store.Update(component);
+
+        await Store.Delete(userVersion);
+
+        return Success;
     }
 
     public static Task<Result<VisualElementModel>> GetComponenUserOrMainVersionAsync(int componentId, string userName)

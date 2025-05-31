@@ -11,7 +11,10 @@ static class Store
     {
         return DbOperation(db => db.DeleteAsync(entity));
     }
-    
+    public static Task Delete(ComponentWorkspace entity)
+    {
+        return DbOperation(db => db.DeleteAsync(entity));
+    }
     public static Task Insert(ComponentHistoryEntity entity)
     {
         return DbOperation(db => db.InsertAsync(entity));
@@ -28,6 +31,11 @@ static class Store
     }
     
     public static async Task<bool> Update(UserEntity entity)
+    {
+        return await DbOperation(db => db.UpdateAsync(entity));
+    }
+    
+    public static async Task<bool> Update(ComponentEntity entity)
     {
         return await DbOperation(db => db.UpdateAsync(entity));
     }
