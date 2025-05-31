@@ -37,7 +37,7 @@ public sealed record ApplicationState
     // APPLICATION STATE
     public required ApplicationPreviewInfo Preview { get; init; }
     
-    public int ProjectId { get; set; }
+    public int ProjectId { get; init; }
     
     public int ComponentId { get; init; }
     
