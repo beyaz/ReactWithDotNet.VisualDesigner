@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-
+﻿
 namespace ReactWithDotNet.VisualDesigner.Primitive;
 
 delegate Task InputChangeHandler(string senderName, string newValue);
@@ -270,7 +269,7 @@ sealed class MagicInput : Component<MagicInput.State>
         return new FlexColumn(PositionRelative, SizeFull)
         {
             Zindex3,
-            new FlexColumn(PositionAbsolute, Top(4), HeightAuto, Background(White), BoxShadow(0, 6, 6, 0, rgba(22, 45, 61, .06)), Padding(5), BorderRadius(5))
+            new FlexColumn(PositionAbsolute, MinWidth(200), Top(4), HeightAuto, Background(White), BoxShadow(0, 6, 6, 0, rgba(22, 45, 61, .06)), Padding(5), BorderRadius(5))
             {
                 Zindex4,
                 IsTextAlignRight ? Right(0) : null,
@@ -291,7 +290,8 @@ sealed class MagicInput : Component<MagicInput.State>
                 ItemRender is not null ? ItemRender(text) : text,
                 PaddingLeft(5),
                 Color(rgb(0, 6, 36)),
-                WhiteSpaceNoWrap,
+                WhiteSpaceNormal, OverflowWrapAnywhere,
+                
                 CursorDefault,
 
                 Hover(Background(Gray100)),
