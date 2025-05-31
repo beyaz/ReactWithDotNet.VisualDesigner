@@ -395,7 +395,7 @@ static class ApplicationLogic
                 return tag;
             }
 
-            return component.Name.Split('/').Last();
+            return component.GetName();
         }
 
         return tag;
