@@ -540,7 +540,7 @@ static class NextJs_with_Tailwind
 
         if (tag == "img")
         {
-            if (element.Properties.Any(x => x.Contains("alt:")) is false)
+            if (!element.Properties.Any(x => x.Contains("alt:")))
             {
                 element.Properties.Add("alt: \"?\"");
             }

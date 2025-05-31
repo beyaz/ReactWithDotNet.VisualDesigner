@@ -862,13 +862,14 @@ sealed class ApplicationView : Component<ApplicationState>
                                     return;
                                 }
 
-                                if (result.Value.HasChange is false)
+                                if (result.Value.HasChange)
                                 {
-                                    this.SuccessNotification("File already same.");
+                                    this.SuccessNotification("File updated.");
                                 }
                                 else
                                 {
-                                    this.SuccessNotification("File updated.");
+                                    
+                                    this.SuccessNotification("File already same.");
                                 }
                             })
                         }

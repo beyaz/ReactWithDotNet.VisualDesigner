@@ -52,7 +52,7 @@ sealed class MagicInput : Component<MagicInput.State>
 
     protected override Element render()
     {
-        return new FlexColumn(FitContent is false ? WidthFull : null)
+        return new FlexColumn(!FitContent ? WidthFull : null)
         {
             new input
             {
@@ -136,7 +136,7 @@ sealed class MagicInput : Component<MagicInput.State>
     [KeyboardEventCallOnly("ArrowDown", "ArrowUp", "Enter", "CTRL+ArrowRight")]
     Task OnKeyDown(KeyboardEvent e)
     {
-        if (state.ShowSuggestions is false)
+        if (!state.ShowSuggestions)
         {
             state.ShowSuggestions = true;
 
@@ -254,7 +254,7 @@ sealed class MagicInput : Component<MagicInput.State>
     
     Element ViewSuggestions()
     {
-        if (state.ShowSuggestions is false)
+        if (!state.ShowSuggestions)
         {
             return null;
         }

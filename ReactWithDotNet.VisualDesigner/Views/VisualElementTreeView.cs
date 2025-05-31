@@ -247,7 +247,7 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
         }
 
         Element eyeIcon = node.HideInDesigner ? new IconEyeClose() : new IconEyeOpen();
-        if (isSelected is false && node.HideInDesigner is false)
+        if (!isSelected && !node.HideInDesigner)
         {
             eyeIcon = null;
         }

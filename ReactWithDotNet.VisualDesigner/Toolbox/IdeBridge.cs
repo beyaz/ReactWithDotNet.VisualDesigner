@@ -65,7 +65,7 @@ static class IdeBridge
 
         // try visual studio
         {
-            var vsOpenFileAtLineExeFilePath = Path.Combine(Path.GetDirectoryName(typeof(IdeBridge).Assembly.Location) ?? string.Empty, @"VsOpenFileAtLine.exe");
+            var vsOpenFileAtLineExeFilePath = Path.Combine(Path.GetDirectoryName(typeof(IdeBridge).Assembly.Location) ?? string.Empty, "VsOpenFileAtLine.exe");
 
             if (File.Exists(vsOpenFileAtLineExeFilePath))
             {
