@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\ReactWithDotNet.VisualDesigner\VisualDesigner\GlobalUsings.cs" Link="GlobalUsings.cs" />
+    <Compile Include="..\ReactWithDotNet.VisualDesigner\GlobalUsings.cs" Link="GlobalUsings.cs" />
   </ItemGroup>
 
   <ItemGroup>
