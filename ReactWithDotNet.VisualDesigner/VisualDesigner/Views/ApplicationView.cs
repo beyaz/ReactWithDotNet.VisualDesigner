@@ -174,7 +174,7 @@ sealed class ApplicationView : Component<ApplicationState>
     }
 
     // todo: redesign
-    static async Task<Result<string>> UpdateComponentConfig(int componentId, string componentConfigAsYamlNewValue, string userName)
+    static async Task<Result<string>> UpdateComponentConfig(int projectId, int componentId, string componentConfigAsYamlNewValue, string userName)
     {
         var component = await Store.TryGetComponent(componentId);
         if (component is null)
@@ -217,7 +217,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
         // check name & export file path
         {
-            foreach (var item in (await DbOperation(db => db.GetAllAsync<ComponentEntity>())).Where(x => x.Id != component.Id))
+            foreach (var item in (await Store.GetAllComponentsInProject(projectId)).Where(x => x.Id != component.Id))
             {
                 if (item.GetName() == name && item.GetExportFilePath() == exportFilePath)
                 {
@@ -278,7 +278,8 @@ sealed class ApplicationView : Component<ApplicationState>
 
         // check name & export file path
         {
-            foreach (var item in await DbOperation(db => db.GetAllAsync<ComponentEntity>()))
+            
+            foreach (var item in await  Store.GetAllComponentsInProject(state.ProjectId))
             {
                 if (item.GetName() == name && item.GetExportFilePath() == exportFilePath)
                 {
@@ -681,7 +682,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
         if (state.MainContentTab == MainContentTabs.ComponentConfig)
         {
-            var result = await UpdateComponentConfig(state.ComponentId, state.MainContentText, state.UserName);
+            var result = await UpdateComponentConfig(state.ProjectId,state.ComponentId, state.MainContentText, state.UserName);
             if (result.HasError)
             {
                 this.FailNotification(result.Error.Message);

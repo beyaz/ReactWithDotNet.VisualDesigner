@@ -32,14 +32,11 @@ static class Extensions
     
     public static async Task<Result<GetComponentDataOutput>> GetComponentData(GetComponentDataInput input)
     {
-        var output = await DbOperation(async db =>
+        var output = new GetComponentDataOutput
         {
-            return new GetComponentDataOutput
-            {
-                Component        = await Store.TryGetComponent(input.ComponentId),
-                WorkspaceVersion = await Store.TryGetComponentWorkspace(input.ComponentId ,input.UserName)
-            };
-        });
+            Component        = await Store.TryGetComponent(input.ComponentId),
+            WorkspaceVersion = await Store.TryGetComponentWorkspace(input.ComponentId ,input.UserName)
+        };
 
         if (output.Component is null)
         {
