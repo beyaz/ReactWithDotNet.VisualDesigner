@@ -1,4 +1,4 @@
-﻿namespace ReactWithDotNet.VisualDesigner.Views;
+﻿namespace ReactWithDotNet.VisualDesigner;
 
 public sealed record ProjectConfig
 {
