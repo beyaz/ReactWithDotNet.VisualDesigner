@@ -393,7 +393,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
         // try take from db cache
         {
-            var lastUsage = (await GetLastUsageInfoByUserName(userName)).FirstOrDefault(p => p.ProjectId == projectId);
+            var lastUsage = await Store.TryGetUser(projectId, userName);
             if (lastUsage?.LastStateAsYaml.HasValue() is true)
             {
                 state = DeserializeFromYaml<ApplicationState>(lastUsage.LastStateAsYaml);
