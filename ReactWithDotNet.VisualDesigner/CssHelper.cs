@@ -148,12 +148,12 @@ public static class CssHelper
 
             // check is conditional sample: border-width: {props.isSelected} ? 2 : 5
             {
-                var conditionalValue = TextParser.TryParseConditionalValue(cssAttributeValue);
-                if (conditionalValue.success)
+                var (success, condition, left, right) = TextParser.TryParseConditionalValue(cssAttributeValue);
+                if (success)
                 {
                     string lefTailwindClass;
                     {
-                        var result = ConvertToTailwindClass(project, cssAttributeName, conditionalValue.left);
+                        var result = ConvertToTailwindClass(project, cssAttributeName, left);
                         if (result.HasError)
                         {
                             return result.Error;
@@ -164,10 +164,10 @@ public static class CssHelper
 
                     var rightTailwindClass = string.Empty;
 
-                    if (conditionalValue.right.HasValue())
+                    if (right.HasValue())
                     {
                         {
-                            var result = ConvertToTailwindClass(project, cssAttributeName, conditionalValue.right);
+                            var result = ConvertToTailwindClass(project, cssAttributeName, right);
                             if (result.HasError)
                             {
                                 return result.Error;
@@ -177,7 +177,7 @@ public static class CssHelper
                         }
                     }
 
-                    return "${" + $"{ClearConnectedValue(conditionalValue.condition)} ? '{lefTailwindClass}' : '{rightTailwindClass}'" + '}';
+                    return "${" + $"{ClearConnectedValue(condition)} ? '{lefTailwindClass}' : '{rightTailwindClass}'" + '}';
                 }
             }
 
