@@ -4,6 +4,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 17.0.32014.148
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReactWithDotNet.VisualDesigner", "ReactWithDotNet.VisualDesigner\ReactWithDotNet.VisualDesigner.csproj", "{A995C489-B0D2-4E43-80AA-D3E2BDFF9C07}"
+	ProjectSection(ProjectDependencies) = postProject
+		{308971CA-490F-48F8-A074-34C194E03AFE} = {308971CA-490F-48F8-A074-34C194E03AFE}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReactWithDotNet.VisualDesigner.Test", "ReactWithDotNet.VisualDesigner.Test\ReactWithDotNet.VisualDesigner.Test.csproj", "{9BB39A70-CDC3-4F24-A7CE-93FD78AEE253}"
 EndProject
