@@ -303,8 +303,6 @@ sealed class ApplicationView : Component<ApplicationState>
 
             Preview = state.Preview,
 
-            ComponentName = component.Name,
-
             ComponentId = componentId,
 
             ComponentRootElement = componentRootElement,

@@ -39,8 +39,6 @@ public sealed record ApplicationState
     
     public int ProjectId { get; set; }
     
-    public string ComponentName { get; init; }
-    
     public int ComponentId { get; init; }
     
     public VisualElementModel ComponentRootElement { get; set; }
