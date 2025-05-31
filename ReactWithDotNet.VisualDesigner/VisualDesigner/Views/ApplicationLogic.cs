@@ -1,6 +1,5 @@
 ﻿using System.IO;
 using System.Reflection;
-using ReactWithDotNet.VisualDesigner.DataAccess;
 
 namespace ReactWithDotNet.VisualDesigner.Views;
 
@@ -84,7 +83,7 @@ static class ApplicationLogic
     {
         return Cache.AccessValue($"{nameof(ProjectConfig)}:{projectId}", () =>
         {
-            var configAsYaml = DbOperation(db => db.FirstOrDefault<ProjectEntity>(x => x.Id == projectId))?.ConfigAsYaml;
+            var configAsYaml = Store.TryGetProject(projectId).GetAwaiter().GetResult()?.ConfigAsYaml;
             if (configAsYaml.HasNoValue())
             {
                 return new();
@@ -354,11 +353,11 @@ static class ApplicationLogic
         return suggestions;
     }
 
-    public static string GetTagText(string tag)
+    public static async Task<string> GetTagText(string tag)
     {
         if (int.TryParse(tag, out var componentId))
         {
-            var component = DbOperation(db => db.FirstOrDefault<ComponentEntity>(x => x.Id == componentId));
+            var component = await Store.TryGetComponent(componentId);
             if (component is null)
             {
                 return tag;

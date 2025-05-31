@@ -147,7 +147,7 @@ static class NextJs_with_Tailwind
 
         rootNode = ArrangeImageAndLinkTags(rootNode);
 
-        return ConvertReactNodeModelToTsxCode(rootNode, null, 2);
+        return await ConvertReactNodeModelToTsxCode(rootNode, null, 2);
     }
 
     static async Task<Result<(string filePath, string fileContent)>> CalculateExportInfo(ExportInput input)
@@ -228,7 +228,7 @@ static class NextJs_with_Tailwind
         return (filePath, fileNewContent);
     }
 
-    static Result<IReadOnlyList<string>> ConvertReactNodeModelToTsxCode(ReactNode node, ReactNode parentNode, int indentLevel)
+    static  async Task<Result<IReadOnlyList<string>>> ConvertReactNodeModelToTsxCode(ReactNode node, ReactNode parentNode, int indentLevel)
     {
         List<string> lines = [];
 
@@ -257,7 +257,7 @@ static class NextJs_with_Tailwind
 
             IReadOnlyList<string> innerLines;
             {
-                var result = ConvertReactNodeModelToTsxCode(node, parentNode, indentLevel);
+                var result = await ConvertReactNodeModelToTsxCode(node, parentNode, indentLevel);
                 if (result.HasError)
                 {
                     return result.Error;
@@ -283,7 +283,7 @@ static class NextJs_with_Tailwind
 
             IReadOnlyList<string> innerLines;
             {
-                var result = ConvertReactNodeModelToTsxCode(node, parentNode, indentLevel);
+                var result = await ConvertReactNodeModelToTsxCode(node, parentNode, indentLevel);
                 if (result.HasError)
                 {
                     return result.Error;
@@ -319,7 +319,7 @@ static class NextJs_with_Tailwind
 
                 IReadOnlyList<string> innerLines;
                 {
-                    var result = ConvertReactNodeModelToTsxCode(node, parentNode, indentLevel);
+                    var result = await ConvertReactNodeModelToTsxCode(node, parentNode, indentLevel);
                     if (result.HasError)
                     {
                         return result.Error;
@@ -347,7 +347,7 @@ static class NextJs_with_Tailwind
         var tag = nodeTag;
         if (int.TryParse(nodeTag, out var componentId))
         {
-            var component = DbOperation(db => db.FirstOrDefault<ComponentEntity>(x => x.Id == componentId));
+            var component = await Store.TryGetComponent(componentId);
             if (component is null)
             {
                 return new ArgumentNullException($"ComponentNotFound. {componentId}");
@@ -511,7 +511,7 @@ static class NextJs_with_Tailwind
         {
             IReadOnlyList<string> childTsx;
             {
-                var result = ConvertReactNodeModelToTsxCode(child, node, indentLevel + 1);
+                var result = await ConvertReactNodeModelToTsxCode(child, node, indentLevel + 1);
                 if (result.HasError)
                 {
                     return result.Error;

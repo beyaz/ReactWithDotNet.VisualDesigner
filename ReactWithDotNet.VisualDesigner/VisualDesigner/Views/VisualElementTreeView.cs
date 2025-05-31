@@ -45,7 +45,7 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
     [CustomEvent]
     public OnTreeItemMove TreeItemMove { get; init; }
 
-    protected override Element render()
+    protected override async Task<Element> renderAsync()
     {
         if (Model is null)
         {
@@ -54,7 +54,7 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
 
         return new div(CursorDefault, Padding(5), OnMouseLeave(OnMouseLeaveHandler), OnKeyDown(On_Key_Down), TabIndex(0), OutlineNone)
         {
-            ToVisual(Model, 0, "0"),
+            await ToVisual(Model, 0, "0"),
             WidthFull, HeightFull
         };
     }
@@ -194,7 +194,7 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
         return Task.CompletedTask;
     }
 
-    IReadOnlyList<Element> ToVisual(VisualElementModel node, int indent, string path)
+    async Task<IReadOnlyList<Element>> ToVisual(VisualElementModel node, int indent, string path)
     {
         var isSelected = SelectedPath == path;
 
@@ -268,7 +268,7 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
                 {
                     MarginLeft(4), FontSize13,
 
-                    new span { GetTagText(node.Tag) },
+                    new span { await GetTagText(node.Tag) },
 
                     icon,
 
@@ -307,7 +307,7 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
         {
             var child = node.Children[i];
 
-            returnList.AddRange(ToVisual(child, indent + 1, $"{path},{i}"));
+            returnList.AddRange(await ToVisual(child, indent + 1, $"{path},{i}"));
         }
 
         return returnList;

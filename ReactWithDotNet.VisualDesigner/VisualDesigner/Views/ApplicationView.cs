@@ -2100,7 +2100,7 @@ sealed class ApplicationView : Component<ApplicationState>
         Client.RunJavascript($"window.ComponentIndicatorZoom = {state.Preview.Scale}");
     }
 
-    Element YamlEditor()
+    async Task<Element> YamlEditor()
     {
         state = state with
         {
@@ -2108,9 +2108,9 @@ sealed class ApplicationView : Component<ApplicationState>
             {
                 MainContentTabs.Code => SerializeToYaml(CurrentVisualElement),
 
-                MainContentTabs.ProjectConfig => DbOperation(db => db.FirstOrDefault<ProjectEntity>(x => x.Id == state.ProjectId)?.ConfigAsYaml),
+                MainContentTabs.ProjectConfig => (await Store.TryGetProject(state.ProjectId))?.ConfigAsYaml,
 
-                MainContentTabs.ComponentConfig => DbOperation(db => db.FirstOrDefault<ComponentEntity>(x => x.Id == state.ComponentId)?.ConfigAsYaml),
+                MainContentTabs.ComponentConfig => (await Store.TryGetComponent(state.ComponentId))?.ConfigAsYaml,
 
                 MainContentTabs.NewComponentConfig =>
                     """

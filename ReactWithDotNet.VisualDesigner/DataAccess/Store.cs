@@ -36,4 +36,9 @@ static class Store
     {
         return await DbOperation(db => db.FirstOrDefaultAsync<ComponentEntity>(x => x.Id == componentId));
     }
+    
+    public static async Task<ProjectEntity> TryGetProject(int projectId)
+    {
+        return await DbOperation(db => db.FirstOrDefaultAsync<ProjectEntity>(x => x.Id == projectId));
+    }
 }
