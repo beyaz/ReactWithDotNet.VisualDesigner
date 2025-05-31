@@ -356,7 +356,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
                 if (name.HasNoValue())
                 {
-                    return new Exception("NameMustBeEntered");
+                    return new Exception($"{ComponentConfigReservedName.Name} should be entered.");
                 }
             }
             {
@@ -367,7 +367,12 @@ sealed class ApplicationView : Component<ApplicationState>
 
                 if (exportFilePath.HasNoValue())
                 {
-                    return new Exception("ExportFilePathMustBeEnteredCorrectly");
+                    return new Exception($"{ComponentConfigReservedName.ExportFilePath} should be entered.");
+                }
+                
+                if (!exportFilePath.Contains('/'))
+                {
+                    return new Exception($"{ComponentConfigReservedName.ExportFilePath} should be entered correctly. Expected directory seperator: '/' ");
                 }
             }
         }
@@ -2106,9 +2111,9 @@ sealed class ApplicationView : Component<ApplicationState>
                 MainContentTabs.ComponentConfig => (await Store.TryGetComponent(state.ComponentId))?.ConfigAsYaml,
 
                 MainContentTabs.NewComponentConfig =>
-                    """
-                    name: write component name here
-                    exportFilePath: write export file path here
+                    $"""
+                    {ComponentConfigReservedName.Name}: write_component_name_here
+                    {ComponentConfigReservedName.ExportFilePath}: write_export_file_path_here
                     """,
                 _ => null
             }
