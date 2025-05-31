@@ -502,15 +502,21 @@ sealed class ApplicationView : Component<ApplicationState>
 
     Task OnCommonSizeClicked(MouseEvent e)
     {
-        state.Preview.Width = e.currentTarget.data["value"] switch
+        state = state with
         {
-            "M"   => 320,
-            "SM"  => 640,
-            "MD"  => 768,
-            "LG"  => 1024,
-            "XL"  => 1280,
-            "XXL" => 1536,
-            _     => throw new ArgumentOutOfRangeException()
+            Preview = state.Preview with
+            {
+                Width = e.currentTarget.data["value"] switch
+                {
+                    "M"   => 320,
+                    "SM"  => 640,
+                    "MD"  => 768,
+                    "LG"  => 1024,
+                    "XL"  => 1280,
+                    "XXL" => 1536,
+                    _     => throw new ArgumentOutOfRangeException()
+                }
+            }
         };
 
         return Task.CompletedTask;
@@ -1190,7 +1196,7 @@ sealed class ApplicationView : Component<ApplicationState>
                     {
                         OnClick(_ =>
                         {
-                            state.Preview.Width -= 10;
+                            state = state with { Preview = state.Preview with { Width = state.Preview.Width - 10 } };
 
                             return Task.CompletedTask;
                         }),
@@ -1202,7 +1208,7 @@ sealed class ApplicationView : Component<ApplicationState>
                     {
                         OnClick(_ =>
                         {
-                            state.Preview.Width += 10;
+                            state = state with { Preview = state.Preview with { Width = state.Preview.Width + 10 } };
 
                             return Task.CompletedTask;
                         }),
@@ -1906,7 +1912,13 @@ sealed class ApplicationView : Component<ApplicationState>
                             return Task.CompletedTask;
                         }
 
-                        state.Preview.Scale -= 10;
+                        state = state with
+                        {
+                            Preview = state.Preview with
+                            {
+                                Scale = state.Preview.Scale - 10
+                            }
+                        };
 
                         UpdateZoomInClient();
 
@@ -1925,7 +1937,13 @@ sealed class ApplicationView : Component<ApplicationState>
                             return Task.CompletedTask;
                         }
 
-                        state.Preview.Scale += 10;
+                        state = state with
+                        {
+                            Preview = state.Preview with
+                            {
+                                Scale = state.Preview.Scale + 10
+                            }
+                        };
 
                         UpdateZoomInClient();
 

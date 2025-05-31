@@ -6,11 +6,11 @@ public sealed record ApplicationPreviewInfo
 {
     // @formatter:off
     
-    public int Width { get; set; }
+    public int Width { get; init; }
     
     public int Height { get; init; }
     
-    public double Scale { get; set; }
+    public double Scale { get; init; }
     
     // @formatter:on
 }
