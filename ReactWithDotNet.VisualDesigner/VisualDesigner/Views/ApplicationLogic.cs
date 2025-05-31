@@ -7,6 +7,12 @@ static class ApplicationLogic
 {
     public static readonly CachedObjectMap Cache = new() { Timeout = TimeSpan.FromMinutes(5) };
 
+    public static IReadOnlyList<ProjectEntity> GetAllProjectsCached()
+    {
+        return Cache.AccessValue(nameof(GetAllProjectsCached),
+                                 () => Store.GetAllProjects().GetAwaiter().GetResult().ToList());
+    }
+    
     public static IReadOnlyList<ComponentEntity> GetAllComponentsInProjectFromCache(int projectId)
     {
         return Cache.AccessValue(nameof(GetAllComponentsInProjectFromCache) + projectId, () => Store.GetAllComponentsInProject(projectId).GetAwaiter().GetResult().ToList());
@@ -92,7 +98,7 @@ static class ApplicationLogic
 
     public static IReadOnlyList<string> GetProjectNames(ApplicationState state)
     {
-        return GetAllProjects().Select(x => x.Name).ToList();
+        return GetAllProjectsCached().Select(x => x.Name).ToList();
     }
 
     public static async Task<IReadOnlyList<string>> GetPropSuggestions(ApplicationState state)

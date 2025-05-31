@@ -12,11 +12,7 @@ static class ApplicationDatabase
 
     
 
-    public static IReadOnlyList<ProjectEntity> GetAllProjects()
-    {
-        return Cache.AccessValue(nameof(GetAllProjects),
-                                 () => Store.GetAllProjects().GetAwaiter().GetResult().ToList());
-    }
+    
 
    
 

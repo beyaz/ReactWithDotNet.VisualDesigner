@@ -1364,10 +1364,10 @@ sealed class ApplicationView : Component<ApplicationState>
                 Name = string.Empty,
 
                 Suggestions = GetProjectNames(state),
-                Value       = GetAllProjects().FirstOrDefault(p => p.Id == state.ProjectId)?.Name,
+                Value       = GetAllProjectsCached().FirstOrDefault(p => p.Id == state.ProjectId)?.Name,
                 OnChange = async (_, projectName) =>
                 {
-                    var projectEntity = GetAllProjects().FirstOrDefault(x => x.Name == projectName);
+                    var projectEntity = GetAllProjectsCached().FirstOrDefault(x => x.Name == projectName);
                     if (projectEntity is null)
                     {
                         this.FailNotification("Project not found. @" + projectName);
