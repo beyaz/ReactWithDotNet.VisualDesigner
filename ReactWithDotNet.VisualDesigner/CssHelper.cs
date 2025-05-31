@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System.Collections.Immutable;
+using System.Globalization;
 using System.Reflection;
 using System.Text.RegularExpressions;
 
@@ -17,7 +18,7 @@ public static class CssHelper
         { "XXL", XXL }
     };
 
-    static readonly IReadOnlyDictionary<string, double> TailwindSpacingScaleMap = new Dictionary<string, double>
+    static readonly ImmutableDictionary<string, double> TailwindSpacingScaleMap = (new Dictionary<string, double>
     {
         { "0px", 0 },
         { "2px", 0.5 },
@@ -53,7 +54,7 @@ public static class CssHelper
         { "288px", 72 },
         { "320px", 80 },
         { "384px", 96 }
-    };
+    }).ToImmutableDictionary();
 
     public static Result<string> ConvertDesignerStyleItemToTailwindClassName(ProjectConfig project, string designerStyleItemText)
     {
@@ -877,7 +878,7 @@ public static class CssHelper
 
         if (designerStyleItem.Pseudo is not null)
         {
-            return ApplyPseudo(designerStyleItem.Pseudo, style.ToArray());
+            return ApplyPseudo(designerStyleItem.Pseudo, [.. style]);
         }
 
         return (StyleModifier)style;
