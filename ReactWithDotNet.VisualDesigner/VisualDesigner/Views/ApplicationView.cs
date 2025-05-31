@@ -1426,7 +1426,7 @@ sealed class ApplicationView : Component<ApplicationState>
                     return new div { $"ComponentNotFound.{componentId}" };
                 }
 
-                inputValue = component.Name;
+                inputValue = component.GetNameWithExportFilePath();
             }
 
             inputTag = new FlexRow(WidthFull)

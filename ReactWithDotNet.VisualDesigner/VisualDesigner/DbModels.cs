@@ -62,7 +62,8 @@ public sealed record ComponentHistoryEntity
     
     public required int ComponentId { get; init; }
     
-    public required string ComponentName { get; init; }
+    // todo: remove
+    public string ComponentName { get; init; }
     
     public string ConfigAsYaml { get; init; }
     
