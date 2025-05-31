@@ -4,9 +4,9 @@ namespace ReactWithDotNet.VisualDesigner.Views;
 
 static class ComponentConfigReservedName
 {
-    public static readonly string ExportFilePath = "exportFilePath";
+    public static readonly string ExportFilePath = "ExportFilePath";
     
-    public static readonly string Name = "name";
+    public static readonly string Name = "Name";
 }
 
 static class ComponentEntityExtensions
