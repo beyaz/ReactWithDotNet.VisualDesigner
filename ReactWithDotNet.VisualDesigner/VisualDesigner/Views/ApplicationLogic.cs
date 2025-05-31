@@ -469,7 +469,7 @@ static class ApplicationLogic
         return None;
     }
 
-    public static Task<Result> TrySaveComponentForUser(Store store, ApplicationState state)
+    public static async Task<Result> TrySaveComponentForUser(Store store, ApplicationState state)
     {
         var componentId = state.ComponentId;
 
@@ -477,46 +477,43 @@ static class ApplicationLogic
 
         if (componentId <= 0 || userName.HasNoValue())
         {
-            return Task.FromResult(Success);
+            return Success;
         }
 
-        return DbOperation(async db =>
+        var userVersion = await store.TryGetComponentWorkspace(componentId, userName);
+        if (userVersion is null)
         {
-            var userVersion = await db.FirstOrDefaultAsync<ComponentWorkspace>(x => x.ComponentId == componentId && x.UserName == userName);
-            if (userVersion is null)
+            var component = await store.TryGetComponent(componentId);
+            if (component is null)
             {
-                var component = await db.FirstOrDefaultAsync<ComponentEntity>(x => x.Id == componentId);
-                if (component is null)
-                {
-                    return new Exception($"ComponentId ({componentId}) is not found");
-                }
+                return new Exception($"ComponentId ({componentId}) is not found");
+            }
 
-                if (SerializeToYaml(state.ComponentRootElement) == component.RootElementAsYaml)
-                {
-                    return Success;
-                }
-
-                userVersion = new()
-                {
-                    ComponentId       = componentId,
-                    RootElementAsYaml = SerializeToYaml(state.ComponentRootElement),
-                    UserName          = userName,
-                    LastAccessTime    = DateTime.Now
-                };
-
-                await db.InsertAsync(userVersion);
-
+            if (SerializeToYaml(state.ComponentRootElement) == component.RootElementAsYaml)
+            {
                 return Success;
             }
 
-            await db.UpdateAsync(userVersion with
+            userVersion = new()
             {
+                ComponentId       = componentId,
                 RootElementAsYaml = SerializeToYaml(state.ComponentRootElement),
-                LastAccessTime = DateTime.Now
-            });
+                UserName          = userName,
+                LastAccessTime    = DateTime.Now
+            };
+
+            await store.Insert(userVersion);
 
             return Success;
+        }
+
+        await store.Update(userVersion with
+        {
+            RootElementAsYaml = SerializeToYaml(state.ComponentRootElement),
+            LastAccessTime = DateTime.Now
         });
+
+        return Success;
     }
 
     public static async Task UpdateLastUsageInfo(Store store, ApplicationState state)
