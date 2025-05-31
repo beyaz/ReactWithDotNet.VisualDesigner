@@ -24,7 +24,7 @@ public sealed record Result
         return new() { HasError = true, Error = failInfo };
     }
 
-    public static implicit operator Result(NoneObject noneObject)
+    public static implicit operator Result(NoneObject _)
     {
         return new() { Success = true };
     }
@@ -51,7 +51,7 @@ public class Result<TValue>: IEnumerable<TValue>
         return new() { Error = failInfo };
     }
 
-    public static implicit operator Result<TValue>(NoneObject noneObject)
+    public static implicit operator Result<TValue>(NoneObject _)
     {
         return new() { Success = true };
     }
@@ -83,7 +83,7 @@ public sealed record Maybe<TValue> : IEnumerable<TValue>
         return new() { Value = value, HasValue = value is not null };
     }
 
-    public static implicit operator Maybe<TValue>(NoneObject noneObject)
+    public static implicit operator Maybe<TValue>(NoneObject _)
     {
         return new() { HasValue = false };
     }
