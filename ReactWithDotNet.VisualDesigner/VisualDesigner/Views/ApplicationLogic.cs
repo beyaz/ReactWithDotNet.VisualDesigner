@@ -98,7 +98,7 @@ static class ApplicationLogic
         return GetAllProjects().Select(x => x.Name).ToList();
     }
 
-    public static IReadOnlyList<string> GetPropSuggestions(ApplicationState state)
+    public static async Task<IReadOnlyList<string>> GetPropSuggestions(ApplicationState state)
     {
         var items = new List<string>();
 
@@ -136,11 +136,11 @@ static class ApplicationLogic
 
         if (tag == "img")
         {
-            items.AddRange(Cache.AccessValue("image_suggestions", () =>
+            items.AddRange(await Cache.AccessValue("image_suggestions", async () =>
             {
                 var returnList = new List<string>();
 
-                var user = GetUser(state.ProjectId, state.UserName);
+                var user = await Store.TryGetUser(state.ProjectId, state.UserName);
                 if (user is not null)
                 {
                     if (user.LocalWorkspacePath.HasValue())
@@ -162,7 +162,7 @@ static class ApplicationLogic
                 return returnList;
             }));
 
-            var user = GetUser(state.ProjectId, state.UserName);
+            var user = await Store.TryGetUser(state.ProjectId, state.UserName);
             if (user is not null)
             {
                 if (user.LocalWorkspacePath.HasValue())

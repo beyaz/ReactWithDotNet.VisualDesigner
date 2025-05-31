@@ -54,9 +54,4 @@ static class ApplicationDatabase
     {
         return (await DbOperation(async db => await db.SelectAsync<UserEntity>(x => x.UserName == userName))).ToList();
     }
-
-    public static UserEntity GetUser(int projectId, string userName)
-    {
-        return DbOperation(db => db.FirstOrDefault<UserEntity>(x => x.ProjectId == projectId && x.UserName == userName));
-    }
 }

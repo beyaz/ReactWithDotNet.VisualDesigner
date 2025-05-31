@@ -154,7 +154,7 @@ static class NextJs_with_Tailwind
     {
         var (projectId, componentId, userName) = input;
 
-        var user = GetUser(projectId, userName);
+        var user = await Store.TryGetUser(projectId, userName);
 
         var project = GetProjectConfig(projectId);
 

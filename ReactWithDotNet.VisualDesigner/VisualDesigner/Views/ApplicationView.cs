@@ -1736,7 +1736,7 @@ sealed class ApplicationView : Component<ApplicationState>
                 }
             };
 
-            Element inputEditor()
+            async Task<Element> inputEditor()
             {
                 string value = null;
 
@@ -1749,7 +1749,7 @@ sealed class ApplicationView : Component<ApplicationState>
                 {
                     Placeholder = "Add property",
 
-                    Suggestions = GetPropSuggestions(state),
+                    Suggestions = await GetPropSuggestions(state),
 
                     Name = (state.Selection.SelectedPropertyIndex ?? (props.Count + 1) * -1).ToString(),
 
