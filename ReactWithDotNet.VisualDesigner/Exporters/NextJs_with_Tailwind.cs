@@ -1,7 +1,6 @@
 ﻿using System.Collections.Immutable;
 using System.Reflection;
 using System.Text;
-using ReactWithDotNet.VisualDesigner.DataAccess;
 
 namespace ReactWithDotNet.VisualDesigner.Exporters;
 
@@ -33,7 +32,7 @@ sealed record ExportInput
 
 static class NextJs_with_Tailwind
 {
-    public static async Task<Result<ExportOutput>> Export(Store defaultStore, ExportInput input)
+    public static async Task<Result<ExportOutput>> Export(ExportInput input)
     {
         string filePath;
         string fileContent;
@@ -86,7 +85,7 @@ static class NextJs_with_Tailwind
                 continue;
             }
 
-            var result = await Export(DefaultStore,new()
+            var result = await Export(new()
             {
                 ComponentId = component.Id,
                 ProjectId   = component.ProjectId,

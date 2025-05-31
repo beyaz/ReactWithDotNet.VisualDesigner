@@ -469,7 +469,7 @@ static class ApplicationLogic
         return None;
     }
 
-    public static async Task<Result> TrySaveComponentForUser(Store store, ApplicationState state)
+    public static async Task<Result> TrySaveComponentForUser(ApplicationState state)
     {
         var componentId = state.ComponentId;
 
@@ -480,10 +480,10 @@ static class ApplicationLogic
             return Success;
         }
 
-        var userVersion = await store.TryGetComponentWorkspace(componentId, userName);
+        var userVersion = await Store.TryGetComponentWorkspace(componentId, userName);
         if (userVersion is null)
         {
-            var component = await store.TryGetComponent(componentId);
+            var component = await Store.TryGetComponent(componentId);
             if (component is null)
             {
                 return new Exception($"ComponentId ({componentId}) is not found");
@@ -502,12 +502,12 @@ static class ApplicationLogic
                 LastAccessTime    = DateTime.Now
             };
 
-            await store.Insert(userVersion);
+            await Store.Insert(userVersion);
 
             return Success;
         }
 
-        await store.Update(userVersion with
+        await Store.Update(userVersion with
         {
             RootElementAsYaml = SerializeToYaml(state.ComponentRootElement),
             LastAccessTime = DateTime.Now
@@ -516,7 +516,7 @@ static class ApplicationLogic
         return Success;
     }
 
-    public static async Task UpdateLastUsageInfo(Store store, ApplicationState state)
+    public static async Task UpdateLastUsageInfo( ApplicationState state)
     {
         var projectId = state.ProjectId;
 
@@ -527,12 +527,12 @@ static class ApplicationLogic
             return;
         }
 
-        var user = await store.TryGetUser(projectId, userName);
+        var user = await Store.TryGetUser(projectId, userName);
         if (user is not null)
         {
             if (user.LastStateAsYaml != SerializeToYaml(state))
             {
-                await store.Update(user with
+                await Store.Update(user with
                 {
                     LastAccessTime = DateTime.Now,
                     LastStateAsYaml = SerializeToYaml(state)
@@ -542,7 +542,7 @@ static class ApplicationLogic
             return;
         }
 
-        await store.Insert(new UserEntity
+        await Store.Insert(new UserEntity
         {
             UserName        = userName,
             ProjectId       = projectId,
