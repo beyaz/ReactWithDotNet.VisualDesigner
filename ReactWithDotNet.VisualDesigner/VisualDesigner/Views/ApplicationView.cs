@@ -724,6 +724,8 @@ sealed class ApplicationView : Component<ApplicationState>
                                     return;
                                 }
 
+                                state = result.Value;
+
                                 this.SuccessNotification("OK");
                             })
                         },

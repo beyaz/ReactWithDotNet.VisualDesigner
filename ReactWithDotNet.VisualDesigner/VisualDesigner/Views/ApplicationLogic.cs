@@ -411,9 +411,9 @@ static class ApplicationLogic
         return None;
     }
 
-    public static Task<Result> RollbackComponent(ApplicationState state)
+    public static async Task<Result<ApplicationState>> RollbackComponent(ApplicationState state)
     {
-        return DbOperation(async db =>
+        return await DbOperation<Result<ApplicationState>>(async db =>
         {
             ComponentEntity component;
             ComponentWorkspace userVersion;
@@ -430,13 +430,13 @@ static class ApplicationLogic
 
             if (userVersion is null)
             {
-                return Fail($"User ({state.UserName}) has no change to rollback.");
+                return new Exception($"User ({state.UserName}) has no change to rollback.");
             }
 
             // Check if the user version is the same as the main version
             if (component.RootElementAsYaml == SerializeToYaml(state.ComponentRootElement))
             {
-                return Fail($"User ({state.UserName}) has no change to rollback.");
+                return new Exception($"User ({state.UserName}) has no change to rollback.");
             }
 
             await db.InsertAsync(new ComponentHistoryEntity
@@ -453,7 +453,7 @@ static class ApplicationLogic
 
             await db.DeleteAsync(userVersion);
 
-            return Success;
+            return state;
         });
     }
 
