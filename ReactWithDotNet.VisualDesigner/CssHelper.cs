@@ -1213,7 +1213,7 @@ public static class CssHelper
         return new ArgumentOutOfRangeException($"{pseudoName} not recognized");
     }
 
-    static HtmlStyle ToHtmlStyle(ProjectConfig project, string name, string value)
+    static Result<IReadOnlyDictionary<string, string>> ToHtmlStyle(ProjectConfig project, string name, string value)
     {
         ArgumentNullException.ThrowIfNull(name);
 
@@ -1293,7 +1293,7 @@ public static class CssHelper
                     value = valueAsDouble.AsPixel();
                 }
 
-                return (name, value);
+                return asDictionary((name, value));
             }
 
             // S A M E
@@ -1330,7 +1330,7 @@ public static class CssHelper
             case "visibility":
             case "user-select":
             {
-                return (name, value);
+                return asDictionary((name, value));
             }
 
             case "border-top":
@@ -1353,7 +1353,7 @@ public static class CssHelper
                     value = string.Join(" ", parts);
                 }
 
-                return (name, value);
+                return asDictionary((name, value));
             }
 
             // m u l t i p l e
@@ -1364,7 +1364,7 @@ public static class CssHelper
                     value = valueAsDouble.AsPixel();
                 }
 
-                return new[] { ("padding-left", value), ("padding-right", value) };
+                return asDictionary(("padding-left", value), ("padding-right", value) );
             }
             case "py":
             {
@@ -1373,7 +1373,7 @@ public static class CssHelper
                     value = valueAsDouble.AsPixel();
                 }
 
-                return new[] { ("padding-top", value), ("padding-bottom", value) };
+                return asDictionary(("padding-top", value), ("padding-bottom", value) );
             }
             case "size":
             {
@@ -1382,7 +1382,7 @@ public static class CssHelper
                     value = valueAsDouble.AsPixel();
                 }
 
-                return new[] { ("width", value), ("height", value) };
+                return asDictionary( ("width", value), ("height", value) );
             }
 
             // c o l o r s
@@ -1395,7 +1395,7 @@ public static class CssHelper
                     value = realColor;
                 }
 
-                return (name, value);
+                return asDictionary((name, value));
             }
 
             // SPECIAL
@@ -1406,8 +1406,10 @@ public static class CssHelper
                     value = valueAsDouble + "deg";
                 }
 
-                return (name, value);
+                return asDictionary((name, value));
             }
+
+                
         }
 
         return new Exception($"{name}: {value} is not recognized");
@@ -1438,6 +1440,13 @@ public static class CssHelper
                 return None;
             }
         }
+        
+        static Dictionary<string, string> asDictionary(params (string Name, string Value)[] items)
+        {
+            return items.ToDictionary(x => x.Name, x => x.Value);
+        }
+        
+        
     }
 
     static Maybe<(string Pseudo, string NewText)> TryReadPseudo(string text)
@@ -1636,35 +1645,3 @@ public sealed record DesignerStyleItem
     }
 }
 
-public sealed class HtmlStyle : Result<Dictionary<string, string>>
-{
-    public static implicit operator HtmlStyle((string Name, string Value) item)
-    {
-        return new()
-        {
-            Success = true,
-            Value = new()
-            {
-                [item.Name] = item.Value
-            }
-        };
-    }
-
-    public static implicit operator HtmlStyle((string Name, string Value)[] items)
-    {
-        return new()
-        {
-            Success = true,
-            Value   = items.ToDictionary(x => x.Name, x => x.Value)
-        };
-    }
-
-    public static implicit operator HtmlStyle(Exception exception)
-    {
-        return new()
-        {
-            Success = false,
-            Error   = exception
-        };
-    }
-}
