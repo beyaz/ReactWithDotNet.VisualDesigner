@@ -590,34 +590,34 @@ sealed class ApplicationView : Component<ApplicationState>
 
     async Task OnDeleteSelectedComponentClicked(MouseEvent e)
     {
-        await DbOperation(async db =>
+        var component = await Store.TryGetComponent(state.ComponentId);
+        if (component is null)
         {
-            var component = await Store.TryGetComponent(state.ComponentId);
-            if (component is not null)
-            {
-                // validate other users working on component
-                {
-                    var workingUserNames = (await Store.GetComponentWorkspaces(component.Id)).Select(x => x.UserName).ToList();
+            this.FailNotification("ComponentNotFound");
+            return;
+        }
+       
+        // validate other users working on component
+        {
+            var workingUserNames = (await Store.GetComponentWorkspaces(component.Id)).Select(x => x.UserName).ToList();
                 
-                    if (workingUserNames.Any())
-                    {
-                        this.FailNotification($"Users working on component. They should commit or rollback the component.{string.Join(", ", workingUserNames)}");
-                        return;
-                    }
-                }
-               
-                await Store.Insert(new ComponentHistoryEntity
-                {
-                    ComponentId                = component.Id,
-                    ComponentRootElementAsYaml = component.RootElementAsYaml,
-                    ConfigAsYaml               = component.ConfigAsYaml,
-                    InsertTime                 = DateTime.Now,
-                    UserName                   = state.UserName
-                });
-
-                await db.DeleteAsync(component);
+            if (workingUserNames.Any())
+            {
+                this.FailNotification($"Users working on component. They should commit or rollback the component.{string.Join(", ", workingUserNames)}");
+                return;
             }
+        }
+               
+        await Store.Insert(new ComponentHistoryEntity
+        {
+            ComponentId                = component.Id,
+            ComponentRootElementAsYaml = component.RootElementAsYaml,
+            ConfigAsYaml               = component.ConfigAsYaml,
+            InsertTime                 = DateTime.Now,
+            UserName                   = state.UserName
         });
+
+        await Store.Delete(component);
 
         Cache.Clear();
 

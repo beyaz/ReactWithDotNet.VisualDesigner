@@ -7,6 +7,11 @@ static class Store
         return (long)await DbOperation(db => db.InsertAsync(entity));
     }
     
+    public static Task Delete(ComponentEntity entity)
+    {
+        return DbOperation(db => db.DeleteAsync(entity));
+    }
+    
     public static Task Insert(ComponentHistoryEntity entity)
     {
         return DbOperation(db => db.InsertAsync(entity));
