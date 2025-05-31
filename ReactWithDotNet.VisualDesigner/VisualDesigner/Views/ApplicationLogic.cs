@@ -5,7 +5,7 @@ namespace ReactWithDotNet.VisualDesigner.Views;
 
 static class ApplicationLogic
 {
-    public static readonly CachedObjectMap Cache = new() { Timeout = TimeSpan.FromMinutes(5) };
+   
 
     public static IReadOnlyList<ProjectEntity> GetAllProjectsCached()
     {

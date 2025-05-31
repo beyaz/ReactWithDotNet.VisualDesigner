@@ -5,6 +5,8 @@ namespace ReactWithDotNet.VisualDesigner;
 
 static class Extensions
 {
+    public static readonly CachedObjectMap Cache = new() { Timeout = TimeSpan.FromMinutes(5) };
+    
     public class IO
     {
         public static async Task<Result<string>> TryReadFile(string filePath)
