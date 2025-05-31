@@ -1,5 +1,4 @@
 ﻿using System.Collections.Immutable;
-using System.Data;
 using System.IO;
 using System.Reflection;
 using ReactWithDotNet.VisualDesigner.DataAccess;
@@ -82,26 +81,6 @@ static class ApplicationLogic
                                                        (await db.SelectAsync<ComponentEntity>(x => x.ProjectId == projectId))
                                                        .Select(c => c.Name)
                                                        .ToImmutableList()));
-    }
-
-    public static async Task<Result<ComponentEntity>> GetComponentByComponentName_NotNull(this IDbConnection db, string componentName)
-    {
-        if (componentName.HasNoValue())
-        {
-            return new ArgumentException($"ComponentName: {componentName} is not valid");
-        }
-
-        var query =
-            from record in await db.SelectAsync<ComponentEntity>(x => x.Name == componentName)
-            select record;
-
-        var component = query.FirstOrDefault();
-        if (component is null)
-        {
-            return new IOException($"ComponentName ({componentName}) is not found");
-        }
-
-        return component;
     }
 
     public static Task<Result<VisualElementModel>> GetComponenUserOrMainVersionAsync(int componentId, string userName)
