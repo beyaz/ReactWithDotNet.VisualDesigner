@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.ComponentModel;
+using System.Text;
 using ReactWithDotNet.ThirdPartyLibraries.MonacoEditorReact;
 using ReactWithDotNet.VisualDesigner.Exporters;
 using static ReactWithDotNet.VisualDesigner.ComponentEntityExtensions;
@@ -176,7 +177,7 @@ sealed class ApplicationView : Component<ApplicationState>
     // todo: redesign
     static async Task<Result<string>> UpdateComponentConfig(int componentId, string componentConfigAsYamlNewValue, string userName)
     {
-        var component = await DbOperation(db => db.FirstOrDefaultAsync<ComponentEntity>(x => x.Id == componentId));
+        var component = await Store.TryGetComponent(componentId);
         if (component is null)
         {
             return new Exception("ComponentNotFound");
@@ -347,7 +348,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
     async Task ChangeSelectedComponent(int componentId, ComponentEntity component)
     {
-        component ??= await DbOperation(db => db.FirstOrDefaultAsync<ComponentEntity>(x => x.Id == componentId));
+        component ??= await Store.TryGetComponent(componentId);
 
         VisualElementModel componentRootElement;
         {
@@ -592,7 +593,7 @@ sealed class ApplicationView : Component<ApplicationState>
     {
         await DbOperation(async db =>
         {
-            var component = await db.FirstOrDefaultAsync<ComponentEntity>(x => x.Id == state.ComponentId);
+            var component = await Store.TryGetComponent(state.ComponentId);
             if (component is not null)
             {
                 var componentWorkspace = await db.FirstOrDefaultAsync<ComponentWorkspace>(x => x.ComponentId == component.Id);
@@ -1418,7 +1419,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
             foreach (var componentId in TryReadTagAsDesignerComponentId(visualElementModel))
             {
-                var component = await DbOperation(db => db.FirstOrDefaultAsync<ComponentEntity>(x => x.Id == componentId));
+                var component = await Store.TryGetComponent(componentId);
                 if (component is null)
                 {
                     return new div { $"ComponentNotFound.{componentId}" };

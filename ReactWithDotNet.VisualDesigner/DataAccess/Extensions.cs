@@ -1,4 +1,5 @@
 ﻿global using static ReactWithDotNet.VisualDesigner.DataAccess.Extensions;
+using System.ComponentModel;
 using System.IO;
 
 namespace ReactWithDotNet.VisualDesigner.DataAccess;
@@ -35,7 +36,7 @@ static class Extensions
         {
             return new GetComponentDataOutput
             {
-                Component        = await db.FirstOrDefaultAsync<ComponentEntity>(x => x.Id == input.ComponentId),
+                Component        = await Store.TryGetComponent(input.ComponentId),
                 WorkspaceVersion = await db.FirstOrDefaultAsync<ComponentWorkspace>(x => x.ComponentId == input.ComponentId && x.UserName == input.UserName)
             };
         });
