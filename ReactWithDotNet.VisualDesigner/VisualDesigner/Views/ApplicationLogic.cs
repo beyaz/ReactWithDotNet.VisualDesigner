@@ -469,7 +469,7 @@ static class ApplicationLogic
         return None;
     }
 
-    public static Task<Result> TrySaveComponentForUser(Store defaultStore, ApplicationState state)
+    public static Task<Result> TrySaveComponentForUser(Store store, ApplicationState state)
     {
         var componentId = state.ComponentId;
 
@@ -519,7 +519,7 @@ static class ApplicationLogic
         });
     }
 
-    public static Task UpdateLastUsageInfo(Store store, ApplicationState state)
+    public static async Task UpdateLastUsageInfo(Store store, ApplicationState state)
     {
         var projectId = state.ProjectId;
 
@@ -527,33 +527,30 @@ static class ApplicationLogic
 
         if (projectId <= 0 || userName.HasNoValue())
         {
-            return Task.FromResult(Success);
+            return;
         }
 
-        return DbOperation(async db =>
+        var user = await store.TryGetUser(projectId, userName);
+        if (user is not null)
         {
-            var dbRecord = await db.FirstOrDefaultAsync<UserEntity>(x => x.ProjectId == projectId && x.UserName == userName);
-            if (dbRecord is not null)
+            if (user.LastStateAsYaml != SerializeToYaml(state))
             {
-                if (dbRecord.LastStateAsYaml != SerializeToYaml(state))
+                await store.Update(user with
                 {
-                    await db.UpdateAsync(dbRecord with
-                    {
-                        LastAccessTime = DateTime.Now,
-                        LastStateAsYaml = SerializeToYaml(state)
-                    });
-                }
-
-                return;
+                    LastAccessTime = DateTime.Now,
+                    LastStateAsYaml = SerializeToYaml(state)
+                });
             }
 
-            await db.InsertAsync(new UserEntity
-            {
-                UserName        = userName,
-                ProjectId       = projectId,
-                LastAccessTime  = DateTime.Now,
-                LastStateAsYaml = SerializeToYaml(state)
-            });
+            return;
+        }
+
+        await store.Insert(new UserEntity
+        {
+            UserName        = userName,
+            ProjectId       = projectId,
+            LastAccessTime  = DateTime.Now,
+            LastStateAsYaml = SerializeToYaml(state)
         });
     }
 }

@@ -7,7 +7,12 @@ sealed record Store
         return (long)await DbOperation(db => db.InsertAsync(entity));
     }
     
-    public async Task<UserEntity> TryGetUserEntity(int projectId, string userName)
+    public async Task<bool> Update(UserEntity entity)
+    {
+        return await DbOperation(db => db.UpdateAsync(entity));
+    }
+    
+    public async Task<UserEntity> TryGetUser(int projectId, string userName)
     {
         return await DbOperation(db => db.FirstOrDefaultAsync<UserEntity>(x => x.ProjectId == projectId && x.UserName == userName));
     }
