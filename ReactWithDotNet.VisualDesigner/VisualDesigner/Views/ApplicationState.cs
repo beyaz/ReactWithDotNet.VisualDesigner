@@ -21,7 +21,7 @@ public sealed record ApplicationSelectionState
       
     public string VisualElementTreeItemPath { get; init; }
     
-    public string VisualElementTreeItemPathHover { get; set; }
+    public string VisualElementTreeItemPathHover { get; init; }
     
     public int? SelectedStyleIndex { get; init; }
     

@@ -934,7 +934,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
             TreeItemHover = treeItemPath =>
             {
-                state.Selection.VisualElementTreeItemPathHover = treeItemPath;
+                state.Selection = state.Selection with { VisualElementTreeItemPathHover = treeItemPath };
 
                 return Task.CompletedTask;
             },
@@ -946,7 +946,7 @@ sealed class ApplicationView : Component<ApplicationState>
             },
             MouseLeave = () =>
             {
-                state.Selection.VisualElementTreeItemPathHover = null;
+                state.Selection = state.Selection with { VisualElementTreeItemPathHover = null };
                 return Task.CompletedTask;
             },
             SelectionChanged = treeItemPath =>
