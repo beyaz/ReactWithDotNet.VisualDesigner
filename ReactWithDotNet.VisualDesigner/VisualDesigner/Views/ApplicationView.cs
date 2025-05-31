@@ -1551,7 +1551,7 @@ sealed class ApplicationView : Component<ApplicationState>
                             SelectedStyleIndex = styleIndex
                         };
 
-                        var id = "style_editor";
+                        const string id = "style_editor";
 
                         // calculate js code for focus to input editor
                         {
