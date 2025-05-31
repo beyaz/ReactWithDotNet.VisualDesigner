@@ -45,7 +45,7 @@ public sealed record ApplicationState
     
     public bool IsProjectSettingsPopupVisible { get; init; }
     
-    public required ApplicationSelectionState Selection { get; init; }
+    public required ApplicationSelectionState Selection { get; set; }
     
     public string UserName { get; init; }
     

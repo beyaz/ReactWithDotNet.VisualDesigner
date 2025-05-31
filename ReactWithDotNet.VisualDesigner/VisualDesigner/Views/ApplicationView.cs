@@ -1287,7 +1287,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
                 OnClick(_ =>
                 {
-                    state.IsProjectSettingsPopupVisible = !state.IsProjectSettingsPopupVisible;
+                    state = state with { IsProjectSettingsPopupVisible = !state.IsProjectSettingsPopupVisible };
 
                     return Task.CompletedTask;
                 }),
@@ -1333,7 +1333,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
                             await ChangeSelectedComponent(newDbRecord.Id);
 
-                            state.IsProjectSettingsPopupVisible = false;
+                            state = state with { IsProjectSettingsPopupVisible = false };
                         }
                     }
                 } : null
