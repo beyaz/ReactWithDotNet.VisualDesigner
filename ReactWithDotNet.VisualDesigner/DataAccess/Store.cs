@@ -56,4 +56,9 @@ static class Store
     {
         return await DbOperation(db => db.FirstOrDefaultAsync<ProjectEntity>(x => x.Id == projectId));
     }
+    
+    public static Task<IEnumerable<ProjectEntity>> GetAllProjects()
+    {
+        return DbOperation(connection => connection.GetAllAsync<ProjectEntity>());
+    }
 }
