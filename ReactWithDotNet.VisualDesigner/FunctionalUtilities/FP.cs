@@ -30,8 +30,7 @@ public sealed record Result
     }
 }
 
-// todo: make record
-public class Result<TValue>: IEnumerable<TValue>
+public sealed record Result<TValue>: IEnumerable<TValue>
 {
     public Exception Error { get; init; }
 
