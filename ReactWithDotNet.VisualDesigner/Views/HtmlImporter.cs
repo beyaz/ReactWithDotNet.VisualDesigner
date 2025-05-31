@@ -12,7 +12,7 @@ static class HtmlImporter
             return false;
         }
 
-        if (html.StartsWith("<") && html.EndsWith(">") && html.Length > 4)
+        if (html.StartsWith('<') && html.EndsWith('>') && html.Length > 4)
         {
             return true;
         }
