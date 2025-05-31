@@ -228,7 +228,6 @@ sealed class ApplicationView : Component<ApplicationState>
             await DbOperation(db => db.InsertAsync(new ComponentHistoryEntity
             {
                 ComponentId                = component.Id,
-                ComponentName              = component.Name,
                 ConfigAsYaml               = component.ConfigAsYaml,
                 ComponentRootElementAsYaml = component.RootElementAsYaml,
                 InsertTime                 = DateTime.Now,
@@ -605,7 +604,6 @@ sealed class ApplicationView : Component<ApplicationState>
                 await db.InsertAsync(new ComponentHistoryEntity
                 {
                     ComponentId                = component.Id,
-                    ComponentName              = component.Name,
                     ComponentRootElementAsYaml = component.RootElementAsYaml,
                     ConfigAsYaml               = component.ConfigAsYaml,
                     InsertTime                 = DateTime.Now,

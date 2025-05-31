@@ -56,7 +56,7 @@ static class ApplicationLogic
             await db.InsertAsync(new ComponentHistoryEntity
             {
                 ComponentId                = component.Id,
-                ComponentName              = component.Name,
+                ConfigAsYaml             = component.ConfigAsYaml,
                 ComponentRootElementAsYaml = component.RootElementAsYaml,
                 UserName                   = state.UserName,
                 InsertTime                 = DateTime.Now
@@ -442,7 +442,7 @@ static class ApplicationLogic
             await db.InsertAsync(new ComponentHistoryEntity
             {
                 ComponentId                = component.Id,
-                ComponentName              = component.Name,
+                ConfigAsYaml              = component.ConfigAsYaml,
                 ComponentRootElementAsYaml = SerializeToYaml(state.ComponentRootElement),
                 InsertTime                 = DateTime.Now,
                 UserName                   = state.UserName
