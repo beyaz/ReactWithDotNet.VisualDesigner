@@ -11,9 +11,9 @@ public class ApplicationStateSaveService : BackgroundService
         {
             foreach (var (_, state) in ApplicationStateCache)
             {
-                await UpdateLastUsageInfo(state);
+                await UpdateLastUsageInfo(DefaultStore,state);
 
-                await TrySaveComponentForUser(state);
+                await TrySaveComponentForUser(DefaultStore,state);
             }
 
             await Task.Delay(TimeSpan.FromSeconds(2), stoppingToken);

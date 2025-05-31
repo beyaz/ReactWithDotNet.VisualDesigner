@@ -1,12 +1,14 @@
 ﻿using System.Globalization;
 using System.IO;
+using ReactWithDotNet.VisualDesigner.DataAccess;
 
 namespace ReactWithDotNet.VisualDesigner;
 
 static class Extensions
 {
     
-    
+    public static Store DefaultStore { get; } = new ();
+
     public class IO
     {
         public static async Task<Result<string>> TryReadFile(string filePath)

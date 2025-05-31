@@ -469,7 +469,7 @@ static class ApplicationLogic
         return None;
     }
 
-    public static Task<Result> TrySaveComponentForUser(ApplicationState state)
+    public static Task<Result> TrySaveComponentForUser(Store defaultStore, ApplicationState state)
     {
         var componentId = state.ComponentId;
 
@@ -519,7 +519,7 @@ static class ApplicationLogic
         });
     }
 
-    public static Task UpdateLastUsageInfo(ApplicationState state)
+    public static Task UpdateLastUsageInfo(Store store, ApplicationState state)
     {
         var projectId = state.ProjectId;
 
