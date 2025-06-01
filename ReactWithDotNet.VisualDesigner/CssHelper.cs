@@ -507,7 +507,6 @@ public static class CssHelper
                     foreach (var (width, style, color) in TryParseBorderCss(cssAttributeValue))
                     {
                         var (isNamedColor, namedColor) = tryResolveColorName(project, color);
-                        
 
                         var items = new List<string>();
                         if (width == "1px")
