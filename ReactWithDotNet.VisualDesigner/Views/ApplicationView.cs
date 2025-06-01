@@ -947,18 +947,6 @@ sealed class ApplicationView : Component<ApplicationState>
 
     Element PartLeftPanel()
     {
-        var componentNameEditor = new input
-        {
-            type     = "text",
-            value    = GetComponentName(state.ProjectId, state.ComponentId),
-            disabled = true,
-            style =
-            {
-                FlexGrow(1),
-                Focus(OutlineNone)
-            }
-        };
-
         var removeIconInLayersTab = CreateIcon(Icon.remove, 16);
         if (state.Selection.VisualElementTreeItemPath.HasValue())
         {
@@ -1244,7 +1232,7 @@ sealed class ApplicationView : Component<ApplicationState>
             {
                 new IconDelete() + Size(16) + Color(Theme.text_primary) + Hover(Color(Blue300)) + OnClick(OnDeleteSelectedComponentClicked),
 
-                componentNameEditor
+                GetComponentName(state.ProjectId, state.ComponentId)
             },
 
             tabButtons,
