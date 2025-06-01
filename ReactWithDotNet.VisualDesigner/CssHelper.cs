@@ -543,9 +543,10 @@ public static class CssHelper
                 case "background":
                 case "bg":
                 {
-                    if (project.Colors.TryGetValue(cssAttributeValue, out var htmlColor))
+                    var (isNamedColor, namedColor) = tryResolveColorName(project, cssAttributeValue);
+                    if (isNamedColor)
                     {
-                        cssAttributeValue = htmlColor;
+                        return $"bg-{namedColor}";
                     }
 
                     return $"bg-[{cssAttributeValue.Replace(" ", "")}]";
