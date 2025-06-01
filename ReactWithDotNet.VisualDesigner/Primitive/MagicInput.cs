@@ -105,6 +105,8 @@ sealed class MagicInput : Component<MagicInput.State>
             InitialValue = Value,
 
             Value = Value,
+            
+            IgnoreTypingFinishedEvent = state?.IgnoreTypingFinishedEvent ?? false,
 
             FilteredSuggestions = Suggestions ?? []
         };
@@ -190,6 +192,8 @@ sealed class MagicInput : Component<MagicInput.State>
         {
             state.ShowSuggestions = false;
 
+            state.IgnoreTypingFinishedEvent = true;
+
             if (state.SelectedSuggestionOffset is null)
             {
                 if (state.Value.HasValue() && state.Value.Trim() != Value?.Trim())
@@ -240,6 +244,12 @@ sealed class MagicInput : Component<MagicInput.State>
 
     Task OnTypingFinished()
     {
+        if (state.IgnoreTypingFinishedEvent)
+        {
+            state.IgnoreTypingFinishedEvent = false;
+            return Task.CompletedTask;
+        }
+        
         state.ShowSuggestions = true;
 
         state.SelectedSuggestionOffset = null;
@@ -314,5 +324,7 @@ sealed class MagicInput : Component<MagicInput.State>
         public bool ShowSuggestions { get; set; }
 
         public string Value { get; set; }
+        
+        public bool IgnoreTypingFinishedEvent { get; set; }
     }
 }
