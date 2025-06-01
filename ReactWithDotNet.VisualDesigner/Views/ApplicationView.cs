@@ -909,13 +909,6 @@ sealed class ApplicationView : Component<ApplicationState>
                         },
                         new FlexRowCentered(Padding(4), Border(1, solid, transparent))
                         {
-                            "Project",
-                            OnClick(OnMainContentTabHeaderClicked),
-                            Id((int)MainContentTabs.ProjectConfig),
-                            When(state.MainContentTab == MainContentTabs.ProjectConfig, BorderRadius(4), Border(1, solid, Theme.BorderColor))
-                        },
-                        new FlexRowCentered(Padding(4), Border(1, solid, transparent))
-                        {
                             "Import Html",
                             OnClick(OnMainContentTabHeaderClicked),
                             Id((int)MainContentTabs.ImportHtml),
@@ -927,6 +920,13 @@ sealed class ApplicationView : Component<ApplicationState>
                             OnClick(OnMainContentTabHeaderClicked),
                             Id((int)MainContentTabs.ComponentConfig),
                             When(state.MainContentTab.In(MainContentTabs.ComponentConfig, MainContentTabs.NewComponentConfig), BorderRadius(4), Border(1, solid, Theme.BorderColor))
+                        },
+                        new FlexRowCentered(Padding(4), Border(1, solid, transparent))
+                        {
+                            "Project",
+                            OnClick(OnMainContentTabHeaderClicked),
+                            Id((int)MainContentTabs.ProjectConfig),
+                            When(state.MainContentTab == MainContentTabs.ProjectConfig, BorderRadius(4), Border(1, solid, Theme.BorderColor))
                         }
                     }
                 }
