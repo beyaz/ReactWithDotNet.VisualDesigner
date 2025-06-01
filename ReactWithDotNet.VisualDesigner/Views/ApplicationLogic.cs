@@ -216,13 +216,9 @@ static class ApplicationLogic
         foreach (var number in new[]{2,4,6,8,10,12,16,20,24,28,32,36,40})
         {
             items.Add($"gap: {number}");
+            items.Add($"border-radius: {number}");
         }
         
-        for (var i = 1; i <= 100; i++)
-        {
-            items.Add($"border-radius: {i}");
-        }
-
         items.Add("flex-row-centered");
         items.Add("flex-col-centered");
 
