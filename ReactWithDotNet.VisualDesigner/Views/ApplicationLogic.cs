@@ -250,6 +250,7 @@ static class ApplicationLogic
         foreach (var colorName in project.Colors.Select(x => x.Key))
         {
             items.Add("bg: " + colorName);
+            items.Add("background: " + colorName);
         }
 
         // w
