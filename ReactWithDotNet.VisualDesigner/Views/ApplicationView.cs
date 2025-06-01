@@ -312,6 +312,8 @@ sealed class ApplicationView : Component<ApplicationState>
 
             ComponentRootElement = componentRootElement,
 
+            LeftTab = state.LeftTab,
+                
             Selection = new(),
 
             StyleItemDragDrop    = new(),
@@ -320,7 +322,10 @@ sealed class ApplicationView : Component<ApplicationState>
 
         if (state.ComponentRootElement is not null)
         {
-            state = state with { Selection = state.Selection with { VisualElementTreeItemPath = "0" } };
+            state = state with
+            {
+                Selection = state.Selection with { VisualElementTreeItemPath = "0" }
+            };
         }
     }
 
@@ -1239,9 +1244,8 @@ sealed class ApplicationView : Component<ApplicationState>
 
             new FlexColumn(WidthFull, Flex(1), OverflowAuto)
             {
-                elementTree,
-
-                componentTree
+                componentTree,
+                elementTree
             }
         };
     }
