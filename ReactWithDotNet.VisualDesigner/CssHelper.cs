@@ -506,28 +506,7 @@ public static class CssHelper
                 {
                     foreach (var (width, style, color) in TryParseBorderCss(cssAttributeValue))
                     {
-                        bool isNamedColor;
-                        string namedColor = null;
-                        {
-                            isNamedColor = project.Colors.TryGetValue(color, out _);
-                            if (isNamedColor)
-                            {
-                                namedColor = color;    
-                            }
-                            else
-                            {
-                                foreach (var (name, htmlColor) in project.Colors)
-                                {
-                                    if (htmlColor == color)
-                                    {
-                                        isNamedColor = true;
-                                        namedColor   = name;
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                        
+                        var (isNamedColor, namedColor) = tryResolveColorName(project, color);
                         
 
                         var items = new List<string>();
@@ -720,6 +699,33 @@ public static class CssHelper
 
                     return None;
                 });
+            }
+
+            static (bool isNamedColor, string namedColor) tryResolveColorName(ProjectConfig project, string color)
+            {
+                bool isNamedColor;
+                string namedColor = null;
+                {
+                    isNamedColor = project.Colors.TryGetValue(color, out _);
+                    if (isNamedColor)
+                    {
+                        namedColor = color;    
+                    }
+                    else
+                    {
+                        foreach (var (name, htmlColor) in project.Colors)
+                        {
+                            if (htmlColor == color)
+                            {
+                                isNamedColor = true;
+                                namedColor   = name;
+                                break;
+                            }
+                        }
+                    }
+                }
+                
+                return (isNamedColor, namedColor);
             }
         }
     }
