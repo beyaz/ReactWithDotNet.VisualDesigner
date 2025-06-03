@@ -1107,10 +1107,19 @@ sealed class ApplicationView : Component<ApplicationState>
 
                 if (isTryingToMakeRoot)
                 {
+                    var rootNode = sourceNodeParent.Children[sourceNodeIndex];
+                    
+                    sourceNodeParent.Children.RemoveAt(sourceNodeIndex);
+
+                    rootNode.Children.Add(state.ComponentRootElement);
+                    
                     state = state with
                     {
-                        ComponentRootElement = sourceNodeParent.Children[sourceNodeIndex],
-                        Selection = new()
+                        ComponentRootElement = rootNode,
+                        Selection = new ApplicationSelectionState
+                        {
+                             VisualElementTreeItemPath = "0"
+                        }
                     };
 
                     return Task.CompletedTask;
