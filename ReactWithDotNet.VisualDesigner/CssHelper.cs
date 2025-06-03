@@ -286,6 +286,16 @@ public static class CssHelper
                     {
                         return "transform -translate-y-1/2";
                     }
+                    
+                    if (cssAttributeValue == "translateX(50%)")
+                    {
+                        return "transform translate-x-1/2";
+                    }
+
+                    if (cssAttributeValue == "translateX(-50%)")
+                    {
+                        return "transform -translate-x-1/2";
+                    }
 
                     break;
                 }
