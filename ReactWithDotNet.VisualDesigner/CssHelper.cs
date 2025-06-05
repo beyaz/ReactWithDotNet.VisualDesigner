@@ -379,6 +379,14 @@ public static class CssHelper
                         "1" => "grow",
                         _   => $"flex-grow-[{cssAttributeValue}]"
                     };
+                case "flex-shrink":
+                    return cssAttributeValue switch
+                    {
+                        "0" => "flex-shrink-0",
+                        "1" => "flex-shrink-1",
+                        _   => $"flex-shrink-[{cssAttributeValue}]"
+                    };
+                    
 
                 case "flex-wrap":
                 {
@@ -1347,6 +1355,7 @@ public static class CssHelper
             case "white-space":
             case "visibility":
             case "user-select":
+            case "flex-shrink":
             {
                 return asDictionary((name, value));
             }
