@@ -10,6 +10,8 @@ sealed record DatabaseConfig
     public bool IsSQLite { get; init; }
     
     public bool IsSQLServer { get; init; }
+
+    public bool IsMySQL { get; init; }
     
     public string ConnectionString { get; init; }
     
