@@ -16,8 +16,6 @@ sealed record DatabaseConfig
     public string ConnectionString { get; init; }
     
     public string SchemaName { get; init; }
-    
-    public string TableCreations { get; init; }
 }
 
 sealed record ConfigModel
