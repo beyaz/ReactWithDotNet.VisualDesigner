@@ -27,6 +27,8 @@ sealed record ConfigModel
     
     public string SchemaName { get; init; }
     
+    public string SqlServerTableCreations { get; init; }
+    
     // @formatter:on
 }
 
