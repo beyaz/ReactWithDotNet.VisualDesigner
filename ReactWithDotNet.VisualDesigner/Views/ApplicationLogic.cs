@@ -46,6 +46,8 @@ static class ApplicationLogic
         // Check if the user version is the same as the main version
         if (component.RootElementAsYaml == SerializeToYaml(state.ComponentRootElement))
         {
+            await Store.Delete(userVersion);
+            
             return Fail($"User ({state.UserName}) has no change to commit.");
         }
 
