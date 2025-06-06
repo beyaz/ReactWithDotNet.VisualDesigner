@@ -11,6 +11,11 @@ browserExeArguments: "--app=https://localhost:{Port}/"
 hideConsoleWindow: true
 nextAvailablePortFrom: 5005
 useUrls: true
-databaseTypeIsSqlServer: false
+
+# Database configuration for Sqlite
 databaseTypeIsSqlite: true
 databaseConnectionString: 'Data Source=C:\github\ReactWithDotNet.VisualDesigner\app.db'
+
+# # Database configuration for Sql Server
+databaseTypeIsSqlServer: false
+schemaName: 'RWD'

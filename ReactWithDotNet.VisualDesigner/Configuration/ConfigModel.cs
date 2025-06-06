@@ -25,6 +25,8 @@ sealed record ConfigModel
     
     public string DatabaseConnectionString { get; init; }
     
+    public string SchemaName { get; init; }
+    
     // @formatter:on
 }
 

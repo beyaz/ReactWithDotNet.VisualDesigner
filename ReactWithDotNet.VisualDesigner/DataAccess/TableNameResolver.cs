@@ -17,7 +17,11 @@ sealed class TableNameResolver : ITableNameResolver
 
         if (Config.DatabaseTypeIsSqlServer)
         {
-            return $"dbo.{tableName}";
+            if (Config.SchemaName is null)
+            {
+                throw new NotSupportedException("Database schemaName should be specify.");        
+            }
+            return $"{Config.SchemaName}.{tableName}";
         }
 
         throw new NotSupportedException("Database type is not supported.");
