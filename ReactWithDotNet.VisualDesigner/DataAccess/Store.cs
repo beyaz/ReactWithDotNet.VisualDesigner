@@ -5,6 +5,10 @@ namespace ReactWithDotNet.VisualDesigner.DataAccess;
 
 static class Store
 {
+    static Store()
+    {
+        DommelMapper.SetTableNameResolver(new TableNameResolver());
+    }
     public static Task Delete(ComponentEntity entity)
     {
         return DbOperation(db => db.DeleteAsync(entity));
@@ -107,7 +111,7 @@ static class Store
 
     static async Task<T> DbOperation<T>(Func<IDbConnection, Task<T>> operation)
     {
-        using IDbConnection connection = new SqliteConnection(Config.ConnectionString);
+        using IDbConnection connection = new SqliteConnection(Config.DatabaseConnectionString);
 
         return await operation(connection);
     }

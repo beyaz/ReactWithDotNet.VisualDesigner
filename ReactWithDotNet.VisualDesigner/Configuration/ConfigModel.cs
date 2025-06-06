@@ -19,7 +19,11 @@ sealed record ConfigModel
     
     public bool UseUrls { get; init; }
 
-    public string ConnectionString { get; init; }
+    public bool DatabaseTypeIsSqlite { get; init; }
+    
+    public bool DatabaseTypeIsSqlServer { get; init; }
+    
+    public string DatabaseConnectionString { get; init; }
     
     // @formatter:on
 }

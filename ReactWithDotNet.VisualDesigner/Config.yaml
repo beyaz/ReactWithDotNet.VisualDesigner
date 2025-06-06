@@ -11,4 +11,6 @@ browserExeArguments: "--app=https://localhost:{Port}/"
 hideConsoleWindow: true
 nextAvailablePortFrom: 5005
 useUrls: true
-connectionString: 'Data Source=C:\github\ReactWithDotNet.VisualDesigner\app.db'
+databaseTypeIsSqlServer: false
+databaseTypeIsSqlite: true
+databaseConnectionString: 'Data Source=C:\github\ReactWithDotNet.VisualDesigner\app.db'
