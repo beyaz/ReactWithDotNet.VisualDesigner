@@ -22,7 +22,7 @@ static class Store
 
     public static Task<IEnumerable<ProjectEntity>> GetAllProjects()
     {
-        return DbOperation(connection => connection.GetAllAsync<ProjectEntity>());
+        return DbOperation(db => db.GetAllAsync<ProjectEntity>());
     }
 
     public static Task<IEnumerable<ComponentWorkspace>> GetComponentWorkspaces(int componentId)
