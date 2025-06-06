@@ -20,7 +20,7 @@ static class ApplicationLogic
     
     public static string GetComponentName(int projectId, int componentId)
     {
-        return GetAllComponentsInProjectFromCache(projectId).FirstOrDefault(x => x.Id == componentId).GetName();
+        return GetAllComponentsInProjectFromCache(projectId).FirstOrDefault(x => x.Id == componentId)?.GetName();
     }
     
     public static async Task<Result> CommitComponent(ApplicationState state)
