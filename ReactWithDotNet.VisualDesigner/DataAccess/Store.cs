@@ -1,6 +1,7 @@
 ﻿using System.Data;
 using Microsoft.Data.SqlClient;
 using Microsoft.Data.Sqlite;
+using MySql.Data.MySqlClient;
 
 namespace ReactWithDotNet.VisualDesigner.DataAccess;
 
@@ -122,6 +123,13 @@ static class Store
         if (Config.Database.IsSQLServer)
         {
             using IDbConnection connection = new SqlConnection(Config.Database.ConnectionString);
+
+            return await operation(connection);    
+        }
+        
+        if (Config.Database.IsMySQL)
+        {
+            using IDbConnection connection = new MySqlConnection(Config.Database.ConnectionString);
 
             return await operation(connection);    
         }
