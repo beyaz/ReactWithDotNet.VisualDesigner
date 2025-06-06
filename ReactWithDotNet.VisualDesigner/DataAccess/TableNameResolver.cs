@@ -10,18 +10,18 @@ sealed class TableNameResolver : ITableNameResolver
         var tableAttr = type.GetCustomAttribute<TableAttribute>();
         var tableName = tableAttr?.Name ?? type.Name;
 
-        if (Config.DatabaseTypeIsSqlite)
+        if (Config.Database.IsSQLite)
         {
             return tableName;
         }
 
-        if (Config.DatabaseTypeIsSqlServer)
+        if (Config.Database.IsSQLServer)
         {
-            if (Config.SchemaName is null)
+            if (Config.Database.SchemaName is null)
             {
                 throw new NotSupportedException("Database schemaName should be specify.");        
             }
-            return $"{Config.SchemaName}.{tableName}";
+            return $"{Config.Database.SchemaName}.{tableName}";
         }
 
         throw new NotSupportedException("Database type is not supported.");

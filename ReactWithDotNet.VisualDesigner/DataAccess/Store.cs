@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using Microsoft.Data.SqlClient;
 using Microsoft.Data.Sqlite;
 
 namespace ReactWithDotNet.VisualDesigner.DataAccess;
@@ -111,8 +112,21 @@ static class Store
 
     static async Task<T> DbOperation<T>(Func<IDbConnection, Task<T>> operation)
     {
-        using IDbConnection connection = new SqliteConnection(Config.DatabaseConnectionString);
+        if (Config.Database.IsSQLite)
+        {
+            using IDbConnection connection = new SqliteConnection(Config.Database.ConnectionString);
 
-        return await operation(connection);
+            return await operation(connection);    
+        }
+        
+        if (Config.Database.IsSQLServer)
+        {
+            using IDbConnection connection = new SqlConnection(Config.Database.ConnectionString);
+
+            return await operation(connection);    
+        }
+        
+        throw new NotSupportedException("Database type is not supported.");
+
     }
 }

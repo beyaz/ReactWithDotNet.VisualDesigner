@@ -5,6 +5,19 @@ using System.Runtime.InteropServices;
 
 namespace ReactWithDotNet.VisualDesigner.Configuration;
 
+sealed record DatabaseConfig
+{
+    public bool IsSQLite { get; init; }
+    
+    public bool IsSQLServer { get; init; }
+    
+    public string ConnectionString { get; init; }
+    
+    public string SchemaName { get; init; }
+    
+    public string TableCreations { get; init; }
+}
+
 sealed record ConfigModel
 {
     // @formatter:off
@@ -19,15 +32,7 @@ sealed record ConfigModel
     
     public bool UseUrls { get; init; }
 
-    public bool DatabaseTypeIsSqlite { get; init; }
-    
-    public bool DatabaseTypeIsSqlServer { get; init; }
-    
-    public string DatabaseConnectionString { get; init; }
-    
-    public string SchemaName { get; init; }
-    
-    public string SqlServerTableCreations { get; init; }
+    public DatabaseConfig Database { get; init; }
     
     // @formatter:on
 }
