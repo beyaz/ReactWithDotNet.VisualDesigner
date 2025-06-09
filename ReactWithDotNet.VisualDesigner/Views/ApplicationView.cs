@@ -34,6 +34,19 @@ sealed class ApplicationView : Component<ApplicationState>
 
             state = state with { LeftTab = LeftTabs.ElementTree };
 
+            // try focus in element tree
+            {
+                var js = new StringBuilder();
+                
+                js.AppendLine($"const element = document.getElementById('{treeItemPath}');");
+                js.AppendLine("if(element)");
+                js.AppendLine("{");
+                js.AppendLine("    element.scrollIntoView({ behavior: 'smooth', block: 'center' });");
+                js.AppendLine("}");
+            
+                Client.RunJavascript(js.ToString());
+            }
+
             return Task.CompletedTask;
         });
 
