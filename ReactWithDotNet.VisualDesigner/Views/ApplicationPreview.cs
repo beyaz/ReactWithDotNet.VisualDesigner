@@ -336,12 +336,9 @@ sealed class ApplicationPreview : Component
             {
                 if (element.style.outline is null)
                 {
-                    // element.Add(Outline($"1px {dashed} {Blue300}"));
                     element.id = Guid.NewGuid().ToString("N");
 
-                    var jsCode = $"""
-                                 ReactWithDotNet.OnDocumentReady(()=> ReactWithDotNetHighlightElement(document.getElementById('{element.id}')));
-                                 """;
+                    var jsCode = $"ReactWithDotNet.OnDocumentReady(()=> ReactWithDotNetHighlightElement(document.getElementById('{element.id}')));";
                     context.Client.RunJavascript(jsCode);
                 }
             }
