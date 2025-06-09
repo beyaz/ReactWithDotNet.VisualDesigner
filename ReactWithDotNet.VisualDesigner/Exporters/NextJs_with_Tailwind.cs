@@ -401,6 +401,12 @@ static class NextJs_with_Tailwind
                 sb.Append($" {{{propertyValue}}}");
                 continue;
             }
+            
+            if (propertyName == nameof(HtmlElement.dangerouslySetInnerHTML))
+            {
+                sb.Append($" {propertyName}={{{{ __html: {propertyValue}  }}}}");
+                continue;
+            }
 
             if (IsStringValue(propertyValue))
             {
