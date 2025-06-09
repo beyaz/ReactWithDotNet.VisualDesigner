@@ -38,6 +38,7 @@ static class SyncHelper
         DommelMapper.SetTableNameResolver(new TableNameResolverForSqlServer());
 
         // upload
+        try
         {
             await target.InsertAllAsync(projects);
 
@@ -48,6 +49,11 @@ static class SyncHelper
             await target.InsertAllAsync(componentHistories);
 
             await target.InsertAllAsync(workspaces);
+        }
+        catch (Exception exception)
+        {
+            Console.WriteLine(exception);
+            throw;
         }
     }
 
