@@ -123,4 +123,9 @@ static class ComponentEntityExtensions
 
         return None;
     }
+    
+    public static IReadOnlyDictionary<string, string> GetConfig(this ComponentEntity componentEntity)
+    {
+        return DeserializeFromYaml<Dictionary<string, string>>(componentEntity.ConfigAsYaml);
+    }
 }

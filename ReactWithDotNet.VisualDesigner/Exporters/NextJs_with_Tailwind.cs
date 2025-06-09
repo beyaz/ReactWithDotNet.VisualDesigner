@@ -80,7 +80,7 @@ static class NextJs_with_Tailwind
 
         foreach (var component in components)
         {
-            if (component.GetName() == "HggImage")
+            if (component.GetConfig().TryGetValue("IsExportable", out var isExportable) && isExportable.Equals("False", StringComparison.OrdinalIgnoreCase))
             {
                 continue;
             }
