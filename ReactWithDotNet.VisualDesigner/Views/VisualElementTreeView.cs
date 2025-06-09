@@ -45,6 +45,16 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
     [CustomEvent]
     public OnTreeItemMove TreeItemMove { get; init; }
 
+    protected override Task OverrideStateFromPropsBeforeRender()
+    {
+        if (SelectedPath.HasValue())
+        {
+            state.CollapsedNodes.RemoveAll(path => path != SelectedPath && SelectedPath.StartsWith(path, StringComparison.OrdinalIgnoreCase));
+        }
+        
+        return Task.CompletedTask;
+    }
+
     protected override async Task<Element> renderAsync()
     {
         if (Model is null)
