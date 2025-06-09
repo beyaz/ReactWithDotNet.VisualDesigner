@@ -744,13 +744,21 @@ static class NextJs_with_Tailwind
         var firstReturnLineIndex = lines.FindIndex(componentDeclerationLineIndex, l => l == "    return (");
         if (firstReturnLineIndex < 0)
         {
-            return new InvalidOperationException("No return found");
+            firstReturnLineIndex = lines.FindIndex(componentDeclerationLineIndex, l => l == "  return (");
+            if (firstReturnLineIndex < 0)
+            {
+                return new InvalidOperationException("No return found");
+            }
         }
 
         var firstReturnCloseLineIndex = lines.FindIndex(firstReturnLineIndex, l => l == "    );");
         if (firstReturnCloseLineIndex < 0)
         {
-            return new InvalidOperationException("Return close not found");
+            firstReturnCloseLineIndex = lines.FindIndex(firstReturnLineIndex, l => l == "  );");
+            if (firstReturnCloseLineIndex < 0)
+            {
+                return new InvalidOperationException("Return close not found");
+            }
         }
 
         lines.RemoveRange(firstReturnLineIndex + 1, firstReturnCloseLineIndex - firstReturnLineIndex - 1);
