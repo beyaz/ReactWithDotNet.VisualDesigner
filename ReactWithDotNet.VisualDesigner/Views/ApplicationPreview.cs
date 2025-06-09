@@ -73,6 +73,7 @@ sealed class ApplicationPreview : Component
                 OnTreeItemClicked  = OnItemClick,
                 ReactContext       = Context,
                 HighlightedElement = highlightedElement,
+                Client = Client,
                 ParentModel        = null
             };
             var result = await renderElement(renderContext, rootElement, "0");
@@ -335,7 +336,13 @@ sealed class ApplicationPreview : Component
             {
                 if (element.style.outline is null)
                 {
-                    element.Add(Outline($"1px {dashed} {Blue300}"));
+                    // element.Add(Outline($"1px {dashed} {Blue300}"));
+                    element.id = Guid.NewGuid().ToString("N");
+
+                    var jsCode = $"""
+                                 ReactWithDotNet.OnDocumentReady(()=> ReactWithDotNetHighlightElement(document.getElementById('{element.id}')));
+                                 """;
+                    context.Client.RunJavascript(jsCode);
                 }
             }
 
@@ -477,5 +484,7 @@ sealed class ApplicationPreview : Component
         public required string UserName { get; init; }
         
         public ProjectConfig Project { get; init; }
+        
+        public Client Client { get; init; }
     }
 }
