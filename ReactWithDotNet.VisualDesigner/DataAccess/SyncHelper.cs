@@ -8,17 +8,22 @@ namespace ReactWithDotNet.VisualDesigner.DataAccess;
 
 static class SyncHelper
 {
-    public static void Run()
+    public static Task Run()
     {
-        Transfer_From_SQLite_to_SqlServer("Data Source=C:\\github\\ReactWithDotNet.VisualDesigner\\app.db",
-                                                     "Server=tcp:beyaz.database.windows.net,1433;Initial Catalog=ReactVisualDesigner;Persist Security Info=False;User ID=beyaz;Password=t5U7*n_5fHJ_r-yU;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;");
-        
+        const string sqliteConnection = "Data Source=C:\\github\\ReactWithDotNet.VisualDesigner\\app.db";
+
+        var sqlConnection = "Server=tcp:beyaz.database.windows.net,1433;Initial Catalog=ReactVisualDesigner;Persist Security Info=False;User ID=beyaz;Password=t5U7*n_5fHJ_r-yU;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;";
+
+        return Transfer_From_SQLite_to_SqlServer(sqliteConnection, sqlConnection);
     }
+
     public static async Task Transfer_From_SQLite_to_SqlServer(string sqliteConnection, string sqlConnection)
     {
         IDbConnection source = new SqliteConnection(sqliteConnection);
 
         IDbConnection target = new SqlConnection(sqlConnection);
+
+        // fetch
 
         var projects = await source.GetAllAsync<ProjectEntity>();
 
@@ -31,9 +36,9 @@ static class SyncHelper
         var workspaces = await source.GetAllAsync<ComponentWorkspace>();
 
         DommelMapper.SetTableNameResolver(new TableNameResolverForSqlServer());
-        try
+
+        // upload
         {
-            
             await target.InsertAllAsync(projects);
 
             await target.InsertAllAsync(components);
@@ -44,23 +49,16 @@ static class SyncHelper
 
             await target.InsertAllAsync(workspaces);
         }
-        catch (Exception e)
-        {
-            e.ToString();
-
-        }
     }
 
     class TableNameResolverForSqlServer : ITableNameResolver
     {
         public string ResolveTableName(Type type)
         {
-            
             var tableAttribute = type.GetCustomAttribute<TableAttribute>();
-        
+
             var tableName = tableAttribute?.Name ?? type.Name;
-            
-            
+
             return "RVD." + tableName;
         }
     }
