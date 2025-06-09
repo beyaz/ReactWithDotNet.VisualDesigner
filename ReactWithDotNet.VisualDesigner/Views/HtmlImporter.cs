@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Collections.Immutable;
+using System.Reflection;
 using HtmlAgilityPack;
 
 namespace ReactWithDotNet.VisualDesigner.Views;
@@ -130,7 +131,10 @@ static class HtmlImporter
                 var (map, _) = Style.ParseCssAsDictionary(attributeValue);
                 if (map != null)
                 {
-                    foreach (var item in tryMergeForShorthandDeclerations(map).Where(skipWordWrap).Where(skipJustifyContentFlexStart))
+                    map = tryConvertOutlineToBorder(map);
+                    map = tryMergeForShorthandDeclerations(map);
+                        
+                    foreach (var item in map.Where(skipWordWrap).Where(skipJustifyContentFlexStart))
                     {
                         model.Styles.Add(item.Key + ": " + item.Value);
                     }
@@ -249,6 +253,30 @@ static class HtmlImporter
 
             return true;
         }
+
+        IReadOnlyDictionary<string, string> tryConvertOutlineToBorder(IReadOnlyDictionary<string, string> htmlStyleAttributes)
+        {
+            if (htmlStyleAttributes.TryGetValue("outline", out var outline))
+            {
+                if (htmlStyleAttributes.TryGetValue("outline-offset", out var outlineOffset))
+                {
+                    if (outlineOffset == "-1px" && !htmlStyleAttributes.ContainsKey("border"))
+                    {
+                        var clone = htmlStyleAttributes.ToDictionary();
+                        
+                        clone.Remove("outline");
+                        clone.Remove("outline-offset");
+                        
+                        clone.Add("border", outline);
+
+                        return clone;
+                    }
+                }   
+            }
+
+            return htmlStyleAttributes;
+        }
+       
 
         static IReadOnlyDictionary<string, string> tryMergeForShorthandDeclerations(IReadOnlyDictionary<string, string> inlineStyleMap)
         {
