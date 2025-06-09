@@ -311,11 +311,19 @@ sealed class ApplicationPreview : Component
                             propertyInfo.SetValue(element, TryClearStringValue(value));
                             continue;
                         }
+                        
+                        if (propertyInfo.PropertyType == typeof(dangerouslySetInnerHTML))
+                        {
+                            propertyInfo.SetValue(element, new dangerouslySetInnerHTML(TryClearStringValue(value)));
+                            continue;
+                        }
 
                         if (propertyInfo.PropertyType == typeof(UnionProp<string, double>))
                         {
                             propertyInfo.SetValue(element, (UnionProp<string, double>)value);
                         }
+                        
+                        
                     }
                 }
             }
