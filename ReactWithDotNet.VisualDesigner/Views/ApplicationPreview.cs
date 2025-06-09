@@ -334,13 +334,11 @@ sealed class ApplicationPreview : Component
 
             if (context.HighlightedElement == model)
             {
-                if (element.style.outline is null)
-                {
-                    element.id = Guid.NewGuid().ToString("N");
+                element.id = Guid.NewGuid().ToString("N");
 
-                    var jsCode = $"ReactWithDotNet.OnDocumentReady(()=> ReactWithDotNetHighlightElement(document.getElementById('{element.id}')));";
-                    context.Client.RunJavascript(jsCode);
-                }
+                var jsCode = $"ReactWithDotNet.OnDocumentReady(()=> ReactWithDotNetHighlightElement(document.getElementById('{element.id}')));";
+                    
+                context.Client.RunJavascript(jsCode);
             }
 
             if (model.HasNoChild())
