@@ -8,7 +8,7 @@ namespace ReactWithDotNet.VisualDesigner.DataAccess;
 
 static class SyncHelper
 {
-    public static Task Run()
+    public static Task Transfer_From_SQLite_to_SqlServer()
     {
         const string sqliteConnection = "Data Source=C:\\github\\ReactWithDotNet.VisualDesigner\\app.db";
 
