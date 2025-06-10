@@ -1,7 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Data;
-using System.Data.Common;
 using System.Reflection;
 using Dapper;
 using Microsoft.Data.SqlClient;
@@ -38,14 +37,8 @@ static class SyncHelper
 
         var workspaces = await source.GetAllAsync<ComponentWorkspace>();
 
-      
+        resetDommelResolvers();
 
-        var map = (ConcurrentDictionary<string, string>)(typeof(Dommel.Resolvers).GetField("TypeTableNameCache", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null));
-        map.Clear();
-        
-        DommelMapper.SetTableNameResolver(new TableNameResolverForSqlServer());
-        DommelMapper.SetKeyPropertyResolver(new KeyPropertyResolver());
-        
         IDbTransaction dbTransaction;
         // upload
         try
@@ -53,7 +46,6 @@ static class SyncHelper
             target.Open();
 
             dbTransaction = target.BeginTransaction();
-            
 
             await target.ExecuteAsync("""
                                       DELETE FROM RVD.ComponentWorkspace
@@ -61,19 +53,16 @@ static class SyncHelper
                                       DELETE FROM RVD.ComponentHistory
                                       DELETE FROM RVD.Component
                                       DELETE FROM RVD.Project
-                                      """,null, dbTransaction);
-            
+                                      """, null, dbTransaction);
+
             await insertAll(projects.ToList());
             await insertAll(components.ToList());
-            
-            
-            
+
             await insertAll(users.ToList());
             await insertAll(componentHistories.ToList());
             await insertAll(workspaces.ToList());
-            
-            dbTransaction.Commit();
 
+            dbTransaction.Commit();
         }
         catch (Exception exception)
         {
@@ -82,6 +71,15 @@ static class SyncHelper
         }
 
         return;
+
+        static void resetDommelResolvers()
+        {
+            var map = (ConcurrentDictionary<string, string>)typeof(Resolvers).GetField("TypeTableNameCache", BindingFlags.Static | BindingFlags.NonPublic)!.GetValue(null);
+            map!.Clear();
+
+            DommelMapper.SetTableNameResolver(new TableNameResolverForSqlServer());
+            DommelMapper.SetKeyPropertyResolver(new KeyPropertyResolver());
+        }
 
         async Task insertAll<TEntity>(IReadOnlyList<TEntity> records) where TEntity : class
         {
@@ -96,9 +94,9 @@ static class SyncHelper
                 tableName = "RVD.[User]";
             }
 
-            await target.ExecuteAsync($"SET IDENTITY_INSERT {tableName} ON;",null, dbTransaction);
+            await target.ExecuteAsync($"SET IDENTITY_INSERT {tableName} ON;", null, dbTransaction);
             await target.InsertAllAsync(records, dbTransaction);
-            await target.ExecuteAsync($"SET IDENTITY_INSERT {tableName} OFF;",null, dbTransaction);
+            await target.ExecuteAsync($"SET IDENTITY_INSERT {tableName} OFF;", null, dbTransaction);
         }
     }
 
@@ -117,7 +115,6 @@ static class SyncHelper
             var tableAttribute = type.GetCustomAttribute<TableAttribute>();
 
             var tableName = tableAttribute?.Name ?? type.Name;
-          
 
             return $"RVD.{tableName}";
         }
