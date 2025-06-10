@@ -5,24 +5,6 @@ namespace ReactWithDotNet.VisualDesigner.Views;
 
 static class ApplicationLogic
 {
-   
-
-    public static IReadOnlyList<ProjectEntity> GetAllProjectsCached()
-    {
-        return Cache.AccessValue(nameof(GetAllProjectsCached),
-                                 () => Store.GetAllProjects().GetAwaiter().GetResult().ToList());
-    }
-    
-    public static IReadOnlyList<ComponentEntity> GetAllComponentsInProjectFromCache(int projectId)
-    {
-        return Cache.AccessValue(nameof(GetAllComponentsInProjectFromCache) + projectId, () => Store.GetAllComponentsInProject(projectId).GetAwaiter().GetResult().ToList());
-    }
-    
-    public static string GetComponentName(int projectId, int componentId)
-    {
-        return GetAllComponentsInProjectFromCache(projectId).FirstOrDefault(x => x.Id == componentId)?.GetName();
-    }
-    
     public static async Task<Result> CommitComponent(ApplicationState state)
     {
         ComponentEntity component;
@@ -47,7 +29,7 @@ static class ApplicationLogic
         if (component.RootElementAsYaml == SerializeToYaml(state.ComponentRootElement))
         {
             await Store.Delete(userVersion);
-            
+
             return Fail($"User ({state.UserName}) has no change to commit.");
         }
 
@@ -75,6 +57,22 @@ static class ApplicationLogic
         await Store.Delete(userVersion);
 
         return Success;
+    }
+
+    public static IReadOnlyList<ComponentEntity> GetAllComponentsInProjectFromCache(int projectId)
+    {
+        return Cache.AccessValue(nameof(GetAllComponentsInProjectFromCache) + projectId, () => Store.GetAllComponentsInProject(projectId).GetAwaiter().GetResult().ToList());
+    }
+
+    public static IReadOnlyList<ProjectEntity> GetAllProjectsCached()
+    {
+        return Cache.AccessValue(nameof(GetAllProjectsCached),
+                                 () => Store.GetAllProjects().GetAwaiter().GetResult().ToList());
+    }
+
+    public static string GetComponentName(int projectId, int componentId)
+    {
+        return GetAllComponentsInProjectFromCache(projectId).FirstOrDefault(x => x.Id == componentId)?.GetName();
     }
 
     public static Task<Result<VisualElementModel>> GetComponenUserOrMainVersionAsync(int componentId, string userName)
@@ -132,7 +130,6 @@ static class ApplicationLogic
                 return returnList;
             }));
         }
-       
 
         items.Add("-text: props.userName");
         items.Add("-text: state.userName");
@@ -187,10 +184,6 @@ static class ApplicationLogic
             }
         }
 
-     
-
-       
-
         items.Add("-items-source-design-time-count: 3");
         items.Add("-items-source: {state.userList}");
 
@@ -215,12 +208,12 @@ static class ApplicationLogic
             items.Add($"z-index: {i}");
         }
 
-        foreach (var number in new[]{2,4,6,8,10,12,16,20,24,28,32,36,40})
+        foreach (var number in new[] { 2, 4, 6, 8, 10, 12, 16, 20, 24, 28, 32, 36, 40 })
         {
             items.Add($"gap: {number}");
             items.Add($"border-radius: {number}");
         }
-        
+
         items.Add("flex-row-centered");
         items.Add("flex-col-centered");
 
@@ -347,34 +340,36 @@ static class ApplicationLogic
     public static IReadOnlyList<string> GetTagSuggestions(ApplicationState state)
     {
         var suggestions = new List<string>(TagNameList);
-        
-        suggestions.AddRange(from x in GetAllComponentsInProjectFromCache(state.ProjectId) 
-                             where x.Id != state.ComponentId 
+
+        suggestions.AddRange(from x in GetAllComponentsInProjectFromCache(state.ProjectId)
+                             where x.Id != state.ComponentId
                              select x.GetNameWithExportFilePath());
 
         return suggestions;
     }
 
-    public static async Task<string> GetTagText(string tag)
+    public static Task<string> GetTagText(string tag)
     {
-        if (int.TryParse(tag, out var componentId))
+        return Cache.AccessValue($"{nameof(GetTagText)} :: {tag}", async () =>
         {
-            var component = await Store.TryGetComponent(componentId);
-            if (component is null)
+            if (int.TryParse(tag, out var componentId))
             {
-                return tag;
+                var component = await Store.TryGetComponent(componentId);
+                if (component is null)
+                {
+                    return tag;
+                }
+
+                return component.GetName();
             }
 
-            return component.GetName();
-        }
-
-        return tag;
+            return tag;
+        });
     }
 
     public static async Task<Maybe<string>> GetUserLastAccessedProjectLocalWorkspacePath()
     {
-        
-        foreach (var user in from user in  await Store.GetUserByUserName(Environment.UserName) orderby user.LastAccessTime descending select user)
+        foreach (var user in from user in await Store.GetUserByUserName(Environment.UserName) orderby user.LastAccessTime descending select user)
         {
             return user.LocalWorkspacePath;
         }
@@ -447,7 +442,6 @@ static class ApplicationLogic
         return None;
     }
 
-
     public static async Task<Maybe<string>> TryFindFilePathFromWebRequestPath(string requestPath)
     {
         if (requestPath.StartsWith("/wwwroot/"))
@@ -515,7 +509,7 @@ static class ApplicationLogic
         return Success;
     }
 
-    public static async Task UpdateLastUsageInfo( ApplicationState state)
+    public static async Task UpdateLastUsageInfo(ApplicationState state)
     {
         var projectId = state.ProjectId;
 
