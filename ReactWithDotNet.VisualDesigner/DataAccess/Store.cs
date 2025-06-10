@@ -11,6 +11,7 @@ static class Store
     {
         DommelMapper.SetTableNameResolver(new TableNameResolver());
     }
+
     public static Task Delete(ComponentEntity entity)
     {
         return DbOperation(db => db.DeleteAsync(entity));
@@ -51,14 +52,14 @@ static class Store
         return DbOperation(db => db.SelectAsync<UserEntity>(x => x.UserName == userName));
     }
 
-    public static async Task<long> Insert(UserEntity entity)
+    public static Task Insert(UserEntity entity)
     {
-        return (long)await DbOperation(db => db.InsertAsync(entity));
+        return DbOperation(db => db.InsertAsync(entity));
     }
 
-    public static async Task<long> Insert(ComponentEntity entity)
+    public static Task Insert(ComponentEntity entity)
     {
-        return (long)await DbOperation(db => db.InsertAsync(entity));
+        return DbOperation(db => db.InsertAsync(entity));
     }
 
     public static Task Insert(ComponentHistoryEntity entity)
@@ -66,9 +67,9 @@ static class Store
         return DbOperation(db => db.InsertAsync(entity));
     }
 
-    public static async Task<long> Insert(ComponentWorkspace entity)
+    public static Task Insert(ComponentWorkspace entity)
     {
-        return (long)await DbOperation(db => db.InsertAsync(entity));
+        return DbOperation(db => db.InsertAsync(entity));
     }
 
     public static async Task<ComponentEntity> TryGetComponent(int componentId)
@@ -117,24 +118,23 @@ static class Store
         {
             using IDbConnection connection = new SqliteConnection(Config.Database.ConnectionString);
 
-            return await operation(connection);    
+            return await operation(connection);
         }
-        
+
         if (Config.Database.IsSQLServer)
         {
             using IDbConnection connection = new SqlConnection(Config.Database.ConnectionString);
 
-            return await operation(connection);    
+            return await operation(connection);
         }
-        
+
         if (Config.Database.IsMySQL)
         {
             using IDbConnection connection = new MySqlConnection(Config.Database.ConnectionString);
 
-            return await operation(connection);    
+            return await operation(connection);
         }
-        
-        throw new NotSupportedException("Database type is not supported.");
 
+        throw new NotSupportedException("Database type is not supported.");
     }
 }
