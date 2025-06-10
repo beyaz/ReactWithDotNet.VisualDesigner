@@ -11,7 +11,7 @@ public class Program
 {
     public static void Main(string[] args)
     {
-        // SyncHelper.Transfer_From_SQLite_to_SqlServer().GetAwaiter().GetResult();
+        // SyncHelper.From_SQLite_to_SqlServer.Transfer_From_SQLite_to_SqlServer().GetAwaiter().GetResult();
         
         ProcessHelper.KillAllNamedProcess($"{nameof(ReactWithDotNet)}.{nameof(VisualDesigner)}");
 
