@@ -9,6 +9,8 @@ namespace ReactWithDotNet.VisualDesigner.Views;
 sealed class ApplicationView : Component<ApplicationState>
 {
     static readonly IReadOnlyList<string> MediaSizes = ["M", "SM", "MD", "LG", "XL", "XXL"];
+    
+    
 
     enum Icon
     {
@@ -37,13 +39,13 @@ sealed class ApplicationView : Component<ApplicationState>
             // try focus in element tree
             {
                 var js = new StringBuilder();
-                
+
                 js.AppendLine($"const element = document.getElementById('{treeItemPath}');");
                 js.AppendLine("if(element)");
                 js.AppendLine("{");
                 js.AppendLine("    element.scrollIntoView({ behavior: 'smooth', block: 'center' });");
                 js.AppendLine("}");
-            
+
                 Client.RunJavascript(js.ToString());
             }
 
@@ -326,7 +328,7 @@ sealed class ApplicationView : Component<ApplicationState>
             ComponentRootElement = componentRootElement,
 
             LeftTab = state.LeftTab,
-                
+
             Selection = new(),
 
             StyleItemDragDrop    = new(),
@@ -387,7 +389,7 @@ sealed class ApplicationView : Component<ApplicationState>
                 {
                     return new Exception($"{ComponentConfigReservedName.ExportFilePath} should be entered.");
                 }
-                
+
                 if (!exportFilePath.Contains('/'))
                 {
                     return new Exception($"{ComponentConfigReservedName.ExportFilePath} should be entered correctly. Expected directory seperator: '/' ");
@@ -889,7 +891,6 @@ sealed class ApplicationView : Component<ApplicationState>
                                 }
                                 else
                                 {
-                                    
                                     this.SuccessNotification("File already same.");
                                 }
                             })
@@ -1121,17 +1122,17 @@ sealed class ApplicationView : Component<ApplicationState>
                 if (isTryingToMakeRoot)
                 {
                     var rootNode = sourceNodeParent.Children[sourceNodeIndex];
-                    
+
                     sourceNodeParent.Children.RemoveAt(sourceNodeIndex);
 
                     rootNode.Children.Add(state.ComponentRootElement);
-                    
+
                     state = state with
                     {
                         ComponentRootElement = rootNode,
-                        Selection = new ApplicationSelectionState
+                        Selection = new()
                         {
-                             VisualElementTreeItemPath = "0"
+                            VisualElementTreeItemPath = "0"
                         }
                     };
 
@@ -2126,9 +2127,9 @@ sealed class ApplicationView : Component<ApplicationState>
 
                 MainContentTabs.NewComponentConfig =>
                     $"""
-                    {ComponentConfigReservedName.Name}: write_component_name_here
-                    {ComponentConfigReservedName.ExportFilePath}: write_export_file_path_here
-                    """,
+                     {ComponentConfigReservedName.Name}: write_component_name_here
+                     {ComponentConfigReservedName.ExportFilePath}: write_export_file_path_here
+                     """,
                 _ => null
             }
         };
