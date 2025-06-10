@@ -11,6 +11,8 @@ public class Program
 {
     public static void Main(string[] args)
     {
+        //SyncHelper.Transfer_From_SQLite_to_SqlServer().GetAwaiter().GetResult();
+        
         ProcessHelper.KillAllNamedProcess($"{nameof(ReactWithDotNet)}.{nameof(VisualDesigner)}");
 
         var port = NetworkHelper.GetAvailablePort(Config.NextAvailablePortFrom);

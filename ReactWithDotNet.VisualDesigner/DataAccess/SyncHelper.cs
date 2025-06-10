@@ -1,6 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.Collections.Concurrent;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Data;
+using System.Data.Common;
 using System.Reflection;
+using Dapper;
 using Microsoft.Data.SqlClient;
 using Microsoft.Data.Sqlite;
 
@@ -35,37 +38,93 @@ static class SyncHelper
 
         var workspaces = await source.GetAllAsync<ComponentWorkspace>();
 
-        DommelMapper.SetTableNameResolver(new TableNameResolverForSqlServer());
+      
 
+        var map = (ConcurrentDictionary<string, string>)(typeof(Dommel.Resolvers).GetField("TypeTableNameCache", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null));
+        map.Clear();
+        
+        DommelMapper.SetTableNameResolver(new TableNameResolverForSqlServer());
+        DommelMapper.SetKeyPropertyResolver(new KeyPropertyResolver());
+        
+        IDbTransaction dbTransaction;
         // upload
         try
         {
-            await target.InsertAllAsync(projects);
+            target.Open();
 
-            await target.InsertAllAsync(components);
+            dbTransaction = target.BeginTransaction();
+            
 
-            await target.InsertAllAsync(users);
+            await target.ExecuteAsync("""
+                                      DELETE FROM RVD.ComponentWorkspace
+                                      DELETE FROM RVD.[User]
+                                      DELETE FROM RVD.ComponentHistory
+                                      DELETE FROM RVD.Component
+                                      DELETE FROM RVD.Project
+                                      """,null, dbTransaction);
+            
+            await insertAll(projects.ToList());
+            await insertAll(components.ToList());
+            
+            
+            
+            await insertAll(users.ToList());
+            await insertAll(componentHistories.ToList());
+            await insertAll(workspaces.ToList());
+            
+            dbTransaction.Commit();
 
-            await target.InsertAllAsync(componentHistories);
-
-            await target.InsertAllAsync(workspaces);
         }
         catch (Exception exception)
         {
             Console.WriteLine(exception);
             throw;
         }
+
+        return;
+
+        async Task insertAll<TEntity>(IReadOnlyList<TEntity> records) where TEntity : class
+        {
+            if (records.Count is 0)
+            {
+                return;
+            }
+
+            var tableName = TableNameResolverForSqlServer.Resolve(records.First().GetType());
+            if (tableName == "RVD.User")
+            {
+                tableName = "RVD.[User]";
+            }
+
+            await target.ExecuteAsync($"SET IDENTITY_INSERT {tableName} ON;",null, dbTransaction);
+            await target.InsertAllAsync(records, dbTransaction);
+            await target.ExecuteAsync($"SET IDENTITY_INSERT {tableName} OFF;",null, dbTransaction);
+        }
+    }
+
+    class KeyPropertyResolver : IKeyPropertyResolver
+    {
+        public ColumnPropertyInfo[] ResolveKeyProperties(Type type)
+        {
+            return [];
+        }
     }
 
     class TableNameResolverForSqlServer : ITableNameResolver
     {
-        public string ResolveTableName(Type type)
+        public static string Resolve(Type type)
         {
             var tableAttribute = type.GetCustomAttribute<TableAttribute>();
 
             var tableName = tableAttribute?.Name ?? type.Name;
+          
 
-            return "RVD." + tableName;
+            return $"RVD.{tableName}";
+        }
+
+        public string ResolveTableName(Type type)
+        {
+            return Resolve(type);
         }
     }
 }

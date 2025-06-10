@@ -12,11 +12,14 @@ hideConsoleWindow: true
 nextAvailablePortFrom: 5005
 useUrls: true
 
+# database:
+#   isSQLite: true
+#   connectionString: 'Data Source=C:\github\ReactWithDotNet.VisualDesigner\app.db'
+
 database:
-  isSQLite: true
-  connectionString: 'Data Source=C:\github\ReactWithDotNet.VisualDesigner\app.db'
-
-
+  isSQLServer: true
+  schemaName: 'RVD'
+  connectionString: 'Server=tcp:beyaz.database.windows.net,1433;Initial Catalog=ReactVisualDesigner;Persist Security Info=False;User ID=beyaz;Password=t5U7*n_5fHJ_r-yU;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'
 
 
      # BEGIN TRANSACTION;
@@ -28,7 +31,7 @@ database:
   
       
      #      CREATE TABLE RVD.Project (
-     #          Id           INT PRIMARY KEY,
+     #          Id           INT IDENTITY(1,1) PRIMARY KEY,
      #          Name         VARCHAR(500),
      #          ConfigAsYaml NVARCHAR(MAX)
      #      );
