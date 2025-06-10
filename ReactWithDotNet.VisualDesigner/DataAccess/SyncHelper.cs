@@ -10,6 +10,8 @@ namespace ReactWithDotNet.VisualDesigner.DataAccess;
 
 static class SyncHelper
 {
+    const string SchemaName = "RVD";
+    
     public static Task Transfer_From_SQLite_to_SqlServer()
     {
         const string sqliteConnection = "Data Source=C:\\github\\ReactWithDotNet.VisualDesigner\\app.db";
@@ -47,17 +49,16 @@ static class SyncHelper
 
             dbTransaction = target.BeginTransaction();
 
-            await target.ExecuteAsync("""
-                                      DELETE FROM RVD.ComponentWorkspace
-                                      DELETE FROM RVD.[User]
-                                      DELETE FROM RVD.ComponentHistory
-                                      DELETE FROM RVD.Component
-                                      DELETE FROM RVD.Project
+            await target.ExecuteAsync($"""
+                                      DELETE FROM {SchemaName}.ComponentWorkspace
+                                      DELETE FROM {SchemaName}.[User]
+                                      DELETE FROM {SchemaName}.ComponentHistory
+                                      DELETE FROM {SchemaName}.Component
+                                      DELETE FROM {SchemaName}.Project
                                       """, null, dbTransaction);
 
             await insertAll(projects.ToList());
             await insertAll(components.ToList());
-
             await insertAll(users.ToList());
             await insertAll(componentHistories.ToList());
             await insertAll(workspaces.ToList());
@@ -89,9 +90,9 @@ static class SyncHelper
             }
 
             var tableName = TableNameResolverForSqlServer.Resolve(records.First().GetType());
-            if (tableName == "RVD.User")
+            if (tableName == $"{SchemaName}.User")
             {
-                tableName = "RVD.[User]";
+                tableName = $"{SchemaName}.[User]";
             }
 
             await target.ExecuteAsync($"SET IDENTITY_INSERT {tableName} ON;", null, dbTransaction);
@@ -116,7 +117,7 @@ static class SyncHelper
 
             var tableName = tableAttribute?.Name ?? type.Name;
 
-            return $"RVD.{tableName}";
+            return $"{SchemaName}.{tableName}";
         }
 
         public string ResolveTableName(Type type)
