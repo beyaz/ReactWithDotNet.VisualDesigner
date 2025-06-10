@@ -12,14 +12,14 @@ hideConsoleWindow: true
 nextAvailablePortFrom: 5005
 useUrls: true
 
-# database:
-#   isSQLite: true
-#   connectionString: 'Data Source=C:\github\ReactWithDotNet.VisualDesigner\app.db'
-
 database:
-  isSQLServer: true
-  schemaName: 'RVD'
-  connectionString: 'Server=tcp:beyaz.database.windows.net,1433;Initial Catalog=ReactVisualDesigner;Persist Security Info=False;User ID=beyaz;Password=t5U7*n_5fHJ_r-yU;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'
+  isSQLite: true
+  connectionString: 'Data Source=C:\github\ReactWithDotNet.VisualDesigner\app.db'
+
+# database:
+#   isSQLServer: true
+#   schemaName: 'RVD'
+#   connectionString: 'Server=tcp:beyaz.database.windows.net,1433;Initial Catalog=ReactVisualDesigner;Persist Security Info=False;User ID=beyaz;Password=t5U7*n_5fHJ_r-yU;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'
 
 
      # BEGIN TRANSACTION;
