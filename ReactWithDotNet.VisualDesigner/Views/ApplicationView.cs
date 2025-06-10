@@ -9,8 +9,6 @@ namespace ReactWithDotNet.VisualDesigner.Views;
 sealed class ApplicationView : Component<ApplicationState>
 {
     static readonly IReadOnlyList<string> MediaSizes = ["M", "SM", "MD", "LG", "XL", "XXL"];
-    
-    
 
     enum Icon
     {
@@ -19,6 +17,14 @@ sealed class ApplicationView : Component<ApplicationState>
     }
 
     VisualElementModel CurrentVisualElement => FindTreeNodeByTreePath(state.ComponentRootElement, state.Selection.VisualElementTreeItemPath);
+
+    protected override Element componentDidCatch(Exception exceptionOccurredInRender)
+    {
+        return new div(Background(Gray100))
+        {
+            exceptionOccurredInRender.ToString()
+        };
+    }
 
     protected override async Task constructor()
     {
