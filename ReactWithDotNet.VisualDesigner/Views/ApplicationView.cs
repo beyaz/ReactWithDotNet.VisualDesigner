@@ -739,6 +739,13 @@ sealed class ApplicationView : Component<ApplicationState>
         }
     }
 
+    Task OnPreviewMouseLeave(MouseEvent e)
+    {
+        Client.RefreshComponentPreview();
+
+        return Task.CompletedTask;
+    }
+
     Task OnPropertyItemDropLocationDroped(DragEvent _)
     {
         var dd = state.PropertyItemDragDrop;
@@ -1345,7 +1352,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
     Element PartPreview()
     {
-        return new FlexRow(JustifyContentFlexStart, PositionRelative)
+        return new FlexRow(JustifyContentFlexStart, PositionRelative, OnMouseLeave(OnPreviewMouseLeave))
         {
             BackgroundImage("radial-gradient(#a5a8ed 0.5px, #f8f8f8 0.5px)"),
             BackgroundSize("10px 10px"),
