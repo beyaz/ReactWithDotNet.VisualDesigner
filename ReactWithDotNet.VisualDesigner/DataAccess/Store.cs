@@ -57,9 +57,9 @@ static class Store
         return DbOperation(db => db.InsertAsync(entity));
     }
 
-    public static Task Insert(ComponentEntity entity)
+    public static async Task<int> Insert(ComponentEntity entity)
     {
-        return DbOperation(db => db.InsertAsync(entity));
+        return Convert.ToInt32(await DbOperation(db => db.InsertAsync(entity)));
     }
 
     public static Task Insert(ComponentHistoryEntity entity)
