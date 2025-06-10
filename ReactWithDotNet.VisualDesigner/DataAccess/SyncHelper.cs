@@ -10,16 +10,16 @@ namespace ReactWithDotNet.VisualDesigner.DataAccess;
 
 static class SyncHelper
 {
+    const string SchemaName = "RVD";
+
+    const string sqlConnection = "Server=tcp:beyaz.database.windows.net,1433;Initial Catalog=ReactVisualDesigner;Persist Security Info=False;User ID=beyaz;Password=t5U7*n_5fHJ_r-yU;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;";
+
+    const string sqliteConnection = @"Data Source=C:\github\ReactWithDotNet.VisualDesigner\app.db";
+
     public static class From_SQLite_to_SqlServer
     {
-        const string SchemaName = "RVD";
-
         public static Task Transfer_From_SQLite_to_SqlServer()
         {
-            const string sqliteConnection = @"Data Source=C:\github\ReactWithDotNet.VisualDesigner\app.db";
-
-            const string sqlConnection = "Server=tcp:beyaz.database.windows.net,1433;Initial Catalog=ReactVisualDesigner;Persist Security Info=False;User ID=beyaz;Password=t5U7*n_5fHJ_r-yU;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;";
-
             return Transfer_From_SQLite_to_SqlServer(sqliteConnection, sqlConnection);
         }
 
@@ -120,6 +120,97 @@ static class SyncHelper
                 var tableName = tableAttribute?.Name ?? type.Name;
 
                 return $"{SchemaName}.{tableName}";
+            }
+
+            public string ResolveTableName(Type type)
+            {
+                return Resolve(type);
+            }
+        }
+    }
+
+    public static class From_SqlServer_to_SQLite
+    {
+        public static async Task Transfer_From_SqlServer_to_SQLite()
+        {
+            IDbConnection source = new SqlConnection(sqlConnection);
+
+            IDbConnection target = new SqliteConnection(sqliteConnection);
+
+            // fetch
+
+            var projects = await source.GetAllAsync<ProjectEntity>();
+
+            var components = await source.GetAllAsync<ComponentEntity>();
+
+            var users = await source.GetAllAsync<UserEntity>();
+
+            var componentHistories = await source.GetAllAsync<ComponentHistoryEntity>();
+
+            var workspaces = await source.GetAllAsync<ComponentWorkspace>();
+
+            resetDommelResolvers();
+
+            // upload
+            try
+            {
+                await target.ExecuteAsync("""
+                                          DELETE FROM ComponentWorkspace
+                                          DELETE FROM User
+                                          DELETE FROM ComponentHistory
+                                          DELETE FROM Component
+                                          DELETE FROM Project
+                                          """);
+
+                await insertAll(projects.ToList());
+                await insertAll(components.ToList());
+                await insertAll(users.ToList());
+                await insertAll(componentHistories.ToList());
+                await insertAll(workspaces.ToList());
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine(exception);
+                throw;
+            }
+
+            return;
+
+            static void resetDommelResolvers()
+            {
+                var map = (ConcurrentDictionary<string, string>)typeof(Resolvers).GetField("TypeTableNameCache", BindingFlags.Static | BindingFlags.NonPublic)!.GetValue(null);
+                map!.Clear();
+
+                DommelMapper.SetTableNameResolver(new TableNameResolverForSQLite());
+                DommelMapper.SetKeyPropertyResolver(new KeyPropertyResolver());
+            }
+
+            async Task insertAll<TEntity>(IReadOnlyList<TEntity> records) where TEntity : class
+            {
+                if (records.Count is 0)
+                {
+                    return;
+                }
+
+                await target.InsertAllAsync(records);
+            }
+        }
+
+        class KeyPropertyResolver : IKeyPropertyResolver
+        {
+            public ColumnPropertyInfo[] ResolveKeyProperties(Type type)
+            {
+                return [];
+            }
+        }
+
+        class TableNameResolverForSQLite : ITableNameResolver
+        {
+            public static string Resolve(Type type)
+            {
+                var tableAttribute = type.GetCustomAttribute<TableAttribute>();
+
+                return tableAttribute?.Name ?? type.Name;
             }
 
             public string ResolveTableName(Type type)
