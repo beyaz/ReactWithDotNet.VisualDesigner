@@ -11,10 +11,10 @@ namespace ReactWithDotNet.VisualDesigner.DataAccess;
 static class SyncHelper
 {
     const string SchemaName = "RVD";
-    
+
     public static Task Transfer_From_SQLite_to_SqlServer()
     {
-        const string sqliteConnection = "Data Source=C:\\github\\ReactWithDotNet.VisualDesigner\\app.db";
+        const string sqliteConnection = @"Data Source=C:\github\ReactWithDotNet.VisualDesigner\app.db";
 
         const string sqlConnection = "Server=tcp:beyaz.database.windows.net,1433;Initial Catalog=ReactVisualDesigner;Persist Security Info=False;User ID=beyaz;Password=t5U7*n_5fHJ_r-yU;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;";
 
@@ -50,12 +50,12 @@ static class SyncHelper
             dbTransaction = target.BeginTransaction();
 
             await target.ExecuteAsync($"""
-                                      DELETE FROM {SchemaName}.ComponentWorkspace
-                                      DELETE FROM {SchemaName}.[User]
-                                      DELETE FROM {SchemaName}.ComponentHistory
-                                      DELETE FROM {SchemaName}.Component
-                                      DELETE FROM {SchemaName}.Project
-                                      """, null, dbTransaction);
+                                       DELETE FROM {SchemaName}.ComponentWorkspace
+                                       DELETE FROM {SchemaName}.[User]
+                                       DELETE FROM {SchemaName}.ComponentHistory
+                                       DELETE FROM {SchemaName}.Component
+                                       DELETE FROM {SchemaName}.Project
+                                       """, null, dbTransaction);
 
             await insertAll(projects.ToList());
             await insertAll(components.ToList());
