@@ -421,7 +421,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
             newDbRecord = newDbRecord with
             {
-                Id = (int)await Store.Insert(newDbRecord)
+                Id = await Store.Insert(newDbRecord)
             };
 
             Cache.Clear();
