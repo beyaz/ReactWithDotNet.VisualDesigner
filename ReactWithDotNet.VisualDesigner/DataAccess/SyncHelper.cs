@@ -110,29 +110,15 @@ static class SyncHelper
                 return [];
             }
         }
-
-        class TableNameResolverForSqlServer : ITableNameResolver
-        {
-            public static string Resolve(Type type)
-            {
-                var tableAttribute = type.GetCustomAttribute<TableAttribute>();
-
-                var tableName = tableAttribute?.Name ?? type.Name;
-
-                return $"{SchemaName}.{tableName}";
-            }
-
-            public string ResolveTableName(Type type)
-            {
-                return Resolve(type);
-            }
-        }
     }
 
     public static class From_SqlServer_to_SQLite
     {
         public static async Task Transfer_From_SqlServer_to_SQLite()
         {
+            DommelMapper.SetTableNameResolver(new TableNameResolverForSqlServer());
+            DommelMapper.SetKeyPropertyResolver(new KeyPropertyResolver());
+
             IDbConnection source = new SqlConnection(sqlConnection);
 
             IDbConnection target = new SqliteConnection(sqliteConnection);
@@ -155,11 +141,11 @@ static class SyncHelper
             try
             {
                 await target.ExecuteAsync("""
-                                          DELETE FROM ComponentWorkspace
-                                          DELETE FROM User
-                                          DELETE FROM ComponentHistory
-                                          DELETE FROM Component
-                                          DELETE FROM Project
+                                          DELETE FROM ComponentWorkspace;
+                                          DELETE FROM User;
+                                          DELETE FROM ComponentHistory;
+                                          DELETE FROM Component;
+                                          DELETE FROM Project;
                                           """);
 
                 await insertAll(projects.ToList());
@@ -167,6 +153,10 @@ static class SyncHelper
                 await insertAll(users.ToList());
                 await insertAll(componentHistories.ToList());
                 await insertAll(workspaces.ToList());
+
+                await target.ExecuteAsync("""
+                                          VACUUM;
+                                          """);
             }
             catch (Exception exception)
             {
@@ -206,17 +196,34 @@ static class SyncHelper
 
         class TableNameResolverForSQLite : ITableNameResolver
         {
-            public static string Resolve(Type type)
+            public string ResolveTableName(Type type)
+            {
+                return Resolve(type);
+            }
+
+            static string Resolve(Type type)
             {
                 var tableAttribute = type.GetCustomAttribute<TableAttribute>();
 
                 return tableAttribute?.Name ?? type.Name;
             }
+        }
+    }
 
-            public string ResolveTableName(Type type)
-            {
-                return Resolve(type);
-            }
+    class TableNameResolverForSqlServer : ITableNameResolver
+    {
+        public static string Resolve(Type type)
+        {
+            var tableAttribute = type.GetCustomAttribute<TableAttribute>();
+
+            var tableName = tableAttribute?.Name ?? type.Name;
+
+            return $"{SchemaName}.{tableName}";
+        }
+
+        public string ResolveTableName(Type type)
+        {
+            return Resolve(type);
         }
     }
 }
