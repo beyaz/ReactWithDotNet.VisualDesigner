@@ -137,8 +137,6 @@ sealed class ApplicationPreview : Component
 
             element.style.Add(UserSelect(none));
 
-            element.Add(Hover(Outline($"1px {dashed} {Blue300}")));
-
             element.id = $"{path}";
 
             element.onClick = context.OnTreeItemClicked;

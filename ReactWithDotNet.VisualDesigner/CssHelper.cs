@@ -896,7 +896,7 @@ public static class CssHelper
 
         var style = new Style();
 
-        var exception = style.TryImport(designerStyleItem.RawHtmlStyles);
+        var exception = style.TryImport(arrangeRawHtmlStyles(designerStyleItem.RawHtmlStyles));
         if (exception is not null)
         {
             return exception;
@@ -908,6 +908,41 @@ public static class CssHelper
         }
 
         return (StyleModifier)style;
+
+        static IReadOnlyDictionary<string, string> arrangeRawHtmlStyles(IReadOnlyDictionary<string, string> dictionary)
+        {
+            var map = new Dictionary<string, string>();
+
+            foreach (var (key, value) in dictionary)
+            {
+                var item = arrangeHtmlStyleValue(key, value);
+                
+                map.Add(item.key, item.value);
+            }
+
+            return map;
+            
+            static (string key, string value) arrangeHtmlStyleValue(string key, string value)
+            {
+                var (success, _, left, right) = TextParser.TryParseConditionalValue(value);
+                if (success)
+                {
+                    if (right is not null)
+                    {
+                        return (key, right);
+                    }
+                
+                    if (left is not null)
+                    {
+                        return (key, left);
+                    }
+                }
+
+                return (key, value);
+            }
+        }
+        
+   
     }
 
     public static Maybe<DesignerStyleItem> TryConvertCssUtilityClassToHtmlStyle(ProjectConfig project, string utilityCssClassName)
