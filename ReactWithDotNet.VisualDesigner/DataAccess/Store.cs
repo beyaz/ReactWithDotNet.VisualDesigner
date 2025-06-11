@@ -44,7 +44,7 @@ static class Store
 
     public static async Task<int?> GetFirstProjectId()
     {
-        return (await DbOperation(async db => await db.FirstOrDefaultAsync<ProjectEntity>(x => true)))?.Id;
+        return (await DbOperation(async db => await db.GetAllAsync<ProjectEntity>())).FirstOrDefault()?.Id;
     }
 
     public static Task<IEnumerable<UserEntity>> GetUserByUserName(string userName)
