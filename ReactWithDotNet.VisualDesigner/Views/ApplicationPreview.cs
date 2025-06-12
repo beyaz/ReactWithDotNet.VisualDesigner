@@ -359,11 +359,12 @@ sealed class ApplicationPreview : Component
 
                     return false;
                 }
+
                 var isProcessed = await processFirstMatch(
                 [
                     () => Task.FromResult(itemSourceDesignTimeCount(model, name, value)),
-                    ()=>Task.FromResult(tryAddClass(element, name, value)),
-                    ()=>tryProcessImage(context, element, model, name, value),
+                    () => Task.FromResult(tryAddClass(element, name, value)),
+                    () => tryProcessImage(context, element, model, name, value),
                     () => Task.FromResult(processInputType(element, name, value)),
                     () => Task.FromResult(tryProcessCommonHtmlProperties(element, name, value)),
                 ]);
