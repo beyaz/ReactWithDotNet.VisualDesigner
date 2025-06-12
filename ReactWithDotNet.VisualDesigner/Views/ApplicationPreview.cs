@@ -151,7 +151,7 @@ sealed class ApplicationPreview : Component
 
             foreach (var (name, value) in from p in model.Properties from x in TryParseProperty(p) where x.Name.NotIn(Design.Text, Design.DesignText) select x)
             {
-                if (await tryProcessFirstMatch(
+                if (await tryProcessByFirstMatch(
                     [
                         () => Task.FromResult(itemSourceDesignTimeCount(model, name, value)),
                         () => Task.FromResult(tryAddClass(element, name, value)),
@@ -176,7 +176,7 @@ sealed class ApplicationPreview : Component
                     return false;
                 }
 
-                static async Task<bool> tryProcessFirstMatch(Func<Task<bool>>[] items)
+                static async Task<bool> tryProcessByFirstMatch(Func<Task<bool>>[] items)
                 {
                     foreach (var item in items)
                     {
