@@ -318,31 +318,21 @@ sealed class ApplicationPreview : Component
 
                 }
 
-                var isProcessed = await processFirstMatch(
-                [
-                    () => Task.FromResult(itemSourceDesignTimeCount(model, name, value)),
-                    ()=>Task.FromResult(tryAddClass(element, name, value)),
-                    ()=>tryProcessImage(context, element, model, name, value)
-                ]);
-                if (isProcessed)
+                static bool processInputType(Element element, string name, string value)
                 {
-                    continue;
-                }
-                
-                
-
-
-               
-
-                if (element is input elementAsInput)
-                {
-                    if (name.Equals("type", StringComparison.OrdinalIgnoreCase))
+                    if (element is input elementAsInput)
                     {
-                        elementAsInput.type = value;
-                        continue;
+                        if (name.Equals("type", StringComparison.OrdinalIgnoreCase))
+                        {
+                            elementAsInput.type = value;
+                            return true;
+                        }
                     }
-                }
 
+                    return false;
+                }
+                
+                static bool tryProcessCommonHtmlProperties(Element element, string name, string value)
                 {
                     var propertyInfo = element.GetType().GetProperty(name, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
                     if (propertyInfo is not null)
@@ -350,23 +340,44 @@ sealed class ApplicationPreview : Component
                         if (propertyInfo.PropertyType == typeof(string))
                         {
                             propertyInfo.SetValue(element, TryClearStringValue(value));
-                            continue;
+                            return true;
                         }
                         
                         if (propertyInfo.PropertyType == typeof(dangerouslySetInnerHTML))
                         {
                             propertyInfo.SetValue(element, new dangerouslySetInnerHTML(TryClearStringValue(value)));
-                            continue;
+                            return true;
                         }
 
                         if (propertyInfo.PropertyType == typeof(UnionProp<string, double>))
                         {
                             propertyInfo.SetValue(element, (UnionProp<string, double>)value);
+                            return true;
                         }
                         
-                        
                     }
+
+                    return false;
                 }
+                var isProcessed = await processFirstMatch(
+                [
+                    () => Task.FromResult(itemSourceDesignTimeCount(model, name, value)),
+                    ()=>Task.FromResult(tryAddClass(element, name, value)),
+                    ()=>tryProcessImage(context, element, model, name, value),
+                    () => Task.FromResult(processInputType(element, name, value)),
+                    () => Task.FromResult(tryProcessCommonHtmlProperties(element, name, value)),
+                ]);
+                if (isProcessed)
+                {
+                    continue;
+                }
+                
+                
+              
+
+               
+
+                
             }
 
             {
