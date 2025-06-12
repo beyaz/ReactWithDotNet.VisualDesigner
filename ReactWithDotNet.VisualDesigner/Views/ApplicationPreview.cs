@@ -149,138 +149,190 @@ sealed class ApplicationPreview : Component
                 tryGetPropValueFromCaller(context, model, Design.Text).HasValue(text => element.text = text);
             }
 
+           
+
+            
+            
             foreach (var (name, value) in from p in model.Properties from x in TryParseProperty(p) where x.Name.NotIn(Design.Text, Design.DesignText) select x)
             {
-                if (name == "-items-source-design-time-count")
+                static async Task<bool> processFirstMatch(Func<Task<bool>>[] items)
                 {
-                    var firstChild = model.Children.FirstOrDefault();
-                    if (firstChild is not null)
+                    foreach (var item in items)
                     {
-                        var designTimeChildrenCount = double.Parse(value);
-
-                        for (var i = 0; i < designTimeChildrenCount - 1; i++)
+                        if (await item())
                         {
-                            model.Children.Add(CloneByUsingYaml(firstChild));
+                            return true;
                         }
                     }
-
-                    continue;
+                
+                    return false;
                 }
-
-                if (name == "class")
+                
+                static bool itemSourceDesignTimeCount(VisualElementModel model, string name, string value)
                 {
-                    element.AddClass(value);
-                    continue;
-                }
-
-                if (element is img elementAsImage)
-                {
-                    var isValueDouble = double.TryParse(value, out var valueAsDouble);
-
-                    if (name.Equals("h", StringComparison.OrdinalIgnoreCase) || name.Equals("height", StringComparison.OrdinalIgnoreCase))
+                    if (name == "-items-source-design-time-count")
                     {
-                        if (isValueDouble)
+                        var firstChild = model.Children.FirstOrDefault();
+                        if (firstChild is not null)
                         {
-                            elementAsImage.height = valueAsDouble + "px";
-                        }
-                        else
-                        {
-                            elementAsImage.height = value;
-                        }
+                            var designTimeChildrenCount = double.Parse(value);
 
-                        continue;
-                    }
-
-                    if (name.Equals("w", StringComparison.OrdinalIgnoreCase) || name.Equals("width", StringComparison.OrdinalIgnoreCase))
-                    {
-                        if (isValueDouble)
-                        {
-                            elementAsImage.width = valueAsDouble + "px";
-                        }
-                        else
-                        {
-                            elementAsImage.width = value;
-                        }
-
-                        continue;
-                    }
-
-                    if (name.Equals("src", StringComparison.OrdinalIgnoreCase))
-                    {
-                        // try initialize dummy src
-                        {
-                            foreach (var width in model.Properties.TryGetPropertyValue("width", "w"))
+                            for (var i = 0; i < designTimeChildrenCount - 1; i++)
                             {
-                                if (int.TryParse(width, out var widthAsNumber))
+                                model.Children.Add(CloneByUsingYaml(firstChild));
+                            }
+                        }
+
+                        return true;
+                    }
+
+                    return false;
+                }
+                
+                static bool tryAddClass(HtmlElement element, string name, string value)
+                {
+                    if (name == "class")
+                    {
+                        element.AddClass(value);
+                        return true;
+                    }
+                    
+                    return false;
+                }
+
+                static async Task<bool> tryProcessImage(RenderContext context, HtmlElement element, VisualElementModel model, string name, string value)
+                {
+
+
+                    if (element is img elementAsImage)
+                    {
+                        var isValueDouble = double.TryParse(value, out var valueAsDouble);
+
+                        if (name.Equals("h", StringComparison.OrdinalIgnoreCase) || name.Equals("height", StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (isValueDouble)
+                            {
+                                elementAsImage.height = valueAsDouble + "px";
+                            }
+                            else
+                            {
+                                elementAsImage.height = value;
+                            }
+
+                            return true;
+                        }
+
+                        if (name.Equals("w", StringComparison.OrdinalIgnoreCase) || name.Equals("width", StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (isValueDouble)
+                            {
+                                elementAsImage.width = valueAsDouble + "px";
+                            }
+                            else
+                            {
+                                elementAsImage.width = value;
+                            }
+
+                            return true;
+                        }
+
+                        if (name.Equals("src", StringComparison.OrdinalIgnoreCase))
+                        {
+                            // try initialize dummy src
+                            {
+                                foreach (var width in model.Properties.TryGetPropertyValue("width", "w"))
                                 {
-                                    foreach (var height in model.Properties.TryGetPropertyValue("height", "h"))
+                                    if (int.TryParse(width, out var widthAsNumber))
                                     {
-                                        if (int.TryParse(height, out var heightAsNumber))
+                                        foreach (var height in model.Properties.TryGetPropertyValue("height", "h"))
                                         {
-                                            elementAsImage.src = DummySrc(widthAsNumber, heightAsNumber);
+                                            if (int.TryParse(height, out var heightAsNumber))
+                                            {
+                                                elementAsImage.src = DummySrc(widthAsNumber, heightAsNumber);
+                                            }
+                                        }
+                                    }
+                                }
+
+                                if (elementAsImage.src.HasNoValue())
+                                {
+                                    foreach (var size in model.Properties.TryGetPropertyValue("size"))
+                                    {
+                                        if (int.TryParse(size, out var sizeAsNumber))
+                                        {
+                                            elementAsImage.src = DummySrc(sizeAsNumber);
                                         }
                                     }
                                 }
                             }
 
+                            if (IsConnectedValue(value))
+                            {
+                                return true;
+                            }
+
+                            (await calculateSrcFromValue(context, model, value)).HasValue(src => { elementAsImage.src = src; });
                             if (elementAsImage.src.HasNoValue())
                             {
-                                foreach (var size in model.Properties.TryGetPropertyValue("size"))
+                                elementAsImage.src = DummySrc(500);
+                            }
+
+                            return true;
+
+                            static async Task<Maybe<string>> calculateSrcFromValue(RenderContext context, VisualElementModel model, string value)
+                            {
+                                var src = TryClearStringValue(value);
+
+                                if (src.StartsWith("https://"))
                                 {
-                                    if (int.TryParse(size, out var sizeAsNumber))
-                                    {
-                                        elementAsImage.src = DummySrc(sizeAsNumber);
-                                    }
+                                    return src;
                                 }
-                            }
-                        }
 
-                        if (IsConnectedValue(value))
-                        {
-                            continue;
-                        }
-
-                        (await calculateSrcFromValue(context, model, value)).HasValue(src => { elementAsImage.src = src; });
-                        if (elementAsImage.src.HasNoValue())
-                        {
-                            elementAsImage.src = DummySrc(500);
-                        }
-                        continue;
-
-                        static async Task<Maybe<string>> calculateSrcFromValue(RenderContext context, VisualElementModel model, string value)
-                        {
-                            var src = TryClearStringValue(value);
-
-                            if (src.StartsWith("https://"))
-                            {
-                                return src;
-                            }
-
-                            if (src.StartsWith("/"))
-                            {
-                                var srcUnderWwwRoot = "/wwwroot" + src;
-
-                                foreach (var localFilePath in await TryFindFilePathFromWebRequestPath(srcUnderWwwRoot))
+                                if (src.StartsWith("/"))
                                 {
-                                    if (File.Exists(localFilePath))
+                                    var srcUnderWwwRoot = "/wwwroot" + src;
+
+                                    foreach (var localFilePath in await TryFindFilePathFromWebRequestPath(srcUnderWwwRoot))
                                     {
-                                        return srcUnderWwwRoot;
+                                        if (File.Exists(localFilePath))
+                                        {
+                                            return srcUnderWwwRoot;
+                                        }
                                     }
+
+                                    return None;
+                                }
+
+                                // try find value from caller
+                                foreach (var callerValue in tryGetPropValueFromCaller(context, model, "src"))
+                                {
+                                    return (await calculateSrcFromValue(context, model, callerValue));
                                 }
 
                                 return None;
                             }
-
-                            // try find value from caller
-                            foreach (var callerValue in tryGetPropValueFromCaller(context, model, "src"))
-                            {
-                                return (await calculateSrcFromValue(context, model, callerValue));
-                            }
-
-                            return None;
                         }
                     }
+
+                    return false;
+
                 }
+
+                var isProcessed = await processFirstMatch(
+                [
+                    () => Task.FromResult(itemSourceDesignTimeCount(model, name, value)),
+                    ()=>Task.FromResult(tryAddClass(element, name, value)),
+                    ()=>tryProcessImage(context, element, model, name, value)
+                ]);
+                if (isProcessed)
+                {
+                    continue;
+                }
+                
+                
+
+
+               
 
                 if (element is input elementAsInput)
                 {
