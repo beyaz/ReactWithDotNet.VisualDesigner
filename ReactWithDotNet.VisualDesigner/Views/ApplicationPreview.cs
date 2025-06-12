@@ -372,13 +372,17 @@ sealed class ApplicationPreview : Component
                 {
                     continue;
                 }
-                
-                
-              
 
-               
-
+                if (name == "ref" || name == "key"|| name == "-items-source"  || name == "size"|| name == "onClick" ||  name == "onInput" || name == "-show-if"|| name == "-hide-if")
+                {
+                    continue;
+                }
                 
+                return new Exception($"Property '{name}' with value '{value}' is not processed for element '{model.Tag}' at path '{path}'.");
+
+
+
+
             }
 
             {
