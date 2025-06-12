@@ -68,12 +68,12 @@ sealed class ApplicationPreview : Component
             var renderContext = new RenderContext
             {
                 ProjectId          = projectId,
-                Project = GetProjectConfig(projectId),
+                Project            = GetProjectConfig(projectId),
                 UserName           = userName,
                 OnTreeItemClicked  = OnItemClick,
                 ReactContext       = Context,
                 HighlightedElement = highlightedElement,
-                Client = Client,
+                Client             = Client,
                 ParentModel        = null
             };
             var result = await renderElement(renderContext, rootElement, "0");
@@ -149,10 +149,6 @@ sealed class ApplicationPreview : Component
                 tryGetPropValueFromCaller(context, model, Design.Text).HasValue(text => element.text = text);
             }
 
-           
-
-            
-            
             foreach (var (name, value) in from p in model.Properties from x in TryParseProperty(p) where x.Name.NotIn(Design.Text, Design.DesignText) select x)
             {
                 static async Task<bool> processFirstMatch(Func<Task<bool>>[] items)
@@ -164,10 +160,10 @@ sealed class ApplicationPreview : Component
                             return true;
                         }
                     }
-                
+
                     return false;
                 }
-                
+
                 static bool itemSourceDesignTimeCount(VisualElementModel model, string name, string value)
                 {
                     if (name == "-items-source-design-time-count")
@@ -188,7 +184,7 @@ sealed class ApplicationPreview : Component
 
                     return false;
                 }
-                
+
                 static bool tryAddClass(HtmlElement element, string name, string value)
                 {
                     if (name == "class")
@@ -196,14 +192,12 @@ sealed class ApplicationPreview : Component
                         element.AddClass(value);
                         return true;
                     }
-                    
+
                     return false;
                 }
 
                 static async Task<bool> tryProcessImage(RenderContext context, HtmlElement element, VisualElementModel model, string name, string value)
                 {
-
-
                     if (element is img elementAsImage)
                     {
                         var isValueDouble = double.TryParse(value, out var valueAsDouble);
@@ -306,7 +300,7 @@ sealed class ApplicationPreview : Component
                                 // try find value from caller
                                 foreach (var callerValue in tryGetPropValueFromCaller(context, model, "src"))
                                 {
-                                    return (await calculateSrcFromValue(context, model, callerValue));
+                                    return await calculateSrcFromValue(context, model, callerValue);
                                 }
 
                                 return None;
@@ -315,7 +309,6 @@ sealed class ApplicationPreview : Component
                     }
 
                     return false;
-
                 }
 
                 static bool processInputType(Element element, string name, string value)
@@ -331,7 +324,7 @@ sealed class ApplicationPreview : Component
 
                     return false;
                 }
-                
+
                 static bool tryProcessCommonHtmlProperties(Element element, string name, string value)
                 {
                     var propertyInfo = element.GetType().GetProperty(name, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
@@ -342,7 +335,7 @@ sealed class ApplicationPreview : Component
                             propertyInfo.SetValue(element, TryClearStringValue(value));
                             return true;
                         }
-                        
+
                         if (propertyInfo.PropertyType == typeof(dangerouslySetInnerHTML))
                         {
                             propertyInfo.SetValue(element, new dangerouslySetInnerHTML(TryClearStringValue(value)));
@@ -354,7 +347,6 @@ sealed class ApplicationPreview : Component
                             propertyInfo.SetValue(element, (UnionProp<string, double>)value);
                             return true;
                         }
-                        
                     }
 
                     return false;
@@ -366,23 +358,19 @@ sealed class ApplicationPreview : Component
                     () => Task.FromResult(tryAddClass(element, name, value)),
                     () => tryProcessImage(context, element, model, name, value),
                     () => Task.FromResult(processInputType(element, name, value)),
-                    () => Task.FromResult(tryProcessCommonHtmlProperties(element, name, value)),
+                    () => Task.FromResult(tryProcessCommonHtmlProperties(element, name, value))
                 ]);
                 if (isProcessed)
                 {
                     continue;
                 }
 
-                if (name == "ref" || name == "key"|| name == "-items-source"  || name == "size"|| name == "onClick" ||  name == "onInput" || name == "-show-if"|| name == "-hide-if")
+                if (name == "ref" || name == "key" || name == "-items-source" || name == "size" || name == "onClick" || name == "onInput" || name == "-show-if" || name == "-hide-if")
                 {
                     continue;
                 }
-                
+
                 return new Exception($"Property '{name}' with value '{value}' is not processed for element '{model.Tag}' at path '{path}'.");
-
-
-
-
             }
 
             {
@@ -402,7 +390,7 @@ sealed class ApplicationPreview : Component
                 element.id = Guid.NewGuid().ToString("N");
 
                 var jsCode = $"ReactWithDotNet.OnDocumentReady(()=> ReactWithDotNetHighlightElement(document.getElementById('{element.id}')));";
-                    
+
                 context.Client.RunJavascript(jsCode);
             }
 
@@ -529,6 +517,7 @@ sealed class ApplicationPreview : Component
 
     record RenderContext
     {
+        public Client Client { get; init; }
         public required VisualElementModel HighlightedElement { get; init; }
 
         public required MouseEventHandler OnTreeItemClicked { get; init; }
@@ -537,14 +526,12 @@ sealed class ApplicationPreview : Component
 
         public required VisualElementModel ParentModel { get; init; }
 
+        public ProjectConfig Project { get; init; }
+
         public required int ProjectId { get; init; }
 
         public required ReactContext ReactContext { get; init; }
 
         public required string UserName { get; init; }
-        
-        public ProjectConfig Project { get; init; }
-        
-        public Client Client { get; init; }
     }
 }
