@@ -72,6 +72,15 @@ sealed class ApplicationView : Component<ApplicationState>
 
                 UpdateZoomInClient();
 
+                if (state.ProjectId <= 0)
+                {
+                    var projectId = await Store.GetFirstProjectId();
+                    if (projectId.HasValue)
+                    {
+                        await ChangeSelectedProject(projectId.Value);
+                    }
+                }
+
                 return;
             }
         }
@@ -95,30 +104,32 @@ sealed class ApplicationView : Component<ApplicationState>
         }
 
         // create new state
-
-        state = new()
         {
-            UserName = userName,
-
-            Preview = new()
+            state = new()
             {
-                Width  = 600,
-                Height = 100,
-                Scale  = 100
-            },
+                UserName = userName,
 
-            Selection = new(),
+                Preview = new()
+                {
+                    Width  = 600,
+                    Height = 100,
+                    Scale  = 100
+                },
 
-            StyleItemDragDrop    = new(),
-            PropertyItemDragDrop = new(),
-            MainContentTab       = MainContentTabs.Design
-        };
+                Selection = new(),
 
-        var projectId = await Store.GetFirstProjectId();
-        if (projectId.HasValue)
-        {
-            await ChangeSelectedProject(projectId.Value);
+                StyleItemDragDrop    = new(),
+                PropertyItemDragDrop = new(),
+                MainContentTab       = MainContentTabs.Design
+            };
+
+            var projectId = await Store.GetFirstProjectId();
+            if (projectId.HasValue)
+            {
+                await ChangeSelectedProject(projectId.Value);
+            }
         }
+        
     }
 
     protected override Task OverrideStateFromPropsBeforeRender()
