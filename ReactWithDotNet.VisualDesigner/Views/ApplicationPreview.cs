@@ -231,6 +231,11 @@ sealed class ApplicationPreview : Component
 
             static async Task<Result> processProperty(RenderContext context, HtmlElement element, VisualElementModel model, string name, string value)
             {
+                foreach (var realValue in tryGetPropValueFromCaller(context, model, name))
+                {
+                    return await processProperty(context, element, model, name, realValue);
+                }
+
                 if (await tryProcessByFirstMatch(
                     [
                         () => Task.FromResult(itemSourceDesignTimeCount(model, name, value)),
