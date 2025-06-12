@@ -353,25 +353,27 @@ sealed class ApplicationPreview : Component
                 static bool tryProcessCommonHtmlProperties(Element element, string name, string value)
                 {
                     var propertyInfo = element.GetType().GetProperty(name, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
-                    if (propertyInfo is not null)
+                    if (propertyInfo is null)
                     {
-                        if (propertyInfo.PropertyType == typeof(string))
-                        {
-                            propertyInfo.SetValue(element, TryClearStringValue(value));
-                            return true;
-                        }
+                        return false;
+                    }
 
-                        if (propertyInfo.PropertyType == typeof(dangerouslySetInnerHTML))
-                        {
-                            propertyInfo.SetValue(element, new dangerouslySetInnerHTML(TryClearStringValue(value)));
-                            return true;
-                        }
+                    if (propertyInfo.PropertyType == typeof(string))
+                    {
+                        propertyInfo.SetValue(element, TryClearStringValue(value));
+                        return true;
+                    }
 
-                        if (propertyInfo.PropertyType == typeof(UnionProp<string, double>))
-                        {
-                            propertyInfo.SetValue(element, (UnionProp<string, double>)value);
-                            return true;
-                        }
+                    if (propertyInfo.PropertyType == typeof(dangerouslySetInnerHTML))
+                    {
+                        propertyInfo.SetValue(element, new dangerouslySetInnerHTML(TryClearStringValue(value)));
+                        return true;
+                    }
+
+                    if (propertyInfo.PropertyType == typeof(UnionProp<string, double>))
+                    {
+                        propertyInfo.SetValue(element, (UnionProp<string, double>)value);
+                        return true;
                     }
 
                     return false;
