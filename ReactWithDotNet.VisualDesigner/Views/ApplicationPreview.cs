@@ -151,6 +151,28 @@ sealed class ApplicationPreview : Component
 
             foreach (var (name, value) in from p in model.Properties from x in TryParseProperty(p) where x.Name.NotIn(Design.Text, Design.DesignText) select x)
             {
+            
+
+                var isProcessed = await processFirstMatch(
+                [
+                    () => Task.FromResult(itemSourceDesignTimeCount(model, name, value)),
+                    () => Task.FromResult(tryAddClass(element, name, value)),
+                    () => tryProcessImage(context, element, model, name, value),
+                    () => Task.FromResult(processInputType(element, name, value)),
+                    () => Task.FromResult(tryProcessCommonHtmlProperties(element, name, value))
+                ]);
+                if (isProcessed)
+                {
+                    continue;
+                }
+
+                if (name == "ref" || name == "key" || name == "-items-source" || name == "size" || name == "onClick" || name == "onInput" || name == "-show-if" || name == "-hide-if")
+                {
+                    continue;
+                }
+
+                return new Exception($"Property '{name}' with value '{value}' is not processed for element '{model.Tag}' at path '{path}'.");
+
                 static async Task<bool> processFirstMatch(Func<Task<bool>>[] items)
                 {
                     foreach (var item in items)
@@ -163,8 +185,8 @@ sealed class ApplicationPreview : Component
 
                     return false;
                 }
-
-                static bool itemSourceDesignTimeCount(VisualElementModel model, string name, string value)
+                
+                    static bool itemSourceDesignTimeCount(VisualElementModel model, string name, string value)
                 {
                     if (name == "-items-source-design-time-count")
                     {
@@ -351,26 +373,6 @@ sealed class ApplicationPreview : Component
 
                     return false;
                 }
-
-                var isProcessed = await processFirstMatch(
-                [
-                    () => Task.FromResult(itemSourceDesignTimeCount(model, name, value)),
-                    () => Task.FromResult(tryAddClass(element, name, value)),
-                    () => tryProcessImage(context, element, model, name, value),
-                    () => Task.FromResult(processInputType(element, name, value)),
-                    () => Task.FromResult(tryProcessCommonHtmlProperties(element, name, value))
-                ]);
-                if (isProcessed)
-                {
-                    continue;
-                }
-
-                if (name == "ref" || name == "key" || name == "-items-source" || name == "size" || name == "onClick" || name == "onInput" || name == "-show-if" || name == "-hide-if")
-                {
-                    continue;
-                }
-
-                return new Exception($"Property '{name}' with value '{value}' is not processed for element '{model.Tag}' at path '{path}'.");
             }
 
             {
