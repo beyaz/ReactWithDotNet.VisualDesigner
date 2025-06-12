@@ -151,7 +151,7 @@ sealed class ApplicationPreview : Component
 
             foreach (var (name, value) in from p in model.Properties from x in TryParseProperty(p) where x.Name.NotIn(Design.Text, Design.DesignText) select x)
             {
-                var result = await processProperty(context, element, model, name, value);
+                var result = await processProp(context, element, model, name, value);
                 if (result.HasError)
                 {
                     return result.Error;
@@ -229,27 +229,27 @@ sealed class ApplicationPreview : Component
 
             return element;
 
-            static async Task<Result> processProperty(RenderContext context, HtmlElement element, VisualElementModel model, string name, string value)
+            static async Task<Result> processProp(RenderContext context, HtmlElement element, VisualElementModel model, string propName, string propValue)
             {
-                foreach (var realValue in tryGetPropValueFromCaller(context, model, name))
+                foreach (var propRealValue in tryGetPropValueFromCaller(context, model, propName))
                 {
-                    return await processProperty(context, element, model, name, realValue);
+                    return await processProp(context, element, model, propName, propRealValue);
                 }
 
                 if (await tryProcessByFirstMatch(
                     [
-                        () => Task.FromResult(itemSourceDesignTimeCount(model, name, value)),
-                        () => Task.FromResult(tryAddClass(element, name, value)),
-                        () => tryProcessImage(context, element, model, name, value),
-                        () => Task.FromResult(processInputType(element, name, value)),
-                        () => Task.FromResult(tryProcessCommonHtmlProperties(element, name, value)),
-                        () => Task.FromResult(isKnownProp(name))
+                        () => Task.FromResult(itemSourceDesignTimeCount(model, propName, propValue)),
+                        () => Task.FromResult(tryAddClass(element, propName, propValue)),
+                        () => tryProcessImage(context, element, model, propName, propValue),
+                        () => Task.FromResult(processInputType(element, propName, propValue)),
+                        () => Task.FromResult(tryProcessCommonHtmlProperties(element, propName, propValue)),
+                        () => Task.FromResult(isKnownProp(propName))
                     ]))
                 {
                     return Success;
                 }
 
-                return new Exception($"Property '{name}' with value '{value}' is not processed for element '{model.Tag}'.");
+                return new Exception($"Property '{propName}' with value '{propValue}' is not processed for element '{model.Tag}'.");
 
                 static bool isKnownProp(string name)
                 {
