@@ -233,7 +233,7 @@ sealed class ApplicationPreview : Component
             {
                 foreach (var propRealValue in tryGetPropValueFromCaller(context, model, propName))
                 {
-                    return await processProp(context, element, model, propName, propRealValue);
+                    propValue = propRealValue;
                 }
 
                 if (await tryProcessByFirstMatch(
