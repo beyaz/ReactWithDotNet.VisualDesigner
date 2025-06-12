@@ -151,6 +151,86 @@ sealed class ApplicationPreview : Component
 
             foreach (var (name, value) in from p in model.Properties from x in TryParseProperty(p) where x.Name.NotIn(Design.Text, Design.DesignText) select x)
             {
+                var result = await processProperty(context, element, model, name, value);
+                if (result.HasError)
+                {
+                    return result.Error;
+                }
+            }
+
+            {
+                var result = model.Styles
+                    .Select(x => CreateDesignerStyleItemFromText(context.Project, x))
+                    .ConvertAll(designerItem => designerItem.ToStyleModifier())
+                    .Then(styleModifiers => element.Add(styleModifiers.ToArray()));
+
+                if (result.HasError)
+                {
+                    return result.Error;
+                }
+            }
+
+            if (context.HighlightedElement == model)
+            {
+                element.id = Guid.NewGuid().ToString("N");
+
+                var jsCode = $"ReactWithDotNet.OnDocumentReady(()=> ReactWithDotNetHighlightElement(document.getElementById('{element.id}')));";
+
+                context.Client.RunJavascript(jsCode);
+            }
+
+            if (model.HasNoChild())
+            {
+                return element;
+            }
+
+            for (var i = 0; i < model.Children.Count; i++)
+            {
+                Element childElement;
+                {
+                    var childPath = $"{path},{i}";
+                    if (context.Parent is not null)
+                    {
+                        childPath = path;
+                    }
+
+                    var childModel = model.Children[i];
+                    if (childModel.HideInDesigner)
+                    {
+                        continue;
+                    }
+
+                    // check -show/hide-if
+                    {
+                        var hideIf = tryGetPropValueFromCaller(context, childModel, "-hide-if");
+                        if (hideIf.HasValue && hideIf.Value == "true")
+                        {
+                            continue;
+                        }
+
+                        var showIf = tryGetPropValueFromCaller(context, childModel, "-show-if");
+                        if (showIf.HasValue && showIf.Value == "false")
+                        {
+                            continue;
+                        }
+                    }
+
+                    var result = await renderElement(context, childModel, childPath);
+                    if (result.HasError)
+                    {
+                        return new Exception($"Path: {childPath}", result.Error);
+                    }
+
+                    childElement = result.Value;
+                }
+
+                element.children.Add(childElement);
+            }
+
+            return element;
+
+            static async Task<Result> processProperty(RenderContext context, HtmlElement element, VisualElementModel model, string name, string value)
+            {
                 if (await tryProcessByFirstMatch(
                     [
                         () => Task.FromResult(itemSourceDesignTimeCount(model, name, value)),
@@ -161,10 +241,10 @@ sealed class ApplicationPreview : Component
                         () => Task.FromResult(isKnownProp(name))
                     ]))
                 {
-                    continue;
+                    return Success;
                 }
 
-                return new Exception($"Property '{name}' with value '{value}' is not processed for element '{model.Tag}' at path '{path}'.");
+                return new Exception($"Property '{name}' with value '{value}' is not processed for element '{model.Tag}'.");
 
                 static bool isKnownProp(string name)
                 {
@@ -380,87 +460,6 @@ sealed class ApplicationPreview : Component
                 }
             }
 
-            {
-                var result = model.Styles
-                    .Select(x => CreateDesignerStyleItemFromText(context.Project, x))
-                    .ConvertAll(designerItem => designerItem.ToStyleModifier())
-                    .Then(styleModifiers => element.Add(styleModifiers.ToArray()));
-
-                if (result.HasError)
-                {
-                    return result.Error;
-                }
-            }
-
-            if (context.HighlightedElement == model)
-            {
-                element.id = Guid.NewGuid().ToString("N");
-
-                var jsCode = $"ReactWithDotNet.OnDocumentReady(()=> ReactWithDotNetHighlightElement(document.getElementById('{element.id}')));";
-
-                context.Client.RunJavascript(jsCode);
-            }
-
-            if (model.HasNoChild())
-            {
-                return element;
-            }
-
-            for (var i = 0; i < model.Children.Count; i++)
-            {
-                Element childElement;
-                {
-                    var childPath = $"{path},{i}";
-                    if (context.Parent is not null)
-                    {
-                        childPath = path;
-                    }
-
-                    var childModel = model.Children[i];
-                    if (childModel.HideInDesigner)
-                    {
-                        continue;
-                    }
-
-                    // check -show/hide-if
-                    {
-                        var hideIf = tryGetPropValueFromCaller(context, childModel, "-hide-if");
-                        if (hideIf.HasValue && hideIf.Value == "true")
-                        {
-                            continue;
-                        }
-
-                        var showIf = tryGetPropValueFromCaller(context, childModel, "-show-if");
-                        if (showIf.HasValue && showIf.Value == "false")
-                        {
-                            continue;
-                        }
-                    }
-
-                    var result = await renderElement(context, childModel, childPath);
-                    if (result.HasError)
-                    {
-                        return new Exception($"Path: {childPath}", result.Error);
-                    }
-
-                    childElement = result.Value;
-                }
-
-                element.children.Add(childElement);
-            }
-
-            return element;
-
-            static Maybe<(string propertyName, string propertyValue)> tryGetProperty(VisualElementModel model, string propertyName)
-            {
-                foreach (var (name, value) in from p in model.Properties from v in TryParseProperty(p) where v.Name == propertyName select v)
-                {
-                    return (name, value);
-                }
-
-                return None;
-            }
-
             static Maybe<string> tryGetPropValueFromCaller(RenderContext context, VisualElementModel model, string propertyName)
             {
                 if (context.ParentModel is null)
@@ -496,6 +495,16 @@ sealed class ApplicationPreview : Component
                 }
 
                 return None;
+
+                static Maybe<(string propertyName, string propertyValue)> tryGetProperty(VisualElementModel model, string propertyName)
+                {
+                    foreach (var (name, value) in from p in model.Properties from v in TryParseProperty(p) where v.Name == propertyName select v)
+                    {
+                        return (name, value);
+                    }
+
+                    return None;
+                }
             }
         }
     }
