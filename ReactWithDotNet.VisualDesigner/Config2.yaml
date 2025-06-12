@@ -1,0 +1,18 @@
+browsers:
+  'windows':
+    - 'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe'
+    - 'C:\Program Files\Google\Chrome\Application\chrome.exe'
+    - 'C:\Program Files\Mozilla Firefox\firefox.exe'
+  'mac':
+    - '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
+  'linux':
+    - '/usr/bin/google-chrome'
+browserExeArguments: "--app=https://localhost:{Port}/"
+hideConsoleWindow: true
+nextAvailablePortFrom: 5005
+useUrls: true
+
+database:
+  isSQLServer: true
+  schemaName: 'RVD'
+  connectionString: 'Data Source=srvdev\atlas;Initial Catalog=boa;Min Pool Size=10; Max Pool Size=100;Application Name=Thriller;Integrated Security=true; TrustServerCertificate=true;'
