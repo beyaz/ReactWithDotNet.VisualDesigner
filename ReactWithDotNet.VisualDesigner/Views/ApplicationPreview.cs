@@ -168,7 +168,7 @@ sealed class ApplicationPreview : Component
 
                 static bool isKnownProp(string name)
                 {
-                    if (name == "ref" || name == "key" || name == "-items-source" || name == "size" || name == "onClick" || name == "onInput" || name == "-show-if" || name == "-hide-if")
+                    if (name is "ref" or "key" or "-items-source" or "size" or "onClick" or "onInput" or "-show-if" or "-hide-if")
                     {
                         return true;
                     }
