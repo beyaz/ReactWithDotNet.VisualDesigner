@@ -144,7 +144,12 @@ sealed class ApplicationPreview : Component
             // make clever
             if (model.HasText() || model.GetDesignText().HasValue())
             {
-                element.Add(TryClearStringValue(model.GetDesignText() ?? model.GetText()));
+                var text = TryClearStringValue(model.GetDesignText() ?? model.GetText());
+                if (!isUnknownValue(text))
+                {
+                    element.Add(text);
+                }
+                
 
                 tryGetPropValueFromCaller(context, model, Design.Text).HasValue(text => element.text = text);
             }
@@ -160,9 +165,9 @@ sealed class ApplicationPreview : Component
 
             {
                 var result = model.Styles
-                    .Select(x => CreateDesignerStyleItemFromText(context.Project, x))
-                    .ConvertAll(designerItem => designerItem.ToStyleModifier())
-                    .Then(styleModifiers => element.Add(styleModifiers.ToArray()));
+                                  .Select(x => CreateDesignerStyleItemFromText(context.Project, x))
+                                  .ConvertAll(designerItem => designerItem.ToStyleModifier())
+                                  .Then(styleModifiers => element.Add(styleModifiers.ToArray()));
 
                 if (result.HasError)
                 {
@@ -229,11 +234,26 @@ sealed class ApplicationPreview : Component
 
             return element;
 
+            static bool isUnknownValue(string value)
+            {
+                if (value.StartsWith("props.", StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+
+                return false;
+            }
+
             static async Task<Result> processProp(RenderContext context, HtmlElement element, VisualElementModel model, string propName, string propValue)
             {
                 foreach (var propRealValue in tryGetPropValueFromCaller(context, model, propName))
                 {
                     propValue = propRealValue;
+                }
+
+                if (isUnknownValue(propValue))
+                {
+                    return Success;
                 }
 
                 if (await tryProcessByFirstMatch(
