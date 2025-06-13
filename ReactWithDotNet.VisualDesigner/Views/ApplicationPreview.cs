@@ -149,7 +149,6 @@ sealed class ApplicationPreview : Component
                 {
                     element.Add(text);
                 }
-                
 
                 tryGetPropValueFromCaller(context, model, Design.Text).HasValue(text => element.text = text);
             }
