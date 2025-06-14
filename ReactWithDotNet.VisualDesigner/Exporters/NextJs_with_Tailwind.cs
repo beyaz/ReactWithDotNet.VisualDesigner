@@ -258,9 +258,11 @@ static class NextJs_with_Tailwind
         {
             node = node with { Properties = node.Properties.Remove(showIf) };
 
-            List<string> lines = [];
+            List<string> lines =
+            [
+                $"{Indent(indentLevel)}{{{ClearConnectedValue(showIf.Value)} && ("
+            ];
 
-            lines.Add($"{Indent(indentLevel)}{{{ClearConnectedValue(showIf.Value)} && (");
             indentLevel++;
 
             IReadOnlyList<string> innerLines;
@@ -286,8 +288,10 @@ static class NextJs_with_Tailwind
         {
             node = node with { Properties = node.Properties.Remove(hideIf) };
 
-            List<string> lines = [];
-            lines.Add($"{Indent(indentLevel)}{{!{ClearConnectedValue(hideIf.Value)} && (");
+            List<string> lines =
+            [
+                $"{Indent(indentLevel)}{{!{ClearConnectedValue(hideIf.Value)} && ("
+            ];
             indentLevel++;
 
             IReadOnlyList<string> innerLines;
@@ -309,50 +313,52 @@ static class NextJs_with_Tailwind
             return lines;
         }
 
+        // is map
         {
             List<string> lines = [];
 
-            // is map
+            var itemsSource = parentNode?.Properties.FirstOrDefault(x => x.Name is "-items-source");
+            if (itemsSource is not null)
             {
-                var itemsSource = parentNode?.Properties.FirstOrDefault(x => x.Name is "-items-source");
-                if (itemsSource is not null)
+                parentNode = parentNode with { Properties = parentNode.Properties.Remove(itemsSource) };
+
+                lines.Add($"{Indent(indentLevel)}{{");
+                indentLevel++;
+
+                lines.Add($"{Indent(indentLevel)}{ClearConnectedValue(itemsSource.Value)}.map((_item, _index) =>");
+                lines.Add($"{Indent(indentLevel)}{{");
+                indentLevel++;
+
+                lines.Add(Indent(indentLevel) + "return (");
+                indentLevel++;
+
+                IReadOnlyList<string> innerLines;
                 {
-                    parentNode = parentNode with { Properties = parentNode.Properties.Remove(itemsSource) };
-
-                    lines.Add($"{Indent(indentLevel)}{{");
-                    indentLevel++;
-
-                    lines.Add($"{Indent(indentLevel)}{ClearConnectedValue(itemsSource.Value)}.map((_item, _index) =>");
-                    lines.Add($"{Indent(indentLevel)}{{");
-                    indentLevel++;
-
-                    lines.Add(Indent(indentLevel) + "return (");
-                    indentLevel++;
-
-                    IReadOnlyList<string> innerLines;
+                    var result = await ConvertReactNodeModelToTsxCode(node, parentNode, indentLevel);
+                    if (result.HasError)
                     {
-                        var result = await ConvertReactNodeModelToTsxCode(node, parentNode, indentLevel);
-                        if (result.HasError)
-                        {
-                            return result.Error;
-                        }
-
-                        innerLines = result.Value;
+                        return result.Error;
                     }
-                    lines.AddRange(innerLines);
 
-                    indentLevel--;
-                    lines.Add(Indent(indentLevel) + ");");
-
-                    indentLevel--;
-                    lines.Add(Indent(indentLevel) + "})");
-
-                    indentLevel--;
-                    lines.Add(Indent(indentLevel) + "}");
-
-                    return lines;
+                    innerLines = result.Value;
                 }
+                lines.AddRange(innerLines);
+
+                indentLevel--;
+                lines.Add(Indent(indentLevel) + ");");
+
+                indentLevel--;
+                lines.Add(Indent(indentLevel) + "})");
+
+                indentLevel--;
+                lines.Add(Indent(indentLevel) + "}");
+
+                return lines;
             }
+        }
+
+        {
+            List<string> lines = [];
 
             var elementType = node.HtmlElementType;
 
