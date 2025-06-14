@@ -582,7 +582,7 @@ static class NextJs_with_Tailwind
                 {
                     lines.Add($"{Indent(indentLevel)}<{tag}");
 
-                    lines.AddRange(propsAsLines(propsAsText, indentLevel));
+                    lines.AddRange(propsAsMultiLines(propsAsText, indentLevel));
 
                     lines.Add($"{Indent(indentLevel)}>");
                 }
@@ -621,7 +621,7 @@ static class NextJs_with_Tailwind
             return lines;
         }
 
-        static IReadOnlyList<string> propsAsLines(IReadOnlyList<string> propsAsText, int indentLevel)
+        static IReadOnlyList<string> propsAsMultiLines(IReadOnlyList<string> propsAsText, int indentLevel)
         {
             List<string> lines = [];
 
