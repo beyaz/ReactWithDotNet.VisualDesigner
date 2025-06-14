@@ -507,16 +507,6 @@ static class NextJs_with_Tailwind
                 }
             }
 
-            var sb = new StringBuilder();
-
-            sb.Append($"{Indent(indentLevel)}<{tag}");
-
-            if (propsAsText.Count > 0)
-            {
-                sb.Append(" ");
-                sb.Append(string.Join(" ", propsAsText));
-            }
-
             // inner text
             {
                 if (node.Children.Count == 1)
@@ -529,17 +519,34 @@ static class NextJs_with_Tailwind
 
                     if (IsConnectedValue(childrenText))
                     {
-                        sb.Append('>');
-                        lines.Add(sb.ToString());
+                        if (propsAsText.Count > 0)
+                        {
+                            return new List<string>
+                            {
+                                $"{Indent(indentLevel)}<{tag} {string.Join(" ", propsAsText)}>",
+                                $"{Indent(indentLevel + 1)}{childrenText}",
+                                $"{Indent(indentLevel)}</{tag}>"
+                            };
+                        }
 
-                        lines.Add($"{Indent(indentLevel + 1)}{childrenText}");
-
-                        // Close tag
-                        lines.Add($"{Indent(indentLevel)}</{tag}>");
-
-                        return lines;
+                        return new List<string>
+                        {
+                            $"{Indent(indentLevel)}<{tag}>",
+                            $"{Indent(indentLevel + 1)}{childrenText}",
+                            $"{Indent(indentLevel)}</{tag}>"
+                        };
                     }
                 }
+            }
+
+            var sb = new StringBuilder();
+
+            sb.Append($"{Indent(indentLevel)}<{tag}");
+
+            if (propsAsText.Count > 0)
+            {
+                sb.Append(" ");
+                sb.Append(string.Join(" ", propsAsText));
             }
 
             sb.Append('>');
