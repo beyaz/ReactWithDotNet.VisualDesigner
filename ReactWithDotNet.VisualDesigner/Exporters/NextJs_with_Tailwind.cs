@@ -476,7 +476,7 @@ static class NextJs_with_Tailwind
                     return new TsxLines
                     {
                         $"{Indent(indentLevel)}<{tag}",
-                        propsAsText.Select(x => Indent(indentLevel + 1) + x),
+                        propsAsMultiLines(propsAsText, indentLevel),
                         $"{Indent(indentLevel)}/>"
                     };
                 }
@@ -508,7 +508,7 @@ static class NextJs_with_Tailwind
                         return new TsxLines
                         {
                             $"{Indent(indentLevel)}<{tag}",
-                            propsAsText.Select(x => Indent(indentLevel + 1) + x),
+                            propsAsMultiLines(propsAsText, indentLevel),
                             $"{Indent(indentLevel)}>",
 
                             $"{Indent(indentLevel + 1)}{childrenProperty.Value}",
@@ -552,7 +552,7 @@ static class NextJs_with_Tailwind
                             return new TsxLines
                             {
                                 $"{Indent(indentLevel)}<{tag}",
-                                propsAsText.Select(x => Indent(indentLevel + 1) + x),
+                                propsAsMultiLines(propsAsText, indentLevel),
                                 $"{Indent(indentLevel)}>",
 
                                 $"{Indent(indentLevel + 1)}{childrenText}",
