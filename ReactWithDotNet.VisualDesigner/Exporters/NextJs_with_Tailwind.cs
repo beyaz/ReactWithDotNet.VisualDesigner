@@ -236,16 +236,16 @@ static class NextJs_with_Tailwind
 
     static async Task<Result<IReadOnlyList<string>>> ConvertReactNodeModelToTsxCode(ReactNode node, ReactNode parentNode, int indentLevel)
     {
-        List<string> lines = [];
-
         var nodeTag = node.Tag;
 
         if (nodeTag is null)
         {
             if (node.Text.HasValue())
             {
-                lines.Add($"{Indent(indentLevel)}{AsFinalText(node.Text)}");
-                return lines;
+                return new List<string>
+                {
+                    $"{Indent(indentLevel)}{AsFinalText(node.Text)}"
+                };
             }
 
             return new ArgumentNullException(nameof(nodeTag));
@@ -257,6 +257,8 @@ static class NextJs_with_Tailwind
         if (showIf is not null)
         {
             node = node with { Properties = node.Properties.Remove(showIf) };
+
+            List<string> lines = [];
 
             lines.Add($"{Indent(indentLevel)}{{{ClearConnectedValue(showIf.Value)} && (");
             indentLevel++;
@@ -284,6 +286,7 @@ static class NextJs_with_Tailwind
         {
             node = node with { Properties = node.Properties.Remove(hideIf) };
 
+            List<string> lines = [];
             lines.Add($"{Indent(indentLevel)}{{!{ClearConnectedValue(hideIf.Value)} && (");
             indentLevel++;
 
@@ -306,214 +309,193 @@ static class NextJs_with_Tailwind
             return lines;
         }
 
-        // is map
         {
-            var itemsSource = parentNode?.Properties.FirstOrDefault(x => x.Name is "-items-source");
-            if (itemsSource is not null)
+            List<string> lines = [];
+
+            // is map
             {
-                parentNode = parentNode with { Properties = parentNode.Properties.Remove(itemsSource) };
-
-                lines.Add($"{Indent(indentLevel)}{{");
-                indentLevel++;
-
-                lines.Add($"{Indent(indentLevel)}{ClearConnectedValue(itemsSource.Value)}.map((_item, _index) =>");
-                lines.Add($"{Indent(indentLevel)}{{");
-                indentLevel++;
-
-                lines.Add(Indent(indentLevel) + "return (");
-                indentLevel++;
-
-                IReadOnlyList<string> innerLines;
+                var itemsSource = parentNode?.Properties.FirstOrDefault(x => x.Name is "-items-source");
+                if (itemsSource is not null)
                 {
-                    var result = await ConvertReactNodeModelToTsxCode(node, parentNode, indentLevel);
-                    if (result.HasError)
+                    parentNode = parentNode with { Properties = parentNode.Properties.Remove(itemsSource) };
+
+                    lines.Add($"{Indent(indentLevel)}{{");
+                    indentLevel++;
+
+                    lines.Add($"{Indent(indentLevel)}{ClearConnectedValue(itemsSource.Value)}.map((_item, _index) =>");
+                    lines.Add($"{Indent(indentLevel)}{{");
+                    indentLevel++;
+
+                    lines.Add(Indent(indentLevel) + "return (");
+                    indentLevel++;
+
+                    IReadOnlyList<string> innerLines;
                     {
-                        return result.Error;
-                    }
-
-                    innerLines = result.Value;
-                }
-                lines.AddRange(innerLines);
-
-                indentLevel--;
-                lines.Add(Indent(indentLevel) + ");");
-
-                indentLevel--;
-                lines.Add(Indent(indentLevel) + "})");
-
-                indentLevel--;
-                lines.Add(Indent(indentLevel) + "}");
-
-                return lines;
-            }
-        }
-
-        var elementType = node.HtmlElementType;
-
-        var tag = nodeTag;
-        if (int.TryParse(nodeTag, out var componentId))
-        {
-            var component = await Store.TryGetComponent(componentId);
-            if (component is null)
-            {
-                return new ArgumentNullException($"ComponentNotFound. {componentId}");
-            }
-
-            tag = component.GetName();
-        }
-
-        var childrenProperty = node.Properties.FirstOrDefault(x => x.Name == "children");
-        if (childrenProperty is not null)
-        {
-            node = node with { Properties = node.Properties.Remove(childrenProperty) };
-        }
-
-        var textProperty = node.Properties.FirstOrDefault(x => x.Name == Design.Text);
-        if (textProperty is not null)
-        {
-            node = node with { Properties = node.Properties.Remove(textProperty) };
-        }
-
-        var propsAsText = new List<string>();
-
-        foreach (var reactProperty in node.Properties.Where(p => p.Name.NotIn(Design.Text, Design.DesignText)))
-        {
-            var propertyName = reactProperty.Name;
-
-            var propertyValue = reactProperty.Value;
-
-            if (propertyName is "-items-source" || propertyName is "-items-source-design-time-count")
-            {
-                continue;
-            }
-
-            if (propertyValue == "false")
-            {
-                continue;
-            }
-
-            if (propertyValue == "true")
-            {
-                propsAsText.Add($"{propertyName}");
-                continue;
-            }
-
-            if (propertyName == Design.SpreadOperator)
-            {
-                propsAsText.Add($"{{{propertyValue}}}");
-                continue;
-            }
-
-            if (propertyName == nameof(HtmlElement.dangerouslySetInnerHTML))
-            {
-                propsAsText.Add($"{propertyName}={{{{ __html: {propertyValue}  }}}}");
-                continue;
-            }
-
-            if (IsStringValue(propertyValue))
-            {
-                propsAsText.Add($"{propertyName}={propertyValue}");
-                continue;
-            }
-
-            if (IsConnectedValue(propertyValue))
-            {
-                propsAsText.Add($"{propertyName}={propertyValue}");
-                continue;
-            }
-
-            if (IsStringTemplate(propertyValue))
-            {
-                propsAsText.Add($"{propertyName}={{{propertyValue}}}");
-                continue;
-            }
-
-            if (elementType.HasValue)
-            {
-                var propertyType = elementType.Value.GetProperty(propertyName, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance)?.PropertyType;
-                if (propertyType is not null)
-                {
-                    if (propertyType == typeof(string))
-                    {
-                        var isString = propertyValue.Contains('/') || propertyValue.StartsWith('#') || propertyValue.Split(' ').Length > 1;
-                        if (isString)
+                        var result = await ConvertReactNodeModelToTsxCode(node, parentNode, indentLevel);
+                        if (result.HasError)
                         {
-                            propsAsText.Add($"{propertyName}=\"{propertyValue}\"");
+                            return result.Error;
+                        }
+
+                        innerLines = result.Value;
+                    }
+                    lines.AddRange(innerLines);
+
+                    indentLevel--;
+                    lines.Add(Indent(indentLevel) + ");");
+
+                    indentLevel--;
+                    lines.Add(Indent(indentLevel) + "})");
+
+                    indentLevel--;
+                    lines.Add(Indent(indentLevel) + "}");
+
+                    return lines;
+                }
+            }
+
+            var elementType = node.HtmlElementType;
+
+            var tag = nodeTag;
+            if (int.TryParse(nodeTag, out var componentId))
+            {
+                var component = await Store.TryGetComponent(componentId);
+                if (component is null)
+                {
+                    return new ArgumentNullException($"ComponentNotFound. {componentId}");
+                }
+
+                tag = component.GetName();
+            }
+
+            var childrenProperty = node.Properties.FirstOrDefault(x => x.Name == "children");
+            if (childrenProperty is not null)
+            {
+                node = node with { Properties = node.Properties.Remove(childrenProperty) };
+            }
+
+            var textProperty = node.Properties.FirstOrDefault(x => x.Name == Design.Text);
+            if (textProperty is not null)
+            {
+                node = node with { Properties = node.Properties.Remove(textProperty) };
+            }
+
+            var propsAsText = new List<string>();
+
+            foreach (var reactProperty in node.Properties.Where(p => p.Name.NotIn(Design.Text, Design.DesignText)))
+            {
+                var propertyName = reactProperty.Name;
+
+                var propertyValue = reactProperty.Value;
+
+                if (propertyName is "-items-source" || propertyName is "-items-source-design-time-count")
+                {
+                    continue;
+                }
+
+                if (propertyValue == "false")
+                {
+                    continue;
+                }
+
+                if (propertyValue == "true")
+                {
+                    propsAsText.Add($"{propertyName}");
+                    continue;
+                }
+
+                if (propertyName == Design.SpreadOperator)
+                {
+                    propsAsText.Add($"{{{propertyValue}}}");
+                    continue;
+                }
+
+                if (propertyName == nameof(HtmlElement.dangerouslySetInnerHTML))
+                {
+                    propsAsText.Add($"{propertyName}={{{{ __html: {propertyValue}  }}}}");
+                    continue;
+                }
+
+                if (IsStringValue(propertyValue))
+                {
+                    propsAsText.Add($"{propertyName}={propertyValue}");
+                    continue;
+                }
+
+                if (IsConnectedValue(propertyValue))
+                {
+                    propsAsText.Add($"{propertyName}={propertyValue}");
+                    continue;
+                }
+
+                if (IsStringTemplate(propertyValue))
+                {
+                    propsAsText.Add($"{propertyName}={{{propertyValue}}}");
+                    continue;
+                }
+
+                if (elementType.HasValue)
+                {
+                    var propertyType = elementType.Value.GetProperty(propertyName, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance)?.PropertyType;
+                    if (propertyType is not null)
+                    {
+                        if (propertyType == typeof(string))
+                        {
+                            var isString = propertyValue.Contains('/') || propertyValue.StartsWith('#') || propertyValue.Split(' ').Length > 1;
+                            if (isString)
+                            {
+                                propsAsText.Add($"{propertyName}=\"{propertyValue}\"");
+                                continue;
+                            }
+                        }
+
+                        if ((propertyType == typeof(UnionProp<string, double?>) || propertyType == typeof(UnionProp<string, double>)) && double.TryParse(propertyValue, out _))
+                        {
+                            propsAsText.Add($"{propertyName}={{{propertyValue}}}");
                             continue;
                         }
                     }
-
-                    if ((propertyType == typeof(UnionProp<string, double?>) || propertyType == typeof(UnionProp<string, double>)) && double.TryParse(propertyValue, out _))
-                    {
-                        propsAsText.Add($"{propertyName}={{{propertyValue}}}");
-                        continue;
-                    }
                 }
+
+                propsAsText.Add($"{propertyName}={{{propertyValue}}}");
             }
 
-            propsAsText.Add($"{propertyName}={{{propertyValue}}}");
-        }
-
-        if (node.Children.Count == 0 && node.Text.HasNoValue() && childrenProperty is null)
-        {
-            if (propsAsText.Count > 0)
+            if (node.Children.Count == 0 && node.Text.HasNoValue() && childrenProperty is null)
             {
+                if (propsAsText.Count > 0)
+                {
+                    return new List<string>
+                    {
+                        $"{Indent(indentLevel)}<{tag} {string.Join(" ", propsAsText)} />"
+                    };
+                }
+
                 return new List<string>
                 {
-                    $"{Indent(indentLevel)}<{tag} {string.Join(" ", propsAsText)} />"
+                    $"{Indent(indentLevel)}<{tag} />"
                 };
             }
 
-            return new List<string>
+            var sb = new StringBuilder();
+
+            sb.Append($"{Indent(indentLevel)}<{tag}");
+
+            if (propsAsText.Count > 0)
             {
-                $"{Indent(indentLevel)}<{tag} />"
-            };
-        }
-
-        var sb = new StringBuilder();
-
-        sb.Append($"{Indent(indentLevel)}<{tag}");
-
-        if (propsAsText.Count > 0)
-        {
-            sb.Append(" ");
-            sb.Append(string.Join(" ", propsAsText));
-        }
-
-        // try add from state 
-        {
-            // sample: children: state.suggestionNodes
-
-            if (childrenProperty is not null)
-            {
-                sb.Append('>');
-                lines.Add(sb.ToString());
-
-                lines.Add($"{Indent(indentLevel + 1)}{childrenProperty.Value}");
-
-                // Close tag
-                lines.Add($"{Indent(indentLevel)}</{tag}>");
-
-                return lines;
+                sb.Append(" ");
+                sb.Append(string.Join(" ", propsAsText));
             }
-        }
 
-        // from props
-        {
-            if (node.Children.Count == 1)
+            // try add from state 
             {
-                var childrenText = node.Children[0].Text + string.Empty;
-                if (textProperty is not null)
-                {
-                    childrenText = AsFinalText(ClearConnectedValue(textProperty.Value));
-                }
+                // sample: children: state.suggestionNodes
 
-                if (IsConnectedValue(childrenText))
+                if (childrenProperty is not null)
                 {
                     sb.Append('>');
                     lines.Add(sb.ToString());
 
-                    lines.Add($"{Indent(indentLevel + 1)}{childrenText}");
+                    lines.Add($"{Indent(indentLevel + 1)}{childrenProperty.Value}");
 
                     // Close tag
                     lines.Add($"{Indent(indentLevel)}</{tag}>");
@@ -521,38 +503,63 @@ static class NextJs_with_Tailwind
                     return lines;
                 }
             }
-        }
 
-        sb.Append('>');
-        lines.Add(sb.ToString());
-
-        // Add text content
-        if (!string.IsNullOrWhiteSpace(node.Text))
-        {
-            lines.Add($"{Indent(indentLevel)}{AsFinalText(node.Text)}");
-        }
-
-        // Add children
-        foreach (var child in node.Children)
-        {
-            IReadOnlyList<string> childTsx;
+            // from props
             {
-                var result = await ConvertReactNodeModelToTsxCode(child, node, indentLevel + 1);
-                if (result.HasError)
+                if (node.Children.Count == 1)
                 {
-                    return result.Error;
-                }
+                    var childrenText = node.Children[0].Text + string.Empty;
+                    if (textProperty is not null)
+                    {
+                        childrenText = AsFinalText(ClearConnectedValue(textProperty.Value));
+                    }
 
-                childTsx = result.Value;
+                    if (IsConnectedValue(childrenText))
+                    {
+                        sb.Append('>');
+                        lines.Add(sb.ToString());
+
+                        lines.Add($"{Indent(indentLevel + 1)}{childrenText}");
+
+                        // Close tag
+                        lines.Add($"{Indent(indentLevel)}</{tag}>");
+
+                        return lines;
+                    }
+                }
             }
 
-            lines.AddRange(childTsx);
+            sb.Append('>');
+            lines.Add(sb.ToString());
+
+            // Add text content
+            if (!string.IsNullOrWhiteSpace(node.Text))
+            {
+                lines.Add($"{Indent(indentLevel)}{AsFinalText(node.Text)}");
+            }
+
+            // Add children
+            foreach (var child in node.Children)
+            {
+                IReadOnlyList<string> childTsx;
+                {
+                    var result = await ConvertReactNodeModelToTsxCode(child, node, indentLevel + 1);
+                    if (result.HasError)
+                    {
+                        return result.Error;
+                    }
+
+                    childTsx = result.Value;
+                }
+
+                lines.AddRange(childTsx);
+            }
+
+            // Close tag
+            lines.Add($"{Indent(indentLevel)}</{tag}>");
+
+            return lines;
         }
-
-        // Close tag
-        lines.Add($"{Indent(indentLevel)}</{tag}>");
-
-        return lines;
     }
 
     static async Task<Result<ReactNode>> ConvertVisualElementModelToReactNodeModel(ProjectConfig project, VisualElementModel element)
