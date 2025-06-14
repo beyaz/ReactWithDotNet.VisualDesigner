@@ -492,7 +492,8 @@ static class NextJs_with_Tailwind
                 sb.Append(string.Join(" ", propsAsText));
             }
 
-            // try add from state 
+
+            // children property
             {
                 // sample: children: state.suggestionNodes
 
@@ -510,7 +511,7 @@ static class NextJs_with_Tailwind
                 }
             }
 
-            // from props
+            // inner text
             {
                 if (node.Children.Count == 1)
                 {
