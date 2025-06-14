@@ -356,11 +356,11 @@ static class NextJs_with_Tailwind
             tag = component.GetName();
         }
 
-        var indent = new string(' ', indentLevel * 4);
+      
 
         var sb = new StringBuilder();
 
-        sb.Append($"{indent}<{tag}");
+        sb.Append($"{Indent(indentLevel)}<{tag}");
 
         var childrenProperty = node.Properties.FirstOrDefault(x => x.Name == "children");
         if (childrenProperty is not null)
@@ -481,7 +481,7 @@ static class NextJs_with_Tailwind
                 lines.Add($"{Indent(indentLevel + 1)}{childrenProperty.Value}");
 
                 // Close tag
-                lines.Add($"{indent}</{tag}>");
+                lines.Add($"{Indent(indentLevel)}</{tag}>");
 
                 return lines;
             }
@@ -505,7 +505,7 @@ static class NextJs_with_Tailwind
                     lines.Add($"{Indent(indentLevel + 1)}{childrenText}");
 
                     // Close tag
-                    lines.Add($"{indent}</{tag}>");
+                    lines.Add($"{Indent(indentLevel)}</{tag}>");
 
                     return lines;
                 }
@@ -518,7 +518,7 @@ static class NextJs_with_Tailwind
         // Add text content
         if (!string.IsNullOrWhiteSpace(node.Text))
         {
-            lines.Add($"{indent}{AsFinalText(node.Text)}");
+            lines.Add($"{Indent(indentLevel)}{AsFinalText(node.Text)}");
         }
 
         // Add children
@@ -539,7 +539,7 @@ static class NextJs_with_Tailwind
         }
 
         // Close tag
-        lines.Add($"{indent}</{tag}>");
+        lines.Add($"{Indent(indentLevel)}</{tag}>");
 
         return lines;
     }
