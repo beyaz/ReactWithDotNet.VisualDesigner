@@ -34,7 +34,6 @@ static class ESLint
 {
     public static readonly int IndentLength = 4;
     public static readonly int MaxCharLengthPerLine = 80;
-    
 }
 
 static class NextJs_with_Tailwind
@@ -235,7 +234,7 @@ static class NextJs_with_Tailwind
         return (filePath, fileNewContent);
     }
 
-    static  async Task<Result<IReadOnlyList<string>>> ConvertReactNodeModelToTsxCode(ReactNode node, ReactNode parentNode, int indentLevel)
+    static async Task<Result<IReadOnlyList<string>>> ConvertReactNodeModelToTsxCode(ReactNode node, ReactNode parentNode, int indentLevel)
     {
         List<string> lines = [];
 
@@ -363,8 +362,6 @@ static class NextJs_with_Tailwind
             tag = component.GetName();
         }
 
-      
-
         var sb = new StringBuilder();
 
         sb.Append($"{Indent(indentLevel)}<{tag}");
@@ -382,7 +379,7 @@ static class NextJs_with_Tailwind
         }
 
         var propsAsText = new List<string>();
-        
+
         foreach (var reactProperty in node.Properties.Where(p => p.Name.NotIn(Design.Text, Design.DesignText)))
         {
             var propertyName = reactProperty.Name;
@@ -410,7 +407,7 @@ static class NextJs_with_Tailwind
                 propsAsText.Add($"{{{propertyValue}}}");
                 continue;
             }
-            
+
             if (propertyName == nameof(HtmlElement.dangerouslySetInnerHTML))
             {
                 propsAsText.Add($"{propertyName}={{{{ __html: {propertyValue}  }}}}");
@@ -461,13 +458,11 @@ static class NextJs_with_Tailwind
             propsAsText.Add($"{propertyName}={{{propertyValue}}}");
         }
 
-        
         if (propsAsText.Count > 0)
         {
             sb.Append(" ");
             sb.Append(string.Join(" ", propsAsText));
         }
-        
 
         var hasSelfClose = node.Children.Count == 0 && node.Text.HasNoValue() && childrenProperty is null;
         if (hasSelfClose)
