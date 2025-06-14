@@ -30,6 +30,13 @@ sealed record ExportInput
     // @formatter:on
 }
 
+static class ESLint
+{
+    public static readonly int IndentLength = 4;
+    public static readonly int MaxCharLengthPerLine = 80;
+    
+}
+
 static class NextJs_with_Tailwind
 {
     public static async Task<Result<ExportOutput>> Export(ExportInput input)
@@ -731,7 +738,7 @@ static class NextJs_with_Tailwind
 
     static string Indent(int indentLevel)
     {
-        return new(' ', indentLevel * 4);
+        return new(' ', indentLevel * ESLint.IndentLength);
     }
 
     static Result<string> InjectRender(IReadOnlyList<string> fileContent, string targetComponentName, IReadOnlyList<string> linesToInject)
