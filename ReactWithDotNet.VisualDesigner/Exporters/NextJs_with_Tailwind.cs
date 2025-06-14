@@ -1,5 +1,6 @@
 ﻿using System.Collections.Immutable;
 using System.Reflection;
+using System.Text.RegularExpressions;
 
 namespace ReactWithDotNet.VisualDesigner.Exporters;
 
@@ -580,7 +581,9 @@ static class NextJs_with_Tailwind
                 else
                 {
                     lines.Add($"{Indent(indentLevel)}<{tag}");
-                    lines.Add(propsAsText.Select(x => Indent(indentLevel + 1) + x));
+
+                    lines.AddRange(propsAsLines(propsAsText, indentLevel));
+
                     lines.Add($"{Indent(indentLevel)}>");
                 }
             }
@@ -616,6 +619,54 @@ static class NextJs_with_Tailwind
             lines.Add($"{Indent(indentLevel)}</{tag}>");
 
             return lines;
+        }
+
+        static IReadOnlyList<string> propsAsLines(IReadOnlyList<string> propsAsText, int indentLevel)
+        {
+            List<string> lines = [];
+
+            foreach (var propItem in propsAsText)
+            {
+                if (propItem.StartsWith("className", StringComparison.OrdinalIgnoreCase))
+                {
+                    if (propItem.Contains("`"))
+                    {
+                        var items = splitClassName(propItem.RemoveFromStart("className={`").RemoveFromEnd("`}"));
+
+                        lines.Add(Indent(indentLevel + 1) + "className={`");
+
+                        lines.AddRange(items.Select(x => Indent(indentLevel + 2) + x));
+                        lines.Add(Indent(indentLevel + 1) + "`}");
+                        continue;
+                    }
+                }
+
+                lines.Add(Indent(indentLevel + 1) + propItem);
+            }
+
+            return lines;
+
+            static List<string> splitClassName(string input)
+            {
+                var result = new List<string>();
+
+                // ${...} patternini yakala
+                var pattern = @"(\$\{.*?\})";
+                var parts = Regex.Split(input, pattern);
+
+                foreach (var part in parts)
+                {
+                    var trimmed = part.Trim();
+                    if (string.IsNullOrWhiteSpace(trimmed))
+                    {
+                        continue;
+                    }
+
+                    result.Add(trimmed);
+                }
+
+                return result;
+            }
         }
     }
 
