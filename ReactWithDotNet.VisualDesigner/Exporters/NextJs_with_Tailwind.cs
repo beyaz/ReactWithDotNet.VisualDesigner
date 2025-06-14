@@ -324,8 +324,7 @@ static class NextJs_with_Tailwind
                 lines.Add($"{Indent(indentLevel)}{{");
                 indentLevel++;
 
-                lines.Add($"{Indent(indentLevel)}{ClearConnectedValue(itemsSource.Value)}.map((_item, _index) =>");
-                lines.Add($"{Indent(indentLevel)}{{");
+                lines.Add($"{Indent(indentLevel)}{ClearConnectedValue(itemsSource.Value)}.map((_item, _index) => {{");
                 indentLevel++;
 
                 lines.Add(Indent(indentLevel) + "return (");
