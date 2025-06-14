@@ -456,12 +456,10 @@ static class NextJs_with_Tailwind
                 propsAsText.Add($"{propertyName}={{{propertyValue}}}");
             }
 
-            
             var propsCanExportInOneLine =
                 propsAsText.Count == 0 || propsAsText.Count == 1 ||
                 tag.Length + " ".Length + string.Join(" ", propsAsText).Length <= ESLint.MaxCharLengthPerLine;
 
-            
             if (node.Children.Count == 0 && node.Text.HasNoValue() && childrenProperty is null)
             {
                 if (propsAsText.Count > 0)
@@ -473,14 +471,13 @@ static class NextJs_with_Tailwind
                             $"{Indent(indentLevel)}<{tag} {string.Join(" ", propsAsText)} />"
                         };
                     }
-                    
+
                     return new TsxLines
                     {
                         $"{Indent(indentLevel)}<{tag}",
-                        propsAsText.Select(x=>Indent(indentLevel+1) + x),
+                        propsAsText.Select(x => Indent(indentLevel + 1) + x),
                         $"{Indent(indentLevel)}/>"
                     };
-                   
                 }
 
                 return new TsxLines
@@ -506,13 +503,13 @@ static class NextJs_with_Tailwind
                                 $"{Indent(indentLevel)}</{tag}>"
                             };
                         }
-                        
+
                         return new TsxLines
                         {
                             $"{Indent(indentLevel)}<{tag}",
-                            propsAsText.Select(x=>Indent(indentLevel+1) + x),
+                            propsAsText.Select(x => Indent(indentLevel + 1) + x),
                             $"{Indent(indentLevel)}>",
-                            
+
                             $"{Indent(indentLevel + 1)}{childrenProperty.Value}",
                             $"{Indent(indentLevel)}</{tag}>"
                         };
@@ -550,13 +547,13 @@ static class NextJs_with_Tailwind
                                     $"{Indent(indentLevel)}</{tag}>"
                                 };
                             }
-                            
+
                             return new TsxLines
                             {
                                 $"{Indent(indentLevel)}<{tag}",
-                                propsAsText.Select(x=>Indent(indentLevel+1) + x),
+                                propsAsText.Select(x => Indent(indentLevel + 1) + x),
                                 $"{Indent(indentLevel)}>",
-                                
+
                                 $"{Indent(indentLevel + 1)}{childrenText}",
                                 $"{Indent(indentLevel)}</{tag}>"
                             };
@@ -578,12 +575,12 @@ static class NextJs_with_Tailwind
             {
                 if (propsCanExportInOneLine)
                 {
-                    lines.Add($"{Indent(indentLevel)}<{tag} {string.Join(" ", propsAsText)}>");    
+                    lines.Add($"{Indent(indentLevel)}<{tag} {string.Join(" ", propsAsText)}>");
                 }
                 else
                 {
                     lines.Add($"{Indent(indentLevel)}<{tag}");
-                    lines.Add(propsAsText.Select(x=>Indent(indentLevel+1) + x));
+                    lines.Add(propsAsText.Select(x => Indent(indentLevel + 1) + x));
                     lines.Add($"{Indent(indentLevel)}>");
                 }
             }
@@ -857,6 +854,17 @@ static class NextJs_with_Tailwind
         return injectedFileContent;
     }
 
+    class TsxLines : List<string>
+    {
+        public void Add(IEnumerable<string> lines)
+        {
+            foreach (var line in lines)
+            {
+                Add(line);
+            }
+        }
+    }
+
     record ReactNode
     {
         public ImmutableList<ReactNode> Children { get; init; } = [];
@@ -874,16 +882,5 @@ static class NextJs_with_Tailwind
     {
         public required string Name { get; init; }
         public required string Value { get; init; }
-    }
-
-    class TsxLines: List<string>
-    {
-        public void Add(IEnumerable<string> lines)
-        {
-            foreach (var line in lines)
-            {
-                Add(line);
-            }
-        }
     }
 }
