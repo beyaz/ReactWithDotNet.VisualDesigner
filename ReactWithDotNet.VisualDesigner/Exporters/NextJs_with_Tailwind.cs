@@ -321,10 +321,7 @@ static class NextJs_with_Tailwind
             {
                 parentNode = parentNode with { Properties = parentNode.Properties.Remove(itemsSource) };
 
-                lines.Add($"{Indent(indentLevel)}{{");
-                indentLevel++;
-
-                lines.Add($"{Indent(indentLevel)}{ClearConnectedValue(itemsSource.Value)}.map((_item, _index) => {{");
+                lines.Add($"{Indent(indentLevel)}{{{ClearConnectedValue(itemsSource.Value)}.map((_item, _index) => {{");
                 indentLevel++;
 
                 lines.Add(Indent(indentLevel) + "return (");
@@ -346,10 +343,7 @@ static class NextJs_with_Tailwind
                 lines.Add(Indent(indentLevel) + ");");
 
                 indentLevel--;
-                lines.Add(Indent(indentLevel) + "})");
-
-                indentLevel--;
-                lines.Add(Indent(indentLevel) + "}");
+                lines.Add(Indent(indentLevel) + "})}");
 
                 return lines;
             }
@@ -420,7 +414,7 @@ static class NextJs_with_Tailwind
 
                 if (IsStringValue(propertyValue))
                 {
-                    propsAsText.Add($"{propertyName}={propertyValue}");
+                    propsAsText.Add($"{propertyName}=\"{TryClearStringValue(propertyValue)}\"");
                     continue;
                 }
 
