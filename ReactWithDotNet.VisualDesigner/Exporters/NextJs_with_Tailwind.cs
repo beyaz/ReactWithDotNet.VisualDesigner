@@ -482,6 +482,31 @@ static class NextJs_with_Tailwind
                 };
             }
 
+            // children property
+            {
+                // sample: children: state.suggestionNodes
+
+                if (childrenProperty is not null)
+                {
+                    if (propsAsText.Count > 0)
+                    {
+                        return new List<string>
+                        {
+                            $"{Indent(indentLevel)}<{tag} {string.Join(" ", propsAsText)}>",
+                            $"{Indent(indentLevel + 1)}{childrenProperty.Value}",
+                            $"{Indent(indentLevel)}</{tag}>"
+                        };
+                    }
+
+                    return new List<string>
+                    {
+                        $"{Indent(indentLevel)}<{tag}>",
+                        $"{Indent(indentLevel + 1)}{childrenProperty.Value}",
+                        $"{Indent(indentLevel)}</{tag}>"
+                    };
+                }
+            }
+
             var sb = new StringBuilder();
 
             sb.Append($"{Indent(indentLevel)}<{tag}");
@@ -490,25 +515,6 @@ static class NextJs_with_Tailwind
             {
                 sb.Append(" ");
                 sb.Append(string.Join(" ", propsAsText));
-            }
-
-
-            // children property
-            {
-                // sample: children: state.suggestionNodes
-
-                if (childrenProperty is not null)
-                {
-                    sb.Append('>');
-                    lines.Add(sb.ToString());
-
-                    lines.Add($"{Indent(indentLevel + 1)}{childrenProperty.Value}");
-
-                    // Close tag
-                    lines.Add($"{Indent(indentLevel)}</{tag}>");
-
-                    return lines;
-                }
             }
 
             // inner text
