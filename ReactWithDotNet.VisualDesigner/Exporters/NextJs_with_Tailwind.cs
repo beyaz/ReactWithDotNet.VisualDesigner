@@ -454,6 +454,22 @@ static class NextJs_with_Tailwind
             propsAsText.Add($"{propertyName}={{{propertyValue}}}");
         }
 
+        if (node.Children.Count == 0 && node.Text.HasNoValue() && childrenProperty is null)
+        {
+            if (propsAsText.Count > 0)
+            {
+                return new List<string>
+                {
+                    $"{Indent(indentLevel)}<{tag} {string.Join(" ", propsAsText)} />"
+                };
+            }
+
+            return new List<string>
+            {
+                $"{Indent(indentLevel)}<{tag} />"
+            };
+        }
+
         var sb = new StringBuilder();
 
         sb.Append($"{Indent(indentLevel)}<{tag}");
@@ -462,14 +478,6 @@ static class NextJs_with_Tailwind
         {
             sb.Append(" ");
             sb.Append(string.Join(" ", propsAsText));
-        }
-
-        var hasSelfClose = node.Children.Count == 0 && node.Text.HasNoValue() && childrenProperty is null;
-        if (hasSelfClose)
-        {
-            sb.Append(" />");
-            lines.Add(sb.ToString());
-            return lines;
         }
 
         // try add from state 
