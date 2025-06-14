@@ -362,10 +362,6 @@ static class NextJs_with_Tailwind
             tag = component.GetName();
         }
 
-        var sb = new StringBuilder();
-
-        sb.Append($"{Indent(indentLevel)}<{tag}");
-
         var childrenProperty = node.Properties.FirstOrDefault(x => x.Name == "children");
         if (childrenProperty is not null)
         {
@@ -457,6 +453,10 @@ static class NextJs_with_Tailwind
 
             propsAsText.Add($"{propertyName}={{{propertyValue}}}");
         }
+
+        var sb = new StringBuilder();
+
+        sb.Append($"{Indent(indentLevel)}<{tag}");
 
         if (propsAsText.Count > 0)
         {
