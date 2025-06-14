@@ -358,7 +358,7 @@ static class NextJs_with_Tailwind
         }
 
         {
-            List<string> lines = [];
+           
 
             var elementType = node.HtmlElementType;
 
@@ -539,6 +539,9 @@ static class NextJs_with_Tailwind
                 }
             }
 
+            
+            List<string> lines = [];
+            
             var sb = new StringBuilder();
 
             sb.Append($"{Indent(indentLevel)}<{tag}");
