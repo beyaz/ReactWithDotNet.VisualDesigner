@@ -1,6 +1,5 @@
 ﻿using System.Collections.Immutable;
 using System.Reflection;
-using System.Text;
 
 namespace ReactWithDotNet.VisualDesigner.Exporters;
 
@@ -358,8 +357,6 @@ static class NextJs_with_Tailwind
         }
 
         {
-           
-
             var elementType = node.HtmlElementType;
 
             var tag = nodeTag;
@@ -539,21 +536,16 @@ static class NextJs_with_Tailwind
                 }
             }
 
-            
             List<string> lines = [];
-            
-            var sb = new StringBuilder();
-
-            sb.Append($"{Indent(indentLevel)}<{tag}");
 
             if (propsAsText.Count > 0)
             {
-                sb.Append(" ");
-                sb.Append(string.Join(" ", propsAsText));
+                lines.Add($"{Indent(indentLevel)}<{tag} {string.Join(" ", propsAsText)}>");
             }
-
-            sb.Append('>');
-            lines.Add(sb.ToString());
+            else
+            {
+                lines.Add($"{Indent(indentLevel)}<{tag}>");
+            }
 
             // Add text content
             if (!string.IsNullOrWhiteSpace(node.Text))
