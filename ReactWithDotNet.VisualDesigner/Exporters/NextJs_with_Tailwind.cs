@@ -394,37 +394,37 @@ static class NextJs_with_Tailwind
 
             if (propertyValue == "true")
             {
-                sb.Append($" {propertyName}");
+                propsAsText.Add($"{propertyName}");
                 continue;
             }
 
             if (propertyName == Design.SpreadOperator)
             {
-                sb.Append($" {{{propertyValue}}}");
+                propsAsText.Add($"{{{propertyValue}}}");
                 continue;
             }
             
             if (propertyName == nameof(HtmlElement.dangerouslySetInnerHTML))
             {
-                sb.Append($" {propertyName}={{{{ __html: {propertyValue}  }}}}");
+                propsAsText.Add($"{propertyName}={{{{ __html: {propertyValue}  }}}}");
                 continue;
             }
 
             if (IsStringValue(propertyValue))
             {
-                sb.Append($" {propertyName}={propertyValue}");
+                propsAsText.Add($"{propertyName}={propertyValue}");
                 continue;
             }
 
             if (IsConnectedValue(propertyValue))
             {
-                sb.Append($" {propertyName}={propertyValue}");
+                propsAsText.Add($"{propertyName}={propertyValue}");
                 continue;
             }
 
             if (IsStringTemplate(propertyValue))
             {
-                sb.Append($" {propertyName}={{{propertyValue}}}");
+                propsAsText.Add($"{propertyName}={{{propertyValue}}}");
                 continue;
             }
 
@@ -438,21 +438,28 @@ static class NextJs_with_Tailwind
                         var isString = propertyValue.Contains('/') || propertyValue.StartsWith('#') || propertyValue.Split(' ').Length > 1;
                         if (isString)
                         {
-                            sb.Append($" {propertyName}=\"{propertyValue}\"");
+                            propsAsText.Add($"{propertyName}=\"{propertyValue}\"");
                             continue;
                         }
                     }
 
                     if ((propertyType == typeof(UnionProp<string, double?>) || propertyType == typeof(UnionProp<string, double>)) && double.TryParse(propertyValue, out _))
                     {
-                        sb.Append($" {propertyName}={{{propertyValue}}}");
+                        propsAsText.Add($"{propertyName}={{{propertyValue}}}");
                         continue;
                     }
                 }
             }
 
-            sb.Append($" {propertyName}={{{propertyValue}}}");
+            propsAsText.Add($"{propertyName}={{{propertyValue}}}");
         }
+
+        if (propsAsText.Count > 0)
+        {
+            sb.Append(" ");
+            sb.Append(string.Join(" ", propsAsText));
+        }
+        
 
         var hasSelfClose = node.Children.Count == 0 && node.Text.HasNoValue() && childrenProperty is null;
         if (hasSelfClose)
