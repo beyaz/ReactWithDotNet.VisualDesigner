@@ -473,13 +473,24 @@ static class NextJs_with_Tailwind
             {
                 if (propsAsText.Count > 0)
                 {
-                    return new List<string>
+                    //if (propsCanExportInOneLine)
                     {
-                        $"{Indent(indentLevel)}<{tag} {string.Join(" ", propsAsText)} />"
+                        return new TsxLines
+                        {
+                            $"{Indent(indentLevel)}<{tag} {string.Join(" ", propsAsText)} />"
+                        };
+                    }
+                    
+                    return new TsxLines
+                    {
+                        $"{Indent(indentLevel)}<{tag}",
+                        propsAsText.Select(x=>Indent(indentLevel+1) + x),
+                        $"{Indent(indentLevel)}/>"
                     };
+                   
                 }
 
-                return new List<string>
+                return new TsxLines
                 {
                     $"{Indent(indentLevel)}<{tag} />"
                 };
@@ -493,7 +504,7 @@ static class NextJs_with_Tailwind
                 {
                     if (propsAsText.Count > 0)
                     {
-                        return new List<string>
+                        return new TsxLines
                         {
                             $"{Indent(indentLevel)}<{tag} {string.Join(" ", propsAsText)}>",
                             $"{Indent(indentLevel + 1)}{childrenProperty.Value}",
@@ -501,7 +512,7 @@ static class NextJs_with_Tailwind
                         };
                     }
 
-                    return new List<string>
+                    return new TsxLines
                     {
                         $"{Indent(indentLevel)}<{tag}>",
                         $"{Indent(indentLevel + 1)}{childrenProperty.Value}",
@@ -524,7 +535,7 @@ static class NextJs_with_Tailwind
                     {
                         if (propsAsText.Count > 0)
                         {
-                            return new List<string>
+                            return new TsxLines
                             {
                                 $"{Indent(indentLevel)}<{tag} {string.Join(" ", propsAsText)}>",
                                 $"{Indent(indentLevel + 1)}{childrenText}",
@@ -532,7 +543,7 @@ static class NextJs_with_Tailwind
                             };
                         }
 
-                        return new List<string>
+                        return new TsxLines
                         {
                             $"{Indent(indentLevel)}<{tag}>",
                             $"{Indent(indentLevel + 1)}{childrenText}",
@@ -542,7 +553,7 @@ static class NextJs_with_Tailwind
                 }
             }
 
-            List<string> lines = [];
+            TsxLines lines = [];
 
             if (propsAsText.Count > 0)
             {
@@ -835,5 +846,16 @@ static class NextJs_with_Tailwind
     {
         public required string Name { get; init; }
         public required string Value { get; init; }
+    }
+
+    class TsxLines: List<string>
+    {
+        public void Add(IEnumerable<string> lines)
+        {
+            foreach (var line in lines)
+            {
+                Add(line);
+            }
+        }
     }
 }
