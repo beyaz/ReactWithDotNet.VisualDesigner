@@ -354,7 +354,13 @@ public static class CssHelper
                     return $"min-h-[{cssAttributeValue}]";
 
                 case "z-index":
+                {
+                    if (cssAttributeValue.In("0","10","20","30","40","50","auto"))
+                    {
+                        return $"z-{cssAttributeValue}";
+                    }
                     return $"z-[{cssAttributeValue}]";
+                }
 
                 case "overflow-y":
                 case "overflow-x":
