@@ -31,7 +31,7 @@ sealed record ExportInput
 
 static class ESLint
 {
-    public static readonly int IndentLength = 4;
+    public static readonly int IndentLength = 2;
     public static readonly int MaxCharLengthPerLine = 80;
 }
 
@@ -473,7 +473,7 @@ static class NextJs_with_Tailwind
             {
                 if (propsAsText.Count > 0)
                 {
-                    //if (propsCanExportInOneLine)
+                    if (propsCanExportInOneLine)
                     {
                         return new TsxLines
                         {
@@ -504,9 +504,22 @@ static class NextJs_with_Tailwind
                 {
                     if (propsAsText.Count > 0)
                     {
+                        if (propsCanExportInOneLine)
+                        {
+                            return new TsxLines
+                            {
+                                $"{Indent(indentLevel)}<{tag} {string.Join(" ", propsAsText)}>",
+                                $"{Indent(indentLevel + 1)}{childrenProperty.Value}",
+                                $"{Indent(indentLevel)}</{tag}>"
+                            };
+                        }
+                        
                         return new TsxLines
                         {
-                            $"{Indent(indentLevel)}<{tag} {string.Join(" ", propsAsText)}>",
+                            $"{Indent(indentLevel)}<{tag}",
+                            propsAsText.Select(x=>Indent(indentLevel+1) + x),
+                            $"{Indent(indentLevel)}>",
+                            
                             $"{Indent(indentLevel + 1)}{childrenProperty.Value}",
                             $"{Indent(indentLevel)}</{tag}>"
                         };
@@ -535,9 +548,22 @@ static class NextJs_with_Tailwind
                     {
                         if (propsAsText.Count > 0)
                         {
+                            if (propsCanExportInOneLine)
+                            {
+                                return new TsxLines
+                                {
+                                    $"{Indent(indentLevel)}<{tag} {string.Join(" ", propsAsText)}>",
+                                    $"{Indent(indentLevel + 1)}{childrenText}",
+                                    $"{Indent(indentLevel)}</{tag}>"
+                                };
+                            }
+                            
                             return new TsxLines
                             {
-                                $"{Indent(indentLevel)}<{tag} {string.Join(" ", propsAsText)}>",
+                                $"{Indent(indentLevel)}<{tag}",
+                                propsAsText.Select(x=>Indent(indentLevel+1) + x),
+                                $"{Indent(indentLevel)}>",
+                                
                                 $"{Indent(indentLevel + 1)}{childrenText}",
                                 $"{Indent(indentLevel)}</{tag}>"
                             };
@@ -557,7 +583,16 @@ static class NextJs_with_Tailwind
 
             if (propsAsText.Count > 0)
             {
-                lines.Add($"{Indent(indentLevel)}<{tag} {string.Join(" ", propsAsText)}>");
+                if (propsCanExportInOneLine)
+                {
+                    lines.Add($"{Indent(indentLevel)}<{tag} {string.Join(" ", propsAsText)}>");    
+                }
+                else
+                {
+                    lines.Add($"{Indent(indentLevel)}<{tag}");
+                    lines.Add(propsAsText.Select(x=>Indent(indentLevel+1) + x));
+                    lines.Add($"{Indent(indentLevel)}>");
+                }
             }
             else
             {
