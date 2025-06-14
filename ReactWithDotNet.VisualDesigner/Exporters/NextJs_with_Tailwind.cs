@@ -463,6 +463,12 @@ static class NextJs_with_Tailwind
                 propsAsText.Add($"{propertyName}={{{propertyValue}}}");
             }
 
+            
+            var propsCanExportInOneLine =
+                propsAsText.Count == 0 || propsAsText.Count == 1 ||
+                tag.Length + " ".Length + string.Join(" ", propsAsText).Length <= ESLint.MaxCharLengthPerLine;
+
+            
             if (node.Children.Count == 0 && node.Text.HasNoValue() && childrenProperty is null)
             {
                 if (propsAsText.Count > 0)
