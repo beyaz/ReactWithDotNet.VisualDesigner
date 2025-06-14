@@ -177,7 +177,7 @@ public static class CssHelper
                         }
                     }
 
-                    return "${" + $"{ClearConnectedValue(condition)} ? '{lefTailwindClass}' : '{rightTailwindClass}'" + '}';
+                    return "${" + $"{ClearConnectedValue(condition)} ? \"{lefTailwindClass}\" : \"{rightTailwindClass}\"" + '}';
                 }
             }
 

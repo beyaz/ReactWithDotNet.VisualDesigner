@@ -408,7 +408,7 @@ static class NextJs_with_Tailwind
 
                 if (propertyName == nameof(HtmlElement.dangerouslySetInnerHTML))
                 {
-                    propsAsText.Add($"{propertyName}={{{{ __html: {propertyValue}  }}}}");
+                    propsAsText.Add($"{propertyName}={{{{ __html: {propertyValue} }}}}");
                     continue;
                 }
 
