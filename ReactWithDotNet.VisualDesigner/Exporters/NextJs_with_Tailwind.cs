@@ -461,6 +461,7 @@ static class NextJs_with_Tailwind
             propsAsText.Add($"{propertyName}={{{propertyValue}}}");
         }
 
+        
         if (propsAsText.Count > 0)
         {
             sb.Append(" ");
