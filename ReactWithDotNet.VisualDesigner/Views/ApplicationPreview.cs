@@ -124,8 +124,23 @@ sealed class ApplicationPreview : Component
                     if (componentRootElementModel is not null)
                     {
                         componentRootElementModel.Children.AddRange(model.Children);
+                        
+                        var component = await renderElement(context with { Parent = context, ParentModel = model }, componentRootElementModel, path);
+                        
+                        // try to highlight
+                        if (context.HighlightedElement == model)
+                        {
+                            if (component.Value is HtmlElement htmlElement)
+                            {
+                                var id = htmlElement.id ??= Guid.NewGuid().ToString("N");
 
-                        return await renderElement(context with { Parent = context, ParentModel = model }, componentRootElementModel, path);
+                                var jsCode = $"ReactWithDotNet.OnDocumentReady(()=> ReactWithDotNetHighlightElement(document.getElementById('{id}')));";
+                            
+                                context.Client.RunJavascript(jsCode);
+                            }
+                        }
+                        
+                        return component;
                     }
                 }
             }
@@ -174,6 +189,7 @@ sealed class ApplicationPreview : Component
                 }
             }
 
+            // try to highlight
             if (context.HighlightedElement == model)
             {
                 element.id = Guid.NewGuid().ToString("N");
