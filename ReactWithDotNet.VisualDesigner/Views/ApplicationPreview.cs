@@ -124,9 +124,9 @@ sealed class ApplicationPreview : Component
                     if (componentRootElementModel is not null)
                     {
                         componentRootElementModel.Children.AddRange(model.Children);
-                        
+
                         var component = await renderElement(context with { Parent = context, ParentModel = model }, componentRootElementModel, path);
-                        
+
                         // try to highlight
                         if (context.HighlightedElement == model)
                         {
@@ -135,11 +135,11 @@ sealed class ApplicationPreview : Component
                                 var id = htmlElement.id ??= Guid.NewGuid().ToString("N");
 
                                 var jsCode = $"ReactWithDotNet.OnDocumentReady(()=> ReactWithDotNetHighlightElement(document.getElementById('{id}')));";
-                            
+
                                 context.Client.RunJavascript(jsCode);
                             }
                         }
-                        
+
                         return component;
                     }
                 }
@@ -179,9 +179,9 @@ sealed class ApplicationPreview : Component
 
             {
                 var result = model.Styles
-                                  .Select(x => CreateDesignerStyleItemFromText(context.Project, x))
-                                  .ConvertAll(designerItem => designerItem.ToStyleModifier())
-                                  .Then(styleModifiers => element.Add(styleModifiers.ToArray()));
+                    .Select(x => CreateDesignerStyleItemFromText(context.Project, x))
+                    .ConvertAll(designerItem => designerItem.ToStyleModifier())
+                    .Then(styleModifiers => element.Add(styleModifiers.ToArray()));
 
                 if (result.HasError)
                 {
@@ -192,7 +192,7 @@ sealed class ApplicationPreview : Component
             // try to highlight
             if (context.HighlightedElement == model)
             {
-                element.id = Guid.NewGuid().ToString("N");
+                element.id ??= Guid.NewGuid().ToString("N");
 
                 var jsCode = $"ReactWithDotNet.OnDocumentReady(()=> ReactWithDotNetHighlightElement(document.getElementById('{element.id}')));";
 
