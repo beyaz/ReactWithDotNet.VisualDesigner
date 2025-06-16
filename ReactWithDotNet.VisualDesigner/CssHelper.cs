@@ -696,6 +696,16 @@ public static class CssHelper
 
                     break;
                 }
+                
+                case "grid-template-columns":
+                {
+                    return TailwindGrid.ResolveGridCols(cssAttributeValue);
+                }
+                
+                case "grid-template-rows":
+                {
+                    return TailwindGrid.ResolveGridRows(cssAttributeValue);
+                }
             }
 
             if (cssAttributeName == "outline-offset")
@@ -704,8 +714,9 @@ public static class CssHelper
                 {
                     return "outline-offset-[-1px]";
                 }
-               
             }
+            
+            
 
             return new InvalidOperationException($"Css not handled. {cssAttributeName}: {cssAttributeValue}");
 
@@ -751,6 +762,70 @@ public static class CssHelper
                 
                 return (isNamedColor, namedColor);
             }
+
+        }
+    }
+    
+    static class TailwindGrid
+    {
+        static readonly Dictionary<string, string> PredefinedColumns = new()
+        {
+            { "1fr", "grid-cols-1" },
+            { "1fr 1fr", "grid-cols-2" },
+            { "1fr 1fr 1fr", "grid-cols-3" },
+            { "1fr 1fr 1fr 1fr", "grid-cols-4" },
+            { "1fr 1fr 1fr 1fr 1fr", "grid-cols-5" },
+            { "1fr 1fr 1fr 1fr 1fr 1fr", "grid-cols-6" },
+            { "1fr 1fr 1fr 1fr 1fr 1fr 1fr", "grid-cols-7" },
+            { "1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr", "grid-cols-8" },
+            { "1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr", "grid-cols-9" },
+            { "1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr", "grid-cols-10" },
+            { "1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr", "grid-cols-11" },
+            { "1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr", "grid-cols-12" },
+        };
+        
+        static readonly Dictionary<string, string> PredefinedRows = new()
+        {
+            { "1fr", "grid-rows-1" },
+            { "1fr 1fr", "grid-rows-2" },
+            { "1fr 1fr 1fr", "grid-rows-3" },
+            { "1fr 1fr 1fr 1fr", "grid-rows-4" },
+            { "1fr 1fr 1fr 1fr 1fr", "grid-rows-5" },
+            { "1fr 1fr 1fr 1fr 1fr 1fr", "grid-rows-6" },
+        };
+        
+        public static Result<string> ResolveGridCols(string cssValue)
+        {
+            if (string.IsNullOrWhiteSpace(cssValue))
+            {
+                return new ArgumentNullException(nameof(cssValue));
+            }
+
+            if (PredefinedColumns.TryGetValue(cssValue, out var predefinedClass))
+            {
+                return predefinedClass;
+            }
+
+            var parts = cssValue.Split([' '], StringSplitOptions.RemoveEmptyEntries);
+            
+            return $"grid-cols-[{string.Join("_", parts)}]";
+        }
+        
+        public static Result<string> ResolveGridRows(string cssValue)
+        {
+            if (string.IsNullOrWhiteSpace(cssValue))
+            {
+                return new ArgumentNullException(nameof(cssValue));
+            }
+
+            if (PredefinedRows.TryGetValue(cssValue, out var predefinedClass))
+            {
+                return predefinedClass;
+            }
+
+            var parts = cssValue.Split([' '], StringSplitOptions.RemoveEmptyEntries);
+            
+            return $"grid-rows-[{string.Join("_", parts)}]";
         }
     }
 
@@ -910,7 +985,7 @@ public static class CssHelper
 
         if (designerStyleItem.Pseudo is not null)
         {
-            return ApplyPseudo(designerStyleItem.Pseudo, [.. style]);
+            return ApplyPseudo(designerStyleItem.Pseudo, [..style]);
         }
 
         return (StyleModifier)style;
@@ -949,6 +1024,10 @@ public static class CssHelper
         }
         
    
+        static Result<StyleModifier> ApplyPseudo(string pseudo, IReadOnlyList<StyleModifier> styleModifiers)
+        {
+            return GetPseudoFunction(pseudo).Then(pseudoFunction => pseudoFunction([.. styleModifiers]));
+        }
     }
 
     public static Maybe<DesignerStyleItem> TryConvertCssUtilityClassToHtmlStyle(ProjectConfig project, string utilityCssClassName)
@@ -1265,10 +1344,7 @@ public static class CssHelper
         }
     }
 
-    static Result<StyleModifier> ApplyPseudo(string pseudo, IReadOnlyList<StyleModifier> styleModifiers)
-    {
-        return GetPseudoFunction(pseudo).Then(pseudoFunction => pseudoFunction([.. styleModifiers]));
-    }
+    
 
     static Result<Func<StyleModifier[], StyleModifier>> GetPseudoFunction(string pseudoName)
     {
@@ -1397,6 +1473,8 @@ public static class CssHelper
             case "visibility":
             case "user-select":
             case "flex-shrink":
+            case "grid-template-columns":
+            case "grid-template-rows":
             {
                 return asDictionary((name, value));
             }

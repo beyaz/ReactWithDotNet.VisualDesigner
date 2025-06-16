@@ -355,6 +355,8 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
             var hasRow = styles.Contains("row") || styles.Contains("flex-row-centered");
 
             var hasFlex = styles.Any(x => TryParseProperty(x).Is("display", "flex") || TryParseProperty(x).Is("display", "inline-flex"));
+            
+            var hasGrid = styles.Any(x => TryParseProperty(x).Is("display", "grid") || TryParseProperty(x).Is("display", "inline-grid"));
 
             var hasFlexDirectionColumn = styles.Any(x => TryParseProperty(x).Is("flex-direction", "column"));
 
@@ -364,6 +366,11 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
 
             var hasWidhtWithConstantValue = styles.Any(x => TryParseProperty(x).Is(r => r.Value.IsDouble() && r.Name.In("w", "width")));
 
+            if (hasGrid)
+            {
+                return new IconGrid() + Size(16) + Color(Gray300);
+            }
+            
             if (hasFlexDirectionColumn || hasCol)
             {
                 return new IconFlexColumn() + Size(16) + Color(Gray300);

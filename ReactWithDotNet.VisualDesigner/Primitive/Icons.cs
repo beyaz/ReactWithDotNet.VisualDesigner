@@ -209,6 +209,24 @@ sealed class IconFlexRow : PureComponent
     }
 }
 
+sealed class IconGrid : PureComponent
+{
+    protected override Element render()
+    {
+        return new svg( Fill(none), ViewBox(0, 0, 24, 24),  Size(16))
+        {
+            new path
+            {
+                stroke         = "currentColor",
+                strokeLinecap  = "round",
+                strokeLinejoin = "round",
+                strokeWidth    = 1.5,
+                d              = "M4.75 5.75a1 1 0 011-1h3.5a1 1 0 011 1v3.5a1 1 0 01-1 1h-3.5a1 1 0 01-1-1v-3.5zm0 9a1 1 0 011-1h3.5a1 1 0 011 1v3.5a1 1 0 01-1 1h-3.5a1 1 0 01-1-1v-3.5zm9-9a1 1 0 011-1h3.5a1 1 0 011 1v3.5a1 1 0 01-1 1h-3.5a1 1 0 01-1-1v-3.5zm0 9a1 1 0 011-1h3.5a1 1 0 011 1v3.5a1 1 0 01-1 1h-3.5a1 1 0 01-1-1v-3.5z"
+            }
+        };
+    }
+}
+
 sealed class IconFlexColumn : PureComponent
 {
     protected override Element render()
