@@ -985,7 +985,7 @@ public static class CssHelper
 
         if (designerStyleItem.Pseudo is not null)
         {
-            return ApplyPseudo(designerStyleItem.Pseudo, [..style]);
+            return ApplyPseudo(designerStyleItem.Pseudo, [CreateStyleModifier(x => x.Import(style))]);
         }
 
         return (StyleModifier)style;
