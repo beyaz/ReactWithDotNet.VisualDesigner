@@ -713,4 +713,6 @@ static class Design
     public const string DesignText = "--text";
     
     public const string SpreadOperator = "--spreadOperator";
+    
+    public const string Src = "d-src";
 }
