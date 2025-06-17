@@ -249,12 +249,54 @@ sealed class ApplicationPreview : Component
             {
                 var jsCode = new StringBuilder();
 
+                jsCode.AppendLine("""
+
+                                  function scrollIfNeededThenCall(element, callback) 
+                                  {
+                                    const rect = element.getBoundingClientRect();
+                                  
+                                    const isVisible =
+                                      rect.top >= 0 &&
+                                      rect.left >= 0 &&
+                                      rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+                                      rect.right <= (window.innerWidth || document.documentElement.clientWidth);
+                                  
+                                    if (isVisible) 
+                                    {
+                                      callback();
+                                      
+                                      return;
+                                    }
+                                  
+                                    let timeoutId;
+                                    let lastScrollTop = window.scrollY;
+                                  
+                                    function checkScrollStopped() 
+                                    {
+                                      if (window.scrollY !== lastScrollTop) 
+                                      {
+                                        lastScrollTop = window.scrollY;
+                                        clearTimeout(timeoutId);
+                                        timeoutId = setTimeout(() => 
+                                        {
+                                          callback();
+                                          window.removeEventListener("scroll", checkScrollStopped);
+                                        }, 100);
+                                      }
+                                    }
+                                  
+                                    window.addEventListener("scroll", checkScrollStopped);
+                                    
+                                    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                  }
+                                                
+                                  """);
+
                 jsCode.AppendLine("ReactWithDotNet.OnDocumentReady(() => {");
                 jsCode.AppendLine($"  const element = document.getElementById('{id}');");
                 jsCode.AppendLine("  if(element)");
                 jsCode.AppendLine("  {");
-                jsCode.AppendLine("     element.scrollIntoView({ behavior: 'smooth', block: 'center' });");
-                jsCode.AppendLine("     setTimeout(()=>ReactWithDotNetHighlightElement(element), 500);");
+                jsCode.AppendLine("     scrollIfNeededThenCall(element, () => ReactWithDotNetHighlightElement(element));");
                 jsCode.AppendLine("  }");
                 jsCode.AppendLine("});");
 
