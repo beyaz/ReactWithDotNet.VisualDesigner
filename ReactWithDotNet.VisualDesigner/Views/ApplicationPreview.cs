@@ -132,11 +132,7 @@ sealed class ApplicationPreview : Component
                         {
                             if (component.Value is HtmlElement htmlElement)
                             {
-                                var id = htmlElement.id ??= Guid.NewGuid().ToString("N");
-
-                                var jsCode = $"ReactWithDotNet.OnDocumentReady(()=> ReactWithDotNetHighlightElement(document.getElementById('{id}')));";
-
-                                context.Client.RunJavascript(jsCode);
+                                context.Client.RunJavascript(getJsCodeToHighlightElement(htmlElement.id ??= Guid.NewGuid().ToString("N")));
                             }
                         }
 
@@ -194,10 +190,10 @@ sealed class ApplicationPreview : Component
             {
                 element.id ??= Guid.NewGuid().ToString("N");
 
-                var jsCode = $"ReactWithDotNet.OnDocumentReady(()=> ReactWithDotNetHighlightElement(document.getElementById('{element.id}')));";
-
-                context.Client.RunJavascript(jsCode);
+                context.Client.RunJavascript(getJsCodeToHighlightElement(element.id ??= Guid.NewGuid().ToString("N")));
             }
+            
+            
 
             if (model.HasNoChild())
             {
@@ -248,6 +244,22 @@ sealed class ApplicationPreview : Component
             }
 
             return element;
+
+            static string getJsCodeToHighlightElement(string id)
+            {
+                var jsCode = new StringBuilder();
+
+                jsCode.AppendLine("ReactWithDotNet.OnDocumentReady(() => {");
+                jsCode.AppendLine($"  const element = document.getElementById('{id}');");
+                jsCode.AppendLine("  if(element)");
+                jsCode.AppendLine("  {");
+                jsCode.AppendLine("     element.scrollIntoView({ behavior: 'smooth', block: 'center' });");
+                jsCode.AppendLine("     setTimeout(()=>ReactWithDotNetHighlightElement(element), 500);");
+                jsCode.AppendLine("  }");
+                jsCode.AppendLine("});");
+
+                return jsCode.ToString();
+            }
 
             static bool isUnknownValue(string value)
             {
