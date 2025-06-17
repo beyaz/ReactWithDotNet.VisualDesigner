@@ -192,8 +192,6 @@ sealed class ApplicationPreview : Component
 
                 context.Client.RunJavascript(getJsCodeToHighlightElement(element.id ??= Guid.NewGuid().ToString("N")));
             }
-            
-            
 
             if (model.HasNoChild())
             {
@@ -254,23 +252,23 @@ sealed class ApplicationPreview : Component
                                   function scrollIfNeededThenCall(element, callback) 
                                   {
                                     const rect = element.getBoundingClientRect();
-                                  
+
                                     const isVisible =
                                       rect.top >= 0 &&
                                       rect.left >= 0 &&
                                       rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
                                       rect.right <= (window.innerWidth || document.documentElement.clientWidth);
-                                  
+
                                     if (isVisible) 
                                     {
                                       callback();
                                       
                                       return;
                                     }
-                                  
+
                                     let timeoutId;
                                     let lastScrollTop = window.scrollY;
-                                  
+
                                     function checkScrollStopped() 
                                     {
                                       if (window.scrollY !== lastScrollTop) 
@@ -284,7 +282,7 @@ sealed class ApplicationPreview : Component
                                         }, 100);
                                       }
                                     }
-                                  
+
                                     window.addEventListener("scroll", checkScrollStopped);
                                     
                                     element.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -337,7 +335,7 @@ sealed class ApplicationPreview : Component
                 {
                     return Success;
                 }
-                
+
                 return new Exception($"Property '{propName}' with value '{propValue}' is not processed for element '{model.Tag}'.");
 
                 static bool isKnownProp(string name)
@@ -464,8 +462,7 @@ sealed class ApplicationPreview : Component
                                 }
                             }
                         }
-                        
-                        
+
                         // try initialize dummy src
                         {
                             string dummySrc = null;
@@ -495,12 +492,11 @@ sealed class ApplicationPreview : Component
                                     }
                                 }
                             }
-                            
 
                             if (dummySrc.HasValue())
                             {
                                 elementAsImage.src = dummySrc;
-                                
+
                                 return true;
                             }
                         }
