@@ -665,4 +665,9 @@ static class Design
     public const string SpreadOperator = "--spreadOperator";
     
     public const string Src = "d-src";
+    
+    public const string ItemsSource = "-items-source";
+    
+    public const string ItemsSourceDesignTimeCount = "-items-source-design-time-count";
+    
 }

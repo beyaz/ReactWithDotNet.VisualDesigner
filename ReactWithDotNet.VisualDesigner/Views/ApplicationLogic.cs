@@ -184,8 +184,8 @@ static class ApplicationLogic
             }
         }
 
-        items.Add("-items-source-design-time-count: 3");
-        items.Add("-items-source: {state.userList}");
+        items.Add($"{Design.ItemsSourceDesignTimeCount}: 3");
+        items.Add($"{Design.ItemsSource}: {{state.userList}}");
 
         items.Add("-show-if: {state.isSelectedUser}");
         items.Add("-hide-if: {state.isSelectedUser}");

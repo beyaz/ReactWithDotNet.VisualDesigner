@@ -317,7 +317,7 @@ static class NextJs_with_Tailwind
         {
             List<string> lines = [];
 
-            var itemsSource = parentNode?.Properties.FirstOrDefault(x => x.Name is "-items-source");
+            var itemsSource = parentNode?.Properties.FirstOrDefault(x => x.Name is Design.ItemsSource);
             if (itemsSource is not null)
             {
                 parentNode = parentNode with { Properties = parentNode.Properties.Remove(itemsSource) };
@@ -385,7 +385,7 @@ static class NextJs_with_Tailwind
 
                 var propertyValue = reactProperty.Value;
 
-                if (propertyName is "-items-source" || propertyName is "-items-source-design-time-count")
+                if (propertyName is Design.ItemsSource || propertyName is Design.ItemsSourceDesignTimeCount)
                 {
                     continue;
                 }

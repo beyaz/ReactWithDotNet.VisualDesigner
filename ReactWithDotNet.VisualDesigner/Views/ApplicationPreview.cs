@@ -340,7 +340,7 @@ sealed class ApplicationPreview : Component
 
                 static bool isKnownProp(string name)
                 {
-                    if (name is "ref" or "key" or "-items-source" or "size" or "onClick" or "onInput" or "-show-if" or "-hide-if")
+                    if (name is "ref" or "key" or Design.ItemsSource or "size" or "onClick" or "onInput" or "-show-if" or "-hide-if")
                     {
                         return true;
                     }
@@ -363,7 +363,7 @@ sealed class ApplicationPreview : Component
 
                 static bool itemSourceDesignTimeCount(VisualElementModel model, string name, string value)
                 {
-                    if (name == "-items-source-design-time-count")
+                    if (name == Design.ItemsSourceDesignTimeCount)
                     {
                         var firstChild = model.Children.FirstOrDefault();
                         if (firstChild is not null)
