@@ -216,13 +216,13 @@ sealed class ApplicationPreview : Component
 
                     // check -show/hide-if
                     {
-                        var hideIf = tryGetPropValueFromCaller(context, childModel, "-hide-if");
+                        var hideIf = tryGetPropValueFromCaller(context, childModel, Design.HideIf);
                         if (hideIf.HasValue && hideIf.Value == "true")
                         {
                             continue;
                         }
 
-                        var showIf = tryGetPropValueFromCaller(context, childModel, "-show-if");
+                        var showIf = tryGetPropValueFromCaller(context, childModel, Design.ShowIf);
                         if (showIf.HasValue && showIf.Value == "false")
                         {
                             continue;
@@ -340,7 +340,7 @@ sealed class ApplicationPreview : Component
 
                 static bool isKnownProp(string name)
                 {
-                    if (name is "ref" or "key" or Design.ItemsSource or "size" or "onClick" or "onInput" or "-show-if" or "-hide-if")
+                    if (name is "ref" or "key" or Design.ItemsSource or "size" or "onClick" or "onInput" or Design.ShowIf or Design.HideIf)
                     {
                         return true;
                     }

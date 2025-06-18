@@ -251,8 +251,8 @@ static class NextJs_with_Tailwind
             return new ArgumentNullException(nameof(nodeTag));
         }
 
-        var showIf = node.Properties.FirstOrDefault(x => x.Name is "-show-if");
-        var hideIf = node.Properties.FirstOrDefault(x => x.Name is "-hide-if");
+        var showIf = node.Properties.FirstOrDefault(x => x.Name is Design.ShowIf);
+        var hideIf = node.Properties.FirstOrDefault(x => x.Name is Design.HideIf);
 
         if (showIf is not null)
         {

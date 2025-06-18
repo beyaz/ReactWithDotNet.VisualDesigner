@@ -187,8 +187,8 @@ static class ApplicationLogic
         items.Add($"{Design.ItemsSourceDesignTimeCount}: 3");
         items.Add($"{Design.ItemsSource}: {{state.userList}}");
 
-        items.Add("-show-if: {state.isSelectedUser}");
-        items.Add("-hide-if: {state.isSelectedUser}");
+        items.Add($"{Design.ShowIf}: {{state.isSelectedUser}}");
+        items.Add($"{Design.HideIf}: {{state.isSelectedUser}}");
 
         items.AddRange(GetPropsSuggestions(state));
 
