@@ -35,7 +35,7 @@ public sealed class NextJsExportTest
             {
                 var name = result.Value.Name;
 
-                if (name == "-items-source-design-time-count")
+                if (name == "-hide-if")
                 {
                     model.Properties[i] = "d" + model.Properties[i].Trim();
                 }
