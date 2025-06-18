@@ -1826,10 +1826,21 @@ sealed class ApplicationView : Component<ApplicationState>
                 {
                     TryParseProperty(value).HasValue(x =>
                     {
-                        content = new FlexRow(AlignItemsCenter, FlexWrap)
+                        if (x.Name == Design.SpreadOperator)
                         {
-                            new span(FontWeight600) { x.Name }, ": ", new span(PaddingLeft(2)) { x.Value }
-                        };
+                            content = new FlexRow(AlignItemsCenter, FlexWrap)
+                            {
+                                new span { x.Value }
+                            };
+                        }
+                        else
+                        {
+                            content = new FlexRow(AlignItemsCenter, FlexWrap)
+                            {
+                                new span(FontWeight600) { x.Name }, ": ", new span(PaddingLeft(2)) { x.Value }
+                            };
+                        }
+                      
                     });
                 }
 
