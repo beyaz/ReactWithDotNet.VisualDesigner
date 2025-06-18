@@ -129,7 +129,6 @@ sealed class ApplicationView : Component<ApplicationState>
                 await ChangeSelectedProject(projectId.Value);
             }
         }
-        
     }
 
     protected override Task OverrideStateFromPropsBeforeRender()
@@ -1840,7 +1839,6 @@ sealed class ApplicationView : Component<ApplicationState>
                                 new span(FontWeight600) { x.Name }, ": ", new span(PaddingLeft(2)) { x.Value }
                             };
                         }
-                      
                     });
                 }
 
