@@ -668,6 +668,6 @@ static class Design
     
     public const string ItemsSource = "d-items-source";
     
-    public const string ItemsSourceDesignTimeCount = "-items-source-design-time-count";
+    public const string ItemsSourceDesignTimeCount = "d-items-source-design-time-count";
     
 }
