@@ -30,7 +30,7 @@ public sealed class NextJsExportTest
     {
         for (var i = 0; i < model.Properties.Count; i++)
         {
-            var result = TryParseProperty(model.Properties[i]);
+            var result = TryParseProperty(model.Properties[i].Trim());
             if (result.HasValue)
             {
                 var name = result.Value.Name;
