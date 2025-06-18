@@ -11,57 +11,42 @@ public sealed class NextJsExportTest
     {
         (await NextJs_with_Tailwind.ExportAll(1)).Success.Should().BeTrue();
     }
-    
-    
-    //public static VisualElementModel Fix(this VisualElementModel model)
-    //{
-    //    var bindPropertyIndex = -1;
-        
-    //    string bindValue = null;
-        
-    //    for (var i = 0; i < model.Properties.Count; i++)
-    //    {
-    //        var result = TryParsePropertyValue(model.Properties[i]);
-    //        if (result.HasValue)
-    //        {
-    //            var name = result.Name;
-    //            var value = result.Value;
 
-    //            if (name == "-bind")
-    //            {
-    //                bindPropertyIndex = i;
+    [TestMethod]
+    public async Task FixAll()
+    {
+        foreach (var component in await Store.GetAllComponentsInProject(1))
+        {
+            var visualElementModel = DeserializeFromYaml<VisualElementModel>(component.RootElementAsYaml);
 
-    //                bindValue = value;
-                    
-    //                if (model.Text.HasNoValue())
-    //                {
-    //                    throw new ArgumentException("Text cannot be null");
-    //                }
-    //            }
-    //        }
-    //    }
+            await Store.Update(component with
+            {
+                RootElementAsYaml = SerializeToYaml(Fix(visualElementModel))
+            });
+        }
+    }
 
-    //    if (bindPropertyIndex >= 0)
-    //    {
-    //        model.Properties.RemoveAt(bindPropertyIndex);
-            
-    //        model.Properties.Insert(0,$"-text: {ClearConnectedValue(bindValue)}");
-    //        model.Properties.Insert(1,$"--text: '{TryClearStringValue(model.Text)}'");
+    static VisualElementModel Fix(VisualElementModel model)
+    {
+        for (var i = 0; i < model.Properties.Count; i++)
+        {
+            var result = TryParseProperty(model.Properties[i]);
+            if (result.HasValue)
+            {
+                var name = result.Value.Name;
 
-    //        model.Text = null;
-    //    }
-    //    else if (model.Text.HasValue())
-    //    {
-    //        model.Properties.Insert(0, $"-text: '{TryClearStringValue(model.Text)}'");
+                if (name == "--text")
+                {
+                    model.Properties[i] = "d" + model.Properties[i].Trim().RemoveFromStart("-");
+                }
+            }
+        }
 
-    //        model.Text = null;
-    //    }
+        foreach (var child in model.Children)
+        {
+            Fix(child);
+        }
 
-    //    foreach (var child in model.Children)
-    //    {
-    //        Fix(child);
-    //    }
-
-    //    return model;
-    //}
+        return model;
+    }
 }
