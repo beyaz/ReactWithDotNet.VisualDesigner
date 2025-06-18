@@ -35,9 +35,9 @@ public sealed class NextJsExportTest
             {
                 var name = result.Value.Name;
 
-                if (name == "--text")
+                if (name == "-items-source")
                 {
-                    model.Properties[i] = "d" + model.Properties[i].Trim().RemoveFromStart("-");
+                    model.Properties[i] = "d" + model.Properties[i].Trim();
                 }
             }
         }
