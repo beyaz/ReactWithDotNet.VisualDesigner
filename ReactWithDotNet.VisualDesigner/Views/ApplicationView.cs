@@ -1509,7 +1509,8 @@ sealed class ApplicationView : Component<ApplicationState>
                 new span { "S T Y L E", WhiteSpaceNoWrap, UserSelect(none), PaddingX(4) },
                 new div { Height(1), FlexGrow(1), Background(Gray200) }
             },
-            viewStyles(CurrentVisualElement.Styles)
+            viewStyles(CurrentVisualElement.Styles),
+            SpaceY(16)
         };
 
         static Element CreateAttributeItemCloseIcon(params Modifier[] modifiers)
