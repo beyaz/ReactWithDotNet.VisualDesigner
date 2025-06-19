@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using System.IO;
 using System.Reflection;
 using System.Text.RegularExpressions;
 
@@ -193,6 +194,28 @@ static class NextJs_with_Tailwind
             targetComponentName = result.Value.targetComponentName;
         }
 
+       
+        
+        // create File if not exists
+        {
+            if (filePath is null)
+            {
+                return new IOException("FilePathNotCalculated");
+            }
+            
+            if (!File.Exists(filePath))
+            {
+                
+                var fileContent = 
+                    $"export default function {targetComponentName}()" + "{" + Environment.NewLine +
+                    "    return (" + Environment.NewLine +
+                    "    );" + Environment.NewLine +
+                    "}";
+                await File.WriteAllTextAsync(filePath, fileContent);
+            }
+        }
+        
+        
         string fileNewContent;
         {
             string[] fileContentInDirectory;
