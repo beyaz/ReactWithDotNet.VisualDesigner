@@ -33,11 +33,11 @@ public sealed class NextJsExportTest
             var result = TryParseProperty(model.Properties[i].Trim());
             if (result.HasValue)
             {
-                var name = result.Value.Name;
+                var name = result.Value.Name.Trim();
 
-                if (name == "-hide-if")
+                if (name == "d-text")
                 {
-                    model.Properties[i] = "d" + model.Properties[i].Trim();
+                    model.Properties[i] = "d-text-preview" + model.Properties[i].Trim().RemoveFromStart("d-text");
                 }
             }
         }

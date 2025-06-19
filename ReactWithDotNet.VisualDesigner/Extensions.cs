@@ -660,7 +660,7 @@ static class Design
 {
     public const string Text = "-text";
     
-    public const string DesignText = "d-text";
+    public const string DesignText = "d-text-preview";
     
     public const string SpreadOperator = "--spreadOperator";
     
