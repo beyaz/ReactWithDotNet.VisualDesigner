@@ -131,10 +131,8 @@ static class ApplicationLogic
             }));
         }
 
-        items.Add($"{Design.Text}: props.userName");
-        items.Add($"{Design.Text}: state.userName");
-        items.Add($"{Design.Text}: 'User Name'");
-        items.Add($"{Design.TextPreview}: 'User Name'");
+        items.Add($"{Design.Text}: ?");
+        items.Add($"{Design.TextPreview}: ?");
 
         if (tag == "img")
         {
