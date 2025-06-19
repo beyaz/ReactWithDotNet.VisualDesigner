@@ -1488,30 +1488,27 @@ sealed class ApplicationView : Component<ApplicationState>
             };
         }
 
-        var stylesHeader = new FlexRow(WidthFull, AlignItemsCenter)
-        {
-            new div { Height(1), FlexGrow(1), Background(Gray200) },
-            new span { "S T Y L E", WhiteSpaceNoWrap, UserSelect(none), PaddingX(4) },
-            new div { Height(1), FlexGrow(1), Background(Gray200) }
-        };
-
-        var propsHeader = new FlexRow(WidthFull, AlignItemsCenter)
-        {
-            new div { Height(1), FlexGrow(1), Background(Gray200) },
-            new span { "P R O P S", WhiteSpaceNoWrap, UserSelect(none), PaddingX(4) },
-            new div { Height(1), FlexGrow(1), Background(Gray200) }
-        };
-
         return new FlexColumn(BorderLeft(1, dotted, "#d9d9d9"), PaddingX(2), Gap(8), OverflowYAuto, Background(White))
         {
             inputTag,
 
-            propsHeader,
+            SpaceY(16),
+            new FlexRow(WidthFull, AlignItemsCenter)
+            {
+                new div { Height(1), FlexGrow(1), Background(Gray200) },
+                new span { "P R O P S", WhiteSpaceNoWrap, UserSelect(none), PaddingX(4) },
+                new div { Height(1), FlexGrow(1), Background(Gray200) }
+            },
             viewProps(visualElementModel.Properties),
 
             SpaceY(16),
 
-            stylesHeader,
+            new FlexRow(WidthFull, AlignItemsCenter)
+            {
+                new div { Height(1), FlexGrow(1), Background(Gray200) },
+                new span { "S T Y L E", WhiteSpaceNoWrap, UserSelect(none), PaddingX(4) },
+                new div { Height(1), FlexGrow(1), Background(Gray200) }
+            },
             viewStyles(CurrentVisualElement.Styles)
         };
 
