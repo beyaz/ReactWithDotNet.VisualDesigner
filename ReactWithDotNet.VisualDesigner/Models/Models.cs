@@ -6,10 +6,6 @@ public sealed record VisualElementModel
     
     public string Tag { get; set; }
     
-    public string Text { get; set; }
-    
-    public List<string> Design { get; init; } = [];
-    
     public List<string> Properties { get; init; } = [];
     
     public List<string> Styles { get; init; } = [];
