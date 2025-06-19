@@ -658,7 +658,7 @@ public sealed class StyleAttribute
 
 static class Design
 {
-    public const string Text = "-text";
+    public const string Text = "d-text";
     
     public const string TextPreview = "d-text-preview";
     
