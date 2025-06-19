@@ -134,7 +134,7 @@ static class ApplicationLogic
         items.Add($"{Design.Text}: props.userName");
         items.Add($"{Design.Text}: state.userName");
         items.Add($"{Design.Text}: 'User Name'");
-        items.Add($"{Design.DesignText}: 'User Name'");
+        items.Add($"{Design.TextPreview}: 'User Name'");
 
         if (tag == "img")
         {

@@ -215,7 +215,7 @@ static class HtmlImporter
         {
             
             model.Properties.Add($"{Design.Text}: '{htmlNode.ChildNodes[0].InnerText.Trim()}'");
-            model.Properties.Add($"{Design.DesignText}: '{htmlNode.ChildNodes[0].InnerText.Trim()}'");
+            model.Properties.Add($"{Design.TextPreview}: '{htmlNode.ChildNodes[0].InnerText.Trim()}'");
 
             return model;
         }

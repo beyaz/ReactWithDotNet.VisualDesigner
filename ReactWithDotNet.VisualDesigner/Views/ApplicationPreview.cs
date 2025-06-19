@@ -164,7 +164,7 @@ sealed class ApplicationPreview : Component
                 tryGetPropValueFromCaller(context, model, Design.Text).HasValue(text => element.text = text);
             }
 
-            foreach (var (name, value) in from p in model.Properties from x in TryParseProperty(p) where x.Name.NotIn(Design.Text, Design.DesignText, Design.Src) select x)
+            foreach (var (name, value) in from p in model.Properties from x in TryParseProperty(p) where x.Name.NotIn(Design.Text, Design.TextPreview, Design.Src) select x)
             {
                 var result = await processProp(context, element, model, name, value);
                 if (result.HasError)

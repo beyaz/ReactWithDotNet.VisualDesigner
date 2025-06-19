@@ -379,7 +379,7 @@ static class NextJs_with_Tailwind
 
             var propsAsText = new List<string>();
 
-            foreach (var reactProperty in node.Properties.Where(p => p.Name.NotIn(Design.Text, Design.DesignText, Design.Src)))
+            foreach (var reactProperty in node.Properties.Where(p => p.Name.NotIn(Design.Text, Design.TextPreview, Design.Src)))
             {
                 var propertyName = reactProperty.Name;
 

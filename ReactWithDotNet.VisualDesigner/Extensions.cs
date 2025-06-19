@@ -198,7 +198,7 @@ static class Extensions
         var query = 
             from p in model.Properties
             from v in TryParseProperty(p)
-            where v.Name == Design.DesignText
+            where v.Name == Design.TextPreview
             select v.Value;
 
         return query.FirstOrDefault();
@@ -660,7 +660,7 @@ static class Design
 {
     public const string Text = "-text";
     
-    public const string DesignText = "d-text-preview";
+    public const string TextPreview = "d-text-preview";
     
     public const string SpreadOperator = "--spreadOperator";
     
