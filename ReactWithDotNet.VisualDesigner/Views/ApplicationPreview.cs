@@ -564,6 +564,11 @@ sealed class ApplicationPreview : Component
                         return false;
                     }
 
+                    if (isUnknownValue(value))
+                    {
+                        return true;
+                    }
+                    
                     if (propertyInfo.PropertyType == typeof(string))
                     {
                         propertyInfo.SetValue(element, TryClearStringValue(value));
