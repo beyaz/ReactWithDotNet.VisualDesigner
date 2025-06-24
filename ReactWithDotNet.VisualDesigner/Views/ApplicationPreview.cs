@@ -145,25 +145,15 @@ sealed class ApplicationPreview : Component
             {
                 if (model.Tag == TextNode.Tag)
                 {
-                    // todo: make clever
-                    if (model.HasText() || model.GetDesignText().HasValue())
+                    foreach (var text in tryCalculateText(context, model))
                     {
-                        var text = TryClearStringValue(model.GetDesignText() ?? model.GetText());
-                        if (!isUnknownValue(text))
-                        {
-                            return (HtmlTextNode)text;
-                        }
-
-                        foreach (string item in tryGetPropValueFromCaller(context, model, Design.Text))
-                        {
-                            return (HtmlTextNode)item;
-                        }
+                        return (HtmlTextNode)text;
                     }
 
-                    return null;
+                    return (HtmlTextNode)string.Empty;
                 }
             }
-            
+
             if (element is null)
             {
                 return new ArgumentException($"{model.Tag} is not resolved.");
@@ -174,7 +164,6 @@ sealed class ApplicationPreview : Component
             element.id = $"{path}";
 
             element.onClick = context.OnTreeItemClicked;
-
 
             foreach (var text in tryCalculateText(context, model))
             {
@@ -268,7 +257,7 @@ sealed class ApplicationPreview : Component
                     {
                         return item;
                     }
-                
+
                     var text = TryClearStringValue(model.GetDesignText() ?? model.GetText());
                     if (!isUnknownValue(text))
                     {
@@ -604,7 +593,7 @@ sealed class ApplicationPreview : Component
                     {
                         return true;
                     }
-                    
+
                     if (propertyInfo.PropertyType == typeof(string))
                     {
                         propertyInfo.SetValue(element, TryClearStringValue(value));
