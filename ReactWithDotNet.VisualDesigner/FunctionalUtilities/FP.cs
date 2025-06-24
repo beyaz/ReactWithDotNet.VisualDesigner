@@ -1,5 +1,7 @@
 ﻿global using ReactWithDotNet.VisualDesigner.FunctionalUtilities;
 global using static ReactWithDotNet.VisualDesigner.FunctionalUtilities.FP;
+
+
 using System.Collections;
 
 namespace ReactWithDotNet.VisualDesigner.FunctionalUtilities;
@@ -29,6 +31,8 @@ public sealed record Result
         return new() { Success = true };
     }
 }
+
+
 
 public sealed record Result<TValue>: IEnumerable<TValue>
 {
@@ -68,6 +72,9 @@ public sealed record Result<TValue>: IEnumerable<TValue>
         return GetEnumerator();
     }
 }
+
+
+
 
 public sealed record Maybe<TValue> : IEnumerable<TValue>
 {
@@ -388,4 +395,58 @@ static class FP
 
         throw result.Error;
     }
+    
+    public static Result<TResult> SelectMany<TSource, TIntermediate, TResult>(this Result<TSource> source, Func<TSource, Result<TIntermediate>> bind, Func<TSource, TIntermediate, TResult> project)
+    {
+        if (source.HasError)
+        {
+            return new() { Error = source.Error };
+        }
+
+        var intermediate = bind(source.Value);
+        if (intermediate.HasError)
+        {
+            return new() { Error = intermediate.Error };
+        }
+
+        return project(source.Value, intermediate.Value);
+    }
+    
+    public static Result<TResult> Select<TSource, TResult>(this Result<TSource> result, Func<TSource, TResult> selector)
+    {
+        if (result.HasError)
+        {
+            return new() { Error = result.Error };
+        }
+
+        return selector(result.Value);
+    }
+    
+    
+    public static Maybe<TResult> SelectMany<TSource, TIntermediate, TResult>(this Maybe<TSource> source, Func<TSource, Maybe<TIntermediate>> bind, Func<TSource, TIntermediate, TResult> project)
+    {
+        if (source.HasNoValue)
+        {
+            return None;
+        }
+
+        var intermediate = bind(source.Value);
+        if (intermediate.HasNoValue)
+        {
+            return None;
+        }
+
+        return project(source.Value, intermediate.Value);
+    }
+    
+    public static Maybe<TResult> Select<TSource, TResult>(this Maybe<TSource> result, Func<TSource, TResult> selector)
+    {
+        if (result.HasNoValue)
+        {
+            return None;
+        }
+
+        return selector(result.Value);
+    }
+   
 }
