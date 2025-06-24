@@ -638,9 +638,14 @@ sealed class ApplicationPreview : Component
                 {
                     if (ClearConnectedValue(propertyValue) == $"props.{callerPropertyName}")
                     {
-                        if (ClearConnectedValue(callerPropertyValue).StartsWith("'"))
+                        if (IsStringValue(ClearConnectedValue(callerPropertyValue)))
                         {
-                            return ClearConnectedValue(callerPropertyValue).RemoveFromStart("'").RemoveFromEnd("'");
+                            return TryClearStringValue(ClearConnectedValue(callerPropertyValue));
+                        }
+
+                        if (IsRawStringValue(ClearConnectedValue(callerPropertyValue)))
+                        {
+                            return TryClearRawStringValue(ClearConnectedValue(callerPropertyValue));
                         }
 
                         if (callerPropertyValue == "true" || callerPropertyValue == "false")

@@ -433,6 +433,21 @@ static class Extensions
 
         return value.StartsWith("{") && value.EndsWith("}");
     }
+
+    public static bool IsRawStringValue(string value)
+    {
+        if (value is null)
+        {
+            return false;
+        }
+        
+        return value.TrimStart().StartsWith("| ");
+    }
+    
+    public static string TryClearRawStringValue(string value)
+    {
+        return value?.TrimStart().RemoveFromStart("| ");
+    }
     
     public static bool IsStringValue(string value)
     {

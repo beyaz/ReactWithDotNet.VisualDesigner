@@ -144,9 +144,9 @@ static class NextJs_with_Tailwind
         if (!IsStringValue(text))
         {
 
-            if (text.Trim().StartsWith("| "))
+            if (IsRawStringValue(text))
             {
-                return $"{text.RemoveFromStart("|").Trim()}";
+                return $"{TryClearRawStringValue(text)}";
             }
 
 
