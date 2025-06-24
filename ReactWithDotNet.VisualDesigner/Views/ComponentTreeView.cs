@@ -7,13 +7,11 @@ delegate Task ComponentSelectionChanged(int componentId);
 sealed class ComponentTreeView : Component<ComponentTreeView.State>
 {
     public required int ComponentId { get; init; }
-    
+
     public int ProjectId { get; init; }
 
     [CustomEvent]
     public ComponentSelectionChanged SelectionChanged { get; init; }
-
-  
 
     protected override Task constructor()
     {
@@ -56,7 +54,13 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
                             FlexGrow(1),
                             Focus(OutlineNone)
                         }
-                    }
+                    },
+                    When(state.FilterText?.Length > 0,
+                         () => new IconClose() +
+                               Size(20) +
+                               Color(Gray300) +
+                               Hover(Color(Gray400)) +
+                               OnClick(OnClearFilterTextClicked))
                 },
                 new div(WidthFull, BorderBottom(1, dotted, "#d9d9d9"))
             },
@@ -143,7 +147,7 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
             {
                 return true;
             }
-            
+
             foreach (var path in node.Names)
             {
                 if (path.Contains(state.FilterText ?? string.Empty, StringComparison.OrdinalIgnoreCase))
@@ -181,13 +185,20 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
         };
 
         CalculateRootNode();
-        
+
         return Task.CompletedTask;
     }
 
-     Task OnFilterTextTypeFinished()
+    Task OnClearFilterTextClicked(MouseEvent e)
     {
-         CalculateRootNode();
+        state = state with { FilterText = null };
+
+        return Task.CompletedTask;
+    }
+
+    Task OnFilterTextTypeFinished()
+    {
+        CalculateRootNode();
         return Task.CompletedTask;
     }
 
@@ -302,13 +313,13 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
 
         public int? ComponentId { get; init; }
 
+        public string ExportFilePath { get; init; }
+
         public string Label { get; init; }
 
         public IReadOnlyList<string> Names { get; init; } = [];
 
         public string Path { get; init; }
-        
-        public string ExportFilePath { get; init; }
 
         public bool HasNoChild()
         {
