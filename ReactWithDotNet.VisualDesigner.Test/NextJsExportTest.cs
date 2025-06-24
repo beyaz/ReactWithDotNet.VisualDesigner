@@ -35,9 +35,13 @@ public sealed class NextJsExportTest
             {
                 var name = result.Value.Name.Trim();
 
-                if (name == "-text")
+                if (name == "d-text")
                 {
-                    model.Properties[i] = "d" + model.Properties[i].Trim();
+                    if (IsStringValue(result.Value.Value))
+                    {
+                        model.Properties[i] = "d-text: " + "t("+ '"' + TryClearStringValue(result.Value.Value) + '"' + ")";
+                    }
+                    
                 }
             }
         }
