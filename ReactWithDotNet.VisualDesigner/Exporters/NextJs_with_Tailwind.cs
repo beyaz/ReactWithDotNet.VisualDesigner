@@ -64,7 +64,7 @@ static class NextJs_with_Tailwind
             fileContentAtDisk = result.Value;
         }
 
-        if (fileContentAtDisk == fileContent)
+        if (ignore_whitespace_charachters(fileContentAtDisk) == ignore_whitespace_charachters(fileContent))
         {
             return new ExportOutput();
         }
@@ -79,6 +79,16 @@ static class NextJs_with_Tailwind
         }
 
         return new ExportOutput { HasChange = true };
+        
+        static string ignore_whitespace_charachters(string value)
+        {
+            if (value == null)
+            {
+                return null;
+            }
+
+            return Regex.Replace(value, @"\s+", string.Empty);
+        }
     }
 
     public static async Task<Result> ExportAll(int projectId)
@@ -133,6 +143,13 @@ static class NextJs_with_Tailwind
     {
         if (!IsStringValue(text))
         {
+            
+            //if (text.Trim().Contains(" "))
+            //{
+            //    return $"{text}";    
+            //}
+            
+            
             return $"{{{text}}}";
         }
 
