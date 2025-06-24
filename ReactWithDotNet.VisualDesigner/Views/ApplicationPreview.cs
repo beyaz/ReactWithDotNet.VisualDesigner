@@ -175,16 +175,10 @@ sealed class ApplicationPreview : Component
 
             element.onClick = context.OnTreeItemClicked;
 
-            // todo: make clever
-            if (model.HasText() || model.GetDesignText().HasValue())
-            {
-                var text = TryClearStringValue(model.GetDesignText() ?? model.GetText());
-                if (!isUnknownValue(text))
-                {
-                    element.Add(text);
-                }
 
-                tryGetPropValueFromCaller(context, model, Design.Text).HasValue(text => element.text = text);
+            foreach (var text in tryCalculateText(context, model))
+            {
+                element.text = text;
             }
 
             foreach (var (name, value) in from p in model.Properties from x in TryParseProperty(p) where x.Name.NotIn(Design.Text, Design.TextPreview, Design.Src) select x)
@@ -265,6 +259,25 @@ sealed class ApplicationPreview : Component
             }
 
             return element;
+
+            static Maybe<string> tryCalculateText(RenderContext context, VisualElementModel model)
+            {
+                if (model.HasText() || model.GetDesignText().HasValue())
+                {
+                    foreach (var item in tryGetPropValueFromCaller(context, model, Design.Text))
+                    {
+                        return item;
+                    }
+                
+                    var text = TryClearStringValue(model.GetDesignText() ?? model.GetText());
+                    if (!isUnknownValue(text))
+                    {
+                        return text;
+                    }
+                }
+
+                return None;
+            }
 
             static string getJsCodeToHighlightElement(string id)
             {
