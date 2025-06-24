@@ -346,7 +346,8 @@ static class Extensions
         "style",
         "link",
         "meta",
-        "base"
+        "base",
+        "#text"
 
     ];
     
@@ -673,4 +674,9 @@ static class Design
     public const string HideIf = "d-hide-if";
     public const string ShowIf = "d-show-if";
 
+}
+
+static class TextNode
+{
+    public const string Tag = "#text";
 }

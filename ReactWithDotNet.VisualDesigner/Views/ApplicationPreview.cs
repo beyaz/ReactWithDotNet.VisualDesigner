@@ -143,6 +143,29 @@ sealed class ApplicationPreview : Component
 
             if (element is null)
             {
+                if (model.Tag == TextNode.Tag)
+                {
+                    // todo: make clever
+                    if (model.HasText() || model.GetDesignText().HasValue())
+                    {
+                        var text = TryClearStringValue(model.GetDesignText() ?? model.GetText());
+                        if (!isUnknownValue(text))
+                        {
+                            return (HtmlTextNode)text;
+                        }
+
+                        foreach (string item in tryGetPropValueFromCaller(context, model, Design.Text))
+                        {
+                            return (HtmlTextNode)item;
+                        }
+                    }
+
+                    return null;
+                }
+            }
+            
+            if (element is null)
+            {
                 return new ArgumentException($"{model.Tag} is not resolved.");
             }
 
@@ -152,7 +175,7 @@ sealed class ApplicationPreview : Component
 
             element.onClick = context.OnTreeItemClicked;
 
-            // make clever
+            // todo: make clever
             if (model.HasText() || model.GetDesignText().HasValue())
             {
                 var text = TryClearStringValue(model.GetDesignText() ?? model.GetText());

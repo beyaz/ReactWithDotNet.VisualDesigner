@@ -278,6 +278,14 @@ static class NextJs_with_Tailwind
     {
         var nodeTag = node.Tag;
 
+        if (nodeTag == TextNode.Tag)
+        {
+            return new List<string>
+            {
+                $"{Indent(indentLevel)}{AsFinalText(node.Children[0].Text)}"
+            };
+        }
+        
         if (nodeTag is null)
         {
             if (node.Text.HasValue())
