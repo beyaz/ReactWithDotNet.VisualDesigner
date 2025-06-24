@@ -74,6 +74,14 @@ static class ApplicationLogic
     {
         return GetAllComponentsInProjectFromCache(projectId).FirstOrDefault(x => x.Id == componentId)?.GetName();
     }
+    
+    public static string GetComponentDisplayText(int projectId, int componentId)
+    {
+        var directoryName = GetAllComponentsInProjectFromCache(projectId).FirstOrDefault(x => x.Id == componentId)?.GetExportFilePath()
+            .Split("/").TakeLast(2).FirstOrDefault();
+
+        return directoryName + "/"+ GetComponentName(projectId, componentId);
+    }
 
     public static Task<Result<VisualElementModel>> GetComponenUserOrMainVersionAsync(int componentId, string userName)
     {

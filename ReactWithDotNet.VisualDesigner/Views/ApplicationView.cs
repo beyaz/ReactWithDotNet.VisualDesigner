@@ -1277,13 +1277,16 @@ sealed class ApplicationView : Component<ApplicationState>
             SelectionChanged = ChangeSelectedComponent
         } + When(state.LeftTab != LeftTabs.Components, DisplayNone);
 
+
+       
+        
         return new FlexColumn(SizeFull, AlignItemsCenter, BorderRight(1, dotted, "#d9d9d9"), Background(White))
         {
             new FlexRow(WidthFull, AlignItemsCenter, Gap(4), PaddingLeft(8))
             {
                 new IconDelete() + Size(16) + Color(Theme.text_primary) + Hover(Color(Blue300)) + OnClick(OnDeleteSelectedComponentClicked),
 
-                GetComponentName(state.ProjectId, state.ComponentId)
+                GetComponentDisplayText(state.ProjectId, state.ComponentId)
             },
 
             tabButtons,
