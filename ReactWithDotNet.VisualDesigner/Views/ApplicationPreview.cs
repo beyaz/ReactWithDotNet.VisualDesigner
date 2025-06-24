@@ -671,10 +671,11 @@ sealed class ApplicationPreview : Component
     }
 
     [StopPropagation]
+    [SkipRender]
     Task OnItemClick(MouseEvent e)
     {
         var visualElementTreeItemPath = e.target.id;
-
+        
         var sb = new StringBuilder();
 
         sb.AppendLine("var parentWindow = window.parent;");

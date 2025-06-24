@@ -751,8 +751,6 @@ sealed class ApplicationView : Component<ApplicationState>
 
     Task OnPreviewMouseLeave(MouseEvent e)
     {
-        Client.RefreshComponentPreview();
-
         return Task.CompletedTask;
     }
 
