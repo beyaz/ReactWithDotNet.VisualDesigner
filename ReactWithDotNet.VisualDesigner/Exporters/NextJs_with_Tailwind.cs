@@ -143,13 +143,13 @@ static class NextJs_with_Tailwind
     {
         if (!IsStringValue(text))
         {
-            
-            //if (text.Trim().Contains(" "))
-            //{
-            //    return $"{text}";    
-            //}
-            
-            
+
+            if (text.Trim().StartsWith("| "))
+            {
+                return $"{text.RemoveFromStart("|").Trim()}";
+            }
+
+
             return $"{{{text}}}";
         }
 
