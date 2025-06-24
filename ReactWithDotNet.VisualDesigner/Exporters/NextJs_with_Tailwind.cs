@@ -615,12 +615,6 @@ static class NextJs_with_Tailwind
                 lines.Add($"{Indent(indentLevel)}<{tag}>");
             }
 
-            // Add text content
-            if (!string.IsNullOrWhiteSpace(node.Text))
-            {
-                lines.Add($"{Indent(indentLevel)}{AsFinalText(node.Text)}");
-            }
-
             // Add children
             foreach (var child in node.Children)
             {
