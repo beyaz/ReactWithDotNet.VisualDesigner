@@ -65,7 +65,7 @@ sealed class ApplicationPreview : Component
 
         Element finalElement;
         {
-            var renderContext = new RenderContext
+            var renderContext = new RenderPreviewScope
             {
                 ProjectId          = projectId,
                 Project            = GetProjectConfig(projectId),
@@ -99,7 +99,7 @@ sealed class ApplicationPreview : Component
             finalElement + scaleStyle
         };
 
-        static async Task<Result<Element>> renderElement(RenderContext context, VisualElementModel model, string path)
+        static async Task<Result<Element>> renderElement(RenderPreviewScope scope, VisualElementModel model, string path)
         {
             HtmlElement element = null;
             {
@@ -112,7 +112,7 @@ sealed class ApplicationPreview : Component
                 {
                     VisualElementModel componentRootElementModel;
                     {
-                        var result = await GetComponenUserOrMainVersionAsync(componentId, context.UserName);
+                        var result = await GetComponenUserOrMainVersionAsync(componentId, scope.UserName);
                         if (result.HasError)
                         {
                             return result.Error;
@@ -125,17 +125,19 @@ sealed class ApplicationPreview : Component
                     {
                         componentRootElementModel.Children.AddRange(model.Children);
 
-                        var component = await renderElement(context with { Parent = context, ParentModel = model }, componentRootElementModel, path);
-
+                        var component = await renderElement(scope with { Parent = scope, ParentModel = model }, componentRootElementModel, path);
+                        
                         // try to highlight
-                        if (context.HighlightedElement == model)
+                        if (scope.HighlightedElement == model)
                         {
                             if (component.Value is HtmlElement htmlElement)
                             {
-                                context.Client.RunJavascript(getJsCodeToHighlightElement(htmlElement.id ??= Guid.NewGuid().ToString("N")));
+                                scope.Client.RunJavascript(getJsCodeToHighlightElement(htmlElement.id ??= Guid.NewGuid().ToString("N")));
                             }
                         }
 
+                        Plugin.BeforePreview(scope, model, component.Value);
+                        
                         return component;
                     }
                 }
@@ -145,7 +147,7 @@ sealed class ApplicationPreview : Component
             {
                 if (model.Tag == TextNode.Tag)
                 {
-                    foreach (var text in tryCalculateText(context, model))
+                    foreach (var text in tryCalculateText(scope, model))
                     {
                         return (HtmlTextNode)text;
                     }
@@ -163,16 +165,16 @@ sealed class ApplicationPreview : Component
 
             element.id = $"{path}";
 
-            element.onClick = context.OnTreeItemClicked;
+            element.onClick = scope.OnTreeItemClicked;
 
-            foreach (var text in tryCalculateText(context, model))
+            foreach (var text in tryCalculateText(scope, model))
             {
                 element.text = text;
             }
 
             foreach (var (name, value) in from p in model.Properties from x in TryParseProperty(p) where x.Name.NotIn(Design.Text, Design.TextPreview, Design.Src) select x)
             {
-                var result = await processProp(context, element, model, name, value);
+                var result = await processProp(scope, element, model, name, value);
                 if (result.HasError)
                 {
                     return result.Error;
@@ -181,7 +183,7 @@ sealed class ApplicationPreview : Component
 
             {
                 var result = model.Styles
-                    .Select(x => CreateDesignerStyleItemFromText(context.Project, x))
+                    .Select(x => CreateDesignerStyleItemFromText(scope.Project, x))
                     .ConvertAll(designerItem => designerItem.ToStyleModifier())
                     .Then(styleModifiers => element.Add(styleModifiers.ToArray()));
 
@@ -192,11 +194,11 @@ sealed class ApplicationPreview : Component
             }
 
             // try to highlight
-            if (context.HighlightedElement == model)
+            if (scope.HighlightedElement == model)
             {
                 element.id ??= Guid.NewGuid().ToString("N");
 
-                context.Client.RunJavascript(getJsCodeToHighlightElement(element.id ??= Guid.NewGuid().ToString("N")));
+                scope.Client.RunJavascript(getJsCodeToHighlightElement(element.id ??= Guid.NewGuid().ToString("N")));
             }
 
             if (model.HasNoChild())
@@ -209,7 +211,7 @@ sealed class ApplicationPreview : Component
                 Element childElement;
                 {
                     var childPath = $"{path},{i}";
-                    if (context.Parent is not null)
+                    if (scope.Parent is not null)
                     {
                         childPath = path;
                     }
@@ -222,20 +224,20 @@ sealed class ApplicationPreview : Component
 
                     // check -show/hide-if
                     {
-                        var hideIf = tryGetPropValueFromCaller(context, childModel, Design.HideIf);
+                        var hideIf = tryGetPropValueFromCaller(scope, childModel, Design.HideIf);
                         if (hideIf.HasValue && hideIf.Value == "true")
                         {
                             continue;
                         }
 
-                        var showIf = tryGetPropValueFromCaller(context, childModel, Design.ShowIf);
+                        var showIf = tryGetPropValueFromCaller(scope, childModel, Design.ShowIf);
                         if (showIf.HasValue && showIf.Value == "false")
                         {
                             continue;
                         }
                     }
 
-                    var result = await renderElement(context, childModel, childPath);
+                    var result = await renderElement(scope, childModel, childPath);
                     if (result.HasError)
                     {
                         return new Exception($"Path: {childPath}", result.Error);
@@ -249,11 +251,11 @@ sealed class ApplicationPreview : Component
 
             return element;
 
-            static Maybe<string> tryCalculateText(RenderContext context, VisualElementModel model)
+            static Maybe<string> tryCalculateText(RenderPreviewScope scope, VisualElementModel model)
             {
                 if (model.HasText() || model.GetDesignText().HasValue())
                 {
-                    foreach (var item in tryGetPropValueFromCaller(context, model, Design.Text))
+                    foreach (var item in tryGetPropValueFromCaller(scope, model, Design.Text))
                     {
                         return item;
                     }
@@ -336,9 +338,9 @@ sealed class ApplicationPreview : Component
                 return false;
             }
 
-            static async Task<Result> processProp(RenderContext context, HtmlElement element, VisualElementModel model, string propName, string propValue)
+            static async Task<Result> processProp(RenderPreviewScope scope, HtmlElement element, VisualElementModel model, string propName, string propValue)
             {
-                foreach (var propRealValue in tryGetPropValueFromCaller(context, model, propName))
+                foreach (var propRealValue in tryGetPropValueFromCaller(scope, model, propName))
                 {
                     propValue = propRealValue;
                 }
@@ -347,7 +349,7 @@ sealed class ApplicationPreview : Component
                     [
                         () => Task.FromResult(itemSourceDesignTimeCount(model, propName, propValue)),
                         () => Task.FromResult(tryAddClass(element, propName, propValue)),
-                        () => tryProcessImage(context, element, model, propName, propValue),
+                        () => tryProcessImage(scope, element, model, propName, propValue),
                         () => Task.FromResult(processInputType(element, propName, propValue)),
                         () => Task.FromResult(tryProcessCommonHtmlProperties(element, propName, propValue)),
                         () => Task.FromResult(isKnownProp(propName))
@@ -418,7 +420,7 @@ sealed class ApplicationPreview : Component
                     return false;
                 }
 
-                static async Task<bool> tryProcessImage(RenderContext context, HtmlElement element, VisualElementModel model, string name, string value)
+                static async Task<bool> tryProcessImage(RenderPreviewScope scope, HtmlElement element, VisualElementModel model, string name, string value)
                 {
                     if (element is not img elementAsImage)
                     {
@@ -461,7 +463,7 @@ sealed class ApplicationPreview : Component
                     {
                         // try to assign value
                         {
-                            foreach (var srcValue in await calculateSrcFromValue(context, model, value))
+                            foreach (var srcValue in await calculateSrcFromValue(scope, model, value))
                             {
                                 elementAsImage.src = srcValue;
                                 return true;
@@ -480,7 +482,7 @@ sealed class ApplicationPreview : Component
 
                             if (designTimeSrc.HasValue())
                             {
-                                foreach (var srcValue in await calculateSrcFromValue(context, model, designTimeSrc))
+                                foreach (var srcValue in await calculateSrcFromValue(scope, model, designTimeSrc))
                                 {
                                     elementAsImage.src = srcValue;
                                     return true;
@@ -530,7 +532,7 @@ sealed class ApplicationPreview : Component
 
                         return true;
 
-                        static async Task<Maybe<string>> calculateSrcFromValue(RenderContext context, VisualElementModel model, string value)
+                        static async Task<Maybe<string>> calculateSrcFromValue(RenderPreviewScope scope, VisualElementModel model, string value)
                         {
                             var src = TryClearStringValue(value);
 
@@ -555,9 +557,9 @@ sealed class ApplicationPreview : Component
                             }
 
                             // try find value from caller
-                            foreach (var callerValue in tryGetPropValueFromCaller(context, model, "src"))
+                            foreach (var callerValue in tryGetPropValueFromCaller(scope, model, "src"))
                             {
-                                return await calculateSrcFromValue(context, model, callerValue);
+                                return await calculateSrcFromValue(scope, model, callerValue);
                             }
 
                             return None;
@@ -616,9 +618,9 @@ sealed class ApplicationPreview : Component
                 }
             }
 
-            static Maybe<string> tryGetPropValueFromCaller(RenderContext context, VisualElementModel model, string propertyName)
+            static Maybe<string> tryGetPropValueFromCaller(RenderPreviewScope scope, VisualElementModel model, string propertyName)
             {
-                if (context.ParentModel is null)
+                if (scope.ParentModel is null)
                 {
                     return None;
                 }
@@ -634,7 +636,7 @@ sealed class ApplicationPreview : Component
                     propertyValue = maybe.Value.propertyValue;
                 }
 
-                foreach (var (callerPropertyName, callerPropertyValue) in from p in context.ParentModel.Properties from v in TryParseProperty(p) select v)
+                foreach (var (callerPropertyName, callerPropertyValue) in from p in scope.ParentModel.Properties from v in TryParseProperty(p) select v)
                 {
                     if (ClearConnectedValue(propertyValue) == $"props.{callerPropertyName}")
                     {
@@ -693,23 +695,26 @@ sealed class ApplicationPreview : Component
         return Task.CompletedTask;
     }
 
-    record RenderContext
-    {
-        public Client Client { get; init; }
-        public required VisualElementModel HighlightedElement { get; init; }
+   
+}
 
-        public required MouseEventHandler OnTreeItemClicked { get; init; }
+sealed record RenderPreviewScope
+{
+    public Client Client { get; init; }
+        
+    public required VisualElementModel HighlightedElement { get; init; }
 
-        public RenderContext Parent { get; init; }
+    public required MouseEventHandler OnTreeItemClicked { get; init; }
 
-        public required VisualElementModel ParentModel { get; init; }
+    public RenderPreviewScope Parent { get; init; }
 
-        public ProjectConfig Project { get; init; }
+    public required VisualElementModel ParentModel { get; init; }
 
-        public required int ProjectId { get; init; }
+    public ProjectConfig Project { get; init; }
 
-        public required ReactContext ReactContext { get; init; }
+    public required int ProjectId { get; init; }
 
-        public required string UserName { get; init; }
-    }
+    public required ReactContext ReactContext { get; init; }
+
+    public required string UserName { get; init; }
 }
