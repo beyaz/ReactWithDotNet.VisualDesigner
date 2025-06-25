@@ -126,7 +126,7 @@ sealed class ApplicationPreview : Component
                         componentRootElementModel.Children.AddRange(model.Children);
 
                         var component = await renderElement(scope with { Parent = scope, ParentModel = model }, componentRootElementModel, path);
-                        
+
                         // try to highlight
                         if (scope.HighlightedElement == model)
                         {
@@ -136,8 +136,11 @@ sealed class ApplicationPreview : Component
                             }
                         }
 
-                        Plugin.BeforePreview(scope, model, component.Value);
-                        
+                        if (component.Success)
+                        {
+                            Plugin.BeforeComponentPreview(scope, model, component.Value);
+                        }
+
                         return component;
                     }
                 }
@@ -677,7 +680,7 @@ sealed class ApplicationPreview : Component
     Task OnItemClick(MouseEvent e)
     {
         var visualElementTreeItemPath = e.target.id;
-        
+
         var sb = new StringBuilder();
 
         sb.AppendLine("var parentWindow = window.parent;");
@@ -694,14 +697,12 @@ sealed class ApplicationPreview : Component
 
         return Task.CompletedTask;
     }
-
-   
 }
 
 sealed record RenderPreviewScope
 {
     public Client Client { get; init; }
-        
+
     public required VisualElementModel HighlightedElement { get; init; }
 
     public required MouseEventHandler OnTreeItemClicked { get; init; }
