@@ -2305,6 +2305,20 @@ sealed class ApplicationView : Component<ApplicationState>
 
         public double Scale { get; init; }
 
+        protected override Task OverrideStateFromPropsBeforeRender()
+        {
+            if (Math.Abs(state.ScaleInitialValue - Scale) > 1)
+            {
+                state = state with
+                {
+                    Scale = Scale,
+                    ScaleInitialValue = Scale
+                };
+            }
+            
+            return Task.CompletedTask;
+        }
+
         protected override Element render()
         {
             return new FlexRowCentered(Border(1, solid, Theme.BorderColor), BorderRadius(4), Height(36))
@@ -2346,7 +2360,12 @@ sealed class ApplicationView : Component<ApplicationState>
                     },
                     When(state.IsSuggestionsVisible, () => new FlexColumnCentered(PositionFixed, Background(White), Border(1, solid, Gray300), BorderRadius(4), PaddingY(4), Left(state.SuggestionPopupLocationX), Top(state.SuggestionPopupLocationY))
                     {
-                        new[] { "%25", "%50", "%75", "%100" }.Select(text => new FlexRowCentered(Padding(6, 12), BorderRadius(4), Hover(Background(WhiteSmoke))) { text })
+                        new[] { "%25", "%50", "%75", "%100" }.Select(text => new FlexRowCentered(Padding(6, 12), BorderRadius(4), Hover(Background(Gray100)))
+                        {
+                            text,
+                            Id(text),
+                            OnClick(OnSuggestionItemClicked)
+                        })
                     }),
 
                     new FlexRowCentered(BorderRadius(100), Padding(3), Background(Blue200), Hover(Background(Blue300)))
@@ -2379,7 +2398,7 @@ sealed class ApplicationView : Component<ApplicationState>
                 state = state with
                 {
                     IsSuggestionsVisible = !state.IsSuggestionsVisible,
-                    SuggestionPopupLocationX = rect.left + rect.width / 2 - 16,
+                    SuggestionPopupLocationX = rect.left + rect.width / 2 - 24,
                     SuggestionPopupLocationY = rect.top + rect.height + 8
                 };
 
@@ -2387,14 +2406,31 @@ sealed class ApplicationView : Component<ApplicationState>
             }
         }
 
+        Task OnSuggestionItemClicked(MouseEvent e)
+        {
+            state = state with
+            {
+                Scale = int.Parse(e.target.id.RemoveFromStart("%")),
+                IsSuggestionsVisible = false
+                
+            };
+            
+            DispatchEvent(OnChange, [state.Scale]);
+
+            return Task.CompletedTask;
+        }
+
         internal record State
         {
             public bool IsSuggestionsVisible { get; init; }
+            
             public double Scale { get; init; }
 
             public double SuggestionPopupLocationX { get; init; }
 
             public double SuggestionPopupLocationY { get; init; }
+            
+            public double ScaleInitialValue { get; init; }
         }
     }
 }
