@@ -1275,9 +1275,6 @@ sealed class ApplicationView : Component<ApplicationState>
             SelectionChanged = ChangeSelectedComponent
         } + When(state.LeftTab != LeftTabs.Components, DisplayNone);
 
-
-       
-        
         return new FlexColumn(SizeFull, AlignItemsCenter, BorderRight(1, dotted, "#d9d9d9"), Background(White))
         {
             new FlexRow(WidthFull, AlignItemsCenter, Gap(4), PaddingLeft(8))
@@ -1982,108 +1979,6 @@ sealed class ApplicationView : Component<ApplicationState>
         }
     }
 
-    class ZoomComponent: Component<ZoomComponent.State>
-    {
-        public double Scale { get; init; }
-        
-        [CustomEvent]
-        public Func<double,Task> OnChange{ get; init; }
-        
-        protected override Element render()
-        {
-            return new FlexRowCentered(Border(1, solid, Theme.BorderColor), BorderRadius(4), Height(36))
-        {
-            PositionRelative,
-            
-            new label(PositionAbsolute, Top(-4), Left(8), FontSize10, LineHeight7, Background(Theme.BackgroundColor), PaddingX(4))
-            {
-                "Zoom"
-            },
-
-            new FlexRow(WidthFull, PaddingLeftRight(4), AlignItemsCenter, Gap(4))
-            {
-                new FlexRowCentered(BorderRadius(100), Padding(3), Background(Blue200), Hover(Background(Blue300)))
-                {
-                    OnClick(_ =>
-                    {
-                        if (state.Scale <= 20)
-                        {
-                            return Task.CompletedTask;
-                        }
-
-                        state = state with
-                        {
-                            Scale = state.Scale - 10
-                        };
-
-                        DispatchEvent(OnChange,[state.Scale]);
-                        
-                        return Task.CompletedTask;
-                    }),
-                    new IconMinus()
-                },
-
-                new div
-                {
-                    $"%{state.Scale}",
-                    OnClick(ToggleZoomSuggestions)
-                },
-                When(state.IsSuggestionsVisible,()=>new FlexColumnCentered(PositionFixed, Background(White),Border(1, solid, Gray300), BorderRadius(4), PaddingY(4), Left(state.SuggestionPopupLocationX), Top(state.SuggestionPopupLocationY))
-                {
-                    new []{"%25", "%50", "%75", "%100"}.Select(text=>new FlexRowCentered(Padding(6,12), BorderRadius(4), Hover(Background(WhiteSmoke))){ text })
-                }),
-                
-                new FlexRowCentered(BorderRadius(100), Padding(3), Background(Blue200), Hover(Background(Blue300)))
-                {
-                    OnClick(_ =>
-                    {
-                        if (state.Scale >= 200)
-                        {
-                            return Task.CompletedTask;
-                        }
-
-                        state = state with
-                        {
-                            Scale = state.Scale + 10
-                        };
-
-                        DispatchEvent(OnChange,[state.Scale]);
-                        
-                        return Task.CompletedTask;
-                    }),
-                    new IconPlus()
-                }
-            }
-        };
-            
-            
-            Task ToggleZoomSuggestions(MouseEvent e)
-            {
-                var rect = e.target.boundingClientRect;
-        
-                state = state with
-                {
-                    IsSuggestionsVisible = !state.IsSuggestionsVisible,
-                    SuggestionPopupLocationX = rect.left + rect.width/2-16,
-                    SuggestionPopupLocationY = rect.top + rect.height + 8
-                };
-
-                return Task.CompletedTask;
-            }
-        }
-
-        internal record State
-        {
-            public double Scale { get; init; }
-            
-            public bool IsSuggestionsVisible { get; init; }
-    
-            public double SuggestionPopupLocationX { get; init; }
-            
-            public double SuggestionPopupLocationY { get; init; }
-        }
-    }
-    
     Element PartScale()
     {
         return new ZoomComponent
@@ -2104,10 +1999,7 @@ sealed class ApplicationView : Component<ApplicationState>
                 return Task.CompletedTask;
             }
         };
-        
     }
-
-
 
     Task TryImportHtml(string htmlText)
     {
@@ -2403,6 +2295,106 @@ sealed class ApplicationView : Component<ApplicationState>
 
                 return returnList;
             }
+        }
+    }
+
+    class ZoomComponent : Component<ZoomComponent.State>
+    {
+        [CustomEvent]
+        public Func<double, Task> OnChange { get; init; }
+
+        public double Scale { get; init; }
+
+        protected override Element render()
+        {
+            return new FlexRowCentered(Border(1, solid, Theme.BorderColor), BorderRadius(4), Height(36))
+            {
+                PositionRelative,
+
+                new label(PositionAbsolute, Top(-4), Left(8), FontSize10, LineHeight7, Background(Theme.BackgroundColor), PaddingX(4))
+                {
+                    "Zoom"
+                },
+
+                new FlexRow(WidthFull, PaddingLeftRight(4), AlignItemsCenter, Gap(4))
+                {
+                    new FlexRowCentered(BorderRadius(100), Padding(3), Background(Blue200), Hover(Background(Blue300)))
+                    {
+                        OnClick(_ =>
+                        {
+                            if (state.Scale <= 20)
+                            {
+                                return Task.CompletedTask;
+                            }
+
+                            state = state with
+                            {
+                                Scale = state.Scale - 10
+                            };
+
+                            DispatchEvent(OnChange, [state.Scale]);
+
+                            return Task.CompletedTask;
+                        }),
+                        new IconMinus()
+                    },
+
+                    new div
+                    {
+                        $"%{state.Scale}",
+                        OnClick(ToggleZoomSuggestions)
+                    },
+                    When(state.IsSuggestionsVisible, () => new FlexColumnCentered(PositionFixed, Background(White), Border(1, solid, Gray300), BorderRadius(4), PaddingY(4), Left(state.SuggestionPopupLocationX), Top(state.SuggestionPopupLocationY))
+                    {
+                        new[] { "%25", "%50", "%75", "%100" }.Select(text => new FlexRowCentered(Padding(6, 12), BorderRadius(4), Hover(Background(WhiteSmoke))) { text })
+                    }),
+
+                    new FlexRowCentered(BorderRadius(100), Padding(3), Background(Blue200), Hover(Background(Blue300)))
+                    {
+                        OnClick(_ =>
+                        {
+                            if (state.Scale >= 200)
+                            {
+                                return Task.CompletedTask;
+                            }
+
+                            state = state with
+                            {
+                                Scale = state.Scale + 10
+                            };
+
+                            DispatchEvent(OnChange, [state.Scale]);
+
+                            return Task.CompletedTask;
+                        }),
+                        new IconPlus()
+                    }
+                }
+            };
+
+            Task ToggleZoomSuggestions(MouseEvent e)
+            {
+                var rect = e.target.boundingClientRect;
+
+                state = state with
+                {
+                    IsSuggestionsVisible = !state.IsSuggestionsVisible,
+                    SuggestionPopupLocationX = rect.left + rect.width / 2 - 16,
+                    SuggestionPopupLocationY = rect.top + rect.height + 8
+                };
+
+                return Task.CompletedTask;
+            }
+        }
+
+        internal record State
+        {
+            public bool IsSuggestionsVisible { get; init; }
+            public double Scale { get; init; }
+
+            public double SuggestionPopupLocationX { get; init; }
+
+            public double SuggestionPopupLocationY { get; init; }
         }
     }
 }
