@@ -2315,7 +2315,7 @@ sealed class ApplicationView : Component<ApplicationState>
                     ScaleInitialValue = Scale
                 };
             }
-            
+
             return Task.CompletedTask;
         }
 
@@ -2358,7 +2358,7 @@ sealed class ApplicationView : Component<ApplicationState>
                         $"%{state.Scale}",
                         OnClick(ToggleZoomSuggestions)
                     },
-                    When(state.IsSuggestionsVisible, () => new FlexColumnCentered(PositionFixed, Background(White), Border(1, solid, Gray300), BorderRadius(4), PaddingY(4), Left(state.SuggestionPopupLocationX), Top(state.SuggestionPopupLocationY))
+                    state.IsSuggestionsVisible ? new FlexColumnCentered(PositionFixed, Background(White), Border(1, solid, Gray300), BorderRadius(4), PaddingY(4), Left(state.SuggestionPopupLocationX), Top(state.SuggestionPopupLocationY))
                     {
                         new[] { "%25", "%50", "%75", "%100" }.Select(text => new FlexRowCentered(Padding(6, 12), BorderRadius(4), Hover(Background(Gray100)))
                         {
@@ -2366,7 +2366,7 @@ sealed class ApplicationView : Component<ApplicationState>
                             Id(text),
                             OnClick(OnSuggestionItemClicked)
                         })
-                    }),
+                    } : null,
 
                     new FlexRowCentered(BorderRadius(100), Padding(3), Background(Blue200), Hover(Background(Blue300)))
                     {
@@ -2412,9 +2412,8 @@ sealed class ApplicationView : Component<ApplicationState>
             {
                 Scale = int.Parse(e.target.id.RemoveFromStart("%")),
                 IsSuggestionsVisible = false
-                
             };
-            
+
             DispatchEvent(OnChange, [state.Scale]);
 
             return Task.CompletedTask;
@@ -2423,14 +2422,14 @@ sealed class ApplicationView : Component<ApplicationState>
         internal record State
         {
             public bool IsSuggestionsVisible { get; init; }
-            
+
             public double Scale { get; init; }
+
+            public double ScaleInitialValue { get; init; }
 
             public double SuggestionPopupLocationX { get; init; }
 
             public double SuggestionPopupLocationY { get; init; }
-            
-            public double ScaleInitialValue { get; init; }
         }
     }
 }
