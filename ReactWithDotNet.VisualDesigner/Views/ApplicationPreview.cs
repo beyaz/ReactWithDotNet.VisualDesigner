@@ -123,8 +123,6 @@ sealed class ApplicationPreview : Component
 
                     if (componentRootElementModel is not null)
                     {
-                        componentRootElementModel.Children.AddRange(model.Children);
-
                         var component = await renderElement(scope with { Parent = scope, ParentModel = model }, componentRootElementModel, path);
 
                         // try to highlight
@@ -350,6 +348,7 @@ sealed class ApplicationPreview : Component
 
                 if (await tryProcessByFirstMatch(
                     [
+                        () => Task.FromResult(tryImportChildrenFromParentScope(scope, model, propName, propValue)),
                         () => Task.FromResult(itemSourceDesignTimeCount(model, propName, propValue)),
                         () => Task.FromResult(tryAddClass(element, propName, propValue)),
                         () => tryProcessImage(scope, element, model, propName, propValue),
@@ -372,6 +371,17 @@ sealed class ApplicationPreview : Component
                 {
                     if (name is "ref" or "key" or Design.ItemsSource or "size" or "onClick" or "onInput" or Design.ShowIf or Design.HideIf)
                     {
+                        return true;
+                    }
+
+                    return false;
+                }
+
+                static bool tryImportChildrenFromParentScope(RenderPreviewScope scope, VisualElementModel model, string name, string value)
+                {
+                    if (name == "children" && value == "props.children" && scope.ParentModel is not null)
+                    {
+                        model.Children.AddRange(scope.ParentModel.Children);
                         return true;
                     }
 
