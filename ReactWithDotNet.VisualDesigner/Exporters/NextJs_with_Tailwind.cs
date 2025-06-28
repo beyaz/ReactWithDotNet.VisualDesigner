@@ -117,28 +117,6 @@ static class NextJs_with_Tailwind
         return Success;
     }
 
-    static ReactNode ArrangeImageAndLinkTags(ReactNode node)
-    {
-        if (node.Tag == "img")
-        {
-            node = node with { Tag = "Image" };
-            if (!(node.Properties.Any(x => x.Name == "width") && node.Properties.Any(x => x.Name == "height")))
-            {
-                node = node with { Properties = node.Properties.Add(new() { Name = "fill", Value = "true" }) };
-            }
-        }
-
-        if (node.Tag == "a")
-        {
-            node = node with { Tag = "Link" };
-        }
-
-        return node with
-        {
-            Children = [..node.Children.Select(ArrangeImageAndLinkTags)]
-        };
-    }
-
     static async Task<Result<IReadOnlyList<string>>> CalculateElementTreeTsxCodes(ProjectConfig project, VisualElementModel rootVisualElement)
     {
         ReactNode rootNode;
@@ -152,9 +130,31 @@ static class NextJs_with_Tailwind
             rootNode = result.Value;
         }
 
-        rootNode = ArrangeImageAndLinkTags(rootNode);
+        rootNode = arrangeImageAndLinkTags(rootNode);
 
         return await ConvertReactNodeModelToTsxCode(rootNode, null, 2);
+
+        static ReactNode arrangeImageAndLinkTags(ReactNode node)
+        {
+            if (node.Tag == "img")
+            {
+                node = node with { Tag = "Image" };
+                if (!(node.Properties.Any(x => x.Name == "width") && node.Properties.Any(x => x.Name == "height")))
+                {
+                    node = node with { Properties = node.Properties.Add(new() { Name = "fill", Value = "true" }) };
+                }
+            }
+
+            if (node.Tag == "a")
+            {
+                node = node with { Tag = "Link" };
+            }
+
+            return node with
+            {
+                Children = [..node.Children.Select(arrangeImageAndLinkTags)]
+            };
+        }
     }
 
     static async Task<Result<(string filePath, string fileContent)>> CalculateExportInfo(ExportInput input)
@@ -261,7 +261,7 @@ static class NextJs_with_Tailwind
         {
             return new List<string>
             {
-                $"{Indent(indentLevel)}{asFinalText(node.Children[0].Text)}"
+                $"{indent(indentLevel)}{asFinalText(node.Children[0].Text)}"
             };
         }
 
@@ -271,7 +271,7 @@ static class NextJs_with_Tailwind
             {
                 return new List<string>
                 {
-                    $"{Indent(indentLevel)}{asFinalText(node.Text)}"
+                    $"{indent(indentLevel)}{asFinalText(node.Text)}"
                 };
             }
 
@@ -287,7 +287,7 @@ static class NextJs_with_Tailwind
 
             List<string> lines =
             [
-                $"{Indent(indentLevel)}{{{ClearConnectedValue(showIf.Value)} && ("
+                $"{indent(indentLevel)}{{{ClearConnectedValue(showIf.Value)} && ("
             ];
 
             indentLevel++;
@@ -306,7 +306,7 @@ static class NextJs_with_Tailwind
             lines.AddRange(innerLines);
 
             indentLevel--;
-            lines.Add($"{Indent(indentLevel)})}}");
+            lines.Add($"{indent(indentLevel)})}}");
 
             return lines;
         }
@@ -317,7 +317,7 @@ static class NextJs_with_Tailwind
 
             List<string> lines =
             [
-                $"{Indent(indentLevel)}{{!{ClearConnectedValue(hideIf.Value)} && ("
+                $"{indent(indentLevel)}{{!{ClearConnectedValue(hideIf.Value)} && ("
             ];
             indentLevel++;
 
@@ -335,7 +335,7 @@ static class NextJs_with_Tailwind
             lines.AddRange(innerLines);
 
             indentLevel--;
-            lines.Add($"{Indent(indentLevel)})}}");
+            lines.Add($"{indent(indentLevel)})}}");
 
             return lines;
         }
@@ -349,10 +349,10 @@ static class NextJs_with_Tailwind
             {
                 parentNode = parentNode with { Properties = parentNode.Properties.Remove(itemsSource) };
 
-                lines.Add($"{Indent(indentLevel)}{{{ClearConnectedValue(itemsSource.Value)}.map((_item, _index) => {{");
+                lines.Add($"{indent(indentLevel)}{{{ClearConnectedValue(itemsSource.Value)}.map((_item, _index) => {{");
                 indentLevel++;
 
-                lines.Add(Indent(indentLevel) + "return (");
+                lines.Add(indent(indentLevel) + "return (");
                 indentLevel++;
 
                 IReadOnlyList<string> innerLines;
@@ -368,10 +368,10 @@ static class NextJs_with_Tailwind
                 lines.AddRange(innerLines);
 
                 indentLevel--;
-                lines.Add(Indent(indentLevel) + ");");
+                lines.Add(indent(indentLevel) + ");");
 
                 indentLevel--;
-                lines.Add(Indent(indentLevel) + "})}");
+                lines.Add(indent(indentLevel) + "})}");
 
                 return lines;
             }
@@ -496,21 +496,21 @@ static class NextJs_with_Tailwind
                     {
                         return new TsxLines
                         {
-                            $"{Indent(indentLevel)}<{tag} {string.Join(" ", propsAsText)} />"
+                            $"{indent(indentLevel)}<{tag} {string.Join(" ", propsAsText)} />"
                         };
                     }
 
                     return new TsxLines
                     {
-                        $"{Indent(indentLevel)}<{tag}",
+                        $"{indent(indentLevel)}<{tag}",
                         propsAsMultiLines(propsAsText, indentLevel),
-                        $"{Indent(indentLevel)}/>"
+                        $"{indent(indentLevel)}/>"
                     };
                 }
 
                 return new TsxLines
                 {
-                    $"{Indent(indentLevel)}<{tag} />"
+                    $"{indent(indentLevel)}<{tag} />"
                 };
             }
 
@@ -526,28 +526,28 @@ static class NextJs_with_Tailwind
                         {
                             return new TsxLines
                             {
-                                $"{Indent(indentLevel)}<{tag} {string.Join(" ", propsAsText)}>",
-                                $"{Indent(indentLevel + 1)}{childrenProperty.Value}",
-                                $"{Indent(indentLevel)}</{tag}>"
+                                $"{indent(indentLevel)}<{tag} {string.Join(" ", propsAsText)}>",
+                                $"{indent(indentLevel + 1)}{childrenProperty.Value}",
+                                $"{indent(indentLevel)}</{tag}>"
                             };
                         }
 
                         return new TsxLines
                         {
-                            $"{Indent(indentLevel)}<{tag}",
+                            $"{indent(indentLevel)}<{tag}",
                             propsAsMultiLines(propsAsText, indentLevel),
-                            $"{Indent(indentLevel)}>",
+                            $"{indent(indentLevel)}>",
 
-                            $"{Indent(indentLevel + 1)}{childrenProperty.Value}",
-                            $"{Indent(indentLevel)}</{tag}>"
+                            $"{indent(indentLevel + 1)}{childrenProperty.Value}",
+                            $"{indent(indentLevel)}</{tag}>"
                         };
                     }
 
                     return new TsxLines
                     {
-                        $"{Indent(indentLevel)}<{tag}>",
-                        $"{Indent(indentLevel + 1)}{childrenProperty.Value}",
-                        $"{Indent(indentLevel)}</{tag}>"
+                        $"{indent(indentLevel)}<{tag}>",
+                        $"{indent(indentLevel + 1)}{childrenProperty.Value}",
+                        $"{indent(indentLevel)}</{tag}>"
                     };
                 }
             }
@@ -570,28 +570,28 @@ static class NextJs_with_Tailwind
                             {
                                 return new TsxLines
                                 {
-                                    $"{Indent(indentLevel)}<{tag} {string.Join(" ", propsAsText)}>",
-                                    $"{Indent(indentLevel + 1)}{childrenText}",
-                                    $"{Indent(indentLevel)}</{tag}>"
+                                    $"{indent(indentLevel)}<{tag} {string.Join(" ", propsAsText)}>",
+                                    $"{indent(indentLevel + 1)}{childrenText}",
+                                    $"{indent(indentLevel)}</{tag}>"
                                 };
                             }
 
                             return new TsxLines
                             {
-                                $"{Indent(indentLevel)}<{tag}",
+                                $"{indent(indentLevel)}<{tag}",
                                 propsAsMultiLines(propsAsText, indentLevel),
-                                $"{Indent(indentLevel)}>",
+                                $"{indent(indentLevel)}>",
 
-                                $"{Indent(indentLevel + 1)}{childrenText}",
-                                $"{Indent(indentLevel)}</{tag}>"
+                                $"{indent(indentLevel + 1)}{childrenText}",
+                                $"{indent(indentLevel)}</{tag}>"
                             };
                         }
 
                         return new TsxLines
                         {
-                            $"{Indent(indentLevel)}<{tag}>",
-                            $"{Indent(indentLevel + 1)}{childrenText}",
-                            $"{Indent(indentLevel)}</{tag}>"
+                            $"{indent(indentLevel)}<{tag}>",
+                            $"{indent(indentLevel + 1)}{childrenText}",
+                            $"{indent(indentLevel)}</{tag}>"
                         };
                     }
                 }
@@ -603,20 +603,20 @@ static class NextJs_with_Tailwind
             {
                 if (propsCanExportInOneLine)
                 {
-                    lines.Add($"{Indent(indentLevel)}<{tag} {string.Join(" ", propsAsText)}>");
+                    lines.Add($"{indent(indentLevel)}<{tag} {string.Join(" ", propsAsText)}>");
                 }
                 else
                 {
-                    lines.Add($"{Indent(indentLevel)}<{tag}");
+                    lines.Add($"{indent(indentLevel)}<{tag}");
 
                     lines.AddRange(propsAsMultiLines(propsAsText, indentLevel));
 
-                    lines.Add($"{Indent(indentLevel)}>");
+                    lines.Add($"{indent(indentLevel)}>");
                 }
             }
             else
             {
-                lines.Add($"{Indent(indentLevel)}<{tag}>");
+                lines.Add($"{indent(indentLevel)}<{tag}>");
             }
 
             // Add children
@@ -637,7 +637,7 @@ static class NextJs_with_Tailwind
             }
 
             // Close tag
-            lines.Add($"{Indent(indentLevel)}</{tag}>");
+            lines.Add($"{indent(indentLevel)}</{tag}>");
 
             return lines;
         }
@@ -654,15 +654,15 @@ static class NextJs_with_Tailwind
                     {
                         var items = splitClassName(propItem.RemoveFromStart("className={`").RemoveFromEnd("`}"));
 
-                        lines.Add(Indent(indentLevel + 1) + "className={`");
+                        lines.Add(indent(indentLevel + 1) + "className={`");
 
-                        lines.AddRange(items.Select(x => Indent(indentLevel + 2) + x));
-                        lines.Add(Indent(indentLevel + 1) + "`}");
+                        lines.AddRange(items.Select(x => indent(indentLevel + 2) + x));
+                        lines.Add(indent(indentLevel + 1) + "`}");
                         continue;
                     }
                 }
 
-                lines.Add(Indent(indentLevel + 1) + propItem);
+                lines.Add(indent(indentLevel + 1) + propItem);
             }
 
             return lines;
@@ -703,6 +703,11 @@ static class NextJs_with_Tailwind
             }
 
             return $"{{t(\"{TryClearStringValue(text)}\")}}";
+        }
+
+        static string indent(int indentLevel)
+        {
+            return new(' ', indentLevel * ESLint.IndentLength);
         }
     }
 
@@ -889,11 +894,6 @@ static class NextJs_with_Tailwind
 
             return (reactProperty, classNames);
         }
-    }
-
-    static string Indent(int indentLevel)
-    {
-        return new(' ', indentLevel * ESLint.IndentLength);
     }
 
     static Result<string> InjectRender(IReadOnlyList<string> fileContent, string targetComponentName, IReadOnlyList<string> linesToInject)
