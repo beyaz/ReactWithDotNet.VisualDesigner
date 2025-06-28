@@ -79,7 +79,7 @@ static class NextJs_with_Tailwind
         }
 
         return new ExportOutput { HasChange = true };
-        
+
         static string ignore_whitespace_charachters(string value)
         {
             if (value == null)
@@ -139,23 +139,6 @@ static class NextJs_with_Tailwind
         };
     }
 
-    static string AsFinalText(string text)
-    {
-        if (!IsStringValue(text))
-        {
-
-            if (IsRawStringValue(text))
-            {
-                return $"{TryClearRawStringValue(text)}";
-            }
-
-
-            return $"{{{text}}}";
-        }
-
-        return $"{{t(\"{TryClearStringValue(text)}\")}}";
-    }
-
     static async Task<Result<IReadOnlyList<string>>> CalculateElementTreeTsxCodes(ProjectConfig project, VisualElementModel rootVisualElement)
     {
         ReactNode rootNode;
@@ -211,19 +194,16 @@ static class NextJs_with_Tailwind
             targetComponentName = result.Value.targetComponentName;
         }
 
-       
-        
         // create File if not exists
         {
             if (filePath is null)
             {
                 return new IOException("FilePathNotCalculated");
             }
-            
+
             if (!File.Exists(filePath))
             {
-                
-                var fileContent = 
+                var fileContent =
                     $"export default function {targetComponentName}()" + "{" + Environment.NewLine +
                     "    return (" + Environment.NewLine +
                     "    );" + Environment.NewLine +
@@ -231,8 +211,7 @@ static class NextJs_with_Tailwind
                 await File.WriteAllTextAsync(filePath, fileContent);
             }
         }
-        
-        
+
         string fileNewContent;
         {
             string[] fileContentInDirectory;
@@ -282,17 +261,17 @@ static class NextJs_with_Tailwind
         {
             return new List<string>
             {
-                $"{Indent(indentLevel)}{AsFinalText(node.Children[0].Text)}"
+                $"{Indent(indentLevel)}{asFinalText(node.Children[0].Text)}"
             };
         }
-        
+
         if (nodeTag is null)
         {
             if (node.Text.HasValue())
             {
                 return new List<string>
                 {
-                    $"{Indent(indentLevel)}{AsFinalText(node.Text)}"
+                    $"{Indent(indentLevel)}{asFinalText(node.Text)}"
                 };
             }
 
@@ -580,7 +559,7 @@ static class NextJs_with_Tailwind
                     var childrenText = node.Children[0].Text + string.Empty;
                     if (textProperty is not null)
                     {
-                        childrenText = AsFinalText(ClearConnectedValue(textProperty.Value));
+                        childrenText = asFinalText(ClearConnectedValue(textProperty.Value));
                     }
 
                     if (IsConnectedValue(childrenText))
@@ -709,6 +688,21 @@ static class NextJs_with_Tailwind
 
                 return result;
             }
+        }
+
+        static string asFinalText(string text)
+        {
+            if (!IsStringValue(text))
+            {
+                if (IsRawStringValue(text))
+                {
+                    return $"{TryClearRawStringValue(text)}";
+                }
+
+                return $"{{{text}}}";
+            }
+
+            return $"{{t(\"{TryClearStringValue(text)}\")}}";
         }
     }
 
