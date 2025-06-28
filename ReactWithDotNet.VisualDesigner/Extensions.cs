@@ -687,7 +687,10 @@ static class Design
     public const string ItemsSourceDesignTimeCount = "d-items-source-design-time-count";
     
     public const string HideIf = "d-hide-if";
+    
     public const string ShowIf = "d-show-if";
+    
+    public const string IsImportedChild = "d-is-imported-child";
 
 }
 

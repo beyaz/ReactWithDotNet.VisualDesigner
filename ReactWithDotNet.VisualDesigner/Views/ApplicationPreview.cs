@@ -123,7 +123,7 @@ sealed class ApplicationPreview : Component
 
                     if (componentRootElementModel is not null)
                     {
-                        var component = await renderElement(scope with { Parent = scope, ParentModel = model }, componentRootElementModel, path);
+                        var component = await renderElement(scope with { Parent = scope, ParentModel = model, ParentPath = path }, componentRootElementModel, path);
 
                         // try to highlight
                         if (scope.HighlightedElement == model)
@@ -211,17 +211,30 @@ sealed class ApplicationPreview : Component
             {
                 Element childElement;
                 {
-                    var childPath = $"{path},{i}";
-                    if (scope.Parent is not null)
-                    {
-                        childPath = path;
-                    }
-
                     var childModel = model.Children[i];
                     if (childModel.HideInDesigner)
                     {
                         continue;
                     }
+                    
+                    
+                    var childPath = $"{path},{i}";
+                    {
+                        // children: props.children
+                        if (childModel.Properties.Any(x=>x == Design.IsImportedChild))
+                        {
+                            childModel.Properties.Remove(Design.IsImportedChild);
+                        
+                            childPath = $"{scope.ParentPath},{i}";
+                        }
+                        else if (scope.Parent is not null)
+                        {
+                            // when any child element clicked in component we need to trigger only component
+                            childPath = path;
+                        }
+                    }
+
+                    
 
                     // check -show/hide-if
                     {
@@ -381,6 +394,12 @@ sealed class ApplicationPreview : Component
                 {
                     if (name == "children" && value == "props.children" && scope.ParentModel is not null)
                     {
+                        // mark children as imported
+                        foreach (var item in scope.ParentModel.Children)
+                        {
+                            item.Properties.Add(Design.IsImportedChild);
+                        }
+                        
                         model.Children.AddRange(scope.ParentModel.Children);
                         return true;
                     }
@@ -728,4 +747,6 @@ sealed record RenderPreviewScope
     public required ReactContext ReactContext { get; init; }
 
     public required string UserName { get; init; }
+    
+    public string ParentPath { get; init; }
 }
