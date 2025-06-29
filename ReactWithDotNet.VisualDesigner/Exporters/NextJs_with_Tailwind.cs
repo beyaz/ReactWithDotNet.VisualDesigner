@@ -713,10 +713,6 @@ static class NextJs_with_Tailwind
 
     static async Task<Result<ReactNode>> ConvertVisualElementModelToReactNodeModel(ProjectConfig project, VisualElementModel element)
     {
-        List<string> classNames = [];
-
-        var classNameShouldBeTemplateLiteral = false;
-
         // Open tag
         var tag = element.Tag;
 
@@ -770,6 +766,10 @@ static class NextJs_with_Tailwind
             HtmlElementType = TryGetHtmlElementTypeByTagName(tag)
         };
 
+        List<string> classNames = [];
+
+        var classNameShouldBeTemplateLiteral = false;
+
         // Add properties
         foreach (var property in element.Properties)
         {
@@ -817,8 +817,8 @@ static class NextJs_with_Tailwind
             node = node with { Properties = node.Properties.Add(new() { Name = "className", Value = firstLastChar + string.Join(" ", classNames) + firstLastChar }) };
         }
 
-        var hasSelfClose = element.Children.Count == 0 && element.HasNoText();
-        if (hasSelfClose)
+        var hasNoChildAndHasNoText = element.Children.Count == 0 && element.HasNoText();
+        if (hasNoChildAndHasNoText)
         {
             return node;
         }
@@ -830,7 +830,8 @@ static class NextJs_with_Tailwind
             {
                 Children = node.Children.Add(new()
                 {
-                    Text            = element.GetText(),
+                    Text = element.GetText(),
+
                     HtmlElementType = None
                 })
             };
