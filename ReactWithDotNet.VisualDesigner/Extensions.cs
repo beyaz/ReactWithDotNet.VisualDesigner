@@ -371,6 +371,19 @@ static class Extensions
         return node;
     }
     
+    public static VisualElementModel Modify(VisualElementModel root, VisualElementModel target, Func<VisualElementModel, VisualElementModel> modifyNode)
+    {
+        if (root == target)
+        {
+            return modifyNode(root);
+        }
+
+        return root with
+        {
+            Children = ListFrom(from child in root.Children select Modify(child, target, modifyNode))
+        };
+    }
+    
     public static T CloneByUsingYaml<T>(T value) where T : class
     {
         if (value is null)

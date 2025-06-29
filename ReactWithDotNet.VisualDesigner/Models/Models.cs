@@ -12,7 +12,7 @@ public sealed record VisualElementModel
     
     public List<VisualElementModel> Children { get; init; } = [];
 
-    public bool HideInDesigner { get; set; }
+    public bool HideInDesigner { get; init; }
     
     // @formatter:on
 }

@@ -18,6 +18,14 @@ sealed class ApplicationView : Component<ApplicationState>
 
     VisualElementModel CurrentVisualElement => FindTreeNodeByTreePath(state.ComponentRootElement, state.Selection.VisualElementTreeItemPath);
 
+    void UpdateCurrentVisualElement(Func<VisualElementModel,VisualElementModel> modify)
+    {
+        state = state with
+        {
+            ComponentRootElement = Modify(state.ComponentRootElement, CurrentVisualElement, modify)
+        };
+    }
+    
     protected override Element componentDidCatch(Exception exceptionOccurredInRender)
     {
         return new div(Background(Gray100))
@@ -139,6 +147,8 @@ sealed class ApplicationView : Component<ApplicationState>
 
         return Task.CompletedTask;
     }
+    
+    
 
     protected override Element render()
     {
@@ -1055,7 +1065,10 @@ sealed class ApplicationView : Component<ApplicationState>
             },
             OnHideInDesignerToggle = () =>
             {
-                CurrentVisualElement.HideInDesigner = !CurrentVisualElement.HideInDesigner;
+                UpdateCurrentVisualElement(x => x with
+                {
+                    HideInDesigner = !CurrentVisualElement.HideInDesigner
+                });
 
                 return Task.CompletedTask;
             },
