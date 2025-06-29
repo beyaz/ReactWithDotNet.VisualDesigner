@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+﻿global using Shouldly;
 
 namespace ReactWithDotNet.VisualDesigner.Test;
 
@@ -22,10 +22,9 @@ public sealed class HtmlImporterTest
 
         var model = HtmlImporter.ConvertToVisualElementModel(project, html);
 
-        model.Styles.Should().BeEquivalentTo(new List<string>
-        {
+        model.Styles.ShouldBe([
             "color: #222530",
             "ABC"
-        });
+        ]);
     }
 }

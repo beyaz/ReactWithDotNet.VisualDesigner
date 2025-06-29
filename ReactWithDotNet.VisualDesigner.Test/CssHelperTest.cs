@@ -1,5 +1,4 @@
-﻿using FluentAssertions;
-
+﻿
 namespace ReactWithDotNet.VisualDesigner.Test;
 
 [TestClass]
@@ -12,7 +11,7 @@ public sealed class CssHelperTest
         {
             var result = CreateDesignerStyleItemFromText(GetProjectConfig(1),designerStyleItem);
 
-            result.Success.Should().BeTrue();
+            result.Success.ShouldBeTrue();
 
             return result.Value;
         }
@@ -22,9 +21,9 @@ public sealed class CssHelperTest
         {
             var value = Call("w-full");
 
-            value.Pseudo.Should().BeNull();
+            value.Pseudo.ShouldBeNull();
         
-            value.RawHtmlStyles["width"].Should().Be("100%");
+            value.RawHtmlStyles["width"].ShouldBe("100%");
         }
         
         [TestMethod]
@@ -32,9 +31,9 @@ public sealed class CssHelperTest
         {
             var value = Call("width: 400px");
             
-            value.Pseudo.Should().BeNull();
+            value.Pseudo.ShouldBeNull();
         
-            value.RawHtmlStyles["width"].Should().Be("400px");
+            value.RawHtmlStyles["width"].ShouldBe("400px");
         }
         
         [TestMethod]
@@ -42,9 +41,9 @@ public sealed class CssHelperTest
         {
             var value = Call("hover: width: 400px");
 
-            value.Pseudo.Should().Be("hover");
+            value.Pseudo.ShouldBe("hover");
         
-            value.RawHtmlStyles["width"].Should().Be("400px");
+            value.RawHtmlStyles["width"].ShouldBe("400px");
         }
     }
  

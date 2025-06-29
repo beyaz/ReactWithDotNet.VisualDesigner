@@ -9,7 +9,6 @@ global using System.Collections.Generic;
 global using System.Linq;
 global using static ReactWithDotNet.Mixin;
 
-
 global using System.Threading.Tasks;
 
 global using ReactWithDotNet.VisualDesigner.DataAccess;
@@ -27,7 +26,5 @@ global using static ReactWithDotNet.VisualDesigner.Mappers.Mapper;
 global using ReactWithDotNet.VisualDesigner.Toolbox;
 
 using System.Runtime.CompilerServices;
-
-
 
 [assembly: InternalsVisibleTo("ReactWithDotNet.VisualDesigner.Test")]
