@@ -873,12 +873,12 @@ static class NextJs_with_Tailwind
                 return (None, value.Split(" ", StringSplitOptions.RemoveEmptyEntries));
             }
 
-            if (name == "w" || name == "width")
+            if (name is "w" or "width")
             {
                 return (new ReactProperty { Name = "width", Value = value }, None);
             }
 
-            if (name == "h" || name == "height")
+            if (name is "h" or "height")
             {
                 return (new ReactProperty { Name = "height", Value = value }, None);
             }
