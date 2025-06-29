@@ -4,7 +4,7 @@ public sealed record VisualElementModel
 {
     // @formatter:off
     
-    public string Tag { get; set; }
+    public string Tag { get; init; }
     
     public List<string> Properties { get; init; } = [];
     

@@ -1486,11 +1486,12 @@ sealed class ApplicationView : Component<ApplicationState>
                     {
                         foreach (var dbRecord in TryFindComponentByComponentNameWithExportFilePath(state.ProjectId, newValue))
                         {
-                            CurrentVisualElement.Tag = dbRecord.Id.ToString();
+                            UpdateCurrentVisualElement(x=> x with{Tag = dbRecord.Id.ToString()});
+                            
                             return Task.CompletedTask;
                         }
 
-                        CurrentVisualElement.Tag = newValue;
+                        UpdateCurrentVisualElement(x=> x with{Tag = newValue});
 
                         return Task.CompletedTask;
                     },
