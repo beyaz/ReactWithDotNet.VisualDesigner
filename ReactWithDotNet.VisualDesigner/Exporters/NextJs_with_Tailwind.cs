@@ -860,10 +860,6 @@ static class NextJs_with_Tailwind
 
         static (Maybe<ReactProperty> reactProperty, Maybe<IReadOnlyList<string>> classNames) tryConvertToReactProperty(string property)
         {
-            Maybe<ReactProperty> reactProperty = None;
-            
-            Maybe<IReadOnlyList<string>> classNames = None;
-
             var parseResult = TryParseProperty(property);
             if (parseResult.HasNoValue)
             {
@@ -874,26 +870,20 @@ static class NextJs_with_Tailwind
 
             if (name == "class")
             {
-                classNames = value.Split(" ", StringSplitOptions.RemoveEmptyEntries);
-
-                return (reactProperty, classNames);
+                return (None, value.Split(" ", StringSplitOptions.RemoveEmptyEntries));
             }
 
             if (name == "w" || name == "width")
             {
-                reactProperty = new ReactProperty { Name = "width", Value = value };
-                return (reactProperty, classNames);
+                return (new ReactProperty { Name = "width", Value = value }, None);
             }
 
             if (name == "h" || name == "height")
             {
-                reactProperty = new ReactProperty { Name = "height", Value = value };
-                return (reactProperty, classNames);
+                return (new ReactProperty { Name = "height", Value = value }, None);
             }
 
-            reactProperty = new ReactProperty { Name = name, Value = value };
-
-            return (reactProperty, classNames);
+            return (new ReactProperty { Name = name, Value = value }, None);
         }
     }
 
@@ -957,13 +947,13 @@ static class NextJs_with_Tailwind
     {
         public ImmutableList<ReactNode> Children { get; init; } = [];
 
-        internal required Maybe<Type> HtmlElementType { get; init; }
-
         public ImmutableList<ReactProperty> Properties { get; init; } = [];
 
         public string Tag { get; init; }
 
         public string Text { get; init; }
+
+        internal required Maybe<Type> HtmlElementType { get; init; }
     }
 
     record ReactProperty
