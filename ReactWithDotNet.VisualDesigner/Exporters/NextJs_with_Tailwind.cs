@@ -956,7 +956,7 @@ static class NextJs_with_Tailwind
     {
         public ImmutableList<ReactNode> Children { get; init; } = [];
 
-        public required Maybe<Type> HtmlElementType { get; init; }
+        internal required Maybe<Type> HtmlElementType { get; init; }
 
         public ImmutableList<ReactProperty> Properties { get; init; } = [];
 
