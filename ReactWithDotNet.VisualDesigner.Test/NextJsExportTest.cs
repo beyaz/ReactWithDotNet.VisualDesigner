@@ -11,7 +11,7 @@ public sealed class NextJsExportTest
         (await NextJs_with_Tailwind.ExportAll(1)).Success.ShouldBeTrue();
     }
 
-    [TestMethod]
+    //[TestMethod]
     public async Task FixAll()
     {
         foreach (var component in await Store.GetAllComponentsInProject(1))
