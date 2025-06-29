@@ -120,6 +120,9 @@ static class ApplicationLogic
             var selectedVisualItem = FindTreeNodeByTreePath(state.ComponentRootElement, state.Selection.VisualElementTreeItemPath);
 
             tag = selectedVisualItem.Tag;
+
+            tag = await GetTagText(tag);
+
         }
 
         if (tag != null)
@@ -196,7 +199,12 @@ static class ApplicationLogic
         items.Add($"{Design.ShowIf}: {{state.isSelectedUser}}");
         items.Add($"{Design.HideIf}: {{state.isSelectedUser}}");
 
-        items.AddRange(GetPropsSuggestions(state));
+
+        if (tag != null)
+        {
+            items.AddRange(await Plugin.GetPropSuggestions(state, tag));
+        }
+        
 
         return items;
     }

@@ -216,8 +216,9 @@ sealed class ApplicationPreview : Component
                     {
                         continue;
                     }
-                    
-                    
+
+                    var childScope = scope;
+
                     var childPath = $"{path},{i}";
                     {
                         // children: props.children
@@ -226,6 +227,8 @@ sealed class ApplicationPreview : Component
                             childModel.Properties.Remove(Design.IsImportedChild);
                         
                             childPath = $"{scope.ParentPath},{i}";
+
+                            childScope = scope.Parent;
                         }
                         else if (scope.Parent is not null)
                         {
@@ -251,7 +254,7 @@ sealed class ApplicationPreview : Component
                         }
                     }
 
-                    var result = await renderElement(scope, childModel, childPath);
+                    var result = await renderElement(childScope, childModel, childPath);
                     if (result.HasError)
                     {
                         return new Exception($"Path: {childPath}", result.Error);
