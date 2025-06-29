@@ -117,7 +117,7 @@ static class NextJs_with_Tailwind
         return Success;
     }
 
-    static async Task<Result<IReadOnlyList<string>>> CalculateElementTreeTsxCodes(ProjectConfig project, VisualElementModel rootVisualElement)
+    internal static async Task<Result<IReadOnlyList<string>>> CalculateElementTreeTsxCodes(ProjectConfig project, VisualElementModel rootVisualElement)
     {
         ReactNode rootNode;
         {
