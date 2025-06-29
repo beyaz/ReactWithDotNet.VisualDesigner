@@ -31,6 +31,7 @@ static class Plugin
 
             return items;
         }
+        
         if (tag == "BComboBox")
         {
             var items = new List<string>();
@@ -42,6 +43,26 @@ static class Plugin
                 foreach (var text in await GetMessagingByGroupName("POSPortal"))
                 {
                     returnList.Add($"labelText: \"{text}\"");
+                }
+
+                return returnList;
+            }));
+
+            return items;
+        }
+
+
+        if (tag == "BCheckBox")
+        {
+            var items = new List<string>();
+
+            items.AddRange(await Cache.AccessValue($"{nameof(Plugin)}-{tag}", async () =>
+            {
+                var returnList = new List<string>();
+
+                foreach (var text in await GetMessagingByGroupName("POSPortal"))
+                {
+                    returnList.Add($"label: \"{text}\"");
                 }
 
                 return returnList;

@@ -1,0 +1,344 @@
+import React, { useState } from "react";
+import { BasePage, useMessage, useStore, useDevice, useNav } from "b-digital-framework";
+import { useApplicationContext } from "b-boa-base";
+import { moduleLogger } from "b-log";
+import { TextValuePair } from "b-digital-internet-banking";
+import { BDigitalGroupView } from "b-digital-group-view";
+import { BComboBox } from "b-combo-box";
+import { BDigitalGrid } from "b-digital-grid";
+import { BDigitalBox } from "b-digital-box";
+import { BButton } from "b-button";
+import { BCheckBox } from "b-check-box";
+import { BInput } from "b-input";
+import { BInputMaskExtended } from "b-input-mask-extended";
+import { BDigitalMoneyInput } from "b-digital-money-input";
+
+import { ManuelProvisionModel, PurchaseResultViewModel } from '../../../models';
+import { useMobilePosService } from "../../../services/useMobilePosService";
+import { CurrencyModel, GetManuelProvisionPreDataClientRequest, ManuelProvisionClientRequest, ManuelProvisionClientResponse } from "../../../types";
+
+
+export const ManuelProvisionForm = () => {
+    const { getMessage } = useMessage("POSPortal");
+    const logger = moduleLogger("POSPortalLogger");
+    const context = useApplicationContext();
+    const store = useStore();
+    const { isMobile, isTablet } = useDevice();
+    const { navigateByAction, navigatePage } = useNav();
+
+    const { getManuelProvisionPreData, manuelProvision } = useMobilePosService();
+
+    const initialModel: ManuelProvisionModel = {
+        isInitialize: false,
+        fecId: 0,
+        amount: undefined,
+        nameAndSurname: undefined,
+        cardNumber: undefined,
+        cardExpireMonthYear: undefined, // MM/YY format
+        cardExpireDateMonth: undefined,
+        cardExpireDateYear: undefined,
+        cvv2: undefined,
+        installmentNumber: 0, // Default to cash payment
+        deferringNumber: 0, // Default to no deferring
+        is3DSecure: false
+    };
+    const [model, setModel] = React.useState<ManuelProvisionModel>((store?.transactionContext?.data as ManuelProvisionModel) || initialModel);
+    const [currencySelectList, setCurrencySelectList] = useState<Array<TextValuePair> | undefined>();
+    const [installmentMonthList, setInstallmentMonthList] = useState<Array<TextValuePair> | undefined>();
+    const [deferringMonthList, setDeferringMonthList] = useState<Array<TextValuePair> | undefined>();
+
+    React.useEffect(() => {
+        logger.info("ManuelProvisionForm page mounted info log");
+
+        const controller = new AbortController();
+
+        const handleGetManuelProvisionPreData = async (controller: AbortController) => {
+
+            logger.info("handleGetManuelProvisionPreData started");
+
+            var getManuelProvisionPreDataRequest: GetManuelProvisionPreDataClientRequest = {};
+
+            var getManuelProvisionPreDataResponse = await getManuelProvisionPreData.send(getManuelProvisionPreDataRequest, controller.signal)
+            if (!getManuelProvisionPreDataResponse.success) {
+                logger.error("Failed to fetch data:", getManuelProvisionPreDataResponse.result);
+                return;
+            }
+
+            const {
+                currencyList,
+                maxInstallmentCount,
+                maxDeferringCount,
+            } = getManuelProvisionPreDataResponse;
+
+            setCurrencySelectList(currencyList.map<TextValuePair>((item: CurrencyModel) => { return { value: item.fecId.toString(), text: item.fecCode }; }));
+
+            var installmentList = maxInstallmentCount > 0 ? [...Array(maxInstallmentCount - 1).keys()]
+                .map<TextValuePair>((item) => {
+                    return { value: (item + 2).toString(), text: (item + 2).toString() };
+                }) : [];
+            var cashItem: TextValuePair = { value: '0', text: getMessage('Cash') };
+            installmentList.unshift(cashItem);
+            setInstallmentMonthList(installmentList);
+
+            var deferringList = maxDeferringCount > 0 ? [...Array(maxDeferringCount - 1).keys()]
+                .map<TextValuePair>((item) => {
+                    return { value: (item + 1).toString(), text: (item + 1).toString() };
+                }) : [];
+            var noDeferringItem: TextValuePair = { value: '0', text: getMessage('Cash') };
+            deferringList.unshift(noDeferringItem);
+            setDeferringMonthList(deferringList);
+
+            setModel({
+                ...model,
+                fecId: 0,
+                installmentNumber: 0, // Default to cash payment
+                deferringNumber: 0, // Default to no deferring
+            });
+
+
+            logger.info("handleGetManuelProvisionPreData finished");
+        }
+
+        handleGetManuelProvisionPreData(controller).catch((error) => {
+            if (error.name !== "AbortError") {
+                logger.error("Failed to fetch data:", error);
+            }
+        });
+        return () => {
+            controller.abort();
+        };
+    }, []);
+
+    React.useEffect(() => {
+        store?.setTransactionContext({
+            ...store.transactionContext,
+            data: model,
+            nextPageAction: handleNextAction,
+        });
+    }, [model]);
+
+    const handleNextAction = async () => {
+        const clientRequest: ManuelProvisionClientRequest = {
+            amount: model.amount,
+            fecId: model.fecId,
+            cardHolderName: model.nameAndSurname,
+            cardNumber: model.cardNumber,
+            cardExpireDateMonth: model.cardExpireDateMonth,
+            cardExpireDateYear: model.cardExpireDateYear,
+            cardCVV2: model.cvv2,
+            description: model.description,
+            is3DSecure: model.is3DSecure
+        };
+        const response = await manuelProvision.send(clientRequest, new AbortController().signal);
+        if (!response.success) {
+            store.setMessage({ content: response.result?.errorMessage });
+            logger.error("Failed to process Manuel Provision:", JSON.stringify(response));
+            return;
+        }
+        store.setTransactionContext({
+            ...store.transactionContext,
+            data: {
+                paymentToken: response.paymentToken,
+                isSuccess: true,
+            } as PurchaseResultViewModel,
+            nextPageAction: undefined,
+        });
+
+        // TODO: Get this link from the response
+        const paymentUrl = "https://cebimpospaytest.kuveytturk.com.tr/api/payment/load3d?token=" + response.paymentToken + "&lang=tr";
+
+        try {
+            const isSuccess = await openPopupWindowAsync(paymentUrl, "_blank", 700, 700);
+            if (isSuccess) {
+                navigateByAction("mobilepos", "purchase-success-result-view", true);
+            }
+            else {
+                navigateByAction("mobilepos", "purchase-fail-result-view", true);
+            }
+
+        }
+        catch (error) {
+            store.setMessage({ content: getMessage("PopupBlockedError") });
+            logger.error("Failed to open payment URL:", error);
+        }
+    };
+
+    const openPopupWindowAsync = (url: string, windowName: string, width: number, height: number) => new Promise((resolve, reject) => {
+        const top = window.top.outerHeight / 2 + window.top.screenY - (height / 2);
+        const left = window.top.outerWidth / 2 + window.top.screenX - (width / 2);
+        var popup = window.open(url, windowName, `popup=true,width=${width},height=${height},top=${top},left=${left}`);
+        if (!popup) {
+            reject(new Error("Popup blocked or failed to open"));
+            return;
+        }
+
+        const interval = setInterval(() => {
+            const isFinished = popup.closed || popup.location.href.includes("success") || popup.location.href.includes("fail") || popup.location.href.includes("error");
+            const isSuccess = popup.location.href.includes("succes");
+            if (isFinished) {
+                clearInterval(interval);
+                resolve(isSuccess);
+            }
+        }, 500);
+    });
+
+    const handleClick = () => {
+        if (model.amount === undefined || !model.nameAndSurname || !model.cardNumber || !model.cardExpireMonthYear) {
+            return;
+        }
+        console.log("Get Paid button clicked");
+        handleNextAction();
+    };
+
+    const fecCode = currencySelectList?.find((item) => item.value === model.fecId.toString())?.text;
+    const cardExpireDateMonthYearString =
+        model.cardExpireDateMonth + '/' + model.cardExpireDateYear;
+
+    return (
+        <BasePage pageTitle={getMessage("ManuelCardPaymentPageTitle")}>
+            <BDigitalBox styleContext="noMargin" sx={{ py: 2 }}></BDigitalBox>
+            <BDigitalGroupView title={"abc_"+getMessage("PaymentInfoGroupTitle")}>
+                <BDigitalGrid container justifyContent="space-between" spacing={1} alignItems="center" >
+                    <BDigitalGrid item xs={12} lg={6}>
+                        <BDigitalMoneyInput
+                            id="inpPrice"
+                            value={model.amount}
+                            fec={fecCode}
+                            currencyVisible={false}
+                            handleMoneyInputChange={(value: number) => {
+                                setModel({ ...model, amount: value });
+                            }}
+                            inputProps={{ valueConstraint: { required: true }, autoComplete: "off" }}
+                        />
+                    </BDigitalGrid>
+                    <BDigitalGrid item xs={12} lg={6}>
+                        <BComboBox
+                            id="cmbCurrency"
+                            dataSource={currencySelectList}
+                            labelText={getMessage("CurrencyLabel")}
+                            hintText={getMessage("CurrencySelectHint")}
+                            fullWidth={false}
+                            value={[model.fecId]}
+                            onSelect={(selectedIndexes: [number], selectedItems: [TextValuePair], selectedValues: [string]) => {
+                                setModel({ ...model, fecId: parseInt(selectedItems[0].value) });
+                            }}
+                        />
+                    </BDigitalGrid>
+                </BDigitalGrid>
+                <BInput
+                    id="inpCardHolderNameSurname"
+                    valueConstraint={{ required: true }}
+                    context={context}
+                    floatingLabelText={getMessage("CardHolderNameSurnameLabel")}
+                    value={model.nameAndSurname}
+                    autoComplete="off"
+                    onChange={(e: any, value: any) => {
+                        model.nameAndSurname = value;
+                    }}
+                />
+                <BInputMaskExtended
+                    floatingLabelText={getMessage('CardNumberLabel')}
+                    mask={[/[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/, ' ', /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/, ' ', /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/, ' ', /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/]}
+                    hintText={'0000 0000 0000 0000'}
+                    value={model.cardNumber}
+                    onChange={(e: any, value: string) => {
+                        setModel({ ...model, cardNumber: value.replace(' ', '') });
+                    }}
+                    valueConstraint={{ required: true, autoComplete: "off" }}
+                />
+                <BDigitalGrid container justifyContent="space-between" spacing={1} alignItems="center" wrap="nowrap">
+                    <BDigitalGrid item xs={6}>
+                        <BInputMaskExtended
+                            floatingLabelText={getMessage("CardMonthYearLabel")}
+                            mask={[/[0-1]/, /[0-9]/, '/', /[0-9]/, /[0-9]/,]}
+                            hintText={'00/00'}
+                            value={model.cardExpireMonthYear}
+                            onChange={(e: any, value: string) => {
+                                const [monthStr, yearStr] = value.split('/');
+                                setModel({
+                                    ...model,
+                                    cardExpireMonthYear: value,
+                                    cardExpireDateMonth: parseInt(monthStr),
+                                    cardExpireDateYear: parseInt(yearStr)
+                                });
+                                require: true;
+                                autoComplete: "off"
+                            }}
+                        />
+                    </BDigitalGrid>
+                    <BDigitalGrid item xs={6}>
+                        <BInput
+                            id="cVV"
+                            floatingLabelText={getMessage("CardCVV2Label")}
+                            value={model.cvv2}
+                            maxLength={15}
+                            onBlur={(e: any, value: string) => {
+                                setModel({ ...model, cvv2: value });
+                            }}
+                            valueConstraint={{ required: true, autoComplete: "off" }} />
+                    </BDigitalGrid>
+                </BDigitalGrid>
+
+                <BComboBox
+                    id="cmbInstallmentList"
+                    dataSource={installmentMonthList}
+                    labelText={getMessage("InstallmentSelectionLabel")}
+                    hintText={getMessage("InstallmentSelectionHint")}
+                    hiddenClearButton={true}
+                    value={[model.installmentNumber]}
+                    onSelect={(selectedIndexes: [number], selectedItems: [TextValuePair], selectedValues: [string]) => {
+                        setModel({ ...model, installmentNumber: parseInt(selectedItems[0].value) });
+                    }}
+                />
+
+                <BComboBox
+                    id="cmbDeferringList"
+                    dataSource={deferringMonthList}
+                    labelText={getMessage("DeferringSelectionLabel")}
+                    hintText={getMessage("DeferringSelectionHint")}
+                    hiddenClearButton={true}
+                    value={[model.deferringNumber]}
+                    onSelect={(selectedIndexes: [number], selectedItems: [TextValuePair], selectedValues: [string]) => {
+                        setModel({ ...model, deferringNumber: parseInt(selectedItems[0].value) });
+                    }}
+                />
+                <BInput
+                    id="inpDescription"
+                    valueConstraint={{ required: false }}
+                    context={context}
+                    floatingLabelText={getMessage("DescriptionLabel")}
+                    value={model.description}
+                    autoComplete="off"
+                    onChange={(e: any, value: any) => {
+                        model.description = value;
+                    }}
+                />
+                <BCheckBox context={context}
+                    checked={model.is3DSecure}
+                    label={getMessage("PayWithThreeDCheckLabel")}
+                    onCheck={(e: any, checked: boolean) => {
+                        setModel({ ...model, is3DSecure: checked });
+                    }}
+                />
+            </BDigitalGroupView>
+
+            <BDigitalGrid container direction="row" justifyContent="flex-end" >
+                <BDigitalGrid item xs={isMobile ? 12 : undefined}>
+                    <BButton
+                        id="btnGetPaid"
+                        type="contained"
+                        text={getMessage("GetPaidButtonLabel")}
+                        fullWidth={isMobile}
+                        style={{
+                            backgroundColor: context.theme.boaPalette.pri500,
+                            color: context.theme.boaPalette.comp500,
+                            minWidth: context.theme.spacing(20),
+                            padding: isTablet ? context.theme.spacing(1, 8) : context.theme.spacing(1, 1.75),
+                        }}
+                        onClick={handleClick}
+                        />
+                </BDigitalGrid>
+            </BDigitalGrid >
+        </BasePage >
+    );
+};

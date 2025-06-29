@@ -610,7 +610,7 @@ sealed class ApplicationPreview : Component
                     {
                         if (name.Equals("type", StringComparison.OrdinalIgnoreCase))
                         {
-                            elementAsInput.type = value;
+                            elementAsInput.type = TryClearStringValue(value);
                             return true;
                         }
                     }
