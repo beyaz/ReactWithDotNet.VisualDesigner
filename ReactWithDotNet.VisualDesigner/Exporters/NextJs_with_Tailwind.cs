@@ -861,12 +861,13 @@ static class NextJs_with_Tailwind
         static (Maybe<ReactProperty> reactProperty, Maybe<IReadOnlyList<string>> classNames) tryConvertToReactProperty(string property)
         {
             Maybe<ReactProperty> reactProperty = None;
+            
             Maybe<IReadOnlyList<string>> classNames = None;
 
             var parseResult = TryParseProperty(property);
             if (parseResult.HasNoValue)
             {
-                return (reactProperty, classNames);
+                return (None, None);
             }
 
             var (name, value) = parseResult.Value;
