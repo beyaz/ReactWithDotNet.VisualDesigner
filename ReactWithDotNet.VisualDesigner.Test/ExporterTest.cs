@@ -28,13 +28,7 @@ public sealed class ExporterTest
 
         static async Task act(VisualElementModel visualElementModel, IReadOnlyList<string> expected)
         {
-            var project = new ProjectConfig
-            {
-                Styles = new Dictionary<string, string>
-                {
-                    { "ABC", "font-size: 16px; font-family: \"Host Grotesk\"; font-weight: 400; line-height: 24px;" }
-                }
-            };
+            var project = new ProjectConfig();
 
             var result = await NextJs_with_Tailwind.CalculateElementTreeTsxCodes(project, visualElementModel);
 
