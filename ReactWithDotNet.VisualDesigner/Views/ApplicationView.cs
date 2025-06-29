@@ -18,14 +18,6 @@ sealed class ApplicationView : Component<ApplicationState>
 
     VisualElementModel CurrentVisualElement => FindTreeNodeByTreePath(state.ComponentRootElement, state.Selection.VisualElementTreeItemPath);
 
-    void UpdateCurrentVisualElement(Func<VisualElementModel,VisualElementModel> modify)
-    {
-        state = state with
-        {
-            ComponentRootElement = Modify(state.ComponentRootElement, CurrentVisualElement, modify)
-        };
-    }
-    
     protected override Element componentDidCatch(Exception exceptionOccurredInRender)
     {
         return new div(Background(Gray100))
@@ -147,8 +139,6 @@ sealed class ApplicationView : Component<ApplicationState>
 
         return Task.CompletedTask;
     }
-    
-    
 
     protected override Element render()
     {
@@ -1486,12 +1476,12 @@ sealed class ApplicationView : Component<ApplicationState>
                     {
                         foreach (var dbRecord in TryFindComponentByComponentNameWithExportFilePath(state.ProjectId, newValue))
                         {
-                            UpdateCurrentVisualElement(x=> x with{Tag = dbRecord.Id.ToString()});
-                            
+                            UpdateCurrentVisualElement(x => x with { Tag = dbRecord.Id.ToString() });
+
                             return Task.CompletedTask;
                         }
 
-                        UpdateCurrentVisualElement(x=> x with{Tag = newValue});
+                        UpdateCurrentVisualElement(x => x with { Tag = newValue });
 
                         return Task.CompletedTask;
                     },
@@ -2045,6 +2035,14 @@ sealed class ApplicationView : Component<ApplicationState>
         }
 
         return Task.CompletedTask;
+    }
+
+    void UpdateCurrentVisualElement(Func<VisualElementModel, VisualElementModel> modify)
+    {
+        state = state with
+        {
+            ComponentRootElement = Modify(state.ComponentRootElement, CurrentVisualElement, modify)
+        };
     }
 
     Result UpdateElementNode(string path, string yaml)
