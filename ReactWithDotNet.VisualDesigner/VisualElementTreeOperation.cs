@@ -3,7 +3,7 @@
 record VisualElementTreeOperationMoveResponse
 {
     public VisualElementModel NewRoot { get; init; }
-    
+
     public ApplicationSelectionState Selection { get; init; }
 }
 
@@ -16,7 +16,6 @@ static class VisualElementTreeOperation
             if (source == "0")
             {
                 return new Exception("Root node cannot move.");
-
             }
         }
 
@@ -63,7 +62,7 @@ static class VisualElementTreeOperation
             sourceNodeParent.Children.RemoveAt(sourceNodeIndex);
 
             rootNode.Children.Add(root);
-            
+
             return new VisualElementTreeOperationMoveResponse
             {
                 NewRoot = rootNode,
@@ -112,7 +111,7 @@ static class VisualElementTreeOperation
 
                 return new VisualElementTreeOperationMoveResponse
                 {
-                    NewRoot = root,
+                    NewRoot   = root,
                     Selection = new()
                 };
             }
@@ -125,7 +124,7 @@ static class VisualElementTreeOperation
             {
                 return new VisualElementTreeOperationMoveResponse
                 {
-                    NewRoot   = root
+                    NewRoot = root
                 };
             }
 
@@ -133,7 +132,7 @@ static class VisualElementTreeOperation
             {
                 return new VisualElementTreeOperationMoveResponse
                 {
-                    NewRoot   = root
+                    NewRoot = root
                 };
             }
         }
@@ -178,6 +177,5 @@ static class VisualElementTreeOperation
                 Selection = new()
             };
         }
-        
     }
 }
