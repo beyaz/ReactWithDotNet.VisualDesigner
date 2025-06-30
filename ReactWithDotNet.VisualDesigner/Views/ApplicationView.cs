@@ -762,7 +762,10 @@ sealed class ApplicationView : Component<ApplicationState>
         {
             if (dd.EndItemIndex.HasValue)
             {
-                CurrentVisualElement.Properties.MoveItemRelativeTo(dd.StartItemIndex.Value, dd.EndItemIndex.Value, dd.Position == AttibuteDragPosition.Before);
+                UpdateCurrentVisualElement(x=> x with
+                {
+                    Properties = x.Properties.MoveItemRelativeTo(dd.StartItemIndex.Value, dd.EndItemIndex.Value, dd.Position == AttibuteDragPosition.Before)
+                });
             }
         }
 
@@ -1795,11 +1798,18 @@ sealed class ApplicationView : Component<ApplicationState>
 
                         if (index >= 0)
                         {
-                            CurrentVisualElement.Properties[index] = newValue;
+                            UpdateCurrentVisualElement(x => x with
+                            {
+                                Properties = x.Properties.SetItem(index, newValue)
+                            });
+
                         }
                         else
                         {
-                            CurrentVisualElement.Properties.Add(newValue);
+                            UpdateCurrentVisualElement(x => x with
+                            {
+                                Properties = x.Properties.Add(newValue)
+                            });
                         }
 
                         state = state with { Selection = state.Selection with { SelectedPropertyIndex = null } };
@@ -1814,7 +1824,10 @@ sealed class ApplicationView : Component<ApplicationState>
             {
                 var closeIcon = CreateAttributeItemCloseIcon(OnClick([StopPropagation](_) =>
                 {
-                    CurrentVisualElement.Properties.RemoveAt(state.Selection.SelectedPropertyIndex!.Value);
+                    UpdateCurrentVisualElement(x=> x with
+                    {
+                        Properties = x.Properties.RemoveAt(state.Selection.SelectedPropertyIndex!.Value)
+                    });
 
                     state = state with { Selection = state.Selection with { SelectedPropertyIndex = null } };
 

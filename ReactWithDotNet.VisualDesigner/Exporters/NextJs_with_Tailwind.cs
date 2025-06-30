@@ -720,17 +720,17 @@ static class NextJs_with_Tailwind
         {
             if (!element.Properties.Any(x => x.Contains("alt:")))
             {
-                element.Properties.Add("alt: \"?\"");
+                element = element with { Properties = element.Properties.Add("alt: \"?\"") };
             }
 
             var sizeProperty = element.Properties.FirstOrDefault(x => x.Contains("size:"));
             if (sizeProperty is not null)
             {
-                element.Properties.Remove(sizeProperty);
+                element = element with { Properties = element.Properties.Remove(sizeProperty) };
 
-                element.Properties.Add(sizeProperty.Replace("size:", "width:"));
+                element = element with { Properties = element.Properties.Add(sizeProperty.Replace("size:", "width:")) };
 
-                element.Properties.Add(sizeProperty.Replace("size:", "height:"));
+                element = element with { Properties = element.Properties.Add(sizeProperty.Replace("size:", "height:")) };
             }
 
             // try to add width and height to default style

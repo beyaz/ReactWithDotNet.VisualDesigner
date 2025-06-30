@@ -206,16 +206,15 @@ static class HtmlImporter
                 }
             }
 
-            model.Properties.Add(attributeName + ": " + attributeValue);
+            model = model with { Properties = model.Properties.Add(attributeName + ": " + attributeValue) };
         }
 
         ArrangeAccordingToProject(project, model.Styles);
 
         if (htmlNode.ChildNodes.Count == 1 && htmlNode.ChildNodes[0].NodeType == HtmlNodeType.Text && htmlNode.ChildNodes[0].InnerText.HasValue())
         {
-            
-            model.Properties.Add($"{Design.Text}: '{htmlNode.ChildNodes[0].InnerText.Trim()}'");
-            model.Properties.Add($"{Design.TextPreview}: '{htmlNode.ChildNodes[0].InnerText.Trim()}'");
+            model = model with { Properties = model.Properties.Add($"{Design.Text}: '{htmlNode.ChildNodes[0].InnerText.Trim()}'") };
+            model = model with { Properties = model.Properties.Add($"{Design.TextPreview}: '{htmlNode.ChildNodes[0].InnerText.Trim()}'") };
 
             return model;
         }

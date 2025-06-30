@@ -224,7 +224,7 @@ sealed class ApplicationPreview : Component
                         // children: props.children
                         if (childModel.Properties.Any(x=>x == Design.IsImportedChild))
                         {
-                            childModel.Properties.Remove(Design.IsImportedChild);
+                            childModel = childModel with { Properties = childModel.Properties.Remove(Design.IsImportedChild) };
                         
                             childPath = $"{scope.ParentPath},{i}";
 
@@ -398,12 +398,10 @@ sealed class ApplicationPreview : Component
                     if (name == "children" && value == "props.children" && scope.ParentModel is not null)
                     {
                         // mark children as imported
-                        foreach (var item in scope.ParentModel.Children)
+                        model.Children.AddRange(scope.ParentModel.Children.Select(item =>item with
                         {
-                            item.Properties.Add(Design.IsImportedChild);
-                        }
-                        
-                        model.Children.AddRange(scope.ParentModel.Children);
+                            Properties = item.Properties.Add(Design.IsImportedChild)
+                        }));
                         return true;
                     }
 

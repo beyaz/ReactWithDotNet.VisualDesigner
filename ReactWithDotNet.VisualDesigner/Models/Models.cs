@@ -6,7 +6,7 @@ public sealed record VisualElementModel
     
     public string Tag { get; init; }
     
-    public List<string> Properties { get; init; } = [];
+    public IReadOnlyList<string> Properties { get; init; } = [];
     
     public List<string> Styles { get; init; } = [];
     

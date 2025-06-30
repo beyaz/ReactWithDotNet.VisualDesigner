@@ -38,7 +38,7 @@ public sealed class NextJsExportTest
                 {
                     if (IsStringValue(result.Value.Value))
                     {
-                        model.Properties[i] = "d-text: " + "t("+ '"' + TryClearStringValue(result.Value.Value) + '"' + ")";
+                        //model.Properties[i] = "d-text: " + "t("+ '"' + TryClearStringValue(result.Value.Value) + '"' + ")";
                     }
                     
                 }
