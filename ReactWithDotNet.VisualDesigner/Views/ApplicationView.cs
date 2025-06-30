@@ -2102,33 +2102,14 @@ sealed class ApplicationView : Component<ApplicationState>
             return Success;
         }
 
-        var isSuccessfullyUpdated = false;
-
-        var node = state.ComponentRootElement;
-
-        var paths = path.Split(',').Select(int.Parse).ToList();
-        for (var i = 1; i < paths.Count; i++)
+        UpdateCurrentVisualElement(x=>x with
         {
-            var index = paths[i];
-            if (node.Children.Count <= index)
-            {
-                return new Exception($"IndexIsNotValid: {path}");
-            }
-
-            if (i == paths.Count - 1)
-            {
-                node.Children[index]  = newModel;
-                isSuccessfullyUpdated = true;
-                break;
-            }
-
-            node = node.Children[index];
-        }
-
-        if (!isSuccessfullyUpdated)
-        {
-            return new Exception($"IndexIsNotValid: {path}");
-        }
+            Tag = newModel.Tag,
+            Properties = newModel.Properties,
+            Styles = newModel.Styles,
+            Children = newModel.Children,
+            HideInDesigner = newModel.HideInDesigner
+        });
 
         return Success;
     }
