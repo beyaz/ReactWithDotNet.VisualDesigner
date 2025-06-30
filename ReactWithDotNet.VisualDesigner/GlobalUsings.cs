@@ -17,7 +17,6 @@ global using static ReactWithDotNet.VisualDesigner.Primitive.NotificationHelper;
 global using static ReactWithDotNet.VisualDesigner.Primitive.Animation;
 global using static ReactWithDotNet.VisualDesigner.Views.ApplicationLogic;
 global using static ReactWithDotNet.VisualDesigner.Views.ApplicationStateMemoryCache;
-global using static ReactWithDotNet.VisualDesigner.Views.CecilHelper;
 global using static ReactWithDotNet.VisualDesigner.CssHelper;
 global using static ReactWithDotNet.VisualDesigner.Toolbox.YamlHelper;
 
