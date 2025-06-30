@@ -1583,11 +1583,18 @@ sealed class ApplicationView : Component<ApplicationState>
 
                         if (state.Selection.SelectedStyleIndex.HasValue)
                         {
-                            CurrentVisualElement.Styles[state.Selection.SelectedStyleIndex.Value] = newValue;
+                            UpdateCurrentVisualElement(x=>x with
+                            {
+                                Styles = x.Styles.SetItem(state.Selection.SelectedStyleIndex.Value,newValue)
+                            });
+                            
                         }
                         else
                         {
-                            CurrentVisualElement.Styles.Add(newValue);
+                            UpdateCurrentVisualElement(x=>x with
+                            {
+                                Styles = x.Styles.Add(newValue)
+                            });
                         }
 
                         state = state with { Selection = state.Selection with { SelectedStyleIndex = null } };
@@ -1602,7 +1609,10 @@ sealed class ApplicationView : Component<ApplicationState>
             {
                 var closeIcon = CreateAttributeItemCloseIcon(OnClick([StopPropagation](_) =>
                 {
-                    CurrentVisualElement.Styles.RemoveAt(state.Selection.SelectedStyleIndex!.Value);
+                    UpdateCurrentVisualElement(x=> x with
+                    {
+                        Styles = x.Styles.RemoveAt(state.Selection.SelectedStyleIndex!.Value)
+                    });
 
                     state = state with { Selection = state.Selection with { SelectedStyleIndex = null } };
 

@@ -741,7 +741,7 @@ static class NextJs_with_Tailwind
                     {
                         if (element.Styles.TryGetPropertyValue("width", "w").HasNoValue)
                         {
-                            element.Styles.Add($"width: {propertyValue}");
+                            element = element with { Styles = element.Styles.Add($"width: {propertyValue}") };
                         }
                     }
                 }
@@ -752,7 +752,7 @@ static class NextJs_with_Tailwind
                     {
                         if (element.Styles.TryGetPropertyValue("height", "h").HasNoValue)
                         {
-                            element.Styles.Add($"height: {propertyValue}");
+                            element = element with { Styles = element.Styles.Add($"height: {propertyValue}") };
                         }
                     }
                 }

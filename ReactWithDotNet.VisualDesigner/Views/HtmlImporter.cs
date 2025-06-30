@@ -31,7 +31,7 @@ static class HtmlImporter
         return ConvertToVisualElementModel(project, htmlDocument.DocumentNode.FirstChild);
     }
 
-    static void ArrangeAccordingToProject(ProjectConfig project, List<string> designerStyles)
+    static IReadOnlyList<string> ArrangeAccordingToProject(ProjectConfig project, IReadOnlyList<string> designerStyles)
     {
         foreach (var (className, css) in project.Styles)
         {
@@ -51,14 +51,14 @@ static class HtmlImporter
             {
                 foreach (var (htmlAttributeName, htmlAttributeValue) in htmlStyleAttributes)
                 {
-                    designerStyles.RemoveAll(x => hasMatch(project, x, htmlAttributeName, htmlAttributeValue));
+                    designerStyles = designerStyles.RemoveAll(x => hasMatch(project, x, htmlAttributeName, htmlAttributeValue));
                 }
 
-                designerStyles.Add(className);
+                designerStyles = designerStyles.Add(className);
             }
         }
 
-        return;
+        return designerStyles;
 
         static bool hasFullMatch(ProjectConfig project, IReadOnlyList<string> designerStyles, IReadOnlyDictionary<string, string> htmlStyleAttributes)
         {
@@ -135,7 +135,7 @@ static class HtmlImporter
                         
                     foreach (var item in map.Where(skipWordWrap).Where(skipJustifyContentFlexStart))
                     {
-                        model.Styles.Add(item.Key + ": " + item.Value);
+                        model = model with { Styles = model.Styles.Add(item.Key + ": " + item.Value) };
                     }
                 }
 
@@ -152,7 +152,7 @@ static class HtmlImporter
 
                 foreach (var (className, styles) in from className in listOfCssClass select processClassName(project, className))
                 {
-                    model.Styles.AddRange(styles);
+                    model = model with { Styles = model.Styles.AddRange(styles) };
 
                     className.HasValue(n => remainigClassNames.Add(n));
                 }
@@ -209,7 +209,7 @@ static class HtmlImporter
             model = model with { Properties = model.Properties.Add(attributeName + ": " + attributeValue) };
         }
 
-        ArrangeAccordingToProject(project, model.Styles);
+        model = model with { Styles = ArrangeAccordingToProject(project, model.Styles) };
 
         if (htmlNode.ChildNodes.Count == 1 && htmlNode.ChildNodes[0].NodeType == HtmlNodeType.Text && htmlNode.ChildNodes[0].InnerText.HasValue())
         {

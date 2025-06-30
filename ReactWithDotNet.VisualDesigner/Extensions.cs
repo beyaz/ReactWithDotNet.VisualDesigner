@@ -1,5 +1,4 @@
-﻿using System.Collections.Immutable;
-using System.Globalization;
+﻿using System.Globalization;
 using System.IO;
 
 namespace ReactWithDotNet.VisualDesigner;
@@ -363,42 +362,6 @@ static class Extensions
         };
     }
 
-    /// <summary>
-    ///     Bir öğeyi, listede başka bir öğenin önüne veya arkasına taşır.
-    ///     Drag-and-drop gibi işlemler için idealdir.
-    /// </summary>
-    public static void MoveItemRelativeTo<T>(this List<T> list, int sourceIndex, int targetIndex, bool insertBefore)
-    {
-        if (list == null || sourceIndex == targetIndex || sourceIndex < 0 || targetIndex < 0 ||
-            sourceIndex >= list.Count || targetIndex >= list.Count)
-        {
-            return;
-        }
-
-        var item = list[sourceIndex];
-
-        list.RemoveAt(sourceIndex);
-
-        if (sourceIndex < targetIndex)
-        {
-            targetIndex--;
-        }
-
-        var insertIndex = insertBefore ? targetIndex : targetIndex + 1;
-
-        if (insertIndex > list.Count)
-        {
-            insertIndex = list.Count;
-        }
-
-        if (insertIndex < 0)
-        {
-            insertIndex = 0;
-        }
-
-        list.Insert(insertIndex, item);
-    }
-    
     /// <summary>
     ///     Bir öğeyi, listede başka bir öğenin önüne veya arkasına taşır.
     ///     Drag-and-drop gibi işlemler için idealdir.

@@ -8,7 +8,7 @@ public sealed record VisualElementModel
     
     public IReadOnlyList<string> Properties { get; init; } = [];
     
-    public List<string> Styles { get; init; } = [];
+    public IReadOnlyList<string> Styles { get; init; } = [];
     
     public List<VisualElementModel> Children { get; init; } = [];
 
