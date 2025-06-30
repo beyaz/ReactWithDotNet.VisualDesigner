@@ -762,7 +762,7 @@ sealed class ApplicationView : Component<ApplicationState>
         {
             if (dd.EndItemIndex.HasValue)
             {
-                UpdateCurrentVisualElement(x=> x with
+                UpdateCurrentVisualElement(x => x with
                 {
                     Properties = x.Properties.MoveItemRelativeTo(dd.StartItemIndex.Value, dd.EndItemIndex.Value, dd.Position == AttibuteDragPosition.Before)
                 });
@@ -1098,165 +1098,27 @@ sealed class ApplicationView : Component<ApplicationState>
             },
             TreeItemMove = (source, target, position) =>
             {
-                // root check
+                VisualElementTreeOperationMoveResponse response;
                 {
-                    if (source == "0")
+                    var result = VisualElementTreeOperation.Move(state.ComponentRootElement, source, target, position);
+                    if (result.HasError)
                     {
-                        this.FailNotification("Root node cannot move.");
-
-                        return Task.CompletedTask;
-                    }
-                }
-
-                // parent - child control
-                {
-                    if (target.StartsWith(source, StringComparison.OrdinalIgnoreCase))
-                    {
-                        this.FailNotification("Parent node cannot add to child.");
-
-                        return Task.CompletedTask;
-                    }
-                }
-
-                // same target control
-                {
-                    if (source == target)
-                    {
-                        return Task.CompletedTask;
-                    }
-                }
-
-                var isTryingToMakeRoot = target == "0" && position == DragPosition.Before;
-
-                VisualElementModel sourceNodeParent;
-                int sourceNodeIndex;
-                {
-                    var temp = state.ComponentRootElement;
-
-                    var indexArray = source.Split(',');
-
-                    var length = indexArray.Length - 1;
-                    for (var i = 1; i < length; i++)
-                    {
-                        temp = temp.Children[int.Parse(indexArray[i])];
-                    }
-
-                    sourceNodeIndex = int.Parse(indexArray[length]);
-
-                    sourceNodeParent = temp;
-                }
-
-                if (isTryingToMakeRoot)
-                {
-                    var rootNode = sourceNodeParent.Children[sourceNodeIndex];
-
-                    sourceNodeParent.Children.RemoveAt(sourceNodeIndex);
-
-                    rootNode.Children.Add(state.ComponentRootElement);
-
-                    state = state with
-                    {
-                        ComponentRootElement = rootNode,
-                        Selection = new()
-                        {
-                            VisualElementTreeItemPath = "0"
-                        }
-                    };
-
-                    return Task.CompletedTask;
-                }
-
-                VisualElementModel targetNodeParent;
-                int targetNodeIndex;
-                {
-                    var temp = state.ComponentRootElement;
-
-                    var indexArray = target.Split(',');
-
-                    var length = indexArray.Length - 1;
-                    for (var i = 1; i < length; i++)
-                    {
-                        temp = temp.Children[int.Parse(indexArray[i])];
-                    }
-
-                    targetNodeIndex = int.Parse(indexArray[length]);
-
-                    targetNodeParent = temp;
-                }
-
-                if (position == DragPosition.Inside)
-                {
-                    var sourceNode = sourceNodeParent.Children[sourceNodeIndex];
-
-                    var targetNode = targetNodeParent.Children[targetNodeIndex];
-
-                    if (targetNode.Children.Count > 0)
-                    {
-                        this.FailNotification("Select valid location");
+                        this.FailNotification(result.Error.Message);
 
                         return Task.CompletedTask;
                     }
 
-                    // remove from source
-                    sourceNodeParent.Children.RemoveAt(sourceNodeIndex);
-
-                    if (targetNode.HasNoChild())
-                    {
-                        targetNode.Children.Add(sourceNode);
-
-                        state = state with { Selection = new() };
-
-                        return Task.CompletedTask;
-                    }
+                    response = result.Value;
                 }
 
-                // is same parent
-                if (sourceNodeParent == targetNodeParent)
+                if (response.NewRoot is not null)
                 {
-                    if (position == DragPosition.After && sourceNodeIndex - targetNodeIndex == 1)
-                    {
-                        return Task.CompletedTask;
-                    }
-
-                    if (position == DragPosition.Before && targetNodeIndex - sourceNodeIndex == 1)
-                    {
-                        return Task.CompletedTask;
-                    }
+                    state = state with { ComponentRootElement = response.NewRoot };
                 }
 
+                if (response.Selection is not null)
                 {
-                    var sourceNode = sourceNodeParent.Children[sourceNodeIndex];
-
-                    // remove from source
-                    sourceNodeParent.Children.RemoveAt(sourceNodeIndex);
-
-                    if (sourceNodeParent == targetNodeParent)
-                    {
-                        // is adding end
-                        if (position == DragPosition.After && targetNodeIndex == targetNodeParent.Children.Count)
-                        {
-                            targetNodeParent.Children.Insert(targetNodeIndex, sourceNode);
-
-                            state = state with { Selection = new() };
-
-                            return Task.CompletedTask;
-                        }
-
-                        if (position == DragPosition.After && targetNodeIndex == 0)
-                        {
-                            targetNodeIndex++;
-                        }
-
-                        if (position == DragPosition.Before && targetNodeIndex == targetNodeParent.Children.Count)
-                        {
-                            targetNodeIndex--;
-                        }
-                    }
-
-                    // insert into target
-                    targetNodeParent.Children.Insert(targetNodeIndex, sourceNode);
-
-                    state = state with { Selection = new() };
+                    state = state with { Selection = response.Selection };
                 }
 
                 return Task.CompletedTask;
@@ -1583,15 +1445,14 @@ sealed class ApplicationView : Component<ApplicationState>
 
                         if (state.Selection.SelectedStyleIndex.HasValue)
                         {
-                            UpdateCurrentVisualElement(x=>x with
+                            UpdateCurrentVisualElement(x => x with
                             {
-                                Styles = x.Styles.SetItem(state.Selection.SelectedStyleIndex.Value,newValue)
+                                Styles = x.Styles.SetItem(state.Selection.SelectedStyleIndex.Value, newValue)
                             });
-                            
                         }
                         else
                         {
-                            UpdateCurrentVisualElement(x=>x with
+                            UpdateCurrentVisualElement(x => x with
                             {
                                 Styles = x.Styles.Add(newValue)
                             });
@@ -1609,7 +1470,7 @@ sealed class ApplicationView : Component<ApplicationState>
             {
                 var closeIcon = CreateAttributeItemCloseIcon(OnClick([StopPropagation](_) =>
                 {
-                    UpdateCurrentVisualElement(x=> x with
+                    UpdateCurrentVisualElement(x => x with
                     {
                         Styles = x.Styles.RemoveAt(state.Selection.SelectedStyleIndex!.Value)
                     });
@@ -1812,7 +1673,6 @@ sealed class ApplicationView : Component<ApplicationState>
                             {
                                 Properties = x.Properties.SetItem(index, newValue)
                             });
-
                         }
                         else
                         {
@@ -1834,7 +1694,7 @@ sealed class ApplicationView : Component<ApplicationState>
             {
                 var closeIcon = CreateAttributeItemCloseIcon(OnClick([StopPropagation](_) =>
                 {
-                    UpdateCurrentVisualElement(x=> x with
+                    UpdateCurrentVisualElement(x => x with
                     {
                         Properties = x.Properties.RemoveAt(state.Selection.SelectedPropertyIndex!.Value)
                     });
@@ -2102,7 +1962,7 @@ sealed class ApplicationView : Component<ApplicationState>
             return Success;
         }
 
-        UpdateCurrentVisualElement(x=>x with
+        UpdateCurrentVisualElement(x => x with
         {
             Tag = newModel.Tag,
             Properties = newModel.Properties,
