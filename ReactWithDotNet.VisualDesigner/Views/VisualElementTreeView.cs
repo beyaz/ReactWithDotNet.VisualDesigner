@@ -9,9 +9,9 @@ enum DragPosition
     Inside
 }
 
-delegate Task OnTreeItemMove(string treeItemPathSourge, string treeItemPathTarget, DragPosition position);
+delegate Task OnTreeItemMove(string treeItemPathSource, string treeItemPathTarget, DragPosition position);
 
-delegate Task OnTreeItemCopyPaste(string treeItemPathSourge, string treeItemPathTarget);
+delegate Task OnTreeItemCopyPaste(string treeItemPathSource, string treeItemPathTarget);
 
 delegate Task OnTreeItemDelete();
 
