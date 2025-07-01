@@ -230,10 +230,10 @@ sealed class ApplicationPreview : Component
                     var childPath = $"{path},{i}";
                     {
                         // children: props.children
-                        if (childModel.Properties.Any(x=>x == Design.IsImportedChild))
+                        if (childModel.Properties.Any(x => x == Design.IsImportedChild))
                         {
                             childModel = childModel with { Properties = childModel.Properties.Remove(Design.IsImportedChild) };
-                        
+
                             childPath = $"{scope.ParentPath},{i}";
 
                             childScope = scope.Parent;
@@ -244,8 +244,6 @@ sealed class ApplicationPreview : Component
                             childPath = path;
                         }
                     }
-
-                    
 
                     // check -show/hide-if
                     {
@@ -363,10 +361,8 @@ sealed class ApplicationPreview : Component
                 return false;
             }
 
-            
             static async Task<Result> processProp(PropertyProcessScope data)
             {
-                    
                 foreach (var propRealValue in tryGetPropValueFromCaller(data.scope, data.model, data.propName))
                 {
                     data = data with { propValue = propRealValue };
@@ -406,14 +402,14 @@ sealed class ApplicationPreview : Component
                 static bool tryImportChildrenFromParentScope(PropertyProcessScope data)
                 {
                     var propName = data.propName;
-                    var propValue= data.propValue;
+                    var propValue = data.propValue;
                     var scope = data.scope;
                     var model = data.model;
-                    
+
                     if (propName == "children" && propValue == "props.children" && scope.ParentModel is not null)
                     {
                         // mark children as imported
-                        model.Children.AddRange(scope.ParentModel.Children.Select(item =>item with
+                        model.Children.AddRange(scope.ParentModel.Children.Select(item => item with
                         {
                             Properties = item.Properties.Add(Design.IsImportedChild)
                         }));
@@ -439,9 +435,9 @@ sealed class ApplicationPreview : Component
                 static bool itemSourceDesignTimeCount(PropertyProcessScope data)
                 {
                     var propName = data.propName;
-                    var propValue= data.propValue;
+                    var propValue = data.propValue;
                     var model = data.model;
-                    
+
                     if (propName == Design.ItemsSourceDesignTimeCount)
                     {
                         var firstChild = model.Children.FirstOrDefault();
@@ -464,8 +460,8 @@ sealed class ApplicationPreview : Component
                 static bool tryAddClass(PropertyProcessScope data)
                 {
                     var propName = data.propName;
-                    var propValue= data.propValue;
-                    
+                    var propValue = data.propValue;
+
                     if (propName == "class")
                     {
                         data.element.AddClass(propValue);
@@ -478,7 +474,7 @@ sealed class ApplicationPreview : Component
                 static async Task<bool> tryProcessImage(PropertyProcessScope data)
                 {
                     var propName = data.propName;
-                    var propValue= data.propValue;
+                    var propValue = data.propValue;
                     var scope = data.scope;
                     var model = data.model;
                     var element = data.element;
@@ -633,9 +629,9 @@ sealed class ApplicationPreview : Component
                 static bool processInputType(PropertyProcessScope data)
                 {
                     var propName = data.propName;
-                    var propValue= data.propValue;
+                    var propValue = data.propValue;
                     var element = data.element;
-                    
+
                     if (element is input elementAsInput)
                     {
                         if (propName.Equals("type", StringComparison.OrdinalIgnoreCase))
@@ -651,9 +647,9 @@ sealed class ApplicationPreview : Component
                 static bool tryProcessCommonHtmlProperties(PropertyProcessScope data)
                 {
                     var propName = data.propName;
-                    var propValue= data.propValue;
+                    var propValue = data.propValue;
                     var element = data.element;
-                    
+
                     var propertyInfo = element.GetType().GetProperty(propName, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
                     if (propertyInfo is null)
                     {
@@ -777,6 +773,8 @@ sealed record RenderPreviewScope
 
     public required VisualElementModel ParentModel { get; init; }
 
+    public string ParentPath { get; init; }
+
     public ProjectConfig Project { get; init; }
 
     public required int ProjectId { get; init; }
@@ -784,15 +782,13 @@ sealed record RenderPreviewScope
     public required ReactContext ReactContext { get; init; }
 
     public required string UserName { get; init; }
-    
-    public string ParentPath { get; init; }
 }
 
 sealed record PropertyProcessScope
 {
-    public RenderPreviewScope scope { get; init; }
     public HtmlElement element { get; init; }
     public VisualElementModel model { get; init; }
     public string propName { get; init; }
     public string propValue { get; init; }
+    public RenderPreviewScope scope { get; init; }
 }
