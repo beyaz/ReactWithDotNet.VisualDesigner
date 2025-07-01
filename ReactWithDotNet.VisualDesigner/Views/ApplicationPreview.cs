@@ -175,7 +175,15 @@ sealed class ApplicationPreview : Component
 
             foreach (var (name, value) in from p in model.Properties from x in TryParseProperty(p) where x.Name.NotIn(Design.Text, Design.TextPreview, Design.Src) select x)
             {
-                var result = await processProp(scope, element, model, name, value);
+                var propertyProcessScope = new PropertyProcessScope
+                {
+                    scope     = scope,
+                    element   = element,
+                    model     = model,
+                    propName  = name,
+                    propValue = value
+                };
+                var result = await processProp(propertyProcessScope);
                 if (result.HasError)
                 {
                     return result.Error;
@@ -355,33 +363,35 @@ sealed class ApplicationPreview : Component
                 return false;
             }
 
-            static async Task<Result> processProp(RenderPreviewScope scope, HtmlElement element, VisualElementModel model, string propName, string propValue)
+            
+            static async Task<Result> processProp(PropertyProcessScope data)
             {
-                foreach (var propRealValue in tryGetPropValueFromCaller(scope, model, propName))
+                    
+                foreach (var propRealValue in tryGetPropValueFromCaller(data.scope, data.model, data.propName))
                 {
-                    propValue = propRealValue;
+                    data = data with { propValue = propRealValue };
                 }
 
                 if (await tryProcessByFirstMatch(
                     [
-                        () => Task.FromResult(tryImportChildrenFromParentScope(scope, model, propName, propValue)),
-                        () => Task.FromResult(itemSourceDesignTimeCount(model, propName, propValue)),
-                        () => Task.FromResult(tryAddClass(element, propName, propValue)),
-                        () => tryProcessImage(scope, element, model, propName, propValue),
-                        () => Task.FromResult(processInputType(element, propName, propValue)),
-                        () => Task.FromResult(tryProcessCommonHtmlProperties(element, propName, propValue)),
-                        () => Task.FromResult(isKnownProp(propName))
+                        () => Task.FromResult(tryImportChildrenFromParentScope(data)),
+                        () => Task.FromResult(itemSourceDesignTimeCount(data)),
+                        () => Task.FromResult(tryAddClass(data)),
+                        () => tryProcessImage(data),
+                        () => Task.FromResult(processInputType(data)),
+                        () => Task.FromResult(tryProcessCommonHtmlProperties(data)),
+                        () => Task.FromResult(isKnownProp(data.propName))
                     ]))
                 {
                     return Success;
                 }
 
-                if (isUnknownValue(propValue))
+                if (isUnknownValue(data.propValue))
                 {
                     return Success;
                 }
 
-                return new Exception($"Property '{propName}' with value '{propValue}' is not processed for element '{model.Tag}'.");
+                return new Exception($"Property '{data.propName}' with value '{data.propValue}' is not processed for element '{data.model.Tag}'.");
 
                 static bool isKnownProp(string name)
                 {
@@ -393,8 +403,13 @@ sealed class ApplicationPreview : Component
                     return false;
                 }
 
-                static bool tryImportChildrenFromParentScope(RenderPreviewScope scope, VisualElementModel model, string propName, string propValue)
+                static bool tryImportChildrenFromParentScope(PropertyProcessScope data)
                 {
+                    var propName = data.propName;
+                    var propValue= data.propValue;
+                    var scope = data.scope;
+                    var model = data.model;
+                    
                     if (propName == "children" && propValue == "props.children" && scope.ParentModel is not null)
                     {
                         // mark children as imported
@@ -421,8 +436,12 @@ sealed class ApplicationPreview : Component
                     return false;
                 }
 
-                static bool itemSourceDesignTimeCount(VisualElementModel model, string propName, string propValue)
+                static bool itemSourceDesignTimeCount(PropertyProcessScope data)
                 {
+                    var propName = data.propName;
+                    var propValue= data.propValue;
+                    var model = data.model;
+                    
                     if (propName == Design.ItemsSourceDesignTimeCount)
                     {
                         var firstChild = model.Children.FirstOrDefault();
@@ -442,19 +461,28 @@ sealed class ApplicationPreview : Component
                     return false;
                 }
 
-                static bool tryAddClass(HtmlElement element, string propName, string propValue)
+                static bool tryAddClass(PropertyProcessScope data)
                 {
+                    var propName = data.propName;
+                    var propValue= data.propValue;
+                    
                     if (propName == "class")
                     {
-                        element.AddClass(propValue);
+                        data.element.AddClass(propValue);
                         return true;
                     }
 
                     return false;
                 }
 
-                static async Task<bool> tryProcessImage(RenderPreviewScope scope, HtmlElement element, VisualElementModel model, string propName, string propValue)
+                static async Task<bool> tryProcessImage(PropertyProcessScope data)
                 {
+                    var propName = data.propName;
+                    var propValue= data.propValue;
+                    var scope = data.scope;
+                    var model = data.model;
+                    var element = data.element;
+
                     if (element is not img elementAsImage)
                     {
                         return false;
@@ -602,8 +630,12 @@ sealed class ApplicationPreview : Component
                     return false;
                 }
 
-                static bool processInputType(Element element, string propName, string propValue)
+                static bool processInputType(PropertyProcessScope data)
                 {
+                    var propName = data.propName;
+                    var propValue= data.propValue;
+                    var element = data.element;
+                    
                     if (element is input elementAsInput)
                     {
                         if (propName.Equals("type", StringComparison.OrdinalIgnoreCase))
@@ -616,8 +648,12 @@ sealed class ApplicationPreview : Component
                     return false;
                 }
 
-                static bool tryProcessCommonHtmlProperties(Element element, string propName, string propValue)
+                static bool tryProcessCommonHtmlProperties(PropertyProcessScope data)
                 {
+                    var propName = data.propName;
+                    var propValue= data.propValue;
+                    var element = data.element;
+                    
                     var propertyInfo = element.GetType().GetProperty(propName, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
                     if (propertyInfo is null)
                     {
@@ -750,4 +786,13 @@ sealed record RenderPreviewScope
     public required string UserName { get; init; }
     
     public string ParentPath { get; init; }
+}
+
+sealed record PropertyProcessScope
+{
+    public RenderPreviewScope scope { get; init; }
+    public HtmlElement element { get; init; }
+    public VisualElementModel model { get; init; }
+    public string propName { get; init; }
+    public string propValue { get; init; }
 }
