@@ -393,9 +393,9 @@ sealed class ApplicationPreview : Component
                     return false;
                 }
 
-                static bool tryImportChildrenFromParentScope(RenderPreviewScope scope, VisualElementModel model, string name, string value)
+                static bool tryImportChildrenFromParentScope(RenderPreviewScope scope, VisualElementModel model, string propName, string propValue)
                 {
-                    if (name == "children" && value == "props.children" && scope.ParentModel is not null)
+                    if (propName == "children" && propValue == "props.children" && scope.ParentModel is not null)
                     {
                         // mark children as imported
                         model.Children.AddRange(scope.ParentModel.Children.Select(item =>item with
@@ -421,14 +421,14 @@ sealed class ApplicationPreview : Component
                     return false;
                 }
 
-                static bool itemSourceDesignTimeCount(VisualElementModel model, string name, string value)
+                static bool itemSourceDesignTimeCount(VisualElementModel model, string propName, string propValue)
                 {
-                    if (name == Design.ItemsSourceDesignTimeCount)
+                    if (propName == Design.ItemsSourceDesignTimeCount)
                     {
                         var firstChild = model.Children.FirstOrDefault();
                         if (firstChild is not null)
                         {
-                            var designTimeChildrenCount = double.Parse(value);
+                            var designTimeChildrenCount = double.Parse(propValue);
 
                             for (var i = 0; i < designTimeChildrenCount - 1; i++)
                             {
@@ -442,28 +442,28 @@ sealed class ApplicationPreview : Component
                     return false;
                 }
 
-                static bool tryAddClass(HtmlElement element, string name, string value)
+                static bool tryAddClass(HtmlElement element, string propName, string propValue)
                 {
-                    if (name == "class")
+                    if (propName == "class")
                     {
-                        element.AddClass(value);
+                        element.AddClass(propValue);
                         return true;
                     }
 
                     return false;
                 }
 
-                static async Task<bool> tryProcessImage(RenderPreviewScope scope, HtmlElement element, VisualElementModel model, string name, string value)
+                static async Task<bool> tryProcessImage(RenderPreviewScope scope, HtmlElement element, VisualElementModel model, string propName, string propValue)
                 {
                     if (element is not img elementAsImage)
                     {
                         return false;
                     }
 
-                    var isValueDouble = double.TryParse(value, out var valueAsDouble);
+                    var isValueDouble = double.TryParse(propValue, out var valueAsDouble);
 
-                    if (name.Equals("h", StringComparison.OrdinalIgnoreCase) ||
-                        name.Equals("height", StringComparison.OrdinalIgnoreCase))
+                    if (propName.Equals("h", StringComparison.OrdinalIgnoreCase) ||
+                        propName.Equals("height", StringComparison.OrdinalIgnoreCase))
                     {
                         if (isValueDouble)
                         {
@@ -471,14 +471,14 @@ sealed class ApplicationPreview : Component
                         }
                         else
                         {
-                            elementAsImage.height = value;
+                            elementAsImage.height = propValue;
                         }
 
                         return true;
                     }
 
-                    if (name.Equals("w", StringComparison.OrdinalIgnoreCase) ||
-                        name.Equals("width", StringComparison.OrdinalIgnoreCase))
+                    if (propName.Equals("w", StringComparison.OrdinalIgnoreCase) ||
+                        propName.Equals("width", StringComparison.OrdinalIgnoreCase))
                     {
                         if (isValueDouble)
                         {
@@ -486,17 +486,17 @@ sealed class ApplicationPreview : Component
                         }
                         else
                         {
-                            elementAsImage.width = value;
+                            elementAsImage.width = propValue;
                         }
 
                         return true;
                     }
 
-                    if (name.Equals("src", StringComparison.OrdinalIgnoreCase))
+                    if (propName.Equals("src", StringComparison.OrdinalIgnoreCase))
                     {
                         // try to assign value
                         {
-                            foreach (var srcValue in await calculateSrcFromValue(scope, model, value))
+                            foreach (var srcValue in await calculateSrcFromValue(scope, model, propValue))
                             {
                                 elementAsImage.src = srcValue;
                                 return true;
@@ -602,13 +602,13 @@ sealed class ApplicationPreview : Component
                     return false;
                 }
 
-                static bool processInputType(Element element, string name, string value)
+                static bool processInputType(Element element, string propName, string propValue)
                 {
                     if (element is input elementAsInput)
                     {
-                        if (name.Equals("type", StringComparison.OrdinalIgnoreCase))
+                        if (propName.Equals("type", StringComparison.OrdinalIgnoreCase))
                         {
-                            elementAsInput.type = TryClearStringValue(value);
+                            elementAsInput.type = TryClearStringValue(propValue);
                             return true;
                         }
                     }
@@ -616,34 +616,34 @@ sealed class ApplicationPreview : Component
                     return false;
                 }
 
-                static bool tryProcessCommonHtmlProperties(Element element, string name, string value)
+                static bool tryProcessCommonHtmlProperties(Element element, string propName, string propValue)
                 {
-                    var propertyInfo = element.GetType().GetProperty(name, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
+                    var propertyInfo = element.GetType().GetProperty(propName, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
                     if (propertyInfo is null)
                     {
                         return false;
                     }
 
-                    if (isUnknownValue(value))
+                    if (isUnknownValue(propValue))
                     {
                         return true;
                     }
 
                     if (propertyInfo.PropertyType == typeof(string))
                     {
-                        propertyInfo.SetValue(element, TryClearStringValue(value));
+                        propertyInfo.SetValue(element, TryClearStringValue(propValue));
                         return true;
                     }
 
                     if (propertyInfo.PropertyType == typeof(dangerouslySetInnerHTML))
                     {
-                        propertyInfo.SetValue(element, new dangerouslySetInnerHTML(TryClearStringValue(value)));
+                        propertyInfo.SetValue(element, new dangerouslySetInnerHTML(TryClearStringValue(propValue)));
                         return true;
                     }
 
                     if (propertyInfo.PropertyType == typeof(UnionProp<string, double>))
                     {
-                        propertyInfo.SetValue(element, (UnionProp<string, double>)value);
+                        propertyInfo.SetValue(element, (UnionProp<string, double>)propValue);
                         return true;
                     }
 
