@@ -368,20 +368,24 @@ sealed class ApplicationPreview : Component
                     data = data with { propValue = propRealValue };
                 }
 
-                if (await tryProcessByFirstMatch(
+                if (await TryProcessByFirstMatch(data, 
                     [
-                        () => Task.FromResult(tryImportChildrenFromParentScope(data)),
-                        () => Task.FromResult(itemSourceDesignTimeCount(data)),
-                        () => Task.FromResult(tryAddClass(data)),
-                        () => tryProcessImage(data),
-                        () => Task.FromResult(processInputType(data)),
-                        () => Task.FromResult(tryProcessCommonHtmlProperties(data)),
-                        () => Task.FromResult(isKnownProp(data.propName))
+                        tryImportChildrenFromParentScope,
+                        itemSourceDesignTimeCount,
+                        tryAddClass,
+                        tryProcessImage,
+                        processInputType,
+                        tryProcessCommonHtmlProperties
                     ]))
                 {
                     return Success;
                 }
 
+                if (isKnownProp(data.propName))
+                {
+                    return Success;
+                }
+                
                 if (isUnknownValue(data.propValue))
                 {
                     return Success;
@@ -419,18 +423,7 @@ sealed class ApplicationPreview : Component
                     return false;
                 }
 
-                static async Task<bool> tryProcessByFirstMatch(Func<Task<bool>>[] items)
-                {
-                    foreach (var item in items)
-                    {
-                        if (await item())
-                        {
-                            return true;
-                        }
-                    }
-
-                    return false;
-                }
+                
 
                 static bool itemSourceDesignTimeCount(PropertyProcessScope data)
                 {

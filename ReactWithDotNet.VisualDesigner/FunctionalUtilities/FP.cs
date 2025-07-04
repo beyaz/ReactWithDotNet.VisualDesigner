@@ -449,4 +449,43 @@ static class FP
         return selector(result.Value);
     }
    
+    public static async Task<bool> TryProcessByFirstMatch<Tin>(Tin value, Pipe<Tin, bool> pipe)
+    {
+        foreach (Func<Tin, Task<bool>> item in pipe)
+        {
+            if (await item(value))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+    
+}
+
+public sealed record Pipe<Tin, Tout>: IEnumerable<Func<Tin, Task<Tout>>>
+{
+    readonly List<Func<Tin, Task<Tout>>> _items = [];
+    
+    public void Add(Func<Tin, Tout> value)
+    {
+        _items.Add(x => Task.FromResult(value(x)));
+    }
+    
+    public void Add(Func<Tin, Task<Tout>> value)
+    {
+        _items.Add(value);
+    }
+
+    public IEnumerator GetEnumerator()
+    {
+        return _items.GetEnumerator();
+    }
+
+    IEnumerator<Func<Tin, Task<Tout>>> IEnumerable<Func<Tin, Task<Tout>>>.GetEnumerator()
+    {
+        return _items.GetEnumerator();
+    }
+
 }
