@@ -410,15 +410,19 @@ sealed class ApplicationPreview : Component
                     var propName = data.propName;
                     var propValue = data.propValue;
                     var scope = data.scope;
-                    var model = data.model;
+                    
 
                     if (propName == "children" && propValue == "props.children" && scope.ParentModel is not null)
                     {
                         // mark children as imported
-                        model.Children.AddRange(scope.ParentModel.Children.Select(item => item with
+                        data = data with { model = data.model with
                         {
-                            Properties = item.Properties.Add(Design.IsImportedChild)
-                        }));
+                            Children = data.model.Children.AddRange(scope.ParentModel.Children.Select(item => item with
+                            {
+                                Properties = item.Properties.Add(Design.IsImportedChild)
+                            }))
+                        } };
+                        
                         return data with { IsProcessed = true };
                     }
 
@@ -442,7 +446,7 @@ sealed class ApplicationPreview : Component
 
                             for (var i = 0; i < designTimeChildrenCount - 1; i++)
                             {
-                                model.Children.Add(CloneByUsingYaml(firstChild));
+                                model = model with { Children = model.Children.Add(CloneByUsingYaml(firstChild)) };
                             }
                         }
 

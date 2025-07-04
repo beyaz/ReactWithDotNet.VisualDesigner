@@ -10,7 +10,7 @@ public sealed record VisualElementModel
     
     public IReadOnlyList<string> Styles { get; init; } = [];
     
-    public List<VisualElementModel> Children { get; init; } = [];
+    public IReadOnlyList<VisualElementModel> Children { get; init; } = [];
 
     public bool HideInDesigner { get; init; }
     

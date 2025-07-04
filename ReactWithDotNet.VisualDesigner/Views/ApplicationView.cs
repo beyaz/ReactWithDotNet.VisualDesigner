@@ -297,13 +297,12 @@ sealed class ApplicationView : Component<ApplicationState>
             return Task.CompletedTask;
         }
 
-        var selection = state.Selection;
-
-        var node = FindTreeNodeByTreePath(state.ComponentRootElement, selection.VisualElementTreeItemPath);
-
-        node.Children.Add(new()
+        UpdateCurrentVisualElement(x=> x with
         {
-            Tag = "div"
+            Children = x.Children.Add(new()
+            {
+                Tag = "div"
+            })
         });
 
         return Task.CompletedTask;
@@ -462,8 +461,14 @@ sealed class ApplicationView : Component<ApplicationState>
             {
                 node = node.Children[int.Parse(intArray[i])];
             }
-
-            node.Children.RemoveAt(int.Parse(intArray[^1]));
+            
+            state = state with
+            {
+                ComponentRootElement = Modify(state.ComponentRootElement, node, x=>x with
+                {
+                    Children = x.Children.RemoveAt(int.Parse(intArray[^1]))
+                })
+            };
         }
 
         state = state with { Selection = new() };
@@ -1092,7 +1097,13 @@ sealed class ApplicationView : Component<ApplicationState>
 
                 var sourceNodeClone = SerializeToYaml(sourceNode).AsVisualElementModel();
 
-                targetNode.Children.Add(sourceNodeClone);
+                state = state with
+                {
+                    ComponentRootElement = Modify(state.ComponentRootElement, targetNode, x=>x with
+                    {
+                        Children = x.Children.Add(sourceNodeClone)
+                    })
+                };
 
                 return Task.CompletedTask;
             },
@@ -1914,7 +1925,10 @@ sealed class ApplicationView : Component<ApplicationState>
         }
         else
         {
-            CurrentVisualElement.Children.Add(model);
+            UpdateCurrentVisualElement(x=>x with
+            {
+                Children = x.Children.Add(model)
+            });
         }
 
         return Task.CompletedTask;

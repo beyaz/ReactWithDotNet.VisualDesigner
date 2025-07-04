@@ -227,7 +227,7 @@ static class HtmlImporter
                 continue;
             }
 
-            model.Children.Add(childModel);
+            model = model with { Children = model.Children.Add(childModel) };
         }
 
         return model;
