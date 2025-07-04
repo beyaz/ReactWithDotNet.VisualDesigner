@@ -711,48 +711,48 @@ static class NextJs_with_Tailwind
         }
     }
 
-    static async Task<Result<ReactNode>> ConvertVisualElementModelToReactNodeModel(ProjectConfig project, VisualElementModel element)
+    static async Task<Result<ReactNode>> ConvertVisualElementModelToReactNodeModel(ProjectConfig project, VisualElementModel elementModel)
     {
         // Open tag
-        var tag = element.Tag;
+        var tag = elementModel.Tag;
 
         if (tag == "img")
         {
-            if (!element.Properties.Any(x => x.Contains("alt:")))
+            if (!elementModel.Properties.Any(x => x.Contains("alt:")))
             {
-                element = element with { Properties = element.Properties.Add("alt: \"?\"") };
+                elementModel = elementModel with { Properties = elementModel.Properties.Add("alt: \"?\"") };
             }
 
-            var sizeProperty = element.Properties.FirstOrDefault(x => x.Contains("size:"));
+            var sizeProperty = elementModel.Properties.FirstOrDefault(x => x.Contains("size:"));
             if (sizeProperty is not null)
             {
-                element = element with { Properties = element.Properties.Remove(sizeProperty) };
+                elementModel = elementModel with { Properties = elementModel.Properties.Remove(sizeProperty) };
 
-                element = element with { Properties = element.Properties.Add(sizeProperty.Replace("size:", "width:")) };
+                elementModel = elementModel with { Properties = elementModel.Properties.Add(sizeProperty.Replace("size:", "width:")) };
 
-                element = element with { Properties = element.Properties.Add(sizeProperty.Replace("size:", "height:")) };
+                elementModel = elementModel with { Properties = elementModel.Properties.Add(sizeProperty.Replace("size:", "height:")) };
             }
 
             // try to add width and height to default style
             {
                 // width
                 {
-                    foreach (var propertyValue in element.Properties.TryGetPropertyValue("width", "w"))
+                    foreach (var propertyValue in elementModel.Properties.TryGetPropertyValue("width", "w"))
                     {
-                        if (element.Styles.TryGetPropertyValue("width", "w").HasNoValue)
+                        if (elementModel.Styles.TryGetPropertyValue("width", "w").HasNoValue)
                         {
-                            element = element with { Styles = element.Styles.Add($"width: {propertyValue}") };
+                            elementModel = elementModel with { Styles = elementModel.Styles.Add($"width: {propertyValue}") };
                         }
                     }
                 }
 
                 // height
                 {
-                    foreach (var propertyValue in element.Properties.TryGetPropertyValue("height", "h"))
+                    foreach (var propertyValue in elementModel.Properties.TryGetPropertyValue("height", "h"))
                     {
-                        if (element.Styles.TryGetPropertyValue("height", "h").HasNoValue)
+                        if (elementModel.Styles.TryGetPropertyValue("height", "h").HasNoValue)
                         {
-                            element = element with { Styles = element.Styles.Add($"height: {propertyValue}") };
+                            elementModel = elementModel with { Styles = elementModel.Styles.Add($"height: {propertyValue}") };
                         }
                     }
                 }
@@ -771,7 +771,7 @@ static class NextJs_with_Tailwind
         var classNameShouldBeTemplateLiteral = false;
 
         // Add properties
-        foreach (var property in element.Properties)
+        foreach (var property in elementModel.Properties)
         {
             var (reactProperty, classNameList) = tryConvertToReactProperty(property);
             if (classNameList.HasValue)
@@ -789,7 +789,7 @@ static class NextJs_with_Tailwind
             return new Exception($"PropertyParseError: {property}");
         }
 
-        foreach (var styleItem in element.Styles)
+        foreach (var styleItem in elementModel.Styles)
         {
             string tailwindClassName;
             {
@@ -817,20 +817,20 @@ static class NextJs_with_Tailwind
             node = node with { Properties = node.Properties.Add(new() { Name = "className", Value = firstLastChar + string.Join(" ", classNames) + firstLastChar }) };
         }
 
-        var hasNoChildAndHasNoText = element.Children.Count == 0 && element.HasNoText();
+        var hasNoChildAndHasNoText = elementModel.Children.Count == 0 && elementModel.HasNoText();
         if (hasNoChildAndHasNoText)
         {
             return node;
         }
 
         // Add text content
-        if (element.HasText())
+        if (elementModel.HasText())
         {
             node = node with
             {
                 Children = node.Children.Add(new()
                 {
-                    Text = element.GetText(),
+                    Text = elementModel.GetText(),
 
                     HtmlElementType = None
                 })
@@ -838,7 +838,7 @@ static class NextJs_with_Tailwind
         }
 
         // Add children
-        foreach (var child in element.Children)
+        foreach (var child in elementModel.Children)
         {
             ReactNode childNode;
             {
