@@ -368,15 +368,17 @@ sealed class ApplicationPreview : Component
                     data = data with { propValue = propRealValue };
                 }
 
-                if (await TryProcessByFirstMatch(data, 
-                    [
-                        tryImportChildrenFromParentScope,
-                        itemSourceDesignTimeCount,
-                        tryAddClass,
-                        tryProcessImage,
-                        processInputType,
-                        tryProcessCommonHtmlProperties
-                    ]))
+                data = await RunWhile(data, x => !x.IsProcessed,
+                [
+                    tryImportChildrenFromParentScope,
+                    itemSourceDesignTimeCount,
+                    tryAddClass,
+                    tryProcessImage,
+                    processInputType,
+                    tryProcessCommonHtmlProperties
+                ]);
+                
+                if (data.IsProcessed)
                 {
                     return Success;
                 }
@@ -403,7 +405,7 @@ sealed class ApplicationPreview : Component
                     return false;
                 }
 
-                static bool tryImportChildrenFromParentScope(PropertyProcessScope data)
+                static PropertyProcessScope tryImportChildrenFromParentScope(PropertyProcessScope data)
                 {
                     var propName = data.propName;
                     var propValue = data.propValue;
@@ -417,15 +419,15 @@ sealed class ApplicationPreview : Component
                         {
                             Properties = item.Properties.Add(Design.IsImportedChild)
                         }));
-                        return true;
+                        return data with { IsProcessed = true };
                     }
 
-                    return false;
+                    return data;
                 }
 
                 
 
-                static bool itemSourceDesignTimeCount(PropertyProcessScope data)
+                static PropertyProcessScope itemSourceDesignTimeCount(PropertyProcessScope data)
                 {
                     var propName = data.propName;
                     var propValue = data.propValue;
@@ -444,13 +446,13 @@ sealed class ApplicationPreview : Component
                             }
                         }
 
-                        return true;
+                        return data with { IsProcessed = true };
                     }
 
-                    return false;
+                    return data;
                 }
 
-                static bool tryAddClass(PropertyProcessScope data)
+                static PropertyProcessScope tryAddClass(PropertyProcessScope data)
                 {
                     var propName = data.propName;
                     var propValue = data.propValue;
@@ -458,13 +460,13 @@ sealed class ApplicationPreview : Component
                     if (propName == "class")
                     {
                         data.element.AddClass(propValue);
-                        return true;
+                        return data with { IsProcessed = true };
                     }
 
-                    return false;
+                    return data;
                 }
 
-                static async Task<bool> tryProcessImage(PropertyProcessScope data)
+                static async Task<PropertyProcessScope> tryProcessImage(PropertyProcessScope data)
                 {
                     var propName = data.propName;
                     var propValue = data.propValue;
@@ -474,7 +476,7 @@ sealed class ApplicationPreview : Component
 
                     if (element is not img elementAsImage)
                     {
-                        return false;
+                        return data;
                     }
 
                     var isValueDouble = double.TryParse(propValue, out var valueAsDouble);
@@ -491,7 +493,7 @@ sealed class ApplicationPreview : Component
                             elementAsImage.height = propValue;
                         }
 
-                        return true;
+                        return data with { IsProcessed = true };
                     }
 
                     if (propName.Equals("w", StringComparison.OrdinalIgnoreCase) ||
@@ -506,7 +508,7 @@ sealed class ApplicationPreview : Component
                             elementAsImage.width = propValue;
                         }
 
-                        return true;
+                        return data with { IsProcessed = true };
                     }
 
                     if (propName.Equals("src", StringComparison.OrdinalIgnoreCase))
@@ -516,7 +518,7 @@ sealed class ApplicationPreview : Component
                             foreach (var srcValue in await calculateSrcFromValue(scope, model, propValue))
                             {
                                 elementAsImage.src = srcValue;
-                                return true;
+                                return data with { IsProcessed = true };
                             }
                         }
 
@@ -535,7 +537,7 @@ sealed class ApplicationPreview : Component
                                 foreach (var srcValue in await calculateSrcFromValue(scope, model, designTimeSrc))
                                 {
                                     elementAsImage.src = srcValue;
-                                    return true;
+                                    return data with { IsProcessed = true };
                                 }
                             }
                         }
@@ -574,13 +576,13 @@ sealed class ApplicationPreview : Component
                             {
                                 elementAsImage.src = dummySrc;
 
-                                return true;
+                                return data with { IsProcessed = true };
                             }
                         }
 
                         elementAsImage.src = DummySrc(500);
 
-                        return true;
+                        return data with { IsProcessed = true };
 
                         static async Task<Maybe<string>> calculateSrcFromValue(RenderPreviewScope scope, VisualElementModel model, string value)
                         {
@@ -616,10 +618,10 @@ sealed class ApplicationPreview : Component
                         }
                     }
 
-                    return false;
+                    return data;
                 }
 
-                static bool processInputType(PropertyProcessScope data)
+                static PropertyProcessScope processInputType(PropertyProcessScope data)
                 {
                     var propName = data.propName;
                     var propValue = data.propValue;
@@ -630,14 +632,14 @@ sealed class ApplicationPreview : Component
                         if (propName.Equals("type", StringComparison.OrdinalIgnoreCase))
                         {
                             elementAsInput.type = TryClearStringValue(propValue);
-                            return true;
+                            return data with{ IsProcessed = true};
                         }
                     }
 
-                    return false;
+                    return data;
                 }
 
-                static bool tryProcessCommonHtmlProperties(PropertyProcessScope data)
+                static PropertyProcessScope tryProcessCommonHtmlProperties(PropertyProcessScope data)
                 {
                     var propName = data.propName;
                     var propValue = data.propValue;
@@ -646,33 +648,33 @@ sealed class ApplicationPreview : Component
                     var propertyInfo = element.GetType().GetProperty(propName, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
                     if (propertyInfo is null)
                     {
-                        return false;
+                        return data;
                     }
 
                     if (isUnknownValue(propValue))
                     {
-                        return true;
+                        return data with{ IsProcessed = true};
                     }
 
                     if (propertyInfo.PropertyType == typeof(string))
                     {
                         propertyInfo.SetValue(element, TryClearStringValue(propValue));
-                        return true;
+                        return data with{ IsProcessed = true};
                     }
 
                     if (propertyInfo.PropertyType == typeof(dangerouslySetInnerHTML))
                     {
                         propertyInfo.SetValue(element, new dangerouslySetInnerHTML(TryClearStringValue(propValue)));
-                        return true;
+                        return data with{ IsProcessed = true};
                     }
 
                     if (propertyInfo.PropertyType == typeof(UnionProp<string, double>))
                     {
                         propertyInfo.SetValue(element, (UnionProp<string, double>)propValue);
-                        return true;
+                        return data with{ IsProcessed = true};
                     }
 
-                    return false;
+                    return data;
                 }
             }
 
@@ -784,4 +786,6 @@ sealed record PropertyProcessScope
     public string propName { get; init; }
     public string propValue { get; init; }
     public RenderPreviewScope scope { get; init; }
+    
+    public bool IsProcessed { get; init; }
 }

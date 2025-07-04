@@ -449,17 +449,20 @@ static class FP
         return selector(result.Value);
     }
    
-    public static async Task<bool> TryProcessByFirstMatch<Tin>(Tin value, Pipe<Tin, bool> pipe)
+    public static async Task<TValue> RunWhile<TValue>( TValue value, Func<TValue, bool> canContinueToExecute, Pipe<TValue, TValue> pipe)
     {
-        foreach (Func<Tin, Task<bool>> item in pipe)
+        foreach (Func<TValue, Task<TValue>> item in pipe)
         {
-            if (await item(value))
+            if (!canContinueToExecute(value))
             {
-                return true;
+                return value;
             }
+            
+            value = await item(value);
+           
         }
 
-        return false;
+        return value;
     }
     
 }
