@@ -70,17 +70,17 @@ static class ApplicationLogic
                                  () => Store.GetAllProjects().GetAwaiter().GetResult().ToList());
     }
 
-    public static string GetComponentName(int projectId, int componentId)
-    {
-        return GetAllComponentsInProjectFromCache(projectId).FirstOrDefault(x => x.Id == componentId)?.GetName();
-    }
-    
     public static string GetComponentDisplayText(int projectId, int componentId)
     {
         var directoryName = GetAllComponentsInProjectFromCache(projectId).FirstOrDefault(x => x.Id == componentId)?.GetExportFilePath()
-            .Split("/").TakeLast(2).FirstOrDefault();
+                                                                         .Split("/").TakeLast(2).FirstOrDefault();
 
-        return directoryName + "/"+ GetComponentName(projectId, componentId);
+        return directoryName + "/" + GetComponentName(projectId, componentId);
+    }
+
+    public static string GetComponentName(int projectId, int componentId)
+    {
+        return GetAllComponentsInProjectFromCache(projectId).FirstOrDefault(x => x.Id == componentId)?.GetName();
     }
 
     public static Task<Result<VisualElementModel>> GetComponentUserOrMainVersionAsync(int componentId, string userName)
@@ -109,33 +109,28 @@ static class ApplicationLogic
         return GetAllProjectsCached().Select(x => x.Name).ToList();
     }
 
-    
     public static async Task<IReadOnlyList<string>> GetPropSuggestions(ApplicationState state)
     {
+        var scope = new PropSuggestionScope();
+        {
+            if (state.Selection.VisualElementTreeItemPath.HasValue())
+            {
+                var selectedVisualItem = FindTreeNodeByTreePath(state.ComponentRootElement, state.Selection.VisualElementTreeItemPath);
+
+                var tag = selectedVisualItem.Tag;
+
+                scope = new PropSuggestionScope
+                {
+                    Component = await TryGetComponentByTag(selectedVisualItem.Tag),
+                    TagName   = await GetTagText(tag)
+                };
+            }
+        }
+
         var items = new List<string>();
 
-       
-
-        var scope = new PropSuggestionScope();
-        
-
-        if (state.Selection.VisualElementTreeItemPath.HasValue())
-        {
-            var selectedVisualItem = FindTreeNodeByTreePath(state.ComponentRootElement, state.Selection.VisualElementTreeItemPath);
-
-            var tag = selectedVisualItem.Tag;
-
-            scope = new PropSuggestionScope
-            {
-                Component = await TryGetComponentByTag(selectedVisualItem.Tag),
-                TagName   = await GetTagText(tag)
-            };
-
-        }
-        
-
         items.AddRange(await Plugin.GetPropSuggestions(scope));
-        
+
         if (scope.TagName != null)
         {
             items.AddRange(Cache.AccessValue($"{nameof(GetPropSuggestions)}-{scope.TagName}", () =>
@@ -156,12 +151,12 @@ static class ApplicationLogic
         items.Add($"{Design.Text}: ?");
         items.Add($"{Design.TextPreview}: ?");
 
-        if (scope.TagName== "img")
+        if (scope.TagName == "img")
         {
             items.AddRange(await Cache.AccessValue("image_suggestions", async () =>
             {
                 var user = await Store.TryGetUser(state.ProjectId, state.UserName);
-                
+
                 return getImagesIsPublicFolder(user?.LocalWorkspacePath);
             }));
 
@@ -171,7 +166,7 @@ static class ApplicationLogic
                 {
                     yield break;
                 }
-                
+
                 var publicFolder = Path.Combine(localWorkspacePath, "public");
                 if (Directory.Exists(publicFolder))
                 {
@@ -354,21 +349,8 @@ static class ApplicationLogic
         {
             return component.GetName();
         }
-        
-        return tag;
-    }
-    
-    public static Task<Maybe<ComponentEntity>> TryGetComponentByTag(string tag)
-    {
-        return Cache.AccessValue($"{nameof(TryGetComponentByTag)} :: {tag}", async () =>
-        {
-            foreach (var componentId in TryParseInt32(tag))
-            {
-                return (Maybe<ComponentEntity>)await Store.TryGetComponent(componentId) ?? None;
-            }
 
-            return None;
-        });
+        return tag;
     }
 
     public static async Task<Maybe<string>> GetUserLastAccessedProjectLocalWorkspacePath()
@@ -464,6 +446,19 @@ static class ApplicationLogic
         }
 
         return None;
+    }
+
+    public static Task<Maybe<ComponentEntity>> TryGetComponentByTag(string tag)
+    {
+        return Cache.AccessValue($"{nameof(TryGetComponentByTag)} :: {tag}", async () =>
+        {
+            foreach (var componentId in TryParseInt32(tag))
+            {
+                return (Maybe<ComponentEntity>)await Store.TryGetComponent(componentId) ?? None;
+            }
+
+            return None;
+        });
     }
 
     public static async Task<Result> TrySaveComponentForUser(ApplicationState state)
