@@ -615,7 +615,7 @@ sealed class ApplicationPreview : Component
                                 return None;
                             }
 
-                            // try find value from caller
+                            // try to find value from caller
                             foreach (var callerValue in tryGetPropValueFromCaller(scope, model, "src"))
                             {
                                 return await calculateSrcFromValue(scope, model, callerValue);
