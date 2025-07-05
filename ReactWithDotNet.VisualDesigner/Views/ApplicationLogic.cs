@@ -83,7 +83,7 @@ static class ApplicationLogic
         return directoryName + "/"+ GetComponentName(projectId, componentId);
     }
 
-    public static Task<Result<VisualElementModel>> GetComponenUserOrMainVersionAsync(int componentId, string userName)
+    public static Task<Result<VisualElementModel>> GetComponentUserOrMainVersionAsync(int componentId, string userName)
     {
         var input = new GetComponentDataInput { ComponentId = componentId, UserName = userName };
 

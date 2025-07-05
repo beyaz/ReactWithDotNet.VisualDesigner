@@ -112,7 +112,7 @@ sealed class ApplicationPreview : Component
                 {
                     VisualElementModel componentRootElementModel;
                     {
-                        var result = await GetComponenUserOrMainVersionAsync(componentId, scope.UserName);
+                        var result = await GetComponentUserOrMainVersionAsync(componentId, scope.UserName);
                         if (result.HasError)
                         {
                             return result.Error;
