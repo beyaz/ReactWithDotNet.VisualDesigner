@@ -110,7 +110,7 @@ static class Extensions
         {
             config = config with { UseUrls = false };
         }
-
-        return config;
+        
+        return Plugin.AfterReadConfig(config);
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Microsoft.Data.SqlClient;
 using System.Data;
 using Dapper;
+using ReactWithDotNet.VisualDesigner.Configuration;
 
 namespace ReactWithDotNet.VisualDesigner;
 
@@ -160,5 +161,23 @@ static class Plugin
 
             return returnList;
         }
+    }
+
+    public static ConfigModel AfterReadConfig(ConfigModel config)
+    {
+        if (Environment.MachineName.StartsWith("BTARC", StringComparison.OrdinalIgnoreCase))
+        {
+            return config with
+            {
+                Database = new()
+                {
+                    IsSQLServer      = true,
+                    SchemaName       = "RVD",
+                    ConnectionString = @"Data Source=srvdev\atlas;Initial Catalog=boa;Min Pool Size=10; Max Pool Size=100;Application Name=Thriller;Integrated Security=true; TrustServerCertificate=true;"
+                }
+            };
+        }
+
+        return config;
     }
 }
