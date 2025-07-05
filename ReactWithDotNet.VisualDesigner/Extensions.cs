@@ -26,6 +26,16 @@ static class Extensions
         return None;
     }
     
+    public static Maybe<double> TryParseDouble(string text)
+    {
+        if (double.TryParse(text, out var number))
+        {
+            return number;
+        }
+
+        return None;
+    }
+    
     public static readonly CachedObjectMap Cache = new() { Timeout = TimeSpan.FromMinutes(5) };
 
     public static readonly CultureInfo CultureInfo_en_US = new("en-US");

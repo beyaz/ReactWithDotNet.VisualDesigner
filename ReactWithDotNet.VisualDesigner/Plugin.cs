@@ -23,12 +23,98 @@ static class Plugin
     {
         String, Number, Date
     }
+    
+    record ComponentMeta
+    {
+        public IReadOnlyList<PropMeta> Props { get; init; }
+        
+        public string TagName { get; init; }
+    }
 
     record PropMeta
     {
-        public ValueTypes ValueType { get; set; }
-        public string Name { get; set; }
+        public ValueTypes ValueType { get; init; }
+        
+        public string Name { get; init; }
     }
+
+    static readonly IReadOnlyList<ComponentMeta> ComponentsMeta =
+    [
+        new()
+        {
+            TagName = "BInput",
+            Props =
+            [
+                new()
+                {
+                    Name      = "floatingLabelText",
+                    ValueType = ValueTypes.String
+                },
+                new()
+                {
+                    Name      = "helperText",
+                    ValueType = ValueTypes.String
+                },
+                new()
+                {
+                    Name      = "maxLength",
+                    ValueType = ValueTypes.Number
+                }
+            ]
+        },
+        
+        new()
+        {
+            TagName = "BComboBox",
+            Props =
+            [
+                new()
+                {
+                    Name      = "labelText",
+                    ValueType = ValueTypes.String
+                }
+            ]
+        },
+        
+        new()
+        {
+            TagName = "BCheckBox",
+            Props =
+            [
+                new()
+                {
+                    Name      = "label",
+                    ValueType = ValueTypes.String
+                }
+            ]
+        },
+        
+        new()
+        {
+            TagName = "BDigitalGroupView",
+            Props =
+            [
+                new()
+                {
+                    Name      = "title",
+                    ValueType = ValueTypes.String
+                }
+            ]
+        },
+        
+        new()
+        {
+            TagName = "BDigitalPlateNumber",
+            Props =
+            [
+                new()
+                {
+                    Name      = "label",
+                    ValueType = ValueTypes.String
+                }
+            ]
+        }
+    ];
 
     public static ConfigModel AfterReadConfig(ConfigModel config)
     {
@@ -88,25 +174,24 @@ static class Plugin
                 numberSuggestions.Add("16");
             }
 
-            var stringPropertyMap = new Dictionary<string, IReadOnlyList<string>>
-            {
-                { "BInput", ["floatingLabelText","helperText","maxLength"] },
-                { "BComboBox", ["labelText"] },
-                { "BCheckBox", ["label"] },
-                { "BDigitalGroupView", ["title"] },
-                { "BDigitalPlateNumber", ["label"] }
-            };
-
             List<string> returnList = [];
             
-            if (stringPropertyMap.TryGetValue(scope.TagName, out var propertyNames))
+            foreach (var prop in  from m in ComponentsMeta where m.TagName == scope.TagName from p in m.Props select p)
             {
-                foreach (var item in stringSuggestions)
+                if (prop.ValueType == ValueTypes.String)
                 {
-                    foreach (var propertyName in propertyNames)
+                    foreach (var item in stringSuggestions)
                     {
-                        returnList.Add($"{propertyName}: \"{item}\"");
+                        returnList.Add($"{prop.Name}: \"{item}\"");
                     }
+                }
+                
+                if (prop.ValueType == ValueTypes.Number)
+                {
+                    returnList.Add($"{prop.Name}: 2");
+                    returnList.Add($"{prop.Name}: 4");
+                    returnList.Add($"{prop.Name}: 8");
+                    returnList.Add($"{prop.Name}: 12");
                 }
             }
 

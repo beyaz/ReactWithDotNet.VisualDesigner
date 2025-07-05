@@ -822,6 +822,11 @@ sealed class ApplicationPreview : Component
                         {
                             return callerPropertyValue;
                         }
+
+                        foreach (var _ in TryParseDouble(callerPropertyValue))
+                        {
+                            return callerPropertyValue;
+                        }
                     }
                 }
 
