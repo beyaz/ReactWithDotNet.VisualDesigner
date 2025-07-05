@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using System.Reflection;
 using System.Text;
+using System.Text.Json.Nodes;
 
 namespace ReactWithDotNet.VisualDesigner.Views;
 
@@ -173,15 +174,26 @@ sealed class ApplicationPreview : Component
                 element.text = text;
             }
 
-            foreach (var (name, value) in from p in model.Properties from x in TryParseProperty(p) where x.Name.NotIn(Design.Text, Design.TextPreview, Design.Src) select x)
+            model = model with
             {
+                Properties = ListFrom(from p in model.Properties 
+                                      from x in TryParseProperty(p) 
+                                      where x.Name.NotIn(Design.Text, Design.TextPreview, Design.Src) select p)
+            };
+            
+            while(model.Properties.Count > 0)
+            {
+                var propText = model.Properties[0];
+                
+                var prop = TryParseProperty(propText).Value;
+                
                 var propertyProcessScope = new PropertyProcessScope
                 {
                     scope     = scope,
                     element   = element,
                     model     = model,
-                    propName  = name,
-                    propValue = value
+                    propName  = prop.Name,
+                    propValue = prop.Value
                 };
                 var result = await processProp(propertyProcessScope);
                 if (result.HasError)
@@ -190,6 +202,11 @@ sealed class ApplicationPreview : Component
                 }
 
                 model = result.Value.model;
+
+                model = model with
+                {
+                    Properties = model.Properties.Where(p => p != propText).ToList()
+                };
 
             }
 
@@ -279,6 +296,14 @@ sealed class ApplicationPreview : Component
 
             static Maybe<string> tryCalculateText(RenderPreviewScope scope, VisualElementModel model)
             {
+                {
+                    var text = model.GetText();
+                    if (IsStringValue(text))
+                    {
+                        return TryClearStringValue(text);
+                    }
+                }
+                
                 if (model.HasText() || model.GetDesignText().HasValue())
                 {
                     foreach (var item in tryGetPropValueFromCaller(scope, model, Design.Text))
@@ -440,6 +465,76 @@ sealed class ApplicationPreview : Component
                     var propValue = data.propValue;
                     var model = data.model;
 
+                    if (propName == Design.ItemsSource)
+                    {
+                        var firstChild = model.Children.FirstOrDefault();
+                        if (firstChild is not null)
+                        {
+                            var result = Try(()=>System.Text.Json.JsonSerializer.Deserialize<JsonNode[]>(data.propValue));
+                            if (result.HasError)
+                            {
+                                return data with { IsProcessed = true, model = model};
+                            }
+
+                            var arr = result.Value;
+
+                            var designTimeChildrenCount = arr.Length;
+                            
+                            model = model with
+                            {
+                                Children = ListFrom(Enumerable.Range(0, designTimeChildrenCount).Select(i =>
+                                {
+                                    var childModel = CloneByUsingYaml(firstChild);
+
+                                    childModel = ModifyElements(childModel, _ => true, m=>modifyElement(m, arr,i));
+                                    
+                                    return childModel;
+                                })),
+                                
+                                Properties = ListFrom(data.model.Properties.Where(p =>
+                                {
+                                    foreach (var prop in TryParseProperty(p))
+                                    {
+                                        if (prop.Name == Design.ItemsSourceDesignTimeCount)
+                                        {
+                                            return false;
+                                        }
+                                    }
+
+                                    return true;
+                                }))
+                            };
+                        }
+
+                        return data with { IsProcessed = true, model = model};
+                        
+                        static VisualElementModel modifyElement(VisualElementModel m, JsonNode[] arr, int index)
+                        {
+                            return m with
+                            {
+                                Properties = ListFrom(m.Properties.Select(p =>
+                                {
+                                    foreach (var (name, value) in TryParseProperty(p))
+                                    {
+                                        if (value.StartsWith("_item.", StringComparison.OrdinalIgnoreCase))
+                                        {
+                                            var _item = arr[index];
+
+                                            var path = value.RemoveFromStart("_item.");
+
+                                            foreach (var realValue in JsonHelper.ReadValueAtPathFromJsonObject(_item, path))
+                                            {
+                                                return $"{name}: \"{realValue}\"";
+                                            }
+                                        }
+                                    }
+
+                                    return p;
+                                }))
+                            };
+                        }
+                    }
+                    
                     if (propName == Design.ItemsSourceDesignTimeCount)
                     {
                         var firstChild = model.Children.FirstOrDefault();
@@ -549,7 +644,7 @@ sealed class ApplicationPreview : Component
                             }
                         }
 
-                        // try initialize dummy src
+                        // try to initialize dummy src
                         {
                             string dummySrc = null;
                             {
@@ -721,6 +816,11 @@ sealed class ApplicationPreview : Component
                         {
                             return callerPropertyValue;
                         }
+
+                        if (IsJsonArray(callerPropertyValue))
+                        {
+                            return callerPropertyValue;
+                        }
                     }
                 }
 
@@ -761,6 +861,9 @@ sealed class ApplicationPreview : Component
 
         return Task.CompletedTask;
     }
+    
+    
+    
 }
 
 sealed record RenderPreviewScope
@@ -795,4 +898,33 @@ sealed record PropertyProcessScope
     public RenderPreviewScope scope { get; init; }
     
     public bool IsProcessed { get; init; }
+}
+
+
+static class JsonHelper
+{
+    public static Maybe<object> ReadValueAtPathFromJsonObject(JsonNode obj, string propertyPath)
+    {
+        if (obj == null || string.IsNullOrEmpty(propertyPath))
+        {
+            return None;
+        }
+
+        string[] pathSegments = propertyPath.Split('.');
+        JsonNode currentNode = obj;
+
+        foreach (var segment in pathSegments)
+        {
+            if (currentNode is JsonObject jsonObject && jsonObject.TryGetPropertyValue(segment, out JsonNode value))
+            {
+                currentNode = value;
+            }
+            else
+            {
+                return None;
+            }
+        }
+
+        return currentNode;
+    }
 }

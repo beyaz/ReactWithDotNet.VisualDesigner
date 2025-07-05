@@ -5,6 +5,17 @@ namespace ReactWithDotNet.VisualDesigner;
 
 static class Extensions
 {
+    public static Result<T> Try<T>(Func<T> func)
+    {
+        try
+        {
+            return func();
+        }
+        catch (Exception exception)
+        {
+            return exception;
+        }
+    }
     public static Maybe<int> TryParseInt32(string text)
     {
         if (int.TryParse(text, out var number))
@@ -308,7 +319,19 @@ static class Extensions
 
         return value.StartsWith("{") && value.EndsWith("}");
     }
+    
+    public static bool IsJsonArray(string value)
+    {
+        if (value is null)
+        {
+            return false;
+        }
 
+        return value.StartsWith("[") && value.EndsWith("]");
+    }
+
+    
+    
     public static bool IsDouble(this string value)
     {
         return double.TryParse(value, CultureInfo_en_US, out _);
@@ -370,6 +393,20 @@ static class Extensions
         {
             Children = ListFrom(from child in root.Children select Modify(child, target, modifyNode))
         };
+    }
+    
+    public static VisualElementModel ModifyElements(VisualElementModel root, Func<VisualElementModel, bool> match, Func<VisualElementModel, VisualElementModel> modify)
+    {
+        // Eğer kök eleman match fonksiyonuna uyuyorsa modify et
+        var modifiedRoot = match(root) ? modify(root) : root;
+
+        // Çocuk elemanları yine bu fonksiyonla recursive olarak işleyin
+        var modifiedChildren = modifiedRoot.Children
+                                           .Select(child => ModifyElements(child, match, modify))
+                                           .ToList();
+
+        // Yeni bir VisualElementModel oluştur ve değiştirilen çocukları ekle
+        return modifiedRoot with { Children = modifiedChildren };
     }
 
     /// <summary>
