@@ -109,33 +109,39 @@ static class ApplicationLogic
         return GetAllProjectsCached().Select(x => x.Name).ToList();
     }
 
+    
     public static async Task<IReadOnlyList<string>> GetPropSuggestions(ApplicationState state)
     {
         var items = new List<string>();
 
-        string tag = null;
+       
+
+        var scope = new PropSuggestionScope();
+        
 
         if (state.Selection.VisualElementTreeItemPath.HasValue())
         {
             var selectedVisualItem = FindTreeNodeByTreePath(state.ComponentRootElement, state.Selection.VisualElementTreeItemPath);
 
-            tag = selectedVisualItem.Tag;
+            var tag = selectedVisualItem.Tag;
 
-            tag = await GetTagText(tag);
+            scope = new PropSuggestionScope
+            {
+                Component = await TryGetComponentByTag(selectedVisualItem.Tag),
+                TagName   = await GetTagText(tag)
+            };
 
-        }
-
-        if (tag != null)
-        {
-            items.AddRange(await Plugin.GetPropSuggestions(state, tag));
         }
         
-        if (tag != null)
+
+        items.AddRange(await Plugin.GetPropSuggestions(scope));
+        
+        if (scope.TagName != null)
         {
-            items.AddRange(Cache.AccessValue($"{nameof(GetPropSuggestions)}-{tag}", () =>
+            items.AddRange(Cache.AccessValue($"{nameof(GetPropSuggestions)}-{scope.TagName}", () =>
             {
                 var returnList = new List<string>();
-                foreach (var htmlElementType in TryGetHtmlElementTypeByTagName(tag))
+                foreach (var htmlElementType in TryGetHtmlElementTypeByTagName(scope.TagName))
                 {
                     foreach (var propertyInfo in htmlElementType.GetProperties(BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance))
                     {
@@ -150,48 +156,30 @@ static class ApplicationLogic
         items.Add($"{Design.Text}: ?");
         items.Add($"{Design.TextPreview}: ?");
 
-        if (tag == "img")
+        if (scope.TagName== "img")
         {
             items.AddRange(await Cache.AccessValue("image_suggestions", async () =>
             {
-                var returnList = new List<string>();
-
                 var user = await Store.TryGetUser(state.ProjectId, state.UserName);
-                if (user is not null)
-                {
-                    if (user.LocalWorkspacePath.HasValue())
-                    {
-                        var publicFolder = Path.Combine(user.LocalWorkspacePath, "public");
-                        if (Directory.Exists(publicFolder))
-                        {
-                            foreach (var pattern in new[] { "*.svg", "*.png" })
-                            {
-                                foreach (var file in Directory.GetFiles(publicFolder, pattern, SearchOption.AllDirectories))
-                                {
-                                    returnList.Add($"src: {file.RemoveFromStart(publicFolder).Replace(Path.DirectorySeparatorChar, '/')}");
-                                }
-                            }
-                        }
-                    }
-                }
-
-                return returnList;
+                
+                return getImagesIsPublicFolder(user?.LocalWorkspacePath);
             }));
 
-            var user = await Store.TryGetUser(state.ProjectId, state.UserName);
-            if (user is not null)
+            static IEnumerable<string> getImagesIsPublicFolder(string localWorkspacePath)
             {
-                if (user.LocalWorkspacePath.HasValue())
+                if (string.IsNullOrWhiteSpace(localWorkspacePath))
                 {
-                    var publicFolder = Path.Combine(user.LocalWorkspacePath, "public");
-                    if (Directory.Exists(publicFolder))
+                    yield break;
+                }
+                
+                var publicFolder = Path.Combine(localWorkspacePath, "public");
+                if (Directory.Exists(publicFolder))
+                {
+                    foreach (var pattern in new[] { "*.svg", "*.png" })
                     {
-                        foreach (var pattern in new[] { "*.svg", "*.png" })
+                        foreach (var file in Directory.GetFiles(publicFolder, pattern, SearchOption.AllDirectories))
                         {
-                            foreach (var file in Directory.GetFiles(publicFolder, pattern, SearchOption.AllDirectories))
-                            {
-                                items.Add($"src: {file.RemoveFromStart(publicFolder).Replace(Path.DirectorySeparatorChar, '/')}");
-                            }
+                            yield return file.RemoveFromStart(publicFolder).Replace(Path.DirectorySeparatorChar, '/');
                         }
                     }
                 }
@@ -203,10 +191,6 @@ static class ApplicationLogic
 
         items.Add($"{Design.ShowIf}: {{state.isSelectedUser}}");
         items.Add($"{Design.HideIf}: {{state.isSelectedUser}}");
-
-
-       
-        
 
         return items;
     }
@@ -364,22 +348,26 @@ static class ApplicationLogic
         return suggestions;
     }
 
-    public static Task<string> GetTagText(string tag)
+    public static async Task<string> GetTagText(string tag)
     {
-        return Cache.AccessValue($"{nameof(GetTagText)} :: {tag}", async () =>
+        foreach (var component in await TryGetComponentByTag(tag))
         {
-            if (int.TryParse(tag, out var componentId))
+            return component.GetName();
+        }
+        
+        return tag;
+    }
+    
+    public static Task<Maybe<ComponentEntity>> TryGetComponentByTag(string tag)
+    {
+        return Cache.AccessValue($"{nameof(TryGetComponentByTag)} :: {tag}", async () =>
+        {
+            foreach (var componentId in TryParseInt32(tag))
             {
-                var component = await Store.TryGetComponent(componentId);
-                if (component is null)
-                {
-                    return tag;
-                }
-
-                return component.GetName();
+                return (Maybe<ComponentEntity>)await Store.TryGetComponent(componentId) ?? None;
             }
 
-            return tag;
+            return None;
         });
     }
 

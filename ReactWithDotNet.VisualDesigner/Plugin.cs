@@ -4,6 +4,13 @@ using Dapper;
 
 namespace ReactWithDotNet.VisualDesigner;
 
+sealed record PropSuggestionScope
+{
+    public string TagName { get; init; }
+    public Maybe<ComponentEntity> Component { get; init; }
+}
+
+
 static class Plugin
 {
     public static Element BeforeComponentPreview(RenderPreviewScope scope, VisualElementModel visualElementModel, Element component)
@@ -11,8 +18,10 @@ static class Plugin
         return component;
     }
 
-    public static async Task<IReadOnlyList<string>> GetPropSuggestions(ApplicationState state, string tag)
+    public static async Task<IReadOnlyList<string>> GetPropSuggestions(PropSuggestionScope scope)
     {
+        var tag = scope.TagName;
+        
         if (tag == "BInput")
         {
             var items = new List<string>();
