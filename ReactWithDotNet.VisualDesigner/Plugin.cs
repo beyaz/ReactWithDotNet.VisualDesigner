@@ -19,6 +19,17 @@ static class Plugin
     const string BOA_MessagingByGroupName = "BOA.MessagingByGroupName";
     const string BOA_RequestFullName = "BOA.RequestFullName";
 
+    enum ValueTypes
+    {
+        String, Number, Date
+    }
+
+    record PropMeta
+    {
+        public ValueTypes ValueType { get; set; }
+        public string Name { get; set; }
+    }
+
     public static ConfigModel AfterReadConfig(ConfigModel config)
     {
         if (Environment.MachineName.StartsWith("BTARC", StringComparison.OrdinalIgnoreCase))
@@ -44,34 +55,52 @@ static class Plugin
 
     public static async Task<IReadOnlyList<string>> GetPropSuggestions(PropSuggestionScope scope)
     {
-        var tag = scope.TagName;
-
-        var stringSuggestions = new List<string>();
+        if (scope.TagName.HasNoValue())
         {
-            if (scope.Component.GetConfig().TryGetValue(BOA_MessagingByGroupName, out var messagingGroupName))
-            {
-                foreach (var item in await GetMessagingByGroupName(messagingGroupName))
-                {
-                    stringSuggestions.Add(item.Description);
-                    stringSuggestions.Add($"${item.PropertyName}$ {item.Description}");
-                }
-            }
+            return [];
         }
 
-        var stringPropertyMap = new Dictionary<string, IReadOnlyList<string>>
-        {
-            { "BInput", ["floatingLabelText"] },
-            { "BComboBox", ["labelText"] },
-            { "BCheckBox", ["label"] },
-            { "BDigitalGroupView", ["title"] }
-        };
+        return await Cache.AccessValue($"{nameof(Plugin)}-{scope.TagName}", () =>calculate(scope));
 
-        if (stringPropertyMap.TryGetValue(tag, out var propertyNames))
+        static async Task<IReadOnlyList<string>> calculate(PropSuggestionScope scope)
         {
-            return Cache.AccessValue($"{nameof(Plugin)}-{tag}", () =>
+            
+                                     
+        
+            var stringSuggestions = new List<string>();
             {
-                var returnList = new List<string>();
+                if (scope.Component.GetConfig().TryGetValue(BOA_MessagingByGroupName, out var messagingGroupName))
+                {
+                    foreach (var item in await GetMessagingByGroupName(messagingGroupName))
+                    {
+                        stringSuggestions.Add(item.Description);
+                        stringSuggestions.Add($"${item.PropertyName}$ {item.Description}");
+                    }
+                }
+            }
+        
+            var numberSuggestions = new List<string>();
+            {
+                numberSuggestions.Add("2");
+                numberSuggestions.Add("4");
+                numberSuggestions.Add("8");
+                numberSuggestions.Add("12");
+                numberSuggestions.Add("16");
+            }
 
+            var stringPropertyMap = new Dictionary<string, IReadOnlyList<string>>
+            {
+                { "BInput", ["floatingLabelText","helperText","maxLength"] },
+                { "BComboBox", ["labelText"] },
+                { "BCheckBox", ["label"] },
+                { "BDigitalGroupView", ["title"] },
+                { "BDigitalPlateNumber", ["label"] }
+            };
+
+            List<string> returnList = [];
+            
+            if (stringPropertyMap.TryGetValue(scope.TagName, out var propertyNames))
+            {
                 foreach (var item in stringSuggestions)
                 {
                     foreach (var propertyName in propertyNames)
@@ -79,12 +108,12 @@ static class Plugin
                         returnList.Add($"{propertyName}: \"{item}\"");
                     }
                 }
+            }
 
-                return returnList;
-            });
+            return returnList;
         }
-
-        return [];
+        
+        
     }
 
     static Task<IReadOnlyList<MessagingInfo>> GetMessagingByGroupName(string messagingGroupName)
