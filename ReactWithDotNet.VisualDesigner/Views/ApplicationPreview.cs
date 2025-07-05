@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using System.Reflection;
 using System.Text;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 
 namespace ReactWithDotNet.VisualDesigner.Views;
@@ -176,17 +177,18 @@ sealed class ApplicationPreview : Component
 
             model = model with
             {
-                Properties = ListFrom(from p in model.Properties 
-                                      from x in TryParseProperty(p) 
-                                      where x.Name.NotIn(Design.Text, Design.TextPreview, Design.Src) select p)
+                Properties = ListFrom(from p in model.Properties
+                                      from x in TryParseProperty(p)
+                                      where x.Name.NotIn(Design.Text, Design.TextPreview, Design.Src)
+                                      select p)
             };
-            
-            while(model.Properties.Count > 0)
+
+            while (model.Properties.Count > 0)
             {
                 var propText = model.Properties[0];
-                
+
                 var prop = TryParseProperty(propText).Value;
-                
+
                 var propertyProcessScope = new PropertyProcessScope
                 {
                     scope     = scope,
@@ -207,14 +209,13 @@ sealed class ApplicationPreview : Component
                 {
                     Properties = model.Properties.Where(p => p != propText).ToList()
                 };
-
             }
 
             {
                 var result = model.Styles
-                    .Select(x => CreateDesignerStyleItemFromText(scope.Project, x))
-                    .ConvertAll(designerItem => designerItem.ToStyleModifier())
-                    .Then(styleModifiers => element.Add(styleModifiers.ToArray()));
+                                  .Select(x => CreateDesignerStyleItemFromText(scope.Project, x))
+                                  .ConvertAll(designerItem => designerItem.ToStyleModifier())
+                                  .Then(styleModifiers => element.Add(styleModifiers.ToArray()));
 
                 if (result.HasError)
                 {
@@ -303,7 +304,7 @@ sealed class ApplicationPreview : Component
                         return TryClearStringValue(text);
                     }
                 }
-                
+
                 if (model.HasText() || model.GetDesignText().HasValue())
                 {
                     foreach (var item in tryGetPropValueFromCaller(scope, model, Design.Text))
@@ -405,7 +406,7 @@ sealed class ApplicationPreview : Component
                     processInputType,
                     tryProcessCommonHtmlProperties
                 ]);
-                
+
                 if (data.IsProcessed)
                 {
                     return data;
@@ -415,7 +416,7 @@ sealed class ApplicationPreview : Component
                 {
                     return data;
                 }
-                
+
                 if (isUnknownValue(data.propValue))
                 {
                     return data;
@@ -438,26 +439,26 @@ sealed class ApplicationPreview : Component
                     var propName = data.propName;
                     var propValue = data.propValue;
                     var scope = data.scope;
-                    
 
                     if (propName == "children" && propValue == "props.children" && scope.ParentModel is not null)
                     {
                         // mark children as imported
-                        data = data with { model = data.model with
+                        data = data with
                         {
-                            Children = data.model.Children.AddRange(scope.ParentModel.Children.Select(item => item with
+                            model = data.model with
                             {
-                                Properties = item.Properties.Add(Design.IsImportedChild)
-                            }))
-                        } };
-                        
+                                Children = data.model.Children.AddRange(scope.ParentModel.Children.Select(item => item with
+                                {
+                                    Properties = item.Properties.Add(Design.IsImportedChild)
+                                }))
+                            }
+                        };
+
                         return data with { IsProcessed = true };
                     }
 
                     return data;
                 }
-
-                
 
                 static PropertyProcessScope itemSourceDesignTimeCount(PropertyProcessScope data)
                 {
@@ -470,27 +471,27 @@ sealed class ApplicationPreview : Component
                         var firstChild = model.Children.FirstOrDefault();
                         if (firstChild is not null)
                         {
-                            var result = Try(()=>System.Text.Json.JsonSerializer.Deserialize<JsonNode[]>(data.propValue));
+                            var result = Try(() => JsonSerializer.Deserialize<JsonNode[]>(data.propValue));
                             if (result.HasError)
                             {
-                                return data with { IsProcessed = true, model = model};
+                                return data with { IsProcessed = true, model = model };
                             }
 
                             var arr = result.Value;
 
                             var designTimeChildrenCount = arr.Length;
-                            
+
                             model = model with
                             {
                                 Children = ListFrom(Enumerable.Range(0, designTimeChildrenCount).Select(i =>
                                 {
                                     var childModel = CloneByUsingYaml(firstChild);
 
-                                    childModel = ModifyElements(childModel, _ => true, m=>modifyElement(m, arr,i));
-                                    
+                                    childModel = ModifyElements(childModel, _ => true, m => modifyElement(m, arr, i));
+
                                     return childModel;
                                 })),
-                                
+
                                 Properties = ListFrom(data.model.Properties.Where(p =>
                                 {
                                     foreach (var prop in TryParseProperty(p))
@@ -506,8 +507,8 @@ sealed class ApplicationPreview : Component
                             };
                         }
 
-                        return data with { IsProcessed = true, model = model};
-                        
+                        return data with { IsProcessed = true, model = model };
+
                         static VisualElementModel modifyElement(VisualElementModel m, JsonNode[] arr, int index)
                         {
                             return m with
@@ -534,7 +535,7 @@ sealed class ApplicationPreview : Component
                             };
                         }
                     }
-                    
+
                     if (propName == Design.ItemsSourceDesignTimeCount)
                     {
                         var firstChild = model.Children.FirstOrDefault();
@@ -548,7 +549,7 @@ sealed class ApplicationPreview : Component
                             }
                         }
 
-                        return data with { IsProcessed = true, model = model};
+                        return data with { IsProcessed = true, model = model };
                     }
 
                     return data;
@@ -734,7 +735,7 @@ sealed class ApplicationPreview : Component
                         if (propName.Equals("type", StringComparison.OrdinalIgnoreCase))
                         {
                             elementAsInput.type = TryClearStringValue(propValue);
-                            return data with{ IsProcessed = true};
+                            return data with { IsProcessed = true };
                         }
                     }
 
@@ -755,25 +756,25 @@ sealed class ApplicationPreview : Component
 
                     if (isUnknownValue(propValue))
                     {
-                        return data with{ IsProcessed = true};
+                        return data with { IsProcessed = true };
                     }
 
                     if (propertyInfo.PropertyType == typeof(string))
                     {
                         propertyInfo.SetValue(element, TryClearStringValue(propValue));
-                        return data with{ IsProcessed = true};
+                        return data with { IsProcessed = true };
                     }
 
                     if (propertyInfo.PropertyType == typeof(dangerouslySetInnerHTML))
                     {
                         propertyInfo.SetValue(element, new dangerouslySetInnerHTML(TryClearStringValue(propValue)));
-                        return data with{ IsProcessed = true};
+                        return data with { IsProcessed = true };
                     }
 
                     if (propertyInfo.PropertyType == typeof(UnionProp<string, double>))
                     {
                         propertyInfo.SetValue(element, (UnionProp<string, double>)propValue);
-                        return data with{ IsProcessed = true};
+                        return data with { IsProcessed = true };
                     }
 
                     return data;
@@ -861,9 +862,6 @@ sealed class ApplicationPreview : Component
 
         return Task.CompletedTask;
     }
-    
-    
-    
 }
 
 sealed record RenderPreviewScope
@@ -896,10 +894,9 @@ sealed record PropertyProcessScope
     public string propName { get; init; }
     public string propValue { get; init; }
     public RenderPreviewScope scope { get; init; }
-    
+
     public bool IsProcessed { get; init; }
 }
-
 
 static class JsonHelper
 {
@@ -910,12 +907,12 @@ static class JsonHelper
             return None;
         }
 
-        string[] pathSegments = propertyPath.Split('.');
-        JsonNode currentNode = obj;
+        var pathSegments = propertyPath.Split('.');
+        var currentNode = obj;
 
         foreach (var segment in pathSegments)
         {
-            if (currentNode is JsonObject jsonObject && jsonObject.TryGetPropertyValue(segment, out JsonNode value))
+            if (currentNode is JsonObject jsonObject && jsonObject.TryGetPropertyValue(segment, out var value))
             {
                 currentNode = value;
             }
