@@ -274,7 +274,7 @@ sealed class ApplicationView : Component<ApplicationState>
             Cache.Clear();
         }
 
-        return "Component name updated.";
+        return "Component config updated.";
     }
 
     Task AddNewLayerClicked(MouseEvent e)

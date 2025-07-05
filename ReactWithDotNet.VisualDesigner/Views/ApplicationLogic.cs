@@ -121,8 +121,9 @@ static class ApplicationLogic
 
                 scope = new PropSuggestionScope
                 {
-                    Component = await TryGetComponentByTag(selectedVisualItem.Tag),
-                    TagName   = await GetTagText(tag)
+                    Component         = await Store.TryGetComponent(state.ComponentId),
+                    SelectedComponent = await TryGetComponentByTag(selectedVisualItem.Tag),
+                    TagName           = await GetTagText(tag)
                 };
             }
         }

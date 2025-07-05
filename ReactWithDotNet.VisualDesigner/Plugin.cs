@@ -7,12 +7,18 @@ namespace ReactWithDotNet.VisualDesigner;
 sealed record PropSuggestionScope
 {
     public string TagName { get; init; }
-    public Maybe<ComponentEntity> Component { get; init; }
+    
+    public Maybe<ComponentEntity> SelectedComponent { get; init; }
+    
+    public ComponentEntity Component { get; init; }
 }
 
 
 static class Plugin
 {
+    const string BOA_MessagingByGroupName = "BOA.MessagingByGroupName";
+    const string BOA_RequestFullName = "BOA.RequestFullName";
+    
     public static Element BeforeComponentPreview(RenderPreviewScope scope, VisualElementModel visualElementModel, Element component)
     {
         return component;
@@ -21,6 +27,19 @@ static class Plugin
     public static async Task<IReadOnlyList<string>> GetPropSuggestions(PropSuggestionScope scope)
     {
         var tag = scope.TagName;
+        
+        var stringSuggestions = new List<string>();
+        {
+            if (scope.Component.GetConfig().TryGetValue(BOA_MessagingByGroupName, out var messagingGroupName))
+            {
+                foreach (var item in await GetMessagingByGroupName(messagingGroupName))
+                {
+                    stringSuggestions.Add(item.Description);
+                    stringSuggestions.Add($"${item.PropertyName}$ {item.Description}");
+                }
+            }
+        }
+        
         
         if (tag == "BInput")
         {
@@ -83,22 +102,14 @@ static class Plugin
         
         if (tag == "BDigitalGroupView")
         {
-            var items = new List<string>();
-
-            items.AddRange(await Cache.AccessValue($"{nameof(Plugin)}-{tag}", async () =>
+            var returnList = new List<string>();
+            
+            foreach (var item in stringSuggestions)
             {
-                var returnList = new List<string>();
-
-                foreach (var item in await GetMessagingByGroupName("WebBanking"))
-                {
-                    returnList.Add($"title: \"{item.Description}\"");
-                    returnList.Add($"title: \"${item.PropertyName}${item.Description}\"");
-                }
-
-                return returnList;
-            }));
-
-            return items;
+                returnList.Add($"title: \"{item}\"");
+            }
+            
+            return returnList;
         }
 
 
@@ -111,36 +122,43 @@ static class Plugin
         
         public string Description { get; init; }
     }
-    static async Task<IReadOnlyList<MessagingInfo>> GetMessagingByGroupName(string messagingGroupName)
+    static  Task<IReadOnlyList<MessagingInfo>> GetMessagingByGroupName(string messagingGroupName)
     {
-        var returnList = new List<MessagingInfo>();
+        var cacheKey = $"{nameof(GetMessagingByGroupName)} :: {messagingGroupName}";
         
-        var connectionString = @"Data Source=srvdev\atlas;Initial Catalog=boa;Min Pool Size=10; Max Pool Size=100;Application Name=Thriller;Integrated Security=true; TrustServerCertificate=true;";
+        return Cache.AccessValue(cacheKey, async ()=>await getMessagingByGroupName(messagingGroupName));
 
-        using IDbConnection connection = new SqlConnection(connectionString);
-
-        const string sql = 
-            """
-                SELECT m.PropertyName, Description
-                  FROM COR.MessagingDetail AS d WITH(NOLOCK)
-            INNER JOIN COR.Messaging       AS m WITH(NOLOCK) ON d.Code = m.Code
-            INNER JOIN COR.MessagingGroup  AS g WITH(NOLOCK) ON g.MessagingGroupId = m.MessagingGroupId
-                 WHERE g.Name = @messagingGroupName
-                   AND d.LanguageId = 1
-            """;
-        
-        var reader = await connection.ExecuteReaderAsync(sql, new { messagingGroupName });
-
-        while (reader.Read())
+        static async Task<IReadOnlyList<MessagingInfo>> getMessagingByGroupName(string messagingGroupName)
         {
-            var propertyName = reader["PropertyName"].ToString();
-            var description = reader["Description"].ToString();
-            
-            returnList.Add(new(){PropertyName = propertyName, Description = description});
-        }
+            var returnList = new List<MessagingInfo>();
         
-        reader.Close();
+            const string connectionString = @"Data Source=srvdev\atlas;Initial Catalog=boa;Min Pool Size=10; Max Pool Size=100;Application Name=Thriller;Integrated Security=true; TrustServerCertificate=true;";
 
-        return returnList;
+            using IDbConnection connection = new SqlConnection(connectionString);
+
+            const string sql = 
+                """
+                    SELECT m.PropertyName, Description
+                      FROM COR.MessagingDetail AS d WITH(NOLOCK)
+                INNER JOIN COR.Messaging       AS m WITH(NOLOCK) ON d.Code = m.Code
+                INNER JOIN COR.MessagingGroup  AS g WITH(NOLOCK) ON g.MessagingGroupId = m.MessagingGroupId
+                     WHERE g.Name = @messagingGroupName
+                       AND d.LanguageId = 1
+                """;
+        
+            var reader = await connection.ExecuteReaderAsync(sql, new { messagingGroupName });
+
+            while (reader.Read())
+            {
+                var propertyName = reader["PropertyName"].ToString();
+                var description = reader["Description"].ToString();
+            
+                returnList.Add(new(){PropertyName = propertyName, Description = description});
+            }
+        
+            reader.Close();
+
+            return returnList;
+        }
     }
 }
