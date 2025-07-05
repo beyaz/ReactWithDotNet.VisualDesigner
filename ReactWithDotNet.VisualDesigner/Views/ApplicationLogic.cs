@@ -127,6 +127,11 @@ static class ApplicationLogic
 
         if (tag != null)
         {
+            items.AddRange(await Plugin.GetPropSuggestions(state, tag));
+        }
+        
+        if (tag != null)
+        {
             items.AddRange(Cache.AccessValue($"{nameof(GetPropSuggestions)}-{tag}", () =>
             {
                 var returnList = new List<string>();
@@ -200,10 +205,7 @@ static class ApplicationLogic
         items.Add($"{Design.HideIf}: {{state.isSelectedUser}}");
 
 
-        if (tag != null)
-        {
-            items.AddRange(await Plugin.GetPropSuggestions(state, tag));
-        }
+       
         
 
         return items;

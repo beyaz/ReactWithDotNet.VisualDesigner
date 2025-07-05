@@ -188,6 +188,9 @@ sealed class ApplicationPreview : Component
                 {
                     return result.Error;
                 }
+
+                model = result.Value.model;
+
             }
 
             {
@@ -361,7 +364,7 @@ sealed class ApplicationPreview : Component
                 return false;
             }
 
-            static async Task<Result> processProp(PropertyProcessScope data)
+            static async Task<Result<PropertyProcessScope>> processProp(PropertyProcessScope data)
             {
                 foreach (var propRealValue in tryGetPropValueFromCaller(data.scope, data.model, data.propName))
                 {
@@ -380,17 +383,17 @@ sealed class ApplicationPreview : Component
                 
                 if (data.IsProcessed)
                 {
-                    return Success;
+                    return data;
                 }
 
                 if (isKnownProp(data.propName))
                 {
-                    return Success;
+                    return data;
                 }
                 
                 if (isUnknownValue(data.propValue))
                 {
-                    return Success;
+                    return data;
                 }
 
                 return new Exception($"Property '{data.propName}' with value '{data.propValue}' is not processed for element '{data.model.Tag}'.");
@@ -450,7 +453,7 @@ sealed class ApplicationPreview : Component
                             }
                         }
 
-                        return data with { IsProcessed = true };
+                        return data with { IsProcessed = true, model = model};
                     }
 
                     return data;
