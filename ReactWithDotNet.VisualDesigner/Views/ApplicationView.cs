@@ -595,7 +595,7 @@ sealed class ApplicationView : Component<ApplicationState>
                     Ruler.HorizontalRuler(state.Preview.Width, state.Preview.Scale) + Width(state.Preview.Width) + MarginTop(12) + PaddingLeft(30),
                     new FlexRow(SizeFull, Width(state.Preview.Width + 30))
                     {
-                        Ruler.VerticleRuler(state.Preview.Scale),
+                        Ruler.VerticalRuler(state.Preview.Scale),
                         PartPreview
                     }
                 };
@@ -759,7 +759,7 @@ sealed class ApplicationView : Component<ApplicationState>
         return Task.CompletedTask;
     }
 
-    Task OnPropertyItemDropLocationDroped(DragEvent _)
+    Task OnPropertyItemDropLocationDropped(DragEvent _)
     {
         var dd = state.PropertyItemDragDrop;
 
@@ -791,7 +791,7 @@ sealed class ApplicationView : Component<ApplicationState>
         return Task.CompletedTask;
     }
 
-    Task OnStyleItemDropLocationDroped(DragEvent _)
+    Task OnStyleItemDropLocationDropped(DragEvent _)
     {
         var dd = state.StyleItemDragDrop;
 
@@ -1602,7 +1602,7 @@ sealed class ApplicationView : Component<ApplicationState>
                             return Task.CompletedTask;
                         }),
                         OnDragLeave(OnStyleItemDropLocationLeaved),
-                        OnDrop(OnStyleItemDropLocationDroped)
+                        OnDrop(OnStyleItemDropLocationDropped)
                     ]);
 
                     var dropLocationAfter = CreateDropLocationElement(state.StyleItemDragDrop.Position == AttibuteDragPosition.After,
@@ -1613,7 +1613,7 @@ sealed class ApplicationView : Component<ApplicationState>
                             return Task.CompletedTask;
                         }),
                         OnDragLeave(OnStyleItemDropLocationLeaved),
-                        OnDrop(OnStyleItemDropLocationDroped)
+                        OnDrop(OnStyleItemDropLocationDropped)
                     ]);
 
                     return new FlexRowCentered(Gap(8))
@@ -1843,7 +1843,7 @@ sealed class ApplicationView : Component<ApplicationState>
                             return Task.CompletedTask;
                         }),
                         OnDragLeave(OnPropertyItemDropLocationLeaved),
-                        OnDrop(OnPropertyItemDropLocationDroped)
+                        OnDrop(OnPropertyItemDropLocationDropped)
                     ]);
 
                     var dropLocationAfter = CreateDropLocationElement(state.PropertyItemDragDrop.Position == AttibuteDragPosition.After,
@@ -1854,7 +1854,7 @@ sealed class ApplicationView : Component<ApplicationState>
                             return Task.CompletedTask;
                         }),
                         OnDragLeave(OnPropertyItemDropLocationLeaved),
-                        OnDrop(OnPropertyItemDropLocationDroped)
+                        OnDrop(OnPropertyItemDropLocationDropped)
                     ]);
 
                     return new FlexRowCentered(Gap(8))
@@ -2046,7 +2046,7 @@ sealed class ApplicationView : Component<ApplicationState>
                         Bottom(3), Left(number * step),
                         new FlexColumn(FontSize8, LineHeight6, FontWeight500, Gap(4))
                         {
-                            new div(MarginLeft(calculateMarginForCenterizeLabel(number)))
+                            new div(MarginLeft(calculateMarginForCenterLabel(number)))
                             {
                                 Convert.ToInt32(number * step * (100 / scale))
                             },
@@ -2096,7 +2096,7 @@ sealed class ApplicationView : Component<ApplicationState>
                 return returnList;
             }
 
-            double calculateMarginForCenterizeLabel(int stepNumber)
+            double calculateMarginForCenterLabel(int stepNumber)
             {
                 var label = stepNumber * step;
 
@@ -2119,7 +2119,7 @@ sealed class ApplicationView : Component<ApplicationState>
             }
         }
 
-        public static Element VerticleRuler(double scale = 100)
+        public static Element VerticalRuler(double scale = 100)
         {
             const int maxHeight = 5000;
 

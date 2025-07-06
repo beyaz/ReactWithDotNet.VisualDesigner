@@ -107,7 +107,7 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
         return Task.CompletedTask;
     }
 
-    Task OnDroped(DragEvent e)
+    Task OnDropped(DragEvent e)
     {
         var treeItemPathTarget = e.currentTarget.id;
 
@@ -295,7 +295,7 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
                 DraggableTrue,
                 OnDragStart(OnDragStarted),
                 OnDragEnter(OnDragEntered),
-                OnDrop(OnDroped),
+                OnDrop(OnDropped),
 
                 afterPositionElement,
                 
@@ -364,7 +364,7 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
 
             var hasHeightWithConstantValue = styles.Any(x => TryParseProperty(x).Is(r => r.Value.IsDouble() && r.Name.In("h", "height")));
 
-            var hasWidhtWithConstantValue = styles.Any(x => TryParseProperty(x).Is(r => r.Value.IsDouble() && r.Name.In("w", "width")));
+            var hasWidthWithConstantValue = styles.Any(x => TryParseProperty(x).Is(r => r.Value.IsDouble() && r.Name.In("w", "width")));
 
             if (hasGrid)
             {
@@ -386,7 +386,7 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
                 return new IconSpaceVertical();
             }
 
-            if (node.HasNoText() && styles.Count == 1 && hasWidhtWithConstantValue)
+            if (node.HasNoText() && styles.Count == 1 && hasWidthWithConstantValue)
             {
                 return new IconSpaceHorizontal();
             }
