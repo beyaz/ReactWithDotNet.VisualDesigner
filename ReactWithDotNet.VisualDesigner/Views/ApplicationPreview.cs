@@ -52,18 +52,7 @@ sealed class ApplicationPreview : Component
             return null;
         }
 
-        VisualElementModel highlightedElement = null;
-        {
-            var selection = appState.Selection;
-            if (selection.VisualElementTreeItemPathHover.HasValue())
-            {
-                highlightedElement = FindTreeNodeByTreePath(rootElement, selection.VisualElementTreeItemPathHover);
-            }
-            else if (selection.VisualElementTreeItemPath.HasValue())
-            {
-                highlightedElement = FindTreeNodeByTreePath(rootElement, selection.VisualElementTreeItemPath);
-            }
-        }
+        var highlightedElement = findHighlightedElement(rootElement, appState.Selection);
 
         Element finalElement;
         {
@@ -100,6 +89,21 @@ sealed class ApplicationPreview : Component
             },
             finalElement + scaleStyle
         };
+
+        static VisualElementModel findHighlightedElement(VisualElementModel rootElement, ApplicationSelectionState selection)
+        {
+            if (selection.VisualElementTreeItemPathHover.HasValue())
+            {
+                return FindTreeNodeByTreePath(rootElement, selection.VisualElementTreeItemPathHover);
+            }
+
+            if (selection.VisualElementTreeItemPath.HasValue())
+            {
+                return FindTreeNodeByTreePath(rootElement, selection.VisualElementTreeItemPath);
+            }
+
+            return null;
+        }
 
         static async Task<Result<Element>> renderElement(RenderPreviewScope scope, VisualElementModel model, string path)
         {
