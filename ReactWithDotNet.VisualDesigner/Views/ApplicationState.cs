@@ -53,21 +53,21 @@ public sealed record ApplicationState
     
     public MainContentTabs MainContentTab  { get; init; }
     
-    public required AttibuteDragDropData StyleItemDragDrop { get; init; }
+    public required AttributeDragDropData StyleItemDragDrop { get; init; }
     
-    public required AttibuteDragDropData PropertyItemDragDrop { get; init; }
+    public required AttributeDragDropData PropertyItemDragDrop { get; init; }
 
     // @formatter:on
 }
 
-public sealed record AttibuteDragDropData
+public sealed record AttributeDragDropData
 {
     public int? StartItemIndex { get; init; }
     public int? EndItemIndex { get; init; }
-    public AttibuteDragPosition? Position { get; init; }
+    public AttributeDragPosition? Position { get; init; }
 }
 
-public enum AttibuteDragPosition
+public enum AttributeDragPosition
 {
     Before,
     After

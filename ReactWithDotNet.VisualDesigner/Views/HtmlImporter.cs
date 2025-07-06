@@ -131,7 +131,7 @@ static class HtmlImporter
                 if (map != null)
                 {
                     map = tryConvertOutlineToBorder(map);
-                    map = tryMergeForShorthandDeclerations(map);
+                    map = tryMergeForShorthandDeclarations(map);
                         
                     foreach (var item in map.Where(skipWordWrap).Where(skipJustifyContentFlexStart))
                     {
@@ -148,21 +148,21 @@ static class HtmlImporter
 
                 var listOfCssClass = attributeValue.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
-                List<string> remainigClassNames = [];
+                List<string> remainingClassNames = [];
 
                 foreach (var (className, styles) in from className in listOfCssClass select processClassName(project, className))
                 {
                     model = model with { Styles = model.Styles.AddRange(styles) };
 
-                    className.HasValue(n => remainigClassNames.Add(n));
+                    className.HasValue(n => remainingClassNames.Add(n));
                 }
 
-                if (remainigClassNames.Count == 0)
+                if (remainingClassNames.Count == 0)
                 {
                     continue;
                 }
 
-                attributeValue = string.Join(" ", remainigClassNames);
+                attributeValue = string.Join(" ", remainingClassNames);
 
                 static (Maybe<string> className, IReadOnlyList<string> styles) processClassName(ProjectConfig project, string className)
                 {
@@ -276,7 +276,7 @@ static class HtmlImporter
         }
        
 
-        static IReadOnlyDictionary<string, string> tryMergeForShorthandDeclerations(IReadOnlyDictionary<string, string> inlineStyleMap)
+        static IReadOnlyDictionary<string, string> tryMergeForShorthandDeclarations(IReadOnlyDictionary<string, string> inlineStyleMap)
         {
             foreach (var func in new[] { fixPaddingAndMargin })
             {

@@ -511,7 +511,7 @@ sealed class ApplicationView : Component<ApplicationState>
             return;
         }
 
-        var lineIndex = GetComponentDeclerationLineIndex(fileContent.Value, location.Value.targetComponentName);
+        var lineIndex = GetComponentDeclarationLineIndex(fileContent.Value, location.Value.targetComponentName);
         if (lineIndex.HasError)
         {
             this.FailNotification(lineIndex.Error.Message);

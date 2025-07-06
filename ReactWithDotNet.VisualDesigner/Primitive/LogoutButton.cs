@@ -53,14 +53,20 @@ sealed class LogoutButton : Component<LogoutButton.State>
 
     Task OnMouseEntered(MouseEvent e)
     {
-        state = state with { IsMouseEntered = true };
+        state = new State
+        {
+            IsMouseEntered = true
+        };
 
         return Task.CompletedTask;
     }
 
     Task OnMouseLeaved(MouseEvent e)
     {
-        state = state with { IsMouseEntered = false };
+        state = new State
+        {
+            IsMouseEntered = false
+        };
 
         return Task.CompletedTask;
     }

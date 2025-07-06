@@ -856,7 +856,7 @@ public static class CssHelper
         {
             string name, value, pseudo;
             {
-                var attribute = ParseStyleAttibute(designerStyleItem);
+                var attribute = ParseStyleAttribute(designerStyleItem);
 
                 name   = attribute.Name;
                 value  = attribute.Value;
@@ -892,7 +892,7 @@ public static class CssHelper
         {
             string name, value, pseudo;
             {
-                var attribute = ParseStyleAttibute(designerStyleItem);
+                var attribute = ParseStyleAttribute(designerStyleItem);
 
                 name   = attribute.Name;
                 value  = attribute.Value;
@@ -933,7 +933,7 @@ public static class CssHelper
         }
     }
 
-    public static StyleAttribute ParseStyleAttibute(string nameValueCombined)
+    public static StyleAttribute ParseStyleAttribute(string nameValueCombined)
     {
         if (string.IsNullOrWhiteSpace(nameValueCombined))
         {
@@ -1200,7 +1200,7 @@ public static class CssHelper
 
         // try read from project config
         {
-            var (name, value, _) = ParseStyleAttibute(utilityCssClassName);
+            var (name, value, _) = ParseStyleAttribute(utilityCssClassName);
             if (name == "color" && value is not null && project.Colors.TryGetValue(value, out var realColor))
             {
                 return new DesignerStyleItem
@@ -1364,7 +1364,7 @@ public static class CssHelper
 
         value = value.Trim();
 
-        foreach (var newValue in tryFixValuesForShorthandDeclerations(name, value))
+        foreach (var newValue in tryFixValuesForShorthandDeclarations(name, value))
         {
             value = newValue;
         }
@@ -1560,16 +1560,16 @@ public static class CssHelper
 
         return new Exception($"{name}: {value} is not recognized");
 
-        static Maybe<string> tryFixValuesForShorthandDeclerations(string name, string value)
+        static Maybe<string> tryFixValuesForShorthandDeclarations(string name, string value)
         {
-            foreach (var newValue in tryFixPaddingAndMarginShorthandDecleration(name, value))
+            foreach (var newValue in tryFixPaddingAndMarginShorthandDeclaration(name, value))
             {
                 return newValue;
             }
 
             return None;
 
-            static Maybe<string> tryFixPaddingAndMarginShorthandDecleration(string name, string value)
+            static Maybe<string> tryFixPaddingAndMarginShorthandDeclaration(string name, string value)
             {
                 if ((name == "padding" || name == "margin") && value.Contains(' '))
                 {

@@ -64,7 +64,7 @@ static class NextJs_with_Tailwind
             fileContentAtDisk = result.Value;
         }
 
-        if (ignore_whitespace_charachters(fileContentAtDisk) == ignore_whitespace_charachters(fileContent))
+        if (ignore_whitespace_characters(fileContentAtDisk) == ignore_whitespace_characters(fileContent))
         {
             return new ExportOutput();
         }
@@ -80,7 +80,7 @@ static class NextJs_with_Tailwind
 
         return new ExportOutput { HasChange = true };
 
-        static string ignore_whitespace_charachters(string value)
+        static string ignore_whitespace_characters(string value)
         {
             if (value == null)
             {
@@ -340,7 +340,7 @@ static class NextJs_with_Tailwind
             return lines;
         }
 
-        // is map
+        // is mapping
         {
             List<string> lines = [];
 
@@ -893,21 +893,21 @@ static class NextJs_with_Tailwind
         var lines = fileContent.ToList();
 
         // focus to component code
-        int componentDeclerationLineIndex;
+        int componentDeclarationLineIndex;
         {
-            var result = GetComponentDeclerationLineIndex(fileContent, targetComponentName);
+            var result = GetComponentDeclarationLineIndex(fileContent, targetComponentName);
             if (result.HasError)
             {
                 return result.Error;
             }
 
-            componentDeclerationLineIndex = result.Value;
+            componentDeclarationLineIndex = result.Value;
         }
 
-        var firstReturnLineIndex = lines.FindIndex(componentDeclerationLineIndex, l => l == "    return (");
+        var firstReturnLineIndex = lines.FindIndex(componentDeclarationLineIndex, l => l == "    return (");
         if (firstReturnLineIndex < 0)
         {
-            firstReturnLineIndex = lines.FindIndex(componentDeclerationLineIndex, l => l == "  return (");
+            firstReturnLineIndex = lines.FindIndex(componentDeclarationLineIndex, l => l == "  return (");
             if (firstReturnLineIndex < 0)
             {
                 return new InvalidOperationException("No return found");

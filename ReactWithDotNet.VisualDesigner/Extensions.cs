@@ -168,14 +168,14 @@ static class Extensions
             return 50;
         }
 
-        var textLegth = text.Length;
+        var textLength = text.Length;
 
-        if (textLegth == 1)
+        if (textLength == 1)
         {
-            textLegth = 2;
+            textLength = 2;
         }
 
-        return textLegth * 7.8;
+        return textLength * 7.8;
     }
 
     public static string ClearConnectedValue(string value)
@@ -240,32 +240,32 @@ static class Extensions
         return node;
     }
 
-    public static Result<int> GetComponentDeclerationLineIndex(IReadOnlyList<string> fileContent, string targetComponentName)
+    public static Result<int> GetComponentDeclarationLineIndex(IReadOnlyList<string> fileContent, string targetComponentName)
     {
         var lines = fileContent.ToList();
 
-        var componentDeclerationLineIndex = lines.FindIndex(line => line.Contains($"function {targetComponentName}("));
-        if (componentDeclerationLineIndex == -1)
+        var componentDeclarationLineIndex = lines.FindIndex(line => line.Contains($"function {targetComponentName}("));
+        if (componentDeclarationLineIndex == -1)
         {
-            componentDeclerationLineIndex = lines.FindIndex(line => line.Contains($"const {targetComponentName} "));
-            if (componentDeclerationLineIndex == -1)
+            componentDeclarationLineIndex = lines.FindIndex(line => line.Contains($"const {targetComponentName} "));
+            if (componentDeclarationLineIndex == -1)
             {
-                componentDeclerationLineIndex = lines.FindIndex(line => line.Contains($"const {targetComponentName}:"));
-                if (componentDeclerationLineIndex == -1)
+                componentDeclarationLineIndex = lines.FindIndex(line => line.Contains($"const {targetComponentName}:"));
+                if (componentDeclarationLineIndex == -1)
                 {
                     return new ArgumentException($"ComponentDeclerationNotFoundInFile. {targetComponentName}");
                 }
             }
         }
 
-        return componentDeclerationLineIndex;
+        return componentDeclarationLineIndex;
     }
 
     public static async Task<Result<(string filePath, string targetComponentName)>> GetComponentFileLocation(int componentId, string userLocalWorkspacePath)
     {
         var component = await Store.TryGetComponent(componentId);
 
-        return (Path.Combine(userLocalWorkspacePath, Path.Combine(component.GetExportFilePath().Split(new[] { '/', Path.DirectorySeparatorChar }))), component.GetName());
+        return (Path.Combine(userLocalWorkspacePath, Path.Combine(component.GetExportFilePath().Split('/', Path.DirectorySeparatorChar))), component.GetName());
     }
 
     public static string GetDesignText(this VisualElementModel model)
