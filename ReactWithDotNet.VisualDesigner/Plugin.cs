@@ -94,6 +94,41 @@ static class Plugin
                     ValueType = ValueTypes.String
                 }
             ]
+        },
+        
+        new()
+        {
+            TagName = "BDigitalDialog",
+            Props =
+            [
+                new()
+                {
+                    Name      = "title",
+                    ValueType = ValueTypes.String
+                },
+                new()
+                {
+                    Name      = "content",
+                    ValueType = ValueTypes.String
+                },
+                new()
+                {
+                    Name      = "open",
+                    ValueType = ValueTypes.Boolean
+                }
+            ]
+        },
+        new()
+        {
+            TagName = "BAlert",
+            Props =
+            [
+                new()
+                {
+                    Name      = "severity",
+                    ValueType = ValueTypes.String
+                }
+            ]
         }
     ];
 
@@ -233,6 +268,11 @@ static class Plugin
                         break;
                     }
                 }
+            }
+            
+            foreach (var item in stringSuggestions)
+            {
+                returnList.Add($"d-text: \"{item}\"");
             }
 
             return returnList;
