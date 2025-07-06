@@ -769,7 +769,7 @@ sealed class ApplicationView : Component<ApplicationState>
             {
                 UpdateCurrentVisualElement(x => x with
                 {
-                    Properties = x.Properties.MoveItemRelativeTo(dd.StartItemIndex.Value, dd.EndItemIndex.Value, dd.Position == AttibuteDragPosition.Before)
+                    Properties = x.Properties.MoveItemRelativeTo(dd.StartItemIndex.Value, dd.EndItemIndex.Value, dd.Position == AttributeDragPosition.Before)
                 });
             }
         }
@@ -799,7 +799,7 @@ sealed class ApplicationView : Component<ApplicationState>
         {
             if (dd.EndItemIndex.HasValue)
             {
-                CurrentVisualElement.Styles.MoveItemRelativeTo(dd.StartItemIndex.Value, dd.EndItemIndex.Value, dd.Position == AttibuteDragPosition.Before);
+                CurrentVisualElement.Styles.MoveItemRelativeTo(dd.StartItemIndex.Value, dd.EndItemIndex.Value, dd.Position == AttributeDragPosition.Before);
             }
         }
 
@@ -1594,22 +1594,22 @@ sealed class ApplicationView : Component<ApplicationState>
 
                 if (state.StyleItemDragDrop.EndItemIndex == index)
                 {
-                    var dropLocationBefore = CreateDropLocationElement(state.StyleItemDragDrop.Position == AttibuteDragPosition.Before,
+                    var dropLocationBefore = CreateDropLocationElement(state.StyleItemDragDrop.Position == AttributeDragPosition.Before,
                     [
                         OnDragEnter(_ =>
                         {
-                            state = state with { StyleItemDragDrop = state.StyleItemDragDrop with { Position = AttibuteDragPosition.Before } };
+                            state = state with { StyleItemDragDrop = state.StyleItemDragDrop with { Position = AttributeDragPosition.Before } };
                             return Task.CompletedTask;
                         }),
                         OnDragLeave(OnStyleItemDropLocationLeaved),
                         OnDrop(OnStyleItemDropLocationDropped)
                     ]);
 
-                    var dropLocationAfter = CreateDropLocationElement(state.StyleItemDragDrop.Position == AttibuteDragPosition.After,
+                    var dropLocationAfter = CreateDropLocationElement(state.StyleItemDragDrop.Position == AttributeDragPosition.After,
                     [
                         OnDragEnter(_ =>
                         {
-                            state = state with { StyleItemDragDrop = state.StyleItemDragDrop with { Position = AttibuteDragPosition.After } };
+                            state = state with { StyleItemDragDrop = state.StyleItemDragDrop with { Position = AttributeDragPosition.After } };
                             return Task.CompletedTask;
                         }),
                         OnDragLeave(OnStyleItemDropLocationLeaved),
@@ -1835,22 +1835,22 @@ sealed class ApplicationView : Component<ApplicationState>
 
                 if (state.PropertyItemDragDrop.EndItemIndex == index)
                 {
-                    var dropLocationBefore = CreateDropLocationElement(state.PropertyItemDragDrop.Position == AttibuteDragPosition.Before,
+                    var dropLocationBefore = CreateDropLocationElement(state.PropertyItemDragDrop.Position == AttributeDragPosition.Before,
                     [
                         OnDragEnter(_ =>
                         {
-                            state = state with { PropertyItemDragDrop = state.PropertyItemDragDrop with { Position = AttibuteDragPosition.Before } };
+                            state = state with { PropertyItemDragDrop = state.PropertyItemDragDrop with { Position = AttributeDragPosition.Before } };
                             return Task.CompletedTask;
                         }),
                         OnDragLeave(OnPropertyItemDropLocationLeaved),
                         OnDrop(OnPropertyItemDropLocationDropped)
                     ]);
 
-                    var dropLocationAfter = CreateDropLocationElement(state.PropertyItemDragDrop.Position == AttibuteDragPosition.After,
+                    var dropLocationAfter = CreateDropLocationElement(state.PropertyItemDragDrop.Position == AttributeDragPosition.After,
                     [
                         OnDragEnter(_ =>
                         {
-                            state = state with { PropertyItemDragDrop = state.PropertyItemDragDrop with { Position = AttibuteDragPosition.After } };
+                            state = state with { PropertyItemDragDrop = state.PropertyItemDragDrop with { Position = AttributeDragPosition.After } };
                             return Task.CompletedTask;
                         }),
                         OnDragLeave(OnPropertyItemDropLocationLeaved),
