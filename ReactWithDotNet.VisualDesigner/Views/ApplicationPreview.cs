@@ -52,20 +52,31 @@ sealed class ApplicationPreview : Component
             return null;
         }
 
-        var highlightedElement = findHighlightedElement(rootElement, appState.Selection);
+        var highlightedElementPath = string.Empty;
+        {
+            if (appState.Selection.VisualElementTreeItemPathHover.HasValue())
+            {
+                highlightedElementPath = appState.Selection.VisualElementTreeItemPathHover;
+            }
+
+            if (appState.Selection.VisualElementTreeItemPath.HasValue())
+            {
+                highlightedElementPath = appState.Selection.VisualElementTreeItemPath;
+            }
+        }
 
         Element finalElement;
         {
             var renderContext = new RenderPreviewScope
             {
-                ProjectId          = projectId,
-                Project            = GetProjectConfig(projectId),
-                UserName           = userName,
-                OnTreeItemClicked  = OnItemClick,
-                ReactContext       = Context,
-                HighlightedElement = highlightedElement,
-                Client             = Client,
-                ParentModel        = null
+                ProjectId              = projectId,
+                Project                = GetProjectConfig(projectId),
+                UserName               = userName,
+                OnTreeItemClicked      = OnItemClick,
+                ReactContext           = Context,
+                Client                 = Client,
+                ParentModel            = null,
+                HighlightedElementPath = highlightedElementPath
             };
             var result = await renderElement(renderContext, rootElement, "0");
             if (result.HasError)
@@ -89,21 +100,6 @@ sealed class ApplicationPreview : Component
             },
             finalElement + scaleStyle
         };
-
-        static VisualElementModel findHighlightedElement(VisualElementModel rootElement, ApplicationSelectionState selection)
-        {
-            if (selection.VisualElementTreeItemPathHover.HasValue())
-            {
-                return FindTreeNodeByTreePath(rootElement, selection.VisualElementTreeItemPathHover);
-            }
-
-            if (selection.VisualElementTreeItemPath.HasValue())
-            {
-                return FindTreeNodeByTreePath(rootElement, selection.VisualElementTreeItemPath);
-            }
-
-            return null;
-        }
 
         static async Task<Result<Element>> renderElement(RenderPreviewScope scope, VisualElementModel model, string path)
         {
@@ -130,16 +126,6 @@ sealed class ApplicationPreview : Component
                     if (componentRootElementModel is not null)
                     {
                         var component = await renderElement(scope with { Parent = scope, ParentModel = model, ParentPath = path }, componentRootElementModel, path);
-
-                        // try to highlight
-                        if (scope.HighlightedElement == model)
-                        {
-                            if (component.Value is HtmlElement htmlElement)
-                            {
-                                scope.Client.RunJavascript(getJsCodeToHighlightElement(htmlElement.id ??= Guid.NewGuid().ToString("N")));
-                            }
-                        }
-
                         if (component.Success)
                         {
                             Plugin.BeforeComponentPreview(scope, model, component.Value);
@@ -228,7 +214,7 @@ sealed class ApplicationPreview : Component
             }
 
             // try to highlight
-            if (scope.HighlightedElement == model)
+            if (scope.HighlightedElementPath == path)
             {
                 element.id ??= Guid.NewGuid().ToString("N");
 
@@ -877,8 +863,6 @@ sealed record RenderPreviewScope
 {
     public Client Client { get; init; }
 
-    public required VisualElementModel HighlightedElement { get; init; }
-
     public required MouseEventHandler OnTreeItemClicked { get; init; }
 
     public RenderPreviewScope Parent { get; init; }
@@ -894,6 +878,8 @@ sealed record RenderPreviewScope
     public required ReactContext ReactContext { get; init; }
 
     public required string UserName { get; init; }
+
+    public string HighlightedElementPath { get; init; }
 }
 
 sealed record PropertyProcessScope
