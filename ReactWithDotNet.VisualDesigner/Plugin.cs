@@ -17,7 +17,6 @@ sealed record PropSuggestionScope
 static class Plugin
 {
     const string BOA_MessagingByGroupName = "BOA.MessagingByGroupName";
-    const string BOA_RequestFullName = "BOA.RequestFullName";
 
     static readonly IReadOnlyList<ComponentMeta> ComponentsMeta =
     [
@@ -95,7 +94,23 @@ static class Plugin
                 }
             ]
         },
-
+        new()
+        {
+            TagName = "BDigitalTabNavigator",
+            Props =
+            [
+                new()
+                {
+                    Name      = "mainResource",
+                    ValueType = ValueTypes.String
+                },
+                new()
+                {
+                    Name      = "selectedTab",
+                    ValueType = ValueTypes.Number
+                }
+            ]
+        },
         new()
         {
             TagName = "BDigitalDialog",
@@ -127,6 +142,19 @@ static class Plugin
                 {
                     Name      = "severity",
                     ValueType = ValueTypes.String
+                }
+            ]
+        },
+        
+        new()
+        {
+            TagName = "BDigitalBox",
+            Props =
+            [
+                new()
+                {
+                    Name      = "pb",
+                    ValueType = ValueTypes.Number
                 }
             ]
         }
@@ -207,22 +235,29 @@ static class Plugin
                 "false"
             ];
 
-            if (scope.Component.GetConfig().TryGetValue(BOA_RequestFullName, out var requestFullName))
+            foreach (var (key, value) in scope.Component.GetConfig())
             {
-                var assemblyPath = string.Empty;
+                const string dotNetVariable = "DotNetVariable.";
 
-                if (requestFullName.StartsWith("BOA.InternetBanking.Payments.API", StringComparison.OrdinalIgnoreCase))
+                if (!key.StartsWith(dotNetVariable, StringComparison.OrdinalIgnoreCase))
                 {
-                    assemblyPath = @"D:\work\BOA.BusinessModules\Dev\BOA.InternetBanking.Payments\API\BOA.InternetBanking.Payments.API\bin\Debug\net8.0\BOA.InternetBanking.Payments.API.dll";
+                    continue;
                 }
 
-                if (assemblyPath.HasValue())
+                var variableName = key.RemoveFromStart(dotNetVariable);
+
+                var dotnetTypeFullName = value;
+
+                var assemblyFilePath = getAssemblyFilePathByFullTypeName(dotnetTypeFullName);
+                if (assemblyFilePath is null)
                 {
-                    stringSuggestions.AddRange(CecilHelper.GetPropertyPathList(assemblyPath, requestFullName, "request.", CecilHelper.IsStringProperty));
-                    numberSuggestions.AddRange(CecilHelper.GetPropertyPathList(assemblyPath, requestFullName, "request.", CecilHelper.IsNumberProperty));
-                    dateSuggestions.AddRange(CecilHelper.GetPropertyPathList(assemblyPath, requestFullName, "request.", CecilHelper.IsDateTimeProperty));
-                    booleanSuggestions.AddRange(CecilHelper.GetPropertyPathList(assemblyPath, requestFullName, "request.", CecilHelper.IsBooleanProperty));
+                    continue;
                 }
+
+                stringSuggestions.AddRange(CecilHelper.GetPropertyPathList(assemblyFilePath, dotnetTypeFullName, $"{variableName}.", CecilHelper.IsStringProperty));
+                numberSuggestions.AddRange(CecilHelper.GetPropertyPathList(assemblyFilePath, dotnetTypeFullName, $"{variableName}.", CecilHelper.IsNumberProperty));
+                dateSuggestions.AddRange(CecilHelper.GetPropertyPathList(assemblyFilePath, dotnetTypeFullName, $"{variableName}.", CecilHelper.IsDateTimeProperty));
+                booleanSuggestions.AddRange(CecilHelper.GetPropertyPathList(assemblyFilePath, dotnetTypeFullName, $"{variableName}.", CecilHelper.IsBooleanProperty));
             }
 
             List<string> returnList = [];
@@ -276,6 +311,16 @@ static class Plugin
             }
 
             return returnList;
+
+            static string getAssemblyFilePathByFullTypeName(string fullTypeName)
+            {
+                if (fullTypeName.StartsWith("BOA.InternetBanking.Payments.API", StringComparison.OrdinalIgnoreCase))
+                {
+                    return @"D:\work\BOA.BusinessModules\Dev\BOA.InternetBanking.Payments\API\BOA.InternetBanking.Payments.API\bin\Debug\net8.0\BOA.InternetBanking.Payments.API.dll";
+                }
+
+                return null;
+            }
         }
     }
 
