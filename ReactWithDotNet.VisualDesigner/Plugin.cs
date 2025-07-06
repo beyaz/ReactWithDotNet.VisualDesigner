@@ -19,25 +19,6 @@ static class Plugin
     const string BOA_MessagingByGroupName = "BOA.MessagingByGroupName";
     const string BOA_RequestFullName = "BOA.RequestFullName";
 
-    enum ValueTypes
-    {
-        String, Number, Date
-    }
-    
-    record ComponentMeta
-    {
-        public IReadOnlyList<PropMeta> Props { get; init; }
-        
-        public string TagName { get; init; }
-    }
-
-    record PropMeta
-    {
-        public ValueTypes ValueType { get; init; }
-        
-        public string Name { get; init; }
-    }
-
     static readonly IReadOnlyList<ComponentMeta> ComponentsMeta =
     [
         new()
@@ -62,7 +43,7 @@ static class Plugin
                 }
             ]
         },
-        
+
         new()
         {
             TagName = "BComboBox",
@@ -75,7 +56,7 @@ static class Plugin
                 }
             ]
         },
-        
+
         new()
         {
             TagName = "BCheckBox",
@@ -88,7 +69,7 @@ static class Plugin
                 }
             ]
         },
-        
+
         new()
         {
             TagName = "BDigitalGroupView",
@@ -101,7 +82,7 @@ static class Plugin
                 }
             ]
         },
-        
+
         new()
         {
             TagName = "BDigitalPlateNumber",
@@ -115,6 +96,14 @@ static class Plugin
             ]
         }
     ];
+
+    enum ValueTypes
+    {
+        String,
+        Number,
+        Date,
+        Boolean
+    }
 
     public static ConfigModel AfterReadConfig(ConfigModel config)
     {
@@ -146,13 +135,10 @@ static class Plugin
             return [];
         }
 
-        return await Cache.AccessValue($"{nameof(Plugin)}-{scope.TagName}", () =>calculate(scope));
+        return await Cache.AccessValue($"{nameof(Plugin)}-{scope.TagName}", () => calculate(scope));
 
         static async Task<IReadOnlyList<string>> calculate(PropSuggestionScope scope)
         {
-            
-                                     
-        
             var stringSuggestions = new List<string>();
             {
                 if (scope.Component.GetConfig().TryGetValue(BOA_MessagingByGroupName, out var messagingGroupName))
@@ -164,41 +150,93 @@ static class Plugin
                     }
                 }
             }
-        
-            var numberSuggestions = new List<string>();
+
+            List<string> numberSuggestions =
+            [
+                "2",
+                "4",
+                "8",
+                "12",
+                "16",
+                "24"
+            ];
+
+            List<string> dateSuggestions =
+            [
+                "new Date().getDate()"
+            ];
+
+            List<string> booleanSuggestions =
+            [
+                "true",
+                "false"
+            ];
+
+            if (scope.Component.GetConfig().TryGetValue(BOA_RequestFullName, out var requestFullName))
             {
-                numberSuggestions.Add("2");
-                numberSuggestions.Add("4");
-                numberSuggestions.Add("8");
-                numberSuggestions.Add("12");
-                numberSuggestions.Add("16");
+                var assemblyPath = string.Empty;
+
+                if (requestFullName.StartsWith("BOA.InternetBanking.Payments.API", StringComparison.OrdinalIgnoreCase))
+                {
+                    assemblyPath = @"D:\work\BOA.BusinessModules\Dev\BOA.InternetBanking.Payments\API\BOA.InternetBanking.Payments.API\bin\Debug\net8.0\BOA.InternetBanking.Payments.API.dll";
+                }
+
+                if (assemblyPath.HasValue())
+                {
+                    stringSuggestions.AddRange(CecilHelper.GetPropertyPathList(assemblyPath, requestFullName, "request.", CecilHelper.IsStringProperty));
+                    numberSuggestions.AddRange(CecilHelper.GetPropertyPathList(assemblyPath, requestFullName, "request.", CecilHelper.IsNumberProperty));
+                    dateSuggestions.AddRange(CecilHelper.GetPropertyPathList(assemblyPath, requestFullName, "request.", CecilHelper.IsDateTimeProperty));
+                    booleanSuggestions.AddRange(CecilHelper.GetPropertyPathList(assemblyPath, requestFullName, "request.", CecilHelper.IsBooleanProperty));
+                }
             }
 
             List<string> returnList = [];
-            
-            foreach (var prop in  from m in ComponentsMeta where m.TagName == scope.TagName from p in m.Props select p)
+
+            foreach (var prop in from m in ComponentsMeta where m.TagName == scope.TagName from p in m.Props select p)
             {
-                if (prop.ValueType == ValueTypes.String)
+                switch (prop.ValueType)
                 {
-                    foreach (var item in stringSuggestions)
+                    case ValueTypes.String:
                     {
-                        returnList.Add($"{prop.Name}: \"{item}\"");
+                        foreach (var item in stringSuggestions)
+                        {
+                            returnList.Add($"{prop.Name}: \"{item}\"");
+                        }
+
+                        break;
                     }
-                }
-                
-                if (prop.ValueType == ValueTypes.Number)
-                {
-                    returnList.Add($"{prop.Name}: 2");
-                    returnList.Add($"{prop.Name}: 4");
-                    returnList.Add($"{prop.Name}: 8");
-                    returnList.Add($"{prop.Name}: 12");
+                    case ValueTypes.Number:
+                    {
+                        foreach (var item in numberSuggestions)
+                        {
+                            returnList.Add($"{prop.Name}: {item}");
+                        }
+
+                        break;
+                    }
+                    case ValueTypes.Date:
+                    {
+                        foreach (var item in dateSuggestions)
+                        {
+                            returnList.Add($"{prop.Name}: {item}");
+                        }
+
+                        break;
+                    }
+                    case ValueTypes.Boolean:
+                    {
+                        foreach (var item in booleanSuggestions)
+                        {
+                            returnList.Add($"{prop.Name}: {item}");
+                        }
+
+                        break;
+                    }
                 }
             }
 
             return returnList;
         }
-        
-        
     }
 
     static Task<IReadOnlyList<MessagingInfo>> GetMessagingByGroupName(string messagingGroupName)
@@ -239,6 +277,20 @@ static class Plugin
 
             return returnList;
         }
+    }
+
+    record ComponentMeta
+    {
+        public IReadOnlyList<PropMeta> Props { get; init; }
+
+        public string TagName { get; init; }
+    }
+
+    record PropMeta
+    {
+        public ValueTypes ValueType { get; init; }
+
+        public string Name { get; init; }
     }
 
     record MessagingInfo

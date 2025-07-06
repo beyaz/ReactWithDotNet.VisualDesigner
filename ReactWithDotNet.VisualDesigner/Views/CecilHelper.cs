@@ -5,7 +5,7 @@ namespace ReactWithDotNet.VisualDesigner.Views;
 
 static class CecilHelper
 {
-    public static IReadOnlyList<string> GetPropertyPathList(string assemblyPath, string typeFullName, Func<PropertyDefinition, bool> matchFunc)
+    public static IReadOnlyList<string> GetPropertyPathList(string assemblyPath, string typeFullName, string prefix, Func<PropertyDefinition, bool> matchFunc)
     {
         var assembly = AssemblyDefinition.ReadAssembly(assemblyPath);
         if (assembly is null)
@@ -19,7 +19,7 @@ static class CecilHelper
             return [];
         }
 
-        return FindStringProperties(type, string.Empty, matchFunc);
+        return FindStringProperties(type, prefix, matchFunc);
 
         static IReadOnlyList<string> FindStringProperties(TypeDefinition type, string prefix, Func<PropertyDefinition, bool> matchFunc)
         {
