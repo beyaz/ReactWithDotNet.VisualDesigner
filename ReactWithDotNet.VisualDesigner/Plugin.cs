@@ -95,7 +95,7 @@ static class Plugin
                 }
             ]
         },
-        
+
         new()
         {
             TagName = "BDigitalDialog",
@@ -269,7 +269,7 @@ static class Plugin
                     }
                 }
             }
-            
+
             foreach (var item in stringSuggestions)
             {
                 returnList.Add($"d-text: \"{item}\"");
