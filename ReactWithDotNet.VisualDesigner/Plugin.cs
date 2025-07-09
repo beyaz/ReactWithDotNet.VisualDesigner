@@ -7,11 +7,10 @@ namespace ReactWithDotNet.VisualDesigner;
 
 sealed record PropSuggestionScope
 {
-    public string TagName { get; init; }
+    public ComponentEntity Component { get; init; }
 
     public Maybe<ComponentEntity> SelectedComponent { get; init; }
-
-    public ComponentEntity Component { get; init; }
+    public string TagName { get; init; }
 }
 
 static class Plugin
@@ -39,6 +38,12 @@ static class Plugin
                 {
                     Name      = "maxLength",
                     ValueType = ValueTypes.Number
+                },
+                new()
+                {
+                    Name        = "autoComplete",
+                    ValueType   = ValueTypes.String,
+                    Suggestions = ["off", "on"]
                 }
             ]
         },
@@ -145,7 +150,7 @@ static class Plugin
                 }
             ]
         },
-        
+
         new()
         {
             TagName = "BDigitalBox",
@@ -264,6 +269,8 @@ static class Plugin
 
             foreach (var prop in from m in ComponentsMeta where m.TagName == scope.TagName from p in m.Props select p)
             {
+                returnList.InsertRange(0, prop.Suggestions ?? []);
+
                 switch (prop.ValueType)
                 {
                     case ValueTypes.String:
@@ -373,15 +380,15 @@ static class Plugin
 
     record PropMeta
     {
-        public ValueTypes ValueType { get; init; }
-
         public string Name { get; init; }
+
+        public IReadOnlyList<string> Suggestions { get; init; }
+        public ValueTypes ValueType { get; init; }
     }
 
     record MessagingInfo
     {
-        public string PropertyName { get; init; }
-
         public string Description { get; init; }
+        public string PropertyName { get; init; }
     }
 }
