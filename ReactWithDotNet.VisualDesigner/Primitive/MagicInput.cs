@@ -1,5 +1,4 @@
-﻿
-namespace ReactWithDotNet.VisualDesigner.Primitive;
+﻿namespace ReactWithDotNet.VisualDesigner.Primitive;
 
 delegate Task InputChangeHandler(string senderName, string newValue);
 
@@ -17,9 +16,9 @@ sealed class MagicInput : Component<MagicInput.State>
     public bool IsBold { get; init; }
     public bool IsTextAlignCenter { get; init; }
     public bool IsTextAlignRight { get; init; }
+
+    public Func<string, Element> ItemRender { get; set; }
     public required string Name { get; init; }
-    
-    public Func<string,Element> ItemRender { get; set; }
 
     [CustomEvent]
     public InputChangeHandler OnChange { get; init; }
@@ -91,7 +90,7 @@ sealed class MagicInput : Component<MagicInput.State>
 
     Task CloseSuggestion()
     {
-        state.ShowSuggestions = false;
+        state = state with { ShowSuggestions = false };
 
         return Task.CompletedTask;
     }
@@ -105,7 +104,7 @@ sealed class MagicInput : Component<MagicInput.State>
             InitialValue = Value,
 
             Value = Value,
-            
+
             IgnoreTypingFinishedEvent = state?.IgnoreTypingFinishedEvent ?? false,
 
             FilteredSuggestions = Suggestions ?? []
@@ -130,17 +129,17 @@ sealed class MagicInput : Component<MagicInput.State>
     [StopPropagation]
     Task OnInputClicked(MouseEvent e)
     {
-        state.ShowSuggestions = false;
+        state = state with { ShowSuggestions = false };
 
         return Task.CompletedTask;
     }
 
-    [KeyboardEventCallOnly("ArrowDown", "ArrowUp", "Enter", "CTRL+ArrowRight", "CTRL+S","CTRL+s")]
+    [KeyboardEventCallOnly("ArrowDown", "ArrowUp", "Enter", "CTRL+ArrowRight", "CTRL+S", "CTRL+s")]
     Task OnKeyDown(KeyboardEvent e)
     {
         if (!state.ShowSuggestions)
         {
-            state.ShowSuggestions = true;
+            state = state with { ShowSuggestions = true };
 
             if (state.SelectedSuggestionOffset >= 0)
             {
@@ -151,7 +150,7 @@ sealed class MagicInput : Component<MagicInput.State>
         var suggestions = state.FilteredSuggestions ?? [];
         if (suggestions.Count == 0)
         {
-            state.ShowSuggestions = false;
+            state = state with { ShowSuggestions = false };
 
             if (e.key == "Enter")
             {
@@ -166,33 +165,58 @@ sealed class MagicInput : Component<MagicInput.State>
 
         if (e.key == "ArrowDown")
         {
-            state.SelectedSuggestionOffset ??= -1;
-
-            state.SelectedSuggestionOffset++;
+            if (state.SelectedSuggestionOffset.HasValue)
+            {
+                state = state with
+                {
+                    SelectedSuggestionOffset = state.SelectedSuggestionOffset.Value + 1
+                };
+            }
+            else
+            {
+                state = state with
+                {
+                    SelectedSuggestionOffset = 0
+                };
+            }
 
             if (state.SelectedSuggestionOffset >= suggestions.Count)
             {
-                state.SelectedSuggestionOffset = suggestions.Count - 1;
+                state = state with { SelectedSuggestionOffset = suggestions.Count - 1 };
             }
         }
 
         if (e.key == "ArrowUp")
         {
-            state.SelectedSuggestionOffset ??= 1;
-
-            state.SelectedSuggestionOffset--;
+            if (state.SelectedSuggestionOffset.HasValue)
+            {
+                state = state with
+                {
+                    SelectedSuggestionOffset = state.SelectedSuggestionOffset.Value - 1
+                };
+            }
+            else
+            {
+                state = state with
+                {
+                    SelectedSuggestionOffset = 0
+                };
+            }
 
             if (state.SelectedSuggestionOffset < 0)
             {
-                state.SelectedSuggestionOffset = 0;
+                state = state with
+                {
+                    SelectedSuggestionOffset = 0
+                };
             }
         }
 
-        if (e.key == "Enter" || ( e.ctrlKey && e.key is "S" or "s"))
+        if (e.key == "Enter" || (e.ctrlKey && e.key is "S" or "s"))
         {
-            state.ShowSuggestions = false;
+            state = state with { ShowSuggestions = false };
 
-            state.IgnoreTypingFinishedEvent = true;
+            state = state with { IgnoreTypingFinishedEvent = true };
 
             if (state.SelectedSuggestionOffset is null)
             {
@@ -206,7 +230,7 @@ sealed class MagicInput : Component<MagicInput.State>
 
             if (suggestions.Count > state.SelectedSuggestionOffset.Value)
             {
-                state.Value = suggestions[state.SelectedSuggestionOffset.Value];
+                state = state with { Value = suggestions[state.SelectedSuggestionOffset.Value] };
 
                 DispatchEvent(OnChange, [Name, state.Value]);
             }
@@ -218,9 +242,11 @@ sealed class MagicInput : Component<MagicInput.State>
             {
                 if (suggestions.Count > state.SelectedSuggestionOffset.Value)
                 {
-                    state.Value = suggestions[state.SelectedSuggestionOffset.Value];
-
-                    state.ShowSuggestions = false;
+                    state = state with
+                    {
+                        Value = suggestions[state.SelectedSuggestionOffset.Value],
+                        ShowSuggestions = false
+                    };
                 }
             }
         }
@@ -231,11 +257,12 @@ sealed class MagicInput : Component<MagicInput.State>
     [StopPropagation]
     Task OnSuggestionItemClicked(MouseEvent e)
     {
-        state.ShowSuggestions = false;
-
-        state.SelectedSuggestionOffset = int.Parse(e.target.data["INDEX"]);
-
-        state.Value = state.FilteredSuggestions[state.SelectedSuggestionOffset.Value];
+        state = state with
+        {
+            ShowSuggestions = false,
+            SelectedSuggestionOffset = int.Parse(e.target.data["INDEX"]),
+            Value = state.FilteredSuggestions[state.SelectedSuggestionOffset!.Value]
+        };
 
         DispatchEvent(OnChange, [Name, state.Value]);
 
@@ -246,22 +273,21 @@ sealed class MagicInput : Component<MagicInput.State>
     {
         if (state.IgnoreTypingFinishedEvent)
         {
-            state.IgnoreTypingFinishedEvent = false;
+            state = state with { IgnoreTypingFinishedEvent = false };
             return Task.CompletedTask;
         }
-        
-        state.ShowSuggestions = true;
 
-        state.SelectedSuggestionOffset = null;
-
-        state.FilteredSuggestions = Suggestions.Where(x => x.Replace(" ", string.Empty).Contains((state.Value + string.Empty).Replace(" ", string.Empty), StringComparison.OrdinalIgnoreCase))
-            .Take(5).ToList();
+        state = state with
+        {
+            ShowSuggestions = true,
+            SelectedSuggestionOffset = null,
+            FilteredSuggestions = Suggestions.Where(x => x.Replace(" ", string.Empty).Contains((state.Value + string.Empty).Replace(" ", string.Empty), StringComparison.OrdinalIgnoreCase))
+                .Take(5).ToList()
+        };
 
         return Task.CompletedTask;
     }
 
-    
-    
     Element ViewSuggestions()
     {
         if (!state.ShowSuggestions)
@@ -301,7 +327,7 @@ sealed class MagicInput : Component<MagicInput.State>
                 PaddingLeft(5),
                 Color(rgb(0, 6, 36)),
                 WhiteSpaceNormal, OverflowWrapAnywhere,
-                
+
                 CursorDefault,
 
                 Hover(Background(Gray100)),
@@ -311,20 +337,20 @@ sealed class MagicInput : Component<MagicInput.State>
         }
     }
 
-    internal class State
+    internal record State
     {
-        public IReadOnlyList<string> FilteredSuggestions { get; set; }
+        public IReadOnlyList<string> FilteredSuggestions { get; init; }
+
+        public bool IgnoreTypingFinishedEvent { get; init; }
 
         public required string InitialName { get; init; }
 
         public string InitialValue { get; init; }
 
-        public int? SelectedSuggestionOffset { get; set; }
+        public int? SelectedSuggestionOffset { get; init; }
 
-        public bool ShowSuggestions { get; set; }
+        public bool ShowSuggestions { get; init; }
 
-        public string Value { get; set; }
-        
-        public bool IgnoreTypingFinishedEvent { get; set; }
+        public string Value { get; init; }
     }
 }
