@@ -269,7 +269,7 @@ static class Plugin
 
             foreach (var prop in from m in ComponentsMeta where m.TagName == scope.TagName from p in m.Props select p)
             {
-                returnList.InsertRange(0, prop.Suggestions ?? []);
+                returnList.InsertRange(0, from item in prop.Suggestions ?? [] select $"{prop.Name}: \"{item}\"" );
 
                 switch (prop.ValueType)
                 {
