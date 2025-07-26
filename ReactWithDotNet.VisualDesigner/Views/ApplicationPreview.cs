@@ -81,7 +81,7 @@ sealed class ApplicationPreview : Component
             var result = await renderElement(renderContext, rootElement, "0");
             if (result.HasError)
             {
-                return new div(Size(200), Background(Gray100))
+                return new div(Background(Gray100))
                 {
                     result.Error.ToString()
                 };
