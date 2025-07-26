@@ -580,7 +580,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
         Element middle()
         {
-            return state.MainContentTab.In(MainContentTabs.Code,
+            return state.MainContentTab.In(MainContentTabs.Structure,
                                            MainContentTabs.ProjectConfig,
                                            MainContentTabs.ImportHtml,
                                            MainContentTabs.ComponentConfig,
@@ -678,7 +678,7 @@ sealed class ApplicationView : Component<ApplicationState>
             return;
         }
 
-        if (state.MainContentTab == MainContentTabs.Code)
+        if (state.MainContentTab == MainContentTabs.Structure)
         {
             // check has any edit
             if (state.MainContentText != SerializeToYaml(CurrentVisualElement))
@@ -945,10 +945,10 @@ sealed class ApplicationView : Component<ApplicationState>
                         },
                         new FlexRowCentered(Padding(4), Border(1, solid, transparent))
                         {
-                            "Code",
+                            "Structure",
                             OnClick(OnMainContentTabHeaderClicked),
-                            Id((int)MainContentTabs.Code),
-                            When(state.MainContentTab == MainContentTabs.Code, BorderRadius(4), Border(1, solid, Theme.BorderColor))
+                            Id((int)MainContentTabs.Structure),
+                            When(state.MainContentTab == MainContentTabs.Structure, BorderRadius(4), Border(1, solid, Theme.BorderColor))
                         },
                         new FlexRowCentered(Padding(4), Border(1, solid, transparent))
                         {
@@ -1999,7 +1999,7 @@ sealed class ApplicationView : Component<ApplicationState>
         {
             MainContentText = state.MainContentTab switch
             {
-                MainContentTabs.Code => SerializeToYaml(CurrentVisualElement),
+                MainContentTabs.Structure => SerializeToYaml(CurrentVisualElement),
 
                 MainContentTabs.ProjectConfig => (await Store.TryGetProject(state.ProjectId))?.ConfigAsYaml,
 

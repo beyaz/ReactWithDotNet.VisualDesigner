@@ -80,7 +80,7 @@ public enum LeftTabs
 
 public enum MainContentTabs
 {
-    Design, Code, ProjectConfig, ImportHtml, ComponentConfig, NewComponentConfig
+    Design, Structure, ProjectConfig, ImportHtml, ComponentConfig, NewComponentConfig
 }
 
 static class ApplicationStateMemoryCache
