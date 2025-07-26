@@ -20,18 +20,87 @@ static class Plugin
 
     class Components
     {
+        public static readonly IReadOnlyList<Type> AllTypes =
+        [
+            typeof(BTypography),
+            typeof(BDigitalGrid)
+        ];
+
+        public static IReadOnlyList<string> GetPropSuggestions(string tag)
+        {
+            if (tag == nameof(Components.BTypography))
+            {
+                return Components.BTypography.GetSuggestions();
+            }
+            
+            if (tag == nameof(Components.BDigitalGrid))
+            {
+                return Components.BDigitalGrid.GetSuggestions();
+            }
+
+            return [];
+        }
+        
         public sealed class BTypography : Component
         {
+            public string variant { get; set; }
+            
             protected override Element render()
             {
-                return new Typography();
+                return new Typography
+                {
+                    children = { children },
+                    variant = variant
+                };
+            }
+
+            public static IReadOnlyList<string> GetSuggestions()
+            {
+                return
+                [
+                    $"{nameof(variant)}: 'h1'",
+                    $"{nameof(variant)}: 'h2'",
+                    $"{nameof(variant)}: 'h3'",
+                    $"{nameof(variant)}: 'h4'",
+                    $"{nameof(variant)}: 'h5'",
+                    $"{nameof(variant)}: 'h6'"
+                ];
+            }
+        }
+        
+        public sealed class BDigitalGrid : Component
+        {
+            public bool? item { get; set; }
+            
+            public bool? container { get; set; }
+            
+            public string direction { get; set; }
+            
+            protected override Element render()
+            {
+                return new Grid
+                {
+                    children  = { children },
+                    direction = direction
+                };
+            }
+            
+            public static IReadOnlyList<string> GetSuggestions()
+            {
+                return
+                [
+                    $"{nameof(container)}: true",
+                    $"{nameof(item)}: true",
+                    $"{nameof(direction)}: 'column'",
+                    $"{nameof(direction)}: 'row'"
+                ];
             }
         }
     }
 
     public static IReadOnlyList<string> GetTagSuggestions()
     {
-        return [nameof(Components.BTypography)];
+        return Components.AllTypes.Select(t => t.Name).ToList();
     }
     
     static readonly IReadOnlyList<ComponentMeta> ComponentsMeta =
@@ -249,6 +318,8 @@ static class Plugin
                 }
             }
 
+            
+
             List<string> numberSuggestions =
             [
                 "2",
@@ -347,6 +418,8 @@ static class Plugin
                 returnList.Add($"d-text: \"{item}\"");
             }
 
+            returnList.InsertRange(0, Components.GetPropSuggestions(scope.TagName));
+            
             return returnList;
 
             static string getAssemblyFilePathByFullTypeName(string fullTypeName)
@@ -424,11 +497,12 @@ static class Plugin
 
     public static Element TryCreateElementForPreview(string tag)
     {
-        if (tag == nameof(Components.BTypography))
+        var type = Components.AllTypes.FirstOrDefault(t => t.Name == tag);
+        if (type is null)
         {
-            return new Components.BTypography();
+            return null;
         }
 
-        return null;
+        return (Element)Activator.CreateInstance(type);
     }
 }

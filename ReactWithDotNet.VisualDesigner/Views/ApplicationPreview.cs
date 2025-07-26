@@ -103,7 +103,7 @@ sealed class ApplicationPreview : Component
 
         static async Task<Result<Element>> renderElement(RenderPreviewScope scope, VisualElementModel model, string path)
         {
-            HtmlElement element = null;
+            Element element = null;
             {
                 TryGetHtmlElementTypeByTagName(model.Tag).HasValue(elementType => { element = (HtmlElement)Activator.CreateInstance(elementType); });
             }
@@ -149,21 +149,30 @@ sealed class ApplicationPreview : Component
                 }
             }
 
+            element ??= Plugin.TryCreateElementForPreview(model.Tag);
+            
             if (element is null)
             {
                 return new ArgumentException($"{model.Tag} is not resolved.");
             }
 
-            element.style.Add(UserSelect(none));
-
-            element.id = $"{path}";
-
-            element.onClick = scope.OnTreeItemClicked;
-
-            foreach (var text in tryCalculateText(scope, model))
             {
-                element.text = text;
+                if (element is HtmlElement htmlElement)
+                {
+                    htmlElement.style.Add(UserSelect(none));
+
+                    htmlElement.id = $"{path}";
+
+                    htmlElement.onClick = scope.OnTreeItemClicked;
+
+                    foreach (var text in tryCalculateText(scope, model))
+                    {
+                        htmlElement.text = text;
+                    }
+                }
             }
+            
+           
 
             model = model with
             {
@@ -214,14 +223,16 @@ sealed class ApplicationPreview : Component
             }
 
             // try to highlight
-            if (scope.HighlightedElementPath == path)
             {
-                if (element.id.HasNoValue())
+                if (scope.HighlightedElementPath == path && element is HtmlElement htmlElement)
                 {
-                    return new DeveloperException("Element.Id not set yet");
-                }
+                    if (htmlElement.id.HasNoValue())
+                    {
+                        return new DeveloperException("Element.Id not set yet");
+                    }
                 
-                scope.Client.RunJavascript(getJsCodeToHighlightElement(element.id));
+                    scope.Client.RunJavascript(getJsCodeToHighlightElement(htmlElement.id));
+                }
             }
 
             if (model.HasNoChild())
@@ -555,7 +566,7 @@ sealed class ApplicationPreview : Component
 
                     if (propName == "class")
                     {
-                        data.element.AddClass(propValue);
+                        (data.element as HtmlElement)?.AddClass(propValue);
                         return data with { IsProcessed = true };
                     }
 
@@ -887,7 +898,7 @@ sealed record RenderPreviewScope
 
 sealed record PropertyProcessScope
 {
-    public HtmlElement element { get; init; }
+    public Element element { get; init; }
     public VisualElementModel model { get; init; }
     public string propName { get; init; }
     public string propValue { get; init; }
