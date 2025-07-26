@@ -421,4 +421,14 @@ static class Plugin
         public string Description { get; init; }
         public string PropertyName { get; init; }
     }
+
+    public static Element TryCreateElementForPreview(string tag)
+    {
+        if (tag == nameof(Components.BTypography))
+        {
+            return new Components.BTypography();
+        }
+
+        return null;
+    }
 }
