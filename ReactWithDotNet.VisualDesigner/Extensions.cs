@@ -203,20 +203,24 @@ static class Extensions
         ];
     }
 
-    public static Element EditorFontLinks()
+    public static Element EditorFontLinks(ReactContext context)
     {
         return new Fragment
         {
-            new link { href = "https://fonts.googleapis.com", rel = "preconnect" },
-
-            new link { href = "https://fonts.gstatic.com", rel = "preconnect", crossOrigin = "true" },
-
-            new link { href = "https://fonts.googleapis.com/css2?family=Wix+Madefor+Text:ital,wght@0,400..800;1,400..800&display=swap", rel = "stylesheet" },
-            new link
+            new style
             {
-                href = "https://fonts.cdnfonts.com/css/ibm-plex-mono-3",
-                rel  = "stylesheet"
-            }
+                 $@"
+
+                @font-face {{
+                  font-family: 'Wix Madefor Text';
+                  src: url('{context.wwwroot}/fonts/WixMadeforText-Regular.woff2') format('woff2');
+                  font-weight: normal;
+                  font-style: normal;
+                  font-display: swap;
+                }}
+
+                "
+            },
         };
     }
 

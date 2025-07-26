@@ -66,12 +66,6 @@ sealed class MainLayout : PureComponent, IPageLayout
                     """
                 },
 
-                
-
-              
-
-                arrangeFonts(),
-
                 new link { href = "https://fonts.googleapis.com/icon?family=Material+Icons", rel = "stylesheet" },
 
                 new script { src = "https://cdn.tailwindcss.com" },
@@ -83,23 +77,7 @@ sealed class MainLayout : PureComponent, IPageLayout
                 new div(Id(ContainerDomElementId), SizeFull)
             }
         };
-
-        IEnumerable<Element> arrangeFonts()
-        {
-            return
-            [
-                new link { href = "https://fonts.gstatic.com", rel = "preconnect" },
-
-                new link { href = "https://fonts.googleapis.com", rel = "preconnect" },
-
-                new link { href = "https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap", rel = "stylesheet" },
-
-                new link { href = "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&family=Wix+Madefor+Text:ital,wght@0,400..800;1,400..800&display=swap", rel = "stylesheet" },
-
-                new link { href = "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Wix+Madefor+Text:ital,wght@0,400..800;1,400..800&display=swap", rel = "stylesheet" }
-            ];
-        }
-
+        
         Element ElementIndicators()
         {
             var isPreviewPage = Context.HttpContext.Request.GetDisplayUrl().EndsWith(Page.VisualDesignerPreview.Url, StringComparison.OrdinalIgnoreCase);

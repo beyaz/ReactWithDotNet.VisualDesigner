@@ -144,7 +144,7 @@ sealed class ApplicationView : Component<ApplicationState>
     {
         return new FlexRow(Padding(10), SizeFull, Background(Theme.BackgroundColor))
         {
-            EditorFontLinks,
+            EditorFontLinks(Context),
             EditorFont(),
             new FlexColumn
             {
