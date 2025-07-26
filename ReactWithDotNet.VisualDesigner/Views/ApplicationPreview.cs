@@ -216,9 +216,12 @@ sealed class ApplicationPreview : Component
             // try to highlight
             if (scope.HighlightedElementPath == path)
             {
-                element.id ??= Guid.NewGuid().ToString("N");
-
-                scope.Client.RunJavascript(getJsCodeToHighlightElement(element.id ??= Guid.NewGuid().ToString("N")));
+                if (element.id.HasNoValue())
+                {
+                    return new DeveloperException("Element.Id not set yet");
+                }
+                
+                scope.Client.RunJavascript(getJsCodeToHighlightElement(element.id));
             }
 
             if (model.HasNoChild())
