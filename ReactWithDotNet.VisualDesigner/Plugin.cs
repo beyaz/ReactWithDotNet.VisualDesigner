@@ -19,6 +19,19 @@ static class Plugin
 
     static readonly IReadOnlyList<ComponentMeta> ComponentsMeta =
     [
+        
+        new()
+        {
+            TagName = "BasePage",
+            Props =
+            [
+                new()
+                {
+                    Name      = "pageTitle",
+                    ValueType = ValueTypes.String
+                }
+            ]
+        },
         new()
         {
             TagName = "BInput",
