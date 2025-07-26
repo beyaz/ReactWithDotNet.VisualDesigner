@@ -780,6 +780,16 @@ sealed class ApplicationPreview : Component
                         propertyInfo.SetValue(element, (UnionProp<string, double>)propValue);
                         return data with { IsProcessed = true };
                     }
+                    
+                    if (propertyInfo.PropertyType == typeof(bool) || propertyInfo.PropertyType == typeof(bool?))
+                    {
+                        if (bool.TryParse(TryClearStringValue(propValue), out var result))
+                        {
+                            propertyInfo.SetValue(element, result);
+                        }
+                        
+                        return data with { IsProcessed = true };
+                    }
 
                     return data;
                 }

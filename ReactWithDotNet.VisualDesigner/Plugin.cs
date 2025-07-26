@@ -425,7 +425,7 @@ static class Plugin
             return [];
         }
 
-        public sealed class BDigitalGrid : Component
+        sealed class BDigitalGrid : Component
         {
             public bool? container { get; set; }
 
@@ -453,7 +453,7 @@ static class Plugin
             }
         }
 
-        public sealed class BTypography : Component
+        sealed class BTypography : Component
         {
             public string variant { get; set; }
 
