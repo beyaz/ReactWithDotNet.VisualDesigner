@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using System.Reflection;
 using Dapper;
 using Microsoft.Data.SqlClient;
 using ReactWithDotNet.ThirdPartyLibraries.MUI.Material;
@@ -353,7 +354,7 @@ static class Plugin
 
     public static Element TryCreateElementForPreview(string tag)
     {
-        var type = Components.AllTypes.FirstOrDefault(t => t.Name == tag);
+        var type = Components.AllTypes.FirstOrDefault(t => t.Name.Equals(tag, StringComparison.OrdinalIgnoreCase));
         if (type is null)
         {
             return null;
@@ -407,24 +408,102 @@ static class Plugin
         public static readonly IReadOnlyList<Type> AllTypes =
         [
             typeof(BTypography),
-            typeof(BDigitalGrid)
+            typeof(BDigitalGrid),
+            typeof(BasePage),
+            typeof(BDigitalGroupView),
+            typeof(BDigitalBox)
         ];
 
         public static IReadOnlyList<string> GetPropSuggestions(string tag)
         {
-            if (tag == nameof(BTypography))
+            var type = Components.AllTypes.FirstOrDefault(t => t.Name.Equals(tag, StringComparison.OrdinalIgnoreCase));
+            if (type is null)
             {
-                return BTypography.GetSuggestions();
+                return [];
             }
 
-            if (tag == nameof(BDigitalGrid))
+            var methodInfo = type.GetMethod(nameof(GetPropSuggestions), BindingFlags.Static | BindingFlags.Public);
+            if (methodInfo is null)
             {
-                return BDigitalGrid.GetSuggestions();
+                return [];
             }
 
-            return [];
+            return (IReadOnlyList<string>)methodInfo.Invoke(null, []);
         }
 
+        sealed class BasePage : Component
+        {
+            public string pageTitle { get; set; }
+
+            public static IReadOnlyList<string> GetSuggestions()
+            {
+                return
+                [
+               
+                ];
+            }
+
+            protected override Element render()
+            {
+                return new FlexColumn()
+                {
+                    children  =
+                    {
+                        new div{ pageTitle },
+                        children
+                    }
+                   
+                };
+            }
+        }
+        
+        sealed class BDigitalGroupView : Component
+        {
+            public string title { get; set; }
+
+            public static IReadOnlyList<string> GetSuggestions()
+            {
+                return
+                [
+               
+                ];
+            }
+
+            protected override Element render()
+            {
+                return new FlexColumn()
+                {
+                    children  =
+                    {
+                        new div{ title },
+                        children
+                    }
+                   
+                };
+            }
+        }
+        
+        
+        sealed class BDigitalBox : Component
+        {
+            public string styleContext { get; set; }
+            
+            public static IReadOnlyList<string> GetSuggestions()
+            {
+                return
+                [
+                    $"{nameof(styleContext)}: 'noMargin'"
+                ];
+            }
+
+            protected override Element render()
+            {
+                return new Grid
+                {
+                    children  = { children }
+                };
+            }
+        }
         sealed class BDigitalGrid : Component
         {
             public bool? container { get; set; }

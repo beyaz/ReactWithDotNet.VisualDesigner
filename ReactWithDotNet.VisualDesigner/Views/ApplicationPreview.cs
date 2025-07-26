@@ -386,7 +386,7 @@ sealed class ApplicationPreview : Component
 
             static bool isUnknownValue(string value)
             {
-                if (value.StartsWith("props.", StringComparison.OrdinalIgnoreCase))
+                if (value?.StartsWith("props.", StringComparison.OrdinalIgnoreCase) is true)
                 {
                     return true;
                 }

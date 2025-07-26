@@ -1792,7 +1792,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
                                 TryParseProperty(nameValue).HasValue(parseResult =>
                                 {
-                                    var startIndex = nameValue.LastIndexOf(parseResult.Value, StringComparison.OrdinalIgnoreCase);
+                                    var startIndex = nameValue.LastIndexOf(parseResult.Value ?? string.Empty, StringComparison.OrdinalIgnoreCase);
                                     var endIndex = nameValue.Length;
 
                                     jsCode.AppendLine($"document.getElementById('{id}').setSelectionRange({startIndex}, {endIndex});");
