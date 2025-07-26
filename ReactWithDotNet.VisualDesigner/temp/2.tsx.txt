@@ -1,0 +1,144 @@
+import React, { useState } from "react";
+import { BasePage, useMessage, useStore, useDevice, useNav } from "b-digital-framework";
+import { useApplicationContext } from "b-boa-base";
+import { moduleLogger } from "b-log";
+import { BDigitalGroupView } from "b-digital-group-view";
+import { BDigitalGrid } from "b-digital-grid";
+import { BTypography } from "b-core-typography";
+import { BIcon } from "b-icon";
+import { BAlert } from 'b-core-alert';
+
+import { GetPaymentLinkViewPreDataClientRequest } from "../../../types";
+import { useMobilePosService } from "../../../services/useMobilePosService";
+import { PaymentByLinkModel } from "../../../models";
+
+export const PaymentViewLink = () => {
+    const { getMessage } = useMessage("POSPortal");
+    const logger = moduleLogger("POSPortalLogger");
+    const context = useApplicationContext();
+    const store = useStore();
+
+    const { getPaymentLinkViewPreData } = useMobilePosService();
+
+    const [model] = React.useState<PaymentByLinkModel>((store?.transactionContext?.data as PaymentByLinkModel));
+
+    const [amount, setAmount] = React.useState<number | undefined>(undefined);
+    const [fecCode, setFecCode] = React.useState<string | undefined>(undefined);
+    const [qrCodeImageBlobUrl, setQrCodeImageBlobUrl] = React.useState<string | string>(undefined);
+    const [paymentUrl, setPaymentUrl] = React.useState<string | string>(undefined);
+
+    const [paymentStatusMessage, setPaymentStatusMessage] = useState<string | undefined>(undefined);
+
+    var iconTimer = BIcon.getIcon(
+        {
+            dynamicIcon: 'TimerRounded',
+            iconProperties:
+            {
+                viewBox: "0,0,24,20",
+                htmlcolor: context.theme.boaPalette.pri500,
+                style: {
+                    width: 22,
+                    height: 22
+                }
+            }
+        });
+
+    var iconCopy = BIcon.getIcon(
+        {
+            symbol: 'content_copy',
+            size: 22,
+            type: 'outlined',
+            color: context.theme.boaPalette.pri500
+        }
+    );
+
+    React.useEffect(() => {
+        logger.info("PaymentViewLink page mounted info log");
+
+        const controller = new AbortController();
+        setPaymentStatusMessage(getMessage("TRQRPaymentStatusPending"))
+
+        const handlePaymentLinkViewPreData = async (controller: AbortController) => {
+            logger.info("Fetching payment link view pre-data with payment token:" + model.paymentToken);
+            var getPaymentLinkViewPreDataRequest: GetPaymentLinkViewPreDataClientRequest = {
+                paymentToken: model?.paymentToken,
+            };
+
+            var getPaymentLinkViewPreDataResponse = await getPaymentLinkViewPreData.send(getPaymentLinkViewPreDataRequest, controller.signal);
+            if (!getPaymentLinkViewPreDataResponse.success) {
+                logger.error("Failed to fetch data:", getPaymentLinkViewPreDataResponse.result);
+                return;
+            }
+
+            setAmount(getPaymentLinkViewPreDataResponse.amount);
+            setFecCode(getPaymentLinkViewPreDataResponse.fecCode);
+            setPaymentUrl(getPaymentLinkViewPreDataResponse.paymentUrl);
+
+            const byteCharacters = atob(getPaymentLinkViewPreDataResponse.qrCodeImageBase64);
+            const byteNumbers = new Array(byteCharacters.length);
+            for (let i = 0; i < byteCharacters.length; i++) {
+                byteNumbers[i] = byteCharacters.charCodeAt(i);
+            }
+            const byteArray = new Uint8Array(byteNumbers);
+            const blob = new Blob([byteArray], { type: "image/png" });
+
+            setQrCodeImageBlobUrl(URL.createObjectURL(blob));
+        };
+
+        handlePaymentLinkViewPreData(controller).catch((error) => {
+            if (error.name !== "AbortError") {
+                logger.error("Failed to fetch data:", error);
+            }
+        });
+
+    }, []);
+    
+    return (
+        <BasePage pageTitle={getMessage("PaymentByLinkPageTitle")} >
+            <BDigitalGroupView>
+                <BDigitalGrid container direction="column" justifyContent="flex-start" alignItems="center" spacing={2}>
+                    <BDigitalGrid item>
+                        <BTypography variant="h5" style={{ color: context.theme.boaPalette.pri500 }}><b>{amount?.toFixed(2)} {fecCode}</b></BTypography>
+                    </BDigitalGrid>
+                    <BDigitalGrid item>
+                        <BTypography variant="body0b"><b>{paymentStatusMessage}</b></BTypography>
+                    </BDigitalGrid>
+                    <BDigitalGrid item>
+                        <BTypography variant="body1" style={{ textAlign: "center" }}>{getMessage("YouCanShareThisPaymentUrlOrQrCode")}</BTypography>
+                    </BDigitalGrid>
+                    <BDigitalGrid item>
+                        <img src={qrCodeImageBlobUrl} alt="QR Code" />
+                    </BDigitalGrid>
+                    <BDigitalGrid item container direction="row" justifyContent="center" alignItems="center">
+                        <BDigitalGrid item>
+                            <BTypography variant="body1" style={{ textAlign: "center" }}>{iconTimer} {getMessage("RemotePaymentLink1")} <b>{getMessage("LinkTime")}</b> {getMessage("RemotePaymentLink2")}</BTypography>
+                        </BDigitalGrid>
+                    </BDigitalGrid>
+                    <BDigitalGrid item container direction="row" justifyContent="center" alignItems="center">
+                        <BDigitalGrid item>
+                            <BTypography variant="body1" style={{ textAlign: "center", paddingRight: '6px' }}>
+                                <a
+                                    href={paymentUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    style={{ color: context.theme.boaPalette.pri500, textDecoration: "underline", wordBreak: 'break-word' }}
+                                >
+                                    {paymentUrl}
+                                </a>
+                                <span
+                                    onClick={() => navigator.clipboard.writeText(paymentUrl)}
+                                    style={{ color: context.theme.boaPalette.pri500, cursor: "pointer", padding: '8px' }}
+                                >
+                                    {iconCopy}
+                                </span>
+                            </BTypography>
+                        </BDigitalGrid>
+                    </BDigitalGrid>
+                </BDigitalGrid>
+            </BDigitalGroupView>
+            <BDigitalGrid justifyContent="flex-start" alignItems="center" spacing={2}>
+                <BAlert variant="standard" severity="info">{getMessage("QRCodeInformation")}</BAlert>
+            </BDigitalGrid>
+        </BasePage >
+    );
+};
