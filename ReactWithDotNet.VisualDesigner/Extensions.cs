@@ -209,17 +209,17 @@ static class Extensions
         {
             new style
             {
-                 $@"
-
-                @font-face {{
-                  font-family: 'Wix Madefor Text';
-                  src: url('{context.wwwroot}/fonts/WixMadeforText-Regular.woff2') format('woff2');
-                  font-weight: normal;
-                  font-style: normal;
-                  font-display: swap;
-                }}
-
-                "
+                $$"""
+                  
+                  @font-face {
+                    font-family: 'Wix Madefor Text';
+                    src: url('{{context.wwwroot}}/fonts/WixMadeforText-Regular.woff2') format('woff2');
+                    font-weight: normal;
+                    font-style: normal;
+                    font-display: swap;
+                  }
+                                  
+                  """
             },
         };
     }
