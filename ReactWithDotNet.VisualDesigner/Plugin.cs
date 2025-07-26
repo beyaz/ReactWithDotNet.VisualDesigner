@@ -18,94 +18,8 @@ static class Plugin
 {
     const string BOA_MessagingByGroupName = "BOA.MessagingByGroupName";
 
-    class Components
-    {
-        public static readonly IReadOnlyList<Type> AllTypes =
-        [
-            typeof(BTypography),
-            typeof(BDigitalGrid)
-        ];
-
-        public static IReadOnlyList<string> GetPropSuggestions(string tag)
-        {
-            if (tag == nameof(Components.BTypography))
-            {
-                return Components.BTypography.GetSuggestions();
-            }
-            
-            if (tag == nameof(Components.BDigitalGrid))
-            {
-                return Components.BDigitalGrid.GetSuggestions();
-            }
-
-            return [];
-        }
-        
-        public sealed class BTypography : Component
-        {
-            public string variant { get; set; }
-            
-            protected override Element render()
-            {
-                return new Typography
-                {
-                    children = { children },
-                    variant = variant
-                };
-            }
-
-            public static IReadOnlyList<string> GetSuggestions()
-            {
-                return
-                [
-                    $"{nameof(variant)}: 'h1'",
-                    $"{nameof(variant)}: 'h2'",
-                    $"{nameof(variant)}: 'h3'",
-                    $"{nameof(variant)}: 'h4'",
-                    $"{nameof(variant)}: 'h5'",
-                    $"{nameof(variant)}: 'h6'"
-                ];
-            }
-        }
-        
-        public sealed class BDigitalGrid : Component
-        {
-            public bool? item { get; set; }
-            
-            public bool? container { get; set; }
-            
-            public string direction { get; set; }
-            
-            protected override Element render()
-            {
-                return new Grid
-                {
-                    children  = { children },
-                    direction = direction
-                };
-            }
-            
-            public static IReadOnlyList<string> GetSuggestions()
-            {
-                return
-                [
-                    $"{nameof(container)}: true",
-                    $"{nameof(item)}: true",
-                    $"{nameof(direction)}: 'column'",
-                    $"{nameof(direction)}: 'row'"
-                ];
-            }
-        }
-    }
-
-    public static IReadOnlyList<string> GetTagSuggestions()
-    {
-        return Components.AllTypes.Select(t => t.Name).ToList();
-    }
-    
     static readonly IReadOnlyList<ComponentMeta> ComponentsMeta =
     [
-        
         new()
         {
             TagName = "BasePage",
@@ -318,8 +232,6 @@ static class Plugin
                 }
             }
 
-            
-
             List<string> numberSuggestions =
             [
                 "2",
@@ -370,7 +282,7 @@ static class Plugin
 
             foreach (var prop in from m in ComponentsMeta where m.TagName == scope.TagName from p in m.Props select p)
             {
-                returnList.InsertRange(0, from item in prop.Suggestions ?? [] select $"{prop.Name}: \"{item}\"" );
+                returnList.InsertRange(0, from item in prop.Suggestions ?? [] select $"{prop.Name}: \"{item}\"");
 
                 switch (prop.ValueType)
                 {
@@ -419,7 +331,7 @@ static class Plugin
             }
 
             returnList.InsertRange(0, Components.GetPropSuggestions(scope.TagName));
-            
+
             return returnList;
 
             static string getAssemblyFilePathByFullTypeName(string fullTypeName)
@@ -432,6 +344,22 @@ static class Plugin
                 return null;
             }
         }
+    }
+
+    public static IReadOnlyList<string> GetTagSuggestions()
+    {
+        return Components.AllTypes.Select(t => t.Name).ToList();
+    }
+
+    public static Element TryCreateElementForPreview(string tag)
+    {
+        var type = Components.AllTypes.FirstOrDefault(t => t.Name == tag);
+        if (type is null)
+        {
+            return null;
+        }
+
+        return (Element)Activator.CreateInstance(type);
     }
 
     static Task<IReadOnlyList<MessagingInfo>> GetMessagingByGroupName(string messagingGroupName)
@@ -474,6 +402,85 @@ static class Plugin
         }
     }
 
+    class Components
+    {
+        public static readonly IReadOnlyList<Type> AllTypes =
+        [
+            typeof(BTypography),
+            typeof(BDigitalGrid)
+        ];
+
+        public static IReadOnlyList<string> GetPropSuggestions(string tag)
+        {
+            if (tag == nameof(BTypography))
+            {
+                return BTypography.GetSuggestions();
+            }
+
+            if (tag == nameof(BDigitalGrid))
+            {
+                return BDigitalGrid.GetSuggestions();
+            }
+
+            return [];
+        }
+
+        public sealed class BDigitalGrid : Component
+        {
+            public bool? container { get; set; }
+
+            public string direction { get; set; }
+            public bool? item { get; set; }
+
+            public static IReadOnlyList<string> GetSuggestions()
+            {
+                return
+                [
+                    $"{nameof(container)}: true",
+                    $"{nameof(item)}: true",
+                    $"{nameof(direction)}: 'column'",
+                    $"{nameof(direction)}: 'row'"
+                ];
+            }
+
+            protected override Element render()
+            {
+                return new Grid
+                {
+                    children  = { children },
+                    direction = direction
+                };
+            }
+        }
+
+        public sealed class BTypography : Component
+        {
+            public string variant { get; set; }
+
+            public static IReadOnlyList<string> GetSuggestions()
+            {
+                return
+                [
+                    $"{nameof(variant)}: 'h1'",
+                    $"{nameof(variant)}: 'h2'",
+                    $"{nameof(variant)}: 'h3'",
+                    $"{nameof(variant)}: 'h4'",
+                    $"{nameof(variant)}: 'h5'",
+                    $"{nameof(variant)}: 'h6'"
+                ];
+            }
+
+            protected override Element render()
+            {
+                return new Typography
+                {
+                    children = { children },
+                    variant  = variant
+                };
+            }
+        }
+    }
+
     record ComponentMeta
     {
         public IReadOnlyList<PropMeta> Props { get; init; }
@@ -493,16 +500,5 @@ static class Plugin
     {
         public string Description { get; init; }
         public string PropertyName { get; init; }
-    }
-
-    public static Element TryCreateElementForPreview(string tag)
-    {
-        var type = Components.AllTypes.FirstOrDefault(t => t.Name == tag);
-        if (type is null)
-        {
-            return null;
-        }
-
-        return (Element)Activator.CreateInstance(type);
     }
 }
