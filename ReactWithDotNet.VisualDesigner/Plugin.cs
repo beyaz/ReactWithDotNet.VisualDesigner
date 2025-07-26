@@ -1,6 +1,7 @@
 ﻿using System.Data;
 using Dapper;
 using Microsoft.Data.SqlClient;
+using ReactWithDotNet.ThirdPartyLibraries.MUI.Material;
 using ReactWithDotNet.VisualDesigner.Configuration;
 
 namespace ReactWithDotNet.VisualDesigner;
@@ -17,6 +18,22 @@ static class Plugin
 {
     const string BOA_MessagingByGroupName = "BOA.MessagingByGroupName";
 
+    class Components
+    {
+        public sealed class BTypography : Component
+        {
+            protected override Element render()
+            {
+                return new Typography();
+            }
+        }
+    }
+
+    public static IReadOnlyList<string> GetTagSuggestions()
+    {
+        return [nameof(Components.BTypography)];
+    }
+    
     static readonly IReadOnlyList<ComponentMeta> ComponentsMeta =
     [
         

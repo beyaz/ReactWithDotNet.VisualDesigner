@@ -335,13 +335,21 @@ static class ApplicationLogic
 
     public static IReadOnlyList<string> GetTagSuggestions(ApplicationState state)
     {
-        var suggestions = new List<string>(TagNameList);
+        var projectId = state.ProjectId;
+        
+        return Cache.AccessValue($"{nameof(GetTagSuggestions)}-{projectId}", () =>
+        {
+            var suggestions = new List<string>();
+            
+            suggestions.AddRange(Plugin.GetTagSuggestions());
+            
+            suggestions.AddRange(TagNameList);
 
-        suggestions.AddRange(from x in GetAllComponentsInProjectFromCache(state.ProjectId)
-                             where x.Id != state.ComponentId
-                             select x.GetNameWithExportFilePath());
+            suggestions.AddRange(from x in GetAllComponentsInProjectFromCache(projectId)
+                                 select x.GetNameWithExportFilePath());
 
-        return suggestions;
+            return suggestions;
+        });
     }
 
     public static async Task<string> GetTagText(string tag)
