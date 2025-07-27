@@ -873,7 +873,7 @@ sealed class ApplicationPreview : Component
     [SkipRender]
     Task OnItemClick(MouseEvent e)
     {
-        var visualElementTreeItemPath = e.target.id;
+        var visualElementTreeItemPath = e.currentTarget?.id ?? e.target.id;
 
         var sb = new StringBuilder();
 

@@ -447,7 +447,7 @@ static class Plugin
             public MouseEventHandler onMouseClick;
         }
 
-        sealed class BAlert : Component
+        sealed class BAlert : ComponentBase
         {
             public string severity { get; set; }
             public string variant { get; set; }
@@ -465,6 +465,7 @@ static class Plugin
             {
                 return new FlexRow(Gap(8), BackgroundColor("#e8f0fe"), Color("#1a73e8"), BorderRadius(10), Padding(12, 16), AlignItemsCenter, FontFamily("Arial, sans-serif"), FontSize14)
                 {
+                    Id(id), OnClick(onMouseClick),
                     new FlexRowCentered(Size(24))
                     {
                         new svg(ViewBox(0, 0, 24, 24), Fill(none), svg.Size(24))
