@@ -436,21 +436,22 @@ static class Plugin
         {
             public string pageTitle { get; set; }
 
-            public static IReadOnlyList<string> GetSuggestions()
+            public static IReadOnlyList<string> GetPropSuggestions()
             {
                 return
                 [
-               
+                    $"{nameof(pageTitle)}: '?'"
                 ];
             }
 
             protected override Element render()
             {
-                return new FlexColumn()
+                return new FlexColumn(Background(Gray100), WidthFull)
                 {
                     children  =
                     {
-                        new div{ pageTitle },
+                        new div(FontWeight600, FontSize18){ pageTitle },
+                        SpaceY(24),
                         children
                     }
                    
@@ -462,21 +463,21 @@ static class Plugin
         {
             public string title { get; set; }
 
-            public static IReadOnlyList<string> GetSuggestions()
+            public static IReadOnlyList<string> GetPropSuggestions()
             {
                 return
                 [
-               
+                    $"{nameof(title)}: '?'"
                 ];
             }
 
             protected override Element render()
             {
-                return new FlexColumn()
+                return new FlexColumn(Background(White), BorderRadius(8), Border(1,solid,Gray200), Padding(16))
                 {
                     children  =
                     {
-                        new div{ title },
+                        title is null ? null : new div{ title },
                         children
                     }
                    
@@ -489,7 +490,7 @@ static class Plugin
         {
             public string styleContext { get; set; }
             
-            public static IReadOnlyList<string> GetSuggestions()
+            public static IReadOnlyList<string> GetPropSuggestions()
             {
                 return
                 [
@@ -510,16 +511,44 @@ static class Plugin
             public bool? container { get; set; }
 
             public string direction { get; set; }
+            
             public bool? item { get; set; }
+            
+            public string justifyContent { get; set; }
+            
+            public string alignItems { get; set; }
+            
+            public int? spacing  { get; set; }
 
-            public static IReadOnlyList<string> GetSuggestions()
+            public static IReadOnlyList<string> GetPropSuggestions()
             {
                 return
                 [
                     $"{nameof(container)}: true",
                     $"{nameof(item)}: true",
                     $"{nameof(direction)}: 'column'",
-                    $"{nameof(direction)}: 'row'"
+                    $"{nameof(direction)}: 'row'",
+                    
+                    $"{nameof(justifyContent)}: 'flex-start'",
+                    $"{nameof(justifyContent)}: 'center'",
+                    $"{nameof(justifyContent)}: 'flex-end'",
+                    $"{nameof(justifyContent)}: 'space-between'",
+                    $"{nameof(justifyContent)}: 'space-around'",
+                    $"{nameof(justifyContent)}: 'space-evenly'",
+                    
+                    $"{nameof(alignItems)}: 'flex-start'",
+                    $"{nameof(alignItems)}: 'stretch'",
+                    $"{nameof(alignItems)}: 'flex-end'",
+                    $"{nameof(alignItems)}: 'center'",
+                    $"{nameof(alignItems)}: 'baseline'",
+                    
+                    $"{nameof(spacing)}: 1",
+                    $"{nameof(spacing)}: 2",
+                    $"{nameof(spacing)}: 3",
+                    $"{nameof(spacing)}: 4",
+                    $"{nameof(spacing)}: 5",
+                    $"{nameof(spacing)}: 6"
+                    
                 ];
             }
 
@@ -528,7 +557,13 @@ static class Plugin
                 return new Grid
                 {
                     children  = { children },
-                    direction = direction
+                    
+                    container = container,
+                    item = item,
+                    direction = direction,
+                    justifyContent = justifyContent,
+                    alignItems = alignItems,
+                    spacing = spacing
                 };
             }
         }
@@ -537,7 +572,7 @@ static class Plugin
         {
             public string variant { get; set; }
 
-            public static IReadOnlyList<string> GetSuggestions()
+            public static IReadOnlyList<string> GetPropSuggestions()
             {
                 return
                 [
@@ -546,7 +581,10 @@ static class Plugin
                     $"{nameof(variant)}: 'h3'",
                     $"{nameof(variant)}: 'h4'",
                     $"{nameof(variant)}: 'h5'",
-                    $"{nameof(variant)}: 'h6'"
+                    $"{nameof(variant)}: 'h6'",
+                    
+                    $"{nameof(variant)}: 'body0'",
+                    $"{nameof(variant)}: 'body1'"
                 ];
             }
 

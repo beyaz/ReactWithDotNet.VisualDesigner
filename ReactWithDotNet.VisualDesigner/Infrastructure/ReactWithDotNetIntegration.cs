@@ -125,6 +125,8 @@ public static class ReactWithDotNetIntegration
 
     static Task WriteHtmlResponse(HttpContext httpContext, Type layoutType, Type mainContentType)
     {
+        Cache.Clear();
+        
         httpContext.Response.ContentType = "text/html; charset=UTF-8";
 
         httpContext.Response.Headers[HeaderNames.CacheControl] = "no-cache, no-store, must-revalidate";

@@ -790,6 +790,16 @@ sealed class ApplicationPreview : Component
                         
                         return data with { IsProcessed = true };
                     }
+                    
+                    if (propertyInfo.PropertyType == typeof(int) || propertyInfo.PropertyType == typeof(int?))
+                    {
+                        if (int.TryParse(TryClearStringValue(propValue), out var result))
+                        {
+                            propertyInfo.SetValue(element, result);
+                        }
+                        
+                        return data with { IsProcessed = true };
+                    }
 
                     return data;
                 }
