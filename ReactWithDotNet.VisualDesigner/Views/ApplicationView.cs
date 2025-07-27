@@ -993,7 +993,7 @@ sealed class ApplicationView : Component<ApplicationState>
                 JustifyContentSpaceBetween,
                 AlignItemsCenter,
                 BorderBottom(Solid(1, Theme.BorderColor)),
-                Padding(5, 30)
+                Padding(8, 32)
             }
         };
     }
