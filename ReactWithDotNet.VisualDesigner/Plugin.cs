@@ -349,24 +349,25 @@ static class Plugin
 
     public static IReadOnlyList<string> GetTagSuggestions()
     {
-        return Components.AllTypes.Select(t => t.Name).ToList();
+        return Components.AllTypes.Select(x => x.type.Name).ToList();
     }
 
     public static Element TryCreateElementForPreview(string tag, string id, MouseEventHandler onMouseClick)
     {
-        var type = Components.AllTypes.FirstOrDefault(t => t.Name.Equals(tag, StringComparison.OrdinalIgnoreCase));
+        var type = Components.AllTypes.Select(x => x.type).FirstOrDefault(t => t.Name.Equals(tag, StringComparison.OrdinalIgnoreCase));
         if (type is null)
         {
             return null;
         }
 
-        var component =  (Element)Activator.CreateInstance(type);
+        var component = (Element)Activator.CreateInstance(type);
 
         if (component is Components.ComponentBase componentBase)
         {
             componentBase.id           = id;
             componentBase.onMouseClick = onMouseClick;
         }
+
         return component;
     }
 
@@ -412,25 +413,20 @@ static class Plugin
 
     class Components
     {
-        public class ComponentBase : Component
-        {
-            public string id;
-            public MouseEventHandler onMouseClick;
-        }
-        public static readonly IReadOnlyList<Type> AllTypes =
+        public static readonly IReadOnlyList<(Type type, Func<IReadOnlyList<string>> propSuggestions)> AllTypes =
         [
-            typeof(BTypography),
-            typeof(BDigitalGrid),
-            typeof(BasePage),
-            typeof(BDigitalGroupView),
-            typeof(BDigitalBox),
-            typeof(BAlert),
-            typeof(BIcon)
+            (typeof(BTypography), BTypography.GetPropSuggestions),
+            (typeof(BDigitalGrid), BDigitalGrid.GetPropSuggestions),
+            (typeof(BasePage), BasePage.GetPropSuggestions),
+            (typeof(BDigitalGroupView), BDigitalGroupView.GetPropSuggestions),
+            (typeof(BDigitalBox), BDigitalBox.GetPropSuggestions),
+            (typeof(BAlert), BAlert.GetPropSuggestions),
+            (typeof(BIcon), BIcon.GetPropSuggestions)
         ];
 
         public static IReadOnlyList<string> GetPropSuggestions(string tag)
         {
-            var type = Components.AllTypes.FirstOrDefault(t => t.Name.Equals(tag, StringComparison.OrdinalIgnoreCase));
+            var type = AllTypes.Select(x => x.type).FirstOrDefault(t => t.Name.Equals(tag, StringComparison.OrdinalIgnoreCase));
             if (type is null)
             {
                 return [];
@@ -444,184 +440,17 @@ static class Plugin
 
             return (IReadOnlyList<string>)methodInfo.Invoke(null, []);
         }
-        
-        sealed class BasePage : ComponentBase
+
+        public class ComponentBase : Component
         {
-            public string pageTitle { get; set; }
-
-            public static IReadOnlyList<string> GetPropSuggestions()
-            {
-                return
-                [
-                    $"{nameof(pageTitle)}: '?'"
-                ];
-            }
-
-            protected override Element render()
-            {
-                return new FlexColumn(Background(Gray100), WidthFull, Id(id), OnClick(onMouseClick))
-                {
-                    children  =
-                    {
-                        new div(FontWeight600, FontSize18, Id(id)){ pageTitle },
-                        SpaceY(24) + Id(id),
-                        children
-                    }
-                   
-                };
-            }
-        }
-        
-        sealed class BDigitalGroupView : ComponentBase
-        {
-            public string title { get; set; }
-
-            public static IReadOnlyList<string> GetPropSuggestions()
-            {
-                return
-                [
-                    $"{nameof(title)}: '?'"
-                ];
-            }
-
-            protected override Element render()
-            {
-                return new FlexColumn(Background(White), BorderRadius(8), Border(1,solid,Gray200), Padding(16), Id(id), OnClick(onMouseClick))
-                {
-                    children  =
-                    {
-                        title is null ? null : new div{ title },
-                        children
-                    }
-                   
-                };
-            }
-        }
-        
-        
-        sealed class BDigitalBox : Component
-        {
-            public string styleContext { get; set; }
-            
-            public static IReadOnlyList<string> GetPropSuggestions()
-            {
-                return
-                [
-                    $"{nameof(styleContext)}: 'noMargin'"
-                ];
-            }
-
-            protected override Element render()
-            {
-                return new Grid
-                {
-                    children  = { children }
-                };
-            }
-        }
-        sealed class BDigitalGrid : ComponentBase
-        {
-            public bool? container { get; set; }
-
-            public string direction { get; set; }
-            
-            public bool? item { get; set; }
-            
-            public string justifyContent { get; set; }
-            
-            public string alignItems { get; set; }
-            
-            public int? spacing  { get; set; }
-
-            public static IReadOnlyList<string> GetPropSuggestions()
-            {
-                return
-                [
-                    $"{nameof(container)}: true",
-                    $"{nameof(item)}: true",
-                    $"{nameof(direction)}: 'column'",
-                    $"{nameof(direction)}: 'row'",
-                    
-                    $"{nameof(justifyContent)}: 'flex-start'",
-                    $"{nameof(justifyContent)}: 'center'",
-                    $"{nameof(justifyContent)}: 'flex-end'",
-                    $"{nameof(justifyContent)}: 'space-between'",
-                    $"{nameof(justifyContent)}: 'space-around'",
-                    $"{nameof(justifyContent)}: 'space-evenly'",
-                    
-                    $"{nameof(alignItems)}: 'flex-start'",
-                    $"{nameof(alignItems)}: 'stretch'",
-                    $"{nameof(alignItems)}: 'flex-end'",
-                    $"{nameof(alignItems)}: 'center'",
-                    $"{nameof(alignItems)}: 'baseline'",
-                    
-                    $"{nameof(spacing)}: 1",
-                    $"{nameof(spacing)}: 2",
-                    $"{nameof(spacing)}: 3",
-                    $"{nameof(spacing)}: 4",
-                    $"{nameof(spacing)}: 5",
-                    $"{nameof(spacing)}: 6"
-                    
-                ];
-            }
-
-            protected override Element render()
-            {
-                return new Grid
-                {
-                    children  = { children },
-                    
-                    container = container,
-                    item = item,
-                    direction = direction,
-                    justifyContent = justifyContent,
-                    alignItems = alignItems,
-                    spacing = spacing,
-                    
-                    id = id,
-                    onClick = onMouseClick
-                };
-            }
+            public string id;
+            public MouseEventHandler onMouseClick;
         }
 
-        sealed class BTypography : ComponentBase
-        {
-            public string variant { get; set; }
-
-            public static IReadOnlyList<string> GetPropSuggestions()
-            {
-                return
-                [
-                    $"{nameof(variant)}: 'h1'",
-                    $"{nameof(variant)}: 'h2'",
-                    $"{nameof(variant)}: 'h3'",
-                    $"{nameof(variant)}: 'h4'",
-                    $"{nameof(variant)}: 'h5'",
-                    $"{nameof(variant)}: 'h6'",
-                    
-                    $"{nameof(variant)}: 'body0'",
-                    $"{nameof(variant)}: 'body1'"
-                ];
-            }
-
-            protected override Element render()
-            {
-                return new Typography
-                {
-                    children = { children },
-                    variant  = variant,
-                    
-                    id      = id,
-                    onClick = onMouseClick
-                };
-            }
-        }
-        
         sealed class BAlert : Component
         {
-            public string variant { get; set; }
-            
             public string severity { get; set; }
+            public string variant { get; set; }
 
             public static IReadOnlyList<string> GetPropSuggestions()
             {
@@ -666,11 +495,146 @@ static class Plugin
                 };
             }
         }
-        
-         sealed class BIcon : ComponentBase
+
+        sealed class BasePage : ComponentBase
+        {
+            public string pageTitle { get; set; }
+
+            public static IReadOnlyList<string> GetPropSuggestions()
+            {
+                return
+                [
+                    $"{nameof(pageTitle)}: '?'"
+                ];
+            }
+
+            protected override Element render()
+            {
+                return new FlexColumn(Background(Gray100), WidthFull, Id(id), OnClick(onMouseClick))
+                {
+                    children =
+                    {
+                        new div(FontWeight600, FontSize18, Id(id)) { pageTitle },
+                        SpaceY(24) + Id(id),
+                        children
+                    }
+                };
+            }
+        }
+
+        sealed class BDigitalBox : Component
+        {
+            public string styleContext { get; set; }
+
+            public static IReadOnlyList<string> GetPropSuggestions()
+            {
+                return
+                [
+                    $"{nameof(styleContext)}: 'noMargin'"
+                ];
+            }
+
+            protected override Element render()
+            {
+                return new Grid
+                {
+                    children = { children }
+                };
+            }
+        }
+
+        sealed class BDigitalGrid : ComponentBase
+        {
+            public string alignItems { get; set; }
+            public bool? container { get; set; }
+
+            public string direction { get; set; }
+
+            public bool? item { get; set; }
+
+            public string justifyContent { get; set; }
+
+            public int? spacing { get; set; }
+
+            public static IReadOnlyList<string> GetPropSuggestions()
+            {
+                return
+                [
+                    $"{nameof(container)}: true",
+                    $"{nameof(item)}: true",
+                    $"{nameof(direction)}: 'column'",
+                    $"{nameof(direction)}: 'row'",
+
+                    $"{nameof(justifyContent)}: 'flex-start'",
+                    $"{nameof(justifyContent)}: 'center'",
+                    $"{nameof(justifyContent)}: 'flex-end'",
+                    $"{nameof(justifyContent)}: 'space-between'",
+                    $"{nameof(justifyContent)}: 'space-around'",
+                    $"{nameof(justifyContent)}: 'space-evenly'",
+
+                    $"{nameof(alignItems)}: 'flex-start'",
+                    $"{nameof(alignItems)}: 'stretch'",
+                    $"{nameof(alignItems)}: 'flex-end'",
+                    $"{nameof(alignItems)}: 'center'",
+                    $"{nameof(alignItems)}: 'baseline'",
+
+                    $"{nameof(spacing)}: 1",
+                    $"{nameof(spacing)}: 2",
+                    $"{nameof(spacing)}: 3",
+                    $"{nameof(spacing)}: 4",
+                    $"{nameof(spacing)}: 5",
+                    $"{nameof(spacing)}: 6"
+                ];
+            }
+
+            protected override Element render()
+            {
+                return new Grid
+                {
+                    children = { children },
+
+                    container      = container,
+                    item           = item,
+                    direction      = direction,
+                    justifyContent = justifyContent,
+                    alignItems     = alignItems,
+                    spacing        = spacing,
+
+                    id      = id,
+                    onClick = onMouseClick
+                };
+            }
+        }
+
+        sealed class BDigitalGroupView : ComponentBase
+        {
+            public string title { get; set; }
+
+            public static IReadOnlyList<string> GetPropSuggestions()
+            {
+                return
+                [
+                    $"{nameof(title)}: '?'"
+                ];
+            }
+
+            protected override Element render()
+            {
+                return new FlexColumn(Background(White), BorderRadius(8), Border(1, solid, Gray200), Padding(16), Id(id), OnClick(onMouseClick))
+                {
+                    children =
+                    {
+                        title is null ? null : new div { title },
+                        children
+                    }
+                };
+            }
+        }
+
+        sealed class BIcon : ComponentBase
         {
             public string name { get; set; }
-            
+
             public static IReadOnlyList<string> GetPropSuggestions()
             {
                 return
@@ -687,10 +651,9 @@ static class Plugin
                     createSvg
                 };
             }
-            
+
             Element createSvg()
             {
-
                 if (name == "TimerRounded")
                 {
                     return new svg(ViewBox(0, 0, 24, 24), Fill("currentColor"), svg.Size(24))
@@ -701,7 +664,7 @@ static class Plugin
                         }
                     };
                 }
-                
+
                 if (name == "content_copy")
                 {
                     return new svg(Fill("currentColor"), ViewBox(0, 0, 24, 24), svg.Size(24))
@@ -714,6 +677,39 @@ static class Plugin
                 }
 
                 return name;
+            }
+        }
+
+        sealed class BTypography : ComponentBase
+        {
+            public string variant { get; set; }
+
+            public static IReadOnlyList<string> GetPropSuggestions()
+            {
+                return
+                [
+                    $"{nameof(variant)}: 'h1'",
+                    $"{nameof(variant)}: 'h2'",
+                    $"{nameof(variant)}: 'h3'",
+                    $"{nameof(variant)}: 'h4'",
+                    $"{nameof(variant)}: 'h5'",
+                    $"{nameof(variant)}: 'h6'",
+
+                    $"{nameof(variant)}: 'body0'",
+                    $"{nameof(variant)}: 'body1'"
+                ];
+            }
+
+            protected override Element render()
+            {
+                return new Typography
+                {
+                    children = { children },
+                    variant  = variant,
+
+                    id      = id,
+                    onClick = onMouseClick
+                };
             }
         }
     }
