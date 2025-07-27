@@ -825,169 +825,166 @@ sealed class ApplicationView : Component<ApplicationState>
     {
         return new FlexRow(UserSelect(none))
         {
-            new FlexRowCentered(Gap(16))
-            {
-                new h3 { "React Visual Designer" },
 
+            // P R O J E C T
+            new FlexRowCentered(Gap(16), Border(1, solid, Theme.BorderColor), BorderRadius(4), PaddingX(8), Height(36))
+            {
+                PositionRelative,
+                new label(PositionAbsolute, Top(-4), Left(8), FontSize10, LineHeight7, Background(Theme.BackgroundColor), PaddingX(4)) { "Project" },
+
+                PartProject
+            },
+
+            // A C T I O N S
+
+            new FlexRowCentered
+            {
                 new FlexRowCentered(Gap(16), Border(1, solid, Theme.BorderColor), BorderRadius(4), PaddingX(8), Height(36))
                 {
                     PositionRelative,
-                    new label(PositionAbsolute, Top(-4), Left(8), FontSize10, LineHeight7, Background(Theme.BackgroundColor), PaddingX(4)) { "Project" },
+                    new label(PositionAbsolute, Top(-4), Left(8), FontSize10, LineHeight7, Background(Theme.BackgroundColor), PaddingX(4)) { "Component" },
 
-                    PartProject
-                },
-
-                // A C T I O N S
-
-                new FlexRowCentered
-                {
-                    new FlexRowCentered(Gap(16), Border(1, solid, Theme.BorderColor), BorderRadius(4), PaddingX(8), Height(36))
+                    new FlexRowCentered(Hover(Color(Blue300)))
                     {
-                        PositionRelative,
-                        new label(PositionAbsolute, Top(-4), Left(8), FontSize10, LineHeight7, Background(Theme.BackgroundColor), PaddingX(4)) { "Component" },
-
-                        new FlexRowCentered(Hover(Color(Blue300)))
+                        "Rollback",
+                        OnClick(async _ =>
                         {
-                            "Rollback",
-                            OnClick(async _ =>
+                            if (state.ComponentId <= 0)
                             {
-                                if (state.ComponentId <= 0)
-                                {
-                                    this.FailNotification("Select any component.");
+                                this.FailNotification("Select any component.");
 
-                                    return;
-                                }
+                                return;
+                            }
 
-                                var result = await RollbackComponent(state);
-                                if (result.HasError)
-                                {
-                                    this.FailNotification(result.Error.Message);
-
-                                    return;
-                                }
-
-                                state = result.Value;
-
-                                this.SuccessNotification("OK");
-                            })
-                        },
-
-                        new FlexRowCentered(Hover(Color(Blue300)))
-                        {
-                            "Commit",
-                            OnClick(async _ =>
+                            var result = await RollbackComponent(state);
+                            if (result.HasError)
                             {
-                                if (state.ComponentId <= 0)
-                                {
-                                    this.FailNotification("Select any component.");
+                                this.FailNotification(result.Error.Message);
 
-                                    return;
-                                }
+                                return;
+                            }
 
-                                var result = await CommitComponent(state);
-                                if (result.HasError)
-                                {
-                                    this.FailNotification(result.Error.Message);
+                            state = result.Value;
 
-                                    return;
-                                }
+                            this.SuccessNotification("OK");
+                        })
+                    },
 
-                                this.SuccessNotification("OK");
-                            })
-                        },
-
-                        new FlexRowCentered(Hover(Color(Blue300)))
-                        {
-                            "Export",
-                            OnClick(async _ =>
-                            {
-                                if (state.ComponentId <= 0)
-                                {
-                                    this.FailNotification("Select any component.");
-
-                                    return;
-                                }
-
-                                var result = await NextJs_with_Tailwind.Export(state.AsExportInput());
-                                if (result.HasError)
-                                {
-                                    this.FailNotification(result.Error.Message);
-                                    return;
-                                }
-
-                                if (result.Value.HasChange)
-                                {
-                                    this.SuccessNotification("File updated.");
-                                }
-                                else
-                                {
-                                    this.SuccessNotification("File already same.");
-                                }
-                            })
-                        }
-                    }
-                },
-
-                new IconFocus() + Color(Gray500) + Hover(Color(Blue300)) + OnClick(FocusToCurrentComponentInIde),
-
-                new FlexRowCentered(Border(1, solid, Theme.BorderColor), BorderRadius(4), Height(36))
-                {
-                    PositionRelative,
-                    new label(PositionAbsolute, Top(-4), Left(8), FontSize10, LineHeight7, Background(Theme.BackgroundColor), PaddingX(4)) { "View" },
-
-                    new FlexRowCentered(Gap(8), Padding(4), LineHeight10, WhiteSpaceNoWrap)
+                    new FlexRowCentered(Hover(Color(Blue300)))
                     {
-                        new FlexRowCentered(Padding(4), Border(1, solid, transparent))
+                        "Commit",
+                        OnClick(async _ =>
                         {
-                            "Design",
-                            OnClick(OnMainContentTabHeaderClicked),
-                            Id((int)MainContentTabs.Design),
-                            When(state.MainContentTab == MainContentTabs.Design, BorderRadius(4), Border(1, solid, Theme.BorderColor))
-                        },
-                        new FlexRowCentered(Padding(4), Border(1, solid, transparent))
+                            if (state.ComponentId <= 0)
+                            {
+                                this.FailNotification("Select any component.");
+
+                                return;
+                            }
+
+                            var result = await CommitComponent(state);
+                            if (result.HasError)
+                            {
+                                this.FailNotification(result.Error.Message);
+
+                                return;
+                            }
+
+                            this.SuccessNotification("OK");
+                        })
+                    },
+
+                    new FlexRowCentered(Hover(Color(Blue300)))
+                    {
+                        "Export",
+                        OnClick(async _ =>
                         {
-                            "Structure",
-                            OnClick(OnMainContentTabHeaderClicked),
-                            Id((int)MainContentTabs.Structure),
-                            When(state.MainContentTab == MainContentTabs.Structure, BorderRadius(4), Border(1, solid, Theme.BorderColor))
-                        },
-                        new FlexRowCentered(Padding(4), Border(1, solid, transparent))
-                        {
-                            "Output",
-                            OnClick(OnMainContentTabHeaderClicked),
-                            Id((int)MainContentTabs.Output),
-                            When(state.MainContentTab == MainContentTabs.Output, BorderRadius(4), Border(1, solid, Theme.BorderColor))
-                        },
-                        new FlexRowCentered(Padding(4), Border(1, solid, transparent))
-                        {
-                            "Import Html",
-                            OnClick(OnMainContentTabHeaderClicked),
-                            Id((int)MainContentTabs.ImportHtml),
-                            When(state.MainContentTab == MainContentTabs.ImportHtml, BorderRadius(4), Border(1, solid, Theme.BorderColor))
-                        },
-                        new FlexRowCentered(Padding(4), Border(1, solid, transparent))
-                        {
-                            "Config",
-                            OnClick(OnMainContentTabHeaderClicked),
-                            Id((int)MainContentTabs.ComponentConfig),
-                            When(state.MainContentTab.In(MainContentTabs.ComponentConfig, MainContentTabs.NewComponentConfig), BorderRadius(4), Border(1, solid, Theme.BorderColor))
-                        },
-                        new FlexRowCentered(Padding(4), Border(1, solid, transparent))
-                        {
-                            "Project",
-                            OnClick(OnMainContentTabHeaderClicked),
-                            Id((int)MainContentTabs.ProjectConfig),
-                            When(state.MainContentTab == MainContentTabs.ProjectConfig, BorderRadius(4), Border(1, solid, Theme.BorderColor))
-                        }
+                            if (state.ComponentId <= 0)
+                            {
+                                this.FailNotification("Select any component.");
+
+                                return;
+                            }
+
+                            var result = await NextJs_with_Tailwind.Export(state.AsExportInput());
+                            if (result.HasError)
+                            {
+                                this.FailNotification(result.Error.Message);
+                                return;
+                            }
+
+                            if (result.Value.HasChange)
+                            {
+                                this.SuccessNotification("File updated.");
+                            }
+                            else
+                            {
+                                this.SuccessNotification("File already same.");
+                            }
+                        })
                     }
                 }
             },
-            new FlexRowCentered(Gap(32))
-            {
-                PartMediaSizeButtons,
 
-                PartScale
+            // F O C U S
+            new IconFocus() + Color(Gray500) + Hover(Color(Blue300)) + OnClick(FocusToCurrentComponentInIde),
+
+            // V I E W
+            new FlexRowCentered(Border(1, solid, Theme.BorderColor), BorderRadius(4), Height(36))
+            {
+                PositionRelative,
+                new label(PositionAbsolute, Top(-4), Left(8), FontSize10, LineHeight7, Background(Theme.BackgroundColor), PaddingX(4)) { "View" },
+
+                new FlexRowCentered(Gap(8), Padding(4), LineHeight10, WhiteSpaceNoWrap)
+                {
+                    new FlexRowCentered(Padding(4), Border(1, solid, transparent))
+                    {
+                        "Design",
+                        OnClick(OnMainContentTabHeaderClicked),
+                        Id((int)MainContentTabs.Design),
+                        When(state.MainContentTab == MainContentTabs.Design, BorderRadius(4), Border(1, solid, Theme.BorderColor))
+                    },
+                    new FlexRowCentered(Padding(4), Border(1, solid, transparent))
+                    {
+                        "Structure",
+                        OnClick(OnMainContentTabHeaderClicked),
+                        Id((int)MainContentTabs.Structure),
+                        When(state.MainContentTab == MainContentTabs.Structure, BorderRadius(4), Border(1, solid, Theme.BorderColor))
+                    },
+                    new FlexRowCentered(Padding(4), Border(1, solid, transparent))
+                    {
+                        "Output",
+                        OnClick(OnMainContentTabHeaderClicked),
+                        Id((int)MainContentTabs.Output),
+                        When(state.MainContentTab == MainContentTabs.Output, BorderRadius(4), Border(1, solid, Theme.BorderColor))
+                    },
+                    new FlexRowCentered(Padding(4), Border(1, solid, transparent))
+                    {
+                        "Import Html",
+                        OnClick(OnMainContentTabHeaderClicked),
+                        Id((int)MainContentTabs.ImportHtml),
+                        When(state.MainContentTab == MainContentTabs.ImportHtml, BorderRadius(4), Border(1, solid, Theme.BorderColor))
+                    },
+                    new FlexRowCentered(Padding(4), Border(1, solid, transparent))
+                    {
+                        "Config",
+                        OnClick(OnMainContentTabHeaderClicked),
+                        Id((int)MainContentTabs.ComponentConfig),
+                        When(state.MainContentTab.In(MainContentTabs.ComponentConfig, MainContentTabs.NewComponentConfig), BorderRadius(4), Border(1, solid, Theme.BorderColor))
+                    },
+                    new FlexRowCentered(Padding(4), Border(1, solid, transparent))
+                    {
+                        "Project",
+                        OnClick(OnMainContentTabHeaderClicked),
+                        Id((int)MainContentTabs.ProjectConfig),
+                        When(state.MainContentTab == MainContentTabs.ProjectConfig, BorderRadius(4), Border(1, solid, Theme.BorderColor))
+                    }
+                }
             },
+
+            PartMediaSizeButtons,
+
+            PartScale,
 
             new LogoutButton(),
 
