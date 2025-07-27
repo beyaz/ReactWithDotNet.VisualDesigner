@@ -157,6 +157,18 @@ static class NextJs_with_Tailwind
         }
     }
 
+    public static async Task<Result<string>> CalculateElementTsxCode(int projectId, VisualElementModel visualElement)
+    {
+        var project = GetProjectConfig(projectId);
+        
+        var result = await CalculateElementTreeTsxCodes(project, visualElement);
+        if (result.HasError)
+        {
+            return result.Error;
+        }
+
+        return string.Join(Environment.NewLine, result.Value);
+    }
     static async Task<Result<(string filePath, string fileContent)>> CalculateExportInfo(ExportInput input)
     {
         var (projectId, componentId, userName) = input;

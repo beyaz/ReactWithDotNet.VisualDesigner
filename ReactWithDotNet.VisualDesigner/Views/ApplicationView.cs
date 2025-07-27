@@ -581,6 +581,7 @@ sealed class ApplicationView : Component<ApplicationState>
         Element middle()
         {
             return state.MainContentTab.In(MainContentTabs.Structure,
+                                           MainContentTabs.Output,
                                            MainContentTabs.ProjectConfig,
                                            MainContentTabs.ImportHtml,
                                            MainContentTabs.ComponentConfig,
@@ -949,6 +950,13 @@ sealed class ApplicationView : Component<ApplicationState>
                             OnClick(OnMainContentTabHeaderClicked),
                             Id((int)MainContentTabs.Structure),
                             When(state.MainContentTab == MainContentTabs.Structure, BorderRadius(4), Border(1, solid, Theme.BorderColor))
+                        },
+                        new FlexRowCentered(Padding(4), Border(1, solid, transparent))
+                        {
+                            "Output",
+                            OnClick(OnMainContentTabHeaderClicked),
+                            Id((int)MainContentTabs.Output),
+                            When(state.MainContentTab == MainContentTabs.Output, BorderRadius(4), Border(1, solid, Theme.BorderColor))
                         },
                         new FlexRowCentered(Padding(4), Border(1, solid, transparent))
                         {
@@ -2010,6 +2018,9 @@ sealed class ApplicationView : Component<ApplicationState>
                      {ComponentConfigReservedName.Name}: write_component_name_here
                      {ComponentConfigReservedName.ExportFilePath}: write_export_file_path_here
                      """,
+                
+                MainContentTabs.Output=> await calculateTsxCodeOfCurrentVisualElement(),
+                
                 _ => null
             }
         };
@@ -2028,6 +2039,22 @@ sealed class ApplicationView : Component<ApplicationState>
                 unicodeHighlight    = new { showExcludeOptions = false }
             }
         };
+
+        async Task<string> calculateTsxCodeOfCurrentVisualElement()
+        {
+            if (state.Selection.VisualElementTreeItemPath.HasNoValue())
+            {
+                return  "Select any component.";
+            }
+                
+            var result = await NextJs_with_Tailwind.CalculateElementTsxCode(state.ProjectId, CurrentVisualElement);
+            if (result.HasError)
+            {
+                return result.Error.Message;
+            }
+            
+            return result.Value;
+        }
     }
 
     static class Ruler
