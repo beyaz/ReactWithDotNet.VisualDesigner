@@ -98,7 +98,7 @@ sealed class ApplicationPreview : Component
             {
                 GetProjectConfig(projectId).GlobalCss
             },
-            finalElement + scaleStyle
+            finalElement + scaleStyle + UserSelect(none)
         };
 
         static async Task<Result<Element>> renderElement(RenderPreviewScope scope, VisualElementModel model, string path)
@@ -159,8 +159,6 @@ sealed class ApplicationPreview : Component
             {
                 if (element is HtmlElement htmlElement)
                 {
-                    htmlElement.style.Add(UserSelect(none));
-
                     htmlElement.id = $"{path}";
 
                     htmlElement.onClick = scope.OnTreeItemClicked;
