@@ -424,7 +424,8 @@ static class Plugin
             typeof(BasePage),
             typeof(BDigitalGroupView),
             typeof(BDigitalBox),
-            typeof(BAlert)
+            typeof(BAlert),
+            typeof(BIcon)
         ];
 
         public static IReadOnlyList<string> GetPropSuggestions(string tag)
@@ -663,6 +664,56 @@ static class Plugin
                         children
                     }
                 };
+            }
+        }
+        
+         sealed class BIcon : ComponentBase
+        {
+            public string name { get; set; }
+            
+            public static IReadOnlyList<string> GetPropSuggestions()
+            {
+                return
+                [
+                    $"{nameof(name)}: 'TimerRounded'",
+                    $"{nameof(name)}: 'content_copy'"
+                ];
+            }
+
+            protected override Element render()
+            {
+                return new FlexRowCentered(Size(24), Id(id), OnClick(onMouseClick))
+                {
+                    createSvg
+                };
+            }
+            
+            Element createSvg()
+            {
+
+                if (name == "TimerRounded")
+                {
+                    return new svg(ViewBox(0, 0, 24, 24), Fill("currentColor"), svg.Size(24))
+                    {
+                        new path
+                        {
+                            d = "M15.07 1H8.93c-.52 0-.93.41-.93.93s.41.93.93.93h6.14c.52 0 .93-.41.93-.93S15.59 1 15.07 1Zm-2.15 9.45V7.5c0-.28-.22-.5-.5-.5s-.5.22-.5.5v3.5c0 .13.05.26.15.35l2.5 2.5c.2.2.51.2.71 0 .2-.2.2-.51 0-.71l-2.36-2.36ZM12 4C7.59 4 4 7.59 4 12s3.59 8 8 8 8-3.59 8-8c0-1.9-.66-3.63-1.76-5.01l1.29-1.29c.2-.2.2-.51 0-.71s-.51-.2-.71 0l-1.3 1.3C16.63 5.21 14.39 4 12 4Zm0 14c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6Z"
+                        }
+                    };
+                }
+                
+                if (name == "content_copy")
+                {
+                    return new svg(Fill("currentColor"), ViewBox(0, 0, 24, 24), svg.Size(24))
+                    {
+                        new path
+                        {
+                            d = "M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1Zm3 4H8c-1.1 0-2 .9-2 2v16h14c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2Zm0 18H8V7h11v16Z"
+                        }
+                    };
+                }
+
+                return name;
             }
         }
     }
