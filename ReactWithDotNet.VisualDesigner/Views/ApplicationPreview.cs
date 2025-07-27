@@ -6,6 +6,8 @@ using System.Text.Json.Nodes;
 
 namespace ReactWithDotNet.VisualDesigner.Views;
 
+
+
 sealed class ApplicationPreview : Component
 {
     public Task Refresh()
@@ -230,6 +232,16 @@ sealed class ApplicationPreview : Component
                     }
                 
                     scope.Client.RunJavascript(getJsCodeToHighlightElement(htmlElement.id));
+                }
+                
+                if (scope.HighlightedElementPath == path && element is PluginComponentBase componentBase)
+                {
+                    if (componentBase.id.HasNoValue())
+                    {
+                        return new DeveloperException("Element.Id not set yet");
+                    }
+                
+                    scope.Client.RunJavascript(getJsCodeToHighlightElement(componentBase.id));
                 }
             }
 
@@ -951,4 +963,10 @@ static class JsonHelper
 
         return currentNode;
     }
+}
+
+public class PluginComponentBase : Component
+{
+    public string id;
+    public MouseEventHandler onMouseClick;
 }

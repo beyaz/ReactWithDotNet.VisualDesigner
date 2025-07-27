@@ -362,7 +362,7 @@ static class Plugin
 
         var component = (Element)Activator.CreateInstance(type);
 
-        if (component is Components.ComponentBase componentBase)
+        if (component is PluginComponentBase componentBase)
         {
             componentBase.id           = id;
             componentBase.onMouseClick = onMouseClick;
@@ -441,13 +441,7 @@ static class Plugin
             return (IReadOnlyList<string>)methodInfo.Invoke(null, []);
         }
 
-        public class ComponentBase : Component
-        {
-            public string id;
-            public MouseEventHandler onMouseClick;
-        }
-
-        sealed class BAlert : ComponentBase
+        sealed class BAlert : PluginComponentBase
         {
             public string severity { get; set; }
             public string variant { get; set; }
@@ -497,7 +491,7 @@ static class Plugin
             }
         }
 
-        sealed class BasePage : ComponentBase
+        sealed class BasePage : PluginComponentBase
         {
             public string pageTitle { get; set; }
 
@@ -544,7 +538,7 @@ static class Plugin
             }
         }
 
-        sealed class BDigitalGrid : ComponentBase
+        sealed class BDigitalGrid : PluginComponentBase
         {
             public string alignItems { get; set; }
             public bool? container { get; set; }
@@ -607,7 +601,7 @@ static class Plugin
             }
         }
 
-        sealed class BDigitalGroupView : ComponentBase
+        sealed class BDigitalGroupView : PluginComponentBase
         {
             public string title { get; set; }
 
@@ -632,7 +626,7 @@ static class Plugin
             }
         }
 
-        sealed class BIcon : ComponentBase
+        sealed class BIcon : PluginComponentBase
         {
             public string name { get; set; }
 
@@ -681,7 +675,7 @@ static class Plugin
             }
         }
 
-        sealed class BTypography : ComponentBase
+        sealed class BTypography : PluginComponentBase
         {
             public string variant { get; set; }
 
