@@ -297,7 +297,7 @@ sealed class ApplicationView : Component<ApplicationState>
             return Task.CompletedTask;
         }
 
-        UpdateCurrentVisualElement(x=> x with
+        UpdateCurrentVisualElement(x => x with
         {
             Children = x.Children.Add(new()
             {
@@ -461,10 +461,10 @@ sealed class ApplicationView : Component<ApplicationState>
             {
                 node = node.Children[int.Parse(intArray[i])];
             }
-            
+
             state = state with
             {
-                ComponentRootElement = Modify(state.ComponentRootElement, node, x=>x with
+                ComponentRootElement = Modify(state.ComponentRootElement, node, x => x with
                 {
                     Children = x.Children.RemoveAt(int.Parse(intArray[^1]))
                 })
@@ -1107,7 +1107,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
                 state = state with
                 {
-                    ComponentRootElement = Modify(state.ComponentRootElement, targetNode, x=>x with
+                    ComponentRootElement = Modify(state.ComponentRootElement, targetNode, x => x with
                     {
                         Children = x.Children.Add(sourceNodeClone)
                     })
@@ -1933,7 +1933,7 @@ sealed class ApplicationView : Component<ApplicationState>
         }
         else
         {
-            UpdateCurrentVisualElement(x=>x with
+            UpdateCurrentVisualElement(x => x with
             {
                 Children = x.Children.Add(model)
             });
@@ -2018,9 +2018,9 @@ sealed class ApplicationView : Component<ApplicationState>
                      {ComponentConfigReservedName.Name}: write_component_name_here
                      {ComponentConfigReservedName.ExportFilePath}: write_export_file_path_here
                      """,
-                
-                MainContentTabs.Output=> await calculateTsxCodeOfCurrentVisualElement(),
-                
+
+                MainContentTabs.Output => await calculateTsxCodeOfCurrentVisualElement(),
+
                 _ => null
             }
         };
@@ -2044,15 +2044,15 @@ sealed class ApplicationView : Component<ApplicationState>
         {
             if (state.Selection.VisualElementTreeItemPath.HasNoValue())
             {
-                return  "Select any component.";
+                return "Select any component.";
             }
-                
+
             var result = await NextJs_with_Tailwind.CalculateElementTsxCode(state.ProjectId, CurrentVisualElement);
             if (result.HasError)
             {
                 return result.Error.Message;
             }
-            
+
             return result.Value;
         }
     }
