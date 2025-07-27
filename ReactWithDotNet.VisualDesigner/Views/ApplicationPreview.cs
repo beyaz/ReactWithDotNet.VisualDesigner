@@ -149,7 +149,7 @@ sealed class ApplicationPreview : Component
                 }
             }
 
-            element ??= Plugin.TryCreateElementForPreview(model.Tag);
+            element ??= Plugin.TryCreateElementForPreview(model.Tag, path, scope.OnTreeItemClicked);
             
             if (element is null)
             {

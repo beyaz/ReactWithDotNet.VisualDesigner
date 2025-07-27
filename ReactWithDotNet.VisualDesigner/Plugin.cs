@@ -352,7 +352,7 @@ static class Plugin
         return Components.AllTypes.Select(t => t.Name).ToList();
     }
 
-    public static Element TryCreateElementForPreview(string tag)
+    public static Element TryCreateElementForPreview(string tag, string id, MouseEventHandler onMouseClick)
     {
         var type = Components.AllTypes.FirstOrDefault(t => t.Name.Equals(tag, StringComparison.OrdinalIgnoreCase));
         if (type is null)
@@ -360,7 +360,14 @@ static class Plugin
             return null;
         }
 
-        return (Element)Activator.CreateInstance(type);
+        var component =  (Element)Activator.CreateInstance(type);
+
+        if (component is Components.ComponentBase componentBase)
+        {
+            componentBase.id           = id;
+            componentBase.onMouseClick = onMouseClick;
+        }
+        return component;
     }
 
     static Task<IReadOnlyList<MessagingInfo>> GetMessagingByGroupName(string messagingGroupName)
@@ -405,6 +412,11 @@ static class Plugin
 
     class Components
     {
+        public class ComponentBase : Component
+        {
+            public string id;
+            public MouseEventHandler onMouseClick;
+        }
         public static readonly IReadOnlyList<Type> AllTypes =
         [
             typeof(BTypography),
@@ -431,8 +443,8 @@ static class Plugin
 
             return (IReadOnlyList<string>)methodInfo.Invoke(null, []);
         }
-
-        sealed class BasePage : Component
+        
+        sealed class BasePage : ComponentBase
         {
             public string pageTitle { get; set; }
 
@@ -446,12 +458,12 @@ static class Plugin
 
             protected override Element render()
             {
-                return new FlexColumn(Background(Gray100), WidthFull)
+                return new FlexColumn(Background(Gray100), WidthFull, Id(id), OnClick(onMouseClick))
                 {
                     children  =
                     {
-                        new div(FontWeight600, FontSize18){ pageTitle },
-                        SpaceY(24),
+                        new div(FontWeight600, FontSize18, Id(id)){ pageTitle },
+                        SpaceY(24) + Id(id),
                         children
                     }
                    
@@ -459,7 +471,7 @@ static class Plugin
             }
         }
         
-        sealed class BDigitalGroupView : Component
+        sealed class BDigitalGroupView : ComponentBase
         {
             public string title { get; set; }
 
@@ -473,7 +485,7 @@ static class Plugin
 
             protected override Element render()
             {
-                return new FlexColumn(Background(White), BorderRadius(8), Border(1,solid,Gray200), Padding(16))
+                return new FlexColumn(Background(White), BorderRadius(8), Border(1,solid,Gray200), Padding(16), Id(id), OnClick(onMouseClick))
                 {
                     children  =
                     {
@@ -506,7 +518,7 @@ static class Plugin
                 };
             }
         }
-        sealed class BDigitalGrid : Component
+        sealed class BDigitalGrid : ComponentBase
         {
             public bool? container { get; set; }
 
@@ -563,12 +575,15 @@ static class Plugin
                     direction = direction,
                     justifyContent = justifyContent,
                     alignItems = alignItems,
-                    spacing = spacing
+                    spacing = spacing,
+                    
+                    id = id,
+                    onClick = onMouseClick
                 };
             }
         }
 
-        sealed class BTypography : Component
+        sealed class BTypography : ComponentBase
         {
             public string variant { get; set; }
 
@@ -593,7 +608,10 @@ static class Plugin
                 return new Typography
                 {
                     children = { children },
-                    variant  = variant
+                    variant  = variant,
+                    
+                    id      = id,
+                    onClick = onMouseClick
                 };
             }
         }
