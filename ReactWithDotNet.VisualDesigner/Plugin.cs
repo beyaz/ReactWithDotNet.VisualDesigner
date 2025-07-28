@@ -1,4 +1,5 @@
-﻿using System.Data;
+﻿using System.Collections;
+using System.Data;
 using System.Reflection;
 using Dapper;
 using Microsoft.Data.SqlClient;
@@ -421,7 +422,10 @@ static class Plugin
             (typeof(BDigitalGroupView), BDigitalGroupView.GetPropSuggestions),
             (typeof(BDigitalBox), BDigitalBox.GetPropSuggestions),
             (typeof(BAlert), BAlert.GetPropSuggestions),
-            (typeof(BIcon), BIcon.GetPropSuggestions)
+            (typeof(BIcon), BIcon.GetPropSuggestions),
+            (typeof(BDigitalMoneyInput), BDigitalMoneyInput.GetPropSuggestions),
+            (typeof(BComboBox), BComboBox.GetPropSuggestions)
+            
         ];
 
         public static IReadOnlyList<string> GetPropSuggestions(string tag)
@@ -517,7 +521,7 @@ static class Plugin
             }
         }
 
-        sealed class BDigitalBox : Component
+        sealed class BDigitalBox : PluginComponentBase
         {
             public string styleContext { get; set; }
 
@@ -537,7 +541,61 @@ static class Plugin
                 };
             }
         }
+        
+        sealed class BDigitalMoneyInput : PluginComponentBase
+        {
+            public string fec { get; set; }
+            
+            public bool? currencyVisible { get; set; }
+            
+            public string bind { get; set; }
 
+            public static IReadOnlyList<string> GetPropSuggestions()
+            {
+                return
+                [
+                    $"{nameof(fec)}: '?'",
+                    $"{nameof(currencyVisible)}: '?'"
+                ];
+            }
+
+            protected override Element render()
+            {
+                return new FlexRow(AlignItemsCenter, PaddingLeftRight(16), Border(1,solid,"#c0c0c0"), BorderRadius(10), Height(58), JustifyContentSpaceBetween)
+                {
+                   new div{bind ?? "Tutar"},
+                   new div{fec ?? "TL"}
+                };
+            }
+        }
+        sealed class BComboBox : PluginComponentBase
+        {
+            public string labelText { get; set; }
+            
+            public string hintText { get; set; }
+            
+            public bool? hiddenClearButton { get; set; }
+            
+            public string bind { get; set; }
+            
+            public IEnumerable dataSource { get; set; }
+
+            public static IReadOnlyList<string> GetPropSuggestions()
+            {
+                return
+                [
+                    
+                ];
+            }
+
+            protected override Element render()
+            {
+                return new FlexRow(AlignItemsCenter, PaddingLeftRight(16), Border(1,solid,"#c0c0c0"), BorderRadius(10), Height(58), JustifyContentSpaceBetween)
+                {
+                    new div{bind ?? "?"}
+                };
+            }
+        }
         sealed class BDigitalGrid : PluginComponentBase
         {
             public string alignItems { get; set; }
@@ -550,6 +608,16 @@ static class Plugin
             public string justifyContent { get; set; }
 
             public int? spacing { get; set; }
+            
+            public int? xs{ get; set; }
+    
+            public int? sm{ get; set; }
+    
+            public int? md{ get; set; }
+    
+            public int? lg{ get; set; }
+    
+            public int? xl{ get; set; }
 
             public static IReadOnlyList<string> GetPropSuggestions()
             {
@@ -594,6 +662,11 @@ static class Plugin
                     justifyContent = justifyContent,
                     alignItems     = alignItems,
                     spacing        = spacing,
+                    xs             = xs,
+                    sm             = sm,
+                    md             = md,
+                    lg             = lg,
+                    xl             = xl,
 
                     id      = id,
                     onClick = onMouseClick
