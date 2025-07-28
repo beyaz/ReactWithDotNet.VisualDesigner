@@ -19,173 +19,15 @@ sealed record PropSuggestionScope
 static class Plugin
 {
     const string BOA_MessagingByGroupName = "BOA.MessagingByGroupName";
-
-    static readonly IReadOnlyList<ComponentMeta> ComponentsMeta =
-    [
-        new()
-        {
-            TagName = "BasePage",
-            Props =
-            [
-                new()
-                {
-                    Name      = "pageTitle",
-                    ValueType = ValueTypes.String
-                }
-            ]
-        },
-        new()
-        {
-            TagName = "BInput",
-            Props =
-            [
-                new()
-                {
-                    Name      = "floatingLabelText",
-                    ValueType = ValueTypes.String
-                },
-                new()
-                {
-                    Name      = "helperText",
-                    ValueType = ValueTypes.String
-                },
-                new()
-                {
-                    Name      = "maxLength",
-                    ValueType = ValueTypes.Number
-                },
-                new()
-                {
-                    Name        = "autoComplete",
-                    ValueType   = ValueTypes.String,
-                    Suggestions = ["off", "on"]
-                }
-            ]
-        },
-
-        new()
-        {
-            TagName = "BComboBox",
-            Props =
-            [
-                new()
-                {
-                    Name      = "labelText",
-                    ValueType = ValueTypes.String
-                }
-            ]
-        },
-
-        new()
-        {
-            TagName = "BCheckBox",
-            Props =
-            [
-                new()
-                {
-                    Name      = "label",
-                    ValueType = ValueTypes.String
-                }
-            ]
-        },
-
-        new()
-        {
-            TagName = "BDigitalGroupView",
-            Props =
-            [
-                new()
-                {
-                    Name      = "title",
-                    ValueType = ValueTypes.String
-                }
-            ]
-        },
-
-        new()
-        {
-            TagName = "BDigitalPlateNumber",
-            Props =
-            [
-                new()
-                {
-                    Name      = "label",
-                    ValueType = ValueTypes.String
-                }
-            ]
-        },
-        new()
-        {
-            TagName = "BDigitalTabNavigator",
-            Props =
-            [
-                new()
-                {
-                    Name      = "mainResource",
-                    ValueType = ValueTypes.String
-                },
-                new()
-                {
-                    Name      = "selectedTab",
-                    ValueType = ValueTypes.Number
-                }
-            ]
-        },
-        new()
-        {
-            TagName = "BDigitalDialog",
-            Props =
-            [
-                new()
-                {
-                    Name      = "title",
-                    ValueType = ValueTypes.String
-                },
-                new()
-                {
-                    Name      = "content",
-                    ValueType = ValueTypes.String
-                },
-                new()
-                {
-                    Name      = "open",
-                    ValueType = ValueTypes.Boolean
-                }
-            ]
-        },
-        new()
-        {
-            TagName = "BAlert",
-            Props =
-            [
-                new()
-                {
-                    Name      = "severity",
-                    ValueType = ValueTypes.String
-                }
-            ]
-        },
-
-        new()
-        {
-            TagName = "BDigitalBox",
-            Props =
-            [
-                new()
-                {
-                    Name      = "pb",
-                    ValueType = ValueTypes.Number
-                }
-            ]
-        }
-    ];
+    
 
     enum ValueTypes
     {
         String,
         Number,
         Date,
-        Boolean
+        Boolean,
+        Enumerable
     }
 
     public static ConfigModel AfterReadConfig(ConfigModel config)
@@ -282,7 +124,7 @@ static class Plugin
 
             List<string> returnList = [];
 
-            foreach (var prop in from m in ComponentsMeta where m.TagName == scope.TagName from p in m.Props select p)
+            foreach (var prop in from m in Components.GetAllTypesMetadata() where m.TagName == scope.TagName from p in m.Props select p)
             {
                 returnList.InsertRange(0, from item in prop.Suggestions ?? [] select $"{prop.Name}: \"{item}\"");
 
@@ -412,8 +254,62 @@ static class Plugin
         }
     }
 
-    class Components
+    static class Components
     {
+        public static IReadOnlyList<ComponentMeta> GetAllTypesMetadata()
+        {
+
+            return AllTypes.Select(x => x.type).Select(createFrom).ToList();
+            
+            static ComponentMeta createFrom(Type type)
+            {
+                return new ()
+                {
+                    TagName = type.Name,
+                    Props   = type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly ).Select(createPropMetaFrom).ToList()
+                };
+                
+                static PropMeta createPropMetaFrom(PropertyInfo propertyInfo)
+                {
+                    return new () 
+                    { 
+                        Name = propertyInfo.Name, 
+                        ValueType =  getValueType(propertyInfo.PropertyType)
+                    };
+
+                    static ValueTypes getValueType(Type propertyType)
+                    {
+                        if (propertyType == typeof(string))
+                        {
+                            return ValueTypes.String;
+                        }
+                        
+                        if (propertyType.In([typeof(short), typeof(short?), typeof(int), typeof(int?), typeof(double), typeof(double?), typeof(long), typeof(long?), ]))
+                        {
+                            return ValueTypes.Number;
+                        }
+                        
+                        if (propertyType.In([typeof(bool), typeof(bool?)]))
+                        {
+                            return ValueTypes.Boolean;
+                        }
+                        
+                        if (propertyType.In([typeof(DateTime), typeof(DateTime?)]))
+                        {
+                            return ValueTypes.Date;
+                        }
+                        
+                        if ( propertyType == typeof(IEnumerable) || typeof(IEnumerable).IsSubclassOf(propertyType))
+                        {
+                            return ValueTypes.Enumerable;
+                        }
+
+                        throw new NotImplementedException(propertyType.FullName);
+                    }
+                }
+            }
+        }
+        
         public static readonly IReadOnlyList<(Type type, Func<IReadOnlyList<string>> propSuggestions)> AllTypes =
         [
             (typeof(BTypography), BTypography.GetPropSuggestions),
@@ -424,7 +320,15 @@ static class Plugin
             (typeof(BAlert), BAlert.GetPropSuggestions),
             (typeof(BIcon), BIcon.GetPropSuggestions),
             (typeof(BDigitalMoneyInput), BDigitalMoneyInput.GetPropSuggestions),
-            (typeof(BComboBox), BComboBox.GetPropSuggestions)
+            (typeof(BComboBox), BComboBox.GetPropSuggestions),
+            (typeof(BInput), BInput.GetPropSuggestions),
+            (typeof(BCheckBox), BCheckBox.GetPropSuggestions),
+            (typeof(BDigitalPlateNumber), BDigitalPlateNumber.GetPropSuggestions),
+            (typeof(BDigitalDialog), BDigitalDialog.GetPropSuggestions),
+            (typeof(BDigitalTabNavigator), BDigitalTabNavigator.GetPropSuggestions),
+            
+            
+            
             
         ];
 
@@ -445,6 +349,54 @@ static class Plugin
             return (IReadOnlyList<string>)methodInfo.Invoke(null, []);
         }
 
+        sealed class BDigitalTabNavigator : PluginComponentBase
+        {
+            public string mainResource { get; set; }
+            
+            public int? selectedTab { get; set; }
+
+            public static IReadOnlyList<string> GetPropSuggestions()
+            {
+                return
+                [
+                
+                ];
+            }
+
+            protected override Element render()
+            {
+                return new FlexRow(AlignItemsCenter, PaddingLeftRight(16), Border(1,solid,"#c0c0c0"), BorderRadius(10), Height(58), JustifyContentSpaceBetween)
+                {
+                
+                };
+            }
+        }
+    
+        sealed class BDigitalDialog : PluginComponentBase
+        {
+            public string title { get; set; }
+            
+            public string content { get; set; }
+        
+            public bool? open { get; set; }
+
+            public static IReadOnlyList<string> GetPropSuggestions()
+            {
+                return
+                [
+                
+                ];
+            }
+
+            protected override Element render()
+            {
+                return new FlexRow(AlignItemsCenter, PaddingLeftRight(16), Border(1,solid,"#c0c0c0"), BorderRadius(10), Height(58), JustifyContentSpaceBetween)
+                {
+                
+                };
+            }
+        }
+        
         sealed class BAlert : PluginComponentBase
         {
             public string severity { get; set; }
@@ -537,7 +489,7 @@ static class Plugin
             {
                 return new Grid
                 {
-                    children = { children }
+                    children = { children },
                 };
             }
         }
@@ -568,6 +520,89 @@ static class Plugin
                 };
             }
         }
+        
+        
+            
+        sealed class BCheckBox : PluginComponentBase
+        {
+            public string label { get; set; }
+            
+            public string bind { get; set; }
+
+            public static IReadOnlyList<string> GetPropSuggestions()
+            {
+                return
+                [
+                
+                ];
+            }
+
+            protected override Element render()
+            {
+                return new FlexRow(AlignItemsCenter, PaddingLeftRight(16), Border(1,solid,"#c0c0c0"), BorderRadius(10), Height(58), JustifyContentSpaceBetween)
+                {
+                    new div{bind ?? "?"}
+                };
+            }
+        }
+        
+        
+        
+        
+            
+        sealed class BDigitalPlateNumber : PluginComponentBase
+        {
+            public string label { get; set; }
+            
+            public string bind { get; set; }
+            
+            public static IReadOnlyList<string> GetPropSuggestions()
+            {
+                return
+                [
+                  
+                ];
+            }
+
+            protected override Element render()
+            {
+                return new FlexRow(AlignItemsCenter, PaddingLeftRight(16), Border(1,solid,"#c0c0c0"), BorderRadius(10), Height(58), JustifyContentSpaceBetween)
+                {
+                    new div{bind ?? "?"}
+                };
+            }
+        }
+            
+        sealed class BInput : PluginComponentBase
+        {
+            public string floatingLabelText { get; set; }
+            
+            public string helperText { get; set; }
+            
+            public int? maxLength { get; set; }
+            
+            public string bind { get; set; }
+            
+            public string autoComplete { get; set; }
+
+            public static IReadOnlyList<string> GetPropSuggestions()
+            {
+                return
+                [
+                    $"{nameof(autoComplete)}: \"on\"",
+                    $"{nameof(autoComplete)}: \"off\""
+                ];
+            }
+
+            protected override Element render()
+            {
+                return new FlexRow(AlignItemsCenter, PaddingLeftRight(16), Border(1,solid,"#c0c0c0"), BorderRadius(10), Height(58), JustifyContentSpaceBetween)
+                {
+                    new div{bind ?? "?"}
+                };
+            }
+        }
+        
         sealed class BComboBox : PluginComponentBase
         {
             public string labelText { get; set; }
