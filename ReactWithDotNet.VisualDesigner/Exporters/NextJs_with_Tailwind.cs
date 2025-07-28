@@ -801,6 +801,34 @@ static class NextJs_with_Tailwind
             return new Exception($"PropertyParseError: {property}");
         }
 
+        // todo make more configurational or 
+        if (project.Name?.Contains("BOA.") is true)
+        {
+            var result = convertStyleToInlineStyleObject(elementModel);
+            if (result.HasError)
+            {
+                return result.Error;
+            }
+
+            var modifiedElementModel = result.Value.modifiedElementModel;
+            var inlineStyle = result.Value.inlineStyle;
+
+            elementModel = modifiedElementModel;
+            if (inlineStyle.Any())
+            {
+                // todo: fix et {{
+                var inlineStyleProperty = new ReactProperty
+                {
+                    Name  = "style",
+                    Value = "{{" + string.Join(", ", inlineStyle.Select(x => $"{x.name}: {x.value}")) +"}}"
+                };
+                
+                node = node with { Properties = node.Properties.Add(inlineStyleProperty) };
+            }
+            
+
+        }
+
         foreach (var styleItem in elementModel.Styles)
         {
             string tailwindClassName;
@@ -973,5 +1001,22 @@ static class NextJs_with_Tailwind
     {
         public required string Name { get; init; }
         public required string Value { get; init; }
+    }
+
+    static Result<(VisualElementModel modifiedElementModel, IReadOnlyList<(string name, string value)> inlineStyle) >
+        convertStyleToInlineStyleObject(VisualElementModel elementModel)
+    {
+        var inlineStyles = new List<(string name, string value)>();
+        
+        foreach (var item in elementModel.Styles)
+        {
+            var styleAttribute = ParseStyleAttribute(item);
+            
+            inlineStyles.Add((styleAttribute.Name, styleAttribute.Value));
+        }
+
+        elementModel = elementModel with { Styles = [] };
+        
+        return (elementModel, inlineStyles);
     }
 }
