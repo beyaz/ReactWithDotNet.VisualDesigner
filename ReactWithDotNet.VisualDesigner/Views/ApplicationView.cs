@@ -709,6 +709,13 @@ sealed class ApplicationView : Component<ApplicationState>
 
             if (project.ConfigAsYaml != state.MainContentText)
             {
+                var parseResult = Try(() => DeserializeFromYaml<ProjectConfig>(state.MainContentText));
+                if (parseResult.HasError)
+                {
+                    this.FailNotification(parseResult.Error.ToString());
+                    return;
+                }
+                
                 await Store.Update(project with { ConfigAsYaml = state.MainContentText });
 
                 Cache.Clear();
