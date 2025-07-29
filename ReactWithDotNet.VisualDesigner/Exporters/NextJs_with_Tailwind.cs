@@ -808,7 +808,7 @@ static class NextJs_with_Tailwind
                 var inlineStyleProperty = new ReactProperty
                 {
                     Name  = "style",
-                    Value = "{{" + string.Join(", ", inlineStyle.Select(x => $"{x.name}: {x.value}")) +"}}"
+                    Value = "{" + string.Join(", ", inlineStyle.Select(x => $"{x.name}: {x.value}")) +"}"
                 };
                 
                 node = node with { Properties = node.Properties.Add(inlineStyleProperty) };
