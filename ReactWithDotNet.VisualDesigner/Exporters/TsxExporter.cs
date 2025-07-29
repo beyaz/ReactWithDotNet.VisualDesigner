@@ -39,6 +39,19 @@ static class ESLint
 
 static class TsxExporter
 {
+    public static async Task<Result<string>> CalculateElementTsxCode(int projectId, VisualElementModel visualElement)
+    {
+        var project = GetProjectConfig(projectId);
+
+        var result = await CalculateElementTreeTsxCodes(project, visualElement);
+        if (result.HasError)
+        {
+            return result.Error;
+        }
+
+        return string.Join(Environment.NewLine, result.Value);
+    }
+
     public static async Task<Result<ExportOutput>> Export(ExportInput input)
     {
         string filePath;
@@ -157,18 +170,6 @@ static class TsxExporter
         }
     }
 
-    public static async Task<Result<string>> CalculateElementTsxCode(int projectId, VisualElementModel visualElement)
-    {
-        var project = GetProjectConfig(projectId);
-        
-        var result = await CalculateElementTreeTsxCodes(project, visualElement);
-        if (result.HasError)
-        {
-            return result.Error;
-        }
-
-        return string.Join(Environment.NewLine, result.Value);
-    }
     static async Task<Result<(string filePath, string fileContent)>> CalculateExportInfo(ExportInput input)
     {
         var (projectId, componentId, userName) = input;
@@ -457,7 +458,7 @@ static class TsxExporter
                     propsAsText.Add($"{propertyName}=\"{TryClearStringValue(propertyValue)}\"");
                     continue;
                 }
-                
+
                 if (IsStringTemplate(propertyValue))
                 {
                     propsAsText.Add($"{propertyName}={{{propertyValue}}}");
@@ -480,7 +481,7 @@ static class TsxExporter
                         }
                     }
                 }
-                
+
                 propsAsText.Add($"{propertyName}={{{propertyValue}}}");
             }
 
@@ -711,6 +712,23 @@ static class TsxExporter
         }
     }
 
+    static Result<(VisualElementModel modifiedElementModel, IReadOnlyList<(string name, string value)> inlineStyle)>
+        convertStyleToInlineStyleObject(VisualElementModel elementModel)
+    {
+        var inlineStyles = new List<(string name, string value)>();
+
+        foreach (var item in elementModel.Styles)
+        {
+            var styleAttribute = ParseStyleAttribute(item);
+
+            inlineStyles.Add((styleAttribute.Name, styleAttribute.Value));
+        }
+
+        elementModel = elementModel with { Styles = [] };
+
+        return (elementModel, inlineStyles);
+    }
+
     static async Task<Result<ReactNode>> ConvertVisualElementModelToReactNodeModel(ProjectConfig project, VisualElementModel elementModel)
     {
         // Open tag
@@ -808,13 +826,11 @@ static class TsxExporter
                 var inlineStyleProperty = new ReactProperty
                 {
                     Name  = "style",
-                    Value = "{" + string.Join(", ", inlineStyle.Select(x => $"{x.name}: {x.value}")) +"}"
+                    Value = "{" + string.Join(", ", inlineStyle.Select(x => $"{x.name}: {x.value}")) + "}"
                 };
-                
+
                 node = node with { Properties = node.Properties.Add(inlineStyleProperty) };
             }
-            
-
         }
 
         foreach (var styleItem in elementModel.Styles)
@@ -989,22 +1005,5 @@ static class TsxExporter
     {
         public required string Name { get; init; }
         public required string Value { get; init; }
-    }
-
-    static Result<(VisualElementModel modifiedElementModel, IReadOnlyList<(string name, string value)> inlineStyle) >
-        convertStyleToInlineStyleObject(VisualElementModel elementModel)
-    {
-        var inlineStyles = new List<(string name, string value)>();
-        
-        foreach (var item in elementModel.Styles)
-        {
-            var styleAttribute = ParseStyleAttribute(item);
-            
-            inlineStyles.Add((styleAttribute.Name, styleAttribute.Value));
-        }
-
-        elementModel = elementModel with { Styles = [] };
-        
-        return (elementModel, inlineStyles);
     }
 }
