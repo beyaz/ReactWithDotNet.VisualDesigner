@@ -799,6 +799,33 @@ static class TsxExporter
         {
             if (project.ExportStylesAsInline)
             {
+                
+                // Transfer properties
+                foreach (var property in elementModel.Properties)
+                {
+                    var propertyIsSuccessfullyParsed = false;
+                    
+                    foreach (var (name, value) in TryParseProperty(property))
+                    {
+                        node = node with
+                        {
+                            Properties = node.Properties.Add(new()
+                            {
+                                Name = name, 
+                                Value = value
+                            })
+                        };
+
+                        propertyIsSuccessfullyParsed = true;
+                    }
+
+                    if (!propertyIsSuccessfullyParsed)
+                    {
+                        return new Exception($"PropertyParseError: {property}");    
+                    }
+                    
+                }
+                
                 var result = convertStyleToInlineStyleObject(elementModel);
                 if (result.HasError)
                 {
@@ -830,7 +857,7 @@ static class TsxExporter
 
                 var classNameShouldBeTemplateLiteral = false;
 
-                // Add properties
+                // Transfer properties
                 foreach (var property in elementModel.Properties)
                 {
                     string name, value;
