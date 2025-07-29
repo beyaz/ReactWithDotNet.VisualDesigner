@@ -784,82 +784,93 @@ static class TsxExporter
             HtmlElementType = TryGetHtmlElementTypeByTagName(tag)
         };
 
-        List<string> classNames = [];
 
-        var classNameShouldBeTemplateLiteral = false;
-
-        // Add properties
-        foreach (var property in elementModel.Properties)
-        {
-            var (reactProperty, classNameList) = tryConvertToReactProperty(property);
-            if (classNameList.HasValue)
-            {
-                classNames.AddRange(classNameList.Value);
-                continue;
-            }
-
-            if (reactProperty.HasValue)
-            {
-                node = node with { Properties = node.Properties.Add(reactProperty.Value) };
-                continue;
-            }
-
-            return new Exception($"PropertyParseError: {property}");
-        }
 
         // todo make more configurational or 
-        if (project.Name?.Contains("BOA.") is true)
+        // arrange inline styles
         {
-            var result = convertStyleToInlineStyleObject(elementModel);
-            if (result.HasError)
+            if (project.Name?.Contains("BOA.") is true)
             {
-                return result.Error;
-            }
-
-            var modifiedElementModel = result.Value.modifiedElementModel;
-            var inlineStyle = result.Value.inlineStyle;
-
-            elementModel = modifiedElementModel;
-            if (inlineStyle.Any())
-            {
-                // todo: fix et {{
-                var inlineStyleProperty = new ReactProperty
-                {
-                    Name  = "style",
-                    Value = "{" + string.Join(", ", inlineStyle.Select(x => $"{x.name}: {x.value}")) + "}"
-                };
-
-                node = node with { Properties = node.Properties.Add(inlineStyleProperty) };
-            }
-        }
-
-        foreach (var styleItem in elementModel.Styles)
-        {
-            string tailwindClassName;
-            {
-                var result = ConvertDesignerStyleItemToTailwindClassName(project, styleItem);
+                var result = convertStyleToInlineStyleObject(elementModel);
                 if (result.HasError)
                 {
                     return result.Error;
                 }
 
-                tailwindClassName = result.Value;
-            }
+                var modifiedElementModel = result.Value.modifiedElementModel;
+                var inlineStyle = result.Value.inlineStyle;
 
-            if (tailwindClassName.StartsWith("${"))
-            {
-                classNameShouldBeTemplateLiteral = true;
-            }
+                elementModel = modifiedElementModel;
+                if (inlineStyle.Any())
+                {
+                    // todo: fix et {{
+                    var inlineStyleProperty = new ReactProperty
+                    {
+                        Name  = "style",
+                        Value = "{" + string.Join(", ", inlineStyle.Select(x => $"{x.name}: {x.value}")) + "}"
+                    };
 
-            classNames.Add(tailwindClassName);
+                    node = node with { Properties = node.Properties.Add(inlineStyleProperty) };
+                }
+            }
         }
 
-        if (classNames.Count > 0)
+        // arrange tailwind classes
         {
-            var firstLastChar = classNameShouldBeTemplateLiteral ? "`" : "\"";
+            List<string> classNames = [];
 
-            node = node with { Properties = node.Properties.Add(new() { Name = "className", Value = firstLastChar + string.Join(" ", classNames) + firstLastChar }) };
+            var classNameShouldBeTemplateLiteral = false;
+
+            // Add properties
+            foreach (var property in elementModel.Properties)
+            {
+                var (reactProperty, classNameList) = tryConvertToReactProperty(property);
+                if (classNameList.HasValue)
+                {
+                    classNames.AddRange(classNameList.Value);
+                    continue;
+                }
+
+                if (reactProperty.HasValue)
+                {
+                    node = node with { Properties = node.Properties.Add(reactProperty.Value) };
+                    continue;
+                }
+
+                return new Exception($"PropertyParseError: {property}");
+            }
+
+       
+
+            foreach (var styleItem in elementModel.Styles)
+            {
+                string tailwindClassName;
+                {
+                    var result = ConvertDesignerStyleItemToTailwindClassName(project, styleItem);
+                    if (result.HasError)
+                    {
+                        return result.Error;
+                    }
+
+                    tailwindClassName = result.Value;
+                }
+
+                if (tailwindClassName.StartsWith("${"))
+                {
+                    classNameShouldBeTemplateLiteral = true;
+                }
+
+                classNames.Add(tailwindClassName);
+            }
+
+            if (classNames.Count > 0)
+            {
+                var firstLastChar = classNameShouldBeTemplateLiteral ? "`" : "\"";
+
+                node = node with { Properties = node.Properties.Add(new() { Name = "className", Value = firstLastChar + string.Join(" ", classNames) + firstLastChar }) };
+            }
         }
+        
 
         var hasNoChildAndHasNoText = elementModel.Children.Count == 0 && elementModel.HasNoText();
         if (hasNoChildAndHasNoText)
