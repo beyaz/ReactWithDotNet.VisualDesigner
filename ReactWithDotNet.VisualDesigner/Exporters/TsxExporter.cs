@@ -784,9 +784,6 @@ static class TsxExporter
             HtmlElementType = TryGetHtmlElementTypeByTagName(tag)
         };
 
-
-
-        
         // arrange inline styles
         {
             if (project.ExportStylesAsInline)
@@ -842,8 +839,6 @@ static class TsxExporter
                     return new Exception($"PropertyParseError: {property}");
                 }
 
-       
-
                 foreach (var styleItem in elementModel.Styles)
                 {
                     string tailwindClassName;
@@ -873,7 +868,6 @@ static class TsxExporter
                 }
             }
         }
-        
 
         var hasNoChildAndHasNoText = elementModel.Children.Count == 0 && elementModel.HasNoText();
         if (hasNoChildAndHasNoText)
