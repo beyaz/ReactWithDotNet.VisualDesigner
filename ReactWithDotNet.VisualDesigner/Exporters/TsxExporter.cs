@@ -693,13 +693,13 @@ static class TsxExporter
 
         static string asFinalText(string text)
         {
+            if (IsRawStringValue(text))
+            {
+                return $"{TryClearRawStringValue(text)}";
+            }
+            
             if (!IsStringValue(text))
             {
-                if (IsRawStringValue(text))
-                {
-                    return $"{TryClearRawStringValue(text)}";
-                }
-
                 return $"{{{text}}}";
             }
 
