@@ -851,16 +851,6 @@ static class TsxExporter
                         classNames.AddRange(value.Split(" ", StringSplitOptions.RemoveEmptyEntries));
                         continue;
                     }
-
-                    //if (name == "w")
-                    //{
-                    //    name = "width";
-                    //}
-                    
-                    //if (name == "h")
-                    //{
-                    //    name = "height";
-                    //}
                     
                     node = node with { Properties = node.Properties.Add(new() { Name = name, Value = value}) };
                 }
