@@ -30,7 +30,7 @@ public sealed class ExporterTest
         {
             var project = new ProjectConfig();
 
-            var result = await NextJs_with_Tailwind.CalculateElementTreeTsxCodes(project, visualElementModel);
+            var result = await TsxExporter.CalculateElementTreeTsxCodes(project, visualElementModel);
 
             result.Success.ShouldBeTrue();
 

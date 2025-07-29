@@ -37,7 +37,7 @@ static class ESLint
     public static readonly int MaxCharLengthPerLine = 80;
 }
 
-static class NextJs_with_Tailwind
+static class TsxExporter
 {
     public static async Task<Result<ExportOutput>> Export(ExportInput input)
     {

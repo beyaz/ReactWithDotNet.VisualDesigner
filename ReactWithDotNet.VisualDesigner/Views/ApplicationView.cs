@@ -913,7 +913,7 @@ sealed class ApplicationView : Component<ApplicationState>
                                 return;
                             }
 
-                            var result = await NextJs_with_Tailwind.Export(state.AsExportInput());
+                            var result = await TsxExporter.Export(state.AsExportInput());
                             if (result.HasError)
                             {
                                 this.FailNotification(result.Error.Message);
@@ -2051,7 +2051,7 @@ sealed class ApplicationView : Component<ApplicationState>
                 return "Select any component.";
             }
 
-            var result = await NextJs_with_Tailwind.CalculateElementTsxCode(state.ProjectId, CurrentVisualElement);
+            var result = await TsxExporter.CalculateElementTsxCode(state.ProjectId, CurrentVisualElement);
             if (result.HasError)
             {
                 return result.Error.Message;

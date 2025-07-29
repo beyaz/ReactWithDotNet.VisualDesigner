@@ -8,7 +8,7 @@ public sealed class NextJsExportTest
     [TestMethod]
     public async Task ExportAll()
     {
-        (await NextJs_with_Tailwind.ExportAll(1)).Success.ShouldBeTrue();
+        (await TsxExporter.ExportAll(1)).Success.ShouldBeTrue();
     }
 
     // [TestMethod]
