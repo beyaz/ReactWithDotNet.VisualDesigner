@@ -11,4 +11,8 @@ public sealed record ProjectConfig
     public IReadOnlyDictionary<string, string> Styles { get; init; } = new Dictionary<string, string>();
 
     public IReadOnlyDictionary<string, IReadOnlyList<string>> Suggestions { get; init; } = new Dictionary<string, IReadOnlyList<string>>();
+
+    public bool ExportStylesAsTailwind { get; init; }
+    
+    public bool ExportStylesAsInline { get; init; }
 }

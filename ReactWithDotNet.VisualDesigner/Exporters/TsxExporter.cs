@@ -786,10 +786,10 @@ static class TsxExporter
 
 
 
-        // todo make more configurational or 
+        
         // arrange inline styles
         {
-            if (project.Name?.Contains("BOA.") is true)
+            if (project.ExportStylesAsInline)
             {
                 var result = convertStyleToInlineStyleObject(elementModel);
                 if (result.HasError)
@@ -817,57 +817,60 @@ static class TsxExporter
 
         // arrange tailwind classes
         {
-            List<string> classNames = [];
-
-            var classNameShouldBeTemplateLiteral = false;
-
-            // Add properties
-            foreach (var property in elementModel.Properties)
+            if (project.ExportStylesAsTailwind)
             {
-                var (reactProperty, classNameList) = tryConvertToReactProperty(property);
-                if (classNameList.HasValue)
-                {
-                    classNames.AddRange(classNameList.Value);
-                    continue;
-                }
+                List<string> classNames = [];
 
-                if (reactProperty.HasValue)
-                {
-                    node = node with { Properties = node.Properties.Add(reactProperty.Value) };
-                    continue;
-                }
+                var classNameShouldBeTemplateLiteral = false;
 
-                return new Exception($"PropertyParseError: {property}");
-            }
+                // Add properties
+                foreach (var property in elementModel.Properties)
+                {
+                    var (reactProperty, classNameList) = tryConvertToReactProperty(property);
+                    if (classNameList.HasValue)
+                    {
+                        classNames.AddRange(classNameList.Value);
+                        continue;
+                    }
+
+                    if (reactProperty.HasValue)
+                    {
+                        node = node with { Properties = node.Properties.Add(reactProperty.Value) };
+                        continue;
+                    }
+
+                    return new Exception($"PropertyParseError: {property}");
+                }
 
        
 
-            foreach (var styleItem in elementModel.Styles)
-            {
-                string tailwindClassName;
+                foreach (var styleItem in elementModel.Styles)
                 {
-                    var result = ConvertDesignerStyleItemToTailwindClassName(project, styleItem);
-                    if (result.HasError)
+                    string tailwindClassName;
                     {
-                        return result.Error;
+                        var result = ConvertDesignerStyleItemToTailwindClassName(project, styleItem);
+                        if (result.HasError)
+                        {
+                            return result.Error;
+                        }
+
+                        tailwindClassName = result.Value;
                     }
 
-                    tailwindClassName = result.Value;
+                    if (tailwindClassName.StartsWith("${"))
+                    {
+                        classNameShouldBeTemplateLiteral = true;
+                    }
+
+                    classNames.Add(tailwindClassName);
                 }
 
-                if (tailwindClassName.StartsWith("${"))
+                if (classNames.Count > 0)
                 {
-                    classNameShouldBeTemplateLiteral = true;
+                    var firstLastChar = classNameShouldBeTemplateLiteral ? "`" : "\"";
+
+                    node = node with { Properties = node.Properties.Add(new() { Name = "className", Value = firstLastChar + string.Join(" ", classNames) + firstLastChar }) };
                 }
-
-                classNames.Add(tailwindClassName);
-            }
-
-            if (classNames.Count > 0)
-            {
-                var firstLastChar = classNameShouldBeTemplateLiteral ? "`" : "\"";
-
-                node = node with { Properties = node.Properties.Add(new() { Name = "className", Value = firstLastChar + string.Join(" ", classNames) + firstLastChar }) };
             }
         }
         
