@@ -145,7 +145,7 @@ static class TsxExporter
 
         rootNode = arrangeImageAndLinkTags(rootNode);
 
-        return await ConvertReactNodeModelToTsxCode(project,rootNode, null, 2);
+        return await ConvertReactNodeModelToTsxCode(project, rootNode, null, 2);
 
         static ReactNode arrangeImageAndLinkTags(ReactNode node)
         {
@@ -697,7 +697,7 @@ static class TsxExporter
             {
                 return $"{TryClearRawStringValue(text)}";
             }
-            
+
             if (!IsStringValue(text))
             {
                 return $"{{{text}}}";
@@ -799,19 +799,18 @@ static class TsxExporter
         {
             if (project.ExportStylesAsInline)
             {
-                
                 // Transfer properties
                 foreach (var property in elementModel.Properties)
                 {
                     var propertyIsSuccessfullyParsed = false;
-                    
+
                     foreach (var (name, value) in TryParseProperty(property))
                     {
                         node = node with
                         {
                             Properties = node.Properties.Add(new()
                             {
-                                Name = name, 
+                                Name  = name,
                                 Value = value
                             })
                         };
@@ -821,11 +820,10 @@ static class TsxExporter
 
                     if (!propertyIsSuccessfullyParsed)
                     {
-                        return new Exception($"PropertyParseError: {property}");    
+                        return new Exception($"PropertyParseError: {property}");
                     }
-                    
                 }
-                
+
                 var result = convertStyleToInlineStyleObject(elementModel);
                 if (result.HasError)
                 {
@@ -833,7 +831,7 @@ static class TsxExporter
                 }
 
                 elementModel = result.Value.modifiedElementModel;
-                
+
                 var inlineStyle = result.Value.inlineStyle;
 
                 if (inlineStyle.Any())
@@ -868,7 +866,7 @@ static class TsxExporter
                             return new Exception($"PropertyParseError: {property}");
                         }
 
-                        name = parseResult.Value.Name;
+                        name  = parseResult.Value.Name;
                         value = parseResult.Value.Value;
                     }
 
@@ -877,8 +875,8 @@ static class TsxExporter
                         classNames.AddRange(value.Split(" ", StringSplitOptions.RemoveEmptyEntries));
                         continue;
                     }
-                    
-                    node = node with { Properties = node.Properties.Add(new() { Name = name, Value = value}) };
+
+                    node = node with { Properties = node.Properties.Add(new() { Name = name, Value = value }) };
                 }
 
                 foreach (var styleItem in elementModel.Styles)
