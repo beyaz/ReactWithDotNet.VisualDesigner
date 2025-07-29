@@ -834,20 +834,35 @@ static class TsxExporter
                 // Add properties
                 foreach (var property in elementModel.Properties)
                 {
-                    var (reactProperty, classNameList) = tryConvertToReactProperty(property);
-                    if (classNameList.HasValue)
+                    string name, value;
                     {
-                        classNames.AddRange(classNameList.Value);
+                        var parseResult = TryParseProperty(property);
+                        if (parseResult.HasNoValue)
+                        {
+                            return new Exception($"PropertyParseError: {property}");
+                        }
+
+                        name = parseResult.Value.Name;
+                        value = parseResult.Value.Value;
+                    }
+
+                    if (name == "class")
+                    {
+                        classNames.AddRange(value.Split(" ", StringSplitOptions.RemoveEmptyEntries));
                         continue;
                     }
 
-                    if (reactProperty.HasValue)
-                    {
-                        node = node with { Properties = node.Properties.Add(reactProperty.Value) };
-                        continue;
-                    }
-
-                    return new Exception($"PropertyParseError: {property}");
+                    //if (name == "w")
+                    //{
+                    //    name = "width";
+                    //}
+                    
+                    //if (name == "h")
+                    //{
+                    //    name = "height";
+                    //}
+                    
+                    node = node with { Properties = node.Properties.Add(new() { Name = name, Value = value}) };
                 }
 
                 foreach (var styleItem in elementModel.Styles)
@@ -921,34 +936,6 @@ static class TsxExporter
         }
 
         return node;
-
-        static (Maybe<ReactProperty> reactProperty, Maybe<IReadOnlyList<string>> classNames) tryConvertToReactProperty(string property)
-        {
-            var parseResult = TryParseProperty(property);
-            if (parseResult.HasNoValue)
-            {
-                return (None, None);
-            }
-
-            var (name, value) = parseResult.Value;
-
-            if (name == "class")
-            {
-                return (None, value.Split(" ", StringSplitOptions.RemoveEmptyEntries));
-            }
-
-            if (name is "w" or "width")
-            {
-                return (new ReactProperty { Name = "width", Value = value }, None);
-            }
-
-            if (name is "h" or "height")
-            {
-                return (new ReactProperty { Name = "height", Value = value }, None);
-            }
-
-            return (new ReactProperty { Name = name, Value = value }, None);
-        }
     }
 
     static Result<string> InjectRender(IReadOnlyList<string> fileContent, string targetComponentName, IReadOnlyList<string> linesToInject)
