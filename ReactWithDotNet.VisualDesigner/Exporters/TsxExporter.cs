@@ -805,13 +805,12 @@ static class TsxExporter
                     return result.Error;
                 }
 
-                var modifiedElementModel = result.Value.modifiedElementModel;
+                elementModel = result.Value.modifiedElementModel;
+                
                 var inlineStyle = result.Value.inlineStyle;
 
-                elementModel = modifiedElementModel;
                 if (inlineStyle.Any())
                 {
-                    // todo: fix et {{
                     var inlineStyleProperty = new ReactProperty
                     {
                         Name  = "style",
