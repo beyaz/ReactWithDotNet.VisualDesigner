@@ -478,12 +478,6 @@ static class NextJs_with_Tailwind
                                 continue;
                             }
                         }
-
-                        if ((propertyType == typeof(UnionProp<string, double?>) || propertyType == typeof(UnionProp<string, double>)) && double.TryParse(propertyValue, out _))
-                        {
-                            propsAsText.Add($"{propertyName}={{{propertyValue}}}");
-                            continue;
-                        }
                     }
                 }
                 
