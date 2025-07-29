@@ -11,7 +11,7 @@ public sealed class NextJsExportTest
         (await NextJs_with_Tailwind.ExportAll(1)).Success.ShouldBeTrue();
     }
 
-    //[TestMethod]
+    [TestMethod]
     public async Task FixAll()
     {
         foreach (var component in await Store.GetAllComponentsInProject(1))
@@ -32,22 +32,19 @@ public sealed class NextJsExportTest
             var result = TryParseProperty(model.Properties[i].Trim());
             if (result.HasValue)
             {
-                var name = result.Value.Name.Trim();
-
-                if (name == "d-text")
+                if (IsConnectedValue(result.Value.Value))
                 {
-                    if (IsStringValue(result.Value.Value))
-                    {
-                        //model.Properties[i] = "d-text: " + "t("+ '"' + TryClearStringValue(result.Value.Value) + '"' + ")";
-                    }
-                    
+                    model = model with { Properties = model.Properties.SetItem(i, result.Value.Name + ": " + ClearConnectedValue(result.Value.Value)) };
                 }
             }
         }
 
-        foreach (var child in model.Children)
+        for (var i = 0; i < model.Children.Count; i++)
         {
-            Fix(child);
+            model = model with
+            {
+                Children = model.Children.SetItem(i, Fix(model.Children[i]))
+            };
         }
 
         return model;
