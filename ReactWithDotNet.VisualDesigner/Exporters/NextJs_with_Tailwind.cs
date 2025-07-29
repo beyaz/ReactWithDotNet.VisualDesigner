@@ -487,12 +487,6 @@ static class NextJs_with_Tailwind
                     }
                 }
                 
-                if (IsConnectedValue(propertyValue))
-                {
-                    propsAsText.Add($"{propertyName}={propertyValue}");
-                    continue;
-                }
-
                 propsAsText.Add($"{propertyName}={{{propertyValue}}}");
             }
 
