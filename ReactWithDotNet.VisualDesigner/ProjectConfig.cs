@@ -15,4 +15,6 @@ public sealed record ProjectConfig
     public bool ExportStylesAsTailwind { get; init; }
     
     public bool ExportStylesAsInline { get; init; }
+    
+    public string TranslationFunctionName { get; init; }
 }

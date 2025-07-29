@@ -145,7 +145,7 @@ static class TsxExporter
 
         rootNode = arrangeImageAndLinkTags(rootNode);
 
-        return await ConvertReactNodeModelToTsxCode(rootNode, null, 2);
+        return await ConvertReactNodeModelToTsxCode(project,rootNode, null, 2);
 
         static ReactNode arrangeImageAndLinkTags(ReactNode node)
         {
@@ -266,7 +266,7 @@ static class TsxExporter
         return (filePath, fileNewContent);
     }
 
-    static async Task<Result<IReadOnlyList<string>>> ConvertReactNodeModelToTsxCode(ReactNode node, ReactNode parentNode, int indentLevel)
+    static async Task<Result<IReadOnlyList<string>>> ConvertReactNodeModelToTsxCode(ProjectConfig project, ReactNode node, ReactNode parentNode, int indentLevel)
     {
         var nodeTag = node.Tag;
 
@@ -274,7 +274,7 @@ static class TsxExporter
         {
             return new List<string>
             {
-                $"{indent(indentLevel)}{asFinalText(node.Children[0].Text)}"
+                $"{indent(indentLevel)}{asFinalText(project, node.Children[0].Text)}"
             };
         }
 
@@ -284,7 +284,7 @@ static class TsxExporter
             {
                 return new List<string>
                 {
-                    $"{indent(indentLevel)}{asFinalText(node.Text)}"
+                    $"{indent(indentLevel)}{asFinalText(project, node.Text)}"
                 };
             }
 
@@ -307,7 +307,7 @@ static class TsxExporter
 
             IReadOnlyList<string> innerLines;
             {
-                var result = await ConvertReactNodeModelToTsxCode(node, parentNode, indentLevel);
+                var result = await ConvertReactNodeModelToTsxCode(project, node, parentNode, indentLevel);
                 if (result.HasError)
                 {
                     return result.Error;
@@ -336,7 +336,7 @@ static class TsxExporter
 
             IReadOnlyList<string> innerLines;
             {
-                var result = await ConvertReactNodeModelToTsxCode(node, parentNode, indentLevel);
+                var result = await ConvertReactNodeModelToTsxCode(project, node, parentNode, indentLevel);
                 if (result.HasError)
                 {
                     return result.Error;
@@ -370,7 +370,7 @@ static class TsxExporter
 
                 IReadOnlyList<string> innerLines;
                 {
-                    var result = await ConvertReactNodeModelToTsxCode(node, parentNode, indentLevel);
+                    var result = await ConvertReactNodeModelToTsxCode(project, node, parentNode, indentLevel);
                     if (result.HasError)
                     {
                         return result.Error;
@@ -560,7 +560,7 @@ static class TsxExporter
                     var childrenText = node.Children[0].Text + string.Empty;
                     if (textProperty is not null)
                     {
-                        childrenText = asFinalText(ClearConnectedValue(textProperty.Value));
+                        childrenText = asFinalText(project, ClearConnectedValue(textProperty.Value));
                     }
 
                     if (IsConnectedValue(childrenText))
@@ -625,7 +625,7 @@ static class TsxExporter
             {
                 IReadOnlyList<string> childTsx;
                 {
-                    var result = await ConvertReactNodeModelToTsxCode(child, node, indentLevel + 1);
+                    var result = await ConvertReactNodeModelToTsxCode(project, child, node, indentLevel + 1);
                     if (result.HasError)
                     {
                         return result.Error;
@@ -691,7 +691,7 @@ static class TsxExporter
             }
         }
 
-        static string asFinalText(string text)
+        static string asFinalText(ProjectConfig project, string text)
         {
             if (IsRawStringValue(text))
             {
@@ -703,7 +703,18 @@ static class TsxExporter
                 return $"{{{text}}}";
             }
 
-            return $"{{t(\"{TryClearStringValue(text)}\")}}";
+            // try to export with translation function
+            {
+                var translateFunction = project.TranslationFunctionName;
+                {
+                    if (translateFunction.HasValue())
+                    {
+                        return $"{{{translateFunction.Trim()}(\"{TryClearStringValue(text)}\")}}";
+                    }
+                }
+            }
+
+            return "{" + '"' + TryClearStringValue(text) + '"' + "}";
         }
 
         static string indent(int indentLevel)
