@@ -457,13 +457,7 @@ static class NextJs_with_Tailwind
                     propsAsText.Add($"{propertyName}=\"{TryClearStringValue(propertyValue)}\"");
                     continue;
                 }
-
-                if (IsConnectedValue(propertyValue))
-                {
-                    propsAsText.Add($"{propertyName}={propertyValue}");
-                    continue;
-                }
-
+                
                 if (IsStringTemplate(propertyValue))
                 {
                     propsAsText.Add($"{propertyName}={{{propertyValue}}}");
@@ -491,6 +485,12 @@ static class NextJs_with_Tailwind
                             continue;
                         }
                     }
+                }
+                
+                if (IsConnectedValue(propertyValue))
+                {
+                    propsAsText.Add($"{propertyName}={propertyValue}");
+                    continue;
                 }
 
                 propsAsText.Add($"{propertyName}={{{propertyValue}}}");
