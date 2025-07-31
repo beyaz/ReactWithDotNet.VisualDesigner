@@ -411,7 +411,7 @@ sealed class ApplicationPreview : Component
                     data = data with { propValue = propRealValue };
                 }
 
-                data = await RunWhile(data, x => !x.IsProcessed,
+                var result = await RunWhile(data, x => !x.IsProcessed,
                 [
                     tryImportChildrenFromParentScope,
                     itemSourceDesignTimeCount,
@@ -420,6 +420,11 @@ sealed class ApplicationPreview : Component
                     processInputType,
                     tryProcessCommonHtmlProperties
                 ]);
+                if (result.HasError)
+                {
+                    return result.Error;
+                }
+                data = result.Value;
 
                 if (data.IsProcessed)
                 {
@@ -583,7 +588,7 @@ sealed class ApplicationPreview : Component
                     return data;
                 }
 
-                static async Task<PropertyProcessScope> tryProcessImage(PropertyProcessScope data)
+                static async Task<Result<PropertyProcessScope>> tryProcessImage(PropertyProcessScope data)
                 {
                     var propName = data.propName;
                     var propValue = data.propValue;

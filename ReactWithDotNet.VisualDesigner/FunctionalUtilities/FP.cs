@@ -449,17 +449,23 @@ static class FP
         return selector(result.Value);
     }
    
-    public static async Task<TValue> RunWhile<TValue>( TValue value, Func<TValue, bool> canContinueToExecute, Pipe<TValue, TValue> pipe)
+    public static async Task<Result<TValue>> RunWhile<TValue>( TValue value, Func<TValue, bool> canContinueToExecute, Pipe<TValue, TValue> pipe)
     {
-        foreach (Func<TValue, Task<TValue>> item in pipe)
+        foreach (Func<TValue, Task<Result<TValue>>> item in pipe)
         {
             if (!canContinueToExecute(value))
             {
                 return value;
             }
             
-            value = await item(value);
-           
+            var result = await item(value);
+            if (result.HasError)
+            {
+                return result.Error;
+            }
+            
+            value = result.Value;
+
         }
 
         return value;
@@ -467,16 +473,18 @@ static class FP
     
 }
 
-public sealed record Pipe<Tin, Tout>: IEnumerable<Func<Tin, Task<Tout>>>
+public sealed record Pipe<Tin, Tout>: IEnumerable<Func<Tin, Task<Result<Tout>>>>
 {
-    readonly List<Func<Tin, Task<Tout>>> _items = [];
+    readonly List<Func<Tin, Task<Result<Tout>>>> _items = [];
     
     public void Add(Func<Tin, Tout> value)
     {
-        _items.Add(x => Task.FromResult(value(x)));
+        var fn = (Tin x) => Task.FromResult(Result.From(value(x)));
+        
+        _items.Add(fn);
     }
     
-    public void Add(Func<Tin, Task<Tout>> value)
+    public void Add(Func<Tin, Task<Result<Tout>>> value)
     {
         _items.Add(value);
     }
@@ -486,7 +494,7 @@ public sealed record Pipe<Tin, Tout>: IEnumerable<Func<Tin, Task<Tout>>>
         return _items.GetEnumerator();
     }
 
-    IEnumerator<Func<Tin, Task<Tout>>> IEnumerable<Func<Tin, Task<Tout>>>.GetEnumerator()
+    IEnumerator<Func<Tin, Task<Result<Tout>>>> IEnumerable<Func<Tin, Task<Result<Tout>>>>.GetEnumerator()
     {
         return _items.GetEnumerator();
     }
