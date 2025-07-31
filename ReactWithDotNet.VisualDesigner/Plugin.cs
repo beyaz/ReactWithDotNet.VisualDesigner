@@ -255,6 +255,10 @@ static class Plugin
     {
         public static readonly IReadOnlyList<(Type type, Func<IReadOnlyList<string>> propSuggestions)> AllTypes =
         [
+            // NextJsSupport
+            (typeof(Image), Image.GetPropSuggestions),
+            (typeof(Link), Link.GetPropSuggestions),
+            
             (typeof(BTypography), BTypography.GetPropSuggestions),
             (typeof(BDigitalGrid), BDigitalGrid.GetPropSuggestions),
             (typeof(BasePage), BasePage.GetPropSuggestions),
@@ -341,6 +345,67 @@ static class Plugin
             return (IReadOnlyList<string>)methodInfo.Invoke(null, []);
         }
 
+        sealed class Image : PluginComponentBase
+        {
+            public string src { get; set; }
+            
+            public string alt { get; set; }
+            
+            public string width { get; set; }
+            
+            public string height { get; set; }
+
+            public bool? fill { get; set; }
+            
+            public string className { get; set; }
+
+            public static IReadOnlyList<string> GetPropSuggestions()
+            {
+                return
+                [
+                    
+                ];
+            }
+
+            protected override Element render()
+            {
+                return new img
+                {
+                    src=src,
+                    alt = alt,
+                    width = width,
+                    height = height,
+                    className = className
+                } + When(fill is true, SizeFull);
+            }
+        }
+        
+        sealed class Link : PluginComponentBase
+        {
+            public string href { get; set; }
+            public string target { get; set; }
+            
+            public string className { get; set; }
+
+            public static IReadOnlyList<string> GetPropSuggestions()
+            {
+                return
+                [
+                    
+                ];
+            }
+
+            protected override Element render()
+            {
+                return new a
+                {
+                    href      = href,
+                    target    = target,
+                    className = className
+                };
+            }
+        }
+        
         sealed class BAlert : PluginComponentBase
         {
             public string severity { get; set; }
