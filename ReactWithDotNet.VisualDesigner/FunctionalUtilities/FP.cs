@@ -490,5 +490,4 @@ public sealed record Pipe<Tin, Tout>: IEnumerable<Func<Tin, Task<Tout>>>
     {
         return _items.GetEnumerator();
     }
-
 }
