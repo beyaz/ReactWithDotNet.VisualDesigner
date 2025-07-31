@@ -26,6 +26,9 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
     public Func<Task> MouseLeave { get; init; }
 
     [CustomEvent]
+    public Func<string, Task> NavigateToComponent { get; init; }
+
+    [CustomEvent]
     public OnTreeItemDelete OnDelete { get; init; }
 
     [CustomEvent]
@@ -35,9 +38,6 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
 
     [CustomEvent]
     public Func<string, Task> SelectionChanged { get; init; }
-    
-    [CustomEvent]
-    public Func<string, Task> NavigateToComponent { get; init; }
 
     [CustomEvent]
     public OnTreeItemHover TreeItemHover { get; init; }
@@ -51,7 +51,7 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
         {
             state.CollapsedNodes.RemoveAll(path => path != SelectedPath && SelectedPath.StartsWith(path, StringComparison.OrdinalIgnoreCase));
         }
-        
+
         return Task.CompletedTask;
     }
 
@@ -90,6 +90,16 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
 
             state.CopiedTreeItemPath = null;
         }
+
+        return Task.CompletedTask;
+    }
+
+    [StopPropagation]
+    Task OnDoubleClicked(MouseEvent e)
+    {
+        var selectedPath = e.currentTarget.id;
+
+        DispatchEvent(NavigateToComponent, [selectedPath]);
 
         return Task.CompletedTask;
     }
@@ -263,7 +273,7 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
         }
 
         var isDesignerComponent = TryReadTagAsDesignerComponentId(node).Any();
-        
+
         var returnList = new List<Element>
         {
             new FlexColumn(PaddingLeft(indent * 16), Id(path), OnClick(OnTreeItemClicked), OnMouseEnter(OnMouseEnterHandler))
@@ -298,7 +308,7 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
                 OnDrop(OnDropped),
 
                 afterPositionElement,
-                
+
                 When(isDesignerComponent, OnDoubleClick(OnDoubleClicked))
             }
         };
@@ -324,12 +334,20 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
 
         static Element calculateVisualElementIcon(VisualElementModel node)
         {
-            if (node.Tag == "img" || Plugin.IsImageTag(node.Tag))
+            {
+                var icon = Plugin.TryGetIconForElementTreeNode(node);
+                if (icon is not null)
+                {
+                    return icon + Size(16) + Color(Gray300);
+                }
+            }
+
+            if (node.Tag == "img")
             {
                 return new IconImage() + Size(16) + Color(Gray300);
             }
 
-            if (node.Tag == "a" || Plugin.IsLinkTag(node.Tag))
+            if (node.Tag == "a")
             {
                 return new IconLink() + Size(16) + Color(Gray300);
             }
@@ -351,11 +369,11 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
 
             var styles = node.Styles;
 
-            var hasCol = styles.Contains("col") || styles.Contains("flex-col-centered")|| Plugin.CanElementTreeIconBePresentAsColumn(node);
-            var hasRow = styles.Contains("row") || styles.Contains("flex-row-centered") || Plugin.CanElementTreeIconBePresentAsRow(node);
+            var hasCol = styles.Contains("col") || styles.Contains("flex-col-centered");
+            var hasRow = styles.Contains("row") || styles.Contains("flex-row-centered");
 
             var hasFlex = styles.Any(x => TryParseProperty(x).Is("display", "flex") || TryParseProperty(x).Is("display", "inline-flex"));
-            
+
             var hasGrid = styles.Any(x => TryParseProperty(x).Is("display", "grid") || TryParseProperty(x).Is("display", "inline-grid"));
 
             var hasFlexDirectionColumn = styles.Any(x => TryParseProperty(x).Is("flex-direction", "column"));
@@ -370,7 +388,7 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
             {
                 return new IconGrid() + Size(16) + Color(Gray300);
             }
-            
+
             if (hasFlexDirectionColumn || hasCol)
             {
                 return new IconFlexColumn() + Size(16) + Color(Gray300);
@@ -393,16 +411,6 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
 
             return null;
         }
-    }
-
-    [StopPropagation]
-    Task OnDoubleClicked(MouseEvent e)
-    {
-        var selectedPath = e.currentTarget.id;
-
-        DispatchEvent(NavigateToComponent, [selectedPath]);
-
-        return Task.CompletedTask;
     }
 
     internal class State

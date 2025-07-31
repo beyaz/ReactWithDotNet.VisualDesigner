@@ -192,6 +192,11 @@ static class Plugin
         return Components.AllTypes.Select(x => x.type.Name).ToList();
     }
 
+    public static bool IsImage(object component)
+    {
+        return component is Components.Image;
+    }
+
     public static Element TryCreateElementForPreview(string tag, string id, MouseEventHandler onMouseClick)
     {
         var type = Components.AllTypes.Select(x => x.type).FirstOrDefault(t => t.Name.Equals(tag, StringComparison.OrdinalIgnoreCase));
@@ -209,6 +214,50 @@ static class Plugin
         }
 
         return component;
+    }
+
+    public static Element TryGetIconForElementTreeNode(VisualElementModel node)
+    {
+        if (node.Tag == nameof(Components.BDigitalGroupView))
+        {
+            return new Icons.Panel();
+        }
+
+        if (node.Tag == nameof(Components.Link))
+        {
+            return new IconLink();
+        }
+
+        if (node.Tag == nameof(Components.Image) || node.Tag == nameof(Components.BIcon))
+        {
+            return new IconImage();
+        }
+
+        if (node.Tag is nameof(Components.BDigitalGrid))
+        {
+            foreach (var p in node.Properties)
+            {
+                foreach (var (name, value) in TryParseProperty(p))
+                {
+                    if (name == "direction")
+                    {
+                        if (TryClearStringValue(value).Contains("column", StringComparison.OrdinalIgnoreCase))
+                        {
+                            return new IconFlexColumn();
+                        }
+
+                        if (TryClearStringValue(value).Contains("row", StringComparison.OrdinalIgnoreCase))
+                        {
+                            return new IconFlexRow();
+                        }
+                    }
+                }
+            }
+
+            return new IconFlexRow();
+        }
+
+        return null;
     }
 
     static Task<IReadOnlyList<MessagingInfo>> GetMessagingByGroupName(string messagingGroupName)
@@ -251,10 +300,6 @@ static class Plugin
         }
     }
 
-    public static bool IsImage(object component)
-    {
-        return component is Components.Image;
-    }
     static class Components
     {
         public static readonly IReadOnlyList<(Type type, Func<IReadOnlyList<string>> propSuggestions)> AllTypes =
@@ -262,7 +307,7 @@ static class Plugin
             // NextJsSupport
             (typeof(Image), Image.GetPropSuggestions),
             (typeof(Link), Link.GetPropSuggestions),
-            
+
             (typeof(BTypography), BTypography.GetPropSuggestions),
             (typeof(BDigitalGrid), BDigitalGrid.GetPropSuggestions),
             (typeof(BasePage), BasePage.GetPropSuggestions),
@@ -349,25 +394,175 @@ static class Plugin
             return (IReadOnlyList<string>)methodInfo.Invoke(null, []);
         }
 
-        public sealed class Image : PluginComponentBase
+        public sealed class BDigitalGrid : PluginComponentBase
         {
-            public string src { get; set; }
-            
-            public string alt { get; set; }
-            
-            public string width { get; set; }
-            
-            public string height { get; set; }
+            public string alignItems { get; set; }
+            public bool? container { get; set; }
 
-            public bool? fill { get; set; }
-            
-            public string className { get; set; }
+            public string direction { get; set; }
+
+            public bool? item { get; set; }
+
+            public string justifyContent { get; set; }
+
+            public int? lg { get; set; }
+
+            public int? md { get; set; }
+
+            public int? sm { get; set; }
+
+            public int? spacing { get; set; }
+
+            public int? xl { get; set; }
+
+            public int? xs { get; set; }
 
             public static IReadOnlyList<string> GetPropSuggestions()
             {
                 return
                 [
-                    
+                    $"{nameof(container)}: true",
+                    $"{nameof(item)}: true",
+                    $"{nameof(direction)}: 'column'",
+                    $"{nameof(direction)}: 'row'",
+
+                    $"{nameof(justifyContent)}: 'flex-start'",
+                    $"{nameof(justifyContent)}: 'center'",
+                    $"{nameof(justifyContent)}: 'flex-end'",
+                    $"{nameof(justifyContent)}: 'space-between'",
+                    $"{nameof(justifyContent)}: 'space-around'",
+                    $"{nameof(justifyContent)}: 'space-evenly'",
+
+                    $"{nameof(alignItems)}: 'flex-start'",
+                    $"{nameof(alignItems)}: 'stretch'",
+                    $"{nameof(alignItems)}: 'flex-end'",
+                    $"{nameof(alignItems)}: 'center'",
+                    $"{nameof(alignItems)}: 'baseline'",
+
+                    $"{nameof(spacing)}: 1",
+                    $"{nameof(spacing)}: 2",
+                    $"{nameof(spacing)}: 3",
+                    $"{nameof(spacing)}: 4",
+                    $"{nameof(spacing)}: 5",
+                    $"{nameof(spacing)}: 6"
+                ];
+            }
+
+            protected override Element render()
+            {
+                return new Grid
+                {
+                    children = { children },
+
+                    container      = container,
+                    item           = item,
+                    direction      = direction,
+                    justifyContent = justifyContent,
+                    alignItems     = alignItems,
+                    spacing        = spacing,
+                    xs             = xs,
+                    sm             = sm,
+                    md             = md,
+                    lg             = lg,
+                    xl             = xl,
+
+                    id      = id,
+                    onClick = onMouseClick
+                };
+            }
+        }
+
+        public sealed class BDigitalGroupView : PluginComponentBase
+        {
+            public string title { get; set; }
+
+            public static IReadOnlyList<string> GetPropSuggestions()
+            {
+                return
+                [
+                    $"{nameof(title)}: '?'"
+                ];
+            }
+
+            protected override Element render()
+            {
+                return new FlexColumn(Background(White), BorderRadius(8), Border(1, solid, Gray200), Padding(16), Id(id), OnClick(onMouseClick))
+                {
+                    children =
+                    {
+                        title is null ? null : new div { title },
+                        children
+                    }
+                };
+            }
+        }
+
+        public sealed class BIcon : PluginComponentBase
+        {
+            public string name { get; set; }
+
+            public static IReadOnlyList<string> GetPropSuggestions()
+            {
+                return
+                [
+                    $"{nameof(name)}: 'TimerRounded'",
+                    $"{nameof(name)}: 'content_copy'"
+                ];
+            }
+
+            protected override Element render()
+            {
+                return new FlexRowCentered(Size(24), Id(id), OnClick(onMouseClick))
+                {
+                    createSvg
+                };
+            }
+
+            Element createSvg()
+            {
+                if (name == "TimerRounded")
+                {
+                    return new svg(ViewBox(0, 0, 24, 24), Fill("currentColor"), svg.Size(24))
+                    {
+                        new path
+                        {
+                            d = "M15.07 1H8.93c-.52 0-.93.41-.93.93s.41.93.93.93h6.14c.52 0 .93-.41.93-.93S15.59 1 15.07 1Zm-2.15 9.45V7.5c0-.28-.22-.5-.5-.5s-.5.22-.5.5v3.5c0 .13.05.26.15.35l2.5 2.5c.2.2.51.2.71 0 .2-.2.2-.51 0-.71l-2.36-2.36ZM12 4C7.59 4 4 7.59 4 12s3.59 8 8 8 8-3.59 8-8c0-1.9-.66-3.63-1.76-5.01l1.29-1.29c.2-.2.2-.51 0-.71s-.51-.2-.71 0l-1.3 1.3C16.63 5.21 14.39 4 12 4Zm0 14c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6Z"
+                        }
+                    };
+                }
+
+                if (name == "content_copy")
+                {
+                    return new svg(Fill("currentColor"), ViewBox(0, 0, 24, 24), svg.Size(24))
+                    {
+                        new path
+                        {
+                            d = "M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1Zm3 4H8c-1.1 0-2 .9-2 2v16h14c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2Zm0 18H8V7h11v16Z"
+                        }
+                    };
+                }
+
+                return name;
+            }
+        }
+
+        public sealed class Image : PluginComponentBase
+        {
+            public string alt { get; set; }
+
+            public string className { get; set; }
+
+            public bool? fill { get; set; }
+
+            public string height { get; set; }
+            public string src { get; set; }
+
+            public string width { get; set; }
+
+            public static IReadOnlyList<string> GetPropSuggestions()
+            {
+                return
+                [
                 ];
             }
 
@@ -375,27 +570,25 @@ static class Plugin
             {
                 return new img
                 {
-                    src=src,
-                    alt = alt,
-                    width = width,
-                    height = height,
+                    src       = src,
+                    alt       = alt,
+                    width     = width,
+                    height    = height,
                     className = className
                 } + When(fill is true, SizeFull);
             }
         }
-        
+
         public sealed class Link : PluginComponentBase
         {
+            public string className { get; set; }
             public string href { get; set; }
             public string target { get; set; }
-            
-            public string className { get; set; }
 
             public static IReadOnlyList<string> GetPropSuggestions()
             {
                 return
                 [
-                    
                 ];
             }
 
@@ -409,7 +602,7 @@ static class Plugin
                 };
             }
         }
-        
+
         sealed class BAlert : PluginComponentBase
         {
             public string severity { get; set; }
@@ -489,6 +682,7 @@ static class Plugin
         sealed class BCheckBox : PluginComponentBase
         {
             public string bind { get; set; }
+            
             public string label { get; set; }
 
             public static IReadOnlyList<string> GetPropSuggestions()
@@ -575,109 +769,6 @@ static class Plugin
             }
         }
 
-        public sealed class BDigitalGrid : PluginComponentBase
-        {
-            public string alignItems { get; set; }
-            public bool? container { get; set; }
-
-            public string direction { get; set; }
-
-            public bool? item { get; set; }
-
-            public string justifyContent { get; set; }
-
-            public int? lg { get; set; }
-
-            public int? md { get; set; }
-
-            public int? sm { get; set; }
-
-            public int? spacing { get; set; }
-
-            public int? xl { get; set; }
-
-            public int? xs { get; set; }
-
-            public static IReadOnlyList<string> GetPropSuggestions()
-            {
-                return
-                [
-                    $"{nameof(container)}: true",
-                    $"{nameof(item)}: true",
-                    $"{nameof(direction)}: 'column'",
-                    $"{nameof(direction)}: 'row'",
-
-                    $"{nameof(justifyContent)}: 'flex-start'",
-                    $"{nameof(justifyContent)}: 'center'",
-                    $"{nameof(justifyContent)}: 'flex-end'",
-                    $"{nameof(justifyContent)}: 'space-between'",
-                    $"{nameof(justifyContent)}: 'space-around'",
-                    $"{nameof(justifyContent)}: 'space-evenly'",
-
-                    $"{nameof(alignItems)}: 'flex-start'",
-                    $"{nameof(alignItems)}: 'stretch'",
-                    $"{nameof(alignItems)}: 'flex-end'",
-                    $"{nameof(alignItems)}: 'center'",
-                    $"{nameof(alignItems)}: 'baseline'",
-
-                    $"{nameof(spacing)}: 1",
-                    $"{nameof(spacing)}: 2",
-                    $"{nameof(spacing)}: 3",
-                    $"{nameof(spacing)}: 4",
-                    $"{nameof(spacing)}: 5",
-                    $"{nameof(spacing)}: 6"
-                ];
-            }
-
-            protected override Element render()
-            {
-                return new Grid
-                {
-                    children = { children },
-
-                    container      = container,
-                    item           = item,
-                    direction      = direction,
-                    justifyContent = justifyContent,
-                    alignItems     = alignItems,
-                    spacing        = spacing,
-                    xs             = xs,
-                    sm             = sm,
-                    md             = md,
-                    lg             = lg,
-                    xl             = xl,
-
-                    id      = id,
-                    onClick = onMouseClick
-                };
-            }
-        }
-
-        sealed class BDigitalGroupView : PluginComponentBase
-        {
-            public string title { get; set; }
-
-            public static IReadOnlyList<string> GetPropSuggestions()
-            {
-                return
-                [
-                    $"{nameof(title)}: '?'"
-                ];
-            }
-
-            protected override Element render()
-            {
-                return new FlexColumn(Background(White), BorderRadius(8), Border(1, solid, Gray200), Padding(16), Id(id), OnClick(onMouseClick))
-                {
-                    children =
-                    {
-                        title is null ? null : new div { title },
-                        children
-                    }
-                };
-            }
-        }
-
         sealed class BDigitalMoneyInput : PluginComponentBase
         {
             public string bind { get; set; }
@@ -744,55 +835,6 @@ static class Plugin
             }
         }
 
-        public sealed class BIcon : PluginComponentBase
-        {
-            public string name { get; set; }
-
-            public static IReadOnlyList<string> GetPropSuggestions()
-            {
-                return
-                [
-                    $"{nameof(name)}: 'TimerRounded'",
-                    $"{nameof(name)}: 'content_copy'"
-                ];
-            }
-
-            protected override Element render()
-            {
-                return new FlexRowCentered(Size(24), Id(id), OnClick(onMouseClick))
-                {
-                    createSvg
-                };
-            }
-
-            Element createSvg()
-            {
-                if (name == "TimerRounded")
-                {
-                    return new svg(ViewBox(0, 0, 24, 24), Fill("currentColor"), svg.Size(24))
-                    {
-                        new path
-                        {
-                            d = "M15.07 1H8.93c-.52 0-.93.41-.93.93s.41.93.93.93h6.14c.52 0 .93-.41.93-.93S15.59 1 15.07 1Zm-2.15 9.45V7.5c0-.28-.22-.5-.5-.5s-.5.22-.5.5v3.5c0 .13.05.26.15.35l2.5 2.5c.2.2.51.2.71 0 .2-.2.2-.51 0-.71l-2.36-2.36ZM12 4C7.59 4 4 7.59 4 12s3.59 8 8 8 8-3.59 8-8c0-1.9-.66-3.63-1.76-5.01l1.29-1.29c.2-.2.2-.51 0-.71s-.51-.2-.71 0l-1.3 1.3C16.63 5.21 14.39 4 12 4Zm0 14c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6Z"
-                        }
-                    };
-                }
-
-                if (name == "content_copy")
-                {
-                    return new svg(Fill("currentColor"), ViewBox(0, 0, 24, 24), svg.Size(24))
-                    {
-                        new path
-                        {
-                            d = "M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1Zm3 4H8c-1.1 0-2 .9-2 2v16h14c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2Zm0 18H8V7h11v16Z"
-                        }
-                    };
-                }
-
-                return name;
-            }
-        }
-
         sealed class BInput : PluginComponentBase
         {
             public string autoComplete { get; set; }
@@ -856,6 +898,58 @@ static class Plugin
         }
     }
 
+    static class Icons
+    {
+        public sealed class Panel : PureComponent
+        {
+            protected override Element render()
+            {
+                return new svg(ViewBox(0, 0, 16, 16), Fill(none), svg.Size(16))
+                {
+                    new rect
+                    {
+                        x              = 1,
+                        y              = 2,
+                        width          = 14,
+                        height         = 12,
+                        rx             = 1,
+                        stroke         = "currentColor",
+                        strokeWidth    = 1,
+                        strokeLinecap  = "round",
+                        strokeLinejoin = "round"
+                    },
+                    new line
+                    {
+                        x1             = 1,
+                        y1             = 4.5,
+                        x2             = 15,
+                        y2             = 4.5,
+                        stroke         = "currentColor",
+                        strokeWidth    = 1,
+                        strokeLinecap  = "round",
+                        strokeLinejoin = "round"
+                    },
+                    new rect
+                    {
+                        x      = 3,
+                        y      = 7,
+                        width  = 10,
+                        height = 1,
+                        fill   = "currentColor"
+                    },
+                    new rect
+                    {
+                        x      = 3,
+                        y      = 9,
+                        width  = 6,
+                        height = 1,
+                        fill   = "currentColor"
+                    }
+                };
+            }
+        }
+    }
+
     record ComponentMeta
     {
         public IReadOnlyList<PropMeta> Props { get; init; }
@@ -874,61 +968,5 @@ static class Plugin
     {
         public string Description { get; init; }
         public string PropertyName { get; init; }
-    }
-
-    
-    
-    public static bool IsImageTag(string tag)
-    {
-        return tag == nameof(Components.Image) || tag == nameof(Components.BIcon);
-    }
-    
-    public static bool IsLinkTag(string tag)
-    {
-        return tag == nameof(Components.Link);
-    }
-
-    public static bool CanElementTreeIconBePresentAsRow(VisualElementModel node)
-    {
-        if (node.Tag is nameof(Components.BDigitalGrid))
-        {
-            foreach (var p in node.Properties)
-            {
-                foreach (var (name, value) in TryParseProperty(p))
-                {
-                    if (name == "direction")
-                    {
-                        if (TryClearStringValue(value).Contains("row", StringComparison.OrdinalIgnoreCase))
-                        {
-                            return true;
-                        }
-                    }
-                }
-            }
-        }
-
-        return false;
-    }
-    
-    public static bool CanElementTreeIconBePresentAsColumn(VisualElementModel node)
-    {
-        if (node.Tag is nameof(Components.BDigitalGrid))
-        {
-            foreach (var p in node.Properties)
-            {
-                foreach (var (name, value) in TryParseProperty(p))
-                {
-                    if (name == "direction")
-                    {
-                        if (TryClearStringValue(value).Contains("column", StringComparison.OrdinalIgnoreCase))
-                        {
-                            return true;
-                        }
-                    }
-                }
-            }
-        }
-
-        return false;
     }
 }
