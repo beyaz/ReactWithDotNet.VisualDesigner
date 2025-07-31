@@ -27,16 +27,46 @@ public sealed class NextJsExportTest
 
     static VisualElementModel Fix(VisualElementModel model)
     {
-        for (var i = 0; i < model.Properties.Count; i++)
+        if (model.Tag == "a")
         {
-            var result = TryParseProperty(model.Properties[i].Trim());
-            if (result.HasValue)
+            model = model with { Tag = "Link" };
+            
+            var hrefIndex = model.Properties.ToList().FindIndex(x => x.Contains("href:"));
+            foreach (var tuple in TryParseProperty(model.Properties[hrefIndex]))
             {
-                if (IsConnectedValue(result.Value.Value))
+                if (tuple.Value[0] == '/' || tuple.Value[0] == '#')
                 {
-                    model = model with { Properties = model.Properties.SetItem(i, result.Value.Name + ": " + ClearConnectedValue(result.Value.Value)) };
+                    model = model with { Properties = model.Properties.SetItem(hrefIndex, "href: "+'"'+tuple.Value + '"') };
+                }
+                else
+                {
+                    ;
                 }
             }
+            
+            return model;
+        }
+
+        if (model.Tag == "img")
+        {
+            model = model with { Tag = "Image" };
+
+            if (model.Properties.Any(x => x.Contains("width:")) is false &&
+                model.Properties.Any(x => x.Contains("height:")) is false)
+            {
+                model = model with { Properties = model.Properties.Add("fill: true") };
+            }
+
+            var srcIndex = model.Properties.ToList().FindIndex(x => x.Contains("src:"));
+            foreach (var tuple in TryParseProperty(model.Properties[srcIndex]))
+            {
+                if (tuple.Value.Contains("/", StringComparison.OrdinalIgnoreCase) && tuple.Value[0] != '"')
+                {
+                    model = model with { Properties = model.Properties.SetItem(srcIndex, "src: " + '"' + tuple.Value + '"') };
+                }
+            }
+
+            return model;
         }
 
         for (var i = 0; i < model.Children.Count; i++)

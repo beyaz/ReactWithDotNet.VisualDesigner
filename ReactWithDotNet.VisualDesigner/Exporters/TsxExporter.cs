@@ -142,32 +142,9 @@ static class TsxExporter
 
             rootNode = result.Value;
         }
-
-        rootNode = arrangeImageAndLinkTags(rootNode);
-
+        
         return await ConvertReactNodeModelToTsxCode(project, rootNode, null, 2);
 
-        static ReactNode arrangeImageAndLinkTags(ReactNode node)
-        {
-            if (node.Tag == "img")
-            {
-                node = node with { Tag = "Image" };
-                if (!(node.Properties.Any(x => x.Name == "width") && node.Properties.Any(x => x.Name == "height")))
-                {
-                    node = node with { Properties = node.Properties.Add(new() { Name = "fill", Value = "true" }) };
-                }
-            }
-
-            if (node.Tag == "a")
-            {
-                node = node with { Tag = "Link" };
-            }
-
-            return node with
-            {
-                Children = [..node.Children.Select(arrangeImageAndLinkTags)]
-            };
-        }
     }
 
     static async Task<Result<(string filePath, string fileContent)>> CalculateExportInfo(ExportInput input)
