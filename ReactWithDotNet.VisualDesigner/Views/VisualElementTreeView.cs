@@ -351,8 +351,8 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
 
             var styles = node.Styles;
 
-            var hasCol = styles.Contains("col") || styles.Contains("flex-col-centered");
-            var hasRow = styles.Contains("row") || styles.Contains("flex-row-centered");
+            var hasCol = styles.Contains("col") || styles.Contains("flex-col-centered")|| Plugin.CanElementTreeIconBePresentAsColumn(node);
+            var hasRow = styles.Contains("row") || styles.Contains("flex-row-centered") || Plugin.CanElementTreeIconBePresentAsRow(node);
 
             var hasFlex = styles.Any(x => TryParseProperty(x).Is("display", "flex") || TryParseProperty(x).Is("display", "inline-flex"));
             

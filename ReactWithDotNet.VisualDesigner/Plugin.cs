@@ -575,7 +575,7 @@ static class Plugin
             }
         }
 
-        sealed class BDigitalGrid : PluginComponentBase
+        public sealed class BDigitalGrid : PluginComponentBase
         {
             public string alignItems { get; set; }
             public bool? container { get; set; }
@@ -744,7 +744,7 @@ static class Plugin
             }
         }
 
-        sealed class BIcon : PluginComponentBase
+        public sealed class BIcon : PluginComponentBase
         {
             public string name { get; set; }
 
@@ -876,13 +876,59 @@ static class Plugin
         public string PropertyName { get; init; }
     }
 
+    
+    
     public static bool IsImageTag(string tag)
     {
-        return tag == nameof(Components.Image);
+        return tag == nameof(Components.Image) || tag == nameof(Components.BIcon);
     }
     
     public static bool IsLinkTag(string tag)
     {
         return tag == nameof(Components.Link);
+    }
+
+    public static bool CanElementTreeIconBePresentAsRow(VisualElementModel node)
+    {
+        if (node.Tag is nameof(Components.BDigitalGrid))
+        {
+            foreach (var p in node.Properties)
+            {
+                foreach (var (name, value) in TryParseProperty(p))
+                {
+                    if (name == "direction")
+                    {
+                        if (TryClearStringValue(value).Contains("row", StringComparison.OrdinalIgnoreCase))
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+    
+    public static bool CanElementTreeIconBePresentAsColumn(VisualElementModel node)
+    {
+        if (node.Tag is nameof(Components.BDigitalGrid))
+        {
+            foreach (var p in node.Properties)
+            {
+                foreach (var (name, value) in TryParseProperty(p))
+                {
+                    if (name == "direction")
+                    {
+                        if (TryClearStringValue(value).Contains("column", StringComparison.OrdinalIgnoreCase))
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+
+        return false;
     }
 }
