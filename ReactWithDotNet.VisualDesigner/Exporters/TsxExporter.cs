@@ -747,11 +747,6 @@ static class TsxExporter
 
         if (tag == "img")
         {
-            if (!elementModel.Properties.Any(x => x.Contains("alt:")))
-            {
-                elementModel = elementModel with { Properties = elementModel.Properties.Add("alt: \"?\"") };
-            }
-
             var sizeProperty = elementModel.Properties.FirstOrDefault(x => x.Contains("size:"));
             if (sizeProperty is not null)
             {
