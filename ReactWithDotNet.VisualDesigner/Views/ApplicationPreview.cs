@@ -591,38 +591,36 @@ sealed class ApplicationPreview : Component
                     var model = data.model;
                     var element = data.element;
 
-                    if (element is not img elementAsImage)
+                    if (!(element is img || Plugin.IsImage(element)))
                     {
                         return data;
                     }
-
+                    
                     var isValueDouble = double.TryParse(propValue, out var valueAsDouble);
 
-                    if (propName.Equals("h", StringComparison.OrdinalIgnoreCase) ||
-                        propName.Equals("height", StringComparison.OrdinalIgnoreCase))
+                    if (propName.Equals("height", StringComparison.OrdinalIgnoreCase))
                     {
                         if (isValueDouble)
                         {
-                            elementAsImage.height = valueAsDouble + "px";
+                            ReflectionHelper.SetPropertyValue(element, "height", valueAsDouble.AsPixel());
                         }
                         else
                         {
-                            elementAsImage.height = propValue;
+                            ReflectionHelper.SetPropertyValue(element, "height", propValue);
                         }
 
                         return data with { IsProcessed = true };
                     }
 
-                    if (propName.Equals("w", StringComparison.OrdinalIgnoreCase) ||
-                        propName.Equals("width", StringComparison.OrdinalIgnoreCase))
+                    if (propName.Equals("width", StringComparison.OrdinalIgnoreCase))
                     {
                         if (isValueDouble)
                         {
-                            elementAsImage.width = valueAsDouble + "px";
+                            ReflectionHelper.SetPropertyValue(element, "width", valueAsDouble.AsPixel());
                         }
                         else
                         {
-                            elementAsImage.width = propValue;
+                            ReflectionHelper.SetPropertyValue(element, "width", propValue);
                         }
 
                         return data with { IsProcessed = true };
@@ -634,7 +632,8 @@ sealed class ApplicationPreview : Component
                         {
                             foreach (var srcValue in await calculateSrcFromValue(scope, model, propValue))
                             {
-                                elementAsImage.src = srcValue;
+                                ReflectionHelper.SetPropertyValue(element, "src", srcValue);
+                                
                                 return data with { IsProcessed = true };
                             }
                         }
@@ -653,7 +652,8 @@ sealed class ApplicationPreview : Component
                             {
                                 foreach (var srcValue in await calculateSrcFromValue(scope, model, designTimeSrc))
                                 {
-                                    elementAsImage.src = srcValue;
+                                    ReflectionHelper.SetPropertyValue(element, "src", srcValue);
+                                    
                                     return data with { IsProcessed = true };
                                 }
                             }
@@ -663,11 +663,11 @@ sealed class ApplicationPreview : Component
                         {
                             string dummySrc = null;
                             {
-                                foreach (var width in model.Properties.TryGetPropertyValue("width", "w"))
+                                foreach (var width in model.Properties.TryGetPropertyValue("width"))
                                 {
                                     if (int.TryParse(width, out var widthAsNumber))
                                     {
-                                        foreach (var height in model.Properties.TryGetPropertyValue("height", "h"))
+                                        foreach (var height in model.Properties.TryGetPropertyValue("height"))
                                         {
                                             if (int.TryParse(height, out var heightAsNumber))
                                             {
@@ -691,13 +691,13 @@ sealed class ApplicationPreview : Component
 
                             if (dummySrc.HasValue())
                             {
-                                elementAsImage.src = dummySrc;
+                                ReflectionHelper.SetPropertyValue(element, "src", dummySrc);
 
                                 return data with { IsProcessed = true };
                             }
                         }
 
-                        elementAsImage.src = DummySrc(500);
+                        ReflectionHelper.SetPropertyValue(element, "src", DummySrc(500));
 
                         return data with { IsProcessed = true };
 
@@ -901,6 +901,56 @@ sealed class ApplicationPreview : Component
 
         return Task.CompletedTask;
     }
+    
+    static class ReflectionHelper
+    {
+        public static Result SetPropertyValue(object obj, string propertyName, object value)
+        {
+            var type = obj.GetType();
+            
+            var propertyInfo = type.GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
+            if (propertyInfo is null)
+            {
+                return new MissingMemberException(type.FullName + "::" + propertyName);
+            }
+            
+            if (!propertyInfo.CanWrite)
+            {
+                return new MissingMemberException(type.FullName + "::" + propertyName + " has no set property");
+            }
+
+            var propertyType = propertyInfo.PropertyType;
+
+            if (propertyType == typeof(string))
+            {
+                propertyInfo.SetValue(obj, value?.ToString());
+                
+                return Success;
+            }
+
+            if (propertyType == typeof(double) || propertyType == typeof(double?)  && value is double)
+            {
+                propertyInfo.SetValue(obj, value);
+
+                return Success;
+            }
+            
+            if (propertyType == typeof(UnionProp<string, double?>))
+            {
+                if (value is double d)
+                {
+                    propertyInfo.SetValue(obj, (UnionProp<string, double?>)d);
+                    return Success;
+                }
+               
+                propertyInfo.SetValue(obj, (UnionProp<string, double?>)value.ToString());
+
+                return Success;
+            }
+            
+            return new Exception("PropertyTypeNotImplementedForReflection:" + propertyType.FullName);
+        }
+    }
 }
 
 sealed record RenderPreviewScope
@@ -970,3 +1020,4 @@ public class PluginComponentBase : Component
     public string id;
     public MouseEventHandler onMouseClick;
 }
+

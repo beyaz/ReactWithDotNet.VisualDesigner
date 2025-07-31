@@ -251,6 +251,10 @@ static class Plugin
         }
     }
 
+    public static bool IsImage(object component)
+    {
+        return component is Components.Image;
+    }
     static class Components
     {
         public static readonly IReadOnlyList<(Type type, Func<IReadOnlyList<string>> propSuggestions)> AllTypes =
@@ -345,7 +349,7 @@ static class Plugin
             return (IReadOnlyList<string>)methodInfo.Invoke(null, []);
         }
 
-        sealed class Image : PluginComponentBase
+        public sealed class Image : PluginComponentBase
         {
             public string src { get; set; }
             
