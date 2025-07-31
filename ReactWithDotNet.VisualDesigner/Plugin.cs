@@ -384,7 +384,7 @@ static class Plugin
             }
         }
         
-        sealed class Link : PluginComponentBase
+        public sealed class Link : PluginComponentBase
         {
             public string href { get; set; }
             public string target { get; set; }
@@ -874,5 +874,15 @@ static class Plugin
     {
         public string Description { get; init; }
         public string PropertyName { get; init; }
+    }
+
+    public static bool IsImageTag(string tag)
+    {
+        return tag == nameof(Components.Image);
+    }
+    
+    public static bool IsLinkTag(string tag)
+    {
+        return tag == nameof(Components.Link);
     }
 }

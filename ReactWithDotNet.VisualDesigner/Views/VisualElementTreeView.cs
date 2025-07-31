@@ -324,12 +324,12 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
 
         static Element calculateVisualElementIcon(VisualElementModel node)
         {
-            if (node.Tag == "img")
+            if (node.Tag == "img" || Plugin.IsImageTag(node.Tag))
             {
                 return new IconImage() + Size(16) + Color(Gray300);
             }
 
-            if (node.Tag == "a")
+            if (node.Tag == "a" || Plugin.IsLinkTag(node.Tag))
             {
                 return new IconLink() + Size(16) + Color(Gray300);
             }
