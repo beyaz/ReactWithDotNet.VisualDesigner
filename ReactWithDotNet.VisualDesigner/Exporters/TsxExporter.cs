@@ -744,20 +744,7 @@ static class TsxExporter
     {
         // Open tag
         var tag = elementModel.Tag;
-
-        if (tag == "img")
-        {
-            var sizeProperty = elementModel.Properties.FirstOrDefault(x => x.Contains("size:"));
-            if (sizeProperty is not null)
-            {
-                elementModel = elementModel with { Properties = elementModel.Properties.Remove(sizeProperty) };
-
-                elementModel = elementModel with { Properties = elementModel.Properties.Add(sizeProperty.Replace("size:", "width:")) };
-
-                elementModel = elementModel with { Properties = elementModel.Properties.Add(sizeProperty.Replace("size:", "height:")) };
-            }
-        }
-
+        
         var node = new ReactNode
         {
             Tag = tag,
