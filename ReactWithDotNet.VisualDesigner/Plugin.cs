@@ -500,7 +500,22 @@ static class Plugin
         public sealed class BIcon : PluginComponentBase
         {
             public string name { get; set; }
+            
+            public string size { get; set; }
 
+            double GetSize()
+            {
+                if (size.HasValue())
+                {
+                    if (double.TryParse(size, out var d))
+                    {
+                        return d;
+                    }
+                }
+
+                return 24;
+            }
+            
             public static IReadOnlyList<string> GetPropSuggestions()
             {
                 return
@@ -512,7 +527,9 @@ static class Plugin
 
             protected override Element render()
             {
-                return new FlexRowCentered(Size(24), Id(id), OnClick(onMouseClick))
+                
+                
+                return new FlexRowCentered(Size(GetSize()), Id(id), OnClick(onMouseClick))
                 {
                     createSvg
                 };
@@ -522,7 +539,7 @@ static class Plugin
             {
                 if (name == "TimerRounded")
                 {
-                    return new svg(ViewBox(0, 0, 24, 24), Fill("currentColor"), svg.Size(24))
+                    return new svg(ViewBox(0, 0, 24, 24), Fill("currentColor"), svg.Size(GetSize()))
                     {
                         new path
                         {
@@ -533,7 +550,7 @@ static class Plugin
 
                 if (name == "content_copy")
                 {
-                    return new svg(Fill("currentColor"), ViewBox(0, 0, 24, 24), svg.Size(24))
+                    return new svg(Fill("currentColor"), ViewBox(0, 0, 24, 24), svg.Size(GetSize()))
                     {
                         new path
                         {
