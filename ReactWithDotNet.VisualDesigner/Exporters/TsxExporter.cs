@@ -756,31 +756,6 @@ static class TsxExporter
 
                 elementModel = elementModel with { Properties = elementModel.Properties.Add(sizeProperty.Replace("size:", "height:")) };
             }
-
-            // try to add width and height to default style
-            {
-                // width
-                {
-                    foreach (var propertyValue in elementModel.Properties.TryGetPropertyValue("width", "w"))
-                    {
-                        if (elementModel.Styles.TryGetPropertyValue("width", "w").HasNoValue)
-                        {
-                            elementModel = elementModel with { Styles = elementModel.Styles.Add($"width: {propertyValue}") };
-                        }
-                    }
-                }
-
-                // height
-                {
-                    foreach (var propertyValue in elementModel.Properties.TryGetPropertyValue("height", "h"))
-                    {
-                        if (elementModel.Styles.TryGetPropertyValue("height", "h").HasNoValue)
-                        {
-                            elementModel = elementModel with { Styles = elementModel.Styles.Add($"height: {propertyValue}") };
-                        }
-                    }
-                }
-            }
         }
 
         var node = new ReactNode
