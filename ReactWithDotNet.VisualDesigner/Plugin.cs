@@ -806,6 +806,9 @@ static class Plugin
             {
                 return new FlexRow(AlignItemsCenter, PaddingLeftRight(16), Border(1, solid, "#c0c0c0"), BorderRadius(10), Height(58), JustifyContentSpaceBetween)
                 {
+                    Id(id),
+                    OnClick(onMouseClick),
+                    
                     new div { bind ?? "Tutar" },
                     new div { fec ?? "TL" }
                 };
