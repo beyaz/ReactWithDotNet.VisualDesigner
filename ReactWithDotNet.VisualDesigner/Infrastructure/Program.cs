@@ -41,6 +41,8 @@ public class Program
         {
             app.UseDeveloperExceptionPage();
         }
+        
+        Prettier.Register(app);
 
         app.UseHttpsRedirection();
 

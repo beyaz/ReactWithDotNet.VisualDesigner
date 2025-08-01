@@ -26,7 +26,11 @@
 	</ItemGroup>
 
 	<Target Name="CopyVsOpenFileAtLineOutput" AfterTargets="Build">
-		<Exec Command="xcopy $(SolutionDir)\VsOpenFileAtLine\bin\$(ConfigurationName)\net48\*.* $(TargetDir) /Y /S /E" />
+		<Exec Command="xcopy $(SolutionDir)\VsOpenFileAtLine\bin\$(ConfigurationName)\net48\*.* $(TargetDir)HelperApps\VsOpenFileAtLine\ /Y /S /E" />
+	</Target>
+
+	<Target Name="Prettier" AfterTargets="Build">
+		<Exec Command="xcopy $(SolutionDir)TsxFormatter\*.* $(TargetDir)HelperApps\TsxFormatter\ /Y /S /E" />
 	</Target>
 
 </Project>

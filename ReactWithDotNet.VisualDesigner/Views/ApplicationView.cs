@@ -2057,6 +2057,12 @@ sealed class ApplicationView : Component<ApplicationState>
                 return result.Error.Message;
             }
 
+            result = await Prettier.FormatCode(result.Value);
+            if (result.HasError)
+            {
+                return result.Error.Message;
+            }
+            
             return result.Value;
         }
     }
