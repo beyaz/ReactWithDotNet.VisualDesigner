@@ -684,15 +684,14 @@ static class Plugin
 
             protected override Element render()
             {
-                return new FlexColumn(Background(Gray100), WidthFull, Id(id), OnClick(onMouseClick))
+                return new FlexColumn(WidthFull, Padding(16), Background("#fafafa"))
                 {
                     children =
                     {
-                        new div(FontWeight600, FontSize18, Id(id)) { pageTitle },
-                        SpaceY(24) + Id(id),
+                        new h6(FontWeight500, FontSize20, PaddingTop(32), PaddingBottom(24)) { pageTitle },
                         children
                     }
-                };
+                } + Id(id) + OnClick(onMouseClick);
             }
         }
 
@@ -888,6 +887,8 @@ static class Plugin
         {
             public string variant { get; set; }
 
+            public string dangerouslySetInnerHTML { get; set; }
+
             public static IReadOnlyList<string> GetPropSuggestions()
             {
                 return
@@ -910,9 +911,15 @@ static class Plugin
                 {
                     children = { children },
                     variant  = variant,
+                    
+                    style =
+                    {
+                        FontFamily("Roboto, sans-serif"), FontWeight400, LineHeight27
+                    },
 
                     id      = id,
-                    onClick = onMouseClick
+                    onClick = onMouseClick,
+                    //TODO: Open: dangerouslySetInnerHTML = dangerouslySetInnerHTML
                 };
             }
         }
