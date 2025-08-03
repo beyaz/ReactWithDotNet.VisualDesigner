@@ -1,6 +1,8 @@
 ﻿using System.Collections.Immutable;
+using System.Globalization;
 using System.IO;
 using System.Reflection;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace ReactWithDotNet.VisualDesigner.Exporters;
@@ -709,14 +711,16 @@ static class TsxExporter
         {
             var styleAttribute = ParseStyleAttribute(item);
 
-            var name = styleAttribute.Name;
+            var name = kebabToCamelCase(styleAttribute.Name);
 
             var value = styleAttribute.Value;
 
-            if (TryClearStringValue(value).EndsWith("px", StringComparison.OrdinalIgnoreCase))
+            if (double.TryParse(value, out var valueAsDouble))
             {
-                value = '"' + TryClearStringValue(value) + '"';
+                value = valueAsDouble.AsPixel();
             }
+            
+            value = '"' + TryClearStringValue(value) + '"';
             
             inlineStyles.Add((name, value));
         }
@@ -724,6 +728,39 @@ static class TsxExporter
         elementModel = elementModel with { Styles = [] };
 
         return (elementModel, inlineStyles);
+        
+        static string kebabToCamelCase(string kebab)
+        {
+            if (string.IsNullOrEmpty(kebab))
+            {
+                return kebab;
+            }
+
+            StringBuilder camelCase = new StringBuilder();
+            bool capitalizeNext = false;
+
+            foreach (char c in kebab)
+            {
+                if (c == '-')
+                {
+                    capitalizeNext = true;
+                }
+                else
+                {
+                    if (capitalizeNext)
+                    {
+                        camelCase.Append(char.ToUpper(c, CultureInfo.InvariantCulture));
+                        capitalizeNext = false;
+                    }
+                    else
+                    {
+                        camelCase.Append(c);
+                    }
+                }
+            }
+
+            return camelCase.ToString();
+        }
     }
 
     static async Task<Result<ReactNode>> ConvertVisualElementModelToReactNodeModel(ProjectConfig project, VisualElementModel elementModel)
