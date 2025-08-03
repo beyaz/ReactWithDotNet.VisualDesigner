@@ -709,7 +709,16 @@ static class TsxExporter
         {
             var styleAttribute = ParseStyleAttribute(item);
 
-            inlineStyles.Add((styleAttribute.Name, styleAttribute.Value));
+            var name = styleAttribute.Name;
+
+            var value = styleAttribute.Value;
+
+            if (TryClearStringValue(value).EndsWith("px", StringComparison.OrdinalIgnoreCase))
+            {
+                value = '"' + TryClearStringValue(value) + '"';
+            }
+            
+            inlineStyles.Add((name, value));
         }
 
         elementModel = elementModel with { Styles = [] };
