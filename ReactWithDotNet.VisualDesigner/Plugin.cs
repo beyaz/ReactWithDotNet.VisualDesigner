@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Data;
 using System.Reflection;
+using System.Text.Json.Serialization;
 using Dapper;
 using Microsoft.Data.SqlClient;
 using ReactWithDotNet.ThirdPartyLibraries.MUI.Material;
@@ -311,14 +312,20 @@ static class Plugin
             (typeof(BTypography), BTypography.GetPropSuggestions),
             (typeof(BDigitalGrid), BDigitalGrid.GetPropSuggestions),
             (typeof(BasePage), BasePage.GetPropSuggestions),
+            (typeof(TransactionWizardPage), TransactionWizardPage.GetPropSuggestions),
+            (typeof(BRadioButtonGroup), BRadioButtonGroup.GetPropSuggestions),
             (typeof(BDigitalGroupView), BDigitalGroupView.GetPropSuggestions),
             (typeof(BDigitalBox), BDigitalBox.GetPropSuggestions),
             (typeof(BAlert), BAlert.GetPropSuggestions),
             (typeof(BIcon), BIcon.GetPropSuggestions),
             (typeof(BDigitalMoneyInput), BDigitalMoneyInput.GetPropSuggestions),
             (typeof(BComboBox), BComboBox.GetPropSuggestions),
+            (typeof(BDigitalDatepicker), BDigitalDatepicker.GetPropSuggestions),
             (typeof(BInput), BInput.GetPropSuggestions),
+            (typeof(BInputMaskExtended), BInputMaskExtended.GetPropSuggestions),
+            (typeof(BPlateNumber), BPlateNumber.GetPropSuggestions),
             (typeof(BCheckBox), BCheckBox.GetPropSuggestions),
+            (typeof(BButton), BButton.GetPropSuggestions),
             (typeof(BDigitalPlateNumber), BDigitalPlateNumber.GetPropSuggestions),
             (typeof(BDigitalDialog), BDigitalDialog.GetPropSuggestions),
             (typeof(BDigitalTabNavigator), BDigitalTabNavigator.GetPropSuggestions)
@@ -673,7 +680,129 @@ static class Plugin
                 } + Id(id) + OnClick(onMouseClick);
             }
         }
+        
+        sealed class TransactionWizardPage : PluginComponentBase
+        {
+            public bool? isWide { get; set; }
 
+            public static IReadOnlyList<string> GetPropSuggestions()
+            {
+                return
+                [
+                 
+                ];
+            }
+
+            protected override Element render()
+            {
+                return new FlexColumn(WidthFull, Padding(16), Background("#fafafa"))
+                {
+                    children =
+                    {
+                        children
+                    }
+                } + Id(id) + OnClick(onMouseClick);
+            }
+        }
+
+        sealed class BRadioButtonGroup : PluginComponentBase
+        {
+            public string items { get; set; }
+
+            public static IReadOnlyList<string> GetPropSuggestions()
+            {
+                return
+                [
+                 
+                ];
+            }
+
+            class ItemModel
+            {
+                public string label { get; set; }
+            }
+
+            protected override Element render()
+            {
+                if (items.HasNoValue())
+                {
+                    return null;
+                }
+
+                var itemList = System.Text.Json.JsonSerializer.Deserialize<ItemModel[]>(items);
+                
+                return new FlexRow(Gap(24))
+                {
+                    itemList.Select(x=>new FlexRowCentered(Gap(12), WidthFitContent)
+                    {
+                        new svg(ViewBox(0, 0, 24, 24), svg.Width(24), svg.Height(24), Fill(rgb(22, 160, 133)))
+                        {
+                            new path{d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zm0-5C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"}
+                        },
+                        
+                        new label
+                        {
+                            FontSize16, FontWeight400,LineHeight(1.5), FontFamily("Roboto, sans-serif"),
+                            x.label
+                        }
+                    })
+                    
+                } + Id(id) + OnClick(onMouseClick);
+            }
+        }
+        
+        
+        sealed class BDigitalTabNavigator : PluginComponentBase
+        {
+            public string mainResource { get; set; }
+
+            public int? selectedTab { get; set; }
+
+            public string items { get; set; }
+
+            public static IReadOnlyList<string> GetPropSuggestions()
+            {
+                return
+                [
+                 
+                ];
+            }
+
+            class ItemModel
+            {
+                public string label { get; set; }
+            }
+
+            protected override Element render()
+            {
+                if (items.HasNoValue())
+                {
+                    return null;
+                }
+
+                var itemList = System.Text.Json.JsonSerializer.Deserialize<ItemModel[]>(items);
+                
+                return new FlexRow(BorderBottom(1, solid, rgba(0, 0, 0, 0.12)), Color(rgb(22, 160, 133)))
+                {
+                    new FlexRow(Gap(24))
+                    {
+                        itemList.Select(x=>new FlexRowCentered(Padding(24), WidthFitContent, AlignItemsCenter)
+                        {
+                            BorderBottom(2, solid,rgb(22, 160, 133)),
+                        
+                            new label
+                            {
+                                FontSize16, FontWeight400,LineHeight(1.5), FontFamily("Roboto, sans-serif"),
+                                x.label
+                            }
+                        })
+                    
+                    }
+                    
+                } + Id(id) + OnClick(onMouseClick);
+            }
+        }
+        
         sealed class BCheckBox : PluginComponentBase
         {
             public string bind { get; set; }
@@ -689,13 +818,37 @@ static class Plugin
 
             protected override Element render()
             {
-                return new FlexRow(AlignItemsCenter, PaddingLeftRight(16), Border(1, solid, "#c0c0c0"), BorderRadius(10), Height(58), JustifyContentSpaceBetween)
+                return new FlexRowCentered(Gap(4), WidthFitContent)
                 {
-                    new div { bind ?? "?" }
+                    new input{ type="checkbox"},
+                    new div { label ?? "?" }
+                };
+            }
+        }
+        
+        sealed class BButton : PluginComponentBase
+        {
+            
+            public string text { get; set; }
+
+            public static IReadOnlyList<string> GetPropSuggestions()
+            {
+                return
+                [
+                ];
+            }
+
+            protected override Element render()
+            {
+                return new FlexRowCentered(WidthFitContent, Background("Blue"),BorderRadius(10), Padding(5,15), BorderColor(rgb(230, 245, 243)), Color(White))
+                {
+                    new div { text ?? "?" }
                 };
             }
         }
 
+       
+        
         sealed class BComboBox : PluginComponentBase
         {
             public string bind { get; set; }
@@ -716,9 +869,98 @@ static class Plugin
 
             protected override Element render()
             {
-                return new FlexRow(AlignItemsCenter, PaddingLeftRight(16), Border(1, solid, "#c0c0c0"), BorderRadius(10), Height(58), JustifyContentSpaceBetween)
+                var textContent = string.Empty;
+                if (labelText.HasValue())
                 {
-                    new div { bind ?? "?" }
+                    textContent = labelText;
+                }
+                if (bind.HasValue())
+                {
+                    textContent += " | " + bind;
+                }
+                
+                return new div(WidthFull, PaddingTop(16), PaddingBottom(8))
+                {
+                    Id(id), OnClick(onMouseClick),
+                    
+                    new FlexRow(AlignItemsCenter, PaddingLeft(16), PaddingRight(12), Border(1, solid, "#c0c0c0"), BorderRadius(10), Height(58), JustifyContentSpaceBetween)
+                    {
+                        new div(Color(rgba(0, 0, 0, 0.54)), FontSize16, FontWeight400, FontFamily("Roboto, sans-serif"))
+                        {
+                            textContent
+                        },
+                        new svg(ViewBox(0,0,24,24), svg.Width(24), svg.Height(24), Color(rgb(117, 117, 117)))
+                        {
+                            new path
+                            {
+                                d= "M7 10l5 5 5-5z",
+                                fill = "#757575"
+                            }
+                        }
+                    },
+                    new FlexRow(JustifyContentSpaceBetween, FontSize12, PaddingLeftRight(14), Color(rgb(158, 158, 158)), LineHeight15)
+                    {
+                        //new div{ helperText},
+                        //new div{ maxLength }
+                    }
+                };
+            }
+        }
+        
+        sealed class BDigitalDatepicker : PluginComponentBase
+        {
+            public string bind { get; set; }
+
+            public IEnumerable dataSource { get; set; }
+
+            public bool? hiddenClearButton { get; set; }
+
+            public string hintText { get; set; }
+            public string labelText { get; set; }
+
+            public static IReadOnlyList<string> GetPropSuggestions()
+            {
+                return
+                [
+                ];
+            }
+
+            protected override Element render()
+            {
+                var textContent = string.Empty;
+                if (labelText.HasValue())
+                {
+                    textContent = labelText;
+                }
+                if (bind.HasValue())
+                {
+                    textContent += " | " + bind;
+                }
+                
+                return new div(WidthFull, PaddingTop(16), PaddingBottom(8))
+                {
+                    Id(id), OnClick(onMouseClick),
+                    
+                    new FlexRow(AlignItemsCenter, PaddingLeft(16), PaddingRight(12), Border(1, solid, "#c0c0c0"), BorderRadius(10), Height(58), JustifyContentSpaceBetween)
+                    {
+                        new div(Color(rgba(0, 0, 0, 0.54)), FontSize16, FontWeight400, FontFamily("Roboto, sans-serif"))
+                        {
+                            textContent
+                        },
+                        new svg(ViewBox(0,0,24,24), svg.Width(24), svg.Height(24), Color(rgb(117, 117, 117)))
+                        {
+                            new path
+                            {
+                                d    = "M7 10l5 5 5-5z",
+                                fill = "#757575"
+                            }
+                        }
+                    },
+                    new FlexRow(JustifyContentSpaceBetween, FontSize12, PaddingLeftRight(14), Color(rgb(158, 158, 158)), LineHeight15)
+                    {
+                        //new div{ helperText},
+                        //new div{ maxLength }
+                    }
                 };
             }
         }
@@ -749,8 +991,16 @@ static class Plugin
             public string content { get; set; }
 
             public bool? open { get; set; }
+            
             public string title { get; set; }
+            
+            public string actions { get; set; }
 
+            class ItemModel
+            {
+                public string label { get; set; }
+            }
+            
             public static IReadOnlyList<string> GetPropSuggestions()
             {
                 return
@@ -760,7 +1010,44 @@ static class Plugin
 
             protected override Element render()
             {
-                return new FlexRow(AlignItemsCenter, PaddingLeftRight(16), Border(1, solid, "#c0c0c0"), BorderRadius(10), Height(58), JustifyContentSpaceBetween);
+                if (actions.HasNoValue())
+                {
+                    return null;
+                }
+
+                var actionList = System.Text.Json.JsonSerializer.Deserialize<ItemModel[]>(actions);
+                
+                return new div(Background(rgba(0, 0, 0, 0.5)), Padding(24), BorderRadius(8))
+                {
+                    new div(Background("white"), BorderRadius(8),Padding(16), FontFamily("Roboto, sans-serif"))
+                    {
+                        new FlexRow(JustifyContentSpaceBetween, AlignItemsCenter, PaddingY(16))
+                        {
+                            new div(FontSize20){ title},
+                            new svg(ViewBox(0,0,24,24), svg.Width(24), svg.Height(24))
+                            {
+                                new path
+                                {
+                                    d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
+                                }
+                            }
+                        },
+                        
+                        new Alert
+                        {
+                            content
+                        },
+                        SpaceY(12),
+                        new FlexRow(JustifyContentFlexEnd, Color(rgb(22, 160, 133)),FontWeightBold, FontSize14, Gap(24))
+                        {
+                            actionList.Select(x=>new div
+                            {
+                                x.label
+                            })
+                        }
+                    }
+                    
+                };
             }
         }
 
@@ -775,20 +1062,39 @@ static class Plugin
             {
                 return
                 [
-                    $"{nameof(fec)}: '?'",
-                    $"{nameof(currencyVisible)}: '?'"
+                 
                 ];
             }
 
             protected override Element render()
             {
-                return new FlexRow(AlignItemsCenter, PaddingLeftRight(16), Border(1, solid, "#c0c0c0"), BorderRadius(10), Height(58), JustifyContentSpaceBetween)
+                var textContent = "Tutar";
+                
+                if (bind.HasValue())
                 {
-                    Id(id),
-                    OnClick(onMouseClick),
+                    textContent += " | " + bind;
+                }
+                
+                return new div(WidthFull, PaddingTop(16), PaddingBottom(8))
+                {
+                    new FlexRow(AlignItemsCenter, PaddingLeftRight(16), Border(1, solid, "#c0c0c0"), BorderRadius(10), Height(58), JustifyContentSpaceBetween)
+                    {
+                        new div(Color(rgba(0, 0, 0, 0.54)), FontSize16, FontWeight400, FontFamily("Roboto, sans-serif"))
+                        {
+                            textContent
+                        },
                     
-                    new div { bind ?? "Tutar" },
-                    new div { fec ?? "TL" }
+                        new div{ fec ?? "TL" },
+                        
+                       
+                    },
+                    new FlexRow(JustifyContentSpaceBetween, FontSize12, PaddingLeftRight(14), Color(rgb(158, 158, 158)), LineHeight15)
+                    {
+                        //new div{ helperText},
+                        //new div{ maxLength }
+                    },
+                    
+                    Id(id), OnClick(onMouseClick)
                 };
             }
         }
@@ -814,24 +1120,6 @@ static class Plugin
             }
         }
 
-        sealed class BDigitalTabNavigator : PluginComponentBase
-        {
-            public string mainResource { get; set; }
-
-            public int? selectedTab { get; set; }
-
-            public static IReadOnlyList<string> GetPropSuggestions()
-            {
-                return
-                [
-                ];
-            }
-
-            protected override Element render()
-            {
-                return new FlexRow(AlignItemsCenter, PaddingLeftRight(16), Border(1, solid, "#c0c0c0"), BorderRadius(10), Height(58), JustifyContentSpaceBetween);
-            }
-        }
 
         sealed class BInput : PluginComponentBase
         {
@@ -855,9 +1143,113 @@ static class Plugin
 
             protected override Element render()
             {
+                var textContent = string.Empty;
+                if (floatingLabelText.HasValue())
+                {
+                    textContent = floatingLabelText;
+                }
+                if (bind.HasValue())
+                {
+                    textContent += " | " + bind;
+                }
+                
+                return new div(PaddingTop(16), PaddingBottom(8))
+                {
+                    new FlexRow(AlignItemsCenter, PaddingLeftRight(16), Border(1, solid, "#c0c0c0"), BorderRadius(10), Height(58), JustifyContentSpaceBetween)
+                    {
+                        new div(Color(rgba(0, 0, 0, 0.54)), FontSize16, FontWeight400, FontFamily("Roboto, sans-serif")) { textContent },
+                    
+                        Id(id), OnClick(onMouseClick)
+                    },
+                    new FlexRow(JustifyContentSpaceBetween, FontSize12, PaddingLeftRight(14), Color(rgb(158, 158, 158)), LineHeight15)
+                    {
+                        new div{ helperText},
+                        new div{ maxLength }
+                    }
+                };
+            }
+        }
+        
+        sealed class BInputMaskExtended : PluginComponentBase
+        {
+            public string autoComplete { get; set; }
+
+            public string bind { get; set; }
+            public string floatingLabelText { get; set; }
+
+            public string helperText { get; set; }
+
+            public int? maxLength { get; set; }
+
+            public static IReadOnlyList<string> GetPropSuggestions()
+            {
+                return
+                [
+                    $"{nameof(autoComplete)}: \"on\"",
+                    $"{nameof(autoComplete)}: \"off\""
+                ];
+            }
+
+            protected override Element render()
+            {
+                var textContent = string.Empty;
+                if (floatingLabelText.HasValue())
+                {
+                    textContent = floatingLabelText;
+                }
+                if (bind.HasValue())
+                {
+                    textContent += " | " + bind;
+                }
+                
+                return new div(PaddingTop(16), PaddingBottom(8))
+                {
+                    new FlexRow(AlignItemsCenter, PaddingLeftRight(16), Border(1, solid, "#c0c0c0"), BorderRadius(10), Height(58), JustifyContentSpaceBetween)
+                    {
+                        new div(Color(rgba(0, 0, 0, 0.54)), FontSize16, FontWeight400, FontFamily("Roboto, sans-serif")) { textContent },
+                    
+                        Id(id), OnClick(onMouseClick)
+                    },
+                    new FlexRow(JustifyContentSpaceBetween, FontSize12, PaddingLeftRight(14), Color(rgb(158, 158, 158)), LineHeight15)
+                    {
+                        new div{ helperText},
+                        new div{ maxLength }
+                    }
+                };
+            }
+        }
+        
+        sealed class BPlateNumber : PluginComponentBase
+        {
+            public string bind { get; set; }
+            
+            public string label { get; set; }
+
+            public static IReadOnlyList<string> GetPropSuggestions()
+            {
+                return
+                [
+                   
+                ];
+            }
+
+            protected override Element render()
+            {
+                var textContent = string.Empty;
+                if (label.HasValue())
+                {
+                    textContent = label;
+                }
+                if (bind.HasValue())
+                {
+                    textContent += " | " + bind;
+                }
+                
                 return new FlexRow(AlignItemsCenter, PaddingLeftRight(16), Border(1, solid, "#c0c0c0"), BorderRadius(10), Height(58), JustifyContentSpaceBetween)
                 {
-                    new div { bind ?? "?" }
+                    new div { textContent },
+                    
+                    Id(id), OnClick(onMouseClick)
                 };
             }
         }
