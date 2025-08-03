@@ -14,7 +14,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
     <PackageReference Include="MSTest" Version="3.10.0" />
-    <PackageReference Include="ReactWithDotNet" Version="1.0.30" />
+    <PackageReference Include="ReactWithDotNet" Version="1.0.31" />
     <PackageReference Include="Shouldly" Version="4.3.0" />
   </ItemGroup>
 
