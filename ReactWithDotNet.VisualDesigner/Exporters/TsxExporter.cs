@@ -145,7 +145,7 @@ static class TsxExporter
             rootNode = result.Value;
         }
 
-        rootNode = Plugin.AnalyzeReactNode(rootNode);
+        rootNode = Plugin.AnalyzeNode(rootNode);
 
         return await ConvertReactNodeModelToTsxCode(project, rootNode, null, 2);
     }

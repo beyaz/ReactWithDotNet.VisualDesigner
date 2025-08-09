@@ -1,7 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Immutable;
 using System.Data;
+using System.Globalization;
 using System.Reflection;
+using System.Text;
 using Dapper;
 using Microsoft.Data.SqlClient;
 using ReactWithDotNet.ThirdPartyLibraries.MUI.Material;
@@ -20,10 +22,44 @@ sealed record PropSuggestionScope
 
 static class Plugin
 {
+    static string ConvertDotNetPathToJsPath(string dotNetPath)
+    {
+        if (string.IsNullOrEmpty(dotNetPath))
+        {
+            return dotNetPath;
+        }
+
+        var camelCase = new StringBuilder();
+        var capitalizeNext = false;
+
+        foreach (var c in dotNetPath)
+        {
+            if (c == '.')
+            {
+                capitalizeNext = true;
+                camelCase.Append('.');
+            }
+            else
+            {
+                if (capitalizeNext)
+                {
+                    camelCase.Append(char.ToLower(c, CultureInfo.InvariantCulture));
+                    capitalizeNext = false;
+                }
+                else
+                {
+                    camelCase.Append(c);
+                }
+            }
+        }
+
+        return camelCase.ToString();
+    }
+    
     public static ReactNode AnalyzeNode(ReactNode node)
     {
         var record = Components.AllTypes.FirstOrDefault(x => x.type.Name == node.Tag);
-        if (record.type is null)
+        if (record.analyzeReactNode is null)
         {
             return node;
         }
@@ -144,6 +180,11 @@ static class Plugin
                     {
                         foreach (var item in stringSuggestions)
                         {
+                            if (item.StartsWith("request."))
+                            {
+                                returnList.Add($"{prop.Name}: {ConvertDotNetPathToJsPath(item)}");
+                                continue;
+                            }
                             returnList.Add($"{prop.Name}: \"{item}\"");
                         }
 
@@ -1144,9 +1185,13 @@ static class Plugin
 
         sealed class BInput : PluginComponentBase
         {
+            public bool? required { get; set; }
+            
             public string autoComplete { get; set; }
 
-            public string bind { get; set; }
+            public string value { get; set; }
+            
+            public string onChange { get; set; }
             
             public string floatingLabelText { get; set; }
 
@@ -1170,9 +1215,9 @@ static class Plugin
                 {
                     textContent = floatingLabelText;
                 }
-                if (bind.HasValue())
+                if (value.HasValue())
                 {
-                    textContent += " | " + bind;
+                    textContent += " | " + value;
                 }
                 
                 return new div(PaddingTop(16), PaddingBottom(8))
@@ -1193,38 +1238,70 @@ static class Plugin
             
             public static ReactNode AnalyzeReactNode(ReactNode node)
             {
-                if (node.Tag == nameof(Components.BInput))
+                if (node.Tag == nameof(BInput))
                 {
-                    var bindProperty = node.Properties.FirstOrDefault(x => x.Name == nameof(Components.BInput.bind));
-                    if (bindProperty is not null)
+                    var valueProp = node.Properties.FirstOrDefault(x => x.Name == nameof(value));
+                    var onChangeProp = node.Properties.FirstOrDefault(x => x.Name == nameof(onChange));
+                    var requiredProp = node.Properties.FirstOrDefault(x => x.Name == nameof(required));
+                    var autoCompleteProp = node.Properties.FirstOrDefault(x => x.Name == nameof(autoComplete));
+                    
+                    if (valueProp is not null)
                     {
-                        var properties = node.Properties.Remove(bindProperty);
-
-                        var value = bindProperty.Value;
-                
-                        properties = properties.Add(new ReactProperty
-                        {
-                            Name  = "value",
-                            Value = value
-                        });
+                        var properties = node.Properties;
 
                         List<string> lines =
                         [
                             "(e: any, value: any) =>",
                             "{",
-                            $"updateRequest(r => {{ r.{TryClearStringValue(value)} = value; }});",
-                            "}"
+                            $"  updateRequest(r => {{ r.{valueProp.Value.RemoveFromStart("request.")} = value; }});"
                         ];
-                
-                        properties = properties.Add(new ReactProperty
+
+                        if (onChangeProp is not null)
                         {
-                            Name  = "onChange",
-                            Value = string.Join(Environment.NewLine, lines)
-                        });
-                
-                        node = node with { Properties = properties};
+                            if (IsAlphaNumeric(onChangeProp.Value))
+                            {
+                                lines.Add(onChangeProp.Value + "(e, value);");
+                            }
+                            else
+                            {
+                                lines.Add(onChangeProp.Value);
+                            }
+                        }
+
+                        lines.Add("}");
+                        
+                        if (onChangeProp is not null)
+                        {
+                            onChangeProp = onChangeProp with
+                            {
+                                Value = string.Join(Environment.NewLine, lines)
+                            };
+
+                            properties = properties.SetItem(properties.FindIndex(x => x.Name == onChangeProp.Name), onChangeProp);
+                        }
+                        else
+                        {
+                            properties = properties.Add(new ReactProperty
+                            {
+                                Name  = "onChange",
+                                Value = string.Join(Environment.NewLine, lines)
+                            });
+                        }
+
+                        node = node with { Properties = properties };
                     }
-            
+
+                    if (requiredProp is not null && autoCompleteProp is not null)
+                    {
+                        node = node with
+                        {
+                            Properties = node.Properties.Remove(requiredProp).Remove(autoCompleteProp).Add(new ReactProperty
+                            {
+                                Name  = "valueConstraint",
+                                Value = $"{{ required: {ConvertDotNetPathToJsPath(requiredProp.Value)}, autoComplete: {ConvertDotNetPathToJsPath(autoCompleteProp.Value)} }}"
+                            })
+                        };
+                    }
                 }
 
                 return node with { Children = node.Children.Select(AnalyzeReactNode).ToImmutableList() };

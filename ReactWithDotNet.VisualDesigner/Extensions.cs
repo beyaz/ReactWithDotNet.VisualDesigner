@@ -5,6 +5,16 @@ namespace ReactWithDotNet.VisualDesigner;
 
 static class Extensions
 {
+    public static bool IsAlphaNumeric(string input)
+    {
+        if (string.IsNullOrEmpty(input))
+        {
+            return false;
+        }
+
+        return input.All(char.IsLetterOrDigit);
+    }
+    
     public static Result Try(Action action)
     {
         try
