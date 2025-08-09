@@ -20,43 +20,15 @@ sealed record PropSuggestionScope
 
 static class Plugin
 {
-    public static ReactNode AnalyzeReactNode(ReactNode node)
+    public static ReactNode AnalyzeNode(ReactNode node)
     {
-        if (node.Tag == nameof(Components.BInput))
+        var record = Components.AllTypes.FirstOrDefault(x => x.type.Name == node.Tag);
+        if (record.type is null)
         {
-            var bindProperty = node.Properties.FirstOrDefault(x => x.Name == nameof(Components.BInput.bind));
-            if (bindProperty is not null)
-            {
-                var properties = node.Properties.Remove(bindProperty);
-
-                var value = bindProperty.Value;
-                
-                properties = properties.Add(new ReactProperty
-                {
-                    Name  = "value",
-                    Value = value
-                });
-
-                List<string> lines =
-                [
-                    "(e: any, value: any) =>",
-                    "{",
-                    $"updateRequest(r => {{ r.{TryClearStringValue(value)} = value; }});",
-                    "}"
-                ];
-                
-                properties = properties.Add(new ReactProperty
-                {
-                    Name  = "onChange",
-                    Value = string.Join(Environment.NewLine, lines)
-                });
-                
-                node = node with { Properties = properties};
-            }
-            
+            return node;
         }
 
-        return node with { Children = node.Children.Select(AnalyzeReactNode).ToImmutableList() };
+        return record.analyzeReactNode(node);
     }
     
     const string BOA_MessagingByGroupName = "BOA.MessagingByGroupName";
@@ -352,32 +324,32 @@ static class Plugin
 
     static class Components
     {
-        public static readonly IReadOnlyList<(Type type, Func<IReadOnlyList<string>> propSuggestions)> AllTypes =
+        public static readonly IReadOnlyList<(Type type, Func<IReadOnlyList<string>> propSuggestions, Func<ReactNode,ReactNode> analyzeReactNode)> AllTypes =
         [
             // NextJsSupport
-            (typeof(Image), Image.GetPropSuggestions),
-            (typeof(Link), Link.GetPropSuggestions),
+            (typeof(Image), Image.GetPropSuggestions, null),
+            (typeof(Link), Link.GetPropSuggestions, null),
 
-            (typeof(BTypography), BTypography.GetPropSuggestions),
-            (typeof(BDigitalGrid), BDigitalGrid.GetPropSuggestions),
-            (typeof(BasePage), BasePage.GetPropSuggestions),
-            (typeof(TransactionWizardPage), TransactionWizardPage.GetPropSuggestions),
-            (typeof(BRadioButtonGroup), BRadioButtonGroup.GetPropSuggestions),
-            (typeof(BDigitalGroupView), BDigitalGroupView.GetPropSuggestions),
-            (typeof(BDigitalBox), BDigitalBox.GetPropSuggestions),
-            (typeof(BAlert), BAlert.GetPropSuggestions),
-            (typeof(BIcon), BIcon.GetPropSuggestions),
-            (typeof(BDigitalMoneyInput), BDigitalMoneyInput.GetPropSuggestions),
-            (typeof(BComboBox), BComboBox.GetPropSuggestions),
-            (typeof(BDigitalDatepicker), BDigitalDatepicker.GetPropSuggestions),
-            (typeof(BInput), BInput.GetPropSuggestions),
-            (typeof(BInputMaskExtended), BInputMaskExtended.GetPropSuggestions),
-            (typeof(BPlateNumber), BPlateNumber.GetPropSuggestions),
-            (typeof(BCheckBox), BCheckBox.GetPropSuggestions),
-            (typeof(BButton), BButton.GetPropSuggestions),
-            (typeof(BDigitalPlateNumber), BDigitalPlateNumber.GetPropSuggestions),
-            (typeof(BDigitalDialog), BDigitalDialog.GetPropSuggestions),
-            (typeof(BDigitalTabNavigator), BDigitalTabNavigator.GetPropSuggestions)
+            (typeof(BTypography), BTypography.GetPropSuggestions, null),
+            (typeof(BDigitalGrid), BDigitalGrid.GetPropSuggestions, null),
+            (typeof(BasePage), BasePage.GetPropSuggestions, null),
+            (typeof(TransactionWizardPage), TransactionWizardPage.GetPropSuggestions, null),
+            (typeof(BRadioButtonGroup), BRadioButtonGroup.GetPropSuggestions, null),
+            (typeof(BDigitalGroupView), BDigitalGroupView.GetPropSuggestions, null),
+            (typeof(BDigitalBox), BDigitalBox.GetPropSuggestions, null),
+            (typeof(BAlert), BAlert.GetPropSuggestions, null),
+            (typeof(BIcon), BIcon.GetPropSuggestions, null),
+            (typeof(BDigitalMoneyInput), BDigitalMoneyInput.GetPropSuggestions, null),
+            (typeof(BComboBox), BComboBox.GetPropSuggestions, null),
+            (typeof(BDigitalDatepicker), BDigitalDatepicker.GetPropSuggestions, null),
+            (typeof(BInput), BInput.GetPropSuggestions, BInput.AnalyzeReactNode),
+            (typeof(BInputMaskExtended), BInputMaskExtended.GetPropSuggestions, null),
+            (typeof(BPlateNumber), BPlateNumber.GetPropSuggestions, null),
+            (typeof(BCheckBox), BCheckBox.GetPropSuggestions, null),
+            (typeof(BButton), BButton.GetPropSuggestions, null),
+            (typeof(BDigitalPlateNumber), BDigitalPlateNumber.GetPropSuggestions, null),
+            (typeof(BDigitalDialog), BDigitalDialog.GetPropSuggestions, null),
+            (typeof(BDigitalTabNavigator), BDigitalTabNavigator.GetPropSuggestions, null)
         ];
 
         public static IReadOnlyList<ComponentMeta> GetAllTypesMetadata()
@@ -1170,11 +1142,12 @@ static class Plugin
         }
 
 
-        public sealed class BInput : PluginComponentBase
+        sealed class BInput : PluginComponentBase
         {
             public string autoComplete { get; set; }
 
             public string bind { get; set; }
+            
             public string floatingLabelText { get; set; }
 
             public string helperText { get; set; }
@@ -1216,6 +1189,45 @@ static class Plugin
                         new div{ maxLength }
                     }
                 };
+            }
+            
+            public static ReactNode AnalyzeReactNode(ReactNode node)
+            {
+                if (node.Tag == nameof(Components.BInput))
+                {
+                    var bindProperty = node.Properties.FirstOrDefault(x => x.Name == nameof(Components.BInput.bind));
+                    if (bindProperty is not null)
+                    {
+                        var properties = node.Properties.Remove(bindProperty);
+
+                        var value = bindProperty.Value;
+                
+                        properties = properties.Add(new ReactProperty
+                        {
+                            Name  = "value",
+                            Value = value
+                        });
+
+                        List<string> lines =
+                        [
+                            "(e: any, value: any) =>",
+                            "{",
+                            $"updateRequest(r => {{ r.{TryClearStringValue(value)} = value; }});",
+                            "}"
+                        ];
+                
+                        properties = properties.Add(new ReactProperty
+                        {
+                            Name  = "onChange",
+                            Value = string.Join(Environment.NewLine, lines)
+                        });
+                
+                        node = node with { Properties = properties};
+                    }
+            
+                }
+
+                return node with { Children = node.Children.Select(AnalyzeReactNode).ToImmutableList() };
             }
         }
         
