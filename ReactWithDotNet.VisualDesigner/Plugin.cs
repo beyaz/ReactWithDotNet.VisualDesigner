@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Collections.Immutable;
 using System.Data;
 using System.Reflection;
 using Dapper;
@@ -19,9 +20,43 @@ sealed record PropSuggestionScope
 
 static class Plugin
 {
-    public static ReactNode AnalyzeReactNode(ReactNode rootNode)
+    public static ReactNode AnalyzeReactNode(ReactNode node)
     {
-        return rootNode;
+        if (node.Tag == nameof(Components.BInput))
+        {
+            var bindProperty = node.Properties.FirstOrDefault(x => x.Name == nameof(Components.BInput.bind));
+            if (bindProperty is not null)
+            {
+                var properties = node.Properties.Remove(bindProperty);
+
+                var value = bindProperty.Value;
+                
+                properties = properties.Add(new ReactProperty
+                {
+                    Name  = "value",
+                    Value = value
+                });
+
+                List<string> lines =
+                [
+                    "(e: any, value: any) =>",
+                    "{",
+                    $"updateRequest(r => {{ r.{TryClearStringValue(value)} = value; }});",
+                    "}"
+                ];
+                
+                properties = properties.Add(new ReactProperty
+                {
+                    Name  = "onChange",
+                    Value = string.Join(Environment.NewLine, lines)
+                });
+                
+                node = node with { Properties = properties};
+            }
+            
+        }
+
+        return node with { Children = node.Children.Select(AnalyzeReactNode).ToImmutableList() };
     }
     
     const string BOA_MessagingByGroupName = "BOA.MessagingByGroupName";
@@ -1135,7 +1170,7 @@ static class Plugin
         }
 
 
-        sealed class BInput : PluginComponentBase
+        public sealed class BInput : PluginComponentBase
         {
             public string autoComplete { get; set; }
 

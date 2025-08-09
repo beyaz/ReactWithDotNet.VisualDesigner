@@ -23,7 +23,8 @@ app.post('/format', async (req, res) =>
       parser: parser,
       semi: true,         
       singleQuote: false,  
-      trailingComma: 'es5'
+      trailingComma: 'es5',
+	  arrowParens: 'avoid'
     });
 
     res.status(200).json({ formattedCode });
