@@ -43,11 +43,13 @@ static class CecilHelper
                                    select nestedProperty;
 
             var contractProperties = from p in type.Properties
-                                     where !IsSystemType(p.PropertyType) && !IsCollection(p.PropertyType) is false && isInSameAssembly(p.PropertyType)
+                                     where !IsSystemType(p.PropertyType) && !IsCollection(p.PropertyType) && isInSameAssembly(p.PropertyType)
                                      from nestedProperty in findProperties(isInSameAssembly,p.PropertyType.Resolve(), prefix + p.Name + ".", matchFunc)
                                      select nestedProperty;
 
-            return properties.Concat(nestedProperties).Concat(contractProperties).ToList();
+            var items = contractProperties.ToList();
+
+            return properties.Concat(nestedProperties).Concat(items).ToList();
         }
 
     }
