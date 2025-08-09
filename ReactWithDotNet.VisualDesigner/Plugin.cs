@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using Dapper;
+using Google.Protobuf.Reflection;
 using Microsoft.Data.SqlClient;
 using ReactWithDotNet.ThirdPartyLibraries.MUI.Material;
 using ReactWithDotNet.VisualDesigner.Configuration;
@@ -24,15 +25,6 @@ sealed record PropSuggestionScope
 static class Plugin
 {
     const string BOA_MessagingByGroupName = "BOA.MessagingByGroupName";
-
-    enum ValueTypes
-    {
-        String,
-        Number,
-        Date,
-        Boolean,
-        Enumerable
-    }
 
     public static ConfigModel AfterReadConfig(ConfigModel config)
     {
@@ -78,6 +70,8 @@ static class Plugin
 
         static async Task<IReadOnlyList<string>> calculate(PropSuggestionScope scope)
         {
+            var collectionSuggestions = new List<string>();
+            
             var stringSuggestions = new List<string>();
             {
                 if (scope.Component.GetConfig().TryGetValue(BOA_MessagingByGroupName, out var messagingGroupName))
@@ -134,6 +128,7 @@ static class Plugin
                 numberSuggestions.AddRange(CecilHelper.GetPropertyPathList(assemblyFilePath, dotnetTypeFullName, $"{variableName}.", CecilHelper.IsNumber));
                 dateSuggestions.AddRange(CecilHelper.GetPropertyPathList(assemblyFilePath, dotnetTypeFullName, $"{variableName}.", CecilHelper.IsDateTime));
                 booleanSuggestions.AddRange(CecilHelper.GetPropertyPathList(assemblyFilePath, dotnetTypeFullName, $"{variableName}.", CecilHelper.IsBoolean));
+                collectionSuggestions.AddRange(CecilHelper.GetPropertyPathList(assemblyFilePath, dotnetTypeFullName, $"{variableName}.", CecilHelper.IsCollection));
             }
 
             List<string> returnList = [];
@@ -142,7 +137,7 @@ static class Plugin
             {
                 switch (prop.ValueType)
                 {
-                    case ValueTypes.String:
+                    case JsType.String:
                     {
                         foreach (var item in stringSuggestions)
                         {
@@ -157,7 +152,7 @@ static class Plugin
 
                         break;
                     }
-                    case ValueTypes.Number:
+                    case JsType.Number:
                     {
                         foreach (var item in numberSuggestions)
                         {
@@ -166,7 +161,7 @@ static class Plugin
 
                         break;
                     }
-                    case ValueTypes.Date:
+                    case JsType.Date:
                     {
                         foreach (var item in dateSuggestions)
                         {
@@ -175,9 +170,18 @@ static class Plugin
 
                         break;
                     }
-                    case ValueTypes.Boolean:
+                    case JsType.Boolean:
                     {
                         foreach (var item in booleanSuggestions)
+                        {
+                            returnList.Add($"{prop.Name}: {item}");
+                        }
+
+                        break;
+                    }
+                    case JsType.Array:
+                    {
+                        foreach (var item in collectionSuggestions)
                         {
                             returnList.Add($"{prop.Name}: {item}");
                         }
@@ -411,34 +415,44 @@ static class Plugin
                     return new()
                     {
                         Name      = propertyInfo.Name,
-                        ValueType = getValueType(propertyInfo.PropertyType)
+                        ValueType = getValueType(propertyInfo)
                     };
 
-                    static ValueTypes getValueType(Type propertyType)
+                    static JsType getValueType(PropertyInfo propertyInfo )
                     {
+                        var jsTypeInfoAttribute = propertyInfo.GetCustomAttribute<JsTypeInfoAttribute>();
+                        if (jsTypeInfoAttribute is not null)
+                        {
+                            return jsTypeInfoAttribute.JsType;
+                        }
+
+                        
+                        
+                        
+                        Type propertyType = propertyInfo.PropertyType;
                         if (propertyType == typeof(string))
                         {
-                            return ValueTypes.String;
+                            return JsType.String;
                         }
 
                         if (propertyType.In(typeof(short), typeof(short?), typeof(int), typeof(int?), typeof(double), typeof(double?), typeof(long), typeof(long?)))
                         {
-                            return ValueTypes.Number;
+                            return JsType.Number;
                         }
 
                         if (propertyType.In(typeof(bool), typeof(bool?)))
                         {
-                            return ValueTypes.Boolean;
+                            return JsType.Boolean;
                         }
 
                         if (propertyType.In(typeof(DateTime), typeof(DateTime?)))
                         {
-                            return ValueTypes.Date;
+                            return JsType.Date;
                         }
 
                         if (propertyType == typeof(IEnumerable) || typeof(IEnumerable).IsSubclassOf(propertyType))
                         {
-                            return ValueTypes.Enumerable;
+                            return JsType.Array;
                         }
 
                         throw new NotImplementedException(propertyType.FullName);
@@ -1244,6 +1258,8 @@ static class Plugin
 
         sealed class BComboBox : PluginComponentBase
         {
+
+            [JsTypeInfo(JsType.Array)]
             public string dataSource { get; set; }
 
             public bool? hiddenClearButton { get; set; }
@@ -1548,7 +1564,7 @@ static class Plugin
     {
         public string Name { get; init; }
 
-        public ValueTypes ValueType { get; init; }
+        public JsType ValueType { get; init; }
     }
 
     record MessagingInfo

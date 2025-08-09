@@ -2,7 +2,23 @@
 using Mono.Cecil;
 using TypeDefinition = Mono.Cecil.TypeDefinition;
 
-namespace ReactWithDotNet.VisualDesigner.Views;
+namespace ReactWithDotNet.VisualDesigner;
+
+public enum JsType
+{
+    String, Number, Date, Boolean, Array
+}
+
+[AttributeUsage(AttributeTargets.Property)]
+public sealed class JsTypeInfoAttribute : Attribute
+{
+    public JsTypeInfoAttribute(JsType jsType)
+    {
+        JsType = jsType;
+    }
+
+    public JsType JsType { get; init; }
+}
 
 static class CecilHelper
 {
@@ -138,5 +154,10 @@ static class CecilHelper
     static bool IsCollection(TypeReference typeReference)
     {
         return typeReference.FullName.StartsWith("System.Collections.Generic.List`1", StringComparison.OrdinalIgnoreCase);
+    }
+    
+    public static bool IsCollection(PropertyDefinition propertyDefinition)
+    {
+        return IsCollection(propertyDefinition.PropertyType);
     }
 }
