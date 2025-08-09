@@ -5,6 +5,7 @@ using Dapper;
 using Microsoft.Data.SqlClient;
 using ReactWithDotNet.ThirdPartyLibraries.MUI.Material;
 using ReactWithDotNet.VisualDesigner.Configuration;
+using ReactWithDotNet.VisualDesigner.Exporters;
 
 namespace ReactWithDotNet.VisualDesigner;
 
@@ -18,6 +19,11 @@ sealed record PropSuggestionScope
 
 static class Plugin
 {
+    public static ReactNode AnalyzeReactNode(ReactNode rootNode)
+    {
+        return rootNode;
+    }
+    
     const string BOA_MessagingByGroupName = "BOA.MessagingByGroupName";
 
     enum ValueTypes
