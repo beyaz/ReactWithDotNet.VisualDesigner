@@ -144,9 +144,8 @@ static class TsxExporter
 
             rootNode = result.Value;
         }
-        
-        return await ConvertReactNodeModelToTsxCode(project, rootNode, null, 2);
 
+        return await ConvertReactNodeModelToTsxCode(project, rootNode, null, 2);
     }
 
     static async Task<Result<(string filePath, string fileContent)>> CalculateExportInfo(ExportInput input)
@@ -719,16 +718,16 @@ static class TsxExporter
             {
                 value = valueAsDouble.AsPixel();
             }
-            
+
             value = '"' + TryClearStringValue(value) + '"';
-            
+
             inlineStyles.Add((name, value));
         }
 
         elementModel = elementModel with { Styles = [] };
 
         return (elementModel, inlineStyles);
-        
+
         static string kebabToCamelCase(string kebab)
         {
             if (string.IsNullOrEmpty(kebab))
@@ -736,10 +735,10 @@ static class TsxExporter
                 return kebab;
             }
 
-            StringBuilder camelCase = new StringBuilder();
-            bool capitalizeNext = false;
+            var camelCase = new StringBuilder();
+            var capitalizeNext = false;
 
-            foreach (char c in kebab)
+            foreach (var c in kebab)
             {
                 if (c == '-')
                 {
@@ -767,7 +766,7 @@ static class TsxExporter
     {
         // Open tag
         var tag = elementModel.Tag;
-        
+
         var node = new ReactNode
         {
             Tag = tag,
@@ -987,23 +986,23 @@ static class TsxExporter
             }
         }
     }
+}
 
-    record ReactNode
-    {
-        public ImmutableList<ReactNode> Children { get; init; } = [];
+record ReactNode
+{
+    public ImmutableList<ReactNode> Children { get; init; } = [];
 
-        public ImmutableList<ReactProperty> Properties { get; init; } = [];
+    public ImmutableList<ReactProperty> Properties { get; init; } = [];
 
-        public string Tag { get; init; }
+    public string Tag { get; init; }
 
-        public string Text { get; init; }
+    public string Text { get; init; }
 
-        internal required Maybe<Type> HtmlElementType { get; init; }
-    }
+    internal required Maybe<Type> HtmlElementType { get; init; }
+}
 
-    record ReactProperty
-    {
-        public required string Name { get; init; }
-        public required string Value { get; init; }
-    }
+record ReactProperty
+{
+    public required string Name { get; init; }
+    public required string Value { get; init; }
 }
