@@ -32,46 +32,27 @@ static class CecilHelper
 
         return findProperties(isInSameAssembly, type, prefix, matchFunc);
 
-         static IReadOnlyList<string> findProperties(Func<TypeReference, bool> isInSameAssembly,TypeDefinition type, string prefix, Func<PropertyDefinition, bool> matchFunc)
+        static IReadOnlyList<string> findProperties(Func<TypeReference, bool> isInSameAssembly, TypeDefinition type, string prefix, Func<PropertyDefinition, bool> matchFunc)
         {
             var properties = from p in type.Properties
                              where matchFunc(p)
                              select prefix + p.Name;
 
             var nestedProperties = from nestedType in type.NestedTypes
-                                   from nestedProperty in findProperties(isInSameAssembly,nestedType, prefix + nestedType.Name + ".", matchFunc)
+                                   from nestedProperty in findProperties(isInSameAssembly, nestedType, prefix + nestedType.Name + ".", matchFunc)
                                    select nestedProperty;
 
             var contractProperties = from p in type.Properties
-                                     where !IsSystemType(p.PropertyType) && !IsCollection(p.PropertyType) && isInSameAssembly(p.PropertyType)
-                                     from nestedProperty in findProperties(isInSameAssembly,p.PropertyType.Resolve(), prefix + p.Name + ".", matchFunc)
+                                     where !IsSystemType(p.PropertyType) &&
+                                           !IsCollection(p.PropertyType) &&
+                                           isInSameAssembly(p.PropertyType)
+                                     from nestedProperty in findProperties(isInSameAssembly, p.PropertyType.Resolve(), prefix + p.Name + ".", matchFunc)
                                      select nestedProperty;
 
-            var items = contractProperties.ToList();
-
-            return properties.Concat(nestedProperties).Concat(items).ToList();
+            return properties.Concat(nestedProperties).Concat(contractProperties).ToList();
         }
-
     }
 
-    static bool IsCollection(TypeReference typeReference)
-    {
-        return typeReference.FullName.StartsWith("System.Collections.Generic.List`1", StringComparison.OrdinalIgnoreCase);
-    }
-    
-    public static bool IsSystemType(TypeReference typeReference)
-    {
-        var typeFullName = typeReference.FullName;
-
-        string[] types =
-        [
-            typeof(Type).FullName
-        ];
-
-        return types.Contains(typeFullName) ||
-               types.Contains(typeFullName.RemoveFromStart("System.Nullable`1<").RemoveFromEnd(">"));
-    }
-    
     public static bool IsBoolean(TypeReference typeReference)
     {
         var typeFullName = typeReference.FullName;
@@ -84,7 +65,7 @@ static class CecilHelper
         return types.Contains(typeFullName) ||
                types.Contains(typeFullName.RemoveFromStart("System.Nullable`1<").RemoveFromEnd(">"));
     }
-    
+
     public static bool IsBoolean(PropertyDefinition propertyDefinition)
     {
         return IsBoolean(propertyDefinition.PropertyType);
@@ -102,7 +83,7 @@ static class CecilHelper
         return types.Contains(typeFullName) ||
                types.Contains(typeFullName.RemoveFromStart("System.Nullable`1<").RemoveFromEnd(">"));
     }
-    
+
     public static bool IsDateTime(PropertyDefinition propertyDefinition)
     {
         return IsDateTime(propertyDefinition.PropertyType);
@@ -125,19 +106,37 @@ static class CecilHelper
         return types.Contains(typeFullName) ||
                types.Contains(typeFullName.RemoveFromStart("System.Nullable`1<").RemoveFromEnd(">"));
     }
-    
+
     public static bool IsNumber(PropertyDefinition propertyDefinition)
     {
         return IsNumber(propertyDefinition.PropertyType);
     }
-    
+
     public static bool IsString(TypeReference typeReference)
     {
         return typeReference.FullName == "System.String";
     }
-    
+
     public static bool IsString(PropertyDefinition propertyDefinition)
     {
         return IsString(propertyDefinition.PropertyType);
+    }
+
+    public static bool IsSystemType(TypeReference typeReference)
+    {
+        var typeFullName = typeReference.FullName;
+
+        string[] types =
+        [
+            typeof(Type).FullName
+        ];
+
+        return types.Contains(typeFullName) ||
+               types.Contains(typeFullName.RemoveFromStart("System.Nullable`1<").RemoveFromEnd(">"));
+    }
+
+    static bool IsCollection(TypeReference typeReference)
+    {
+        return typeReference.FullName.StartsWith("System.Collections.Generic.List`1", StringComparison.OrdinalIgnoreCase);
     }
 }
