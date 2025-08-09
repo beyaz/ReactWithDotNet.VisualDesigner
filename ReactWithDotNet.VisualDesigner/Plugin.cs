@@ -4,6 +4,7 @@ using System.Data;
 using System.Globalization;
 using System.Reflection;
 using System.Text;
+using System.Text.Json;
 using Dapper;
 using Microsoft.Data.SqlClient;
 using ReactWithDotNet.ThirdPartyLibraries.MUI.Material;
@@ -22,51 +23,6 @@ sealed record PropSuggestionScope
 
 static class Plugin
 {
-    static string ConvertDotNetPathToJsPath(string dotNetPath)
-    {
-        if (string.IsNullOrEmpty(dotNetPath))
-        {
-            return dotNetPath;
-        }
-
-        var camelCase = new StringBuilder();
-        var capitalizeNext = false;
-
-        foreach (var c in dotNetPath)
-        {
-            if (c == '.')
-            {
-                capitalizeNext = true;
-                camelCase.Append('.');
-            }
-            else
-            {
-                if (capitalizeNext)
-                {
-                    camelCase.Append(char.ToLower(c, CultureInfo.InvariantCulture));
-                    capitalizeNext = false;
-                }
-                else
-                {
-                    camelCase.Append(c);
-                }
-            }
-        }
-
-        return camelCase.ToString();
-    }
-    
-    public static ReactNode AnalyzeNode(ReactNode node)
-    {
-        var record = Components.AllTypes.FirstOrDefault(x => x.type.Name == node.Tag);
-        if (record.analyzeReactNode is null)
-        {
-            return node;
-        }
-
-        return record.analyzeReactNode(node);
-    }
-    
     const string BOA_MessagingByGroupName = "BOA.MessagingByGroupName";
 
     enum ValueTypes
@@ -94,6 +50,16 @@ static class Plugin
         }
 
         return config;
+    }
+
+    public static ReactNode AnalyzeNode(ReactNode node)
+    {
+        foreach (var analyzeFunc in from x in Components.AllTypes where x.analyzeReactNode is not null select x.analyzeReactNode)
+        {
+            node = analyzeFunc(node);
+        }
+
+        return node;
     }
 
     public static Element BeforeComponentPreview(RenderPreviewScope scope, VisualElementModel visualElementModel, Element component)
@@ -185,6 +151,7 @@ static class Plugin
                                 returnList.Add($"{prop.Name}: {ConvertDotNetPathToJsPath(item)}");
                                 continue;
                             }
+
                             returnList.Add($"{prop.Name}: \"{item}\"");
                         }
 
@@ -234,14 +201,14 @@ static class Plugin
                 if (fullTypeName.StartsWith("BOA.InternetBanking.Payments.API", StringComparison.OrdinalIgnoreCase))
                 {
                     const string projectBinDirectoryPath = @"D:\work\BOA.BusinessModules\Dev\BOA.InternetBanking.Payments\API\BOA.InternetBanking.Payments.API\bin\Debug\net8.0\";
-                    
+
                     return projectBinDirectoryPath + "BOA.InternetBanking.Payments.API.dll";
                 }
-                
+
                 if (fullTypeName.StartsWith("BOA.POSPortal.MobilePos.API.", StringComparison.OrdinalIgnoreCase))
                 {
                     const string projectBinDirectoryPath = @"D:\work\BOA.BusinessModules\Dev\BOA.MobilePos\API\BOA.POSPortal.MobilePos.API\bin\Debug\net8.0\";
-                    
+
                     return projectBinDirectoryPath + "BOA.POSPortal.MobilePos.API.dll";
                 }
 
@@ -323,6 +290,40 @@ static class Plugin
         return null;
     }
 
+    static string ConvertDotNetPathToJsPath(string dotNetPath)
+    {
+        if (string.IsNullOrEmpty(dotNetPath))
+        {
+            return dotNetPath;
+        }
+
+        var camelCase = new StringBuilder();
+        var capitalizeNext = false;
+
+        foreach (var c in dotNetPath)
+        {
+            if (c == '.')
+            {
+                capitalizeNext = true;
+                camelCase.Append('.');
+            }
+            else
+            {
+                if (capitalizeNext)
+                {
+                    camelCase.Append(char.ToLower(c, CultureInfo.InvariantCulture));
+                    capitalizeNext = false;
+                }
+                else
+                {
+                    camelCase.Append(c);
+                }
+            }
+        }
+
+        return camelCase.ToString();
+    }
+
     static Task<IReadOnlyList<MessagingInfo>> GetMessagingByGroupName(string messagingGroupName)
     {
         var cacheKey = $"{nameof(GetMessagingByGroupName)} :: {messagingGroupName}";
@@ -365,7 +366,7 @@ static class Plugin
 
     static class Components
     {
-        public static readonly IReadOnlyList<(Type type, Func<IReadOnlyList<string>> propSuggestions, Func<ReactNode,ReactNode> analyzeReactNode)> AllTypes =
+        public static readonly IReadOnlyList<(Type type, Func<IReadOnlyList<string>> propSuggestions, Func<ReactNode, ReactNode> analyzeReactNode)> AllTypes =
         [
             // NextJsSupport
             (typeof(Image), Image.GetPropSuggestions, null),
@@ -381,7 +382,7 @@ static class Plugin
             (typeof(BAlert), BAlert.GetPropSuggestions, null),
             (typeof(BIcon), BIcon.GetPropSuggestions, null),
             (typeof(BDigitalMoneyInput), BDigitalMoneyInput.GetPropSuggestions, null),
-            (typeof(BComboBox), BComboBox.GetPropSuggestions, null),
+            (typeof(BComboBox), BComboBox.GetPropSuggestions, BComboBox.AnalyzeReactNode),
             (typeof(BDigitalDatepicker), BDigitalDatepicker.GetPropSuggestions, null),
             (typeof(BInput), BInput.GetPropSuggestions, BInput.AnalyzeReactNode),
             (typeof(BInputMaskExtended), BInputMaskExtended.GetPropSuggestions, null),
@@ -420,17 +421,17 @@ static class Plugin
                             return ValueTypes.String;
                         }
 
-                        if (propertyType.In([typeof(short), typeof(short?), typeof(int), typeof(int?), typeof(double), typeof(double?), typeof(long), typeof(long?)]))
+                        if (propertyType.In(typeof(short), typeof(short?), typeof(int), typeof(int?), typeof(double), typeof(double?), typeof(long), typeof(long?)))
                         {
                             return ValueTypes.Number;
                         }
 
-                        if (propertyType.In([typeof(bool), typeof(bool?)]))
+                        if (propertyType.In(typeof(bool), typeof(bool?)))
                         {
                             return ValueTypes.Boolean;
                         }
 
-                        if (propertyType.In([typeof(DateTime), typeof(DateTime?)]))
+                        if (propertyType.In(typeof(DateTime), typeof(DateTime?)))
                         {
                             return ValueTypes.Date;
                         }
@@ -569,22 +570,9 @@ static class Plugin
         public sealed class BIcon : PluginComponentBase
         {
             public string name { get; set; }
-            
+
             public string size { get; set; }
 
-            double GetSize()
-            {
-                if (size.HasValue())
-                {
-                    if (double.TryParse(size, out var d))
-                    {
-                        return d;
-                    }
-                }
-
-                return 24;
-            }
-            
             public static IReadOnlyList<string> GetPropSuggestions()
             {
                 return
@@ -596,8 +584,6 @@ static class Plugin
 
             protected override Element render()
             {
-                
-                
                 return new FlexRowCentered(Size(GetSize()), Id(id), OnClick(onMouseClick))
                 {
                     createSvg
@@ -629,6 +615,19 @@ static class Plugin
                 }
 
                 return name;
+            }
+
+            double GetSize()
+            {
+                if (size.HasValue())
+                {
+                    if (double.TryParse(size, out var d))
+                    {
+                        return d;
+                    }
+                }
+
+                return 24;
             }
         }
 
@@ -707,12 +706,12 @@ static class Plugin
             {
                 return new Alert
                 {
-                    id = id,
-                    onClick =onMouseClick,
-                    
+                    id      = id,
+                    onClick = onMouseClick,
+
                     severity = severity,
-                    variant = variant,
-                    
+                    variant  = variant,
+
                     children = { children }
                 };
             }
@@ -742,7 +741,7 @@ static class Plugin
                 } + Id(id) + OnClick(onMouseClick);
             }
         }
-        
+
         sealed class TransactionWizardPage : PluginComponentBase
         {
             public bool? isWide { get; set; }
@@ -751,7 +750,6 @@ static class Plugin
             {
                 return
                 [
-                 
                 ];
             }
 
@@ -775,13 +773,7 @@ static class Plugin
             {
                 return
                 [
-                 
                 ];
-            }
-
-            class ItemModel
-            {
-                public string label { get; set; }
             }
 
             protected override Element render()
@@ -791,48 +783,44 @@ static class Plugin
                     return null;
                 }
 
-                var itemList = System.Text.Json.JsonSerializer.Deserialize<ItemModel[]>(items);
-                
+                var itemList = JsonSerializer.Deserialize<ItemModel[]>(items);
+
                 return new FlexRow(Gap(24))
                 {
-                    itemList.Select(x=>new FlexRowCentered(Gap(12), WidthFitContent)
+                    itemList.Select(x => new FlexRowCentered(Gap(12), WidthFitContent)
                     {
                         new svg(ViewBox(0, 0, 24, 24), svg.Width(24), svg.Height(24), Fill(rgb(22, 160, 133)))
                         {
-                            new path{d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zm0-5C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"}
+                            new path { d = "M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zm0-5C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z" }
                         },
-                        
+
                         new label
                         {
-                            FontSize16, FontWeight400,LineHeight(1.5), FontFamily("Roboto, sans-serif"),
+                            FontSize16, FontWeight400, LineHeight(1.5), FontFamily("Roboto, sans-serif"),
                             x.label
                         }
                     })
-                    
                 } + Id(id) + OnClick(onMouseClick);
             }
+
+            class ItemModel
+            {
+                public string label { get; set; }
+            }
         }
-        
-        
+
         sealed class BDigitalTabNavigator : PluginComponentBase
         {
+            public string items { get; set; }
             public string mainResource { get; set; }
 
             public int? selectedTab { get; set; }
-
-            public string items { get; set; }
 
             public static IReadOnlyList<string> GetPropSuggestions()
             {
                 return
                 [
-                 
                 ];
-            }
-
-            class ItemModel
-            {
-                public string label { get; set; }
             }
 
             protected override Element render()
@@ -842,33 +830,36 @@ static class Plugin
                     return null;
                 }
 
-                var itemList = System.Text.Json.JsonSerializer.Deserialize<ItemModel[]>(items);
-                
+                var itemList = JsonSerializer.Deserialize<ItemModel[]>(items);
+
                 return new FlexRow(BorderBottom(1, solid, rgba(0, 0, 0, 0.12)), Color(rgb(22, 160, 133)))
                 {
                     new FlexRow(Gap(24))
                     {
-                        itemList.Select(x=>new FlexRowCentered(Padding(24), WidthFitContent, AlignItemsCenter)
+                        itemList.Select(x => new FlexRowCentered(Padding(24), WidthFitContent, AlignItemsCenter)
                         {
-                            BorderBottom(2, solid,rgb(22, 160, 133)),
-                        
+                            BorderBottom(2, solid, rgb(22, 160, 133)),
+
                             new label
                             {
-                                FontSize16, FontWeight400,LineHeight(1.5), FontFamily("Roboto, sans-serif"),
+                                FontSize16, FontWeight400, LineHeight(1.5), FontFamily("Roboto, sans-serif"),
                                 x.label
                             }
                         })
-                    
                     }
-                    
                 } + Id(id) + OnClick(onMouseClick);
             }
+
+            class ItemModel
+            {
+                public string label { get; set; }
+            }
         }
-        
+
         sealed class BCheckBox : PluginComponentBase
         {
             public string bind { get; set; }
-            
+
             public string label { get; set; }
 
             public static IReadOnlyList<string> GetPropSuggestions()
@@ -882,15 +873,14 @@ static class Plugin
             {
                 return new FlexRowCentered(Gap(4), WidthFitContent)
                 {
-                    new input{ type="checkbox"},
+                    new input { type = "checkbox" },
                     new div { label ?? "?" }
                 };
             }
         }
-        
+
         sealed class BButton : PluginComponentBase
         {
-            
             public string text { get; set; }
 
             public static IReadOnlyList<string> GetPropSuggestions()
@@ -902,73 +892,13 @@ static class Plugin
 
             protected override Element render()
             {
-                return new FlexRowCentered(WidthFitContent, Background("Blue"),BorderRadius(10), Padding(5,15), BorderColor(rgb(230, 245, 243)), Color(White))
+                return new FlexRowCentered(WidthFitContent, Background("Blue"), BorderRadius(10), Padding(5, 15), BorderColor(rgb(230, 245, 243)), Color(White))
                 {
                     new div { text ?? "?" }
                 };
             }
         }
 
-       
-        
-        sealed class BComboBox : PluginComponentBase
-        {
-            public string bind { get; set; }
-
-            public IEnumerable dataSource { get; set; }
-
-            public bool? hiddenClearButton { get; set; }
-
-            public string hintText { get; set; }
-            public string labelText { get; set; }
-
-            public static IReadOnlyList<string> GetPropSuggestions()
-            {
-                return
-                [
-                ];
-            }
-
-            protected override Element render()
-            {
-                var textContent = string.Empty;
-                if (labelText.HasValue())
-                {
-                    textContent = labelText;
-                }
-                if (bind.HasValue())
-                {
-                    textContent += " | " + bind;
-                }
-                
-                return new div(WidthFull, PaddingTop(16), PaddingBottom(8))
-                {
-                    Id(id), OnClick(onMouseClick),
-                    
-                    new FlexRow(AlignItemsCenter, PaddingLeft(16), PaddingRight(12), Border(1, solid, "#c0c0c0"), BorderRadius(10), Height(58), JustifyContentSpaceBetween)
-                    {
-                        new div(Color(rgba(0, 0, 0, 0.54)), FontSize16, FontWeight400, FontFamily("Roboto, sans-serif"))
-                        {
-                            textContent
-                        },
-                        new svg(ViewBox(0,0,24,24), svg.Width(24), svg.Height(24), Color(rgb(117, 117, 117)))
-                        {
-                            new path
-                            {
-                                d= "M7 10l5 5 5-5z",
-                                fill = "#757575"
-                            }
-                        }
-                    },
-                    new FlexRow(JustifyContentSpaceBetween, FontSize12, PaddingLeftRight(14), Color(rgb(158, 158, 158)), LineHeight15)
-                    {
-                        //new div{ helperText},
-                        //new div{ maxLength }
-                    }
-                };
-            }
-        }
-        
         sealed class BDigitalDatepicker : PluginComponentBase
         {
             public string bind { get; set; }
@@ -994,22 +924,23 @@ static class Plugin
                 {
                     textContent = labelText;
                 }
+
                 if (bind.HasValue())
                 {
                     textContent += " | " + bind;
                 }
-                
+
                 return new div(WidthFull, PaddingTop(16), PaddingBottom(8))
                 {
                     Id(id), OnClick(onMouseClick),
-                    
+
                     new FlexRow(AlignItemsCenter, PaddingLeft(16), PaddingRight(12), Border(1, solid, "#c0c0c0"), BorderRadius(10), Height(58), JustifyContentSpaceBetween)
                     {
                         new div(Color(rgba(0, 0, 0, 0.54)), FontSize16, FontWeight400, FontFamily("Roboto, sans-serif"))
                         {
                             textContent
                         },
-                        new svg(ViewBox(0,0,24,24), svg.Width(24), svg.Height(24), Color(rgb(117, 117, 117)))
+                        new svg(ViewBox(0, 0, 24, 24), svg.Width(24), svg.Height(24), Color(rgb(117, 117, 117)))
                         {
                             new path
                             {
@@ -1050,19 +981,13 @@ static class Plugin
 
         sealed class BDigitalDialog : PluginComponentBase
         {
+            public string actions { get; set; }
             public string content { get; set; }
 
             public bool? open { get; set; }
-            
-            public string title { get; set; }
-            
-            public string actions { get; set; }
 
-            class ItemModel
-            {
-                public string label { get; set; }
-            }
-            
+            public string title { get; set; }
+
             public static IReadOnlyList<string> GetPropSuggestions()
             {
                 return
@@ -1077,39 +1002,43 @@ static class Plugin
                     return null;
                 }
 
-                var actionList = System.Text.Json.JsonSerializer.Deserialize<ItemModel[]>(actions);
-                
+                var actionList = JsonSerializer.Deserialize<ItemModel[]>(actions);
+
                 return new div(Background(rgba(0, 0, 0, 0.5)), Padding(24), BorderRadius(8))
                 {
-                    new div(Background("white"), BorderRadius(8),Padding(16), FontFamily("Roboto, sans-serif"))
+                    new div(Background("white"), BorderRadius(8), Padding(16), FontFamily("Roboto, sans-serif"))
                     {
                         new FlexRow(JustifyContentSpaceBetween, AlignItemsCenter, PaddingY(16))
                         {
-                            new div(FontSize20){ title},
-                            new svg(ViewBox(0,0,24,24), svg.Width(24), svg.Height(24))
+                            new div(FontSize20) { title },
+                            new svg(ViewBox(0, 0, 24, 24), svg.Width(24), svg.Height(24))
                             {
                                 new path
                                 {
-                                    d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
+                                    d = "M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
                                 }
                             }
                         },
-                        
+
                         new Alert
                         {
                             content
                         },
                         SpaceY(12),
-                        new FlexRow(JustifyContentFlexEnd, Color(rgb(22, 160, 133)),FontWeightBold, FontSize14, Gap(24))
+                        new FlexRow(JustifyContentFlexEnd, Color(rgb(22, 160, 133)), FontWeightBold, FontSize14, Gap(24))
                         {
-                            actionList.Select(x=>new div
+                            actionList.Select(x => new div
                             {
                                 x.label
                             })
                         }
                     }
-                    
                 };
+            }
+
+            class ItemModel
+            {
+                public string label { get; set; }
             }
         }
 
@@ -1124,19 +1053,18 @@ static class Plugin
             {
                 return
                 [
-                 
                 ];
             }
 
             protected override Element render()
             {
                 var textContent = "Tutar";
-                
+
                 if (bind.HasValue())
                 {
                     textContent += " | " + bind;
                 }
-                
+
                 return new div(WidthFull, PaddingTop(16), PaddingBottom(8))
                 {
                     new FlexRow(AlignItemsCenter, PaddingLeftRight(16), Border(1, solid, "#c0c0c0"), BorderRadius(10), Height(58), JustifyContentSpaceBetween)
@@ -1145,17 +1073,15 @@ static class Plugin
                         {
                             textContent
                         },
-                    
-                        new div{ fec ?? "TL" },
-                        
-                       
+
+                        new div { fec ?? "TL" },
                     },
                     new FlexRow(JustifyContentSpaceBetween, FontSize12, PaddingLeftRight(14), Color(rgb(158, 158, 158)), LineHeight15)
                     {
                         //new div{ helperText},
                         //new div{ maxLength }
                     },
-                    
+
                     Id(id), OnClick(onMouseClick)
                 };
             }
@@ -1182,60 +1108,21 @@ static class Plugin
             }
         }
 
-
         sealed class BInput : PluginComponentBase
         {
-            public bool? required { get; set; }
-            
             public string autoComplete { get; set; }
 
-            public string value { get; set; }
-            
-            public string onChange { get; set; }
-            
             public string floatingLabelText { get; set; }
 
             public string helperText { get; set; }
 
             public int? maxLength { get; set; }
 
-            public static IReadOnlyList<string> GetPropSuggestions()
-            {
-                return
-                [
-                    $"{nameof(autoComplete)}: \"on\"",
-                    $"{nameof(autoComplete)}: \"off\""
-                ];
-            }
+            public string onChange { get; set; }
+            public bool? required { get; set; }
 
-            protected override Element render()
-            {
-                var textContent = string.Empty;
-                if (floatingLabelText.HasValue())
-                {
-                    textContent = floatingLabelText;
-                }
-                if (value.HasValue())
-                {
-                    textContent += " | " + value;
-                }
-                
-                return new div(PaddingTop(16), PaddingBottom(8))
-                {
-                    new FlexRow(AlignItemsCenter, PaddingLeftRight(16), Border(1, solid, "#c0c0c0"), BorderRadius(10), Height(58), JustifyContentSpaceBetween)
-                    {
-                        new div(Color(rgba(0, 0, 0, 0.54)), FontSize16, FontWeight400, FontFamily("Roboto, sans-serif")) { textContent },
-                    
-                        Id(id), OnClick(onMouseClick)
-                    },
-                    new FlexRow(JustifyContentSpaceBetween, FontSize12, PaddingLeftRight(14), Color(rgb(158, 158, 158)), LineHeight15)
-                    {
-                        new div{ helperText},
-                        new div{ maxLength }
-                    }
-                };
-            }
-            
+            public string value { get; set; }
+
             public static ReactNode AnalyzeReactNode(ReactNode node)
             {
                 if (node.Tag == nameof(BInput))
@@ -1244,7 +1131,7 @@ static class Plugin
                     var onChangeProp = node.Properties.FirstOrDefault(x => x.Name == nameof(onChange));
                     var requiredProp = node.Properties.FirstOrDefault(x => x.Name == nameof(required));
                     var autoCompleteProp = node.Properties.FirstOrDefault(x => x.Name == nameof(autoComplete));
-                    
+
                     if (valueProp is not null)
                     {
                         var properties = node.Properties;
@@ -1269,7 +1156,7 @@ static class Plugin
                         }
 
                         lines.Add("}");
-                        
+
                         if (onChangeProp is not null)
                         {
                             onChangeProp = onChangeProp with
@@ -1302,12 +1189,176 @@ static class Plugin
                             })
                         };
                     }
+
+                    node = node with
+                    {
+                        Properties = node.Properties.Add(new ReactProperty
+                        {
+                            Name  = "context",
+                            Value = "context"
+                        })
+                    };
                 }
 
                 return node with { Children = node.Children.Select(AnalyzeReactNode).ToImmutableList() };
             }
+
+            public static IReadOnlyList<string> GetPropSuggestions()
+            {
+                return
+                [
+                    $"{nameof(autoComplete)}: \"on\"",
+                    $"{nameof(autoComplete)}: \"off\""
+                ];
+            }
+
+            protected override Element render()
+            {
+                var textContent = string.Empty;
+                if (floatingLabelText.HasValue())
+                {
+                    textContent = floatingLabelText;
+                }
+
+                if (value.HasValue())
+                {
+                    textContent += " | " + value;
+                }
+
+                return new div(PaddingTop(16), PaddingBottom(8))
+                {
+                    new FlexRow(AlignItemsCenter, PaddingLeftRight(16), Border(1, solid, "#c0c0c0"), BorderRadius(10), Height(58), JustifyContentSpaceBetween)
+                    {
+                        new div(Color(rgba(0, 0, 0, 0.54)), FontSize16, FontWeight400, FontFamily("Roboto, sans-serif")) { textContent },
+
+                        Id(id), OnClick(onMouseClick)
+                    },
+                    new FlexRow(JustifyContentSpaceBetween, FontSize12, PaddingLeftRight(14), Color(rgb(158, 158, 158)), LineHeight15)
+                    {
+                        new div { helperText },
+                        new div { maxLength }
+                    }
+                };
+            }
         }
-        
+
+        sealed class BComboBox : PluginComponentBase
+        {
+            public string dataSource { get; set; }
+
+            public bool? hiddenClearButton { get; set; }
+
+            public string hintText { get; set; }
+            public string labelText { get; set; }
+
+            public string onSelect { get; set; }
+            public string value { get; set; }
+
+            public static ReactNode AnalyzeReactNode(ReactNode node)
+            {
+                if (node.Tag == nameof(BInput))
+                {
+                    var valueProp = node.Properties.FirstOrDefault(x => x.Name == nameof(value));
+                    var onSelectProp = node.Properties.FirstOrDefault(x => x.Name == nameof(onSelect));
+
+                    if (valueProp is not null)
+                    {
+                        var properties = node.Properties;
+
+                        List<string> lines =
+                        [
+                            "(selectedIndexes: [number], selectedItems: [TextValuePair], selectedValues: [string]) =>",
+                            "{",
+                            $"  updateRequest(r => {{ r.{valueProp.Value.RemoveFromStart("request.")} = selectedValues[0]; }});"
+                        ];
+
+                        if (onSelectProp is not null)
+                        {
+                            if (IsAlphaNumeric(onSelectProp.Value))
+                            {
+                                lines.Add(onSelectProp.Value + "(selectedIndexes, selectedItems, selectedValues);");
+                            }
+                            else
+                            {
+                                lines.Add(onSelectProp.Value);
+                            }
+                        }
+
+                        lines.Add("}");
+
+                        if (onSelectProp is not null)
+                        {
+                            onSelectProp = onSelectProp with
+                            {
+                                Value = string.Join(Environment.NewLine, lines)
+                            };
+
+                            properties = properties.SetItem(properties.FindIndex(x => x.Name == onSelectProp.Name), onSelectProp);
+                        }
+                        else
+                        {
+                            properties = properties.Add(new ReactProperty
+                            {
+                                Name  = "onSelectProp",
+                                Value = string.Join(Environment.NewLine, lines)
+                            });
+                        }
+
+                        node = node with { Properties = properties };
+                    }
+                }
+
+                return node with { Children = node.Children.Select(AnalyzeReactNode).ToImmutableList() };
+            }
+
+            public static IReadOnlyList<string> GetPropSuggestions()
+            {
+                return
+                [
+                ];
+            }
+
+            protected override Element render()
+            {
+                var textContent = string.Empty;
+                if (labelText.HasValue())
+                {
+                    textContent = labelText;
+                }
+
+                if (value.HasValue())
+                {
+                    textContent += " | " + value;
+                }
+
+                return new div(WidthFull, PaddingTop(16), PaddingBottom(8))
+                {
+                    Id(id), OnClick(onMouseClick),
+
+                    new FlexRow(AlignItemsCenter, PaddingLeft(16), PaddingRight(12), Border(1, solid, "#c0c0c0"), BorderRadius(10), Height(58), JustifyContentSpaceBetween)
+                    {
+                        new div(Color(rgba(0, 0, 0, 0.54)), FontSize16, FontWeight400, FontFamily("Roboto, sans-serif"))
+                        {
+                            textContent
+                        },
+                        new svg(ViewBox(0, 0, 24, 24), svg.Width(24), svg.Height(24), Color(rgb(117, 117, 117)))
+                        {
+                            new path
+                            {
+                                d    = "M7 10l5 5 5-5z",
+                                fill = "#757575"
+                            }
+                        }
+                    },
+                    new FlexRow(JustifyContentSpaceBetween, FontSize12, PaddingLeftRight(14), Color(rgb(158, 158, 158)), LineHeight15)
+                    {
+                        //new div{ helperText},
+                        //new div{ maxLength }
+                    }
+                };
+            }
+        }
+
         sealed class BInputMaskExtended : PluginComponentBase
         {
             public string autoComplete { get; set; }
@@ -1335,39 +1386,39 @@ static class Plugin
                 {
                     textContent = floatingLabelText;
                 }
+
                 if (bind.HasValue())
                 {
                     textContent += " | " + bind;
                 }
-                
+
                 return new div(PaddingTop(16), PaddingBottom(8))
                 {
                     new FlexRow(AlignItemsCenter, PaddingLeftRight(16), Border(1, solid, "#c0c0c0"), BorderRadius(10), Height(58), JustifyContentSpaceBetween)
                     {
                         new div(Color(rgba(0, 0, 0, 0.54)), FontSize16, FontWeight400, FontFamily("Roboto, sans-serif")) { textContent },
-                    
+
                         Id(id), OnClick(onMouseClick)
                     },
                     new FlexRow(JustifyContentSpaceBetween, FontSize12, PaddingLeftRight(14), Color(rgb(158, 158, 158)), LineHeight15)
                     {
-                        new div{ helperText},
-                        new div{ maxLength }
+                        new div { helperText },
+                        new div { maxLength }
                     }
                 };
             }
         }
-        
+
         sealed class BPlateNumber : PluginComponentBase
         {
             public string bind { get; set; }
-            
+
             public string label { get; set; }
 
             public static IReadOnlyList<string> GetPropSuggestions()
             {
                 return
                 [
-                   
                 ];
             }
 
@@ -1378,15 +1429,16 @@ static class Plugin
                 {
                     textContent = label;
                 }
+
                 if (bind.HasValue())
                 {
                     textContent += " | " + bind;
                 }
-                
+
                 return new FlexRow(AlignItemsCenter, PaddingLeftRight(16), Border(1, solid, "#c0c0c0"), BorderRadius(10), Height(58), JustifyContentSpaceBetween)
                 {
                     new div { textContent },
-                    
+
                     Id(id), OnClick(onMouseClick)
                 };
             }
@@ -1394,9 +1446,8 @@ static class Plugin
 
         sealed class BTypography : PluginComponentBase
         {
-            public string variant { get; set; }
-
             public string dangerouslySetInnerHTML { get; set; }
+            public string variant { get; set; }
 
             public static IReadOnlyList<string> GetPropSuggestions()
             {
@@ -1420,7 +1471,7 @@ static class Plugin
                 {
                     children = { children },
                     variant  = variant,
-                    
+
                     style =
                     {
                         FontFamily("Roboto, sans-serif"), FontWeight400, LineHeight27
