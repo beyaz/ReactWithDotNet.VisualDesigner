@@ -311,7 +311,7 @@ sealed class MagicInput : Component<MagicInput.State>
                 IsTextAlignRight ? Right(0) : null,
                 IsTextAlignCenter ? Right(none) : null,
 
-                suggestions.Take(5).Select(ToOption)
+                suggestions.Take(7).Select(ToOption)
             },
 
             IsTextAlignCenter ? AlignItemsCenter : null

@@ -133,14 +133,7 @@ static class Plugin
 
             List<string> returnList = [];
             
-            List<string> distinctSuggestions = [];
-
-            var addSuggestion = (string name, string value) =>
-            {
-                
-                
-                returnList.Add($"{name}: {value}");
-            };
+            List<(string name, string value)> distinctSuggestions = [];
 
             foreach (var prop in from m in Components.GetAllTypesMetadata() where m.TagName == scope.TagName from p in m.Props select p)
             {
@@ -205,9 +198,25 @@ static class Plugin
                 addSuggestion("d-text", '"' + item + '"');
             }
 
-            returnList.InsertRange(0, Components.GetPropSuggestions(scope.TagName));
+            foreach (var (name, value) in Components.GetPropSuggestions(scope.TagName))
+            {
+                addSuggestion(name, value);
+            }
 
+            returnList.InsertRange(0, distinctSuggestions.Select(x => x.name + ": " + x.value));
+            
             return returnList;
+
+            void addSuggestion(string name, string value)
+            {
+                if (!distinctSuggestions.Any(x => name.Equals(x.name, StringComparison.OrdinalIgnoreCase)))
+                {
+                    distinctSuggestions.Add((name, value));
+                    return;
+                }
+
+                returnList.Add($"{name}: {value}");
+            }
 
             static string getAssemblyFilePathByFullTypeName(string fullTypeName)
             {
@@ -379,7 +388,7 @@ static class Plugin
 
     static class Components
     {
-        public static readonly IReadOnlyList<(Type type, Func<IReadOnlyList<string>> propSuggestions, Func<ReactNode, ReactNode> analyzeReactNode)> AllTypes =
+        public static readonly IReadOnlyList<(Type type, Func<IReadOnlyList<(string name, string value)>> propSuggestions, Func<ReactNode, ReactNode> analyzeReactNode)> AllTypes =
         [
             // NextJsSupport
             (typeof(Image), Image.GetPropSuggestions, null),
@@ -470,7 +479,7 @@ static class Plugin
             }
         }
 
-        public static IReadOnlyList<string> GetPropSuggestions(string tag)
+        public static IReadOnlyList<(string name, string value)> GetPropSuggestions(string tag)
         {
             var type = AllTypes.Select(x => x.type).FirstOrDefault(t => t.Name.Equals(tag, StringComparison.OrdinalIgnoreCase));
             if (type is null)
@@ -484,7 +493,7 @@ static class Plugin
                 return [];
             }
 
-            return (IReadOnlyList<string>)methodInfo.Invoke(null, []);
+            return (IReadOnlyList<(string name, string value)>)methodInfo.Invoke(null, []);
         }
 
         public sealed class BDigitalGrid : PluginComponentBase
@@ -510,34 +519,32 @@ static class Plugin
 
             public int? xs { get; set; }
 
-            public static IReadOnlyList<string> GetPropSuggestions()
+            public static IReadOnlyList<(string name, string value)> GetPropSuggestions()
             {
                 return
                 [
-                    $"{nameof(container)}: true",
-                    $"{nameof(item)}: true",
-                    $"{nameof(direction)}: 'column'",
-                    $"{nameof(direction)}: 'row'",
-
-                    $"{nameof(justifyContent)}: 'flex-start'",
-                    $"{nameof(justifyContent)}: 'center'",
-                    $"{nameof(justifyContent)}: 'flex-end'",
-                    $"{nameof(justifyContent)}: 'space-between'",
-                    $"{nameof(justifyContent)}: 'space-around'",
-                    $"{nameof(justifyContent)}: 'space-evenly'",
-
-                    $"{nameof(alignItems)}: 'flex-start'",
-                    $"{nameof(alignItems)}: 'stretch'",
-                    $"{nameof(alignItems)}: 'flex-end'",
-                    $"{nameof(alignItems)}: 'center'",
-                    $"{nameof(alignItems)}: 'baseline'",
-
-                    $"{nameof(spacing)}: 1",
-                    $"{nameof(spacing)}: 2",
-                    $"{nameof(spacing)}: 3",
-                    $"{nameof(spacing)}: 4",
-                    $"{nameof(spacing)}: 5",
-                    $"{nameof(spacing)}: 6"
+                    (nameof(container), "true"),
+                    (nameof(item), "true"),
+                    (nameof(direction),'"' +"column" + '"'),
+                    (nameof(direction),'"' +"row" + '"'),
+                    (nameof(justifyContent),'"' +"flex-start" + '"'),
+                    (nameof(justifyContent),'"' +"center" + '"'),
+                    (nameof(justifyContent),'"' +"flex-end" + '"'),
+                    (nameof(justifyContent),'"' +"space-between" + '"'),
+                    (nameof(justifyContent),'"' +"space-around" + '"'),
+                    (nameof(justifyContent),'"' +"space-evenly" + '"'),
+                    (nameof(alignItems),'"' +"flex-start" + '"'),
+                    (nameof(alignItems),'"' +"stretch" + '"'),
+                    (nameof(alignItems),'"' +"flex-end" + '"'),
+                    (nameof(alignItems),'"' +"center" + '"'),
+                    (nameof(alignItems),'"' +"baseline" + '"'),
+                   
+                    (nameof(spacing),"1"),
+                    (nameof(spacing),"2"),
+                    (nameof(spacing),"3"),
+                    (nameof(spacing),"4"),
+                    (nameof(spacing),"5"),  
+                    (nameof(spacing),"6")
                 ];
             }
 
@@ -569,11 +576,11 @@ static class Plugin
         {
             public string title { get; set; }
 
-            public static IReadOnlyList<string> GetPropSuggestions()
+            public static IReadOnlyList<(string name, string value)> GetPropSuggestions()
             {
                 return
                 [
-                    $"{nameof(title)}: '?'"
+                
                 ];
             }
 
@@ -596,12 +603,12 @@ static class Plugin
 
             public string size { get; set; }
 
-            public static IReadOnlyList<string> GetPropSuggestions()
+            public static IReadOnlyList<(string name, string value)> GetPropSuggestions()
             {
                 return
                 [
-                    $"{nameof(name)}: 'TimerRounded'",
-                    $"{nameof(name)}: 'content_copy'"
+                    (nameof(name),"'TimerRounded'"),
+                    (nameof(name),"'content_copy'")
                 ];
             }
 
@@ -667,7 +674,7 @@ static class Plugin
 
             public string width { get; set; }
 
-            public static IReadOnlyList<string> GetPropSuggestions()
+            public static IReadOnlyList<(string name, string value)> GetPropSuggestions()
             {
                 return
                 [
@@ -693,7 +700,7 @@ static class Plugin
             public string href { get; set; }
             public string target { get; set; }
 
-            public static IReadOnlyList<string> GetPropSuggestions()
+            public static IReadOnlyList<(string name, string value)> GetPropSuggestions()
             {
                 return
                 [
@@ -716,12 +723,12 @@ static class Plugin
             public string severity { get; set; }
             public string variant { get; set; }
 
-            public static IReadOnlyList<string> GetPropSuggestions()
+            public static IReadOnlyList<(string name, string value)> GetPropSuggestions()
             {
                 return
                 [
-                    $"{nameof(variant)}: 'standard'",
-                    $"{nameof(severity)}: 'info'"
+                    (nameof(variant), "'standard'"),
+                    (nameof(severity), "'info'")
                 ];
             }
 
@@ -744,11 +751,11 @@ static class Plugin
         {
             public string pageTitle { get; set; }
 
-            public static IReadOnlyList<string> GetPropSuggestions()
+            public static IReadOnlyList<(string name, string value)> GetPropSuggestions()
             {
                 return
                 [
-                    $"{nameof(pageTitle)}: '?'"
+              
                 ];
             }
 
@@ -769,7 +776,7 @@ static class Plugin
         {
             public bool? isWide { get; set; }
 
-            public static IReadOnlyList<string> GetPropSuggestions()
+            public static IReadOnlyList<(string name, string value)> GetPropSuggestions()
             {
                 return
                 [
@@ -792,7 +799,7 @@ static class Plugin
         {
             public string items { get; set; }
 
-            public static IReadOnlyList<string> GetPropSuggestions()
+            public static IReadOnlyList<(string name, string value)> GetPropSuggestions()
             {
                 return
                 [
@@ -839,7 +846,7 @@ static class Plugin
 
             public int? selectedTab { get; set; }
 
-            public static IReadOnlyList<string> GetPropSuggestions()
+            public static IReadOnlyList<(string name, string value)> GetPropSuggestions()
             {
                 return
                 [
@@ -885,7 +892,7 @@ static class Plugin
 
             public string label { get; set; }
 
-            public static IReadOnlyList<string> GetPropSuggestions()
+            public static IReadOnlyList<(string name, string value)> GetPropSuggestions()
             {
                 return
                 [
@@ -906,7 +913,7 @@ static class Plugin
         {
             public string text { get; set; }
 
-            public static IReadOnlyList<string> GetPropSuggestions()
+            public static IReadOnlyList<(string name, string value)> GetPropSuggestions()
             {
                 return
                 [
@@ -933,7 +940,7 @@ static class Plugin
             public string hintText { get; set; }
             public string labelText { get; set; }
 
-            public static IReadOnlyList<string> GetPropSuggestions()
+            public static IReadOnlyList<(string name, string value)> GetPropSuggestions()
             {
                 return
                 [
@@ -985,11 +992,11 @@ static class Plugin
         {
             public string styleContext { get; set; }
 
-            public static IReadOnlyList<string> GetPropSuggestions()
+            public static IReadOnlyList<(string name, string value)> GetPropSuggestions()
             {
                 return
                 [
-                    $"{nameof(styleContext)}: 'noMargin'"
+                    (nameof(styleContext), "'noMargin'")
                 ];
             }
 
@@ -1011,7 +1018,7 @@ static class Plugin
 
             public string title { get; set; }
 
-            public static IReadOnlyList<string> GetPropSuggestions()
+            public static IReadOnlyList<(string name, string value)> GetPropSuggestions()
             {
                 return
                 [
@@ -1072,7 +1079,7 @@ static class Plugin
             public bool? currencyVisible { get; set; }
             public string fec { get; set; }
 
-            public static IReadOnlyList<string> GetPropSuggestions()
+            public static IReadOnlyList<(string name, string value)> GetPropSuggestions()
             {
                 return
                 [
@@ -1115,7 +1122,7 @@ static class Plugin
             public string bind { get; set; }
             public string label { get; set; }
 
-            public static IReadOnlyList<string> GetPropSuggestions()
+            public static IReadOnlyList<(string name, string value)> GetPropSuggestions()
             {
                 return
                 [
@@ -1234,12 +1241,11 @@ static class Plugin
                 return node with { Children = node.Children.Select(AnalyzeReactNode).ToImmutableList() };
             }
 
-            public static IReadOnlyList<string> GetPropSuggestions()
+            public static IReadOnlyList<(string name, string value)> GetPropSuggestions()
             {
                 return
                 [
-                    $"{nameof(isAutoComplete)}: \"on\"",
-                    $"{nameof(isAutoComplete)}: \"off\""
+                 
                 ];
             }
 
@@ -1351,7 +1357,7 @@ static class Plugin
                 return node with { Children = node.Children.Select(AnalyzeReactNode).ToImmutableList() };
             }
 
-            public static IReadOnlyList<string> GetPropSuggestions()
+            public static IReadOnlyList<(string name, string value)> GetPropSuggestions()
             {
                 return
                 [
@@ -1429,12 +1435,11 @@ static class Plugin
             [JsTypeInfo(JsType.Boolean)]
             public string isRequired { get; set; }
 
-            public static IReadOnlyList<string> GetPropSuggestions()
+            public static IReadOnlyList<(string name, string value)> GetPropSuggestions()
             {
                 return
                 [
-                    $"{nameof(isAutoComplete)}: \"on\"",
-                    $"{nameof(isAutoComplete)}: \"off\""
+              
                 ];
             }
 
@@ -1554,7 +1559,7 @@ static class Plugin
 
             public string label { get; set; }
 
-            public static IReadOnlyList<string> GetPropSuggestions()
+            public static IReadOnlyList<(string name, string value)> GetPropSuggestions()
             {
                 return
                 [
@@ -1588,19 +1593,19 @@ static class Plugin
             public string dangerouslySetInnerHTML { get; set; }
             public string variant { get; set; }
 
-            public static IReadOnlyList<string> GetPropSuggestions()
+            public static IReadOnlyList<(string name, string value)> GetPropSuggestions()
             {
                 return
                 [
-                    $"{nameof(variant)}: 'h1'",
-                    $"{nameof(variant)}: 'h2'",
-                    $"{nameof(variant)}: 'h3'",
-                    $"{nameof(variant)}: 'h4'",
-                    $"{nameof(variant)}: 'h5'",
-                    $"{nameof(variant)}: 'h6'",
-
-                    $"{nameof(variant)}: 'body0'",
-                    $"{nameof(variant)}: 'body1'"
+                    (nameof(variant), '"'+"h1"+'"'),
+                    (nameof(variant), '"'+"h2"+'"'),
+                    (nameof(variant), '"'+"h3"+'"'),
+                    (nameof(variant), '"'+"h4"+'"'),
+                    (nameof(variant), '"'+"h5"+'"'),
+                    (nameof(variant), '"'+"h6"+'"'),
+                    
+                    (nameof(variant), '"'+"body0"+'"'),
+                    (nameof(variant), '"'+"body1"+'"')
                 ];
             }
 
