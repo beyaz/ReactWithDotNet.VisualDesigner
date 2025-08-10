@@ -22,6 +22,26 @@ public sealed class JsTypeInfoAttribute : Attribute
 
 static class CecilHelper
 {
+    public static IReadOnlyList<string> GetRemoteApiMethodNames(string assemblyPath, string requestFullName)
+    {
+        var assembly = AssemblyDefinition.ReadAssembly(assemblyPath);
+        if (assembly is null)
+        {
+            return [];
+        }
+
+        var controllerFullName = requestFullName.Replace(".Types.", ".Controllers.").Replace("ClientRequest", "Controller");
+
+        var type = assembly.MainModule.GetType(controllerFullName);
+        if (type is null)
+        {
+            return [];
+        }
+
+        return type.Methods.Where(isReadyToCallFromDesignerGeneratedCodes).Select(m=>m.Name).ToList();
+
+        bool isReadyToCallFromDesignerGeneratedCodes(MethodDefinition m) => m.IsPublic && m.Parameters.Count == 1 && m.Parameters[0].ParameterType.FullName == requestFullName;
+    }
     public static IReadOnlyList<string> GetPropertyPathList(string assemblyPath, string typeFullName, string prefix, Func<PropertyDefinition, bool> matchFunc)
     {
         var assembly = AssemblyDefinition.ReadAssembly(assemblyPath);
@@ -36,7 +56,9 @@ static class CecilHelper
             return [];
         }
 
-        var isInSameAssembly = (TypeReference typeReference) =>
+        return findProperties(isInSameAssembly, type, prefix, matchFunc);
+
+        bool isInSameAssembly(TypeReference typeReference)
         {
             if (typeReference.Scope.Name == Path.GetFileName(assemblyPath))
             {
@@ -44,9 +66,7 @@ static class CecilHelper
             }
 
             return false;
-        };
-
-        return findProperties(isInSameAssembly, type, prefix, matchFunc);
+        }
 
         static IReadOnlyList<string> findProperties(Func<TypeReference, bool> isInSameAssembly, TypeDefinition type, string prefix, Func<PropertyDefinition, bool> matchFunc)
         {

@@ -105,6 +105,8 @@ static class Plugin
                 "false"
             ];
 
+            List<string> remoteApiMethodNames = [];
+            
             foreach (var (key, value) in scope.Component.GetConfig())
             {
                 const string dotNetVariable = "DotNetVariable.";
@@ -129,6 +131,8 @@ static class Plugin
                 dateSuggestions.AddRange(CecilHelper.GetPropertyPathList(assemblyFilePath, dotnetTypeFullName, $"{variableName}.", CecilHelper.IsDateTime));
                 booleanSuggestions.AddRange(CecilHelper.GetPropertyPathList(assemblyFilePath, dotnetTypeFullName, $"{variableName}.", CecilHelper.IsBoolean));
                 collectionSuggestions.AddRange(CecilHelper.GetPropertyPathList(assemblyFilePath, dotnetTypeFullName, $"{variableName}.", CecilHelper.IsCollection));
+
+                remoteApiMethodNames.AddRange(CecilHelper.GetRemoteApiMethodNames(assemblyFilePath, dotnetTypeFullName));
             }
 
             List<string> returnList = [];
@@ -186,6 +190,16 @@ static class Plugin
                         foreach (var item in collectionSuggestions)
                         {
                             addSuggestion(prop.Name, item);
+                        }
+
+                        break;
+                    }
+                    
+                    case JsType.Function:
+                    {
+                        foreach (var remoteApiMethodName in remoteApiMethodNames)
+                        {
+                            addSuggestion(prop.Name, $"callRemoteApi('{remoteApiMethodName}')");
                         }
 
                         break;
@@ -906,10 +920,27 @@ static class Plugin
 
             protected override Element render()
             {
-                return new FlexRowCentered(Gap(4), WidthFitContent)
+
+                var svgForIsCheckedFalse = new svg(ViewBox(0,0,24,24), Fill(rgb(22, 160, 133)))
                 {
-                    new input { type = "checkbox" },
-                    new div { label ?? "?" }
+                    new path { d = "M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z" }
+                };
+                
+                var svgForIsCheckedTrue = new svg(ViewBox(0,0,24,24), Fill(rgb(22, 160, 133)))
+                {
+                    new path { d = "M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.11 0 2-.9 2-2V5c0-1.1-.89-2-2-2zm-9 14l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" }
+                };
+                
+                return new FlexRowCentered(Gap(12), WidthFitContent)
+                {
+                    new FlexRowCentered(Size(24))
+                    {
+                        @checked == "true" ? svgForIsCheckedTrue : svgForIsCheckedFalse
+                    },
+                    new div { label ?? "?" },
+                    
+                    Id(id),
+                    OnClick(onMouseClick)
                 };
             }
             
@@ -992,7 +1023,11 @@ static class Plugin
 
         sealed class BButton : PluginComponentBase
         {
+            [JsTypeInfo(JsType.String)]
             public string text { get; set; }
+            
+            [JsTypeInfo(JsType.Function)]
+            public string onClick { get; set; }
 
             public static IReadOnlyList<(string name, string value)> GetPropSuggestions()
             {
@@ -1005,7 +1040,10 @@ static class Plugin
             {
                 return new FlexRowCentered(WidthFitContent, Background("Blue"), BorderRadius(10), Padding(5, 15), BorderColor(rgb(230, 245, 243)), Color(White))
                 {
-                    new div { text ?? "?" }
+                    new div { text ?? "?" },
+                    
+                    Id(id),
+                    OnClick(onMouseClick)
                 };
             }
         }
@@ -1393,7 +1431,7 @@ static class Plugin
 
             public static ReactNode AnalyzeReactNode(ReactNode node)
             {
-                if (node.Tag == nameof(BInput))
+                if (node.Tag == nameof(BComboBox))
                 {
                     var valueProp = node.Properties.FirstOrDefault(x => x.Name == nameof(value));
                     var onSelectProp = node.Properties.FirstOrDefault(x => x.Name == nameof(onSelect));
