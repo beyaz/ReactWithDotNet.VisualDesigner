@@ -6,7 +6,7 @@ namespace ReactWithDotNet.VisualDesigner;
 
 public enum JsType
 {
-    String, Number, Date, Boolean, Array
+    String, Number, Date, Boolean, Array, Function
 }
 
 [AttributeUsage(AttributeTargets.Property)]

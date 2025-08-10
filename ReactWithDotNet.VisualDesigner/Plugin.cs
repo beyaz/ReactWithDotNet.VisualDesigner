@@ -132,6 +132,15 @@ static class Plugin
             }
 
             List<string> returnList = [];
+            
+            List<string> distinctSuggestions = [];
+
+            var addSuggestion = (string name, string value) =>
+            {
+                
+                
+                returnList.Add($"{name}: {value}");
+            };
 
             foreach (var prop in from m in Components.GetAllTypesMetadata() where m.TagName == scope.TagName from p in m.Props select p)
             {
@@ -143,11 +152,11 @@ static class Plugin
                         {
                             if (item.StartsWith("request."))
                             {
-                                returnList.Add($"{prop.Name}: {ConvertDotNetPathToJsPath(item)}");
+                                addSuggestion(prop.Name, ConvertDotNetPathToJsPath(item));
                                 continue;
                             }
 
-                            returnList.Add($"{prop.Name}: \"{item}\"");
+                            addSuggestion(prop.Name, '"'+item+'"');
                         }
 
                         break;
@@ -156,7 +165,7 @@ static class Plugin
                     {
                         foreach (var item in numberSuggestions)
                         {
-                            returnList.Add($"{prop.Name}: {item}");
+                            addSuggestion(prop.Name, item);
                         }
 
                         break;
@@ -165,7 +174,7 @@ static class Plugin
                     {
                         foreach (var item in dateSuggestions)
                         {
-                            returnList.Add($"{prop.Name}: {item}");
+                            addSuggestion(prop.Name, item);
                         }
 
                         break;
@@ -174,7 +183,7 @@ static class Plugin
                     {
                         foreach (var item in booleanSuggestions)
                         {
-                            returnList.Add($"{prop.Name}: {item}");
+                            addSuggestion(prop.Name, item);
                         }
 
                         break;
@@ -183,7 +192,7 @@ static class Plugin
                     {
                         foreach (var item in collectionSuggestions)
                         {
-                            returnList.Add($"{prop.Name}: {item}");
+                            addSuggestion(prop.Name, item);
                         }
 
                         break;
@@ -193,7 +202,7 @@ static class Plugin
 
             foreach (var item in stringSuggestions)
             {
-                returnList.Add($"d-text: \"{item}\"");
+                addSuggestion("d-text", '"' + item + '"');
             }
 
             returnList.InsertRange(0, Components.GetPropSuggestions(scope.TagName));
@@ -389,7 +398,7 @@ static class Plugin
             (typeof(BComboBox), BComboBox.GetPropSuggestions, BComboBox.AnalyzeReactNode),
             (typeof(BDigitalDatepicker), BDigitalDatepicker.GetPropSuggestions, null),
             (typeof(BInput), BInput.GetPropSuggestions, BInput.AnalyzeReactNode),
-            (typeof(BInputMaskExtended), BInputMaskExtended.GetPropSuggestions, null),
+            (typeof(BInputMaskExtended), BInputMaskExtended.GetPropSuggestions, BInputMaskExtended.AnalyzeReactNode),
             (typeof(BPlateNumber), BPlateNumber.GetPropSuggestions, null),
             (typeof(BCheckBox), BCheckBox.GetPropSuggestions, null),
             (typeof(BButton), BButton.GetPropSuggestions, null),
@@ -1124,17 +1133,25 @@ static class Plugin
 
         sealed class BInput : PluginComponentBase
         {
-            public string autoComplete { get; set; }
+            [JsTypeInfo(JsType.Boolean)]
+            public string isAutoComplete { get; set; }
 
+            [JsTypeInfo(JsType.String)]
             public string floatingLabelText { get; set; }
 
+            [JsTypeInfo(JsType.String)]
             public string helperText { get; set; }
 
-            public int? maxLength { get; set; }
+            [JsTypeInfo(JsType.Number)]
+            public string maxLength { get; set; }
 
+            [JsTypeInfo(JsType.Function)]
             public string onChange { get; set; }
-            public bool? required { get; set; }
+            
+            [JsTypeInfo(JsType.Boolean)]
+            public string isRequired { get; set; }
 
+            [JsTypeInfo(JsType.String)]
             public string value { get; set; }
 
             public static ReactNode AnalyzeReactNode(ReactNode node)
@@ -1143,8 +1160,8 @@ static class Plugin
                 {
                     var valueProp = node.Properties.FirstOrDefault(x => x.Name == nameof(value));
                     var onChangeProp = node.Properties.FirstOrDefault(x => x.Name == nameof(onChange));
-                    var requiredProp = node.Properties.FirstOrDefault(x => x.Name == nameof(required));
-                    var autoCompleteProp = node.Properties.FirstOrDefault(x => x.Name == nameof(autoComplete));
+                    var isRequiredProp = node.Properties.FirstOrDefault(x => x.Name == nameof(isRequired));
+                    var isAutoCompleteProp = node.Properties.FirstOrDefault(x => x.Name == nameof(isAutoComplete));
 
                     if (valueProp is not null)
                     {
@@ -1192,14 +1209,14 @@ static class Plugin
                         node = node with { Properties = properties };
                     }
 
-                    if (requiredProp is not null && autoCompleteProp is not null)
+                    if (isRequiredProp is not null && isAutoCompleteProp is not null)
                     {
                         node = node with
                         {
-                            Properties = node.Properties.Remove(requiredProp).Remove(autoCompleteProp).Add(new ReactProperty
+                            Properties = node.Properties.Remove(isRequiredProp).Remove(isAutoCompleteProp).Add(new ReactProperty
                             {
                                 Name  = "valueConstraint",
-                                Value = $"{{ required: {ConvertDotNetPathToJsPath(requiredProp.Value)}, autoComplete: {ConvertDotNetPathToJsPath(autoCompleteProp.Value)} }}"
+                                Value = $"{{ required: {ConvertDotNetPathToJsPath(isRequiredProp.Value)}, autoComplete: {ConvertDotNetPathToJsPath(isAutoCompleteProp.Value)} ? \"on\" : \"off\" }}"
                             })
                         };
                     }
@@ -1221,8 +1238,8 @@ static class Plugin
             {
                 return
                 [
-                    $"{nameof(autoComplete)}: \"on\"",
-                    $"{nameof(autoComplete)}: \"off\""
+                    $"{nameof(isAutoComplete)}: \"on\"",
+                    $"{nameof(isAutoComplete)}: \"off\""
                 ];
             }
 
@@ -1262,12 +1279,19 @@ static class Plugin
             [JsTypeInfo(JsType.Array)]
             public string dataSource { get; set; }
 
-            public bool? hiddenClearButton { get; set; }
+            [JsTypeInfo(JsType.Boolean)]
+            public string  hiddenClearButton { get; set; }
 
+            [JsTypeInfo(JsType.String)]
             public string hintText { get; set; }
+            
+            [JsTypeInfo(JsType.String)]
             public string labelText { get; set; }
 
+            [JsTypeInfo(JsType.Function)]
             public string onSelect { get; set; }
+            
+            [JsTypeInfo(JsType.String)]
             public string value { get; set; }
 
             public static ReactNode AnalyzeReactNode(ReactNode node)
@@ -1377,21 +1401,40 @@ static class Plugin
 
         sealed class BInputMaskExtended : PluginComponentBase
         {
-            public string autoComplete { get; set; }
+            
+            [JsTypeInfo(JsType.Array)]
+            public string mask { get; set; }
+            
+            [JsTypeInfo(JsType.Boolean)]
+            public string isAutoComplete { get; set; }
+            
+            [JsTypeInfo(JsType.Boolean)]
+            public string isReadonly { get; set; }
 
-            public string bind { get; set; }
+            [JsTypeInfo(JsType.String)]
+            public string value { get; set; }
+            
+            [JsTypeInfo(JsType.String)]
             public string floatingLabelText { get; set; }
 
+            [JsTypeInfo(JsType.String)]
             public string helperText { get; set; }
 
-            public int? maxLength { get; set; }
+            [JsTypeInfo(JsType.Number)]
+            public string maxLength { get; set; }
+            
+            [JsTypeInfo(JsType.Function)]
+            public string onChange { get; set; }
+            
+            [JsTypeInfo(JsType.Boolean)]
+            public string isRequired { get; set; }
 
             public static IReadOnlyList<string> GetPropSuggestions()
             {
                 return
                 [
-                    $"{nameof(autoComplete)}: \"on\"",
-                    $"{nameof(autoComplete)}: \"off\""
+                    $"{nameof(isAutoComplete)}: \"on\"",
+                    $"{nameof(isAutoComplete)}: \"off\""
                 ];
             }
 
@@ -1403,9 +1446,9 @@ static class Plugin
                     textContent = floatingLabelText;
                 }
 
-                if (bind.HasValue())
+                if (value.HasValue())
                 {
-                    textContent += " | " + bind;
+                    textContent += " | " + value;
                 }
 
                 return new div(PaddingTop(16), PaddingBottom(8))
@@ -1422,6 +1465,86 @@ static class Plugin
                         new div { maxLength }
                     }
                 };
+            }
+            
+            public static ReactNode AnalyzeReactNode(ReactNode node)
+            {
+                if (node.Tag == nameof(BInputMaskExtended))
+                {
+                    var valueProp = node.Properties.FirstOrDefault(x => x.Name == nameof(value));
+                    var onChangeProp = node.Properties.FirstOrDefault(x => x.Name == nameof(onChange));
+                    var isRequiredProp = node.Properties.FirstOrDefault(x => x.Name == nameof(isRequired));
+                    var isAutoCompleteProp = node.Properties.FirstOrDefault(x => x.Name == nameof(isAutoComplete));
+
+                    if (valueProp is not null)
+                    {
+                        var properties = node.Properties;
+
+                        List<string> lines =
+                        [
+                            "(e: any, value: any) =>",
+                            "{",
+                            $"  updateRequest(r => {{ r.{valueProp.Value.RemoveFromStart("request.")} = value; }});"
+                        ];
+
+                        if (onChangeProp is not null)
+                        {
+                            if (IsAlphaNumeric(onChangeProp.Value))
+                            {
+                                lines.Add(onChangeProp.Value + "(e, value);");
+                            }
+                            else
+                            {
+                                lines.Add(onChangeProp.Value);
+                            }
+                        }
+
+                        lines.Add("}");
+
+                        if (onChangeProp is not null)
+                        {
+                            onChangeProp = onChangeProp with
+                            {
+                                Value = string.Join(Environment.NewLine, lines)
+                            };
+
+                            properties = properties.SetItem(properties.FindIndex(x => x.Name == onChangeProp.Name), onChangeProp);
+                        }
+                        else
+                        {
+                            properties = properties.Add(new ReactProperty
+                            {
+                                Name  = "onChange",
+                                Value = string.Join(Environment.NewLine, lines)
+                            });
+                        }
+
+                        node = node with { Properties = properties };
+                    }
+
+                    if (isRequiredProp is not null && isAutoCompleteProp is not null)
+                    {
+                        node = node with
+                        {
+                            Properties = node.Properties.Remove(isRequiredProp).Remove(isAutoCompleteProp).Add(new ReactProperty
+                            {
+                                Name  = "valueConstraint",
+                                Value = $"{{ required: {ConvertDotNetPathToJsPath(isRequiredProp.Value)}, autoComplete: {ConvertDotNetPathToJsPath(isAutoCompleteProp.Value)} ? \"on\" : \"off\" }}"
+                            })
+                        };
+                    }
+
+                    node = node with
+                    {
+                        Properties = node.Properties.Add(new ReactProperty
+                        {
+                            Name  = "context",
+                            Value = "context"
+                        })
+                    };
+                }
+
+                return node with { Children = node.Children.Select(AnalyzeReactNode).ToImmutableList() };
             }
         }
 
