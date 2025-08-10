@@ -14,4 +14,14 @@ public sealed class DotNetModelExporterTest
 
         result.Success.ShouldBeTrue();
     }
+    
+    [TestMethod]
+    public void ExportModels2()
+    {
+        var assemblyFilePath = @"D:\work\BOA.BusinessModules\Dev\BOA.InternetBanking.Payments\API\BOA.InternetBanking.Payments.API\bin\Debug\net8.0\BOA.InternetBanking.Payments.API.dll";
+
+        var result = DotNetModelExporter.ExportModelsInAssembly(assemblyFilePath);
+
+        result.Success.ShouldBeTrue();
+    }
 }
