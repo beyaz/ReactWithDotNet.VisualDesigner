@@ -59,6 +59,50 @@ static class Plugin
         return component;
     }
 
+    static IEnumerable<(string variableName, string dotNetAssemblyFilePath, string dotnetTypeFullName)> GetDotNetVariables(ComponentEntity componentEntity)
+    {
+        foreach (var (key, value) in componentEntity.GetConfig())
+        {
+            const string dotNetVariable = "DotNetVariable.";
+
+            if (!key.StartsWith(dotNetVariable, StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            var variableName = key.RemoveFromStart(dotNetVariable);
+
+            var dotnetTypeFullName = value;
+
+            var assemblyFilePath = getAssemblyFilePathByFullTypeName(dotnetTypeFullName);
+            if (assemblyFilePath is null)
+            {
+                continue;
+            }
+
+            yield return (variableName, assemblyFilePath, dotnetTypeFullName);
+        }
+        
+        static string getAssemblyFilePathByFullTypeName(string fullTypeName)
+        {
+            if (fullTypeName.StartsWith("BOA.InternetBanking.Payments.API", StringComparison.OrdinalIgnoreCase))
+            {
+                const string projectBinDirectoryPath = @"D:\work\BOA.BusinessModules\Dev\BOA.InternetBanking.Payments\API\BOA.InternetBanking.Payments.API\bin\Debug\net8.0\";
+
+                return projectBinDirectoryPath + "BOA.InternetBanking.Payments.API.dll";
+            }
+
+            if (fullTypeName.StartsWith("BOA.POSPortal.MobilePos.API.", StringComparison.OrdinalIgnoreCase))
+            {
+                const string projectBinDirectoryPath = @"D:\work\BOA.BusinessModules\Dev\BOA.MobilePos\API\BOA.POSPortal.MobilePos.API\bin\Debug\net8.0\";
+
+                return projectBinDirectoryPath + "BOA.POSPortal.MobilePos.API.dll";
+            }
+
+            return null;
+        }
+    }
+    
     public static async Task<IReadOnlyList<string>> GetPropSuggestions(PropSuggestionScope scope)
     {
         if (scope.TagName.HasNoValue())
@@ -107,32 +151,15 @@ static class Plugin
 
             List<string> remoteApiMethodNames = [];
             
-            foreach (var (key, value) in scope.Component.GetConfig())
+            foreach (var (variableName, dotNetAssemblyFilePath, dotnetTypeFullName) in GetDotNetVariables(scope.Component))
             {
-                const string dotNetVariable = "DotNetVariable.";
+                stringSuggestions.AddRange(CecilHelper.GetPropertyPathList(dotNetAssemblyFilePath, dotnetTypeFullName, $"{variableName}.", CecilHelper.IsString));
+                numberSuggestions.AddRange(CecilHelper.GetPropertyPathList(dotNetAssemblyFilePath, dotnetTypeFullName, $"{variableName}.", CecilHelper.IsNumber));
+                dateSuggestions.AddRange(CecilHelper.GetPropertyPathList(dotNetAssemblyFilePath, dotnetTypeFullName, $"{variableName}.", CecilHelper.IsDateTime));
+                booleanSuggestions.AddRange(CecilHelper.GetPropertyPathList(dotNetAssemblyFilePath, dotnetTypeFullName, $"{variableName}.", CecilHelper.IsBoolean));
+                collectionSuggestions.AddRange(CecilHelper.GetPropertyPathList(dotNetAssemblyFilePath, dotnetTypeFullName, $"{variableName}.", CecilHelper.IsCollection));
 
-                if (!key.StartsWith(dotNetVariable, StringComparison.OrdinalIgnoreCase))
-                {
-                    continue;
-                }
-
-                var variableName = key.RemoveFromStart(dotNetVariable);
-
-                var dotnetTypeFullName = value;
-
-                var assemblyFilePath = getAssemblyFilePathByFullTypeName(dotnetTypeFullName);
-                if (assemblyFilePath is null)
-                {
-                    continue;
-                }
-
-                stringSuggestions.AddRange(CecilHelper.GetPropertyPathList(assemblyFilePath, dotnetTypeFullName, $"{variableName}.", CecilHelper.IsString));
-                numberSuggestions.AddRange(CecilHelper.GetPropertyPathList(assemblyFilePath, dotnetTypeFullName, $"{variableName}.", CecilHelper.IsNumber));
-                dateSuggestions.AddRange(CecilHelper.GetPropertyPathList(assemblyFilePath, dotnetTypeFullName, $"{variableName}.", CecilHelper.IsDateTime));
-                booleanSuggestions.AddRange(CecilHelper.GetPropertyPathList(assemblyFilePath, dotnetTypeFullName, $"{variableName}.", CecilHelper.IsBoolean));
-                collectionSuggestions.AddRange(CecilHelper.GetPropertyPathList(assemblyFilePath, dotnetTypeFullName, $"{variableName}.", CecilHelper.IsCollection));
-
-                remoteApiMethodNames.AddRange(CecilHelper.GetRemoteApiMethodNames(assemblyFilePath, dotnetTypeFullName));
+                remoteApiMethodNames.AddRange(CecilHelper.GetRemoteApiMethodNames(dotNetAssemblyFilePath, dotnetTypeFullName));
             }
 
             List<string> returnList = [];
@@ -232,24 +259,6 @@ static class Plugin
                 returnList.Add($"{name}: {value}");
             }
 
-            static string getAssemblyFilePathByFullTypeName(string fullTypeName)
-            {
-                if (fullTypeName.StartsWith("BOA.InternetBanking.Payments.API", StringComparison.OrdinalIgnoreCase))
-                {
-                    const string projectBinDirectoryPath = @"D:\work\BOA.BusinessModules\Dev\BOA.InternetBanking.Payments\API\BOA.InternetBanking.Payments.API\bin\Debug\net8.0\";
-
-                    return projectBinDirectoryPath + "BOA.InternetBanking.Payments.API.dll";
-                }
-
-                if (fullTypeName.StartsWith("BOA.POSPortal.MobilePos.API.", StringComparison.OrdinalIgnoreCase))
-                {
-                    const string projectBinDirectoryPath = @"D:\work\BOA.BusinessModules\Dev\BOA.MobilePos\API\BOA.POSPortal.MobilePos.API\bin\Debug\net8.0\";
-
-                    return projectBinDirectoryPath + "BOA.POSPortal.MobilePos.API.dll";
-                }
-
-                return null;
-            }
         }
     }
 
