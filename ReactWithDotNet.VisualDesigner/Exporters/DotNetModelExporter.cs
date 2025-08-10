@@ -1,49 +1,26 @@
-﻿using Mono.Cecil;
+﻿using System.Text;
+using Mono.Cecil;
+using TypeDefinition = Mono.Cecil.TypeDefinition;
 
 namespace ReactWithDotNet.VisualDesigner.Exporters;
 
 static class DotNetModelExporter
 {
-    public static TypeDefinition FindType( this AssemblyDefinition definition, string classFullName)
+    public static Result<string> ExportModelsInAssembly(string assemblyFilePath)
     {
-        foreach (var module in definition.Modules)
+        var assemblyDefinition = AssemblyDefinition.ReadAssembly(assemblyFilePath);
+        if (assemblyDefinition is null)
         {
-            var typeDefinition = module.GetType(classFullName);
-
-            if (typeDefinition != null)
-            {
-                return typeDefinition;
-            }
+            return new Exception("AssemblyNotFound:" + assemblyFilePath);
         }
 
-        return null;
-    }
-    
-    public static Result<IReadOnlyList<string>> Export(IReadOnlyList<ExportInfo> exportInfoList)
-    {
         List<string> lines = [];
 
         var typeDefinitions = new List<TypeDefinition>();
 
-        foreach (var info in exportInfoList)
+        foreach (var typeDefinition in from typeDefinition in assemblyDefinition.MainModule.Types where typeDefinition.Namespace.EndsWith(".Types") select typeDefinition)
         {
-            var assemblyDefinition = AssemblyDefinition.ReadAssembly(@"d:\boa\server\bin\" + info.Assembly);
-            if (assemblyDefinition == null)
-            {
-                return new Exception("AssemblyNotFound:" + info.Assembly);
-            }
-
-            foreach (var className in info.ExportClassNames)
-            {
-                var typeDefinition = assemblyDefinition.FindType(className);
-
-                if (typeDefinition == null)
-                {
-                    return new Exception("typeDefinitionNotFound:" + className);
-                }
-
-                typeDefinitions.Add(typeDefinition);
-            }
+            typeDefinitions.Add(typeDefinition);
         }
 
         var groupBy = typeDefinitions.GroupBy(x => x.Namespace, p => p);
@@ -61,7 +38,35 @@ static class DotNetModelExporter
             lines.Add("}");
         }
 
-        return lines;
+        // lines -> final string
+        {
+            var sb = new StringBuilder();
+
+            var indentCount = 0;
+
+            foreach (var line in lines)
+            {
+                var padding = string.Empty.PadRight(indentCount * 4, ' ');
+
+                if (line == "{")
+                {
+                    sb.AppendLine(padding + line);
+                    indentCount++;
+                    continue;
+                }
+
+                if (line == "}")
+                {
+                    indentCount--;
+
+                    padding = string.Empty.PadRight(indentCount * 4, ' ');
+                }
+
+                sb.AppendLine(padding + line);
+            }
+
+            return sb.ToString();
+        }
     }
 
     public static string GetTypeNameInContainerNamespace(string typeFullName, string containerNamespace)
@@ -237,20 +242,5 @@ static class DotNetModelExporter
     static bool IsNullableType(TypeReference typeReference)
     {
         return typeReference.Name == "Nullable`1" && typeReference.IsGenericInstance;
-    }
-
-    public class ExportInfo
-    {
-        #region Public Properties
-        /// <summary>
-        ///     Gets or sets the assembly.
-        /// </summary>
-        public string Assembly { get; set; }
-
-        /// <summary>
-        ///     Gets or sets the export class names.
-        /// </summary>
-        public ICollection<string> ExportClassNames { get; set; }
-        #endregion
     }
 }
