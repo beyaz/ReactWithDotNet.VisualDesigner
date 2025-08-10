@@ -424,7 +424,7 @@ static class Plugin
             (typeof(BInputMaskExtended), BInputMaskExtended.GetPropSuggestions, BInputMaskExtended.AnalyzeReactNode),
             (typeof(BPlateNumber), BPlateNumber.GetPropSuggestions, null),
             (typeof(BCheckBox), BCheckBox.GetPropSuggestions, BCheckBox.AnalyzeReactNode),
-            (typeof(BButton), BButton.GetPropSuggestions, null),
+            (typeof(BButton), BButton.GetPropSuggestions, BButton.AnalyzeReactNode),
             (typeof(BDigitalPlateNumber), BDigitalPlateNumber.GetPropSuggestions, null),
             (typeof(BDigitalDialog), BDigitalDialog.GetPropSuggestions, null),
             (typeof(BDigitalTabNavigator), BDigitalTabNavigator.GetPropSuggestions, null)
@@ -1045,6 +1045,47 @@ static class Plugin
                     Id(id),
                     OnClick(onMouseClick)
                 };
+            }
+            
+              public static ReactNode AnalyzeReactNode(ReactNode node)
+            {
+                if (node.Tag == nameof(BButton))
+                {
+                    var onClickProp = node.Properties.FirstOrDefault(x => x.Name == nameof(onClick));
+
+                    if (onClickProp is not null)
+                    {
+                        var properties = node.Properties;
+
+                        List<string> lines =
+                        [
+                            "() =>",
+                            "{",
+                        ];
+
+                        if (IsAlphaNumeric(onClickProp.Value))
+                        {
+                            lines.Add(onClickProp.Value + "();");
+                        }
+                        else
+                        {
+                            lines.Add(onClickProp.Value);
+                        }
+
+                        lines.Add("}");
+
+                        onClickProp = onClickProp with
+                        {
+                            Value = string.Join(Environment.NewLine, lines)
+                        };
+
+                        properties = properties.SetItem(properties.FindIndex(x => x.Name == onClickProp.Name), onClickProp);
+
+                        node = node with { Properties = properties };
+                    }
+                }
+
+                return node with { Children = node.Children.Select(AnalyzeReactNode).ToImmutableList() };
             }
         }
 
