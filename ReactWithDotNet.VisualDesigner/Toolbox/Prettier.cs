@@ -36,7 +36,7 @@ static class Prettier
             return new FormatException(string.Join(Environment.NewLine + Environment.NewLine,[code, response.error, response.details]));
         }
 
-        return response.formattedCode;
+        return response.formattedCode.TrimEnd().RemoveFromEnd(";");
     }
 
     public static void Register(WebApplication app)

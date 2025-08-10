@@ -227,6 +227,12 @@ static class TsxExporter
                 }
 
                 linesToInject = result.Value;
+
+                var formatResult = await Prettier.FormatCode(string.Join(Environment.NewLine, linesToInject));
+                if (formatResult.Success)
+                {
+                    linesToInject = formatResult.Value.Split(Environment.NewLine.ToCharArray());
+                }
             }
 
             string injectedVersion;
