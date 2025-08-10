@@ -409,7 +409,7 @@ static class Plugin
             (typeof(BInput), BInput.GetPropSuggestions, BInput.AnalyzeReactNode),
             (typeof(BInputMaskExtended), BInputMaskExtended.GetPropSuggestions, BInputMaskExtended.AnalyzeReactNode),
             (typeof(BPlateNumber), BPlateNumber.GetPropSuggestions, null),
-            (typeof(BCheckBox), BCheckBox.GetPropSuggestions, null),
+            (typeof(BCheckBox), BCheckBox.GetPropSuggestions, BCheckBox.AnalyzeReactNode),
             (typeof(BButton), BButton.GetPropSuggestions, null),
             (typeof(BDigitalPlateNumber), BDigitalPlateNumber.GetPropSuggestions, null),
             (typeof(BDigitalDialog), BDigitalDialog.GetPropSuggestions, null),
@@ -888,9 +888,14 @@ static class Plugin
 
         sealed class BCheckBox : PluginComponentBase
         {
-            public string bind { get; set; }
+            [JsTypeInfo(JsType.Boolean)]
+            public string @checked { get; set; }
 
+            [JsTypeInfo(JsType.String)]
             public string label { get; set; }
+            
+            [JsTypeInfo(JsType.Function)]
+            public string onCheck { get; set; }
 
             public static IReadOnlyList<(string name, string value)> GetPropSuggestions()
             {
@@ -907,6 +912,82 @@ static class Plugin
                     new div { label ?? "?" }
                 };
             }
+            
+            public static ReactNode AnalyzeReactNode(ReactNode node)
+            {
+                if (node.Tag == nameof(BCheckBox))
+                {
+                    var checkedProp = node.Properties.FirstOrDefault(x => x.Name == nameof(@checked));
+                    var onCheckProp = node.Properties.FirstOrDefault(x => x.Name == nameof(onCheck));
+
+                    if (checkedProp is not null)
+                    {
+                        var properties = node.Properties;
+
+                        List<string> lines =
+                        [
+                            "(e: any, checked: boolean) =>",
+                            "{",
+                            $"  updateRequest(r => {{ r.{checkedProp.Value.RemoveFromStart("request.")} = checked; }});"
+                        ];
+
+                        if (onCheckProp is not null)
+                        {
+                            if (IsAlphaNumeric(onCheckProp.Value))
+                            {
+                                lines.Add(onCheckProp.Value + "(e, checked);");
+                            }
+                            else
+                            {
+                                lines.Add(onCheckProp.Value);
+                            }
+                        }
+
+                        lines.Add("}");
+
+                        if (onCheckProp is not null)
+                        {
+                            onCheckProp = onCheckProp with
+                            {
+                                Value = string.Join(Environment.NewLine, lines)
+                            };
+
+                            properties = properties.SetItem(properties.FindIndex(x => x.Name == onCheckProp.Name), onCheckProp);
+                        }
+                        else
+                        {
+                            properties = properties.Add(new ReactProperty
+                            {
+                                Name  = "onCheck",
+                                Value = string.Join(Environment.NewLine, lines)
+                            });
+                        }
+
+                        node = node with { Properties = properties };
+                    }
+
+                    node = AddContextProp(node);
+                }
+
+                return node with { Children = node.Children.Select(AnalyzeReactNode).ToImmutableList() };
+            }
+        }
+
+        static ReactNode AddContextProp(ReactNode node)
+        {
+            if (node.Properties.Any(p=>p.Name == "context"))
+            {
+                return node;
+            }
+            
+            return node with
+            {
+                Properties = node.Properties.Add(new ReactProperty
+                {
+                    Name  = "context",
+                    Value = "context"
+                })
+            };
         }
 
         sealed class BButton : PluginComponentBase
@@ -1218,24 +1299,34 @@ static class Plugin
 
                     if (isRequiredProp is not null && isAutoCompleteProp is not null)
                     {
+                        var autoCompleteFinalValue = string.Empty;
+                        {
+                            if ("true".Equals(isAutoCompleteProp.Value, StringComparison.OrdinalIgnoreCase))
+                            {
+                                autoCompleteFinalValue = "'on'";
+                            }
+                            else if ("false".Equals(isAutoCompleteProp.Value, StringComparison.OrdinalIgnoreCase))
+                            {
+                                autoCompleteFinalValue = "'off'";
+                            }
+                            else
+                            {
+                                autoCompleteFinalValue = $"{ConvertDotNetPathToJsPath(isAutoCompleteProp.Value)} ? \"on\" : \"off\" }}";
+                            }
+                        }
+                       
+                        
                         node = node with
                         {
                             Properties = node.Properties.Remove(isRequiredProp).Remove(isAutoCompleteProp).Add(new ReactProperty
                             {
                                 Name  = "valueConstraint",
-                                Value = $"{{ required: {ConvertDotNetPathToJsPath(isRequiredProp.Value)}, autoComplete: {ConvertDotNetPathToJsPath(isAutoCompleteProp.Value)} ? \"on\" : \"off\" }}"
+                                Value = $"{{ required: {ConvertDotNetPathToJsPath(isRequiredProp.Value)}, autoComplete: {autoCompleteFinalValue} }}"
                             })
                         };
                     }
 
-                    node = node with
-                    {
-                        Properties = node.Properties.Add(new ReactProperty
-                        {
-                            Name  = "context",
-                            Value = "context"
-                        })
-                    };
+                    node = AddContextProp(node);
                 }
 
                 return node with { Children = node.Children.Select(AnalyzeReactNode).ToImmutableList() };
@@ -1529,24 +1620,34 @@ static class Plugin
 
                     if (isRequiredProp is not null && isAutoCompleteProp is not null)
                     {
+                        var autoCompleteFinalValue = string.Empty;
+                        {
+                            if ("true".Equals(isAutoCompleteProp.Value, StringComparison.OrdinalIgnoreCase))
+                            {
+                                autoCompleteFinalValue = "'on'";
+                            }
+                            else if ("false".Equals(isAutoCompleteProp.Value, StringComparison.OrdinalIgnoreCase))
+                            {
+                                autoCompleteFinalValue = "'off'";
+                            }
+                            else
+                            {
+                                autoCompleteFinalValue = $"{ConvertDotNetPathToJsPath(isAutoCompleteProp.Value)} ? \"on\" : \"off\" }}";
+                            }
+                        }
+                       
+                        
                         node = node with
                         {
                             Properties = node.Properties.Remove(isRequiredProp).Remove(isAutoCompleteProp).Add(new ReactProperty
                             {
                                 Name  = "valueConstraint",
-                                Value = $"{{ required: {ConvertDotNetPathToJsPath(isRequiredProp.Value)}, autoComplete: {ConvertDotNetPathToJsPath(isAutoCompleteProp.Value)} ? \"on\" : \"off\" }}"
+                                Value = $"{{ required: {ConvertDotNetPathToJsPath(isRequiredProp.Value)}, autoComplete: {autoCompleteFinalValue} }}"
                             })
                         };
                     }
 
-                    node = node with
-                    {
-                        Properties = node.Properties.Add(new ReactProperty
-                        {
-                            Name  = "context",
-                            Value = "context"
-                        })
-                    };
+                    node = AddContextProp(node);
                 }
 
                 return node with { Children = node.Children.Select(AnalyzeReactNode).ToImmutableList() };
