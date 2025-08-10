@@ -28,9 +28,6 @@ class Program
 
     static void Main(string[] args)
     {
-        
-        File.WriteAllText(@"C:\Users\beyaz\OneDrive\Documents\a.txt",args.Length.ToString());
-        
         //args = new string[]
         //{
         //    "C:\\github\\hopgogo\\web\\enduser-ui\\src\\components\\PackageListPage\\PackageDetailView.tsx", "153"
