@@ -69,7 +69,7 @@ static class DotNetModelExporter
         }
     }
 
-    public static string GetTypeNameInContainerNamespace(string typeFullName, string containerNamespace)
+    static string GetTypeNameInContainerNamespace(string typeFullName, string containerNamespace)
     {
         while (true)
         {
