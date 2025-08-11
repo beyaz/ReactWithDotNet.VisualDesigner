@@ -25,6 +25,7 @@ app.post('/format', async (req, res) =>
       singleQuote: false,  
       trailingComma: 'es5',
 	  arrowParens: 'avoid',
+	  useTabs: false,
 	  tabWidth: 4
     });
 
