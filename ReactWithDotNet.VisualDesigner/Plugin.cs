@@ -28,11 +28,7 @@ static class Plugin
     
     public static async Task<Result<ExportOutput>> TryExportModels(ExportInput input)
     {
-        var (projectId, componentId, userName) = input;
-
-        var user = await Store.TryGetUser(projectId, userName);
-
-        var project = GetProjectConfig(projectId);
+        var (_, componentId, userName) = input;
 
         var data = await GetComponentData(new() { ComponentId = componentId, UserName = userName });
         if (data.HasError)
@@ -46,13 +42,17 @@ static class Plugin
         {
             var modelFilePath = Path.Combine(Directory.GetParent(exportFilePath)?.Name ?? string.Empty, "types", "BOA.POSPortal.MobilePos.API.ts");
 
-            var result = await ExportModels("", modelFilePath);
-            if (result.HasError)
+            
+            foreach (var (_, dotNetAssemblyFilePath, _) in from x in GetDotNetVariables(componentEntity) where x.variableName == "request" select x)
             {
-                return result.Error;
-            }
+                var result = await ExportModels(dotNetAssemblyFilePath, modelFilePath);
+                if (result.HasError)
+                {
+                    return result.Error;
+                }
 
-            return result;
+                return result;
+            }
         }
 
         return new ExportOutput();
