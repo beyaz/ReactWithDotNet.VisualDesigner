@@ -16,7 +16,7 @@ app.post('/format', async (req, res) =>
     return res.status(400).json({ error: "EmptyRequest" });
   }
 
-  try 
+  try
   {
     
     const formattedCode = await prettier.format(code, { 
@@ -26,7 +26,7 @@ app.post('/format', async (req, res) =>
       trailingComma: 'es5',
 	  arrowParens: 'avoid',
 	  useTabs: false,
-	  tabWidth: 4
+	  tabWidth: 2
     });
 
     res.status(200).json({ formattedCode });
