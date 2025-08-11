@@ -95,7 +95,7 @@ static class TsxExporter
 
         // update models
         {
-            var result = await TryExportModels(input);
+            var result = await Plugin.TryExportModels(input);
             if (result.HasError)
             {
                 return result.Error;
@@ -104,82 +104,6 @@ static class TsxExporter
 
         return new ExportOutput { HasChange = true };
 
-    }
-
-
-    static async Task<Result<ExportOutput>> TryExportModels(ExportInput input)
-    {
-        var (projectId, componentId, userName) = input;
-
-        var user = await Store.TryGetUser(projectId, userName);
-
-        var project = GetProjectConfig(projectId);
-
-        var data = await GetComponentData(new() { ComponentId = componentId, UserName = userName });
-        if (data.HasError)
-        {
-            return data.Error;
-        }
-
-        var componentEntity = data.Value.Component;
-        
-        foreach (var exportFilePath in componentEntity.TryGetExportFilePath())
-        {
-            var modelFilePath = Path.Combine(Directory.GetParent(exportFilePath)?.Name ?? string.Empty, "types", "BOA.POSPortal.MobilePos.API.ts");
-
-            var result = await ExportModels("", modelFilePath);
-            if (result.HasError)
-            {
-                return result.Error;
-            }
-
-            return result;
-        }
-
-        return new ExportOutput();
-    }
-    
-    static async Task<Result<ExportOutput>> ExportModels(string assemblyFilePath, string modelTsxFilePath)
-    {
-        string tsCodes;
-        {
-            var result = DotNetModelExporter.ExportModelsInAssembly(assemblyFilePath);
-            if (result.HasError)
-            {
-                return result.Error;
-            }
-
-            tsCodes = result.Value;
-        }
-
-        var fileContentAtDisk = string.Empty;
-        
-        if(File.Exists(modelTsxFilePath))
-        {
-            var result = await IO.TryReadFile(modelTsxFilePath);
-            if (result.HasError)
-            {
-                return result.Error;
-            }
-
-            fileContentAtDisk = result.Value;
-        }
-        
-        if (IsEqualsIgnoreWhitespace(tsCodes, fileContentAtDisk))
-        {
-            return new ExportOutput { HasChange = false };
-        }
-        
-        // write to file system
-        {
-            var result = await IO.TryWriteToFile(modelTsxFilePath, tsCodes);
-            if (result.HasError)
-            {
-                return result.Error;
-            }
-        }
-        
-        return new ExportOutput { HasChange = true };
     }
 
     public static async Task<Result> ExportAll(int projectId)
