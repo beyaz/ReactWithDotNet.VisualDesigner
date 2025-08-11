@@ -24,7 +24,8 @@ app.post('/format', async (req, res) =>
       semi: true,         
       singleQuote: false,  
       trailingComma: 'es5',
-	  arrowParens: 'avoid'
+	  arrowParens: 'avoid',
+	  tabWidth: 4
     });
 
     res.status(200).json({ formattedCode });

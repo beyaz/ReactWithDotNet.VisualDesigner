@@ -26,4 +26,8 @@
     <Using Include="Microsoft.VisualStudio.TestTools.UnitTesting" />
   </ItemGroup>
 
+	<Target Name="Prettier" AfterTargets="Build">
+		<Exec Command="xcopy $(SolutionDir)TsxFormatter\*.* $(TargetDir)HelperApps\TsxFormatter\ /Y /S /E" />
+	</Target>
+
 </Project>
