@@ -72,35 +72,30 @@ static class Plugin
 
         var componentEntity = data.Value.Component;
         
-        foreach (var exportFilePath in componentEntity.TryGetExportFilePath())
+        string componentFilePath;
         {
-            string componentFilePath;
+            var result = await GetComponentFileLocation(componentId, user.LocalWorkspacePath);
+            if (result.HasError)
             {
-                var result = await GetComponentFileLocation(componentId, user.LocalWorkspacePath);
-                if (result.HasError)
-                {
-                    return result.Error;
-                }
-
-                componentFilePath = result.Value.filePath;
+                return result.Error;
             }
-            
 
+            componentFilePath = result.Value.filePath;
+        }
             
-            foreach (var (_, dotNetAssemblyFilePath, _) in from x in GetDotNetVariables(componentEntity) where x.variableName == "request" select x)
-            {
-                var modelFolderPath = calculateModelFileFolderPathByPageFilePath(componentFilePath);
+        foreach (var (_, dotNetAssemblyFilePath, _) in from x in GetDotNetVariables(componentEntity) where x.variableName == "request" select x)
+        {
+            var modelFolderPath = calculateModelFileFolderPathByPageFilePath(componentFilePath);
 
-                var modelFilePath =  Path.Combine(modelFolderPath, Path.GetFileNameWithoutExtension(dotNetAssemblyFilePath) + ".ts");
+            var modelFilePath =  Path.Combine(modelFolderPath, Path.GetFileNameWithoutExtension(dotNetAssemblyFilePath) + ".ts");
                 
-                var result = await ExportModels(dotNetAssemblyFilePath, modelFilePath);
-                if (result.HasError)
-                {
-                    return result.Error;
-                }
-
-                return result;
+            var result = await ExportModels(dotNetAssemblyFilePath, modelFilePath);
+            if (result.HasError)
+            {
+                return result.Error;
             }
+
+            return result;
         }
 
         return new ExportOutput();
