@@ -79,6 +79,15 @@ static class TsxExporter
             fileContentAtDisk = result.Value;
         }
 
+        // update models
+        {
+            var result = await Plugin.TryExportModels(input);
+            if (result.HasError)
+            {
+                return result.Error;
+            }
+        }
+        
         if (IsEqualsIgnoreWhitespace(fileContentAtDisk, fileContent))
         {
             return new ExportOutput();
@@ -93,14 +102,7 @@ static class TsxExporter
             }
         }
 
-        // update models
-        {
-            var result = await Plugin.TryExportModels(input);
-            if (result.HasError)
-            {
-                return result.Error;
-            }
-        }
+        
 
         return new ExportOutput { HasChange = true };
 

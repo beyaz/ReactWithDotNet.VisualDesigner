@@ -25,10 +25,42 @@ sealed record PropSuggestionScope
 
 static class Plugin
 {
+
+    public static string AnalyzeExportFilePath(string exportFilePathForComponent)
+    {
+        var names = exportFilePathForComponent.Split('/', StringSplitOptions.RemoveEmptyEntries);
+        if (names.Length == 2 && names[0].StartsWith("BOA."))
+        {
+            // project folder is d:\work\
+            // we need to calculate rest of path
+            
+            // sample: /BOA.InternetBanking.MoneyTransfers/x-form.tsx
+
+            var solutionName = names[0];
+
+            var pagesFolderPath = string.Empty;
+            {
+                pagesFolderPath = $@"D:\work\BOA.BusinessModules\Dev\{solutionName}\OBAWeb\OBA.Web.{solutionName.RemoveFromStart("BOA.")}\ClientApp\pages\";
+                if (solutionName == "BOA.MobilePos")
+                {
+                    pagesFolderPath = @"D:\work\BOA.BusinessModules\Dev\BOA.MobilePos\OBAWeb\OBA.Web.POSPortal.MobilePos\ClientApp\pages\";
+                }
+            }
+            
+            var fileName = names[1];
+            
+            if (Directory.Exists(pagesFolderPath))
+            {
+                return Path.Combine(pagesFolderPath, fileName);
+            }
+        }
+
+        return exportFilePathForComponent;
+    }
     
     public static async Task<Result<ExportOutput>> TryExportModels(ExportInput input)
     {
-        var (_, componentId, userName) = input;
+        var (projectId, componentId, userName) = input;
 
         var data = await GetComponentData(new() { ComponentId = componentId, UserName = userName });
         if (data.HasError)
@@ -36,15 +68,31 @@ static class Plugin
             return data.Error;
         }
 
+        var user = await Store.TryGetUser(projectId, userName);
+
         var componentEntity = data.Value.Component;
         
         foreach (var exportFilePath in componentEntity.TryGetExportFilePath())
         {
-            var modelFilePath = Path.Combine(Directory.GetParent(exportFilePath)?.Name ?? string.Empty, "types", "BOA.POSPortal.MobilePos.API.ts");
+            string componentFilePath;
+            {
+                var result = await GetComponentFileLocation(componentId, user.LocalWorkspacePath);
+                if (result.HasError)
+                {
+                    return result.Error;
+                }
+
+                componentFilePath = result.Value.filePath;
+            }
+            
 
             
             foreach (var (_, dotNetAssemblyFilePath, _) in from x in GetDotNetVariables(componentEntity) where x.variableName == "request" select x)
             {
+                var modelFolderPath = calculateModelFileFolderPathByPageFilePath(componentFilePath);
+
+                var modelFilePath =  Path.Combine(modelFolderPath, Path.GetFileNameWithoutExtension(dotNetAssemblyFilePath) + ".ts");
+                
                 var result = await ExportModels(dotNetAssemblyFilePath, modelFilePath);
                 if (result.HasError)
                 {
@@ -56,6 +104,13 @@ static class Plugin
         }
 
         return new ExportOutput();
+
+        static string calculateModelFileFolderPathByPageFilePath(string filePathForPage)
+        {
+            var clientApp = Directory.GetParent(filePathForPage)?.Parent;
+            
+            return Path.Combine(clientApp?.FullName ?? string.Empty, "types");
+        }
     }
     
     static async Task<Result<ExportOutput>> ExportModels(string assemblyFilePath, string modelTsxFilePath)

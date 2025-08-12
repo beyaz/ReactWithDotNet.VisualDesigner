@@ -309,7 +309,13 @@ static class Extensions
     {
         var component = await Store.TryGetComponent(componentId);
 
-        return (Path.Combine(userLocalWorkspacePath, Path.Combine(component.GetExportFilePath().Split('/', Path.DirectorySeparatorChar))), component.GetName());
+        var exportFilePath = component.GetExportFilePath();
+
+        exportFilePath = Plugin.AnalyzeExportFilePath(exportFilePath);
+
+        var filePath = Path.Combine(userLocalWorkspacePath, Path.Combine(exportFilePath.Split('/', Path.DirectorySeparatorChar)));
+        
+        return (filePath, component.GetName());
     }
 
     public static string GetDesignText(this VisualElementModel model)
