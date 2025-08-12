@@ -69,32 +69,6 @@ static class DotNetModelExporter
         }
     }
 
-    static string GetTypeNameInContainerNamespace(string typeFullName, string containerNamespace)
-    {
-        while (true)
-        {
-            var prefix = containerNamespace + ".";
-            if (typeFullName.StartsWith(prefix))
-            {
-                return typeFullName.RemoveFromStart(prefix);
-            }
-
-            var packages = containerNamespace.Split('.');
-            if (packages.Length <= 1)
-            {
-                return typeFullName;
-            }
-
-            var items = new List<string>();
-            for (var i = 0; i < packages.Length - 1; i++)
-            {
-                items.Add(packages[i]);
-            }
-
-            containerNamespace = string.Join(".", items);
-        }
-    }
-
     static IReadOnlyList<string> GenerateType(TypeDefinition typeDefinition)
     {
         List<string> lines = [];
@@ -162,85 +136,111 @@ static class DotNetModelExporter
         lines.Add("}");
 
         return lines;
-    }
 
-    static string GetTSTypeName(TypeReference typeReference, string containerNamespace)
-    {
-        if (IsNullableType(typeReference))
+        static bool IsImplicitDefinition(PropertyDefinition propertyDefinition)
         {
-            return GetTSTypeName(((GenericInstanceType)typeReference).GenericArguments[0], containerNamespace);
-        }
-
-        if (typeReference.FullName == "System.String")
-        {
-            return "string";
-        }
-
-        if (typeReference.FullName == typeof(short).FullName ||
-            typeReference.FullName == typeof(int).FullName ||
-            typeReference.FullName == typeof(byte).FullName ||
-            typeReference.FullName == typeof(sbyte).FullName ||
-            typeReference.FullName == typeof(short).FullName ||
-            typeReference.FullName == typeof(ushort).FullName ||
-            typeReference.FullName == typeof(double).FullName ||
-            typeReference.FullName == typeof(float).FullName ||
-            typeReference.FullName == typeof(decimal).FullName ||
-            typeReference.FullName == typeof(long).FullName)
-
-        {
-            return "number";
-        }
-
-        if (typeReference.FullName == "System.DateTime")
-        {
-            return "Date";
-        }
-
-        if (typeReference.FullName == "System.Boolean")
-        {
-            return "boolean";
-        }
-
-        if (typeReference.FullName == "System.Object")
-        {
-            return "any";
-        }
-
-        if (typeReference.IsGenericInstance)
-        {
-            var genericInstanceType = (GenericInstanceType)typeReference;
-
-            var isArrayType =
-                genericInstanceType.GenericArguments.Count == 1 &&
-                (
-                    typeReference.Name == "Collection`1" ||
-                    typeReference.Name == "List`1" ||
-                    typeReference.Name == "IReadOnlyCollection`1" ||
-                    typeReference.Name == "IReadOnlyList`1"
-                );
-
-            if (isArrayType)
+            if (propertyDefinition.PropertyType.FullName == "System.Runtime.Serialization.ExtensionDataObject")
             {
-                var arrayType = genericInstanceType.GenericArguments[0];
-                return GetTSTypeName(arrayType, containerNamespace) + "[]";
+                return true;
+            }
+
+            return propertyDefinition.Name.Contains(".");
+        }
+
+        static string GetTSTypeName(TypeReference typeReference, string containerNamespace)
+        {
+            if (IsNullableType(typeReference))
+            {
+                return GetTSTypeName(((GenericInstanceType)typeReference).GenericArguments[0], containerNamespace);
+            }
+
+            if (typeReference.FullName == "System.String")
+            {
+                return "string";
+            }
+
+            if (typeReference.FullName == typeof(short).FullName ||
+                typeReference.FullName == typeof(int).FullName ||
+                typeReference.FullName == typeof(byte).FullName ||
+                typeReference.FullName == typeof(sbyte).FullName ||
+                typeReference.FullName == typeof(short).FullName ||
+                typeReference.FullName == typeof(ushort).FullName ||
+                typeReference.FullName == typeof(double).FullName ||
+                typeReference.FullName == typeof(float).FullName ||
+                typeReference.FullName == typeof(decimal).FullName ||
+                typeReference.FullName == typeof(long).FullName)
+
+            {
+                return "number";
+            }
+
+            if (typeReference.FullName == "System.DateTime")
+            {
+                return "Date";
+            }
+
+            if (typeReference.FullName == "System.Boolean")
+            {
+                return "boolean";
+            }
+
+            if (typeReference.FullName == "System.Object")
+            {
+                return "any";
+            }
+
+            if (typeReference.IsGenericInstance)
+            {
+                var genericInstanceType = (GenericInstanceType)typeReference;
+
+                var isArrayType =
+                    genericInstanceType.GenericArguments.Count == 1 &&
+                    (
+                        typeReference.Name == "Collection`1" ||
+                        typeReference.Name == "List`1" ||
+                        typeReference.Name == "IReadOnlyCollection`1" ||
+                        typeReference.Name == "IReadOnlyList`1"
+                    );
+
+                if (isArrayType)
+                {
+                    var arrayType = genericInstanceType.GenericArguments[0];
+                    return GetTSTypeName(arrayType, containerNamespace) + "[]";
+                }
+            }
+
+            return GetTypeNameInContainerNamespace(typeReference.FullName, containerNamespace);
+
+            static bool IsNullableType(TypeReference typeReference)
+            {
+                return typeReference.Name == "Nullable`1" && typeReference.IsGenericInstance;
             }
         }
 
-        return GetTypeNameInContainerNamespace(typeReference.FullName, containerNamespace);
-    }
-
-    static bool IsImplicitDefinition(PropertyDefinition propertyDefinition)
-    {
-        if (propertyDefinition.PropertyType.FullName == "System.Runtime.Serialization.ExtensionDataObject")
+        static string GetTypeNameInContainerNamespace(string typeFullName, string containerNamespace)
         {
-            return true;
+            while (true)
+            {
+                var prefix = containerNamespace + ".";
+                if (typeFullName.StartsWith(prefix))
+                {
+                    return typeFullName.RemoveFromStart(prefix);
+                }
+
+                var packages = containerNamespace.Split('.');
+                if (packages.Length <= 1)
+                {
+                    return typeFullName;
+                }
+
+                var items = new List<string>();
+                for (var i = 0; i < packages.Length - 1; i++)
+                {
+                    items.Add(packages[i]);
+                }
+
+                containerNamespace = string.Join(".", items);
+            }
         }
-
-        return propertyDefinition.Name.Contains(".");
-    }
-
-    static bool IsNullableType(TypeReference typeReference)
-    {
-        return typeReference.Name == "Nullable`1" && typeReference.IsGenericInstance;
     }
 }
