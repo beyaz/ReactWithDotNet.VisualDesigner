@@ -32,46 +32,52 @@ static class DotNetModelExporter
             var types = typeDefinitions.Where(t => t.Namespace == ns.Key);
             foreach (var typeDefinition in types)
             {
-                lines.AddRange(GenerateType(typeDefinition));
+                lines.AddRange(GetTsCodes(typeDefinition));
             }
 
             lines.Add("}");
         }
 
-        // lines -> final string
-        {
-            var sb = new StringBuilder();
-
-            var indentCount = 0;
-
-            foreach (var line in lines)
-            {
-                var padding = string.Empty.PadRight(indentCount * 4, ' ');
-
-                if (line == "{")
-                {
-                    sb.AppendLine(padding + line);
-                    indentCount++;
-                    continue;
-                }
-
-                if (line == "}")
-                {
-                    indentCount--;
-
-                    padding = string.Empty.PadRight(indentCount * 4, ' ');
-                }
-
-                sb.AppendLine(padding + line);
-            }
-
-            return sb.ToString();
-        }
+        return LinesToString(lines);
     }
 
-    static IReadOnlyList<string> GenerateType(TypeDefinition typeDefinition)
+    public static string LinesToString(IReadOnlyList<string> lines)
+    {
+        var sb = new StringBuilder();
+
+        var indentCount = 0;
+
+        foreach (var line in lines)
+        {
+            var padding = string.Empty.PadRight(indentCount * 4, ' ');
+
+            if (line == "{")
+            {
+                sb.AppendLine(padding + line);
+                indentCount++;
+                continue;
+            }
+
+            if (line == "}")
+            {
+                indentCount--;
+
+                padding = string.Empty.PadRight(indentCount * 4, ' ');
+            }
+
+            sb.AppendLine(padding + line);
+        }
+
+        return sb.ToString();
+    }
+    
+    internal static IReadOnlyList<string> GetTsCodes(TypeDefinition typeDefinition)
     {
         List<string> lines = [];
+
+        lines.Add($"namespace {typeDefinition.Namespace}");
+        lines.Add("{");
+        
 
         if (typeDefinition.IsEnum)
         {
@@ -124,7 +130,7 @@ static class DotNetModelExporter
 
                 var name = TypescriptNaming.GetResolvedPropertyName(propertyDefinition.Name);
 
-                // if (IsNullableType(propertyDefinition.DeclaringType))
+                if (IsNullableType(propertyDefinition.DeclaringType))
                 {
                     name += "?";
                 }
@@ -135,6 +141,8 @@ static class DotNetModelExporter
 
         lines.Add("}");
 
+        lines.Add("}");
+        
         return lines;
 
         static bool IsImplicitDefinition(PropertyDefinition propertyDefinition)
@@ -211,12 +219,12 @@ static class DotNetModelExporter
 
             return GetTypeNameInContainerNamespace(typeReference.FullName, containerNamespace);
 
-            static bool IsNullableType(TypeReference typeReference)
-            {
-                return typeReference.Name == "Nullable`1" && typeReference.IsGenericInstance;
-            }
+            
         }
-
+        static bool IsNullableType(TypeReference typeReference)
+        {
+            return typeReference.Name == "Nullable`1" && typeReference.IsGenericInstance;
+        }
         static string GetTypeNameInContainerNamespace(string typeFullName, string containerNamespace)
         {
             while (true)
