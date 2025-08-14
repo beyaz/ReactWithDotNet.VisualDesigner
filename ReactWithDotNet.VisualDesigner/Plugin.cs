@@ -827,15 +827,17 @@ static class Plugin
 
             protected override Element render()
             {
-                return new Alert
+                return new div
                 {
-                    id      = id,
-                    onClick = onMouseClick,
+                    Id(id), OnClick(onMouseClick),
+                    
+                    new Alert
+                    {
+                        severity = severity,
+                        variant  = variant,
 
-                    severity = severity,
-                    variant  = variant,
-
-                    children = { children }
+                        children = { children }
+                    }
                 };
             }
         }
