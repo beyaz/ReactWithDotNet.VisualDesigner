@@ -720,7 +720,14 @@ static class TsxExporter
                 value = valueAsDouble.AsPixel();
             }
 
-            value = '"' + TryClearStringValue(value) + '"';
+            if (value?.Contains('.') is true)
+            {
+                value = TryClearStringValue(value);
+            }
+            else
+            {
+                value = '"' + TryClearStringValue(value) + '"';
+            }
 
             inlineStyles.Add((name, value));
         }
