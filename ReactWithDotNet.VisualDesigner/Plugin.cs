@@ -308,6 +308,16 @@ static class Plugin
                 addSuggestion(Design.ShowIf,  item);
                 addSuggestion(Design.HideIf,  item);
             }
+            
+            foreach (var item in collectionSuggestions)
+            {
+                if (item.StartsWith("request."))
+                {
+                    addSuggestion(Design.ItemsSource, ConvertDotNetPathToJsPath(item));
+                    continue;
+                }
+                addSuggestion(Design.ItemsSource,  item);
+            }
 
             foreach (var (name, value) in Components.GetPropSuggestions(scope.TagName))
             {
