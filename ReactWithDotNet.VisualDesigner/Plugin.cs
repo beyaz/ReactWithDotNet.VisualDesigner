@@ -497,6 +497,7 @@ static class Plugin
             (typeof(Image), Image.GetPropSuggestions, null),
             (typeof(Link), Link.GetPropSuggestions, null),
 
+            (typeof(BChip), BChip.GetPropSuggestions, BChip.AnalyzeReactNode),
             (typeof(BTypography), BTypography.GetPropSuggestions, null),
             (typeof(BDigitalGrid), BDigitalGrid.GetPropSuggestions, null),
             (typeof(BasePage), BasePage.GetPropSuggestions, null),
@@ -1889,6 +1890,82 @@ static class Plugin
                         //new div{ maxLength }
                     },
 
+                    Id(id), OnClick(onMouseClick)
+                };
+            }
+        }
+        
+        sealed class BChip : PluginComponentBase
+        {
+            [JsTypeInfo(JsType.String)]
+            public string label { get; set; }
+            
+            [JsTypeInfo(JsType.String)]
+            public string variant { get; set; }
+            
+            [JsTypeInfo(JsType.String)]
+            public string color { get; set; }
+
+            [JsTypeInfo(JsType.Function)]
+            public string onClick { get; set; }
+            
+            public static IReadOnlyList<(string name, string value)> GetPropSuggestions()
+            {
+                return
+                [
+                    (nameof(variant), "'default'")
+                ];
+            }
+
+            public static ReactNode AnalyzeReactNode(ReactNode node)
+            {
+                if (node.Tag == nameof(BChip))
+                {
+                    var onClickProp = node.Properties.FirstOrDefault(x => x.Name == nameof(onClick));
+                    if (onClickProp is not null)
+                    {
+                        var properties = node.Properties;
+
+                        List<string> lines =
+                        [
+                            "() =>",
+                            "{",
+                        ];
+
+                        if (IsAlphaNumeric(onClickProp.Value))
+                        {
+                            lines.Add(onClickProp.Value + "();");
+                        }
+                        else
+                        {
+                            lines.Add(onClickProp.Value);
+                        }
+
+                        lines.Add("}");
+
+                        onClickProp = onClickProp with
+                        {
+                            Value = string.Join(Environment.NewLine, lines)
+                        };
+
+                        properties = properties.SetItem(properties.FindIndex(x => x.Name == onClickProp.Name), onClickProp);
+
+                        node = node with { Properties = properties };
+                    }
+                }
+
+                return node with { Children = node.Children.Select(AnalyzeReactNode).ToImmutableList() };
+            }
+            
+            protected override Element render()
+            {
+                return new div
+                {
+                    new Chip
+                    {
+                        color = color,
+                        label = label
+                    },
                     Id(id), OnClick(onMouseClick)
                 };
             }
