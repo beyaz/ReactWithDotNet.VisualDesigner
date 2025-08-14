@@ -725,6 +725,8 @@ static class Plugin
 
             Element createSvg()
             {
+                return new DynamicMuiIcon { name = name, fontSize = "22px"};
+                
                 if (name == "TimerRounded")
                 {
                     return new svg(ViewBox(0, 0, 24, 24), Fill("currentColor"), svg.Size(GetSize()))
