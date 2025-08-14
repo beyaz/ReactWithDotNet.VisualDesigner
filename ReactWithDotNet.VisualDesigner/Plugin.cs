@@ -223,6 +223,12 @@ static class Plugin
                     {
                         foreach (var item in numberSuggestions)
                         {
+                            if (item.StartsWith("request."))
+                            {
+                                addSuggestion(prop.Name, ConvertDotNetPathToJsPath(item));
+                                continue;
+                            }
+                            
                             addSuggestion(prop.Name, item);
                         }
 
@@ -232,6 +238,12 @@ static class Plugin
                     {
                         foreach (var item in dateSuggestions)
                         {
+                            if (item.StartsWith("request."))
+                            {
+                                addSuggestion(prop.Name, ConvertDotNetPathToJsPath(item));
+                                continue;
+                            }
+                            
                             addSuggestion(prop.Name, item);
                         }
 
@@ -241,6 +253,12 @@ static class Plugin
                     {
                         foreach (var item in booleanSuggestions)
                         {
+                            if (item.StartsWith("request."))
+                            {
+                                addSuggestion(prop.Name, ConvertDotNetPathToJsPath(item));
+                                continue;
+                            }
+                            
                             addSuggestion(prop.Name, item);
                         }
 
@@ -250,6 +268,12 @@ static class Plugin
                     {
                         foreach (var item in collectionSuggestions)
                         {
+                            if (item.StartsWith("request."))
+                            {
+                                addSuggestion(prop.Name, ConvertDotNetPathToJsPath(item));
+                                continue;
+                            }
+                            
                             addSuggestion(prop.Name, item);
                         }
 
@@ -1738,7 +1762,7 @@ static class Plugin
             [JsTypeInfo(JsType.String)]
             public string label { get; set; }
             
-            [JsTypeInfo(JsType.String)]
+            [JsTypeInfo(JsType.Number)]
             public string value { get; set; }
             
             [JsTypeInfo(JsType.Boolean)]

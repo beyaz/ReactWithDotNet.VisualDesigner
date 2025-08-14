@@ -135,6 +135,8 @@ static class CecilHelper
             typeof(byte).FullName,
             typeof(short).FullName,
             typeof(int).FullName,
+            typeof(double).FullName,
+            typeof(float).FullName,
             typeof(long).FullName,
             typeof(decimal).FullName,
         ];
