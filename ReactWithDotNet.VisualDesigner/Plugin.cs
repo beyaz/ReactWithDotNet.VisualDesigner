@@ -1952,6 +1952,8 @@ static class Plugin
 
                         node = node with { Properties = properties };
                     }
+
+                    node = AddContextProp(node);
                 }
 
                 return node with { Children = node.Children.Select(AnalyzeReactNode).ToImmutableList() };
@@ -1959,7 +1961,7 @@ static class Plugin
             
             protected override Element render()
             {
-                return new div
+                return new div(BorderRadius(16))
                 {
                     new Chip
                     {
