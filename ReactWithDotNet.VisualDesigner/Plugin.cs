@@ -294,7 +294,19 @@ static class Plugin
 
             foreach (var item in stringSuggestions)
             {
-                addSuggestion("d-text", '"' + item + '"');
+                addSuggestion(Design.Text, '"' + item + '"');
+            }
+            
+            foreach (var item in booleanSuggestions)
+            {
+                if (item.StartsWith("request."))
+                {
+                    addSuggestion(Design.ShowIf, ConvertDotNetPathToJsPath(item));
+                    addSuggestion(Design.HideIf, ConvertDotNetPathToJsPath(item));
+                    continue;
+                }
+                addSuggestion(Design.ShowIf,  item);
+                addSuggestion(Design.HideIf,  item);
             }
 
             foreach (var (name, value) in Components.GetPropSuggestions(scope.TagName))
@@ -1832,8 +1844,6 @@ static class Plugin
 
                         node = node with { Properties = properties };
                     }
-
-                    node = AddContextProp(node);
                 }
 
                 return node with { Children = node.Children.Select(AnalyzeReactNode).ToImmutableList() };
