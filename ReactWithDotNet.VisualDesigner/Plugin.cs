@@ -725,7 +725,7 @@ static class Plugin
 
             Element createSvg()
             {
-                return new DynamicMuiIcon { name = name, fontSize = "22px"};
+                return new DynamicMuiIcon { name = name, fontSize = "medium"};
                 
                 if (name == "TimerRounded")
                 {
