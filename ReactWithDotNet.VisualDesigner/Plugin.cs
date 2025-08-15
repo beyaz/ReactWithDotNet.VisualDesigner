@@ -1,5 +1,4 @@
 ﻿using Dapper;
-using Google.Protobuf.Reflection;
 using Microsoft.Data.SqlClient;
 using Newtonsoft.Json;
 using ReactWithDotNet.ThirdPartyLibraries.MUI.Material;
@@ -12,7 +11,6 @@ using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Text;
-using System.Text.Json;
 
 namespace ReactWithDotNet.VisualDesigner;
 
@@ -729,31 +727,11 @@ static class Plugin
 
             Element createSvg()
             {
-                return new DynamicMuiIcon { name = name, fontSize = "medium"};
-                
-                if (name == "TimerRounded")
+                return new DynamicMuiIcon
                 {
-                    return new svg(ViewBox(0, 0, 24, 24), Fill("currentColor"), svg.Size(GetSize()))
-                    {
-                        new path
-                        {
-                            d = "M15.07 1H8.93c-.52 0-.93.41-.93.93s.41.93.93.93h6.14c.52 0 .93-.41.93-.93S15.59 1 15.07 1Zm-2.15 9.45V7.5c0-.28-.22-.5-.5-.5s-.5.22-.5.5v3.5c0 .13.05.26.15.35l2.5 2.5c.2.2.51.2.71 0 .2-.2.2-.51 0-.71l-2.36-2.36ZM12 4C7.59 4 4 7.59 4 12s3.59 8 8 8 8-3.59 8-8c0-1.9-.66-3.63-1.76-5.01l1.29-1.29c.2-.2.2-.51 0-.71s-.51-.2-.71 0l-1.3 1.3C16.63 5.21 14.39 4 12 4Zm0 14c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6Z"
-                        }
-                    };
-                }
-
-                if (name == "content_copy")
-                {
-                    return new svg(Fill("currentColor"), ViewBox(0, 0, 24, 24), svg.Size(GetSize()))
-                    {
-                        new path
-                        {
-                            d = "M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1Zm3 4H8c-1.1 0-2 .9-2 2v16h14c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2Zm0 18H8V7h11v16Z"
-                        }
-                    };
-                }
-
-                return name;
+                    name = name, 
+                    fontSize = "medium"
+                };
             }
 
             double GetSize()
@@ -829,7 +807,10 @@ static class Plugin
 
         sealed class BAlert : PluginComponentBase
         {
+            [JsTypeInfo(JsType.String)]
             public string severity { get; set; }
+            
+            [JsTypeInfo(JsType.String)]
             public string variant { get; set; }
 
             public static IReadOnlyList<(string name, string value)> GetPropSuggestions()
@@ -860,6 +841,7 @@ static class Plugin
 
         sealed class BasePage : PluginComponentBase
         {
+            [JsTypeInfo(JsType.String)]
             public string pageTitle { get; set; }
 
             public static IReadOnlyList<(string name, string value)> GetPropSuggestions()
@@ -885,7 +867,8 @@ static class Plugin
 
         sealed class TransactionWizardPage : PluginComponentBase
         {
-            public bool? isWide { get; set; }
+            [JsTypeInfo(JsType.Boolean)]
+            public string isWide { get; set; }
 
             public static IReadOnlyList<(string name, string value)> GetPropSuggestions()
             {
@@ -908,6 +891,7 @@ static class Plugin
 
         sealed class BRadioButtonGroup : PluginComponentBase
         {
+            [JsTypeInfo(JsType.Array)]
             public string items { get; set; }
 
             public static IReadOnlyList<(string name, string value)> GetPropSuggestions()
@@ -952,10 +936,14 @@ static class Plugin
 
         sealed class BDigitalTabNavigator : PluginComponentBase
         {
+            [JsTypeInfo(JsType.Array)]
             public string items { get; set; }
+            
+            [JsTypeInfo(JsType.String)]
             public string mainResource { get; set; }
 
-            public int? selectedTab { get; set; }
+            [JsTypeInfo(JsType.Number)]
+            public string selectedTab { get; set; }
 
             public static IReadOnlyList<(string name, string value)> GetPropSuggestions()
             {
@@ -1332,6 +1320,7 @@ static class Plugin
 
         sealed class BDigitalBox : PluginComponentBase
         {
+            [JsTypeInfo(JsType.String)]
             public string styleContext { get; set; }
 
             public static IReadOnlyList<(string name, string value)> GetPropSuggestions()
@@ -1353,11 +1342,17 @@ static class Plugin
 
         sealed class BDigitalDialog : PluginComponentBase
         {
+            [JsTypeInfo(JsType.Array)]
             public string actions { get; set; }
+            
+            [JsTypeInfo(JsType.String)]
             public string content { get; set; }
 
-            public bool? open { get; set; }
+            [JsTypeInfo(JsType.Boolean)]
+            public string open { get; set; }
 
+            
+            [JsTypeInfo(JsType.String)]
             public string title { get; set; }
 
             public static IReadOnlyList<(string name, string value)> GetPropSuggestions()
@@ -1418,7 +1413,10 @@ static class Plugin
 
         sealed class BDigitalPlateNumber : PluginComponentBase
         {
-            public string bind { get; set; }
+            [JsTypeInfo(JsType.String)]
+            public string value { get; set; }
+            
+            [JsTypeInfo(JsType.String)]
             public string label { get; set; }
 
             public static IReadOnlyList<(string name, string value)> GetPropSuggestions()
@@ -1432,7 +1430,7 @@ static class Plugin
             {
                 return new FlexRow(AlignItemsCenter, PaddingLeftRight(16), Border(1, solid, "#c0c0c0"), BorderRadius(10), Height(58), JustifyContentSpaceBetween)
                 {
-                    new div { bind ?? "?" }
+                    new div { value ?? "?" }
                 };
             }
         }
@@ -1825,6 +1823,7 @@ static class Plugin
                 return node with { Children = node.Children.Select(AnalyzeReactNode).ToImmutableList() };
             }
         }
+        
         sealed class BInputMaskExtended : PluginComponentBase
         {
             
@@ -2174,8 +2173,10 @@ static class Plugin
         
         sealed class BPlateNumber : PluginComponentBase
         {
-            public string bind { get; set; }
+            [JsTypeInfo(JsType.String)]
+            public string value { get; set; }
 
+            [JsTypeInfo(JsType.String)]
             public string label { get; set; }
 
             public static IReadOnlyList<(string name, string value)> GetPropSuggestions()
@@ -2193,9 +2194,9 @@ static class Plugin
                     textContent = label;
                 }
 
-                if (bind.HasValue())
+                if (value.HasValue())
                 {
-                    textContent += " | " + bind;
+                    textContent += " | " + value;
                 }
 
                 return new FlexRow(AlignItemsCenter, PaddingLeftRight(16), Border(1, solid, "#c0c0c0"), BorderRadius(10), Height(58), JustifyContentSpaceBetween)
@@ -2210,6 +2211,8 @@ static class Plugin
         sealed class BTypography : PluginComponentBase
         {
             public string dangerouslySetInnerHTML { get; set; }
+            
+            [JsTypeInfo(JsType.String)]
             public string variant { get; set; }
 
             public static IReadOnlyList<(string name, string value)> GetPropSuggestions()
