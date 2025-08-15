@@ -1,6 +1,7 @@
 ﻿using Dapper;
 using Google.Protobuf.Reflection;
 using Microsoft.Data.SqlClient;
+using Newtonsoft.Json;
 using ReactWithDotNet.ThirdPartyLibraries.MUI.Material;
 using ReactWithDotNet.VisualDesigner.Configuration;
 using ReactWithDotNet.VisualDesigner.Exporters;
@@ -500,6 +501,8 @@ static class Plugin
             (typeof(BChip), BChip.GetPropSuggestions, BChip.AnalyzeReactNode),
             (typeof(BTypography), BTypography.GetPropSuggestions, null),
             (typeof(BDigitalGrid), BDigitalGrid.GetPropSuggestions, null),
+            (typeof(BDigitalFilterView), BDigitalFilterView.GetPropSuggestions, BDigitalFilterView.AnalyzeReactNode),
+            
             (typeof(BasePage), BasePage.GetPropSuggestions, null),
             (typeof(TransactionWizardPage), TransactionWizardPage.GetPropSuggestions, null),
             (typeof(BRadioButtonGroup), BRadioButtonGroup.GetPropSuggestions, null),
@@ -921,7 +924,7 @@ static class Plugin
                     return null;
                 }
 
-                var itemList = JsonSerializer.Deserialize<ItemModel[]>(items);
+                var itemList = JsonConvert.DeserializeObject<ItemModel[]>(items);
 
                 return new FlexRow(Gap(24))
                 {
@@ -968,7 +971,7 @@ static class Plugin
                     return null;
                 }
 
-                var itemList = JsonSerializer.Deserialize<ItemModel[]>(items);
+                var itemList = JsonConvert.DeserializeObject<ItemModel[]>(items);
 
                 return new FlexRow(BorderBottom(1, solid, rgba(0, 0, 0, 0.12)), Color(rgb(22, 160, 133)))
                 {
@@ -1371,7 +1374,7 @@ static class Plugin
                     return null;
                 }
 
-                var actionList = JsonSerializer.Deserialize<ItemModel[]>(actions);
+                var actionList = JsonConvert.DeserializeObject<ItemModel[]>(actions);
 
                 return new div(Background(rgba(0, 0, 0, 0.5)), Padding(24), BorderRadius(8))
                 {
@@ -1711,6 +1714,119 @@ static class Plugin
             }
         }
 
+        sealed class BDigitalFilterView:PluginComponentBase
+        {
+            [JsTypeInfo(JsType.String)]
+            public string beginDateLabel { get; set; }
+            
+            [JsTypeInfo(JsType.String)]
+            public string endDateLabel { get; set; }
+            
+            [JsTypeInfo(JsType.Date)]
+            public string beginDate{ get; set; }
+            
+            [JsTypeInfo(JsType.Date)]
+            public string endDate { get; set; }
+            
+            [JsTypeInfo(JsType.Function)]
+            public string onFilterDetailClear { get; set; }
+            
+            [JsTypeInfo(JsType.Function)]
+            public string setFilter { get; set; }
+            
+             public static IReadOnlyList<(string name, string value)> GetPropSuggestions()
+            {
+                return
+                [
+              
+                ];
+            }
+
+            protected override Element render()
+            {
+                return new FlexColumn(PaddingTop(16) )
+                {
+                    new FlexColumn(PaddingY(16), FontSize18)
+                    {
+                        "Filtrele"
+                    },
+                    new div(WidthFull, PaddingTop(16), PaddingBottom(8))
+                    {
+                        new FlexRow(AlignItemsCenter, PaddingLeft(16), PaddingRight(12), Border(1, solid, "#c0c0c0"), BorderRadius(10), Height(58), JustifyContentSpaceBetween)
+                        {
+                            new div(Color(rgba(0, 0, 0, 0.54)), FontSize16, FontWeight400, FontFamily("Roboto, sans-serif"))
+                            {
+                                beginDateLabel + " | " + beginDate
+                            },
+                            new DynamicMuiIcon{ name= "CalendarMonthOutlined", fontSize = "medium"}
+                        }
+                    },
+                    
+                    new div(WidthFull, PaddingTop(16), PaddingBottom(8))
+                    {
+                        new FlexRow(AlignItemsCenter, PaddingLeft(16), PaddingRight(12), Border(1, solid, "#c0c0c0"), BorderRadius(10), Height(58), JustifyContentSpaceBetween)
+                        {
+                            new div(Color(rgba(0, 0, 0, 0.54)), FontSize16, FontWeight400, FontFamily("Roboto, sans-serif"))
+                            {
+                                endDateLabel + " | " + endDate
+                            },
+                            new DynamicMuiIcon{ name= "CalendarMonthOutlined", fontSize = "medium"}
+                        }
+                    },
+                    
+                    children
+                    
+                };
+            }
+            
+            public static ReactNode AnalyzeReactNode(ReactNode node)
+            {
+                if (node.Tag == nameof(BDigitalFilterView))
+                {
+                    var beginDateProp = node.Properties.FirstOrDefault(x => x.Name == nameof(beginDate));
+                    var endDateProp = node.Properties.FirstOrDefault(x => x.Name == nameof(endDate));
+                    var setFilterProp = node.Properties.FirstOrDefault(x => x.Name == nameof(setFilter));
+                   
+                    if (beginDateProp is not null && endDateProp is not null && setFilterProp is not null)
+                    {
+                        var properties = node.Properties;
+                        
+                        properties = properties.Add(new ReactProperty
+                        {
+                            Name  = "beginDateDefault",
+                            Value = beginDateProp.Value
+                        });
+                        
+                        properties = properties.Add(new ReactProperty
+                        {
+                            Name  = "setBeginDate",
+                            Value = $"(value: Date) => {{ updateRequest(r => r.{beginDateProp.Value.RemoveFromStart("request.") } = value;}}) }}"
+                        });
+                        
+                        properties = properties.Add(new ReactProperty
+                        {
+                            Name  = "endDateDefault",
+                            Value = endDateProp.Value
+                        });
+                        properties = properties.Add(new ReactProperty
+                        {
+                            Name  = "setEndDate",
+                            Value = $"(value: Date) => {{ updateRequest(r => r.{beginDateProp.Value.RemoveFromStart("request.") } = value;}}) }}"
+                        });
+
+
+                        properties = properties.Remove(beginDateProp).Remove(endDateProp);
+
+                        node = node with { Properties = properties };
+                    }
+
+
+                    node = AddContextProp(node);
+                }
+
+                return node with { Children = node.Children.Select(AnalyzeReactNode).ToImmutableList() };
+            }
+        }
         sealed class BInputMaskExtended : PluginComponentBase
         {
             
