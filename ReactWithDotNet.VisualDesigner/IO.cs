@@ -32,6 +32,12 @@ static class IO
     {
         try
         {
+            var fileInfo = new FileInfo(filePath);
+            if (fileInfo.IsReadOnly)
+            {
+                fileInfo.IsReadOnly = false;
+            }
+            
             await File.WriteAllTextAsync(filePath, fileContent);
         }
         catch (Exception exception)

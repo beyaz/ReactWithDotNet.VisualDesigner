@@ -509,7 +509,7 @@ static class Plugin
             (typeof(BIcon), BIcon.GetPropSuggestions, null),
             (typeof(BDigitalMoneyInput), BDigitalMoneyInput.GetPropSuggestions, BDigitalMoneyInput.AnalyzeReactNode),
             (typeof(BComboBox), BComboBox.GetPropSuggestions, BComboBox.AnalyzeReactNode),
-            (typeof(BDigitalDatepicker), BDigitalDatepicker.GetPropSuggestions, null),
+            (typeof(BDigitalDatepicker), BDigitalDatepicker.GetPropSuggestions, BDigitalDatepicker.AnalyzeReactNode),
             (typeof(BInput), BInput.GetPropSuggestions, BInput.AnalyzeReactNode),
             (typeof(BInputMaskExtended), BInputMaskExtended.GetPropSuggestions, BInputMaskExtended.AnalyzeReactNode),
             (typeof(BPlateNumber), BPlateNumber.GetPropSuggestions, null),
@@ -1185,14 +1185,29 @@ static class Plugin
 
         sealed class BDigitalDatepicker : PluginComponentBase
         {
-            public string bind { get; set; }
+            [JsTypeInfo(JsType.Date)]
+            public string value { get; set; }
 
-            public IEnumerable dataSource { get; set; }
+            [JsTypeInfo(JsType.Boolean)]
+            public string disabled { get; set; }
 
-            public bool? hiddenClearButton { get; set; }
-
-            public string hintText { get; set; }
+            [JsTypeInfo(JsType.String)]
             public string labelText { get; set; }
+            
+            [JsTypeInfo(JsType.Date)]
+            public string minDate { get; set; }
+            
+            [JsTypeInfo(JsType.Date)]
+            public string maxDate { get; set; }
+          
+            [JsTypeInfo(JsType.String)]
+            public string format { get; set; }
+            
+            [JsTypeInfo(JsType.Function)]
+            public string onDateChange { get; set; }
+            
+            [JsTypeInfo(JsType.String)]
+            public string placeholder { get; set; }
 
             public static IReadOnlyList<(string name, string value)> GetPropSuggestions()
             {
@@ -1209,9 +1224,9 @@ static class Plugin
                     textContent = labelText;
                 }
 
-                if (bind.HasValue())
+                if (value.HasValue())
                 {
-                    textContent += " | " + bind;
+                    textContent += " | " + value;
                 }
 
                 return new div(WidthFull, PaddingTop(16), PaddingBottom(8))
@@ -1224,21 +1239,91 @@ static class Plugin
                         {
                             textContent
                         },
-                        new svg(ViewBox(0, 0, 24, 24), svg.Width(24), svg.Height(24), Color(rgb(117, 117, 117)))
-                        {
-                            new path
-                            {
-                                d    = "M7 10l5 5 5-5z",
-                                fill = "#757575"
-                            }
-                        }
-                    },
-                    new FlexRow(JustifyContentSpaceBetween, FontSize12, PaddingLeftRight(14), Color(rgb(158, 158, 158)), LineHeight15)
-                    {
-                        //new div{ helperText},
-                        //new div{ maxLength }
+                        new DynamicMuiIcon{ name= "CalendarMonthOutlined", fontSize = "medium"},
+                        
                     }
                 };
+            }
+            
+            public static ReactNode AnalyzeReactNode(ReactNode node)
+            {
+                if (node.Tag == nameof(BDigitalDatepicker))
+                {
+                    var valueProp = node.Properties.FirstOrDefault(x => x.Name == nameof(value));
+                    var onDateChangeProp = node.Properties.FirstOrDefault(x => x.Name == nameof(onDateChange));
+                    if (valueProp is not null)
+                    {
+                        var properties = node.Properties;
+
+                        List<string> lines =
+                        [
+                            "(value: Date) =>",
+                            "{",
+                            $"  updateRequest(r => {{ r.{valueProp.Value.RemoveFromStart("request.")} = value; }});"
+                        ];
+
+                        if (onDateChangeProp is not null)
+                        {
+                            if (IsAlphaNumeric(onDateChangeProp.Value))
+                            {
+                                lines.Add(onDateChangeProp.Value + "(value);");
+                            }
+                            else
+                            {
+                                lines.Add(onDateChangeProp.Value);
+                            }
+                        }
+
+                        lines.Add("}");
+
+                        if (onDateChangeProp is not null)
+                        {
+                            onDateChangeProp = onDateChangeProp with
+                            {
+                                Value = string.Join(Environment.NewLine, lines)
+                            };
+
+                            properties = properties.SetItem(properties.FindIndex(x => x.Name == onDateChangeProp.Name), onDateChangeProp);
+                        }
+                        else
+                        {
+                            properties = properties.Add(new ReactProperty
+                            {
+                                Name  = nameof(onDateChange),
+                                Value = string.Join(Environment.NewLine, lines)
+                            });
+                        }
+
+                        node = node with { Properties = properties };
+                    }
+                    
+                    var placeholderProp = node.Properties.FirstOrDefault(x => x.Name == nameof(placeholder));
+                    if (placeholderProp is not null)
+                    {
+                        var placeholderFinalValue = string.Empty;
+                        {
+                            if (IsStringValue(placeholderProp.Value))
+                            {
+                                placeholderFinalValue = placeholderProp.Value;
+                            }
+                            else
+                            {
+                                placeholderFinalValue = $"{ConvertDotNetPathToJsPath(placeholderProp.Value)}";
+                            }
+                        }
+                        
+                        node = node with
+                        {
+                            Properties = node.Properties.Remove(placeholderProp).Add(new ReactProperty
+                            {
+                                Name  = "inputProps",
+                                Value = $"{{ placeholder: {placeholderFinalValue} }}"
+                            })
+                        };
+                    }
+                }
+
+                return node with { Children = node.Children.Select(AnalyzeReactNode).ToImmutableList() };
             }
         }
 
