@@ -1800,7 +1800,7 @@ static class Plugin
                         properties = properties.Add(new ReactProperty
                         {
                             Name  = "setBeginDate",
-                            Value = $"(value: Date) => {{ updateRequest(r => r.{beginDateProp.Value.RemoveFromStart("request.") } = value;}}) }}"
+                            Value = $"(value: Date) => {{ updateRequest(r => r.{beginDateProp.Value.RemoveFromStart("request.") } = value) }}"
                         });
                         
                         properties = properties.Add(new ReactProperty
@@ -1811,7 +1811,7 @@ static class Plugin
                         properties = properties.Add(new ReactProperty
                         {
                             Name  = "setEndDate",
-                            Value = $"(value: Date) => {{ updateRequest(r => r.{beginDateProp.Value.RemoveFromStart("request.") } = value;}}) }}"
+                            Value = $"(value: Date) => {{ updateRequest(r => r.{beginDateProp.Value.RemoveFromStart("request.") } = value) }}"
                         });
 
 
@@ -1820,8 +1820,6 @@ static class Plugin
                         node = node with { Properties = properties };
                     }
 
-
-                    node = AddContextProp(node);
                 }
 
                 return node with { Children = node.Children.Select(AnalyzeReactNode).ToImmutableList() };
