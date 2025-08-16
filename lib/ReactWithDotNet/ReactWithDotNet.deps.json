@@ -1,0 +1,23 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v8.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v8.0": {
+      "ReactWithDotNet/1.0.35": {
+        "runtime": {
+          "ReactWithDotNet.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "ReactWithDotNet/1.0.35": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}
