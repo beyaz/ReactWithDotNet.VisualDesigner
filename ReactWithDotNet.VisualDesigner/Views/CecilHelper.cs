@@ -6,7 +6,12 @@ namespace ReactWithDotNet.VisualDesigner;
 
 public enum JsType
 {
-    String, Number, Date, Boolean, Array, Function
+    String,
+    Number,
+    Date,
+    Boolean,
+    Array,
+    Function
 }
 
 [AttributeUsage(AttributeTargets.Property)]
@@ -22,22 +27,25 @@ public sealed class JsTypeInfoAttribute : Attribute
 
 static class CecilHelper
 {
-    
     public static PropertyDefinition FindPropertyPath(TypeDefinition typeDefinition, string propertyPath)
     {
         if (typeDefinition == null)
-            throw new ArgumentNullException(nameof(typeDefinition));
-        
-        if (string.IsNullOrEmpty(propertyPath))
-            throw new ArgumentException("Property path cannot be null or empty.", nameof(propertyPath));
-
-        string[] properties = propertyPath.Split('.');
-        TypeDefinition currentType = typeDefinition;
-
-        for (int i = 0; i < properties.Length; i++)
         {
-            string propertyName = properties[i];
-            PropertyDefinition property = currentType.Properties.FirstOrDefault(p => p.Name.Equals(propertyName, StringComparison.OrdinalIgnoreCase));
+            throw new ArgumentNullException(nameof(typeDefinition));
+        }
+
+        if (string.IsNullOrEmpty(propertyPath))
+        {
+            throw new ArgumentException("Property path cannot be null or empty.", nameof(propertyPath));
+        }
+
+        var properties = propertyPath.Split('.');
+        var currentType = typeDefinition;
+
+        for (var i = 0; i < properties.Length; i++)
+        {
+            var propertyName = properties[i];
+            var property = currentType.Properties.FirstOrDefault(p => p.Name.Equals(propertyName, StringComparison.OrdinalIgnoreCase));
 
             if (property == null)
             {
@@ -64,27 +72,7 @@ static class CecilHelper
 
         throw new InvalidOperationException("Invalid property path.");
     }
-    
-    public static IReadOnlyList<string> GetRemoteApiMethodNames(string assemblyPath, string requestFullName)
-    {
-        var assembly = AssemblyDefinition.ReadAssembly(assemblyPath);
-        if (assembly is null)
-        {
-            return [];
-        }
 
-        var controllerFullName = requestFullName.Replace(".Types.", ".Controllers.").Replace("ClientRequest", "Controller");
-
-        var type = assembly.MainModule.GetType(controllerFullName);
-        if (type is null)
-        {
-            return [];
-        }
-
-        return type.Methods.Where(isReadyToCallFromDesignerGeneratedCodes).Select(m=>m.Name).ToList();
-
-        bool isReadyToCallFromDesignerGeneratedCodes(MethodDefinition m) => m.IsPublic && m.Parameters.Count == 1 && m.Parameters[0].ParameterType.FullName == requestFullName;
-    }
     public static IReadOnlyList<string> GetPropertyPathList(string assemblyPath, string typeFullName, string prefix, Func<PropertyDefinition, bool> matchFunc)
     {
         var assembly = AssemblyDefinition.ReadAssembly(assemblyPath);
@@ -132,6 +120,27 @@ static class CecilHelper
         }
     }
 
+    public static IReadOnlyList<string> GetRemoteApiMethodNames(string assemblyPath, string requestFullName)
+    {
+        var assembly = AssemblyDefinition.ReadAssembly(assemblyPath);
+        if (assembly is null)
+        {
+            return [];
+        }
+
+        var controllerFullName = requestFullName.Replace(".Types.", ".Controllers.").Replace("ClientRequest", "Controller");
+
+        var type = assembly.MainModule.GetType(controllerFullName);
+        if (type is null)
+        {
+            return [];
+        }
+
+        return type.Methods.Where(isReadyToCallFromDesignerGeneratedCodes).Select(m => m.Name).ToList();
+
+        bool isReadyToCallFromDesignerGeneratedCodes(MethodDefinition m) => m.IsPublic && m.Parameters.Count == 1 && m.Parameters[0].ParameterType.FullName == requestFullName;
+    }
+
     public static bool IsBoolean(TypeReference typeReference)
     {
         var typeFullName = typeReference.FullName;
@@ -148,6 +157,11 @@ static class CecilHelper
     public static bool IsBoolean(PropertyDefinition propertyDefinition)
     {
         return IsBoolean(propertyDefinition.PropertyType);
+    }
+
+    public static bool IsCollection(PropertyDefinition propertyDefinition)
+    {
+        return IsCollection(propertyDefinition.PropertyType);
     }
 
     public static bool IsDateTime(TypeReference typeReference)
@@ -193,6 +207,29 @@ static class CecilHelper
         return IsNumber(propertyDefinition.PropertyType);
     }
 
+    public static bool IsPropertyPathProvidedByCollection(string dotNetAssemblyFilePath, string dotnetTypeFullName, string propertyPath)
+    {
+        var assembly = AssemblyDefinition.ReadAssembly(dotNetAssemblyFilePath);
+        if (assembly is null)
+        {
+            return false;
+        }
+
+        var type = assembly.MainModule.GetType(dotnetTypeFullName);
+        if (type is null)
+        {
+            return false;
+        }
+
+        var propertyDefinition = FindPropertyPath(type, propertyPath);
+        if (propertyDefinition is null)
+        {
+            return false;
+        }
+
+        return IsCollection(propertyDefinition.PropertyType);
+    }
+
     public static bool IsString(TypeReference typeReference)
     {
         return typeReference.FullName == "System.String";
@@ -219,33 +256,5 @@ static class CecilHelper
     static bool IsCollection(TypeReference typeReference)
     {
         return typeReference.FullName.StartsWith("System.Collections.Generic.List`1", StringComparison.OrdinalIgnoreCase);
-    }
-    
-    public static bool IsCollection(PropertyDefinition propertyDefinition)
-    {
-        return IsCollection(propertyDefinition.PropertyType);
-    }
-    
-    public static bool IsPropertyPathProvidedByCollection(string dotNetAssemblyFilePath, string dotnetTypeFullName,  string propertyPath)
-    {
-        var assembly = AssemblyDefinition.ReadAssembly(dotNetAssemblyFilePath);
-        if (assembly is null)
-        {
-            return false;
-        }
-
-        var type = assembly.MainModule.GetType(dotnetTypeFullName);
-        if (type is null)
-        {
-            return false;
-        }
-
-        var propertyDefinition = CecilHelper.FindPropertyPath(type, propertyPath);
-        if (propertyDefinition is null)
-        {
-            return false;
-        }
-
-        return CecilHelper.IsCollection(propertyDefinition.PropertyType);
     }
 }
