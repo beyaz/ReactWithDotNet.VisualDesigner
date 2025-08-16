@@ -94,7 +94,12 @@ static class Plugin
 
     static IEnumerable<(string variableName, string dotNetAssemblyFilePath, string dotnetTypeFullName)> GetDotNetVariables(ComponentEntity componentEntity)
     {
-        foreach (var (key, value) in componentEntity.GetConfig())
+        return GetDotNetVariables(componentEntity.GetConfig());
+    }
+    
+    static IEnumerable<(string variableName, string dotNetAssemblyFilePath, string dotnetTypeFullName)> GetDotNetVariables(IReadOnlyDictionary<string, string> componentConfig)
+    {
+        foreach (var (key, value) in componentConfig ?? [])
         {
             const string dotNetVariable = "DotNetVariable.";
 
@@ -115,7 +120,9 @@ static class Plugin
 
             yield return (variableName, assemblyFilePath, dotnetTypeFullName);
         }
-        
+
+        yield break;
+
         static string getAssemblyFilePathByFullTypeName(string fullTypeName)
         {
             if (fullTypeName.StartsWith("BOA.InternetBanking.Payments.API", StringComparison.OrdinalIgnoreCase))
@@ -135,6 +142,7 @@ static class Plugin
             return null;
         }
     }
+
     
     public static async Task<IReadOnlyList<string>> GetPropSuggestions(PropSuggestionScope scope)
     {
