@@ -1626,11 +1626,13 @@ static class Plugin
                     {
                         var properties = node.Properties;
 
+                        var isCollection = IsPropertyPathProvidedByCollection(componentConfig, valueProp.Value);
+
                         List<string> lines =
                         [
                             "(selectedIndexes: [number], selectedItems: [TextValuePair], selectedValues: [string]) =>",
                             "{",
-                            $"  updateRequest(r => {{ r.{valueProp.Value.RemoveFromStart("request.")} = selectedValues[0]; }});"
+                            $"  updateRequest(r => {{ r.{valueProp.Value.RemoveFromStart("request.")} = selectedValues{(isCollection? string.Empty:"[0]")}; }});"
                         ];
 
                         if (onSelectProp is not null)
@@ -1665,11 +1667,36 @@ static class Plugin
                             });
                         }
 
+                        if (!isCollection)
+                        {
+                            properties = properties.SetItem( properties.IndexOf(valueProp),valueProp with
+                            {
+                                Value = $"[{valueProp.Value}]"
+                            });
+                        }
+
                         node = node with { Properties = properties };
                     }
                 }
 
                 return node with { Children = node.Children.Select(x=>AnalyzeReactNode(x, componentConfig)).ToImmutableList() };
+            }
+
+            static bool IsPropertyPathProvidedByCollection(IReadOnlyDictionary<string, string> componentConfig, string propertyPathWithVariableName)
+            {
+                foreach (var (variableName, dotNetAssemblyFilePath, dotnetTypeFullName) in GetDotNetVariables(componentConfig))
+                {
+                    if (!propertyPathWithVariableName.StartsWith(variableName + ".", StringComparison.OrdinalIgnoreCase))
+                    {
+                        continue;
+                    }
+
+                    var propertyPath = propertyPathWithVariableName.RemoveFromStart(variableName + ".");
+
+                    return CecilHelper.IsPropertyPathProvidedByCollection(dotNetAssemblyFilePath, dotnetTypeFullName, propertyPath);
+                }
+
+                return false;
             }
 
             public static IReadOnlyList<(string name, string value)> GetPropSuggestions()

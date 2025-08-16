@@ -22,6 +22,49 @@ public sealed class JsTypeInfoAttribute : Attribute
 
 static class CecilHelper
 {
+    
+    public static PropertyDefinition FindPropertyPath(TypeDefinition typeDefinition, string propertyPath)
+    {
+        if (typeDefinition == null)
+            throw new ArgumentNullException(nameof(typeDefinition));
+        
+        if (string.IsNullOrEmpty(propertyPath))
+            throw new ArgumentException("Property path cannot be null or empty.", nameof(propertyPath));
+
+        string[] properties = propertyPath.Split('.');
+        TypeDefinition currentType = typeDefinition;
+
+        for (int i = 0; i < properties.Length; i++)
+        {
+            string propertyName = properties[i];
+            PropertyDefinition property = currentType.Properties.FirstOrDefault(p => p.Name.Equals(propertyName, StringComparison.OrdinalIgnoreCase));
+
+            if (property == null)
+            {
+                throw new InvalidOperationException($"Property '{propertyName}' not found in type '{currentType.FullName}'.");
+            }
+
+            if (i < properties.Length - 1)
+            {
+                // Update the currentType to the property type for the next iteration
+                var propertyTypeReference = property.PropertyType;
+
+                if (!(propertyTypeReference is TypeDefinition nextType))
+                {
+                    nextType = propertyTypeReference.Resolve();
+                }
+
+                currentType = nextType;
+            }
+            else
+            {
+                return property;
+            }
+        }
+
+        throw new InvalidOperationException("Invalid property path.");
+    }
+    
     public static IReadOnlyList<string> GetRemoteApiMethodNames(string assemblyPath, string requestFullName)
     {
         var assembly = AssemblyDefinition.ReadAssembly(assemblyPath);
@@ -181,5 +224,28 @@ static class CecilHelper
     public static bool IsCollection(PropertyDefinition propertyDefinition)
     {
         return IsCollection(propertyDefinition.PropertyType);
+    }
+    
+    public static bool IsPropertyPathProvidedByCollection(string dotNetAssemblyFilePath, string dotnetTypeFullName,  string propertyPath)
+    {
+        var assembly = AssemblyDefinition.ReadAssembly(dotNetAssemblyFilePath);
+        if (assembly is null)
+        {
+            return false;
+        }
+
+        var type = assembly.MainModule.GetType(dotnetTypeFullName);
+        if (type is null)
+        {
+            return false;
+        }
+
+        var propertyDefinition = CecilHelper.FindPropertyPath(type, propertyPath);
+        if (propertyDefinition is null)
+        {
+            return false;
+        }
+
+        return CecilHelper.IsCollection(propertyDefinition.PropertyType);
     }
 }
