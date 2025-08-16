@@ -77,7 +77,7 @@ static class Plugin
         return config;
     }
 
-    public static ReactNode AnalyzeNode(ReactNode node)
+    public static ReactNode AnalyzeNode(ReactNode node, IReadOnlyDictionary<string, string> componentConfig)
     {
         foreach (var analyzeFunc in from x in Components.AllTypes where x.analyzeReactNode is not null select x.analyzeReactNode)
         {
@@ -99,7 +99,7 @@ static class Plugin
     
     static IEnumerable<(string variableName, string dotNetAssemblyFilePath, string dotnetTypeFullName)> GetDotNetVariables(IReadOnlyDictionary<string, string> componentConfig)
     {
-        foreach (var (key, value) in componentConfig ?? [])
+        foreach (var (key, value) in componentConfig)
         {
             const string dotNetVariable = "DotNetVariable.";
 

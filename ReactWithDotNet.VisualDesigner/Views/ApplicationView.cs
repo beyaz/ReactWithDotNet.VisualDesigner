@@ -2051,7 +2051,13 @@ sealed class ApplicationView : Component<ApplicationState>
                 return "Select any component.";
             }
 
-            var result = await TsxExporter.CalculateElementTsxCode(state.ProjectId, CurrentVisualElement);
+            var componentEntity = await Store.TryGetComponent(state.ComponentId);
+            if (componentEntity is null)
+            {
+                return $"ComponentNotFound-id:{state.ComponentId}";
+            }
+            
+            var result = await TsxExporter.CalculateElementTsxCode(state.ProjectId, componentEntity.GetConfig(), CurrentVisualElement);
             if (result.HasError)
             {
                 return result.Error.Message;

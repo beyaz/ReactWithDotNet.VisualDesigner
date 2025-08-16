@@ -1,4 +1,5 @@
-﻿using ReactWithDotNet.VisualDesigner.Exporters;
+﻿using System.Collections.ObjectModel;
+using ReactWithDotNet.VisualDesigner.Exporters;
 
 namespace ReactWithDotNet.VisualDesigner.Test;
 
@@ -30,7 +31,7 @@ public sealed class ExporterTest
         {
             var project = new ProjectConfig();
 
-            var result = await TsxExporter.CalculateElementTreeTsxCodes(project, visualElementModel);
+            var result = await TsxExporter.CalculateElementTreeTsxCodes(project,new Dictionary<string, string>(), visualElementModel);
 
             result.Success.ShouldBeTrue();
 

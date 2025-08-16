@@ -41,11 +41,11 @@ static class ESLint
 
 static class TsxExporter
 {
-    public static async Task<Result<string>> CalculateElementTsxCode(int projectId, VisualElementModel visualElement)
+    public static async Task<Result<string>> CalculateElementTsxCode(int projectId, IReadOnlyDictionary<string, string> componentConfig, VisualElementModel visualElement)
     {
         var project = GetProjectConfig(projectId);
 
-        var result = await CalculateElementTreeTsxCodes(project, visualElement);
+        var result = await CalculateElementTreeTsxCodes(project,componentConfig, visualElement);
         if (result.HasError)
         {
             return result.Error;
@@ -125,7 +125,7 @@ static class TsxExporter
         return Success;
     }
 
-    internal static async Task<Result<IReadOnlyList<string>>> CalculateElementTreeTsxCodes(ProjectConfig project, VisualElementModel rootVisualElement)
+    internal static async Task<Result<IReadOnlyList<string>>> CalculateElementTreeTsxCodes(ProjectConfig project, IReadOnlyDictionary<string, string> componentConfig, VisualElementModel rootVisualElement)
     {
         ReactNode rootNode;
         {
@@ -138,7 +138,7 @@ static class TsxExporter
             rootNode = result.Value;
         }
 
-        rootNode = Plugin.AnalyzeNode(rootNode);
+        rootNode = Plugin.AnalyzeNode(rootNode,componentConfig);
 
         return await ConvertReactNodeModelToTsxCode(project, rootNode, null, 2);
     }
@@ -213,7 +213,7 @@ static class TsxExporter
 
             IReadOnlyList<string> linesToInject;
             {
-                var result = await CalculateElementTreeTsxCodes(project, rootVisualElement);
+                var result = await CalculateElementTreeTsxCodes(project,data.Value.Component.GetConfig(), rootVisualElement);
                 if (result.HasError)
                 {
                     return result.Error;
