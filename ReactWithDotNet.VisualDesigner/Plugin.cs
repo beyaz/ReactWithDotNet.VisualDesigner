@@ -81,7 +81,7 @@ static class Plugin
     {
         foreach (var analyzeFunc in from x in Components.AllTypes where x.analyzeReactNode is not null select x.analyzeReactNode)
         {
-            node = analyzeFunc(node);
+            node = analyzeFunc(node, componentConfig);
         }
 
         return node;
@@ -498,7 +498,7 @@ static class Plugin
 
     static class Components
     {
-        public static readonly IReadOnlyList<(Type type, Func<IReadOnlyList<(string name, string value)>> propSuggestions, Func<ReactNode, ReactNode> analyzeReactNode)> AllTypes =
+        public static readonly IReadOnlyList<(Type type, Func<IReadOnlyList<(string name, string value)>> propSuggestions, Func<ReactNode,IReadOnlyDictionary<string, string>, ReactNode> analyzeReactNode)> AllTypes =
         [
             // NextJsSupport
             (typeof(Image), Image.GetPropSuggestions, null),
@@ -1037,7 +1037,7 @@ static class Plugin
                 };
             }
             
-            public static ReactNode AnalyzeReactNode(ReactNode node)
+            public static ReactNode AnalyzeReactNode(ReactNode node, IReadOnlyDictionary<string, string> componentConfig)
             {
                 if (node.Tag == nameof(BCheckBox))
                 {
@@ -1093,7 +1093,7 @@ static class Plugin
                     node = AddContextProp(node);
                 }
 
-                return node with { Children = node.Children.Select(AnalyzeReactNode).ToImmutableList() };
+                return node with { Children = node.Children.Select(x=>AnalyzeReactNode(x, componentConfig)).ToImmutableList() };
             }
         }
 
@@ -1140,7 +1140,7 @@ static class Plugin
                 };
             }
             
-              public static ReactNode AnalyzeReactNode(ReactNode node)
+            public static ReactNode AnalyzeReactNode(ReactNode node, IReadOnlyDictionary<string, string> componentConfig)
             {
                 if (node.Tag == nameof(BButton))
                 {
@@ -1178,7 +1178,7 @@ static class Plugin
                     }
                 }
 
-                return node with { Children = node.Children.Select(AnalyzeReactNode).ToImmutableList() };
+                return node with { Children = node.Children.Select(x=>AnalyzeReactNode(x, componentConfig)).ToImmutableList() };
             }
         }
 
@@ -1244,7 +1244,7 @@ static class Plugin
                 };
             }
             
-            public static ReactNode AnalyzeReactNode(ReactNode node)
+            public static ReactNode AnalyzeReactNode(ReactNode node, IReadOnlyDictionary<string, string> componentConfig)
             {
                 if (node.Tag == nameof(BDigitalDatepicker))
                 {
@@ -1322,7 +1322,7 @@ static class Plugin
                     }
                 }
 
-                return node with { Children = node.Children.Select(AnalyzeReactNode).ToImmutableList() };
+                return node with { Children = node.Children.Select(x=>AnalyzeReactNode(x, componentConfig)).ToImmutableList() };
             }
         }
 
@@ -1466,7 +1466,7 @@ static class Plugin
             [JsTypeInfo(JsType.String)]
             public string value { get; set; }
 
-            public static ReactNode AnalyzeReactNode(ReactNode node)
+            public static ReactNode AnalyzeReactNode(ReactNode node, IReadOnlyDictionary<string, string> componentConfig)
             {
                 if (node.Tag == nameof(BInput))
                 {
@@ -1553,7 +1553,7 @@ static class Plugin
                     node = AddContextProp(node);
                 }
 
-                return node with { Children = node.Children.Select(AnalyzeReactNode).ToImmutableList() };
+                return node with { Children = node.Children.Select(x=>AnalyzeReactNode(x, componentConfig)).ToImmutableList() };
             }
 
             public static IReadOnlyList<(string name, string value)> GetPropSuggestions()
@@ -1615,7 +1615,7 @@ static class Plugin
             [JsTypeInfo(JsType.String)]
             public string value { get; set; }
 
-            public static ReactNode AnalyzeReactNode(ReactNode node)
+            public static ReactNode AnalyzeReactNode(ReactNode node, IReadOnlyDictionary<string, string> componentConfig)
             {
                 if (node.Tag == nameof(BComboBox))
                 {
@@ -1669,7 +1669,7 @@ static class Plugin
                     }
                 }
 
-                return node with { Children = node.Children.Select(AnalyzeReactNode).ToImmutableList() };
+                return node with { Children = node.Children.Select(x=>AnalyzeReactNode(x, componentConfig)).ToImmutableList() };
             }
 
             public static IReadOnlyList<(string name, string value)> GetPropSuggestions()
@@ -1785,7 +1785,7 @@ static class Plugin
                 };
             }
             
-            public static ReactNode AnalyzeReactNode(ReactNode node)
+            public static ReactNode AnalyzeReactNode(ReactNode node, IReadOnlyDictionary<string, string> componentConfig)
             {
                 if (node.Tag == nameof(BDigitalFilterView))
                 {
@@ -1828,7 +1828,7 @@ static class Plugin
 
                 }
 
-                return node with { Children = node.Children.Select(AnalyzeReactNode).ToImmutableList() };
+                return node with { Children = node.Children.Select(x=>AnalyzeReactNode(x, componentConfig)).ToImmutableList() };
             }
         }
         
@@ -1899,7 +1899,7 @@ static class Plugin
                 };
             }
             
-            public static ReactNode AnalyzeReactNode(ReactNode node)
+            public static ReactNode AnalyzeReactNode(ReactNode node, IReadOnlyDictionary<string, string> componentConfig)
             {
                 if (node.Tag == nameof(BInputMaskExtended))
                 {
@@ -1986,7 +1986,7 @@ static class Plugin
                     node = AddContextProp(node);
                 }
 
-                return node with { Children = node.Children.Select(AnalyzeReactNode).ToImmutableList() };
+                return node with { Children = node.Children.Select(x=>AnalyzeReactNode(x, componentConfig)).ToImmutableList() };
             }
         }
 
@@ -2014,7 +2014,7 @@ static class Plugin
                 ];
             }
 
-            public static ReactNode AnalyzeReactNode(ReactNode node)
+            public static ReactNode AnalyzeReactNode(ReactNode node, IReadOnlyDictionary<string, string> componentConfig)
             {
                 if (node.Tag == nameof(BDigitalMoneyInput))
                 {
@@ -2067,7 +2067,7 @@ static class Plugin
                     }
                 }
 
-                return node with { Children = node.Children.Select(AnalyzeReactNode).ToImmutableList() };
+                return node with { Children = node.Children.Select(x=>AnalyzeReactNode(x, componentConfig)).ToImmutableList() };
             }
             
             protected override Element render()
@@ -2123,7 +2123,7 @@ static class Plugin
                 ];
             }
 
-            public static ReactNode AnalyzeReactNode(ReactNode node)
+            public static ReactNode AnalyzeReactNode(ReactNode node, IReadOnlyDictionary<string, string> componentConfig)
             {
                 if (node.Tag == nameof(BChip))
                 {
@@ -2162,7 +2162,7 @@ static class Plugin
                     node = AddContextProp(node);
                 }
 
-                return node with { Children = node.Children.Select(AnalyzeReactNode).ToImmutableList() };
+                return node with { Children = node.Children.Select(x=>AnalyzeReactNode(x, componentConfig)).ToImmutableList() };
             }
             
             protected override Element render()
