@@ -6809,6 +6809,21 @@
                 A transform to apply to the gradient.
             </summary>
         </member>
+        <member name="P:ReactWithDotNet.clipPath.id">
+            <summary>
+                Unique identifier for referencing this clipPath
+            </summary>
+        </member>
+        <member name="P:ReactWithDotNet.clipPath.clipPathUnits">
+            <summary>
+                Coordinate system for the contents
+            </summary>
+        </member>
+        <member name="P:ReactWithDotNet.clipPath.transform">
+            <summary>
+                Apply transformations to the clipping path
+            </summary>
+        </member>
         <member name="P:ReactWithDotNet.clipPath.clipRule">
             <summary>
                 Specifies the fill rule for the clipping path.
@@ -6817,6 +6832,27 @@
         <member name="P:ReactWithDotNet.clipPath.clipBox">
             <summary>
                 Specifies the reference box for the clipping path.
+            </summary>
+        </member>
+        <member name="M:ReactWithDotNet.clipPath.Id(System.String)">
+            <summary>
+                id = <paramref name="value"/>
+            <br/>
+                Unique identifier for referencing this clipPath
+            </summary>
+        </member>
+        <member name="M:ReactWithDotNet.clipPath.ClipPathUnits(System.String)">
+            <summary>
+                clipPathUnits = <paramref name="value"/>
+            <br/>
+                Coordinate system for the contents
+            </summary>
+        </member>
+        <member name="M:ReactWithDotNet.clipPath.Transform(System.String)">
+            <summary>
+                transform = <paramref name="value"/>
+            <br/>
+                Apply transformations to the clipping path
             </summary>
         </member>
         <member name="M:ReactWithDotNet.clipPath.ClipRule(System.String)">
@@ -6853,6 +6889,11 @@
                 Stroke width
             </summary>
         </member>
+        <member name="P:ReactWithDotNet.path.transform">
+            <summary>
+                Apply transformations to the path
+            </summary>
+        </member>
         <member name="M:ReactWithDotNet.path.D(System.String)">
             <summary>
                 d = <paramref name="value"/>
@@ -6879,6 +6920,13 @@
                 strokeWidth = <paramref name="value"/>
             <br/>
                 Stroke width
+            </summary>
+        </member>
+        <member name="M:ReactWithDotNet.path.Transform(System.String)">
+            <summary>
+                transform = <paramref name="value"/>
+            <br/>
+                Apply transformations to the path
             </summary>
         </member>
         <member name="P:ReactWithDotNet.mask.height">
