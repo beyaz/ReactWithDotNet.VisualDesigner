@@ -720,7 +720,7 @@ static class TsxExporter
                 value = valueAsDouble.AsPixel();
             }
 
-            if (value?.Contains('.') is true)
+            if (value?.StartsWith("request.") is true || value?.StartsWith("context.") is true)
             {
                 value = TryClearStringValue(value);
             }
