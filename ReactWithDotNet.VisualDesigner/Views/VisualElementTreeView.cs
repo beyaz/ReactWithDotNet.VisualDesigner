@@ -45,6 +45,28 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
     [CustomEvent]
     public OnTreeItemMove TreeItemMove { get; init; }
 
+    protected override Task constructor()
+    {
+        List<string> collapsedNodesDefaultValue = [];
+        {
+            var childrenCount = Model?.Children?.Count ?? 0;
+            if (childrenCount > 0)
+            {
+                for (var i = 0; i < childrenCount; i++)
+                {
+                    collapsedNodesDefaultValue.Add($"0,{i}");
+                }
+            }
+        }
+
+        state = new State
+        {
+            CollapsedNodes = collapsedNodesDefaultValue
+        };
+        
+        return Task.CompletedTask;
+    }
+
     protected override Task OverrideStateFromPropsBeforeRender()
     {
         if (SelectedPath.HasValue())
