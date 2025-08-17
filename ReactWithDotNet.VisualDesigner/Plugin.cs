@@ -513,6 +513,7 @@ static class Plugin
             (typeof(TransactionWizardPage), TransactionWizardPage.GetPropSuggestions, null),
             (typeof(BRadioButtonGroup), BRadioButtonGroup.GetPropSuggestions, null),
             (typeof(BDigitalGroupView), BDigitalGroupView.GetPropSuggestions, null),
+            (typeof(BDigitalAccountView), BDigitalAccountView.GetPropSuggestions, BDigitalAccountView.AnalyzeReactNode),
             (typeof(BDigitalBox), BDigitalBox.GetPropSuggestions, null),
             (typeof(BAlert), BAlert.GetPropSuggestions, null),
             (typeof(BIcon), BIcon.GetPropSuggestions, null),
@@ -873,6 +874,8 @@ static class Plugin
                 } + Id(id) + OnClick(onMouseClick);
             }
         }
+        
+        
 
         sealed class TransactionWizardPage : PluginComponentBase
         {
@@ -1444,6 +1447,111 @@ static class Plugin
             }
         }
 
+        sealed class BDigitalAccountView : PluginComponentBase
+        {
+            [JsTypeInfo(JsType.Array)]
+            public string accounts { get; set; }
+            
+            [JsTypeInfo(JsType.String)]
+            public string title { get; set; }
+            
+            [JsTypeInfo(JsType.Number)]
+            public string selectedAccountIndex { get; set; }
+            
+            [JsTypeInfo(JsType.Function)]
+            public string onSelectedAccountIndexChange { get; set; }
+
+            public static IReadOnlyList<(string name, string value)> GetPropSuggestions()
+            {
+                return
+                [
+              
+                ];
+            }
+
+            public static ReactNode AnalyzeReactNode(ReactNode node, IReadOnlyDictionary<string, string> componentConfig)
+            {
+                if (node.Tag == nameof(BDigitalAccountView))
+                {
+                    var selectedAccountIndexProp = node.Properties.FirstOrDefault(x => x.Name == nameof(selectedAccountIndex));
+                    var onSelectedAccountIndexChangeProp = node.Properties.FirstOrDefault(x => x.Name == nameof(onSelectedAccountIndexChange));
+
+                    if (selectedAccountIndexProp is not null)
+                    {
+                        var properties = node.Properties;
+
+                        List<string> lines =
+                        [
+                            "(selectedAccountIndex: number) =>",
+                            "{",
+                            $"  updateRequest(r => {{ r.{selectedAccountIndexProp.Value.RemoveFromStart("request.")} = selectedAccountIndex; }});"
+                        ];
+
+                        if (onSelectedAccountIndexChangeProp is not null)
+                        {
+                            if (IsAlphaNumeric(onSelectedAccountIndexChangeProp.Value))
+                            {
+                                lines.Add(onSelectedAccountIndexChangeProp.Value + "(selectedAccountIndex);");
+                            }
+                            else
+                            {
+                                lines.Add(onSelectedAccountIndexChangeProp.Value);
+                            }
+                        }
+
+                        lines.Add("}");
+
+                        if (onSelectedAccountIndexChangeProp is not null)
+                        {
+                            onSelectedAccountIndexChangeProp = onSelectedAccountIndexChangeProp with
+                            {
+                                Value = string.Join(Environment.NewLine, lines)
+                            };
+
+                            properties = properties.SetItem(properties.FindIndex(x => x.Name == onSelectedAccountIndexChangeProp.Name), onSelectedAccountIndexChangeProp);
+                        }
+                        else
+                        {
+                            properties = properties.Add(new ReactProperty
+                            {
+                                Name  = nameof(onSelectedAccountIndexChange),
+                                Value = string.Join(Environment.NewLine, lines)
+                            });
+                        }
+
+                        node = node with { Properties = properties };
+                    }
+                    
+                    node = AddContextProp(node);
+                }
+
+                return node with { Children = node.Children.Select(x=>AnalyzeReactNode(x, componentConfig)).ToImmutableList() };
+            }
+            
+            protected override Element render()
+            {
+                var textContent = string.Empty;
+                if (title.HasValue())
+                {
+                    textContent = title;
+                }
+
+                if (accounts.HasValue())
+                {
+                    textContent += " | " + accounts;
+                }
+
+                return new div(PaddingTop(16), PaddingBottom(8))
+                {
+                    Id(id), OnClick(onMouseClick),
+                    new FlexRow(AlignItemsCenter, PaddingLeftRight(16), Border(1, solid, "#c0c0c0"), BorderRadius(10), Height(58), JustifyContentSpaceBetween)
+                    {
+                        new div(Color(rgba(0, 0, 0, 0.54)), FontSize16, FontWeight400) { textContent }
+                    }
+                };
+            }
+        }
+        
         sealed class BInput : PluginComponentBase
         {
             [JsTypeInfo(JsType.Boolean)]
