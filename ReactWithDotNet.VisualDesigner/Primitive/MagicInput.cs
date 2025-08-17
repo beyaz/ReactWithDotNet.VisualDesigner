@@ -281,12 +281,32 @@ sealed class MagicInput : Component<MagicInput.State>
         {
             ShowSuggestions = true,
             SelectedSuggestionOffset = null,
-            FilteredSuggestions = Suggestions.Where(x => x.Replace(" ", string.Empty).Contains((state.Value + string.Empty).Replace(" ", string.Empty), StringComparison.OrdinalIgnoreCase))
-                .Take(5).ToList()
+            FilteredSuggestions = Suggestions.OrderByDescending(x => hasMatch(x,state.Value)).Take(5).ToList()
         };
 
         return Task.CompletedTask;
+        
+        static int hasMatch(string source, string searchTerm)
+        {
+            if (string.IsNullOrWhiteSpace(source) || string.IsNullOrWhiteSpace(searchTerm))
+            {
+                return 1;
+            }
+
+            var count = 0;
+            foreach (var term in searchTerm.Split(' ', StringSplitOptions.RemoveEmptyEntries))
+            {
+                if (source.Contains(term, StringComparison.OrdinalIgnoreCase))
+                {
+                    count++;
+                }
+            }
+
+            return count;
+        }
     }
+
+    
 
     Element ViewSuggestions()
     {

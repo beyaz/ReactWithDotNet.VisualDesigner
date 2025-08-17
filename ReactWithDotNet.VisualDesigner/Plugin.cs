@@ -1002,6 +1002,9 @@ static class Plugin
 
         sealed class BCheckBox : PluginComponentBase
         {
+            [JsTypeInfo(JsType.String)]
+            public string id { get; set; }
+            
             [JsTypeInfo(JsType.Boolean)]
             public string @checked { get; set; }
 
@@ -1055,11 +1058,17 @@ static class Plugin
                     {
                         var properties = node.Properties;
 
+                        var requestAssignmentLine = string.Empty;
+                        if (checkedProp.Value.StartsWith("request.", StringComparison.OrdinalIgnoreCase))
+                        {
+                            requestAssignmentLine = $"  updateRequest(r => {{ r.{checkedProp.Value.RemoveFromStart("request.")} = checked; }});";
+                        }
+                        
                         List<string> lines =
                         [
                             "(e: any, checked: boolean) =>",
                             "{",
-                            $"  updateRequest(r => {{ r.{checkedProp.Value.RemoveFromStart("request.")} = checked; }});"
+                            requestAssignmentLine
                         ];
 
                         if (onCheckProp is not null)
