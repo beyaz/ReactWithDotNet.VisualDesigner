@@ -206,6 +206,11 @@ static class Plugin
             List<string> returnList = [];
             
             List<(string name, string value)> distinctSuggestions = [];
+            
+            foreach (var (name, value) in Components.GetPropSuggestions(scope.TagName))
+            {
+                addSuggestion(name, value);
+            }
 
             foreach (var prop in from m in Components.GetAllTypesMetadata() where m.TagName == scope.TagName from p in m.Props select p)
             {
@@ -325,12 +330,7 @@ static class Plugin
                 }
                 addSuggestion(Design.ItemsSource,  item);
             }
-
-            foreach (var (name, value) in Components.GetPropSuggestions(scope.TagName))
-            {
-                addSuggestion(name, value);
-            }
-
+            
             returnList.InsertRange(0, distinctSuggestions.Select(x => x.name + ": " + x.value));
             
             return returnList;
@@ -828,7 +828,10 @@ static class Plugin
                 return
                 [
                     (nameof(variant), "'standard'"),
-                    (nameof(severity), "'info'")
+                    (nameof(severity), "'success'"),
+                    (nameof(severity), "'info'"),
+                    (nameof(severity), "'warning'"),
+                    (nameof(severity), "'error'")
                 ];
             }
 
@@ -1135,8 +1138,13 @@ static class Plugin
 
             protected override Element render()
             {
-                return new FlexRowCentered(WidthFitContent, Background("Blue"), BorderRadius(10), Padding(5, 15), BorderColor(rgb(230, 245, 243)), Color(White))
+                return new FlexRowCentered(Background(rgba(22, 160, 133, 1)), BorderRadius(10), PaddingY(8),PaddingX(64), MinWidth(160))
                 {
+                    FontSize(15),
+                    LineHeight26,
+                    LetterSpacing("0.46px"),
+                    Color(rgba(248, 249, 250, 1)),
+                    
                     new div { text ?? "?" },
                     
                     Id(id),

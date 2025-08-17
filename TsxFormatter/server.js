@@ -4,7 +4,7 @@ const prettier = require('prettier');
 const app = express();
 const port = 5009;
 
-app.use(express.json());
+app.use(express.json({ limit: '4mb' }));
 
 app.post('/format', async (req, res) => 
 {

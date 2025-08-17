@@ -29,7 +29,16 @@ static class Prettier
 
         var responseContent = await httpResponseMessage.Content.ReadAsStringAsync();
 
-        var response = JsonSerializer.Deserialize<Response>(responseContent, options);
+        Response response;
+
+        try
+        {
+            response = JsonSerializer.Deserialize<Response>(responseContent, options);
+        }
+        catch (Exception exception)
+        {
+            return exception;
+        }
 
         if (response.error is not null)
         {
