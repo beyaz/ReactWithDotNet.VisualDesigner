@@ -255,6 +255,7 @@ static class CecilHelper
 
     static bool IsCollection(TypeReference typeReference)
     {
-        return typeReference.FullName.StartsWith("System.Collections.Generic.List`1", StringComparison.OrdinalIgnoreCase);
+        return typeReference.FullName.StartsWith("System.Collections.Generic.List`1", StringComparison.OrdinalIgnoreCase)||
+               typeReference.FullName.StartsWith("System.Collections.Generic.IReadOnlyList`1", StringComparison.OrdinalIgnoreCase);;
     }
 }
