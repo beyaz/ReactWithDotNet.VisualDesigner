@@ -1521,8 +1521,6 @@ static class Plugin
 
                         node = node with { Properties = properties };
                     }
-                    
-                    node = AddContextProp(node);
                 }
 
                 return node with { Children = node.Children.Select(x=>AnalyzeReactNode(x, componentConfig)).ToImmutableList() };
@@ -1541,12 +1539,30 @@ static class Plugin
                     textContent += " | " + accounts;
                 }
 
-                return new div(PaddingTop(16), PaddingBottom(8))
+                return new div
                 {
                     Id(id), OnClick(onMouseClick),
-                    new FlexRow(AlignItemsCenter, PaddingLeftRight(16), Border(1, solid, "#c0c0c0"), BorderRadius(10), Height(58), JustifyContentSpaceBetween)
+                    new FlexRow(AlignItemsCenter, Padding(16), Border(1, solid, "#c0c0c0"), BorderRadius(10), Height(83), JustifyContentSpaceBetween)
                     {
-                        new div(Color(rgba(0, 0, 0, 0.54)), FontSize16, FontWeight400) { textContent }
+                        new div(Color(rgba(0, 0, 0, 0.54)), FontSize16, FontWeight400) { textContent },
+                        
+                        new FlexRow(AlignItemsCenter, TextAlignRight, Gap(8))
+                        {
+                            new FlexColumn
+                            {
+                                new div(FontWeight700){"73.148,00 TL"},
+                                new div(Color("rgb(0 0 0 / 60%)")){"Cari Hesap"}
+                            },
+                            
+                            new svg(ViewBox(0, 0, 24, 24), svg.Width(24), svg.Height(24), Color(rgb(117, 117, 117)))
+                            {
+                                new path
+                                {
+                                    d    = "M7 10l5 5 5-5z",
+                                    fill = "#757575"
+                                }
+                            }
+                        }
                     }
                 };
             }
