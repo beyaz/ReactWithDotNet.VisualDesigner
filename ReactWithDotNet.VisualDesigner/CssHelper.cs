@@ -1475,6 +1475,7 @@ public static class CssHelper
             case "flex-shrink":
             case "grid-template-columns":
             case "grid-template-rows":
+            case "letter-spacing":
             {
                 return asDictionary((name, value));
             }

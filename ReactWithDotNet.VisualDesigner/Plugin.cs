@@ -699,6 +699,7 @@ static class Plugin
 
             protected override Element render()
             {
+                
                 return new FlexColumn(Background(White), BorderRadius(10), Border(1, solid, "#E0E0E0"), Padding(24), Id(id), OnClick(onMouseClick))
                 {
                     children =
@@ -862,7 +863,7 @@ static class Plugin
 
             protected override Element render()
             {
-                return new FlexColumn(WidthFull, Padding(16), Background("#fafafa"))
+                return new FlexColumn(FontFamily("Roboto"), WidthFull, Padding(16), Background("#fafafa"))
                 {
                     children =
                     {

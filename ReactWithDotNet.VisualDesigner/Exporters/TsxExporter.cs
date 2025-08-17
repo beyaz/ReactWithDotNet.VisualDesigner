@@ -4,6 +4,7 @@ using System.IO;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
+using Org.BouncyCastle.Asn1;
 
 namespace ReactWithDotNet.VisualDesigner.Exporters;
 
@@ -715,6 +716,11 @@ static class TsxExporter
 
             var value = styleAttribute.Value;
 
+            if (name == nameof(Style.fontWeight))
+            {
+                value = tryGetFontWeight(value);
+            }
+
             if (double.TryParse(value, out var valueAsDouble))
             {
                 value = valueAsDouble.AsPixel();
@@ -767,6 +773,28 @@ static class TsxExporter
             }
 
             return camelCase.ToString();
+        }
+        
+        static string tryGetFontWeight(string weight)
+        {
+            if (!int.TryParse(weight, out var numericWeight))
+            {
+                return weight;
+            }
+
+            return numericWeight switch
+            {
+                100 => "thin",
+                200 => "extra-light",
+                300 => "light",
+                400 => "normal",
+                500 => "medium",
+                600 => "semi-bold",
+                700 => "bold",
+                800 => "extra-bold",
+                900 => "black",
+                _ => weight
+            };
         }
     }
 
