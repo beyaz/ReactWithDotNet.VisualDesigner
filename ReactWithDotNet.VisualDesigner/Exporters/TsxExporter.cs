@@ -410,11 +410,6 @@ static class TsxExporter
                     continue;
                 }
 
-                if (propertyValue == "false")
-                {
-                    continue;
-                }
-
                 if (propertyValue == "true")
                 {
                     propsAsText.Add($"{propertyName}");

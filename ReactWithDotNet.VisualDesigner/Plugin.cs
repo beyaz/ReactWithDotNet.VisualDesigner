@@ -1371,42 +1371,49 @@ static class Plugin
 
         sealed class BDigitalDialog : PluginComponentBase
         {
-            [JsTypeInfo(JsType.Array)]
-            public string actions { get; set; }
-            
-            [JsTypeInfo(JsType.String)]
-            public string content { get; set; }
-
-            [JsTypeInfo(JsType.Boolean)]
-            public string open { get; set; }
-
-            
             [JsTypeInfo(JsType.String)]
             public string title { get; set; }
+            
+            [JsTypeInfo(JsType.Boolean)]
+            public string fullScreen { get; set; }
+            
+            [JsTypeInfo(JsType.Boolean)]
+            public string open { get; set; }
+            
+            [JsTypeInfo(JsType.String)]
+            public string type { get; set; }
+            
+            [JsTypeInfo(JsType.Boolean)]
+            public string displayCloseIcon { get; set; }
+            
+            [JsTypeInfo(JsType.Boolean)]
+            public string displayOkButton { get; set; }
+           
 
             public static IReadOnlyList<(string name, string value)> GetPropSuggestions()
             {
                 return
                 [
+                    (nameof(type), "error"),
+                    (nameof(type), "warning"),
+                    (nameof(type), "info"),
+                    (nameof(type), "success")
                 ];
             }
 
             protected override Element render()
             {
-                if (actions.HasNoValue())
-                {
-                    return null;
-                }
-
-                var actionList = JsonConvert.DeserializeObject<ItemModel[]>(actions);
-
                 return new div(Background(rgba(0, 0, 0, 0.5)), Padding(24), BorderRadius(8))
                 {
-                    new div(Background("white"), BorderRadius(8), Padding(16), FontFamily("Roboto, sans-serif"))
+                    Id(id), OnClick(onMouseClick),
+                    new div(Background("white"), BorderRadius(8), Padding(16))
                     {
+                        // TOP BAR
                         new FlexRow(JustifyContentSpaceBetween, AlignItemsCenter, PaddingY(16))
                         {
-                            new div(FontSize20) { title },
+                            new div(FontSize20, FontWeight400, LineHeight("160%"), LetterSpacing("0.15px")) { title },
+                            
+                            displayCloseIcon == "false" || displayOkButton == "false" ? null :
                             new svg(ViewBox(0, 0, 24, 24), svg.Width(24), svg.Height(24))
                             {
                                 new path
@@ -1416,26 +1423,14 @@ static class Plugin
                             }
                         },
 
-                        new Alert
-                        {
-                            content
-                        },
+                        
                         SpaceY(12),
-                        new FlexRow(JustifyContentFlexEnd, Color(rgb(22, 160, 133)), FontWeightBold, FontSize14, Gap(24))
-                        {
-                            actionList.Select(x => new div
-                            {
-                                x.label
-                            })
-                        }
+                        
+                        children
                     }
                 };
             }
 
-            class ItemModel
-            {
-                public string label { get; set; }
-            }
         }
 
        
