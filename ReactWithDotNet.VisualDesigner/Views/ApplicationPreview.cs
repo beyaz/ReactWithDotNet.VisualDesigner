@@ -773,6 +773,11 @@ sealed class ApplicationPreview : Component
                         return data;
                     }
 
+                    if (propertyInfo.PropertyType.BaseType == typeof(MulticastDelegate))
+                    {
+                        return data with { IsProcessed = true };
+                    }
+
                     if (isUnknownValue(propValue))
                     {
                         return data with { IsProcessed = true };
