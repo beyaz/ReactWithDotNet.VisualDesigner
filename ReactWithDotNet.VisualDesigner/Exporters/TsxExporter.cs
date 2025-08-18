@@ -45,7 +45,7 @@ static class TsxExporter
     {
         var project = GetProjectConfig(projectId);
 
-        var result = await CalculateElementTreeTsxCodes(project,componentConfig, visualElement);
+        var result = await CalculateElementTreeTsxCodes(project, componentConfig, visualElement);
         if (result.HasError)
         {
             return result.Error;
@@ -78,7 +78,7 @@ static class TsxExporter
 
             fileContentAtDisk = result.Value;
         }
-        
+
         if (IsEqualsIgnoreWhitespace(fileContentAtDisk, fileContent))
         {
             return new ExportOutput();
@@ -93,10 +93,7 @@ static class TsxExporter
             }
         }
 
-        
-
         return new ExportOutput { HasChange = true };
-
     }
 
     public static async Task<Result> ExportAll(int projectId)
@@ -138,7 +135,7 @@ static class TsxExporter
             rootNode = result.Value;
         }
 
-        rootNode = Plugin.AnalyzeNode(rootNode,componentConfig);
+        rootNode = Plugin.AnalyzeNode(rootNode, componentConfig);
 
         return await ConvertReactNodeModelToTsxCode(project, rootNode, null, 2);
     }
@@ -213,7 +210,7 @@ static class TsxExporter
 
             IReadOnlyList<string> linesToInject;
             {
-                var result = await CalculateElementTreeTsxCodes(project,data.Value.Component.GetConfig(), rootVisualElement);
+                var result = await CalculateElementTreeTsxCodes(project, data.Value.Component.GetConfig(), rootVisualElement);
                 if (result.HasError)
                 {
                     return result.Error;
@@ -306,7 +303,7 @@ static class TsxExporter
                 return lines;
             }
         }
-        
+
         // show hide
         {
             var showIf = node.Properties.FirstOrDefault(x => x.Name is Design.ShowIf);
@@ -371,8 +368,6 @@ static class TsxExporter
                 return lines;
             }
         }
-        
-       
 
         {
             var elementType = node.HtmlElementType;
@@ -773,7 +768,7 @@ static class TsxExporter
 
             return camelCase.ToString();
         }
-        
+
         static string tryGetFontWeight(string weight)
         {
             if (!int.TryParse(weight, out var numericWeight))
@@ -792,7 +787,7 @@ static class TsxExporter
                 700 => "bold",
                 800 => "extra-bold",
                 900 => "black",
-                _ => weight
+                _   => weight
             };
         }
     }
