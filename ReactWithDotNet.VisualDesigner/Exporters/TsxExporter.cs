@@ -4,7 +4,6 @@ using System.IO;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
-using Org.BouncyCastle.Asn1;
 
 namespace ReactWithDotNet.VisualDesigner.Exporters;
 
@@ -271,68 +270,71 @@ static class TsxExporter
             return new ArgumentNullException(nameof(nodeTag));
         }
 
-        var showIf = node.Properties.FirstOrDefault(x => x.Name is Design.ShowIf);
-        var hideIf = node.Properties.FirstOrDefault(x => x.Name is Design.HideIf);
-
-        if (showIf is not null)
+        // show hide
         {
-            node = node with { Properties = node.Properties.Remove(showIf) };
+            var showIf = node.Properties.FirstOrDefault(x => x.Name is Design.ShowIf);
+            var hideIf = node.Properties.FirstOrDefault(x => x.Name is Design.HideIf);
 
-            List<string> lines =
-            [
-                $"{indent(indentLevel)}{{{ClearConnectedValue(showIf.Value)} && ("
-            ];
-
-            indentLevel++;
-
-            IReadOnlyList<string> innerLines;
+            if (showIf is not null)
             {
-                var result = await ConvertReactNodeModelToTsxCode(project, node, parentNode, indentLevel);
-                if (result.HasError)
+                node = node with { Properties = node.Properties.Remove(showIf) };
+
+                List<string> lines =
+                [
+                    $"{indent(indentLevel)}{{{ClearConnectedValue(showIf.Value)} && ("
+                ];
+
+                indentLevel++;
+
+                IReadOnlyList<string> innerLines;
                 {
-                    return result.Error;
+                    var result = await ConvertReactNodeModelToTsxCode(project, node, parentNode, indentLevel);
+                    if (result.HasError)
+                    {
+                        return result.Error;
+                    }
+
+                    innerLines = result.Value;
                 }
 
-                innerLines = result.Value;
+                lines.AddRange(innerLines);
+
+                indentLevel--;
+                lines.Add($"{indent(indentLevel)})}}");
+
+                return lines;
             }
 
-            lines.AddRange(innerLines);
-
-            indentLevel--;
-            lines.Add($"{indent(indentLevel)})}}");
-
-            return lines;
-        }
-
-        if (hideIf is not null)
-        {
-            node = node with { Properties = node.Properties.Remove(hideIf) };
-
-            List<string> lines =
-            [
-                $"{indent(indentLevel)}{{!{ClearConnectedValue(hideIf.Value)} && ("
-            ];
-            indentLevel++;
-
-            IReadOnlyList<string> innerLines;
+            if (hideIf is not null)
             {
-                var result = await ConvertReactNodeModelToTsxCode(project, node, parentNode, indentLevel);
-                if (result.HasError)
+                node = node with { Properties = node.Properties.Remove(hideIf) };
+
+                List<string> lines =
+                [
+                    $"{indent(indentLevel)}{{!{ClearConnectedValue(hideIf.Value)} && ("
+                ];
+                indentLevel++;
+
+                IReadOnlyList<string> innerLines;
                 {
-                    return result.Error;
+                    var result = await ConvertReactNodeModelToTsxCode(project, node, parentNode, indentLevel);
+                    if (result.HasError)
+                    {
+                        return result.Error;
+                    }
+
+                    innerLines = result.Value;
                 }
 
-                innerLines = result.Value;
+                lines.AddRange(innerLines);
+
+                indentLevel--;
+                lines.Add($"{indent(indentLevel)})}}");
+
+                return lines;
             }
-
-            lines.AddRange(innerLines);
-
-            indentLevel--;
-            lines.Add($"{indent(indentLevel)})}}");
-
-            return lines;
         }
-
+        
         // is mapping
         {
             List<string> lines = [];
