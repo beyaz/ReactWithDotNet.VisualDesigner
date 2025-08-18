@@ -315,7 +315,7 @@ static class TsxExporter
 
                 List<string> lines =
                 [
-                    $"{indent(indentLevel)}{{{showIf.Value} && ("
+                    $"{indent(indentLevel)}{showIf.Value} && ("
                 ];
 
                 indentLevel++;
@@ -334,7 +334,7 @@ static class TsxExporter
                 lines.AddRange(innerLines);
 
                 indentLevel--;
-                lines.Add($"{indent(indentLevel)})}}");
+                lines.Add($"{indent(indentLevel)})");
 
                 return lines;
             }
@@ -345,7 +345,7 @@ static class TsxExporter
 
                 List<string> lines =
                 [
-                    $"{indent(indentLevel)}{{!{hideIf.Value} && ("
+                    $"{indent(indentLevel)}!{hideIf.Value} && ("
                 ];
                 indentLevel++;
 
@@ -363,7 +363,7 @@ static class TsxExporter
                 lines.AddRange(innerLines);
 
                 indentLevel--;
-                lines.Add($"{indent(indentLevel)})}}");
+                lines.Add($"{indent(indentLevel)})");
 
                 return lines;
             }
