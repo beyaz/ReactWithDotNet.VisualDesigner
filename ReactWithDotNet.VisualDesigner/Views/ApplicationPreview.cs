@@ -32,7 +32,7 @@ sealed class ApplicationPreview : Component
 
     protected override async Task<Element> renderAsync()
     {
-        var userName = Environment.UserName; // future: get userName from cookie or url
+        var userName = EnvironmentUserName; // future: get userName from cookie or url
 
         var appState = GetUserLastState(userName);
 

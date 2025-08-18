@@ -111,7 +111,7 @@ static class TsxExporter
             {
                 ComponentId = component.Id,
                 ProjectId   = component.ProjectId,
-                UserName    = Environment.UserName
+                UserName    = EnvironmentUserName
             });
             if (result.HasError)
             {

@@ -364,7 +364,7 @@ static class ApplicationLogic
 
     public static async Task<Maybe<string>> GetUserLastAccessedProjectLocalWorkspacePath()
     {
-        foreach (var user in from user in await Store.GetUserByUserName(Environment.UserName) orderby user.LastAccessTime descending select user)
+        foreach (var user in from user in await Store.GetUserByUserName(EnvironmentUserName) orderby user.LastAccessTime descending select user)
         {
             return user.LocalWorkspacePath;
         }

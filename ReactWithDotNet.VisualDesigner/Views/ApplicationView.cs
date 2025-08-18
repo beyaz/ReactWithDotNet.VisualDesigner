@@ -28,7 +28,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
     protected override async Task constructor()
     {
-        var userName = Environment.UserName; // future: get userName from cookie or url
+        var userName = EnvironmentUserName; // future: get userName from cookie or url
 
         Client.ListenEvent("Change_VisualElementTreeItemPath", treeItemPath =>
         {
@@ -361,7 +361,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
     async Task ChangeSelectedProject(int projectId)
     {
-        var userName = Environment.UserName; // future: get userName from cookie or url
+        var userName = EnvironmentUserName; // future: get userName from cookie or url
 
         // try take from db cache
         {
