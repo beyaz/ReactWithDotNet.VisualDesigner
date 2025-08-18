@@ -9877,6 +9877,76 @@
                 The system prop that allows defining system overrides as well as additional CSS styles.
             </summary>
         </member>
+        <member name="P:ReactWithDotNet.ThirdPartyLibraries.MUI.Material.Button.color">
+            <summary>
+            The color of the component.
+            </summary>
+        </member>
+        <member name="P:ReactWithDotNet.ThirdPartyLibraries.MUI.Material.Button.size">
+            <summary>
+            The size of the component. 'small' | 'medium' | 'large'
+            </summary>
+        </member>
+        <member name="P:ReactWithDotNet.ThirdPartyLibraries.MUI.Material.Button.variant">
+            <summary>
+            The variant to use. 'text' | 'outlined' | 'contained'
+            </summary>
+        </member>
+        <member name="P:ReactWithDotNet.ThirdPartyLibraries.MUI.Material.Button.disabled">
+            <summary>
+            If true, the component is disabled.
+            </summary>
+        </member>
+        <member name="P:ReactWithDotNet.ThirdPartyLibraries.MUI.Material.Button.disableElevation">
+            <summary>
+            If true, the 3D shadow/elevation is disabled.
+            </summary>
+        </member>
+        <member name="P:ReactWithDotNet.ThirdPartyLibraries.MUI.Material.Button.disableFocusRipple">
+            <summary>
+            If true, the ripple effect on focus is disabled.
+            </summary>
+        </member>
+        <member name="P:ReactWithDotNet.ThirdPartyLibraries.MUI.Material.Button.fullWidth">
+            <summary>
+            If true, the button will take up the full width of its container.
+            </summary>
+        </member>
+        <member name="P:ReactWithDotNet.ThirdPartyLibraries.MUI.Material.Button.href">
+            <summary>
+            The URL to link to when the button is clicked.
+            </summary>
+        </member>
+        <member name="P:ReactWithDotNet.ThirdPartyLibraries.MUI.Material.Button.startIcon">
+            <summary>
+            Element placed before the children.
+            </summary>
+        </member>
+        <member name="P:ReactWithDotNet.ThirdPartyLibraries.MUI.Material.Button.endIcon">
+            <summary>
+            Element placed after the children.
+            </summary>
+        </member>
+        <member name="P:ReactWithDotNet.ThirdPartyLibraries.MUI.Material.Button.classes">
+            <summary>
+            Override or extend the styles applied to the component.
+            </summary>
+        </member>
+        <member name="P:ReactWithDotNet.ThirdPartyLibraries.MUI.Material.Button.sx">
+            <summary>
+            The system prop that allows defining system overrides as well as additional CSS styles.
+            </summary>
+        </member>
+        <member name="P:ReactWithDotNet.ThirdPartyLibraries.MUI.Material.Button.id">
+            <summary>
+            The id of the component.
+            </summary>
+        </member>
+        <member name="P:ReactWithDotNet.ThirdPartyLibraries.MUI.Material.Button.onClick">
+            <summary>
+            Callback fired when the button is clicked.
+            </summary>
+        </member>
         <member name="P:ReactWithDotNet.ThirdPartyLibraries.MUI.Material.ButtonBase.centerRipple">
             <summary>
                 If `true`, the ripples are centered.
@@ -10489,15 +10559,6 @@
             </summary>
         </member>
         <member name="P:ReactWithDotNet.ThirdPartyLibraries.MUI.Material.IconButton.loading">
-            <summary>
-                If `true`, the loading indicator is visible and the button is disabled.
-                <br/>
-                If `true | false`, the loading wrapper is always rendered before the children to prevent [Google Translation Crash](https://github.com/mui/material-ui/issues/27853).
-                <br/>
-                @default null
-            </summary>
-        </member>
-        <member name="M:ReactWithDotNet.ThirdPartyLibraries.MUI.Material.IconButton.Loading(System.Object)">
             <summary>
                 If `true`, the loading indicator is visible and the button is disabled.
                 <br/>
@@ -11574,6 +11635,92 @@
         <member name="M:ReactWithDotNet.ThirdPartyLibraries.MUI.Material.SwitchBase.Value(System.String)">
             <summary>
                 The value of the component. The DOM API casts this to a string.
+            </summary>
+        </member>
+        <member name="P:ReactWithDotNet.ThirdPartyLibraries.MUI.Material.Tab.label">
+            <summary>
+            The label element of the tab.
+            </summary>
+        </member>
+        <member name="P:ReactWithDotNet.ThirdPartyLibraries.MUI.Material.Tab.value">
+            <summary>
+            The value of the Tab. 
+            It will be used to match against the value passed to the Tabs component.
+            </summary>
+        </member>
+        <member name="P:ReactWithDotNet.ThirdPartyLibraries.MUI.Material.Tab.disabled">
+            <summary>
+            If true, the tab will be disabled.
+            </summary>
+        </member>
+        <member name="P:ReactWithDotNet.ThirdPartyLibraries.MUI.Material.Tab.classes">
+            <summary>
+            Override or extend the styles applied to the component.
+            </summary>
+        </member>
+        <member name="P:ReactWithDotNet.ThirdPartyLibraries.MUI.Material.Tab.icon">
+            <summary>
+            The icon to display.
+            </summary>
+        </member>
+        <member name="P:ReactWithDotNet.ThirdPartyLibraries.MUI.Material.Tab.iconPosition">
+            <summary>
+            The position of the icon.
+            'top' | 'bottom' | 'start' | 'end'
+            </summary>
+        </member>
+        <member name="P:ReactWithDotNet.ThirdPartyLibraries.MUI.Material.Tab.sx">
+            <summary>
+            The system prop that allows defining system overrides as well as additional CSS styles.
+            </summary>
+        </member>
+        <member name="P:ReactWithDotNet.ThirdPartyLibraries.MUI.Material.Tab.id">
+            <summary>
+            The id of the component.
+            </summary>
+        </member>
+        <member name="P:ReactWithDotNet.ThirdPartyLibraries.MUI.Material.Tabs.value">
+            <summary>
+            The value of the currently selected Tab. 
+            If you don’t want any selected Tab, set this to false.
+            </summary>
+        </member>
+        <member name="P:ReactWithDotNet.ThirdPartyLibraries.MUI.Material.Tabs.onChange">
+            <summary>
+            Callback fired when the value changes.
+            </summary>
+        </member>
+        <member name="P:ReactWithDotNet.ThirdPartyLibraries.MUI.Material.Tabs.orientation">
+            <summary>
+            Determines the orientation of the Tabs.
+            'horizontal' | 'vertical'
+            </summary>
+        </member>
+        <member name="P:ReactWithDotNet.ThirdPartyLibraries.MUI.Material.Tabs.textColor">
+            <summary>
+            Determines the order of the indicator.
+            'primary' | 'secondary'
+            </summary>
+        </member>
+        <member name="P:ReactWithDotNet.ThirdPartyLibraries.MUI.Material.Tabs.variant">
+            <summary>
+            The variant to use.
+            'standard' | 'scrollable' | 'fullWidth'
+            </summary>
+        </member>
+        <member name="P:ReactWithDotNet.ThirdPartyLibraries.MUI.Material.Tabs.classes">
+            <summary>
+            Override or extend the styles applied to the component.
+            </summary>
+        </member>
+        <member name="P:ReactWithDotNet.ThirdPartyLibraries.MUI.Material.Tabs.sx">
+            <summary>
+            The system prop that allows defining system overrides as well as additional CSS styles.
+            </summary>
+        </member>
+        <member name="P:ReactWithDotNet.ThirdPartyLibraries.MUI.Material.Tabs.id">
+            <summary>
+            The id of the component.
             </summary>
         </member>
         <member name="P:ReactWithDotNet.ThirdPartyLibraries.MUI.Material.TextareaAutosize.maxRows">
