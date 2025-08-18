@@ -315,7 +315,7 @@ static class TsxExporter
 
                 List<string> lines =
                 [
-                    $"{indent(indentLevel)}{{{ClearConnectedValue(showIf.Value)} && ("
+                    $"{indent(indentLevel)}{{{showIf.Value} && ("
                 ];
 
                 indentLevel++;
@@ -345,7 +345,7 @@ static class TsxExporter
 
                 List<string> lines =
                 [
-                    $"{indent(indentLevel)}{{!{ClearConnectedValue(hideIf.Value)} && ("
+                    $"{indent(indentLevel)}{{!{hideIf.Value} && ("
                 ];
                 indentLevel++;
 
