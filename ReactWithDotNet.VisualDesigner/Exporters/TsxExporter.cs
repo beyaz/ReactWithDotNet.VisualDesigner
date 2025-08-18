@@ -270,6 +270,43 @@ static class TsxExporter
             return new ArgumentNullException(nameof(nodeTag));
         }
 
+        // is mapping
+        {
+            List<string> lines = [];
+
+            var itemsSource = parentNode?.Properties.FirstOrDefault(x => x.Name is Design.ItemsSource);
+            if (itemsSource is not null)
+            {
+                parentNode = parentNode with { Properties = parentNode.Properties.Remove(itemsSource) };
+
+                lines.Add($"{indent(indentLevel)}{{{ClearConnectedValue(itemsSource.Value)}.map((_item, _index) => {{");
+                indentLevel++;
+
+                lines.Add(indent(indentLevel) + "return (");
+                indentLevel++;
+
+                IReadOnlyList<string> innerLines;
+                {
+                    var result = await ConvertReactNodeModelToTsxCode(project, node, parentNode, indentLevel);
+                    if (result.HasError)
+                    {
+                        return result.Error;
+                    }
+
+                    innerLines = result.Value;
+                }
+                lines.AddRange(innerLines);
+
+                indentLevel--;
+                lines.Add(indent(indentLevel) + ");");
+
+                indentLevel--;
+                lines.Add(indent(indentLevel) + "})}");
+
+                return lines;
+            }
+        }
+        
         // show hide
         {
             var showIf = node.Properties.FirstOrDefault(x => x.Name is Design.ShowIf);
@@ -335,42 +372,7 @@ static class TsxExporter
             }
         }
         
-        // is mapping
-        {
-            List<string> lines = [];
-
-            var itemsSource = parentNode?.Properties.FirstOrDefault(x => x.Name is Design.ItemsSource);
-            if (itemsSource is not null)
-            {
-                parentNode = parentNode with { Properties = parentNode.Properties.Remove(itemsSource) };
-
-                lines.Add($"{indent(indentLevel)}{{{ClearConnectedValue(itemsSource.Value)}.map((_item, _index) => {{");
-                indentLevel++;
-
-                lines.Add(indent(indentLevel) + "return (");
-                indentLevel++;
-
-                IReadOnlyList<string> innerLines;
-                {
-                    var result = await ConvertReactNodeModelToTsxCode(project, node, parentNode, indentLevel);
-                    if (result.HasError)
-                    {
-                        return result.Error;
-                    }
-
-                    innerLines = result.Value;
-                }
-                lines.AddRange(innerLines);
-
-                indentLevel--;
-                lines.Add(indent(indentLevel) + ");");
-
-                indentLevel--;
-                lines.Add(indent(indentLevel) + "})}");
-
-                return lines;
-            }
-        }
+       
 
         {
             var elementType = node.HtmlElementType;
