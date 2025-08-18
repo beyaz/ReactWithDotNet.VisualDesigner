@@ -1799,7 +1799,7 @@ static class Plugin
                         {
                             properties = properties.Add(new ReactProperty
                             {
-                                Name  = "onSelectProp",
+                                Name  = nameof(onSelect),
                                 Value = string.Join(Environment.NewLine, lines)
                             });
                         }

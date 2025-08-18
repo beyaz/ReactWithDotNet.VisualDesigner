@@ -19,6 +19,8 @@ static class Design
     public const string ShowIf = "d-show-if";
     
     public const string IsImportedChild = "d-is-imported-child";
+    
+    public const string Name = "d-name";
 
 }
 

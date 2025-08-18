@@ -296,6 +296,14 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
 
         var isDesignerComponent = TryReadTagAsDesignerComponentId(node).Any();
 
+        string nameText = null;
+        {
+            foreach (var name in from p in node.Properties from pair in TryParseProperty(p) where pair.Name == Design.Name select pair.Value)
+            {
+                nameText = TryClearStringValue(name);
+            }
+        }
+
         var returnList = new List<Element>
         {
             new FlexColumn(PaddingLeft(indent * 16), Id(path), OnClick(OnTreeItemClicked), OnMouseEnter(OnMouseEnterHandler))
@@ -314,8 +322,9 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
 
                     icon,
 
-                    new FlexRow(FlexGrow(1), JustifyContentFlexEnd, PaddingRight(8))
+                    new FlexRow(FlexGrow(1), Gap(4), AlignItemsCenter, JustifyContentFlexEnd, PaddingRight(8))
                     {
+                        nameText is null ? null : new div(FontSize12) { nameText },
                         eyeIcon + Width(16) + Height(16) + When(isSelected, OnClick(Toggle_HideInDesigner))
                     }
                 },

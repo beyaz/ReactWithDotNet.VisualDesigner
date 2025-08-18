@@ -178,7 +178,7 @@ sealed class ApplicationPreview : Component
             {
                 Properties = ListFrom(from p in model.Properties
                                       from x in TryParseProperty(p)
-                                      where x.Name.NotIn(Design.Text, Design.TextPreview, Design.Src)
+                                      where x.Name.NotIn(Design.Text, Design.TextPreview, Design.Src, Design.Name)
                                       select p)
             };
 

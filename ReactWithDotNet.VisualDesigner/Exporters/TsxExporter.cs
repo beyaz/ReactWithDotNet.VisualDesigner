@@ -399,7 +399,7 @@ static class TsxExporter
 
             var propsAsText = new List<string>();
 
-            foreach (var reactProperty in node.Properties.Where(p => p.Name.NotIn(Design.Text, Design.TextPreview, Design.Src)))
+            foreach (var reactProperty in node.Properties.Where(p => p.Name.NotIn(Design.Text, Design.TextPreview, Design.Src, Design.Name)))
             {
                 var propertyName = reactProperty.Name;
 
