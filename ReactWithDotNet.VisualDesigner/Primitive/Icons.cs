@@ -449,71 +449,53 @@ sealed class IconParentChild : PureComponent
     {
         return new svg(ViewBox(0, 0, 24, 24), Fill(none), svg.Size(24))
         {
-            new title
-            {
-                "Tree Icon"
-            },
             new circle
             {
                 cx          = 12,
                 cy          = 4,
-                r           = 2,
+                r           = 3,
                 stroke      = "currentColor",
                 strokeWidth = 1.5
             },
             new path
             {
-                d             = "M12 6 V10",
+                d             = "M12 7 V10",
                 stroke        = "currentColor",
                 strokeWidth   = 1.5,
                 strokeLinecap = "round"
             },
             new path
             {
-                d             = "M6 10 H18",
+                d             = "M7 10 H17",
                 stroke        = "currentColor",
                 strokeWidth   = 1.5,
                 strokeLinecap = "round"
             },
             new path
             {
-                d           = "M6 10 V14",
+                d           = "M7 10 V14",
                 stroke      = "currentColor",
                 strokeWidth = 1.5
             },
             new path
             {
-                d           = "M12 10 V14",
-                stroke      = "currentColor",
-                strokeWidth = 1.5
-            },
-            new path
-            {
-                d           = "M18 10 V14",
+                d           = "M17 10 V14",
                 stroke      = "currentColor",
                 strokeWidth = 1.5
             },
             new circle
             {
-                cx          = 6,
+                cx          = 7,
                 cy          = 16,
-                r           = 2,
+                r           = 3,
                 stroke      = "currentColor",
                 strokeWidth = 1.5
             },
             new circle
             {
-                cx          = 12,
+                cx          = 17,
                 cy          = 16,
-                r           = 2,
-                stroke      = "currentColor",
-                strokeWidth = 1.5
-            },
-            new circle
-            {
-                cx          = 18,
-                cy          = 16,
-                r           = 2,
+                r           = 3,
                 stroke      = "currentColor",
                 strokeWidth = 1.5
             }
