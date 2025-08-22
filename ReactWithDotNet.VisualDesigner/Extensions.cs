@@ -6,6 +6,8 @@ namespace ReactWithDotNet.VisualDesigner;
 
 static class Extensions
 {
+   
+    
     public static string EnvironmentUserName => Environment.UserName;
     
     public static bool IsEqualsIgnoreWhitespace(string a, string b)

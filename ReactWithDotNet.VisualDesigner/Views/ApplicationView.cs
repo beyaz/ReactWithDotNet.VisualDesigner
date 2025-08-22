@@ -142,7 +142,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
     protected override Element render()
     {
-        return new FlexRow(Padding(10), SizeFull, Background(Theme.BackgroundColor))
+        return new FlexRow(Padding(10), SizeFull, BackgroundTheme)
         {
             EditorFontLinks(Context),
             EditorFont(),
@@ -837,7 +837,7 @@ sealed class ApplicationView : Component<ApplicationState>
             new FlexRowCentered(Gap(16), Border(1, solid, Theme.BorderColor), BorderRadius(4), PaddingX(8), Height(36))
             {
                 PositionRelative,
-                new label(PositionAbsolute, Top(-4), Left(8), FontSize10, LineHeight7, Background(Theme.BackgroundColor), PaddingX(4)) { "Project" },
+                new label(PositionAbsolute, Top(-4), Left(8), FontSize10, LineHeight7, BackgroundTheme, PaddingX(4)) { "Project" },
 
                 PartProject
             },
@@ -849,7 +849,7 @@ sealed class ApplicationView : Component<ApplicationState>
                 new FlexRowCentered(Gap(16), Border(1, solid, Theme.BorderColor), BorderRadius(4), PaddingX(8), Height(36))
                 {
                     PositionRelative,
-                    new label(PositionAbsolute, Top(-4), Left(8), FontSize10, LineHeight7, Background(Theme.BackgroundColor), PaddingX(4)) { "Component" },
+                    new label(PositionAbsolute, Top(-4), Left(8), FontSize10, LineHeight7, BackgroundTheme, PaddingX(4)) { "Component" },
 
                     new FlexRowCentered(Hover(Color(Blue300)))
                     {
@@ -940,7 +940,7 @@ sealed class ApplicationView : Component<ApplicationState>
             new FlexRowCentered(Border(1, solid, Theme.BorderColor), BorderRadius(4), Height(36))
             {
                 PositionRelative,
-                new label(PositionAbsolute, Top(-4), Left(8), FontSize10, LineHeight7, Background(Theme.BackgroundColor), PaddingX(4)) { "View" },
+                new label(PositionAbsolute, Top(-4), Left(8), FontSize10, LineHeight7, BackgroundTheme, PaddingX(4)) { "View" },
 
                 new FlexRowCentered(Gap(8), Padding(4), LineHeight10, WhiteSpaceNoWrap)
                 {
@@ -1190,7 +1190,7 @@ sealed class ApplicationView : Component<ApplicationState>
         return new FlexRowCentered(Border(1, solid, Theme.BorderColor), BorderRadius(4), PaddingX(4), Height(36))
         {
             PositionRelative,
-            new label(PositionAbsolute, Top(-4), Left(8), FontSize10, LineHeight7, Background(Theme.BackgroundColor), PaddingX(4)) { "Width" },
+            new label(PositionAbsolute, Top(-4), Left(8), FontSize10, LineHeight7, BackgroundTheme, PaddingX(4)) { "Width" },
 
             new FlexRowCentered(Gap(32))
             {
@@ -2258,7 +2258,7 @@ sealed class ApplicationView : Component<ApplicationState>
             {
                 PositionRelative,
 
-                new label(PositionAbsolute, Top(-4), Left(8), FontSize10, LineHeight7, Background(Theme.BackgroundColor), PaddingX(4))
+                new label(PositionAbsolute, Top(-4), Left(8), FontSize10, LineHeight7, BackgroundTheme, PaddingX(4))
                 {
                     "Zoom"
                 },
