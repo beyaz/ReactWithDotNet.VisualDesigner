@@ -276,6 +276,14 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
 
         var icon = calculateVisualElementIcon(node);
 
+        Element secondaryIcon = null;
+        {
+            if (hasNamedProperty(node,Design.ItemsSourceDesignTimeCount))
+            {
+                secondaryIcon = new IconParentChild() + Size(16) + Color(Gray300);
+            }
+        }
+
         var foldIcon = new FlexRowCentered(Size(16), PositionAbsolute, Top(4), Left(indent * 16 - 12), Hover(BorderRadius(36), Background(Gray50)))
         {
             new IconArrowRightOrDown { IsArrowDown = !state.CollapsedNodes.Contains(path) },
@@ -321,6 +329,8 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
                     new span { await GetTagText(node.Tag) },
 
                     icon,
+                    
+                    secondaryIcon,
 
                     new FlexRow(FlexGrow(1), Gap(4), AlignItemsCenter, JustifyContentFlexEnd, PaddingRight(8))
                     {
@@ -362,6 +372,15 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
         }
 
         return returnList;
+
+        static bool hasNamedProperty(VisualElementModel node, string propertyName)
+        {
+            foreach (var _ in from p in node.Properties from pair in TryParseProperty(p) where pair.Name == propertyName select pair)
+            {
+                return true;
+            }
+            return false;
+        }
 
         static Element calculateVisualElementIcon(VisualElementModel node)
         {

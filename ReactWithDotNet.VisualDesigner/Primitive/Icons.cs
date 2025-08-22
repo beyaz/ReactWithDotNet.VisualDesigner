@@ -442,3 +442,81 @@ sealed class IconFocus : PureComponent
         };
     }
 }
+
+sealed class IconParentChild : PureComponent
+{
+    protected override Element render()
+    {
+        return new svg(ViewBox(0, 0, 24, 24), Fill(none), svg.Size(24))
+        {
+            new title
+            {
+                "Tree Icon"
+            },
+            new circle
+            {
+                cx          = 12,
+                cy          = 4,
+                r           = 2,
+                stroke      = "currentColor",
+                strokeWidth = 1.5
+            },
+            new path
+            {
+                d             = "M12 6 V10",
+                stroke        = "currentColor",
+                strokeWidth   = 1.5,
+                strokeLinecap = "round"
+            },
+            new path
+            {
+                d             = "M6 10 H18",
+                stroke        = "currentColor",
+                strokeWidth   = 1.5,
+                strokeLinecap = "round"
+            },
+            new path
+            {
+                d           = "M6 10 V14",
+                stroke      = "currentColor",
+                strokeWidth = 1.5
+            },
+            new path
+            {
+                d           = "M12 10 V14",
+                stroke      = "currentColor",
+                strokeWidth = 1.5
+            },
+            new path
+            {
+                d           = "M18 10 V14",
+                stroke      = "currentColor",
+                strokeWidth = 1.5
+            },
+            new circle
+            {
+                cx          = 6,
+                cy          = 16,
+                r           = 2,
+                stroke      = "currentColor",
+                strokeWidth = 1.5
+            },
+            new circle
+            {
+                cx          = 12,
+                cy          = 16,
+                r           = 2,
+                stroke      = "currentColor",
+                strokeWidth = 1.5
+            },
+            new circle
+            {
+                cx          = 18,
+                cy          = 16,
+                r           = 2,
+                stroke      = "currentColor",
+                strokeWidth = 1.5
+            }
+        };
+    }
+}
