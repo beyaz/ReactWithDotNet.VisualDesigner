@@ -1495,6 +1495,9 @@ public static class CssHelper
             case "grid-template-rows":
             case "letter-spacing":
             case "page-break-after":
+            case "backdrop-filter":
+            case "transition":
+            case "background-image":
             {
                 return asDictionary((name, value));
             }
@@ -1574,7 +1577,7 @@ public static class CssHelper
 
                 return asDictionary((name, value));
             }
-
+            
                 
         }
 

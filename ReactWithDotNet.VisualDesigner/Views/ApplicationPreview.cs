@@ -418,7 +418,9 @@ sealed class ApplicationPreview : Component
                     tryAddClass,
                     tryProcessImage,
                     processInputType,
-                    tryProcessCommonHtmlProperties
+                    tryProcessCommonHtmlProperties,
+                    tryProcessHtmlElementDataAttribute,
+                    tryProcessHtmlElementUnknowAttribute
                 ]);
                 if (result.HasError)
                 {
@@ -767,6 +769,18 @@ sealed class ApplicationPreview : Component
                     var propValue = data.propValue;
                     var element = data.element;
 
+                    if (propName.StartsWith("data-", StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (element is HtmlElement htmlElement)
+                        {
+                            var dataKey = propName.RemoveFromStart("data-", StringComparison.OrdinalIgnoreCase);
+                            
+                            htmlElement.data.TryAdd(dataKey, propValue);
+                            
+                            return data with { IsProcessed = true };
+                        }
+                    }
+
                     var propertyInfo = element.GetType().GetProperty(propName, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
                     if (propertyInfo is null)
                     {
@@ -821,6 +835,40 @@ sealed class ApplicationPreview : Component
                         return data with { IsProcessed = true };
                     }
 
+                    return data;
+                }
+                
+                static PropertyProcessScope tryProcessHtmlElementDataAttribute(PropertyProcessScope data)
+                {
+                    
+                    var propName = data.propName;
+                    var propValue = data.propValue;
+                    var element = data.element;
+
+                    if (propName.StartsWith("data-", StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (element is HtmlElement htmlElement)
+                        {
+                            var dataKey = propName.RemoveFromStart("data-", StringComparison.OrdinalIgnoreCase);
+                            
+                            htmlElement.data.TryAdd(dataKey, propValue);
+                            
+                            return data with { IsProcessed = true };
+                        }
+                    }
+
+                    return data;
+                }
+                
+                static PropertyProcessScope tryProcessHtmlElementUnknowAttribute(PropertyProcessScope data)
+                {
+                    if (data.element is HtmlElement )
+                    {
+                        return data with { IsProcessed = true };
+                            
+                            
+                    }
+                    
                     return data;
                 }
             }
