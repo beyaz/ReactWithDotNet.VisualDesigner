@@ -706,6 +706,24 @@ public static class CssHelper
                 {
                     return TailwindGrid.ResolveGridRows(cssAttributeValue);
                 }
+                
+                case "page-break-after":
+                {
+                    switch (cssAttributeValue)
+                    {
+                        case "auto":       return "break-after-auto";
+                        case "avoid":      return "break-after-avoid";
+                        case "always":     return "break-after-page";
+                        case "left":       return "break-after-left";
+                        case "right":      return "break-after-right";
+                        case "page":       return "break-after-page";
+                        case "column":     return "break-after-column";
+                        case "avoid-page": return "break-after-avoid-page";
+                        case "all":        return "break-after-all";
+                    }
+
+                    break;
+                }
             }
 
             if (cssAttributeName == "outline-offset")
@@ -1476,6 +1494,7 @@ public static class CssHelper
             case "grid-template-columns":
             case "grid-template-rows":
             case "letter-spacing":
+            case "page-break-after":
             {
                 return asDictionary((name, value));
             }
