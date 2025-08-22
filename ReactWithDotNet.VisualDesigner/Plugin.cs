@@ -636,10 +636,10 @@ static class Plugin
             [Suggestions(["true"])]
             public bool? item { get; set; }
             
-            [Suggestions(["column","row" ])]
+            [Suggestions(["column , row" ])]
             public string direction { get; set; }
 
-            [Suggestions(["flex-start","center","flex-end","space-between","space-around","space-evenly" ])]
+            [Suggestions(["flex-start , center , flex-end , space-between , space-around , space-evenly" ])]
             public string justifyContent { get; set; }
 
             public int? lg { get; set; }
@@ -2507,7 +2507,17 @@ static class Plugin
     }
 }
 
-sealed class SuggestionsAttribute(string[] suggestions) : Attribute
+sealed class SuggestionsAttribute: Attribute
 {
-    public IReadOnlyList<string> Suggestions { get; } = suggestions;
+    public IReadOnlyList<string> Suggestions { get; } 
+
+    public SuggestionsAttribute(string[] suggestions)
+    {
+        Suggestions = suggestions;
+    }
+    
+    public SuggestionsAttribute(string suggestions)
+    {
+        Suggestions = suggestions.Split(',', StringSplitOptions.RemoveEmptyEntries);
+    }
 }
