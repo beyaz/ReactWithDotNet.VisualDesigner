@@ -593,32 +593,53 @@ static class Plugin
             }
         }
 
-        public static IReadOnlyList<(string name, string value)> GetPropSuggestions(string tag)
+        public static IEnumerable<(string name, string value)> GetPropSuggestions(string tag)
         {
             var type = AllTypes.Select(x => x.type).FirstOrDefault(t => t.Name.Equals(tag, StringComparison.OrdinalIgnoreCase));
             if (type is null)
             {
-                return [];
+                yield break;
             }
 
+            
+            foreach (var item in  
+                     from p in type.GetProperties() 
+                     from a in p.GetCustomAttributes<SuggestionsAttribute>() 
+                     from s in a.Suggestions
+                     select (p.Name, s))
+            {
+                yield return item;
+            }
+            
             var methodInfo = type.GetMethod(nameof(GetPropSuggestions), BindingFlags.Static | BindingFlags.Public);
             if (methodInfo is null)
             {
-                return [];
+                yield break;
             }
 
-            return (IReadOnlyList<(string name, string value)>)methodInfo.Invoke(null, []);
+
+            foreach (var item in (IReadOnlyList<(string name, string value)>)methodInfo.Invoke(null, []) ?? [])
+            {
+                yield return item;
+            }
         }
 
         public sealed class BDigitalGrid : PluginComponentBase
         {
             public string alignItems { get; set; }
+            
+            [Suggestions(["true"])]
             public bool? container { get; set; }
 
+            
+
+            [Suggestions(["true"])]
+            public bool? item { get; set; }
+            
+            [Suggestions(["column","row" ])]
             public string direction { get; set; }
 
-            public bool? item { get; set; }
-
+            [Suggestions(["flex-start","center","flex-end","space-between","space-around","space-evenly" ])]
             public string justifyContent { get; set; }
 
             public int? lg { get; set; }
@@ -637,16 +658,6 @@ static class Plugin
             {
                 return
                 [
-                    (nameof(container), "true"),
-                    (nameof(item), "true"),
-                    (nameof(direction),'"' +"column" + '"'),
-                    (nameof(direction),'"' +"row" + '"'),
-                    (nameof(justifyContent),'"' +"flex-start" + '"'),
-                    (nameof(justifyContent),'"' +"center" + '"'),
-                    (nameof(justifyContent),'"' +"flex-end" + '"'),
-                    (nameof(justifyContent),'"' +"space-between" + '"'),
-                    (nameof(justifyContent),'"' +"space-around" + '"'),
-                    (nameof(justifyContent),'"' +"space-evenly" + '"'),
                     (nameof(alignItems),'"' +"flex-start" + '"'),
                     (nameof(alignItems),'"' +"stretch" + '"'),
                     (nameof(alignItems),'"' +"flex-end" + '"'),
@@ -2494,4 +2505,9 @@ static class Plugin
         public string Description { get; init; }
         public string PropertyName { get; init; }
     }
+}
+
+sealed class SuggestionsAttribute(string[] suggestions) : Attribute
+{
+    public IReadOnlyList<string> Suggestions { get; } = suggestions;
 }
