@@ -2126,7 +2126,7 @@ static class Plugin
             [JsTypeInfo(JsType.String)]
             public string label { get; set; }
             
-            [Suggestions("default")]
+            [Suggestions("default, filled , outlined")]
             [JsTypeInfo(JsType.String)]
             public string variant { get; set; }
             
@@ -2186,7 +2186,8 @@ static class Plugin
                     new Chip
                     {
                         color = color,
-                        label = label
+                        label = label,
+                        variant = variant
                     },
                     Id(id), OnClick(onMouseClick)
                 };
