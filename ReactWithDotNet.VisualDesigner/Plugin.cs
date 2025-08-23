@@ -77,11 +77,27 @@ static class Plugin
         return config;
     }
 
+    static IEnumerable<Type> GetAllCustomComponents()
+    {
+        return 
+            from t in typeof(Plugin).Assembly.GetTypes()
+            where t.GetCustomAttribute<CustomComponentAttribute>() is not null
+            select t;
+    }
+    
+    static IEnumerable<MethodInfo> GetAnalyzeMethods(Type type)
+    {
+        return from m in type.GetMethods(BindingFlags.Static | BindingFlags.Public) select m;
+    }
+
     public static ReactNode AnalyzeNode(ReactNode node, IReadOnlyDictionary<string, string> componentConfig)
     {
-        foreach (var analyzeFunc in from x in Components.AllTypes where x.analyzeReactNode is not null select x.analyzeReactNode)
+        foreach (var analyzeMethodInfo in 
+                 from t in GetAllCustomComponents()
+                 from m in GetAnalyzeMethods(t)
+                 select m)
         {
-            node = analyzeFunc(node, componentConfig);
+            node = (ReactNode)analyzeMethodInfo.Invoke(null, [node, componentConfig]);
         }
 
         return node;
@@ -351,7 +367,7 @@ static class Plugin
 
     public static IReadOnlyList<string> GetTagSuggestions()
     {
-        return Components.AllTypes.Select(x => x.type.Name).ToList();
+        return GetAllCustomComponents().Select(x => x.Name).ToList();
     }
 
     public static bool IsImage(object component)
@@ -361,7 +377,7 @@ static class Plugin
 
     public static Element TryCreateElementForPreview(string tag, string id, MouseEventHandler onMouseClick)
     {
-        var type = Components.AllTypes.Select(x => x.type).FirstOrDefault(t => t.Name.Equals(tag, StringComparison.OrdinalIgnoreCase));
+        var type = GetAllCustomComponents().FirstOrDefault(t => t.Name.Equals(tag, StringComparison.OrdinalIgnoreCase));
         if (type is null)
         {
             return null;
@@ -498,41 +514,9 @@ static class Plugin
 
     static class Components
     {
-        public static readonly IReadOnlyList<(Type type, Func<ReactNode, IReadOnlyDictionary<string, string>, ReactNode> analyzeReactNode)> AllTypes =
-        [
-            // NextJsSupport
-            (typeof(Image), null),
-            (typeof(Link), null),
-
-            (typeof(BChip), BChip.AnalyzeReactNode),
-            (typeof(BTypography), null),
-            (typeof(BDigitalGrid), null),
-            (typeof(BDigitalFilterView), BDigitalFilterView.AnalyzeReactNode),
-
-            (typeof(BasePage), null),
-            (typeof(TransactionWizardPage), null),
-            (typeof(BRadioButtonGroup), null),
-            (typeof(BDigitalGroupView), null),
-            (typeof(BDigitalAccountView), BDigitalAccountView.AnalyzeReactNode),
-            (typeof(BDigitalBox), null),
-            (typeof(BAlert), null),
-            (typeof(BIcon), null),
-            (typeof(BDigitalMoneyInput), BDigitalMoneyInput.AnalyzeReactNode),
-            (typeof(BComboBox), BComboBox.AnalyzeReactNode),
-            (typeof(BDigitalDatepicker), BDigitalDatepicker.AnalyzeReactNode),
-            (typeof(BInput), BInput.AnalyzeReactNode),
-            (typeof(BInputMaskExtended), BInputMaskExtended.AnalyzeReactNode),
-            (typeof(BPlateNumber), null),
-            (typeof(BCheckBox), BCheckBox.AnalyzeReactNode),
-            (typeof(BButton), BButton.AnalyzeReactNode),
-            (typeof(BDigitalPlateNumber), null),
-            (typeof(BDigitalDialog), null),
-            (typeof(BDigitalTabNavigator), null)
-        ];
-
-        public static IReadOnlyList<ComponentMeta> GetAllTypesMetadata()
+       public static IReadOnlyList<ComponentMeta> GetAllTypesMetadata()
         {
-            return AllTypes.Select(x => x.type).Select(createFrom).ToList();
+            return GetAllCustomComponents().Select(createFrom).ToList();
 
             static ComponentMeta createFrom(Type type)
             {
@@ -595,7 +579,7 @@ static class Plugin
 
         public static IEnumerable<(string name, string value)> GetPropSuggestions(string tag)
         {
-            var type = AllTypes.Select(x => x.type).FirstOrDefault(t => t.Name.Equals(tag, StringComparison.OrdinalIgnoreCase));
+            var type = GetAllCustomComponents().FirstOrDefault(t => t.Name.Equals(tag, StringComparison.OrdinalIgnoreCase));
             if (type is null)
             {
                 yield break;
@@ -613,6 +597,7 @@ static class Plugin
 
         }
 
+        [CustomComponent]
         public sealed class BDigitalGrid : PluginComponentBase
         {
             [Suggestions("flex-start , flex-end , stretch , center , baseline")]
@@ -677,6 +662,7 @@ static class Plugin
             }
         }
 
+        [CustomComponent]
         public sealed class BDigitalGroupView : PluginComponentBase
         {
             [JsTypeInfo(JsType.String)]
@@ -696,7 +682,7 @@ static class Plugin
                 };
             }
         }
-
+        [CustomComponent]
         public sealed class BIcon : PluginComponentBase
         {
             [Suggestions("TimerRounded , content_copy" )]
@@ -737,6 +723,7 @@ static class Plugin
             }
         }
 
+        [CustomComponent]
         public sealed class Image : PluginComponentBase
         {
             public string alt { get; set; }
@@ -763,7 +750,8 @@ static class Plugin
                 } + When(fill is true, SizeFull);
             }
         }
-
+        
+        [CustomComponent]
         public sealed class Link : PluginComponentBase
         {
             public string className { get; set; }
@@ -782,6 +770,7 @@ static class Plugin
             }
         }
 
+        [CustomComponent]
         sealed class BAlert : PluginComponentBase
         {
             [Suggestions("success , info , warning , error" )]
@@ -809,6 +798,7 @@ static class Plugin
             }
         }
 
+        [CustomComponent]
         sealed class BasePage : PluginComponentBase
         {
             [JsTypeInfo(JsType.String)]
@@ -828,7 +818,7 @@ static class Plugin
         }
         
         
-
+        [CustomComponent]
         sealed class TransactionWizardPage : PluginComponentBase
         {
             [JsTypeInfo(JsType.Boolean)]
@@ -846,6 +836,7 @@ static class Plugin
             }
         }
 
+        [CustomComponent]
         sealed class BRadioButtonGroup : PluginComponentBase
         {
             [JsTypeInfo(JsType.Array)]
@@ -884,6 +875,7 @@ static class Plugin
             }
         }
 
+        [CustomComponent]
         sealed class BDigitalTabNavigator : PluginComponentBase
         {
             [JsTypeInfo(JsType.Array)]
@@ -929,6 +921,7 @@ static class Plugin
             }
         }
 
+        [CustomComponent]
         sealed class BCheckBox : PluginComponentBase
         {
             [JsTypeInfo(JsType.String)]
@@ -969,6 +962,7 @@ static class Plugin
                 };
             }
             
+            [NodeAnalyzer]
             public static ReactNode AnalyzeReactNode(ReactNode node, IReadOnlyDictionary<string, string> componentConfig)
             {
                 if (node.Tag == nameof(BCheckBox))
@@ -1052,6 +1046,7 @@ static class Plugin
             };
         }
 
+        [CustomComponent]
         sealed class BButton : PluginComponentBase
         {
             [JsTypeInfo(JsType.String)]
@@ -1077,6 +1072,7 @@ static class Plugin
                 };
             }
             
+            [NodeAnalyzer]
             public static ReactNode AnalyzeReactNode(ReactNode node, IReadOnlyDictionary<string, string> componentConfig)
             {
                 if (node.Tag == nameof(BButton))
@@ -1119,6 +1115,7 @@ static class Plugin
             }
         }
 
+        [CustomComponent]
         sealed class BDigitalDatepicker : PluginComponentBase
         {
             [JsTypeInfo(JsType.Date)]
@@ -1174,7 +1171,7 @@ static class Plugin
                     }
                 };
             }
-            
+            [NodeAnalyzer]
             public static ReactNode AnalyzeReactNode(ReactNode node, IReadOnlyDictionary<string, string> componentConfig)
             {
                 if (node.Tag == nameof(BDigitalDatepicker))
@@ -1257,6 +1254,7 @@ static class Plugin
             }
         }
 
+        [CustomComponent]
         sealed class BDigitalBox : PluginComponentBase
         {
             [Suggestions("noMargin" )]
@@ -1273,6 +1271,7 @@ static class Plugin
             }
         }
 
+        [CustomComponent]
         sealed class BDigitalDialog : PluginComponentBase
         {
             [JsTypeInfo(JsType.String)]
@@ -1327,7 +1326,7 @@ static class Plugin
         }
 
        
-
+        [CustomComponent]
         sealed class BDigitalPlateNumber : PluginComponentBase
         {
             [JsTypeInfo(JsType.String)]
@@ -1346,6 +1345,7 @@ static class Plugin
             }
         }
 
+        [CustomComponent]
         sealed class BDigitalAccountView : PluginComponentBase
         {
             [JsTypeInfo(JsType.Array)]
@@ -1360,7 +1360,7 @@ static class Plugin
             [JsTypeInfo(JsType.Function)]
             public string onSelectedAccountIndexChange { get; set; }
 
-
+            [NodeAnalyzer]
             public static ReactNode AnalyzeReactNode(ReactNode node, IReadOnlyDictionary<string, string> componentConfig)
             {
                 if (node.Tag == nameof(BDigitalAccountView))
@@ -1460,6 +1460,7 @@ static class Plugin
             }
         }
         
+        [CustomComponent]
         sealed class BInput : PluginComponentBase
         {
             [JsTypeInfo(JsType.Boolean)]
@@ -1483,6 +1484,7 @@ static class Plugin
             [JsTypeInfo(JsType.String)]
             public string value { get; set; }
 
+            [NodeAnalyzer]
             public static ReactNode AnalyzeReactNode(ReactNode node, IReadOnlyDictionary<string, string> componentConfig)
             {
                 if (node.Tag == nameof(BInput))
@@ -1604,6 +1606,7 @@ static class Plugin
             }
         }
 
+        [CustomComponent]
         sealed class BComboBox : PluginComponentBase
         {
 
@@ -1625,6 +1628,7 @@ static class Plugin
             [JsTypeInfo(JsType.String)]
             public string value { get; set; }
 
+            [NodeAnalyzer]
             public static ReactNode AnalyzeReactNode(ReactNode node, IReadOnlyDictionary<string, string> componentConfig)
             {
                 if (node.Tag == nameof(BComboBox))
@@ -1751,6 +1755,7 @@ static class Plugin
             }
         }
 
+        [CustomComponent]
         sealed class BDigitalFilterView:PluginComponentBase
         {
             [JsTypeInfo(JsType.String)]
@@ -1809,7 +1814,7 @@ static class Plugin
                     
                 };
             }
-            
+            [NodeAnalyzer]
             public static ReactNode AnalyzeReactNode(ReactNode node, IReadOnlyDictionary<string, string> componentConfig)
             {
                 if (node.Tag == nameof(BDigitalFilterView))
@@ -1857,6 +1862,7 @@ static class Plugin
             }
         }
         
+        [CustomComponent]
         sealed class BInputMaskExtended : PluginComponentBase
         {
             
@@ -1916,7 +1922,7 @@ static class Plugin
                     }
                 };
             }
-            
+            [NodeAnalyzer]
             public static ReactNode AnalyzeReactNode(ReactNode node, IReadOnlyDictionary<string, string> componentConfig)
             {
                 if (node.Tag == nameof(BInputMaskExtended))
@@ -2008,6 +2014,7 @@ static class Plugin
             }
         }
 
+        [CustomComponent]
         sealed class BDigitalMoneyInput : PluginComponentBase
         {
             [JsTypeInfo(JsType.String)]
@@ -2025,7 +2032,7 @@ static class Plugin
             [JsTypeInfo(JsType.Function)]
             public string handleMoneyInputChange { get; set; }
             
-
+            [NodeAnalyzer]
             public static ReactNode AnalyzeReactNode(ReactNode node, IReadOnlyDictionary<string, string> componentConfig)
             {
                 if (node.Tag == nameof(BDigitalMoneyInput))
@@ -2113,6 +2120,7 @@ static class Plugin
             }
         }
         
+        [CustomComponent]
         sealed class BChip : PluginComponentBase
         {
             [JsTypeInfo(JsType.String)]
@@ -2128,6 +2136,7 @@ static class Plugin
             [JsTypeInfo(JsType.Function)]
             public string onClick { get; set; }
             
+            [NodeAnalyzer]
             public static ReactNode AnalyzeReactNode(ReactNode node, IReadOnlyDictionary<string, string> componentConfig)
             {
                 if (node.Tag == nameof(BChip))
@@ -2184,6 +2193,7 @@ static class Plugin
             }
         }
         
+        [CustomComponent]
         sealed class BPlateNumber : PluginComponentBase
         {
             [JsTypeInfo(JsType.String)]
@@ -2216,6 +2226,7 @@ static class Plugin
             }
         }
 
+        [CustomComponent]
         sealed class BTypography : PluginComponentBase
         {
             public string dangerouslySetInnerHTML { get; set; }
@@ -2331,3 +2342,14 @@ sealed class SuggestionsAttribute: Attribute
         Suggestions = suggestions.Split(',', StringSplitOptions.RemoveEmptyEntries);
     }
 }
+
+sealed class CustomComponentAttribute: Attribute
+{
+   
+}
+
+sealed class NodeAnalyzerAttribute: Attribute
+{
+   
+}
+
