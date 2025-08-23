@@ -498,36 +498,36 @@ static class Plugin
 
     static class Components
     {
-        public static readonly IReadOnlyList<(Type type, Func<IReadOnlyList<(string name, string value)>> propSuggestions, Func<ReactNode,IReadOnlyDictionary<string, string>, ReactNode> analyzeReactNode)> AllTypes =
+        public static readonly IReadOnlyList<(Type type, Func<ReactNode, IReadOnlyDictionary<string, string>, ReactNode> analyzeReactNode)> AllTypes =
         [
             // NextJsSupport
-            (typeof(Image), Image.GetPropSuggestions, null),
-            (typeof(Link), Link.GetPropSuggestions, null),
+            (typeof(Image), null),
+            (typeof(Link), null),
 
-            (typeof(BChip), BChip.GetPropSuggestions, BChip.AnalyzeReactNode),
-            (typeof(BTypography), BTypography.GetPropSuggestions, null),
-            (typeof(BDigitalGrid), BDigitalGrid.GetPropSuggestions, null),
-            (typeof(BDigitalFilterView), BDigitalFilterView.GetPropSuggestions, BDigitalFilterView.AnalyzeReactNode),
-            
-            (typeof(BasePage), BasePage.GetPropSuggestions, null),
-            (typeof(TransactionWizardPage), TransactionWizardPage.GetPropSuggestions, null),
-            (typeof(BRadioButtonGroup), BRadioButtonGroup.GetPropSuggestions, null),
-            (typeof(BDigitalGroupView), BDigitalGroupView.GetPropSuggestions, null),
-            (typeof(BDigitalAccountView), BDigitalAccountView.GetPropSuggestions, BDigitalAccountView.AnalyzeReactNode),
-            (typeof(BDigitalBox), BDigitalBox.GetPropSuggestions, null),
-            (typeof(BAlert), BAlert.GetPropSuggestions, null),
-            (typeof(BIcon), BIcon.GetPropSuggestions, null),
-            (typeof(BDigitalMoneyInput), BDigitalMoneyInput.GetPropSuggestions, BDigitalMoneyInput.AnalyzeReactNode),
-            (typeof(BComboBox), BComboBox.GetPropSuggestions, BComboBox.AnalyzeReactNode),
-            (typeof(BDigitalDatepicker), BDigitalDatepicker.GetPropSuggestions, BDigitalDatepicker.AnalyzeReactNode),
-            (typeof(BInput), BInput.GetPropSuggestions, BInput.AnalyzeReactNode),
-            (typeof(BInputMaskExtended), BInputMaskExtended.GetPropSuggestions, BInputMaskExtended.AnalyzeReactNode),
-            (typeof(BPlateNumber), BPlateNumber.GetPropSuggestions, null),
-            (typeof(BCheckBox), BCheckBox.GetPropSuggestions, BCheckBox.AnalyzeReactNode),
-            (typeof(BButton), BButton.GetPropSuggestions, BButton.AnalyzeReactNode),
-            (typeof(BDigitalPlateNumber), BDigitalPlateNumber.GetPropSuggestions, null),
-            (typeof(BDigitalDialog), BDigitalDialog.GetPropSuggestions, null),
-            (typeof(BDigitalTabNavigator), BDigitalTabNavigator.GetPropSuggestions, null)
+            (typeof(BChip), BChip.AnalyzeReactNode),
+            (typeof(BTypography), null),
+            (typeof(BDigitalGrid), null),
+            (typeof(BDigitalFilterView), BDigitalFilterView.AnalyzeReactNode),
+
+            (typeof(BasePage), null),
+            (typeof(TransactionWizardPage), null),
+            (typeof(BRadioButtonGroup), null),
+            (typeof(BDigitalGroupView), null),
+            (typeof(BDigitalAccountView), BDigitalAccountView.AnalyzeReactNode),
+            (typeof(BDigitalBox), null),
+            (typeof(BAlert), null),
+            (typeof(BIcon), null),
+            (typeof(BDigitalMoneyInput), BDigitalMoneyInput.AnalyzeReactNode),
+            (typeof(BComboBox), BComboBox.AnalyzeReactNode),
+            (typeof(BDigitalDatepicker), BDigitalDatepicker.AnalyzeReactNode),
+            (typeof(BInput), BInput.AnalyzeReactNode),
+            (typeof(BInputMaskExtended), BInputMaskExtended.AnalyzeReactNode),
+            (typeof(BPlateNumber), null),
+            (typeof(BCheckBox), BCheckBox.AnalyzeReactNode),
+            (typeof(BButton), BButton.AnalyzeReactNode),
+            (typeof(BDigitalPlateNumber), null),
+            (typeof(BDigitalDialog), null),
+            (typeof(BDigitalTabNavigator), null)
         ];
 
         public static IReadOnlyList<ComponentMeta> GetAllTypesMetadata()
@@ -601,27 +601,16 @@ static class Plugin
                 yield break;
             }
 
-            
-            foreach (var item in  
-                     from p in type.GetProperties() 
-                     from a in p.GetCustomAttributes<SuggestionsAttribute>() 
+
+            foreach (var item in 
+                     from p in type.GetProperties()
+                     from a in p.GetCustomAttributes<SuggestionsAttribute>()
                      from s in a.Suggestions
                      select (p.Name, s))
             {
                 yield return item;
             }
-            
-            var methodInfo = type.GetMethod(nameof(GetPropSuggestions), BindingFlags.Static | BindingFlags.Public);
-            if (methodInfo is null)
-            {
-                yield break;
-            }
 
-
-            foreach (var item in (IReadOnlyList<(string name, string value)>)methodInfo.Invoke(null, []) ?? [])
-            {
-                yield return item;
-            }
         }
 
         public sealed class BDigitalGrid : PluginComponentBase
@@ -690,15 +679,9 @@ static class Plugin
 
         public sealed class BDigitalGroupView : PluginComponentBase
         {
+            [JsTypeInfo(JsType.String)]
             public string title { get; set; }
 
-            public static IReadOnlyList<(string name, string value)> GetPropSuggestions()
-            {
-                return
-                [
-                
-                ];
-            }
 
             protected override Element render()
             {
@@ -716,19 +699,13 @@ static class Plugin
 
         public sealed class BIcon : PluginComponentBase
         {
+            [Suggestions("TimerRounded , content_copy" )]
+            [JsTypeInfo(JsType.String)]
             public string name { get; set; }
 
+            [JsTypeInfo(JsType.String)]
             public string size { get; set; }
-
-            public static IReadOnlyList<(string name, string value)> GetPropSuggestions()
-            {
-                return
-                [
-                    (nameof(name),"'TimerRounded'"),
-                    (nameof(name),"'content_copy'")
-                ];
-            }
-
+            
             protected override Element render()
             {
                 return new FlexRowCentered(Size(GetSize()), Id(id), OnClick(onMouseClick))
@@ -773,12 +750,6 @@ static class Plugin
 
             public string width { get; set; }
 
-            public static IReadOnlyList<(string name, string value)> GetPropSuggestions()
-            {
-                return
-                [
-                ];
-            }
 
             protected override Element render()
             {
@@ -799,12 +770,6 @@ static class Plugin
             public string href { get; set; }
             public string target { get; set; }
 
-            public static IReadOnlyList<(string name, string value)> GetPropSuggestions()
-            {
-                return
-                [
-                ];
-            }
 
             protected override Element render()
             {
@@ -819,24 +784,14 @@ static class Plugin
 
         sealed class BAlert : PluginComponentBase
         {
+            [Suggestions("success , info , warning , error" )]
             [JsTypeInfo(JsType.String)]
             public string severity { get; set; }
             
+            [Suggestions("standard , outlined , filled" )]
             [JsTypeInfo(JsType.String)]
             public string variant { get; set; }
-
-            public static IReadOnlyList<(string name, string value)> GetPropSuggestions()
-            {
-                return
-                [
-                    (nameof(variant), "'standard'"),
-                    (nameof(severity), "'success'"),
-                    (nameof(severity), "'info'"),
-                    (nameof(severity), "'warning'"),
-                    (nameof(severity), "'error'")
-                ];
-            }
-
+            
             protected override Element render()
             {
                 return new div
@@ -858,15 +813,7 @@ static class Plugin
         {
             [JsTypeInfo(JsType.String)]
             public string pageTitle { get; set; }
-
-            public static IReadOnlyList<(string name, string value)> GetPropSuggestions()
-            {
-                return
-                [
-              
-                ];
-            }
-
+            
             protected override Element render()
             {
                 return new FlexColumn(FontFamily("Roboto"), WidthFull, Padding(16), Background("#fafafa"))
@@ -886,14 +833,7 @@ static class Plugin
         {
             [JsTypeInfo(JsType.Boolean)]
             public string isWide { get; set; }
-
-            public static IReadOnlyList<(string name, string value)> GetPropSuggestions()
-            {
-                return
-                [
-                ];
-            }
-
+            
             protected override Element render()
             {
                 return new FlexColumn(WidthFull, Padding(16), Background("#fafafa"))
@@ -910,13 +850,6 @@ static class Plugin
         {
             [JsTypeInfo(JsType.Array)]
             public string items { get; set; }
-
-            public static IReadOnlyList<(string name, string value)> GetPropSuggestions()
-            {
-                return
-                [
-                ];
-            }
 
             protected override Element render()
             {
@@ -962,12 +895,6 @@ static class Plugin
             [JsTypeInfo(JsType.Number)]
             public string selectedTab { get; set; }
 
-            public static IReadOnlyList<(string name, string value)> GetPropSuggestions()
-            {
-                return
-                [
-                ];
-            }
 
             protected override Element render()
             {
@@ -1015,14 +942,7 @@ static class Plugin
             
             [JsTypeInfo(JsType.Function)]
             public string onCheck { get; set; }
-
-            public static IReadOnlyList<(string name, string value)> GetPropSuggestions()
-            {
-                return
-                [
-                ];
-            }
-
+            
             protected override Element render()
             {
 
@@ -1140,12 +1060,6 @@ static class Plugin
             [JsTypeInfo(JsType.Function)]
             public string onClick { get; set; }
 
-            public static IReadOnlyList<(string name, string value)> GetPropSuggestions()
-            {
-                return
-                [
-                ];
-            }
 
             protected override Element render()
             {
@@ -1231,12 +1145,6 @@ static class Plugin
             [JsTypeInfo(JsType.String)]
             public string placeholder { get; set; }
 
-            public static IReadOnlyList<(string name, string value)> GetPropSuggestions()
-            {
-                return
-                [
-                ];
-            }
 
             protected override Element render()
             {
@@ -1351,16 +1259,10 @@ static class Plugin
 
         sealed class BDigitalBox : PluginComponentBase
         {
+            [Suggestions("noMargin" )]
             [JsTypeInfo(JsType.String)]
             public string styleContext { get; set; }
 
-            public static IReadOnlyList<(string name, string value)> GetPropSuggestions()
-            {
-                return
-                [
-                    (nameof(styleContext), "'noMargin'")
-                ];
-            }
 
             protected override Element render()
             {
@@ -1382,6 +1284,7 @@ static class Plugin
             [JsTypeInfo(JsType.Boolean)]
             public string open { get; set; }
             
+            [Suggestions("error , warning , info , success")]
             [JsTypeInfo(JsType.String)]
             public string type { get; set; }
             
@@ -1391,18 +1294,6 @@ static class Plugin
             [JsTypeInfo(JsType.Boolean)]
             public string displayOkButton { get; set; }
            
-
-            public static IReadOnlyList<(string name, string value)> GetPropSuggestions()
-            {
-                return
-                [
-                    (nameof(type), "error"),
-                    (nameof(type), "warning"),
-                    (nameof(type), "info"),
-                    (nameof(type), "success")
-                ];
-            }
-
             protected override Element render()
             {
                 return new div(Background(rgba(0, 0, 0, 0.5)), Padding(24), BorderRadius(8))
@@ -1445,12 +1336,6 @@ static class Plugin
             [JsTypeInfo(JsType.String)]
             public string label { get; set; }
 
-            public static IReadOnlyList<(string name, string value)> GetPropSuggestions()
-            {
-                return
-                [
-                ];
-            }
 
             protected override Element render()
             {
@@ -1475,13 +1360,6 @@ static class Plugin
             [JsTypeInfo(JsType.Function)]
             public string onSelectedAccountIndexChange { get; set; }
 
-            public static IReadOnlyList<(string name, string value)> GetPropSuggestions()
-            {
-                return
-                [
-              
-                ];
-            }
 
             public static ReactNode AnalyzeReactNode(ReactNode node, IReadOnlyDictionary<string, string> componentConfig)
             {
@@ -1695,13 +1573,6 @@ static class Plugin
                 return node with { Children = node.Children.Select(x=>AnalyzeReactNode(x, componentConfig)).ToImmutableList() };
             }
 
-            public static IReadOnlyList<(string name, string value)> GetPropSuggestions()
-            {
-                return
-                [
-                 
-                ];
-            }
 
             protected override Element render()
             {
@@ -1838,12 +1709,6 @@ static class Plugin
                 return false;
             }
 
-            public static IReadOnlyList<(string name, string value)> GetPropSuggestions()
-            {
-                return
-                [
-                ];
-            }
 
             protected override Element render()
             {
@@ -1906,13 +1771,7 @@ static class Plugin
             [JsTypeInfo(JsType.Function)]
             public string setFilter { get; set; }
             
-             public static IReadOnlyList<(string name, string value)> GetPropSuggestions()
-            {
-                return
-                [
-              
-                ];
-            }
+             
 
             protected override Element render()
             {
@@ -2028,13 +1887,6 @@ static class Plugin
             [JsTypeInfo(JsType.Boolean)]
             public string isRequired { get; set; }
 
-            public static IReadOnlyList<(string name, string value)> GetPropSuggestions()
-            {
-                return
-                [
-              
-                ];
-            }
 
             protected override Element render()
             {
@@ -2173,12 +2025,6 @@ static class Plugin
             [JsTypeInfo(JsType.Function)]
             public string handleMoneyInputChange { get; set; }
             
-            public static IReadOnlyList<(string name, string value)> GetPropSuggestions()
-            {
-                return
-                [
-                ];
-            }
 
             public static ReactNode AnalyzeReactNode(ReactNode node, IReadOnlyDictionary<string, string> componentConfig)
             {
@@ -2272,6 +2118,7 @@ static class Plugin
             [JsTypeInfo(JsType.String)]
             public string label { get; set; }
             
+            [Suggestions("default")]
             [JsTypeInfo(JsType.String)]
             public string variant { get; set; }
             
@@ -2281,14 +2128,6 @@ static class Plugin
             [JsTypeInfo(JsType.Function)]
             public string onClick { get; set; }
             
-            public static IReadOnlyList<(string name, string value)> GetPropSuggestions()
-            {
-                return
-                [
-                    (nameof(variant), "'default'")
-                ];
-            }
-
             public static ReactNode AnalyzeReactNode(ReactNode node, IReadOnlyDictionary<string, string> componentConfig)
             {
                 if (node.Tag == nameof(BChip))
@@ -2353,12 +2192,7 @@ static class Plugin
             [JsTypeInfo(JsType.String)]
             public string label { get; set; }
 
-            public static IReadOnlyList<(string name, string value)> GetPropSuggestions()
-            {
-                return
-                [
-                ];
-            }
+          
 
             protected override Element render()
             {
@@ -2386,25 +2220,10 @@ static class Plugin
         {
             public string dangerouslySetInnerHTML { get; set; }
             
+            [Suggestions("h1, h2 , h3 , h4 , h5 , h6 , body0 , body1")]
             [JsTypeInfo(JsType.String)]
             public string variant { get; set; }
-
-            public static IReadOnlyList<(string name, string value)> GetPropSuggestions()
-            {
-                return
-                [
-                    (nameof(variant), '"'+"h1"+'"'),
-                    (nameof(variant), '"'+"h2"+'"'),
-                    (nameof(variant), '"'+"h3"+'"'),
-                    (nameof(variant), '"'+"h4"+'"'),
-                    (nameof(variant), '"'+"h5"+'"'),
-                    (nameof(variant), '"'+"h6"+'"'),
-                    
-                    (nameof(variant), '"'+"body0"+'"'),
-                    (nameof(variant), '"'+"body1"+'"')
-                ];
-            }
-
+            
             protected override Element render()
             {
                 return new Typography
