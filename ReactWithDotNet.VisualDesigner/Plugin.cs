@@ -923,7 +923,7 @@ static class Plugin
             }
         }
 
-        [CustomComponent]
+        [CustomComponent(Import = "import { BCheckBox } from \"b-check-box\";")]
         sealed class BCheckBox : PluginComponentBase
         {
             [JsTypeInfo(JsType.String)]
@@ -2381,7 +2381,7 @@ sealed class SuggestionsAttribute: Attribute
 
 sealed class CustomComponentAttribute: Attribute
 {
-   
+    public string Import { get; init; }
 }
 
 sealed class NodeAnalyzerAttribute: Attribute
