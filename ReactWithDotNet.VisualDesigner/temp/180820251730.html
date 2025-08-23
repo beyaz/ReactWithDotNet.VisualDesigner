@@ -1,436 +1,223 @@
-<!DOCTYPE html>
-<html lang="tr">
+<html>
+
 <head>
-  <meta charset="UTF-8" />
-  <title>Kredi Kartı Ekstresi</title>
-  <style>
-    /* RDLC Page ayarlarının HTML karşılığı */
-    @page { size: 21cm 28cm; margin: 0; }
-    html, body { margin: 0; padding: 0; background: #fff; }
-
-    .page {
-      position: relative;
-      width: 21cm;       /* PageWidth */
-      height: 28cm;      /* PageHeight */
-      page-break-after: always;
-      font-family: Arial, sans-serif;
-    }
-
-    /* RDLC: Page/PageHeader */
-    .page-header {
-      position: absolute;
-      left: 0; top: 0;
-      width: 21cm;
-      height: 6.5cm;     /* header yüksekliği */
-      font-size: 10pt;
-    }
-
-    /* RDLC: ReportSection/Body */
-    .page-body {
-      position: absolute;
-      left: 0cm;                 /* LeftMargin = 0 */
-      top: 6.5cm;                /* header'dan sonra başlar */
-      width: 20.43851cm;         /* Body Width (RDLC) */
-      height: 11.75776cm;        /* Body Height (RDLC) */
-      font-size: 10pt;
-    }
-
-    /* Yardımcı stiller */
-    .line { position: absolute; border-top: 0.35mm solid #000; }
-    .tblx { position: absolute; }
-    .tblx-row { position: absolute; left: 0; right: 0; }
-    .tblx-col1, .tblx-col2, .tblx-col3 { position: absolute; top: 0; bottom: 0; }
-    .tblx-col1 { left: 0; width: 6.70765cm; font-size: 6pt; }
-    .tblx-col2 { left: 6.70765cm; width: 0.1cm; }
-    .tblx-col3 { left: 6.80765cm; width: 1.7823cm; font-size: 6pt; text-align: right; }
-
-    .rect { position: absolute; }
-    .box { position:absolute; box-sizing:border-box; }
-    .bdr { border:0.25pt solid #666; }               /* varsayılan kenarlık */
-    .bdr-thick { border:0.75pt solid #666; }         /* kalın kenar */
-    .tiny { font-size: 6pt; }
-    .small { font-size: 7pt; }
-    .italic { font-style: italic; }
-    .center { text-align:center; }
-    .right { text-align:right; }
-    .left { text-align:left; }
-	
-	/* === PageFooter (RDLC: Page/PageFooter) === */
-	.page-footer{
-	  position:absolute;
-	  left:0; bottom:0;
-	  width:21cm;               /* PageWidth */
-	  height:2.34723cm;         /* RDLC: <Height> */
-	  font-size:8pt;
-	}
-	.page-footer .tbx{ position:absolute; }
-
-	/* Yazdırmada otomatik sayfa numarası: PageNumber / TotalPages */
-	@media print{
-	  .page-footer .page-xofy::after{ content: counter(page) " / " counter(pages); }
-	  .page-footer .page-calc::after{ content: counter(page); } /* RDLC’deki ikinci textbox: offset yoksa aynı */
-	}
-	
-	
-	/* === OMR (per spec) === */
-	:root{
-	  --omr-top: 5cm;           /* 50 mm aşağıda */
-	  --omr-left: 0.5cm;        /* 5 mm içeriden başlat */
-	  --omr-length: 1cm;        /* >= 10 mm */
-	  --omr-thickness: 0.35mm;  /* çizgi kalınlığı */
-	  --omr-gap: 0.317cm;       /* 3.17 mm aralık */
-	}
-
-	.omr{
-	  position:absolute;
-	  top: var(--omr-top);
-	  left: var(--omr-left);
-	  width: var(--omr-length);
-	  /* İlk-sons çizgi arası 4*gap; üst/alt 15 mm boşluk şartını,
-		 bu bloğu konumlandırırken (5 cm) sağlıyoruz. */
-	  pointer-events:none;
-	}
-
-	.omr .mark{
-	  position:absolute;
-	  left:0;
-	  width: var(--omr-length);
-	  height: 0;
-	  border-top: var(--omr-thickness) solid #000; /* düz siyah çizgi */
-	}
-
-	/* “off” olan çizgi görünmesin (yer ayrılır, boşluk korunur) */
-	.omr .mark.off{ border-top-color: transparent; }
-
-	/* Dikey yerleşimler: BM, EOC, PS1, PS2, PS4 */
-	.omr .bm  { top: calc(var(--omr-gap) * 0); }
-	.omr .eoc { top: calc(var(--omr-gap) * 1); }
-	.omr .ps1 { top: calc(var(--omr-gap) * 2); }
-	.omr .ps2 { top: calc(var(--omr-gap) * 3); }
-	.omr .ps4 { top: calc(var(--omr-gap) * 4); }
-
-	/* Sağ kenara almak istersen: .omr.right kullan */
-	.omr.right{ left:auto; right:0.5cm; }
-  </style>
 </head>
-<body>
 
-<div class="page">
+<body style="cursor: auto;margin:0px;padding:0px;background:rgb(255, 255, 255) none repeat scroll 0% 0% / auto padding-box border-box;">
 
-  <!-- =================== PAGE HEADER =================== -->
-  <div class="page-header">
+    <div style="position:relative;width: 21cm;height:1058.27px;break-after:page;font-family:Arial, sans-serif;">
 
-    <!-- KREDİ KARTI EKSTRESİ / Credit Card Statement -->
-    <div style="position: absolute; top: 2.9874cm; left: 2.46828cm; width: 10.04757cm; height: 0.6cm; font-size: 7pt;">
-      <span style="color: black;">KREDİ KARTI EKSTRESİ / </span>
-      <span class="italic" style="color: black;">Credit Card Statement</span>
-    </div>
+        <!-- =================== PAGE HEADER =================== -->
+        <div style="position:absolute;left:0px;top:0px;width: 21cm;height:245.664px;font-size:13.3333px;">
 
-    <!-- Nakit Avans Limiti -->
-    <div style="position: absolute; top: 5.84704cm; left: 11.75767cm; width: 6.70765cm; height: 0.2825cm;" class="tiny">
-      Nakit Avans Limiti <span class="italic">/ Cash Advance Available</span>
-    </div>
+            <!-- KREDİ KARTI EKSTRESİ / Credit Card Statement -->
+            <div style="position: absolute; top: 2.9874cm; left: 2.46828cm; width: 10.04757cm; height: 0.6cm; font-size: 7pt;top:112.91px;left:93.2893px;width: 10.04757cm;height:22.6719px;font-size:9.33333px;">
+                <span style="color: black;">KREDİ KARTI EKSTRESİ / </span> <span style="color: black;font-style:italic;">Credit Card Statement</span>
+            </div> <!-- Nakit Avans Limiti -->
+            <div style="position: absolute; top: 5.84704cm; left: 11.75767cm; width: 6.70765cm; height: 0.2825cm;top:220.99px;left:444.384px;width: 6.70765cm;height:10.6719px;font-size:8px;">
+                Nakit Avans Limiti <span style="font-style:italic;">/ Cash Advance Available</span>
+            </div> <!-- Kullanılabilir Limit -->
+            <div style="position: absolute; top: 5.52926cm; left: 11.75767cm; width: 6.70765cm; height: 0.2825cm;top:208.98px;left:444.384px;width: 6.70765cm;height:10.6719px;font-size:8px;">
+                Kullanılabilir Limit <span style="font-style:italic;">/ Available Limit</span>
+            </div> <!-- Kart Limiti -->
+            <div style="position: absolute; top: 5.20746cm; left: 11.75766cm; width: 6.70765cm; height: 0.28652cm;top:196.817px;left:444.384px;width: 6.70765cm;height:10.8281px;font-size:8px;">
+                Kart Limiti <span style="font-style:italic;">/ Card Limit</span>
+            </div> <!-- Kart No -->
+            <div style="position: absolute; top: 4.88552cm; left: 11.75766cm; width: 6.70765cm; height: 0.28667cm;top:184.65px;left:444.384px;width: 6.70765cm;height:10.8281px;font-size:8px;">
+                Kart No <span style="font-style:italic;">/ Card Number</span>
+            </div> <!-- Müşteri No -->
+            <div style="position: absolute; top: 4.56635cm; left: 11.75767cm; width: 6.70765cm; height: 0.28389cm;top:172.586px;left:444.384px;width: 6.70765cm;height:10.7266px;font-size:8px;">
+                Müşteri No <span style="font-style:italic;">/ Customer Number</span>
+            </div> <!-- Kart ve Müşteri Bilgileriniz -->
+            <div style="position: absolute; top: 4.18503cm; left: 11.75766cm; width: 6.70765cm; height: 0.34604cm; font-size: 7pt; font-weight: bold;top:158.174px;left:444.384px;width: 6.70765cm;height:13.0781px;font-size:9.33333px;font-weight:700;">
+                Kart ve Müşteri Bilgileriniz / <span style="font-size: 6pt;font-style:italic;">Your Card and Customer Details</span>
+            </div> <!-- Müşteri No değeri -->
+            <div style="position: absolute; top: 4.56635cm; left: 18.5006cm; width: 1.7823cm; height: 0.28389cm; text-align: right;top:172.586px;left:699.235px;width: 1.7823cm;height:10.7266px;text-align:right;font-size:8px;">
+                95240712
+            </div> <!-- Maskelenmiş Kart No -->
+            <div style="position: absolute; top: 4.88552cm; left: 18.5006cm; width: 1.7823cm; height: 0.28667cm; text-align: right;top:184.65px;left:699.235px;width: 1.7823cm;height:10.8281px;text-align:right;font-size:8px;">
+                520180******7641
+            </div> <!-- Kart Limiti değeri -->
+            <div style="position: absolute; top: 5.20746cm; left: 18.4684cm; width: 1.7823cm; height: 0.28652cm; text-align: right;top:196.817px;left:698.018px;width: 1.7823cm;height:10.8281px;text-align:right;font-size:8px;">
+                200,000.00 TL
+            </div> <!-- Kullanılabilir Limit değeri -->
+            <div style="position: absolute; top: 5.52926cm; left: 18.4684cm; width: 1.7823cm; height: 0.2825cm; text-align: right;top:208.98px;left:698.018px;width: 1.7823cm;height:10.6719px;text-align:right;font-size:8px;">
+                194,801.20 TL
+            </div> <!-- Kart Sahibinin Adı Soyadı -->
+            <div style="position: absolute; top: 3.62268cm; left: 2.04208cm; width: 6.70831cm; height: 1.23867cm; font-size: 9pt; text-align: left;top:136.92px;left:77.181px;width: 6.70831cm;height:46.8125px;font-size:12px;text-align:left;">
+                Sayın HANDE BAŞ
+            </div> <!-- Adres -->
+            <div style="position: absolute; top: 5.07277cm; left: 2.05521cm; width: 6.70831cm; height: 1.24196cm; font-size: 9pt; text-align: left;top:191.727px;left:77.6772px;width: 6.70831cm;height:46.9375px;font-size:12px;text-align:left;">
+                Güllük Mahallesi Mah. Koru Sokak No: 31<br />Daire: /5&nbsp;&nbsp;ADAPAZARI/Sakarya
+            </div> <!-- Nakit Avans Limiti değeri -->
+            <div style="position: absolute; top: 5.84704cm; left: 18.4684cm; width: 1.7823cm; height: 0.2825cm; text-align: right;top:220.99px;left:698.018px;width: 1.7823cm;height:10.6719px;text-align:right;font-size:8px;">
+                0.00 TL
+            </div> <!-- Ürün Adı -->
+            <div style="position: absolute; top: 2.5144cm; left: 2.46828cm; width: 10.04757cm; height: 0.473cm; font-size: 7pt;top:95.0324px;left:93.2893px;width: 10.04757cm;height:17.875px;font-size:9.33333px;">
+                Miles&amp;Smiles Platinum
+            </div>
+        </div> <!-- =================== /PAGE HEADER =================== -->
+        <!-- =================== BODY =================== -->
+        <div style="position:absolute;left:0px;top:245.669px;width: 20.4385cm;height:444.383px;font-size:13.3333px;">
 
-    <!-- Kullanılabilir Limit -->
-    <div style="position: absolute; top: 5.52926cm; left: 11.75767cm; width: 6.70765cm; height: 0.2825cm;" class="tiny">
-      Kullanılabilir Limit <span class="italic">/ Available Limit</span>
-    </div>
+            <!-- RDLC: tblxKartMusteriBilgi (Ödeme Bilgileri) -->
+            <div style="left: 11.74649cm; top: 0.05757cm; width: 8.58995cm; height: 2.09638cm;top:2.17587px;width: 8.58995cm;height:79.2266px;position:absolute;">
 
-    <!-- Kart Limiti -->
-    <div style="position: absolute; top: 5.20746cm; left: 11.75766cm; width: 6.70765cm; height: 0.28652cm;" class="tiny">
-      Kart Limiti <span class="italic">/ Card Limit</span>
-    </div>
+                <!-- Row 0 -->
+                <div style="top: 0cm; height: 0.34604cm;height:13.0781px;position:absolute;left:0px;right:0px;">
+                    <div style="font-size: 7pt; font-weight: bold;font-weight:700;left:0px;width: 6.70765cm;position:absolute;top:0px;bottom:0px;">
+                        Ödeme Bilgileriniz <span style="font-size: 6pt; font-weight: bold;font-weight:700;font-style:italic;">/ Your Payment Details</span>
+                    </div>
+                    <div style="left:253.517px;width: 0.1cm;position:absolute;top:0px;bottom:0px;"></div>
+                    <div style="left:257.297px;width: 1.7823cm;font-size:8px;text-align:right;position:absolute;top:0px;bottom:0px;"></div>
+                </div> <!-- Row 1 -->
+                <div style="top: 0.34604cm; height: 0.3cm;height:11.3359px;position:absolute;left:0px;right:0px;">
+                    <div style="left:0px;width: 6.70765cm;font-size:8px;position:absolute;top:0px;bottom:0px;">Hesap Kesim Tarihi <span style="font-style:italic;">/ Statement Issue Date</span></div>
+                    <div style="left:253.517px;width: 0.1cm;position:absolute;top:0px;bottom:0px;"></div>
+                    <div style="left:257.297px;width: 1.7823cm;font-size:8px;text-align:right;position:absolute;top:0px;bottom:0px;">08/08/2025</div>
+                </div> <!-- Row 2 -->
+                <div style="top: 0.64604cm; height: 0.28667cm;height:10.8281px;position:absolute;left:0px;right:0px;">
+                    <div style="left:0px;width: 6.70765cm;font-size:8px;position:absolute;top:0px;bottom:0px;"><span style="color:#ee3124;">Son Ödeme Tarihi</span> <span style="color:#ee3124;font-style:italic;">/ Due Date for Payment</span></div>
+                    <div style="left:253.517px;width: 0.1cm;position:absolute;top:0px;bottom:0px;"></div>
+                    <div style="font-weight: bold;left:257.297px;width: 1.7823cm;font-size:8px;text-align:right;position:absolute;top:0px;bottom:0px;">18/08/2025</div>
+                </div> <!-- Row 3 -->
+                <div style="top: 0.93271cm; height: 0.28667cm;height:10.8281px;position:absolute;left:0px;right:0px;">
+                    <div style="left:0px;width: 6.70765cm;font-size:8px;position:absolute;top:0px;bottom:0px;"><span style="color:#ee3124;">Dönem Borcunuz</span> <span style="color:#ee3124;font-style:italic;">/ Your Current Debt</span></div>
+                    <div style="left:253.517px;width: 0.1cm;position:absolute;top:0px;bottom:0px;"></div>
+                    <div style="font-weight: bold;left:257.297px;width: 1.7823cm;font-size:8px;text-align:right;position:absolute;top:0px;bottom:0px;">5,199.55 TL</div>
+                </div> <!-- Row 4 -->
+                <div style="top: 1.21938cm; height: 0.2825cm;height:10.6719px;position:absolute;left:0px;right:0px;">
+                    <div style="left:0px;width: 6.70765cm;font-size:8px;position:absolute;top:0px;bottom:0px;">Asgari Ödeme Tutarı <span style="font-style:italic;">/ Minimum Payment Amount</span></div>
+                    <div style="left:253.517px;width: 0.1cm;position:absolute;top:0px;bottom:0px;"></div>
+                    <div style="left:257.297px;width: 1.7823cm;font-size:8px;text-align:right;position:absolute;top:0px;bottom:0px;">5,199.55 TL</div>
+                </div> <!-- Row 5 -->
+                <div style="top: 1.50188cm; height: 0.30783cm;height:11.6328px;position:absolute;left:0px;right:0px;">
+                    <div style="left:0px;width: 6.70765cm;font-size:8px;position:absolute;top:0px;bottom:0px;">Kâr Payı Oranı (Aylık/Yıllık) <span style="font-style:italic;">/ Profit Share Rate (Monthly/Yearly)</span></div>
+                    <div style="left:253.517px;width: 0.1cm;position:absolute;top:0px;bottom:0px;"></div>
+                    <div style="font-weight: bold;left:257.297px;width: 1.7823cm;font-size:8px;text-align:right;position:absolute;top:0px;bottom:0px;">3.50% / 42.00%</div>
+                </div> <!-- Row 6 -->
+                <div style="top: 1.80971cm; height: 0.28667cm;height:10.8281px;position:absolute;left:0px;right:0px;">
+                    <div style="left:0px;width: 6.70765cm;font-size:8px;position:absolute;top:0px;bottom:0px;">Gecikme Cezası Oranı (Aylık/Yıllık) <span style="font-style:italic;">/ Delay Rate (Monthly/Yearly)</span></div>
+                    <div style="left:253.517px;width: 0.1cm;position:absolute;top:0px;bottom:0px;"></div>
+                    <div style="font-weight: bold;left:257.297px;width: 1.7823cm;font-size:8px;text-align:right;position:absolute;top:0px;bottom:0px;">3.80% / 45.60%</div>
+                </div>
+            </div> <!-- /tblxKartMusteriBilgi -->
+            <!-- RDLC: tblxKartMusteriBilgi2 (Sonraki Dönem) -->
+            <div style="left: 11.7465cm; top: 2.58667cm; width: 8.58995cm; height: 0.87545cm;top:97.7639px;width: 8.58995cm;height:33.0859px;position:absolute;">
 
-    <!-- Kart No -->
-    <div style="position: absolute; top: 4.88552cm; left: 11.75766cm; width: 6.70765cm; height: 0.28667cm;" class="tiny">
-      Kart No <span class="italic">/ Card Number</span>
-    </div>
+                <!-- Row 0: Başlık (0.30211cm) -->
+                <div style="top: 0cm; height: 0.30211cm;height:11.4141px;position:absolute;left:0px;right:0px;">
+                    <div style="font-size: 7pt; font-weight: bold;font-weight:700;left:0px;width: 6.70765cm;position:absolute;top:0px;bottom:0px;">
+                        Sonraki Dönem Bilgileriniz <span style="font-size: 6pt; font-weight: bold;font-weight:700;font-style:italic;">/ Next Statement's Details</span>
+                    </div>
+                    <div style="left:253.517px;width: 0.1cm;position:absolute;top:0px;bottom:0px;"></div>
+                    <div style="left:257.297px;width: 1.7823cm;font-size:8px;text-align:right;position:absolute;top:0px;bottom:0px;"></div>
+                </div> <!-- Row 1: Sonraki Hesap Kesim Tarihi -->
+                <div style="top: 0.30211cm; height: 0.28667cm;height:10.8281px;position:absolute;left:0px;right:0px;">
+                    <div style="left:0px;width: 6.70765cm;font-size:8px;position:absolute;top:0px;bottom:0px;">Sonraki Hesap Kesim Tarihi <span style="font-style:italic;">/ Next Statement Date</span></div>
+                    <div style="left:253.517px;width: 0.1cm;position:absolute;top:0px;bottom:0px;"></div>
+                    <div style="left:257.297px;width: 1.7823cm;font-size:8px;text-align:right;position:absolute;top:0px;bottom:0px;">08/09/2025</div>
+                </div> <!-- Row 2: Sonraki Son Ödeme Tarihi -->
+                <div style="top: 0.58878cm; height: 0.28667cm;height:10.8281px;position:absolute;left:0px;right:0px;">
+                    <div style="left:0px;width: 6.70765cm;font-size:8px;position:absolute;top:0px;bottom:0px;">Sonraki Son Ödeme Tarihi <span style="font-style:italic;">/ Next Due Date for Payment</span></div>
+                    <div style="left:253.517px;width: 0.1cm;position:absolute;top:0px;bottom:0px;"></div>
+                    <div style="left:257.297px;width: 1.7823cm;font-size:8px;text-align:right;position:absolute;top:0px;bottom:0px;">18/09/2025</div>
+                </div>
+            </div> <!-- /tblxKartMusteriBilgi2 -->
+            <!-- RDLC: txtMessageBox2 (konteyner) + txtMessageBox3 (içerik) -->
+            <div position:absolute;="" top:0.19363cm;="" left:2.06834cm;="" width:6.70831cm;="" height:2.75667cm;="" z-index:="" style="position:absolute;top:7.3183px;left:78.1735px;width:6.70831cm;height:104.188px;z-index:200;border:0.5px solid rgb(102, 102, 102);box-sizing:border-box;">
+                <div position:absolute;="" top:0.13911cm;="" left:0.19991cm;="" RDLC="" ofset="" *="" width:6.25898cm;="" height:2.33273cm;="" font-size:8pt;="" text-align:left;="" line-height:1.25;="" white-space:pre-wrap;="" word-wrap:break-word;="" style="position:absolute;top:5.2577px;left:7.55565px;/* RDLC ofset */
+             width:6.25898cm;height:88.1641px;font-size:10.6667px;text-align:left;line-height:13.3333px;white-space:pre-wrap;word-wrap:break-word;overflow:hidden;">
+                    Taksitli işlemlerde uygulanacak olan kar payı oranı hesap özetinin 25.000 TL ve altında ise %3,50,
+                    25.000-150.000 TL arasında ise %4,00 ve 150.000 TL üzerinde ise %4,50 olarak uygulanacaktır.
+                </div>
+            </div> <!-- =================== RECTANGLE1 =================== -->
+            <div style="left:0cm; top:3.62811cm; width:20.31537cm; height:8.07673cm;top:137.125px;width:20.31537cm;height:305.258px;position:absolute;">
 
-    <!-- Müşteri No -->
-    <div style="position: absolute; top: 4.56635cm; left: 11.75767cm; width: 6.70765cm; height: 0.28389cm;" class="tiny">
-      Müşteri No <span class="italic">/ Customer Number</span>
-    </div>
+                <!-- Tablix1 (özet paneller) -->
+                <div style="left:2.05521cm; top:2.52905cm; width:17.02832cm; height:2.67605cm;top:95.5861px;width:17.02832cm;height:101.141px;position:absolute;">
 
-    <!-- Kart ve Müşteri Bilgileriniz -->
-    <div style="position: absolute; top: 4.18503cm; left: 11.75766cm; width: 6.70765cm; height: 0.34604cm; font-size: 7pt; font-weight: bold;">
-      Kart ve Müşteri Bilgileriniz / <span class="italic" style="font-size: 6pt;">Your Card and Customer Details</span>
-    </div>
-
-    <!-- Müşteri No değeri -->
-    <div style="position: absolute; top: 4.56635cm; left: 18.5006cm; width: 1.7823cm; height: 0.28389cm; text-align: right;" class="tiny">
-      95240712
-    </div>
-
-    <!-- Maskelenmiş Kart No -->
-    <div style="position: absolute; top: 4.88552cm; left: 18.5006cm; width: 1.7823cm; height: 0.28667cm; text-align: right;" class="tiny">
-      520180******7641
-    </div>
-
-    <!-- Kart Limiti değeri -->
-    <div style="position: absolute; top: 5.20746cm; left: 18.4684cm; width: 1.7823cm; height: 0.28652cm; text-align: right;" class="tiny">
-      200,000.00 TL
-    </div>
-
-    <!-- Kullanılabilir Limit değeri -->
-    <div style="position: absolute; top: 5.52926cm; left: 18.4684cm; width: 1.7823cm; height: 0.2825cm; text-align: right;" class="tiny">
-      194,801.20 TL
-    </div>
-
-    <!-- Kart Sahibinin Adı Soyadı -->
-    <div style="position: absolute; top: 3.62268cm; left: 2.04208cm; width: 6.70831cm; height: 1.23867cm; font-size: 9pt; text-align: left;">
-      Sayın HANDE BAŞ
-    </div>
-
-    <!-- Adres -->
-    <div style="position: absolute; top: 5.07277cm; left: 2.05521cm; width: 6.70831cm; height: 1.24196cm; font-size: 9pt; text-align: left;">
-      Güllük Mahallesi Mah. Koru Sokak No: 31<br/>Daire: /5&nbsp;&nbsp;ADAPAZARI/Sakarya
-    </div>
-
-    <!-- Nakit Avans Limiti değeri -->
-    <div style="position: absolute; top: 5.84704cm; left: 18.4684cm; width: 1.7823cm; height: 0.2825cm; text-align: right;" class="tiny">
-      0.00 TL
-    </div>
-
-    <!-- Ürün Adı -->
-    <div style="position: absolute; top: 2.5144cm; left: 2.46828cm; width: 10.04757cm; height: 0.473cm; font-size: 7pt;">
-      Miles&Smiles Platinum
-    </div>
-
-    
-  </div>
-  <!-- =================== /PAGE HEADER =================== -->
-
-  <!-- =================== BODY =================== -->
-  <div class="page-body">
-
-    <!-- RDLC: tblxKartMusteriBilgi (Ödeme Bilgileri) -->
-    <div id="tblxKartMusteriBilgi" class="tblx"
-         style="left: 11.74649cm; top: 0.05757cm; width: 8.58995cm; height: 2.09638cm;">
-
-      <!-- Row 0 -->
-      <div class="tblx-row" style="top: 0cm; height: 0.34604cm;">
-        <div class="tblx-col1" style="font-size: 7pt; font-weight: bold;">
-          Ödeme Bilgileriniz <span class="italic" style="font-size: 6pt; font-weight: bold;">/ Your Payment Details</span>
+                    <!-- Başlıklar -->
+                    <div style="top:0.03528cm; left:1.11434cm; width:3.20041cm; height:0.7cm;left:42.1168px;width:3.20041cm;height:26.4531px;text-align:center;font-size:8px;position:absolute;box-sizing:border-box;">
+                        Devreden Bakiye
+                    </div>
+                    <div style="top:0.03528cm; left:5.0309cm; width:3.49933cm; height:0.7cm;left:190.144px;width:3.49933cm;height:26.4531px;text-align:center;font-size:8px;position:absolute;box-sizing:border-box;">
+                        Dönem Harcamaları
+                    </div>
+                    <div style="top:0.03528cm; left:8.77637cm; width:3.28075cm; height:0.7cm;left:331.705px;width:3.28075cm;height:26.4531px;text-align:center;font-size:8px;position:absolute;box-sizing:border-box;">
+                        Ödemeleriniz
+                    </div>
+                    <div style="top:0.02942cm; left:12.75824cm; width:3.70852cm; height:0.7cm;left:482.201px;width:3.70852cm;height:26.4531px;text-align:center;font-size:8px;position:absolute;box-sizing:border-box;">
+                        Dönem Borcunuz
+                    </div> <!-- Değerler -->
+                    <div style="top:0.65706cm; left:1.15064cm; width:3.28986cm; height:0.54565cm;left:43.4888px;width:3.28986cm;height:20.6172px;text-align:center;font-size:9.33333px;border:0.5px solid rgb(102, 102, 102);position:absolute;box-sizing:border-box;">
+                        5,161.79 TL
+                    </div>
+                    <div style="top:0.65706cm; left:4.31475cm; width:0.71615cm; height:0.48772cm;left:163.077px;width:0.71615cm;height:18.4297px;text-align:center;font-size:9.33333px;position:absolute;box-sizing:border-box;">+</div>
+                    <div style="top:0.65706cm; left:5.0309cm; width:3.35741cm; height:0.54565cm;left:190.144px;width:3.35741cm;height:20.6172px;text-align:center;font-size:9.33333px;border:0.5px solid rgb(102, 102, 102);position:absolute;box-sizing:border-box;">
+                        5,199.55 TL
+                    </div>
+                    <div style="top:0.7647cm; left:8.33632cm; width:0.53795cm; height:0.3983cm;left:315.074px;width:0.53795cm;height:15.0469px;text-align:center;font-size:9.33333px;position:absolute;box-sizing:border-box;">-</div>
+                    <div style="top:0.65706cm; left:8.77637cm; width:3.28075cm; height:0.54565cm;left:331.705px;width:3.28075cm;height:20.6172px;text-align:center;font-size:9.33333px;border:0.5px solid rgb(102, 102, 102);position:absolute;box-sizing:border-box;">
+                        5,161.79 TL
+                    </div>
+                    <div style="top:0.74648cm; left:12.31496cm; width:0.64378cm; height:0.3983cm;left:465.447px;width:0.64378cm;height:15.0469px;text-align:center;font-size:9.33333px;position:absolute;box-sizing:border-box;">=</div>
+                    <div style="top:0.65706cm; left:13.09985cm; width:3.28075cm; height:0.54565cm;left:495.112px;width:3.28075cm;height:20.6172px;text-align:center;font-size:9.33333px;border:1px solid rgb(102, 102, 102);position:absolute;box-sizing:border-box;">
+                        5,199.55 TL
+                    </div>
+                </div> <!-- /Tablix1 -->
+                <!-- txtMessageBox4 (bilgilendirme) -->
+                <div style="left:1.14749cm; top:5.21386cm; width:19.05788cm; height:1.74743cm; font-size:8pt; text-align:left; white-space:pre-wrap;top:197.059px;width:19.05788cm;height:66.0391px;font-size:10.6667px;text-align:left;white-space:pre-wrap;border:0.5px solid rgb(102, 102, 102);position:absolute;box-sizing:border-box;">
+                    Kredi kartı borcunuzun gecikmesi durumunda uygulanacak gecikme cezası oranı, hesap özeti borcunuza göre
+                    aylık akdi kâr payı oranına %0,30 eklenerek hesaplanacaktır. KKDF ve BSMV dahil değildir.
+                </div> <!-- Çizgi Line11 -->
+                <div style="top:5.24038cm; left:1.14749cm; width:19.16788cm; border-top:0.25pt solid #666;left:43.3697px;width:19.16788cm;border-top:0.5px solid rgb(102, 102, 102);position:absolute;"></div> <!-- txtMessageBox5 (ek mesaj; PDF’te başlık metni yok) -->
+                <div style="left:1.14749cm; top:7.06032cm; width:19.05788cm; height:1.01641cm; font-size:18pt; text-align:left; white-space:pre-wrap;top:266.847px;width:19.05788cm;height:38.4141px;font-size:24px;text-align:left;white-space:pre-wrap;border:0.5px solid rgb(102, 102, 102);position:absolute;box-sizing:border-box;">
+                </div> <!-- Çizgi Line14 -->
+                <div style="top:2.50372cm; left:1.14749cm; width:19.05788cm; border-top:0.25pt solid #666;left:43.3697px;width:19.05788cm;border-top:0.5px solid rgb(102, 102, 102);position:absolute;"></div> <!-- tblxEkstreDetay2 (örnek satırlar) -->
+                <div style="left:1.13435cm; top:0.1142cm; width:19.18102cm; height:2.11696cm;top:4.31622px;width:19.18102cm;height:80.0078px;position:absolute;">
+                    <!-- Üst/alt çizgiler -->
+                    <div style="top:0.03163cm; left:0; width:19.05788cm; border-top:0.25pt solid #666;left:0px;width:19.05788cm;border-top:0.5px solid rgb(102, 102, 102);position:absolute;"></div>
+                    <div style="top:0.63163cm; left:0; width:19.05788cm; border-top:0.25pt solid #666;left:0px;width:19.05788cm;border-top:0.5px solid rgb(102, 102, 102);position:absolute;"></div> <!-- Sütun başlıkları -->
+                    <div style="top:0.13544cm; left:0;        width:2.36159cm; height:0.6cm;left:0px;width:2.36159cm;height:22.6719px;text-align:left;font-size:8px;position:absolute;box-sizing:border-box;">İŞLEM TARİHİ</div>
+                    <div style="top:0.13544cm; left:2.0756cm;  width:2.65792cm; height:0.6cm;left:78.4479px;width:2.65792cm;height:22.6719px;text-align:left;font-size:8px;position:absolute;box-sizing:border-box;">İŞLEM AÇIKLAMASI</div>
+                    <div style="top:0.13746cm; left:14.70943cm; width:2.36159cm; height:0.6cm;left:555.947px;width:2.36159cm;height:22.6719px;text-align:left;font-size:8px;position:absolute;box-sizing:border-box;">TUTAR</div>
+                    <div style="top:0.13544cm; left:16.69629cm; width:2.36159cm; height:0.6cm;left:631.041px;width:2.36159cm;height:22.6719px;text-align:left;font-size:8px;position:absolute;box-sizing:border-box;">MİL</div> <!-- Örnek satırlar -->
+                    <div style="top:0.79935cm; left:0;         width:2.0cm; height:0.55205cm;left:0px;width:2.0cm;height:20.8594px;text-align:left;font-size:9.33333px;position:absolute;box-sizing:border-box;">10/07/2025</div>
+                    <div style="top:0.79935cm; left:2.28102cm; width:9cm;   height:0.55205cm;left:86.2118px;width:9cm;height:20.8594px;text-align:left;font-size:9.33333px;position:absolute;box-sizing:border-box;">PAYCELL/TRENDYOL — İstanbul TR</div>
+                    <div style="top:0.79935cm; left:15.18102cm; width:2cm;   height:0.55205cm;left:573.771px;width:2cm;height:20.8594px;text-align:right;font-size:9.33333px;position:absolute;box-sizing:border-box;">154.99 TL</div>
+                    <div style="top:0.79935cm; left:17.18102cm; width:2cm;   height:0.55205cm;left:649.361px;width:2cm;height:20.8594px;text-align:right;font-size:9.33333px;position:absolute;box-sizing:border-box;">1.00</div>
+                    <div style="top:1.35140cm; left:0;         width:2.0cm; height:0.55205cm;left:0px;width:2.0cm;height:20.8594px;text-align:left;font-size:9.33333px;position:absolute;box-sizing:border-box;">10/07/2025</div>
+                    <div style="top:1.35140cm; left:2.28102cm; width:9cm;   height:0.55205cm;left:86.2118px;width:9cm;height:20.8594px;text-align:left;font-size:9.33333px;position:absolute;box-sizing:border-box;">Kredi Kartı Borç Ödeme</div>
+                    <div style="top:1.35140cm; left:15.18102cm; width:2cm;   height:0.55205cm;left:573.771px;width:2cm;height:20.8594px;text-align:right;font-size:9.33333px;position:absolute;box-sizing:border-box;">-5,161.79 TL</div>
+                    <div style="top:1.35140cm; left:17.18102cm; width:2cm;   height:0.55205cm;left:649.361px;width:2cm;height:20.8594px;text-align:right;font-size:9.33333px;position:absolute;box-sizing:border-box;">0.00</div>
+                </div> <!-- /tblxEkstreDetay2 -->
+            </div> <!-- =================== /RECTANGLE1 =================== -->
+        </div> <!-- =================== /BODY =================== -->
+        <!-- =================== PAGE FOOTER =================== -->
+        <div style="position:absolute;left:0px;bottom:0px;width: 21cm;height:88.7109px;font-size:10.6667px;">
+            <!-- Textbox33: =Globals.PageNumber & " / " & Globals.TotalPages -->
+            <div style="top:0.82176cm; left:0.31183cm; width:0.77823cm; height:0.46209cm; text-align:left;left:11.7857px;width:0.77823cm;height:17.4609px;text-align:left;position:absolute;">
+                <span class="page-xofy">1 / 1</span> <!-- ekran görünümü için fallback; yazdırmada CSS counter devreye girer -->
+            </div>
+            <!-- Textbox34:
+            =IIF(First(Fields!TotalPageCount.Value,"StatementPdfContractSet")=0,
+                 Globals!PageNumber,
+                 First(Fields!TotalPageCount.Value,"StatementPdfContractSet")+Globals!PageNumber) -->
+            <div style="top:1.35441cm; left:0.31183cm; width:1.74879cm; height:0.46209cm; text-align:left;left:11.7857px;width:1.74879cm;height:17.4609px;text-align:left;position:absolute;">
+                <span class="page-calc">1</span> <!-- offset yoksa sayfa numarası; yazdırmada counter(page) çalışır -->
+            </div>
+        </div> <!-- =================== /PAGE FOOTER =================== -->
+        <!-- === OMR Marks === -->
+        <div aria-hidden="true" style="position:absolute;top:188.976px;left:18.8976px;width: 1cm;pointer-events:none;">
+            <div style="top:0px;position:absolute;left:0px;width: 1cm;height:0px;border-top:1px solid rgb(0, 0, 0);"></div> <!-- Bench Mark: HER sayfada -->
+            <div style="top:11.9811px;border-top-color:rgba(0, 0, 0, 0);position:absolute;left:0px;width: 1cm;height:0px;border-top:1px solid rgba(0, 0, 0, 0);"></div> <!-- End of Collation: sadece son sayfa 'on' -->
+            <div style="top:23.9622px;border-top-color:rgba(0, 0, 0, 0);position:absolute;left:0px;width: 1cm;height:0px;border-top:1px solid rgba(0, 0, 0, 0);"></div> <!-- PS1 bit -->
+            <div style="top:35.9433px;position:absolute;left:0px;width: 1cm;height:0px;border-top:1px solid rgb(0, 0, 0);"></div> <!-- PS2 bit -->
+            <div style="top:47.9244px;position:absolute;left:0px;width: 1cm;height:0px;border-top:1px solid rgb(0, 0, 0);"></div> <!-- PS4 bit -->
         </div>
-        <div class="tblx-col2"></div>
-        <div class="tblx-col3"></div>
-      </div>
-
-      <!-- Row 1 -->
-      <div class="tblx-row" style="top: 0.34604cm; height: 0.3cm;">
-        <div class="tblx-col1">Hesap Kesim Tarihi <span class="italic">/ Statement Issue Date</span></div>
-        <div class="tblx-col2"></div>
-        <div class="tblx-col3">08/08/2025</div>
-      </div>
-
-      <!-- Row 2 -->
-      <div class="tblx-row" style="top: 0.64604cm; height: 0.28667cm;">
-        <div class="tblx-col1"><span style="color:#ee3124;">Son Ödeme Tarihi</span> <span class="italic" style="color:#ee3124;">/ Due Date for Payment</span></div>
-        <div class="tblx-col2"></div>
-        <div class="tblx-col3" style="font-weight: bold;">18/08/2025</div>
-      </div>
-
-      <!-- Row 3 -->
-      <div class="tblx-row" style="top: 0.93271cm; height: 0.28667cm;">
-        <div class="tblx-col1"><span style="color:#ee3124;">Dönem Borcunuz</span> <span class="italic" style="color:#ee3124;">/ Your Current Debt</span></div>
-        <div class="tblx-col2"></div>
-        <div class="tblx-col3" style="font-weight: bold;">5,199.55 TL</div>
-      </div>
-
-      <!-- Row 4 -->
-      <div class="tblx-row" style="top: 1.21938cm; height: 0.2825cm;">
-        <div class="tblx-col1">Asgari Ödeme Tutarı <span class="italic">/ Minimum Payment Amount</span></div>
-        <div class="tblx-col2"></div>
-        <div class="tblx-col3">5,199.55 TL</div>
-      </div>
-
-      <!-- Row 5 -->
-      <div class="tblx-row" style="top: 1.50188cm; height: 0.30783cm;">
-        <div class="tblx-col1">Kâr Payı Oranı (Aylık/Yıllık) <span class="italic">/ Profit Share Rate (Monthly/Yearly)</span></div>
-        <div class="tblx-col2"></div>
-        <div class="tblx-col3" style="font-weight: bold;">3.50% / 42.00%</div>
-      </div>
-
-      <!-- Row 6 -->
-      <div class="tblx-row" style="top: 1.80971cm; height: 0.28667cm;">
-        <div class="tblx-col1">Gecikme Cezası Oranı (Aylık/Yıllık) <span class="italic">/ Delay Rate (Monthly/Yearly)</span></div>
-        <div class="tblx-col2"></div>
-        <div class="tblx-col3" style="font-weight: bold;">3.80% / 45.60%</div>
-      </div>
-    </div>
-    <!-- /tblxKartMusteriBilgi -->
-
-    <!-- RDLC: tblxKartMusteriBilgi2 (Sonraki Dönem) -->
-    <div id="tblxKartMusteriBilgi2" class="tblx"
-         style="left: 11.7465cm; top: 2.58667cm; width: 8.58995cm; height: 0.87545cm;">
-
-      <!-- Row 0: Başlık (0.30211cm) -->
-      <div class="tblx-row" style="top: 0cm; height: 0.30211cm;">
-        <div class="tblx-col1" style="font-size: 7pt; font-weight: bold;">
-          Sonraki Dönem Bilgileriniz <span class="italic" style="font-size: 6pt; font-weight: bold;">/ Next Statement's Details</span>
-        </div>
-        <div class="tblx-col2"></div>
-        <div class="tblx-col3"></div>
-      </div>
-
-      <!-- Row 1: Sonraki Hesap Kesim Tarihi -->
-      <div class="tblx-row" style="top: 0.30211cm; height: 0.28667cm;">
-        <div class="tblx-col1">Sonraki Hesap Kesim Tarihi <span class="italic">/ Next Statement Date</span></div>
-        <div class="tblx-col2"></div>
-        <div class="tblx-col3">08/09/2025</div>
-      </div>
-
-      <!-- Row 2: Sonraki Son Ödeme Tarihi -->
-      <div class="tblx-row" style="top: 0.58878cm; height: 0.28667cm;">
-        <div class="tblx-col1">Sonraki Son Ödeme Tarihi <span class="italic">/ Next Due Date for Payment</span></div>
-        <div class="tblx-col2"></div>
-        <div class="tblx-col3">18/09/2025</div>
-      </div>
-    </div>
-    <!-- /tblxKartMusteriBilgi2 -->
-
-    <!-- RDLC: txtMessageBox2 (konteyner) + txtMessageBox3 (içerik) -->
-    <div id="txtMessageBox2"
-         class="box bdr"
-         style="
-           position:absolute;
-           top:0.19363cm; left:2.06834cm;
-           width:6.70831cm; height:2.75667cm;
-           z-index: 200;">
-      <div id="txtMessageBox3"
-           style="
-             position:absolute;
-             top:0.13911cm; left:0.19991cm;  /* RDLC ofset */
-             width:6.25898cm; height:2.33273cm;
-             font-size:8pt; text-align:left; line-height:1.25;
-             white-space:pre-wrap; word-wrap:break-word; overflow:hidden;">
-        Taksitli işlemlerde uygulanacak olan kar payı oranı hesap özetinin 25.000 TL ve altında ise %3,50,
-        25.000-150.000 TL arasında ise %4,00 ve 150.000 TL üzerinde ise %4,50 olarak uygulanacaktır.
-      </div>
-    </div>
-
-    <!-- =================== RECTANGLE1 =================== -->
-    <div id="Rectangle1" class="rect"
-         style="left:0cm; top:3.62811cm; width:20.31537cm; height:8.07673cm;">
-
-      <!-- Tablix1 (özet paneller) -->
-      <div id="Tablix1" class="rect"
-           style="left:2.05521cm; top:2.52905cm; width:17.02832cm; height:2.67605cm;">
-
-        <!-- Başlıklar -->
-        <div class="box center tiny" style="top:0.03528cm; left:1.11434cm; width:3.20041cm; height:0.7cm;">
-          Devreden Bakiye
-        </div>
-        <div class="box center tiny" style="top:0.03528cm; left:5.0309cm; width:3.49933cm; height:0.7cm;">
-          Dönem Harcamaları
-        </div>
-        <div class="box center tiny" style="top:0.03528cm; left:8.77637cm; width:3.28075cm; height:0.7cm;">
-          Ödemeleriniz
-        </div>
-        <div class="box center tiny" style="top:0.02942cm; left:12.75824cm; width:3.70852cm; height:0.7cm;">
-          Dönem Borcunuz
-        </div>
-
-        <!-- Değerler -->
-        <div class="box center small bdr" style="top:0.65706cm; left:1.15064cm; width:3.28986cm; height:0.54565cm;">
-		  5,161.79 TL
-		</div>
-
-        <div class="box center small" style="top:0.65706cm; left:4.31475cm; width:0.71615cm; height:0.48772cm;">+</div>
-
-        <div class="box center small bdr" style="top:0.65706cm; left:5.0309cm; width:3.35741cm; height:0.54565cm;">
-		  5,199.55 TL
-		</div>
-
-        <div class="box center small" style="top:0.7647cm; left:8.33632cm; width:0.53795cm; height:0.3983cm;">-</div>
-
-        <div class="box center small bdr" style="top:0.65706cm; left:8.77637cm; width:3.28075cm; height:0.54565cm;">
-          5,161.79 TL
-        </div>
-
-        <div class="box center small" style="top:0.74648cm; left:12.31496cm; width:0.64378cm; height:0.3983cm;">=</div>
-
-        <div class="box center small bdr-thick" style="top:0.65706cm; left:13.09985cm; width:3.28075cm; height:0.54565cm;">
-          5,199.55 TL
-        </div>
-      </div>
-      <!-- /Tablix1 -->
-
-      <!-- txtMessageBox4 (bilgilendirme) -->
-      <div id="txtMessageBox4" class="box bdr"
-           style="left:1.14749cm; top:5.21386cm; width:19.05788cm; height:1.74743cm; font-size:8pt; text-align:left; white-space:pre-wrap;">
-        Kredi kartı borcunuzun gecikmesi durumunda uygulanacak gecikme cezası oranı, hesap özeti borcunuza göre
-        aylık akdi kâr payı oranına %0,30 eklenerek hesaplanacaktır. KKDF ve BSMV dahil değildir.
-      </div>
-
-      <!-- Çizgi Line11 -->
-      <div class="line" style="top:5.24038cm; left:1.14749cm; width:19.16788cm; border-top:0.25pt solid #666;"></div>
-
-      <!-- txtMessageBox5 (ek mesaj; PDF’te başlık metni yok) -->
-      <div id="txtMessageBox5" class="box bdr"
-           style="left:1.14749cm; top:7.06032cm; width:19.05788cm; height:1.01641cm; font-size:18pt; text-align:left; white-space:pre-wrap;">
-      </div>
-
-      <!-- Çizgi Line14 -->
-      <div class="line" style="top:2.50372cm; left:1.14749cm; width:19.05788cm; border-top:0.25pt solid #666;"></div>
-
-      <!-- tblxEkstreDetay2 (örnek satırlar) -->
-      <div id="tblxEkstreDetay2" class="rect"
-           style="left:1.13435cm; top:0.1142cm; width:19.18102cm; height:2.11696cm;">
-        <!-- Üst/alt çizgiler -->
-        <div class="line" style="top:0.03163cm; left:0; width:19.05788cm; border-top:0.25pt solid #666;"></div>
-        <div class="line" style="top:0.63163cm; left:0; width:19.05788cm; border-top:0.25pt solid #666;"></div>
-
-        <!-- Sütun başlıkları -->
-        <div class="box left tiny"  style="top:0.13544cm; left:0;        width:2.36159cm; height:0.6cm;">İŞLEM TARİHİ</div>
-        <div class="box left tiny"  style="top:0.13544cm; left:2.0756cm;  width:2.65792cm; height:0.6cm;">İŞLEM AÇIKLAMASI</div>
-        <div class="box left tiny"  style="top:0.13746cm; left:14.70943cm; width:2.36159cm; height:0.6cm;">TUTAR</div>
-        <div class="box left tiny"  style="top:0.13544cm; left:16.69629cm; width:2.36159cm; height:0.6cm;">MİL</div>
-
-        <!-- Örnek satırlar -->
-        <div class="box left small"  style="top:0.79935cm; left:0;         width:2.0cm; height:0.55205cm;">10/07/2025</div>
-        <div class="box left small"  style="top:0.79935cm; left:2.28102cm; width:9cm;   height:0.55205cm;">PAYCELL/TRENDYOL — İstanbul TR</div>
-        <div class="box right small" style="top:0.79935cm; left:15.18102cm; width:2cm;   height:0.55205cm;">154.99 TL</div>
-        <div class="box right small" style="top:0.79935cm; left:17.18102cm; width:2cm;   height:0.55205cm;">1.00</div>
-
-        <div class="box left small"  style="top:1.35140cm; left:0;         width:2.0cm; height:0.55205cm;">10/07/2025</div>
-        <div class="box left small"  style="top:1.35140cm; left:2.28102cm; width:9cm;   height:0.55205cm;">Kredi Kartı Borç Ödeme</div>
-        <div class="box right small" style="top:1.35140cm; left:15.18102cm; width:2cm;   height:0.55205cm;">-5,161.79 TL</div>
-        <div class="box right small" style="top:1.35140cm; left:17.18102cm; width:2cm;   height:0.55205cm;">0.00</div>
-      </div>
-      <!-- /tblxEkstreDetay2 -->
-    </div>
-    <!-- =================== /RECTANGLE1 =================== -->
-
-  </div>
-  <!-- =================== /BODY =================== -->
-  
-  <!-- =================== PAGE FOOTER =================== -->
-	<div class="page-footer">
-	  <!-- Textbox33: =Globals.PageNumber & " / " & Globals.TotalPages -->
-	  <div class="tbx" style="top:0.82176cm; left:0.31183cm; width:0.77823cm; height:0.46209cm; text-align:left;">
-		<span class="page-xofy">1 / 1</span> <!-- ekran görünümü için fallback; yazdırmada CSS counter devreye girer -->
-	  </div>
-
-	  <!-- Textbox34:
-		   =IIF(First(Fields!TotalPageCount.Value,"StatementPdfContractSet")=0,
-				Globals!PageNumber,
-				First(Fields!TotalPageCount.Value,"StatementPdfContractSet")+Globals!PageNumber) -->
-	  <div class="tbx" style="top:1.35441cm; left:0.31183cm; width:1.74879cm; height:0.46209cm; text-align:left;">
-		<span class="page-calc">1</span> <!-- offset yoksa sayfa numarası; yazdırmada counter(page) çalışır -->
-	  </div>
-	</div>
-	<!-- =================== /PAGE FOOTER =================== -->
-
-	<!-- === OMR Marks === -->
-	<div class="omr" aria-hidden="true">
-	  <div class="mark bm  on"></div>   <!-- Bench Mark: HER sayfada -->
-	  <div class="mark eoc off"></div>  <!-- End of Collation: sadece son sayfa 'on' -->
-	  <div class="mark ps1 off"></div>  <!-- PS1 bit -->
-	  <div class="mark ps2 on"></div>   <!-- PS2 bit -->
-	  <div class="mark ps4 on"></div>   <!-- PS4 bit -->
-	</div>
-</div>
-
+    </div> <!-- Visual Studio Browser Link -->
+    <!-- End Browser Link -->
 </body>
+
 </html>

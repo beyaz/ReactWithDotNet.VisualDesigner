@@ -1498,6 +1498,9 @@ public static class CssHelper
             case "backdrop-filter":
             case "transition":
             case "background-image":
+            case "break-after":
+            case "box-sizing":
+            case "pointer-events":
             {
                 return asDictionary((name, value));
             }
@@ -1558,6 +1561,7 @@ public static class CssHelper
             case "background-color":
             case "background":
             case "color":
+            case "border-top-color":
             {
                 if (project.Colors.TryGetValue(value, out var realColor))
                 {
