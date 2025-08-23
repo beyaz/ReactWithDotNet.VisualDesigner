@@ -769,14 +769,10 @@ sealed class ApplicationPreview : Component
                     var propValue = data.propValue;
                     var element = data.element;
 
-                    if (propName.StartsWith("data-", StringComparison.OrdinalIgnoreCase))
+                    if (propName == "id")
                     {
                         if (element is HtmlElement htmlElement)
                         {
-                            var dataKey = propName.RemoveFromStart("data-", StringComparison.OrdinalIgnoreCase);
-                            
-                            htmlElement.data.TryAdd(dataKey, propValue);
-                            
                             return data with { IsProcessed = true };
                         }
                     }

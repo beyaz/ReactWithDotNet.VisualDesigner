@@ -631,6 +631,7 @@ static class Plugin
             public string sm { get; set; }
 
             [Suggestions("1 , 2 , 3 , 4 , 5 , 6" )]
+            [JsTypeInfo(JsType.Number)]
             public string spacing { get; set; }
 
             [JsTypeInfo(JsType.Number)]
