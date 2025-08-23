@@ -77,7 +77,7 @@ static class Plugin
         return config;
     }
 
-    static IEnumerable<Type> GetAllCustomComponents()
+    public static IEnumerable<Type> GetAllCustomComponents()
     {
         return 
             from t in typeof(Plugin).Assembly.GetTypes()
@@ -369,6 +369,7 @@ static class Plugin
     {
         return GetAllCustomComponents().Select(x => x.Name).ToList();
     }
+    
 
     public static bool IsImage(object component)
     {
@@ -1782,6 +1783,8 @@ static class Plugin
             {
                 return new FlexColumn(PaddingTop(16) )
                 {
+                    Id(id), OnClick(onMouseClick),
+                    
                     new FlexColumn(PaddingY(16), FontSize18)
                     {
                         "Filtrele"
@@ -1810,7 +1813,12 @@ static class Plugin
                         }
                     },
                     
-                    children
+                    children,
+                    
+                    new BButton
+                    {
+                        text = "Sonuçları Göster"
+                    }
                     
                 };
             }
@@ -1850,6 +1858,32 @@ static class Plugin
                             Value = $"(value: Date) => {{ updateRequest(r => r.{beginDateProp.Value.RemoveFromStart("request.") } = value) }}"
                         });
 
+                        // setFilter
+                        {
+                            List<string> lines =
+                            [
+                                "() =>",
+                                "{",
+                            ];
+
+                            if (IsAlphaNumeric(setFilterProp.Value))
+                            {
+                                lines.Add(setFilterProp.Value + "();");
+                            }
+                            else
+                            {
+                                lines.Add(setFilterProp.Value);
+                            }
+
+                            lines.Add("}");
+
+                            setFilterProp = setFilterProp with
+                            {
+                                Value = string.Join(Environment.NewLine, lines)
+                            };
+
+                            properties = properties.SetItem(properties.FindIndex(x => x.Name == setFilterProp.Name), setFilterProp);
+                        }
 
                         properties = properties.Remove(beginDateProp).Remove(endDateProp);
 

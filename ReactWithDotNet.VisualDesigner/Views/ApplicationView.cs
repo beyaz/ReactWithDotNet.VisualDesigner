@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Reflection;
+using System.Text;
 using ReactWithDotNet.ThirdPartyLibraries.MonacoEditorReact;
 using ReactWithDotNet.VisualDesigner.Exporters;
 using static ReactWithDotNet.VisualDesigner.Views.ComponentEntityExtensions;
@@ -1378,6 +1379,49 @@ sealed class ApplicationView : Component<ApplicationState>
             };
         }
 
+
+        
+
+
+        Element shadowProps = null;
+        {
+            shadowProps = new FlexRow(WidthFull, FlexWrap, Gap(4))
+            {
+                calculateShadowProps
+            };
+            
+            IEnumerable<Element> calculateShadowProps()
+            {
+            
+                foreach (var type in from type in Plugin.GetAllCustomComponents() where type.Name == CurrentVisualElement.Tag select type)
+                {
+                    foreach (var propertyInfo in from propertyInfo in type.GetProperties(BindingFlags.Instance | BindingFlags.Public |BindingFlags.DeclaredOnly) select propertyInfo)
+                    {
+                        if ((from p in CurrentVisualElement.Properties 
+                             from prop in TryParseProperty(p) 
+                             where propertyInfo.Name.Equals(prop.Name,StringComparison.OrdinalIgnoreCase) select prop).Any() )
+                        {
+                            continue;
+                        }
+
+                        yield return new FlexRowCentered(CursorDefault, Opacity(0.4), Padding(4, 8), BorderRadius(16), UserSelect(none))
+                        {
+                            propertyInfo.Name + ": " + propertyInfo.GetCustomAttribute<JsTypeInfoAttribute>()?.JsType
+                        };
+                    }
+                }
+            
+            }
+
+            if (shadowProps.children.Count == 0)
+            {
+                shadowProps = null;
+            }
+        }
+        
+       
+
+
         return new FlexColumn(BorderLeft(1, dotted, "#d9d9d9"), PaddingX(2), Gap(8), OverflowYAuto, Background(White))
         {
             inputTag,
@@ -1391,6 +1435,8 @@ sealed class ApplicationView : Component<ApplicationState>
             },
             viewProps(visualElementModel.Properties),
 
+            shadowProps,
+            
             SpaceY(16),
 
             new FlexRow(WidthFull, AlignItemsCenter)
