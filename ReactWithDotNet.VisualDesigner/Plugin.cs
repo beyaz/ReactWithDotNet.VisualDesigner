@@ -626,52 +626,43 @@ static class Plugin
 
         public sealed class BDigitalGrid : PluginComponentBase
         {
+            [Suggestions("flex-start , flex-end , stretch , center , baseline")]
+            [JsTypeInfo(JsType.String)]
             public string alignItems { get; set; }
             
-            [Suggestions(["true"])]
-            public bool? container { get; set; }
+            [Suggestions("true")]
+            [JsTypeInfo(JsType.Boolean)]
+            public string container { get; set; }            
 
+            [Suggestions("true")]
+            [JsTypeInfo(JsType.Boolean)]
+            public string item { get; set; }
             
-
-            [Suggestions(["true"])]
-            public bool? item { get; set; }
-            
-            [Suggestions(["column , row" ])]
+            [Suggestions("column , row" )]
+            [JsTypeInfo(JsType.String)]
             public string direction { get; set; }
 
-            [Suggestions(["flex-start , center , flex-end , space-between , space-around , space-evenly" ])]
+            [Suggestions("flex-start , center , flex-end , space-between , space-around , space-evenly")]
+            [JsTypeInfo(JsType.String)]
             public string justifyContent { get; set; }
 
-            public int? lg { get; set; }
+            [JsTypeInfo(JsType.Number)]
+            public string lg { get; set; }
 
-            public int? md { get; set; }
+            [JsTypeInfo(JsType.Number)]
+            public string md { get; set; }
 
-            public int? sm { get; set; }
+            [JsTypeInfo(JsType.Number)]
+            public string sm { get; set; }
 
-            public int? spacing { get; set; }
+            [Suggestions("1 , 2 , 3 , 4 , 5 , 6" )]
+            public string spacing { get; set; }
 
-            public int? xl { get; set; }
+            [JsTypeInfo(JsType.Number)]
+            public string xl { get; set; }
 
-            public int? xs { get; set; }
-
-            public static IReadOnlyList<(string name, string value)> GetPropSuggestions()
-            {
-                return
-                [
-                    (nameof(alignItems),'"' +"flex-start" + '"'),
-                    (nameof(alignItems),'"' +"stretch" + '"'),
-                    (nameof(alignItems),'"' +"flex-end" + '"'),
-                    (nameof(alignItems),'"' +"center" + '"'),
-                    (nameof(alignItems),'"' +"baseline" + '"'),
-                   
-                    (nameof(spacing),"1"),
-                    (nameof(spacing),"2"),
-                    (nameof(spacing),"3"),
-                    (nameof(spacing),"4"),
-                    (nameof(spacing),"5"),  
-                    (nameof(spacing),"6")
-                ];
-            }
+            [JsTypeInfo(JsType.Number)]
+            public string xs { get; set; }            
 
             protected override Element render()
             {
@@ -679,17 +670,17 @@ static class Plugin
                 {
                     children = { children },
 
-                    container      = container,
-                    item           = item,
+                    container      = container == null ? null : Convert.ToBoolean(container),
+                    item           = item == null ? null : Convert.ToBoolean(item),
                     direction      = direction,
                     justifyContent = justifyContent,
                     alignItems     = alignItems,
-                    spacing        = spacing,
-                    xs             = xs,
-                    sm             = sm,
-                    md             = md,
-                    lg             = lg,
-                    xl             = xl,
+                    spacing        = spacing == null ? null : Convert.ToDouble(spacing),
+                    xs             = xs == null ? null : Convert.ToInt32(xs),
+                    sm             = sm == null ? null : Convert.ToInt32(sm),
+                    md             = md == null ? null : Convert.ToInt32(md),
+                    lg             = lg == null ? null : Convert.ToInt32(lg),
+                    xl             = xl == null ? null : Convert.ToInt32(xl),
 
                     id      = id,
                     onClick = onMouseClick
