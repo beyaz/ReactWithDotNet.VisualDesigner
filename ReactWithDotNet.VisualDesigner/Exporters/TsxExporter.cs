@@ -51,7 +51,7 @@ static class TsxExporter
             return result.Error;
         }
 
-        return string.Join(Environment.NewLine, result.Value);
+        return string.Join(Environment.NewLine, result.Value.elementJsxTree);
     }
 
     public static async Task<Result<ExportOutput>> Export(ExportInput input)
@@ -122,7 +122,7 @@ static class TsxExporter
         return Success;
     }
 
-    internal static async Task<Result<IReadOnlyList<string>>> CalculateElementTreeTsxCodes(ProjectConfig project, IReadOnlyDictionary<string, string> componentConfig, VisualElementModel rootVisualElement)
+    internal static async Task<Result<(IReadOnlyList<string> elementJsxTree, IReadOnlyList<string> importLines)>> CalculateElementTreeTsxCodes(ProjectConfig project, IReadOnlyDictionary<string, string> componentConfig, VisualElementModel rootVisualElement)
     {
         ReactNode rootNode;
         {
@@ -137,7 +137,20 @@ static class TsxExporter
 
         rootNode = Plugin.AnalyzeNode(rootNode, componentConfig);
 
-        return await ConvertReactNodeModelToTsxCode(project, rootNode, null, 2);
+
+        IReadOnlyList<string> elementJsxTree;
+        {
+            var result = await ConvertReactNodeModelToTsxCode(project, rootNode, null, 2);
+            if (result.HasError)
+            {
+                return result.Error;
+            }
+            elementJsxTree = result.Value;
+        }
+        
+        var importLines = Plugin.CalculateImportLines(rootNode);
+
+        return (elementJsxTree, importLines.ToList());
     }
 
     static async Task<Result<(string filePath, string fileContent)>> CalculateExportInfo(ExportInput input)
@@ -197,7 +210,7 @@ static class TsxExporter
 
         string fileNewContent;
         {
-            string[] fileContentInDirectory;
+            IReadOnlyList<string> fileContentInDirectory;
             {
                 var result = await IO.TryReadFileAllLines(filePath);
                 if (result.HasError)
@@ -208,7 +221,7 @@ static class TsxExporter
                 fileContentInDirectory = result.Value;
             }
 
-            IReadOnlyList<string> linesToInject;
+            IReadOnlyList<string> linesToInject; IReadOnlyList<string> importLines;
             {
                 var result = await CalculateElementTreeTsxCodes(project, data.Value.Component.GetConfig(), rootVisualElement);
                 if (result.HasError)
@@ -216,13 +229,36 @@ static class TsxExporter
                     return result.Error;
                 }
 
-                linesToInject = result.Value;
+                linesToInject = result.Value.elementJsxTree;
+                
+                importLines = result.Value.importLines;
 
                 var formatResult = await Prettier.FormatCode(string.Join(Environment.NewLine, linesToInject));
                 if (formatResult.Success)
                 {
                     linesToInject = formatResult.Value.Split(Environment.NewLine.ToCharArray());
                 }
+            }
+
+            // try import import lines
+            {
+                var fileContentInDirectoryAsList = fileContentInDirectory.ToList();
+                
+                foreach (var importLine in importLines)
+                {
+                    if (fileContentInDirectory.Any(x=>IsEqualsIgnoreWhitespace(x, importLine)))
+                    {
+                        continue;
+                    }
+
+                    var lastImportLineIndex = fileContentInDirectoryAsList.FindLastIndex(line => line.TrimStart().StartsWith("import "));
+                    if (lastImportLineIndex >= 0)
+                    {
+                        fileContentInDirectoryAsList.Insert(lastImportLineIndex+1, importLine);    
+                    }
+                }
+
+                fileContentInDirectory = fileContentInDirectoryAsList;
             }
 
             string injectedVersion;

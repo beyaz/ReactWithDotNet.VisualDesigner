@@ -1,5 +1,4 @@
-﻿using System.Collections.ObjectModel;
-using ReactWithDotNet.VisualDesigner.Exporters;
+﻿using ReactWithDotNet.VisualDesigner.Exporters;
 
 namespace ReactWithDotNet.VisualDesigner.Test;
 
@@ -35,7 +34,7 @@ public sealed class ExporterTest
 
             result.Success.ShouldBeTrue();
 
-            result.Value.ShouldBe(expected);
+            result.Value.elementJsxTree.ShouldBe(expected);
         }
     }
 }
