@@ -1,255 +1,35 @@
-import React, { useState } from "react";
-import { BasePage, useMessage, useStore, useDevice, useNav, Page } from "b-digital-framework";
-import { useApplicationContext } from "b-boa-base";
-import { moduleLogger } from "b-log";
-import { TextValuePair } from "b-digital-internet-banking";
-import { BComboBox } from "b-combo-box";
-import { BDigitalGroupView } from "b-digital-group-view";
-import { BDigitalMoneyInput } from "b-digital-money-input";
-import { BDigitalGrid } from "b-digital-grid";
-import { BDigitalBox } from "b-digital-box";
-import BInput from "b-input";
-import { BTypography } from "b-core-typography";
-import BButton from "b-button";
+BDigitalSelectItem
 
-import { CurrencyModel, GeneratePaymentLinkClientRequest, GeneratePaymentLinkClientResponse, GetLinkPaymentPreDataClientRequest, LanguageModel } from "../../../types";
-import { useMobilePosService } from "../../../services/useMobilePosService";
-import { PaymentByLinkModel } from '../../../models';
+ <BDigitalBox styleContext={"primary"} sx={{ pt: 0, pb: 3, mb: 3 }}>
+ 
+ BInputNumericExtended
+ 
+ 
+ BDigitalPhone
+ 
+ 
+ BRadioButtonGroup
+ 
+ 
+ 
+ BDigitalCardView
+ 
+ 
+ 
+ BDigitalEmptyPage
+ 
+ 
+ 
+ BDigitalAccountCardView
+ 
+ 
+  <BDigitalGroupView title={getMessage("PaymentsSSIPaymentDebtInformationLabel")} applySideMargin={false} styles={{ paddingBottom: 0, marginBottom: 0 }}>
 
 
-export const PaymentLinkForm = () => {
-    const { getMessage } = useMessage("POSPortal");
-    const logger = moduleLogger("POSPortalLogger");
-    const context = useApplicationContext();
-    const store = useStore();
-    const { isMobile, isTablet } = useDevice();
-    const { navigateByAction, navigatePage } = useNav();
 
-    const { getLinkPaymentPreData, generatePaymentLink } = useMobilePosService();
+BDigitalListAction
 
-    const initialModel: PaymentByLinkModel = {
-        isInitialize: false,
-        fecId: 0, // Default to TRY
-        amount: undefined,
-        languageId: 1,
-        installmentNumber: 0, // Default to cash payment
-        deferringNumber: 0, // Default to no deferring
-    };
+Fragment
 
-    const [model, setModel] = React.useState<PaymentByLinkModel>(initialModel);
+BInputAction
 
-    const [currencySelectList, setCurrencySelectList] = useState<Array<TextValuePair> | undefined>();
-    const [languageSelectList, setLanguageSelectList] = useState<Array<TextValuePair> | undefined>();
-    const [installmentMonthList, setInstallmentMonthList] = useState<Array<TextValuePair> | undefined>();
-    const [deferringMonthList, setDeferringMonthList] = useState<Array<TextValuePair> | undefined>();
-
-    React.useEffect(() => {
-        logger.info("PaymentLinkForm page mounted info log");
-
-        const controller = new AbortController();
-
-        const handleGetPaymentByLinkPreData = async (controller: AbortController) => {
-
-            logger.info("handleGetPaymentByLinkPreData started");
-
-            var getPaymentByLinkPreDataRequest: GetLinkPaymentPreDataClientRequest = {};
-
-            var getPaymentByLinkPreDataResponse = await getLinkPaymentPreData.send(getPaymentByLinkPreDataRequest, controller.signal)
-            if (!getPaymentByLinkPreDataResponse.success) {
-                logger.error("Failed to fetch data:", getPaymentByLinkPreDataResponse.result);
-                return;
-            }
-
-            const {
-                currencyList,
-                languageList,
-                maxInstallmentCount,
-                maxDeferringCount,
-            } = getPaymentByLinkPreDataResponse;
-
-            setCurrencySelectList(currencyList.map<TextValuePair>((item: CurrencyModel) => {
-                return { value: item.fecId.toString(), text: item.fecCode };
-            }));
-
-            setLanguageSelectList(languageList.map<TextValuePair>((item: LanguageModel) => {
-                return { value: item.languageId.toString(), text: item.language };
-            }));
-
-            var installmentList = maxInstallmentCount > 0 ? [...Array(maxInstallmentCount - 1).keys()]
-                .map<TextValuePair>((item) => {
-                    return { value: (item + 2).toString(), text: (item + 2).toString() };
-                }) : [];
-            var cashItem: TextValuePair = { value: '0', text: getMessage('Cash') };
-            installmentList.unshift(cashItem);
-            setInstallmentMonthList(installmentList);
-
-            var deferringList = maxDeferringCount > 0 ? [...Array(maxDeferringCount - 1).keys()]
-                .map<TextValuePair>((item) => {
-                    return { value: (item + 1).toString(), text: (item + 1).toString() };
-                }) : [];
-            var noDeferringItem: TextValuePair = { value: '0', text: getMessage('Cash') };
-            deferringList.unshift(noDeferringItem);
-            setDeferringMonthList(deferringList);
-
-            setModel({
-                ...model,
-                fecId: 0,
-                languageId: 1,
-                installmentNumber: 0, // Default to cash payment
-                deferringNumber: 0, // Default to no deferring
-            });
-
-            logger.info("handleGetPaymentByLinkPreData finished");
-        }
-
-        handleGetPaymentByLinkPreData(controller).catch((error) => {
-            if (error.name !== "AbortError") {
-                logger.error("Failed to fetch data:", error);
-            }
-        });
-        return () => {
-            controller.abort();
-        };
-    }, []);
-
-    React.useEffect(() => {
-        store?.setTransactionContext({
-            ...store.transactionContext,
-            data: model,
-            nextPageAction: handleNextAction,
-        });
-    }, [model]);
-
-    const handleClick = () => {
-        if (model.amount === undefined || model.amount === null || model.amount <= 0) {
-            return;
-        }
-        else {
-            console.log("Get link button clicked");
-            handleNextAction();
-        }
-    };
-
-    const handleNextAction = async () => {
-        const clientRequest: GeneratePaymentLinkClientRequest = {
-            amount: model.amount,
-            fecId: model.fecId,
-            installmentCount: model.installmentNumber,
-        };
-        const response: GeneratePaymentLinkClientResponse = await generatePaymentLink.send(clientRequest, (new AbortController()).signal);
-        if (!response.success && response.result?.errorMessage) {
-            store.setMessage({ content: response.result?.errorMessage });
-            return;
-        }
-        logger.info("Setting payment token:" + response.paymentToken);
-        setModel({ ...model, paymentToken: response.paymentToken });
-        navigatePage({ controller: "mobilepos", action: "payment-link-view", isPrivate: true });
-    };
-
-    const fecCode = currencySelectList?.find((item) => item.value === model.fecId.toString())?.text;
-
-    return (
-        <BasePage pageTitle={getMessage("PaymentByLinkPageTitle")}>
-            <BDigitalBox styleContext="noMargin" sx={{ py: 2 }}></BDigitalBox>
-            <BDigitalGroupView title={getMessage("PaymentInfoGroupTitle")}>
-                <BDigitalGrid container justifyContent="space-between" spacing={1} alignItems="center" wrap={isMobile ? "wrap" : "nowrap"}>
-                    <BDigitalGrid item xs={12} lg={6}>
-                        <BDigitalMoneyInput
-                            id="inpPrice"
-                            value={model.amount}
-                            fec={fecCode}
-                            currencyVisible={false}
-                            handleMoneyInputChange={(value: number) => {
-                                setModel({ ...model, amount: value });
-                            }}
-                            inputProps={{ valueConstraint: { required: true }, autoComplete: "off" }}
-                        />
-                    </BDigitalGrid>
-                    <BDigitalGrid item xs={12} lg={6}>
-                        <BComboBox
-                            id="cmbCurrency"
-                            dataSource={currencySelectList}
-                            labelText={getMessage("CurrencyLabel")}
-                            hintText={getMessage("CurrencySelectHint")}
-                            hiddenClearButton={true}
-                            value={[model.fecId]}
-                            onSelect={(selectedIndexes: [number], selectedItems: [TextValuePair], selectedValues: [string]) => {
-                                setModel({ ...model, fecId: parseInt(selectedItems[0].value) });
-                            }}
-                        />
-                    </BDigitalGrid>
-                </BDigitalGrid>
-
-                <BDigitalBox styleContext="noMargin" sx={{ pt: 2, pb: 1 }}>
-                    <BTypography variant="body1">{getMessage("PaymentLinkInstallmentLimitInfoMessage")}</BTypography>
-                </BDigitalBox>
-
-                <BComboBox
-                    id="cmbInstallmentList"
-                    dataSource={installmentMonthList}
-                    labelText={getMessage("InstallmentSelectionLabel")}
-                    hintText={getMessage("InstallmentSelectionHint")}
-                    hiddenClearButton={true}
-                    value={[model.installmentNumber]}
-                    onSelect={(selectedIndexes: [number], selectedItems: [TextValuePair], selectedValues: [string]) => {
-                        setModel({ ...model, installmentNumber: parseInt(selectedItems[0].value) });
-                    }}
-                />
-
-                <BComboBox
-                    id="cmbDeferringList"
-                    dataSource={deferringMonthList}
-                    labelText={getMessage("DeferringSelectionLabel")}
-                    hintText={getMessage("DeferringSelectionHint")}
-                    hiddenClearButton={true}
-                    value={[model.deferringNumber]}
-                    onSelect={(selectedIndexes: [number], selectedItems: [TextValuePair], selectedValues: [string]) => {
-                        setModel({ ...model, deferringNumber: parseInt(selectedItems[0].value) });
-                    }}
-                />
-
-                <BInput
-                    id="inpDescription"
-                    valueConstraint={{ required: false }}
-                    context={context}
-                    floatingLabelText={getMessage("DescriptionLabel")}
-                    value={model.description}
-                    autoComplete= "off"
-                    onChange={(e: any, value: any) => {
-                        model.description = value;
-                    }}
-                />
-
-                <BComboBox
-                    id="cmbLanguage"
-                    dataSource={languageSelectList}
-                    labelText={getMessage("LanguageSelectionLabel")}
-                    hintText={getMessage("LanguageSelectionHint")}
-                    hiddenClearButton={true}
-                    value={[model.languageId]}
-                    onSelect={(selectedIndexes: [number], selectedItems: [TextValuePair], selectedValues: [string]) => {
-                        setModel({ ...model, languageId: parseInt(selectedItems[0].value) });
-                    }}
-                />
-            </BDigitalGroupView>
-
-            <BDigitalGrid container direction="row" justifyContent="flex-end">
-                <BDigitalGrid item xs={isMobile ? 12 : undefined}>
-                    <BButton
-                        id="btnGenerateLink"
-                        type="contained"
-                        text={getMessage("GenerateLinkButtonLabel")}
-                        fullWidth={isMobile}
-                        style={{
-                            backgroundColor: context.theme.boaPalette.pri500,
-                            color: context.theme.boaPalette.comp500,
-                            minWidth: context.theme.spacing(20),
-                            padding: isTablet ? context.theme.spacing(1, 8) : context.theme.spacing(1, 1.75),
-                        }}
-                        onClick={handleClick}
-                    />
-                </BDigitalGrid>
-            </BDigitalGrid>
-        </BasePage>
-    );
-};
