@@ -102,6 +102,37 @@ static class Plugin
 
         return node;
     }
+    
+    public static IEnumerable<string> CalculateImportLines(ReactNode node)
+    {
+        var lines = new List<string>();
+        
+        foreach (var type in GetAllCustomComponents())
+        {
+            var importLine = tryGetImportLine(type, node);
+            if (importLine.HasValue())
+            {
+                lines.Add(importLine);
+            }
+        }
+        
+        foreach (var child in node.Children)
+        {
+            lines.AddRange(CalculateImportLines(child));
+        }
+
+        return lines.Distinct();
+
+        static string tryGetImportLine(Type type, ReactNode node)
+        {
+            if (type.Name == node.Tag)
+            {
+                return type.GetCustomAttribute<CustomComponentAttribute>()?.Import;
+            }
+
+            return null;
+        }
+    }
 
     public static Element BeforeComponentPreview(RenderPreviewScope scope, VisualElementModel visualElementModel, Element component)
     {
