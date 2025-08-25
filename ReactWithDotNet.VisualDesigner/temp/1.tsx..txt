@@ -33,3 +33,5 @@ Fragment
 
 BInputAction
 
+
+https://www.figma.com/design/vy2ydwvhlLFEEM0Lp3Sjas/%C3%96demeler--Shared-?node-id=56-199496&p=f&m=dev
