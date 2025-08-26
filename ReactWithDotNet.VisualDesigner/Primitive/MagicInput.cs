@@ -302,6 +302,19 @@ sealed class MagicInput : Component<MagicInput.State>
                 }
             }
 
+            // give more value for same prop
+            {
+                var indexOfColonInSearchTerm = searchTerm.IndexOf(':');
+                var indexOfColonInSource = source.IndexOf(':');
+                if (indexOfColonInSource == indexOfColonInSearchTerm && indexOfColonInSource > 0)
+                {
+                    if (IsEqualsIgnoreWhitespace(searchTerm[..indexOfColonInSearchTerm], source[..indexOfColonInSource]))
+                    {
+                        count += 100;
+                    }
+                }
+            }
+
             return count;
         }
     }

@@ -1404,8 +1404,9 @@ sealed class ApplicationView : Component<ApplicationState>
                             continue;
                         }
 
-                        yield return new FlexRowCentered(CursorDefault, Opacity(0.4), Padding(4, 8), BorderRadius(16), UserSelect(none))
+                        yield return new FlexRowCentered(CursorDefault, Opacity(0.4), Padding(4, 8), BorderRadius(16), UserSelect(none), Hover(Opacity(0.6), Background(Gray200)), OnClick(OnShadowPropClicked))
                         {
+                            Id("SHADOW_PROP-"+propertyInfo.Name),
                             propertyInfo.Name + ": " + propertyInfo.GetCustomAttribute<JsTypeInfoAttribute>()?.JsType
                         };
                     }
@@ -1836,29 +1837,7 @@ sealed class ApplicationView : Component<ApplicationState>
                             }
                         };
 
-                        var id = "PROPS-INPUT-EDITOR-" + propertyIndex;
-
-                        // calculate js code for focus to input editor
-                        {
-                            var jsCode = new StringBuilder();
-
-                            jsCode.AppendLine($"document.getElementById('{id}').focus();");
-
-                            // calculate text selection in edit input
-                            {
-                                var nameValue = CurrentVisualElement.Properties[propertyIndex];
-
-                                TryParseProperty(nameValue).HasValue(parseResult =>
-                                {
-                                    var startIndex = nameValue.LastIndexOf(parseResult.Value ?? string.Empty, StringComparison.OrdinalIgnoreCase);
-                                    var endIndex = nameValue.Length;
-
-                                    jsCode.AppendLine($"document.getElementById('{id}').setSelectionRange({startIndex}, {endIndex});");
-                                });
-                            }
-
-                            Client.RunJavascript(jsCode.ToString());
-                        }
+                        ArrangePropEditMode(propertyIndex);
 
                         return Task.CompletedTask;
                     }),
@@ -1933,6 +1912,55 @@ sealed class ApplicationView : Component<ApplicationState>
                 }
             }
         }
+    }
+
+    void ArrangePropEditMode(int propertyIndex)
+    {
+        var id = "PROPS-INPUT-EDITOR-" + propertyIndex;
+
+        // calculate js code for focus to input editor
+        {
+            var jsCode = new StringBuilder();
+
+            jsCode.AppendLine($"document.getElementById('{id}').focus();");
+
+            // calculate text selection in edit input
+            {
+                var nameValue = CurrentVisualElement.Properties[propertyIndex];
+
+                TryParseProperty(nameValue).HasValue(parseResult =>
+                {
+                    var startIndex = nameValue.LastIndexOf(parseResult.Value ?? string.Empty, StringComparison.OrdinalIgnoreCase);
+                    var endIndex = nameValue.Length;
+
+                    jsCode.AppendLine($"document.getElementById('{id}').setSelectionRange({startIndex}, {endIndex});");
+                });
+            }
+
+            Client.RunJavascript(jsCode.ToString());
+        }
+    }
+
+    Task OnShadowPropClicked(MouseEvent e)
+    {
+        var propName = e.currentTarget.id.RemoveFromStart("SHADOW_PROP-");
+        
+        UpdateCurrentVisualElement(x => x with
+        {
+            Properties = x.Properties.Add($"{propName}: _")
+        });
+
+        var propertyIndex = CurrentVisualElement.Properties.Count - 1;
+        
+        state = state with
+        {
+            Selection = state.Selection with{  SelectedPropertyIndex = propertyIndex}
+        };
+        
+        ArrangePropEditMode(propertyIndex);
+
+        return Task.CompletedTask;
+        
     }
 
     Element PartScale()

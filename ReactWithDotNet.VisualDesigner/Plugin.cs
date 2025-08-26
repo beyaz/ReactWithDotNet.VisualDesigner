@@ -715,6 +715,132 @@ static class Plugin
                 };
             }
         }
+        
+        [CustomComponent(Import="import { BDigitalTransactionConfirm } from \"b-digital-transaction-confirm\";")]
+        public sealed class BDigitalTransactionConfirm : PluginComponentBase
+        {
+            // @formatter:off
+            [JsTypeInfo(JsType.String)]
+            public string sender_titleText { get; set; }
+            
+            [JsTypeInfo(JsType.String)]
+            public string sender_titleTextVariant { get; set; }
+
+            [JsTypeInfo(JsType.String)]
+            public string sender_titleColorVariant { get; set; }
+
+            // ITEM 1
+            [JsTypeInfo(JsType.String)]
+            public string sender_item1_text { get; set; }
+            
+            [JsTypeInfo(JsType.String)]
+            public string sender_item1_textVariant { get; set; }
+                        
+            [JsTypeInfo(JsType.String)]
+            public string sender_item1_textColor { get; set; }
+            
+            [JsTypeInfo(JsType.String)]
+            public string sender_item1_value { get; set; }
+            
+            [JsTypeInfo(JsType.String)]
+            public string sender_item1_valueVariant { get; set; }
+                        
+            [JsTypeInfo(JsType.String)]
+            public string sender_item1_valueColor { get; set; }
+            
+             // ITEM 2
+            [JsTypeInfo(JsType.String)]
+            public string sender_item2_text { get; set; }
+            
+            [JsTypeInfo(JsType.String)]
+            public string sender_item2_textVariant { get; set; }
+                        
+            [JsTypeInfo(JsType.String)]
+            public string sender_item2_textColor { get; set; }
+            
+            [JsTypeInfo(JsType.String)]
+            public string sender_item2_value { get; set; }
+            
+            [JsTypeInfo(JsType.String)]
+            public string sender_item2_valueVariant { get; set; }
+                        
+            [JsTypeInfo(JsType.String)]
+            public string sender_item2_valueColor { get; set; }
+            
+            // ITEM 3
+            [JsTypeInfo(JsType.String)]
+            public string sender_item3_text { get; set; }
+            
+            [JsTypeInfo(JsType.String)]
+            public string sender_item3_textVariant { get; set; }
+                        
+            [JsTypeInfo(JsType.String)]
+            public string sender_item3_textColor { get; set; }
+            
+            [JsTypeInfo(JsType.String)]
+            public string sender_item3_value { get; set; }
+            
+            [JsTypeInfo(JsType.String)]
+            public string sender_item3_valueVariant { get; set; }
+                        
+            [JsTypeInfo(JsType.String)]
+            public string sender_item3_valueColor { get; set; }
+            
+            // @formatter:on
+          
+            
+            protected override Element render()
+            {
+                
+                return new FlexColumn(Background(White), BorderRadius(10), Border(1, solid, rgba(0, 0, 0, 0.12)), Padding(24), Id(id), OnClick(onMouseClick))
+                {
+                    new FlexRow
+                    {
+                        new FlexColumn(AlignItemsCenter, Gap(8))
+                        {
+                            new div{Background(rgb(22, 160, 133)), Padding(5), BorderRadius(8)},
+                            new div{Width(0), Border(1, dashed, rgba(0, 0, 0, 0.12)), Height(80)},
+                            new DynamicMuiIcon{ name = "ArrowDownwardOutlined", fontSize = "24px"},
+                            new div{Width(0), Border(1, dashed, rgba(0, 0, 0, 0.12)), Height(80)},
+                            new div{Background(rgb(22, 160, 133)), Padding(5), BorderRadius(8)}
+                        },
+                        
+                        new FlexColumn
+                        {
+                         new BTypography
+                         {
+                             children={sender_titleText},
+                             variant = sender_titleTextVariant,
+                             color= sender_titleColorVariant
+                         },
+                         
+                         new FlexRow
+                         {
+                             new BTypography
+                             {
+                                 children ={sender_item1_text},
+                                 variant  = sender_item1_textVariant,
+                                 color    = sender_item1_textColor
+                             },
+                             new BTypography
+                             {
+                                 children ={sender_item1_value},
+                                 variant  = sender_item1_valueVariant,
+                                 color    = sender_item1_valueColor
+                             }
+                         }
+                             
+                        }
+                    },
+                    new FlexRow(BorderTop(1, solid, rgba(0, 0, 0, 0.12)))
+                    {
+                        
+                    }
+                };
+            }
+        }
+        
+        
         [CustomComponent(Import="import { BIconExtended as BIcon } from \"../utils/FormAssistant\"")]
         public sealed class BIcon : PluginComponentBase
         {
@@ -2298,21 +2424,60 @@ static class Plugin
         {
             public string dangerouslySetInnerHTML { get; set; }
             
-            [Suggestions("h1, h2 , h3 , h4 , h5 , h6 , body0 , body1")]
+            [Suggestions("h1, h2 , h3 , h4 , h5 , h6 , body0 , body1 , body2, body2m")]
             [JsTypeInfo(JsType.String)]
             public string variant { get; set; }
             
+            [Suggestions("primary, secondary")]
+            [JsTypeInfo(JsType.String)]
+            public string color { get; set; }
+
+
+            static readonly Dictionary<string, StyleModifier> VariantMap = new()
+            {
+                {"body0",new Style{ FontSize18, FontWeight400, LineHeight(1.5)}},
+                {"body1",new Style{ FontSize16, FontWeight400, LineHeight(1.5)}},
+                {"body2",new Style{ FontSize14, FontWeight400, LineHeight(1.43)}},
+                {"body2b",new Style{ FontSize14, FontWeight600, LineHeight(1.5)}},
+                {"body2m",new Style{ FontSize14, FontWeight500, LineHeight(1.5)}},
+                
+                {"h1",new Style{ FontSize("6rem"), FontWeight300, LineHeight(1.167)}},
+                {"h2",new Style{ FontSize("3.75rem"), FontWeight300, LineHeight(1.2)}},
+                {"h3",new Style{ FontSize("3rem"), FontWeight400, LineHeight(1.167)}},
+            };
+
+            static readonly Dictionary<string, StyleModifier> ColorMap = new()
+            {
+                { "primary", new Style { Color("#16A085") } },
+                { "secondary", new Style { Color("#FF9500") } },
+            };
+                
             protected override Element render()
             {
+                var styleOverride = new Style();
+                
+                if (variant.HasValue())
+                {
+                    if (VariantMap.TryGetValue(variant, out var value))
+                    {
+                        styleOverride += value;
+                    }
+                }
+                
+                if (color.HasValue())
+                {
+                    if (ColorMap.TryGetValue(color, out var value))
+                    {
+                        styleOverride += value;
+                    }
+                }
+                
                 return new Typography
                 {
                     children = { children },
                     variant  = variant,
-
-                    style =
-                    {
-                        FontFamily("Roboto, sans-serif"), FontWeight400, LineHeight27
-                    },
+                    color= color,
+                    style = { styleOverride },
 
                     id      = id,
                     onClick = onMouseClick,
