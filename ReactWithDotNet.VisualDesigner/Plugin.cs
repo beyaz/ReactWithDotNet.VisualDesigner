@@ -725,7 +725,10 @@ static class Plugin
             
             protected override Element render()
             {
-                return new Fragment { children };
+                return new Fragment { new div(Id(id), OnClick(onMouseClick))
+                {
+                    children 
+                }};
 
                 //var leftFlow = new FlexColumnCentered(Width(24), Gap(12))
                 //{
