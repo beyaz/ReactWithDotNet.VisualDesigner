@@ -9,7 +9,6 @@ namespace ReactWithDotNet.VisualDesigner.Views;
 
 sealed class ApplicationView : Component<ApplicationState>
 {
-    const string SHADOW_PROP_PREFIX = "SHADOW_PROP-";
     static readonly IReadOnlyList<string> MediaSizes = ["M", "SM", "MD", "LG", "XL", "XXL"];
 
     enum Icon
@@ -828,23 +827,24 @@ sealed class ApplicationView : Component<ApplicationState>
         return Task.CompletedTask;
     }
 
-    Task OnShadowPropClicked(MouseEvent e)
+    Task OnShadowPropClicked(string propName, string value)
     {
-        var propName = e.currentTarget.id.RemoveFromStart(SHADOW_PROP_PREFIX);
-
         UpdateCurrentVisualElement(x => x with
         {
-            Properties = x.Properties.Add($"{propName}: _")
+            Properties = x.Properties.Add($"{propName}: {value ?? "?"}")
         });
 
-        var propertyIndex = CurrentVisualElement.Properties.Count - 1;
-
-        state = state with
+        if (value is null)
         {
-            Selection = state.Selection with { SelectedPropertyIndex = propertyIndex }
-        };
+            var propertyIndex = CurrentVisualElement.Properties.Count - 1;
 
-        ArrangePropEditMode(propertyIndex);
+            state = state with
+            {
+                Selection = state.Selection with { SelectedPropertyIndex = propertyIndex }
+            };
+
+            ArrangePropEditMode(propertyIndex);
+        }
 
         return Task.CompletedTask;
     }
@@ -1461,12 +1461,13 @@ sealed class ApplicationView : Component<ApplicationState>
 
             Element createShadowProperty(PropertyInfo propertyInfo)
             {
-                return new FlexRowCentered(CursorDefault, Opacity(0.4), Padding(4, 8), BorderRadius(16), UserSelect(none), Hover(Opacity(0.6), Background(Gray200)), OnClick(OnShadowPropClicked))
+                return new ShadowPropertyView
                 {
-                    Id(SHADOW_PROP_PREFIX + propertyInfo.Name),
-                    propertyInfo.Name + ": " + propertyInfo.GetCustomAttribute<JsTypeInfoAttribute>()?.JsType,
+                    PropertyName = propertyInfo.Name,
+                    PropertyType = propertyInfo.GetCustomAttribute<JsTypeInfoAttribute>()?.JsType.ToString().ToLower(),
 
-                    new IconArrowRightOrDown { IsArrowDown = true, style = { Width(16) } }
+                    OnChange    = OnShadowPropClicked,
+                    Suggestions = propertyInfo.GetCustomAttribute<SuggestionsAttribute>()?.Suggestions
                 };
             }
         }
@@ -2301,6 +2302,157 @@ sealed class ApplicationView : Component<ApplicationState>
 
                 return returnList;
             }
+        }
+    }
+
+    class ShadowPropertyView : Component<ShadowPropertyView.State>
+    {
+        const string SHADOW_PROP_PREFIX = "SHADOW_PROP-";
+
+        [CustomEvent]
+        public Func<string, string, Task> OnChange { get; init; }
+
+        public string PropertyName { get; init; }
+
+        public string PropertyType { get; init; }
+
+        public IReadOnlyList<string> Suggestions { get; init; }
+
+        protected override Task OverrideStateFromPropsBeforeRender()
+        {
+            if (PropertyName != state.Value)
+            {
+                state = state with
+                {
+                    Value = PropertyName,
+                    InitialValue = PropertyName
+                };
+            }
+
+            return Task.CompletedTask;
+        }
+
+        protected override Element render()
+        {
+            if (Suggestions is null || Suggestions.Count == 0)
+            {
+                return new FlexRowCentered(CursorDefault, Opacity(0.4), Padding(4, 8), BorderRadius(16), UserSelect(none), OnClick(OnShadowPropClicked))
+                {
+                    Hover(Background(Gray100), Opacity(0.6)),
+
+                    Id(SHADOW_PROP_PREFIX + PropertyName),
+
+                    PropertyName + ": " + PropertyType
+                };
+            }
+
+            return new FlexRowCentered(CursorDefault, Padding(4, 8), BorderRadius(16), UserSelect(none), OnClick(OnShadowPropClicked))
+            {
+                Id(SHADOW_PROP_PREFIX + PropertyName),
+
+                state.IsSuggestionsVisible ? null : OnMouseEnter(ToggleZoomSuggestions),
+
+                state.IsSuggestionsVisible ? null : Opacity(0.4),
+
+                !state.IsSuggestionsVisible ? null : Background(Gray50),
+
+                OnMouseLeave(OnPropertyNameMouseLeved),
+
+                new label
+                {
+                    PropertyName
+                },
+                new FlexRowCentered(Size(16))
+                {
+                    new IconArrowRightOrDown { IsArrowDown = true, style = { Width(16) } }
+                },
+
+                !state.IsSuggestionsVisible ? null : new FlexColumnCentered(MinWidth(50), PositionFixed, Zindex2, Background(Gray50), Border(1, solid, Gray100), BorderRadius(16), PaddingY(4), Left(state.SuggestionPopupLocationX), Top(state.SuggestionPopupLocationY))
+                {
+                    Suggestions?.Select(text => new FlexRowCentered(Padding(6, 12), BorderRadius(16), Hover(Background(Gray100)))
+                    {
+                        text,
+                        Id(text),
+                        OnClick(OnSuggestionItemClicked)
+                    }),
+
+                    OnMouseEnter(OnSuggestionBoxEntered),
+                    OnMouseLeave(ToggleZoomSuggestions)
+                }
+            };
+
+            [StopPropagation]
+            Task ToggleZoomSuggestions(MouseEvent e)
+            {
+                var rect = e.target.boundingClientRect;
+
+                state = state with
+                {
+                    IsSuggestionsVisible = !state.IsSuggestionsVisible,
+                    SuggestionPopupLocationX = rect.left + rect.width / 2 - 24,
+                    SuggestionPopupLocationY = rect.top + rect.height
+                };
+
+                return Task.CompletedTask;
+            }
+        }
+
+        [StopPropagation]
+        [DebounceTimeout(200)]
+        Task OnPropertyNameMouseLeved(MouseEvent e)
+        {
+            if (state.IsEnteredSuggestionsBox is false)
+            {
+                state = state with { IsSuggestionsVisible = false };
+            }
+
+            return Task.CompletedTask;
+        }
+
+        Task OnShadowPropClicked(MouseEvent e)
+        {
+            DispatchEvent(OnChange, [PropertyName, null]);
+
+            return Task.CompletedTask;
+        }
+
+        [StopPropagation]
+        Task OnSuggestionBoxEntered(MouseEvent e)
+        {
+            state = state with
+            {
+                IsEnteredSuggestionsBox = true
+            };
+
+            return Task.CompletedTask;
+        }
+
+        [StopPropagation]
+        Task OnSuggestionItemClicked(MouseEvent e)
+        {
+            state = state with
+            {
+                Value = e.target.id,
+                IsSuggestionsVisible = false
+            };
+
+            DispatchEvent(OnChange, [PropertyName, state.Value]);
+
+            return Task.CompletedTask;
+        }
+
+        internal record State
+        {
+            public string InitialValue { get; init; }
+
+            public bool IsEnteredSuggestionsBox { get; init; }
+            public bool IsSuggestionsVisible { get; init; }
+
+            public double SuggestionPopupLocationX { get; init; }
+
+            public double SuggestionPopupLocationY { get; init; }
+
+            public string Value { get; init; }
         }
     }
 
