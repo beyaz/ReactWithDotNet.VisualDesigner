@@ -9,6 +9,7 @@ namespace ReactWithDotNet.VisualDesigner.Views;
 
 sealed class ApplicationView : Component<ApplicationState>
 {
+    const string SHADOW_PROP_PREFIX = "SHADOW_PROP-";
     static readonly IReadOnlyList<string> MediaSizes = ["M", "SM", "MD", "LG", "XL", "XXL"];
 
     enum Icon
@@ -829,7 +830,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
     Task OnShadowPropClicked(MouseEvent e)
     {
-        var propName = e.currentTarget.id.RemoveFromStart("SHADOW_PROP-");
+        var propName = e.currentTarget.id.RemoveFromStart(SHADOW_PROP_PREFIX);
 
         UpdateCurrentVisualElement(x => x with
         {
@@ -1439,6 +1440,7 @@ sealed class ApplicationView : Component<ApplicationState>
                 {
                     foreach (var propertyInfo in from propertyInfo in type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly) select propertyInfo)
                     {
+                        // has already declered
                         if ((from p in CurrentVisualElement.Properties
                                 from prop in TryParseProperty(p)
                                 where propertyInfo.Name.Equals(prop.Name, StringComparison.OrdinalIgnoreCase)
@@ -1447,11 +1449,7 @@ sealed class ApplicationView : Component<ApplicationState>
                             continue;
                         }
 
-                        yield return new FlexRowCentered(CursorDefault, Opacity(0.4), Padding(4, 8), BorderRadius(16), UserSelect(none), Hover(Opacity(0.6), Background(Gray200)), OnClick(OnShadowPropClicked))
-                        {
-                            Id("SHADOW_PROP-" + propertyInfo.Name),
-                            propertyInfo.Name + ": " + propertyInfo.GetCustomAttribute<JsTypeInfoAttribute>()?.JsType
-                        };
+                        yield return createShadowProperty(propertyInfo);
                     }
                 }
             }
@@ -1459,6 +1457,17 @@ sealed class ApplicationView : Component<ApplicationState>
             if (shadowProps.children.Count == 0)
             {
                 shadowProps = null;
+            }
+
+            Element createShadowProperty(PropertyInfo propertyInfo)
+            {
+                return new FlexRowCentered(CursorDefault, Opacity(0.4), Padding(4, 8), BorderRadius(16), UserSelect(none), Hover(Opacity(0.6), Background(Gray200)), OnClick(OnShadowPropClicked))
+                {
+                    Id(SHADOW_PROP_PREFIX + propertyInfo.Name),
+                    propertyInfo.Name + ": " + propertyInfo.GetCustomAttribute<JsTypeInfoAttribute>()?.JsType,
+
+                    new IconArrowRightOrDown { IsArrowDown = true, style = { Width(16) } }
+                };
             }
         }
 
