@@ -88,7 +88,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
         // try take from db cache
         {
-            var lastUsage = (await Store.GetUserByUserName(userName)).OrderByDescending(x=>x.LastAccessTime).FirstOrDefault();
+            var lastUsage = (await Store.GetUserByUserName(userName)).OrderByDescending(x => x.LastAccessTime).FirstOrDefault();
             if (lastUsage is not null && lastUsage.LastStateAsYaml.HasValue())
             {
                 state = DeserializeFromYaml<ApplicationState>(lastUsage.LastStateAsYaml) with
@@ -307,6 +307,33 @@ sealed class ApplicationView : Component<ApplicationState>
         });
 
         return Task.CompletedTask;
+    }
+
+    void ArrangePropEditMode(int propertyIndex)
+    {
+        var id = "PROPS-INPUT-EDITOR-" + propertyIndex;
+
+        // calculate js code for focus to input editor
+        {
+            var jsCode = new StringBuilder();
+
+            jsCode.AppendLine($"document.getElementById('{id}').focus();");
+
+            // calculate text selection in edit input
+            {
+                var nameValue = CurrentVisualElement.Properties[propertyIndex];
+
+                TryParseProperty(nameValue).HasValue(parseResult =>
+                {
+                    var startIndex = nameValue.LastIndexOf(parseResult.Value ?? string.Empty, StringComparison.OrdinalIgnoreCase);
+                    var endIndex = nameValue.Length;
+
+                    jsCode.AppendLine($"document.getElementById('{id}').setSelectionRange({startIndex}, {endIndex});");
+                });
+            }
+
+            Client.RunJavascript(jsCode.ToString());
+        }
     }
 
     Task ChangeSelectedComponent(int componentId)
@@ -716,7 +743,7 @@ sealed class ApplicationView : Component<ApplicationState>
                     this.FailNotification(parseResult.Error.ToString());
                     return;
                 }
-                
+
                 await Store.Update(project with { ConfigAsYaml = state.MainContentText });
 
                 Cache.Clear();
@@ -800,6 +827,27 @@ sealed class ApplicationView : Component<ApplicationState>
         return Task.CompletedTask;
     }
 
+    Task OnShadowPropClicked(MouseEvent e)
+    {
+        var propName = e.currentTarget.id.RemoveFromStart("SHADOW_PROP-");
+
+        UpdateCurrentVisualElement(x => x with
+        {
+            Properties = x.Properties.Add($"{propName}: _")
+        });
+
+        var propertyIndex = CurrentVisualElement.Properties.Count - 1;
+
+        state = state with
+        {
+            Selection = state.Selection with { SelectedPropertyIndex = propertyIndex }
+        };
+
+        ArrangePropEditMode(propertyIndex);
+
+        return Task.CompletedTask;
+    }
+
     Task OnStyleItemDropLocationDropped(DragEvent _)
     {
         var dd = state.StyleItemDragDrop;
@@ -833,7 +881,6 @@ sealed class ApplicationView : Component<ApplicationState>
     {
         return new FlexRow(UserSelect(none))
         {
-
             // P R O J E C T
             new FlexRowCentered(Gap(16), Border(1, solid, Theme.BorderColor), BorderRadius(4), PaddingX(8), Height(36))
             {
@@ -1171,7 +1218,7 @@ sealed class ApplicationView : Component<ApplicationState>
         {
             new FlexRow(WidthFull, AlignItemsCenter, Gap(4), PaddingLeft(8))
             {
-                new IconDelete() + Size(16) + Color(Theme.text_primary) + Hover(Color(Blue300)) + OnClick(OnDeleteSelectedComponentClicked),
+                new IconDelete() + Size(16) + Color(text_primary) + Hover(Color(Blue300)) + OnClick(OnDeleteSelectedComponentClicked),
 
                 GetComponentDisplayText(state.ProjectId, state.ComponentId)
             },
@@ -1379,39 +1426,34 @@ sealed class ApplicationView : Component<ApplicationState>
             };
         }
 
-
-        
-
-
-        Element shadowProps = null;
+        Element shadowProps;
         {
             shadowProps = new FlexRow(WidthFull, FlexWrap, Gap(4))
             {
                 calculateShadowProps
             };
-            
+
             IEnumerable<Element> calculateShadowProps()
             {
-            
                 foreach (var type in from type in Plugin.GetAllCustomComponents() where type.Name == CurrentVisualElement.Tag select type)
                 {
-                    foreach (var propertyInfo in from propertyInfo in type.GetProperties(BindingFlags.Instance | BindingFlags.Public |BindingFlags.DeclaredOnly) select propertyInfo)
+                    foreach (var propertyInfo in from propertyInfo in type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly) select propertyInfo)
                     {
-                        if ((from p in CurrentVisualElement.Properties 
-                             from prop in TryParseProperty(p) 
-                             where propertyInfo.Name.Equals(prop.Name,StringComparison.OrdinalIgnoreCase) select prop).Any() )
+                        if ((from p in CurrentVisualElement.Properties
+                                from prop in TryParseProperty(p)
+                                where propertyInfo.Name.Equals(prop.Name, StringComparison.OrdinalIgnoreCase)
+                                select prop).Any())
                         {
                             continue;
                         }
 
                         yield return new FlexRowCentered(CursorDefault, Opacity(0.4), Padding(4, 8), BorderRadius(16), UserSelect(none), Hover(Opacity(0.6), Background(Gray200)), OnClick(OnShadowPropClicked))
                         {
-                            Id("SHADOW_PROP-"+propertyInfo.Name),
+                            Id("SHADOW_PROP-" + propertyInfo.Name),
                             propertyInfo.Name + ": " + propertyInfo.GetCustomAttribute<JsTypeInfoAttribute>()?.JsType
                         };
                     }
                 }
-            
             }
 
             if (shadowProps.children.Count == 0)
@@ -1419,9 +1461,6 @@ sealed class ApplicationView : Component<ApplicationState>
                 shadowProps = null;
             }
         }
-        
-       
-
 
         return new FlexColumn(BorderLeft(1, dotted, "#d9d9d9"), PaddingX(2), Gap(8), OverflowYAuto, Background(White))
         {
@@ -1437,7 +1476,7 @@ sealed class ApplicationView : Component<ApplicationState>
             viewProps(visualElementModel.Properties),
 
             shadowProps,
-            
+
             SpaceY(16),
 
             new FlexRow(WidthFull, AlignItemsCenter)
@@ -1914,55 +1953,6 @@ sealed class ApplicationView : Component<ApplicationState>
         }
     }
 
-    void ArrangePropEditMode(int propertyIndex)
-    {
-        var id = "PROPS-INPUT-EDITOR-" + propertyIndex;
-
-        // calculate js code for focus to input editor
-        {
-            var jsCode = new StringBuilder();
-
-            jsCode.AppendLine($"document.getElementById('{id}').focus();");
-
-            // calculate text selection in edit input
-            {
-                var nameValue = CurrentVisualElement.Properties[propertyIndex];
-
-                TryParseProperty(nameValue).HasValue(parseResult =>
-                {
-                    var startIndex = nameValue.LastIndexOf(parseResult.Value ?? string.Empty, StringComparison.OrdinalIgnoreCase);
-                    var endIndex = nameValue.Length;
-
-                    jsCode.AppendLine($"document.getElementById('{id}').setSelectionRange({startIndex}, {endIndex});");
-                });
-            }
-
-            Client.RunJavascript(jsCode.ToString());
-        }
-    }
-
-    Task OnShadowPropClicked(MouseEvent e)
-    {
-        var propName = e.currentTarget.id.RemoveFromStart("SHADOW_PROP-");
-        
-        UpdateCurrentVisualElement(x => x with
-        {
-            Properties = x.Properties.Add($"{propName}: _")
-        });
-
-        var propertyIndex = CurrentVisualElement.Properties.Count - 1;
-        
-        state = state with
-        {
-            Selection = state.Selection with{  SelectedPropertyIndex = propertyIndex}
-        };
-        
-        ArrangePropEditMode(propertyIndex);
-
-        return Task.CompletedTask;
-        
-    }
-
     Element PartScale()
     {
         return new ZoomComponent
@@ -2130,7 +2120,7 @@ sealed class ApplicationView : Component<ApplicationState>
             {
                 return $"ComponentNotFound-id:{state.ComponentId}";
             }
-            
+
             var result = await TsxExporter.CalculateElementTsxCode(state.ProjectId, componentEntity.GetConfig(), CurrentVisualElement);
             if (result.HasError)
             {
@@ -2142,7 +2132,7 @@ sealed class ApplicationView : Component<ApplicationState>
             {
                 return result.Error.Message;
             }
-            
+
             return result.Value;
         }
     }
