@@ -19,6 +19,10 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
 {
     [CustomEvent]
     public OnTreeItemCopyPaste CopyPaste { get; init; }
+    
+    
+    [CustomEvent]
+    public Func<DOMRect,Task> EnterEditMode { get; init; }
 
     public VisualElementModel Model { get; init; }
 
@@ -314,8 +318,10 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
 
         var returnList = new List<Element>
         {
-            new FlexColumn(PaddingLeft(indent * 16), Id(path), OnClick(OnTreeItemClicked), OnMouseEnter(OnMouseEnterHandler))
+            new FlexColumn(PaddingLeft(indent * 16), Id(path), OnClick(OnTreeItemClicked),  OnMouseEnter(OnMouseEnterHandler))
             {
+                OnKeyDown(OnKeyDownHandler), TabIndex(0), OutlineNone,
+                
                 PositionRelative,
 
                 foldIcon,
@@ -461,6 +467,15 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
 
             return null;
         }
+    }
+    
+    [KeyboardEventCallOnly("F2")]
+    [StopPropagation]
+    Task OnKeyDownHandler(KeyboardEvent e)
+    {
+        
+        DispatchEvent(EnterEditMode, [e.currentTarget.boundingClientRect]);
+        return Task.CompletedTask;
     }
 
     internal class State

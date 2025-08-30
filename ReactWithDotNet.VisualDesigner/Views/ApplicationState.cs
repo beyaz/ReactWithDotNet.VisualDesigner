@@ -56,6 +56,8 @@ public sealed record ApplicationState
     public required AttributeDragDropData StyleItemDragDrop { get; init; }
     
     public required AttributeDragDropData PropertyItemDragDrop { get; init; }
+    
+    public DOMRect ElementTreeEditPosition { get; init; }
 
     // @formatter:on
 }
