@@ -2573,7 +2573,7 @@ sealed class ApplicationView : Component<ApplicationState>
                     },
                     state.IsSuggestionsVisible ? new FlexColumnCentered(PositionFixed, Background(White), Border(1, solid, Gray300), BorderRadius(4), PaddingY(4), Left(state.SuggestionPopupLocationX), Top(state.SuggestionPopupLocationY))
                     {
-                        new[] { "%25", "%50", "%75", "%100" }.Select(text => new FlexRowCentered(Padding(6, 12), BorderRadius(4), Hover(Background(Gray100)))
+                        new[] { "%25", "%50", "%75", "%100", "%125" }.Select(text => new FlexRowCentered(Padding(6, 12), BorderRadius(4), Hover(Background(Gray100)))
                         {
                             text,
                             Id(text),
