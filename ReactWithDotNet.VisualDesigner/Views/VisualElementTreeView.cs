@@ -19,10 +19,9 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
 {
     [CustomEvent]
     public OnTreeItemCopyPaste CopyPaste { get; init; }
-    
-    
+
     [CustomEvent]
-    public Func<DOMRect,Task> EnterEditMode { get; init; }
+    public Func<DOMRect, Task> EnterEditMode { get; init; }
 
     public VisualElementModel Model { get; init; }
 
@@ -63,11 +62,11 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
             }
         }
 
-        state = new State
+        state = new()
         {
             CollapsedNodes = collapsedNodesDefaultValue
         };
-        
+
         return Task.CompletedTask;
     }
 
@@ -158,6 +157,14 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
 
         state.CollapsedNodes.Clear();
 
+        return Task.CompletedTask;
+    }
+
+    [KeyboardEventCallOnly("F2")]
+    [StopPropagation]
+    Task OnKeyDownHandler(KeyboardEvent e)
+    {
+        DispatchEvent(EnterEditMode, [e.currentTarget.boundingClientRect]);
         return Task.CompletedTask;
     }
 
@@ -282,7 +289,7 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
 
         Element secondaryIcon = null;
         {
-            if (hasNamedProperty(node,Design.ItemsSourceDesignTimeCount))
+            if (hasNamedProperty(node, Design.ItemsSourceDesignTimeCount))
             {
                 secondaryIcon = new IconParentChild() + Size(16) + Color(Gray300);
             }
@@ -318,10 +325,10 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
 
         var returnList = new List<Element>
         {
-            new FlexColumn(PaddingLeft(indent * 16), Id(path), OnClick(OnTreeItemClicked),  OnMouseEnter(OnMouseEnterHandler))
+            new FlexColumn(PaddingLeft(indent * 16), Id(path), OnClick(OnTreeItemClicked), OnMouseEnter(OnMouseEnterHandler))
             {
                 OnKeyDown(OnKeyDownHandler), TabIndex(0), OutlineNone,
-                
+
                 PositionRelative,
 
                 foldIcon,
@@ -335,7 +342,7 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
                     new span { await GetTagText(node.Tag) },
 
                     icon,
-                    
+
                     secondaryIcon,
 
                     new FlexRow(FlexGrow(1), Gap(4), AlignItemsCenter, JustifyContentFlexEnd, PaddingRight(8))
@@ -385,6 +392,7 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
             {
                 return true;
             }
+
             return false;
         }
 
@@ -467,15 +475,6 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
 
             return null;
         }
-    }
-    
-    [KeyboardEventCallOnly("F2")]
-    [StopPropagation]
-    Task OnKeyDownHandler(KeyboardEvent e)
-    {
-        
-        DispatchEvent(EnterEditMode, [e.currentTarget.boundingClientRect]);
-        return Task.CompletedTask;
     }
 
     internal class State
