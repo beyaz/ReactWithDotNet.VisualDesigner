@@ -1055,7 +1055,7 @@ static class Plugin
         sealed class BCheckBox : PluginComponentBase
         {
             [JsTypeInfo(JsType.String)]
-            public string id { get; set; }
+            public new string id { get; set; }
             
             [JsTypeInfo(JsType.Boolean)]
             public string @checked { get; set; }
