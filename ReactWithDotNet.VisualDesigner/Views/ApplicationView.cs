@@ -2446,6 +2446,7 @@ sealed class ApplicationView : Component<ApplicationState>
             public string InitialValue { get; init; }
 
             public bool IsEnteredSuggestionsBox { get; init; }
+
             public bool IsSuggestionsVisible { get; init; }
 
             public double SuggestionPopupLocationX { get; init; }
