@@ -1,7 +1,7 @@
-﻿using ReactWithDotNet.ThirdPartyLibraries.MonacoEditorReact;
-using ReactWithDotNet.VisualDesigner.Exporters;
-using System.Reflection;
+﻿using System.Reflection;
 using System.Text;
+using ReactWithDotNet.ThirdPartyLibraries.MonacoEditorReact;
+using ReactWithDotNet.VisualDesigner.Exporters;
 using static ReactWithDotNet.VisualDesigner.Views.ComponentEntityExtensions;
 using Page = ReactWithDotNet.VisualDesigner.Infrastructure.Page;
 
@@ -469,6 +469,82 @@ sealed class ApplicationView : Component<ApplicationState>
         }
 
         return "Component created.";
+    }
+
+    async Task<Element> createTagEditor()
+    {
+        if (state.ElementTreeEditPosition is null)
+        {
+            return null;
+        }
+
+        VisualElementModel visualElementModel = null;
+
+        if (state.Selection.VisualElementTreeItemPath.HasValue())
+        {
+            visualElementModel = FindTreeNodeByTreePath(state.ComponentRootElement, state.Selection.VisualElementTreeItemPath);
+        }
+
+        if (visualElementModel is null)
+        {
+            return null;
+        }
+
+        string inputValue;
+        {
+            inputValue = visualElementModel.Tag;
+
+            foreach (var componentId in TryReadTagAsDesignerComponentId(visualElementModel))
+            {
+                var component = await Store.TryGetComponent(componentId);
+                if (component is null)
+                {
+                    return new div { $"ComponentNotFound.{componentId}" };
+                }
+
+                inputValue = component.GetNameWithExportFilePath();
+            }
+        }
+
+        var inputTag = new FlexRow(WidthFull)
+        {
+            PositionFixed,
+            Left(state.ElementTreeEditPosition.left),
+            Top(state.ElementTreeEditPosition.top),
+            Width(state.ElementTreeEditPosition.width),
+            Height(state.ElementTreeEditPosition.height),
+            Background(White),
+            Border(1, solid, Gray100),
+            BorderRadius(4),
+            PaddingLeft(8),
+
+            new MagicInput
+            {
+                Id          = "TagEditor",
+                Name        = string.Empty,
+                Value       = inputValue,
+                Suggestions = GetTagSuggestions(state),
+                OnChange = (_, newValue) =>
+                {
+                    foreach (var dbRecord in TryFindComponentByComponentNameWithExportFilePath(state.ProjectId, newValue))
+                    {
+                        UpdateCurrentVisualElement(x => x with { Tag = dbRecord.Id.ToString() });
+
+                        return Task.CompletedTask;
+                    }
+
+                    UpdateCurrentVisualElement(x => x with { Tag = newValue });
+
+                    state = state with { ElementTreeEditPosition = null };
+
+                    return Task.CompletedTask;
+                }
+            }
+        };
+
+        Client.RunJavascript("document.getElementById('TagEditor').focus();");
+
+        return inputTag;
     }
 
     Task DeleteSelectedTreeItem()
@@ -1120,7 +1196,7 @@ sealed class ApplicationView : Component<ApplicationState>
                 {
                     rect = null;
                 }
-                
+
                 state = state with
                 {
                     ElementTreeEditPosition = rect
@@ -1128,7 +1204,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
                 return Task.CompletedTask;
             },
-            
+
             Model = state.ComponentRootElement,
 
             SelectedPath = state.Selection.VisualElementTreeItemPath,
@@ -1391,86 +1467,6 @@ sealed class ApplicationView : Component<ApplicationState>
         };
     }
 
-    async Task<Element> createTagEditor()
-    {
-        if (state.ElementTreeEditPosition is null)
-        {
-            return null;
-        }
-        
-        VisualElementModel visualElementModel = null;
-
-        if (state.Selection.VisualElementTreeItemPath.HasValue())
-        {
-            visualElementModel = FindTreeNodeByTreePath(state.ComponentRootElement, state.Selection.VisualElementTreeItemPath);
-        }
-
-        if (visualElementModel is null)
-        {
-            return null;
-        }
-        
-        
-       
-            string inputValue;
-            {
-                inputValue = visualElementModel.Tag;
-
-                foreach (var componentId in TryReadTagAsDesignerComponentId(visualElementModel))
-                {
-                    var component = await Store.TryGetComponent(componentId);
-                    if (component is null)
-                    {
-                        return new div { $"ComponentNotFound.{componentId}" };
-                    }
-
-                    inputValue = component.GetNameWithExportFilePath();
-                }
-            }
-
-            var inputTag = new FlexRow(WidthFull)
-            {
-               
-                    PositionFixed,
-                    Left(state.ElementTreeEditPosition.left),
-                    Top(state.ElementTreeEditPosition.top),
-                    Width(state.ElementTreeEditPosition.width),
-                    Height(state.ElementTreeEditPosition.height),
-                    Background(White),
-                    Border(1, solid, Gray100),
-                    BorderRadius(4),
-                    PaddingLeft(8),
-                
-                new MagicInput
-                {
-                    Id="TagEditor",
-                    Name        = string.Empty,
-                    Value       = inputValue,
-                    Suggestions = GetTagSuggestions(state),
-                    OnChange = (_, newValue) =>
-                    {
-                        foreach (var dbRecord in TryFindComponentByComponentNameWithExportFilePath(state.ProjectId, newValue))
-                        {
-                            UpdateCurrentVisualElement(x => x with { Tag = dbRecord.Id.ToString() });
-
-                            return Task.CompletedTask;
-                        }
-
-                        UpdateCurrentVisualElement(x => x with { Tag = newValue });
-
-                        state = state with { ElementTreeEditPosition = null };
-
-                        return Task.CompletedTask;
-                    }
-                }
-            };
-
-            Client.RunJavascript("document.getElementById('TagEditor').focus();");
-
-            return inputTag;
-
-    }
-    
     Element PartRightPanel()
     {
         VisualElementModel visualElementModel = null;
@@ -1484,8 +1480,6 @@ sealed class ApplicationView : Component<ApplicationState>
         {
             return new div();
         }
-
-        
 
         Element shadowProps;
         {
@@ -1535,7 +1529,7 @@ sealed class ApplicationView : Component<ApplicationState>
         return new FlexColumn(BorderLeft(1, dotted, "#d9d9d9"), PaddingX(2), Gap(8), OverflowYAuto, Background(White))
         {
             createTagEditor,
-            
+
             SpaceY(16),
             new FlexRow(WidthFull, AlignItemsCenter)
             {
