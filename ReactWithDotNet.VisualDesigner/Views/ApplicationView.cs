@@ -1389,17 +1389,20 @@ sealed class ApplicationView : Component<ApplicationState>
 
         Element inputTag;
         {
-            var inputValue = visualElementModel.Tag;
-
-            foreach (var componentId in TryReadTagAsDesignerComponentId(visualElementModel))
+            string inputValue;
             {
-                var component = await Store.TryGetComponent(componentId);
-                if (component is null)
-                {
-                    return new div { $"ComponentNotFound.{componentId}" };
-                }
+                inputValue = visualElementModel.Tag;
 
-                inputValue = component.GetNameWithExportFilePath();
+                foreach (var componentId in TryReadTagAsDesignerComponentId(visualElementModel))
+                {
+                    var component = await Store.TryGetComponent(componentId);
+                    if (component is null)
+                    {
+                        return new div { $"ComponentNotFound.{componentId}" };
+                    }
+
+                    inputValue = component.GetNameWithExportFilePath();
+                }
             }
 
             inputTag = new FlexRow(WidthFull)
