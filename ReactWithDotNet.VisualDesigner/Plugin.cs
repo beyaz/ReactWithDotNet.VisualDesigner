@@ -719,124 +719,92 @@ static class Plugin
         [CustomComponent(Import="import { BDigitalTransactionConfirm } from \"b-digital-transaction-confirm\";")]
         public sealed class BDigitalTransactionConfirm : PluginComponentBase
         {
-            // @formatter:off
-            [JsTypeInfo(JsType.String)]
-            public string sender_titleText { get; set; }
-            
-            [JsTypeInfo(JsType.String)]
-            public string sender_titleTextVariant { get; set; }
-
-            [JsTypeInfo(JsType.String)]
-            public string sender_titleColorVariant { get; set; }
-
-            // ITEM 1
-            [JsTypeInfo(JsType.String)]
-            public string sender_item1_text { get; set; }
-            
-            [JsTypeInfo(JsType.String)]
-            public string sender_item1_textVariant { get; set; }
-                        
-            [JsTypeInfo(JsType.String)]
-            public string sender_item1_textColor { get; set; }
-            
-            [JsTypeInfo(JsType.String)]
-            public string sender_item1_value { get; set; }
-            
-            [JsTypeInfo(JsType.String)]
-            public string sender_item1_valueVariant { get; set; }
-                        
-            [JsTypeInfo(JsType.String)]
-            public string sender_item1_valueColor { get; set; }
-            
-             // ITEM 2
-            [JsTypeInfo(JsType.String)]
-            public string sender_item2_text { get; set; }
-            
-            [JsTypeInfo(JsType.String)]
-            public string sender_item2_textVariant { get; set; }
-                        
-            [JsTypeInfo(JsType.String)]
-            public string sender_item2_textColor { get; set; }
-            
-            [JsTypeInfo(JsType.String)]
-            public string sender_item2_value { get; set; }
-            
-            [JsTypeInfo(JsType.String)]
-            public string sender_item2_valueVariant { get; set; }
-                        
-            [JsTypeInfo(JsType.String)]
-            public string sender_item2_valueColor { get; set; }
-            
-            // ITEM 3
-            [JsTypeInfo(JsType.String)]
-            public string sender_item3_text { get; set; }
-            
-            [JsTypeInfo(JsType.String)]
-            public string sender_item3_textVariant { get; set; }
-                        
-            [JsTypeInfo(JsType.String)]
-            public string sender_item3_textColor { get; set; }
-            
-            [JsTypeInfo(JsType.String)]
-            public string sender_item3_value { get; set; }
-            
-            [JsTypeInfo(JsType.String)]
-            public string sender_item3_valueVariant { get; set; }
-                        
-            [JsTypeInfo(JsType.String)]
-            public string sender_item3_valueColor { get; set; }
-            
+           
             // @formatter:on
           
             
             protected override Element render()
             {
+                return new Fragment { children };
+
+                //var leftFlow = new FlexColumnCentered(Width(24), Gap(12))
+                //{
+                //    new div { Background(rgb(22, 160, 133)), Padding(6), BorderRadius(8) },
+                //    new div { Width(0), Border(1, dashed, rgba(0, 0, 0, 0.12)), Height(80) },
+                //    new DynamicMuiIcon { name = "ArrowDownwardOutlined", fontSize = "small" },
+                //    new div { Width(0), Border(1, dashed, rgba(0, 0, 0, 0.12)), Height(80) },
+                //    new div { Background(rgb(22, 160, 133)), Padding(6), BorderRadius(8) },
+                //};
                 
-                return new FlexColumn(Background(White), BorderRadius(10), Border(1, solid, rgba(0, 0, 0, 0.12)), Padding(24), Id(id), OnClick(onMouseClick))
-                {
-                    new FlexRow
-                    {
-                        new FlexColumn(AlignItemsCenter, Gap(8))
-                        {
-                            new div{Background(rgb(22, 160, 133)), Padding(5), BorderRadius(8)},
-                            new div{Width(0), Border(1, dashed, rgba(0, 0, 0, 0.12)), Height(80)},
-                            new DynamicMuiIcon{ name = "ArrowDownwardOutlined", fontSize = "24px"},
-                            new div{Width(0), Border(1, dashed, rgba(0, 0, 0, 0.12)), Height(80)},
-                            new div{Background(rgb(22, 160, 133)), Padding(5), BorderRadius(8)}
-                        },
-                        
-                        new FlexColumn
-                        {
-                         new BTypography
-                         {
-                             children={sender_titleText},
-                             variant = sender_titleTextVariant,
-                             color= sender_titleColorVariant
-                         },
+                //var partContent = new FlexColumn(JustifyContentSpaceBetween)
+                //{
+                //    // TOP
+                //    new FlexColumn
+                //    {
+                //        children.Count > 0 ? children[0] : null,
                          
-                         new FlexRow
-                         {
-                             new BTypography
-                             {
-                                 children ={sender_item1_text},
-                                 variant  = sender_item1_textVariant,
-                                 color    = sender_item1_textColor
-                             },
-                             new BTypography
-                             {
-                                 children ={sender_item1_value},
-                                 variant  = sender_item1_valueVariant,
-                                 color    = sender_item1_valueColor
-                             }
-                         }
-                             
-                        }
-                    },
-                    new FlexRow(BorderTop(1, solid, rgba(0, 0, 0, 0.12)))
-                    {
+                //        new FlexRow(AlignItemsCenter, Gap(4))
+                //        {
+                //            children.Count > 0 ? children[1] : null,
+                            
+                //            new BTypography
+                //            {
+                //                children ={sender_item1_text + (sender_item1_value.HasValue() ? ":" : null)},
+                //                variant  = sender_item1_text_variant,
+                //                color    = sender_item1_text_color
+                //            },
+                //            new BTypography
+                //            {
+                //                children ={sender_item1_value},
+                //                variant  = sender_item1_value_variant,
+                //                color    = sender_item1_value_color
+                //            }
+                //        }
+                //    },
+                    
+                //    // CENTER
+                //    new div{ "Amount"},
+                    
+                //    // BOTTOM
+                //    new FlexColumn
+                //    {
+                //        new BTypography
+                //        {
+                //            children ={receiver_title},
+                //            variant  = receiver_title_variant,
+                //            color    = receiver_title_color
+                //        },
+                         
+                //        new FlexRow
+                //        {
+                //            new BTypography
+                //            {
+                //                children ={sender_item1_text},
+                //                variant  = sender_item1_text_variant,
+                //                color    = sender_item1_text_color
+                //            },
+                //            new BTypography
+                //            {
+                //                children ={sender_item1_value},
+                //                variant  = sender_item1_value_variant,
+                //                color    = sender_item1_value_color
+                //            }
+                //        }
+                //    }
+                //};
+                
+                //return new FlexColumn(Background(White), BorderRadius(10), Border(1, solid, rgba(0, 0, 0, 0.12)), Padding(24), Id(id), OnClick(onMouseClick))
+                //{
+                //    new FlexRow(Gap(32), Height(368))
+                //    {
+                //        leftFlow,  partContent
+                //    },
+                    
+                //    new FlexRow(BorderTop(1, solid, rgba(0, 0, 0, 0.12)))
+                //    {
                         
-                    }
-                };
+                //    }
+                //};
             }
         }
         
@@ -1416,16 +1384,36 @@ static class Plugin
         [CustomComponent(Import="import { BDigitalBox } from \"b-digital-box\";")]
         sealed class BDigitalBox : PluginComponentBase
         {
-            [Suggestions("noMargin" )]
+            [Suggestions("noMargin, primary" )]
             [JsTypeInfo(JsType.String)]
             public string styleContext { get; set; }
 
 
             protected override Element render()
             {
+                Style style = new Style();
+                
+                if (styleContext == "primary")
+                {
+                    style = new Style
+                    {
+                        Background(rgb(255, 255, 255)),
+                        Border(1, solid, rgba(0, 0, 0, 0.12)),
+                        BorderRadius(8)
+                    };
+                }
+                if (styleContext == "noMargin")
+                {
+                    style = new Style
+                    {
+                        Margin(0)
+                    };
+                }
+                
                 return new Grid
                 {
-                    children = { children }
+                    children = { children },
+                    style = { style }
                 };
             }
         }
