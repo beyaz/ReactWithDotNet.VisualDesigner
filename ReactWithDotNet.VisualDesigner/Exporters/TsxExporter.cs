@@ -240,7 +240,7 @@ static class TsxExporter
                 }
             }
 
-            // try import import lines
+            // try import lines
             {
                 var fileContentInDirectoryAsList = fileContentInDirectory.ToList();
                 

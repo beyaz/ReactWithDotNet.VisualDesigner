@@ -292,7 +292,7 @@ static class Extensions
     {
         var lines = fileContent.ToList();
 
-        var componentDeclarationLineIndex = lines.FindIndex(line => line.Contains($"function {targetComponentName}("));
+        var componentDeclarationLineIndex = lines.FindIndex(line => line.Contains($"function {targetComponentName}(", StringComparison.OrdinalIgnoreCase));
         if (componentDeclarationLineIndex == -1)
         {
             componentDeclarationLineIndex = lines.FindIndex(line => line.Contains($"const {targetComponentName} "));
