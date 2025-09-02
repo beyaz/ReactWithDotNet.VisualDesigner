@@ -1040,7 +1040,7 @@ sealed class ApplicationView : Component<ApplicationState>
                                 return;
                             }
 
-                            var result = await TsxExporter.Export(state.AsExportInput());
+                            var result = await TsxExporter.ExportToFileSystem(state.AsExportInput());
                             if (result.HasError)
                             {
                                 this.FailNotification(result.Error.Message);

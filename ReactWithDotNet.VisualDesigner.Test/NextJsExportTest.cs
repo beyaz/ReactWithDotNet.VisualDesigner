@@ -19,7 +19,7 @@ public sealed class NextJsExportTest
                 continue;
             }
 
-            var result = await TsxExporter.Export(new()
+            var result = await TsxExporter.ExportToFileSystem(new()
             {
                 ComponentId = component.Id,
                 ProjectId   = component.ProjectId,

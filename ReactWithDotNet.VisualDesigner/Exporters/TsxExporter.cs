@@ -32,37 +32,6 @@ sealed record ExportInput
 
 static class TsxExporter
 {
-    public static async Task<Result<(IReadOnlyList<string> elementJsxTree, IReadOnlyList<string> importLines)>> CalculateElementTreeTsxCodes(ProjectConfig project, IReadOnlyDictionary<string, string> componentConfig, VisualElementModel rootVisualElement)
-    {
-        ReactNode rootNode;
-        {
-            var result = await ModelToNodeTransformer.ConvertVisualElementModelToReactNodeModel(project, rootVisualElement);
-            if (result.HasError)
-            {
-                return result.Error;
-            }
-
-            rootNode = result.Value;
-        }
-
-        rootNode = Plugin.AnalyzeNode(rootNode, componentConfig);
-
-        IReadOnlyList<string> elementJsxTree;
-        {
-            var result = await ConvertReactNodeModelToTsxCode(project, rootNode, null, 2);
-            if (result.HasError)
-            {
-                return result.Error;
-            }
-
-            elementJsxTree = result.Value;
-        }
-
-        var importLines = Plugin.CalculateImportLines(rootNode);
-
-        return (elementJsxTree, importLines.ToList());
-    }
-
     public static async Task<Result<string>> CalculateElementTsxCode(int projectId, IReadOnlyDictionary<string, string> componentConfig, VisualElementModel visualElement)
     {
         var project = GetProjectConfig(projectId);
@@ -76,7 +45,7 @@ static class TsxExporter
         return string.Join(Environment.NewLine, result.Value.elementJsxTree);
     }
 
-    public static async Task<Result<ExportOutput>> Export(ExportInput input)
+    public static async Task<Result<ExportOutput>> ExportToFileSystem(ExportInput input)
     {
         string filePath;
         string fileContent;
@@ -116,6 +85,37 @@ static class TsxExporter
         }
 
         return new ExportOutput { HasChange = true };
+    }
+
+    internal static async Task<Result<(IReadOnlyList<string> elementJsxTree, IReadOnlyList<string> importLines)>> CalculateElementTreeTsxCodes(ProjectConfig project, IReadOnlyDictionary<string, string> componentConfig, VisualElementModel rootVisualElement)
+    {
+        ReactNode rootNode;
+        {
+            var result = await ModelToNodeTransformer.ConvertVisualElementModelToReactNodeModel(project, rootVisualElement);
+            if (result.HasError)
+            {
+                return result.Error;
+            }
+
+            rootNode = result.Value;
+        }
+
+        rootNode = Plugin.AnalyzeNode(rootNode, componentConfig);
+
+        IReadOnlyList<string> elementJsxTree;
+        {
+            var result = await ConvertReactNodeModelToTsxCode(project, rootNode, null, 2);
+            if (result.HasError)
+            {
+                return result.Error;
+            }
+
+            elementJsxTree = result.Value;
+        }
+
+        var importLines = Plugin.CalculateImportLines(rootNode);
+
+        return (elementJsxTree, importLines.ToList());
     }
 
     static async Task<Result<(string filePath, string fileContent)>> CalculateExportInfo(ExportInput input)
