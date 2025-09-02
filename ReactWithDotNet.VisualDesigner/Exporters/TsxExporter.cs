@@ -1,8 +1,5 @@
-﻿using System.Collections.Immutable;
-using System.Globalization;
-using System.IO;
+﻿using System.IO;
 using System.Reflection;
-using System.Text;
 
 namespace ReactWithDotNet.VisualDesigner.Exporters;
 
@@ -32,14 +29,41 @@ sealed record ExportInput
     // @formatter:on
 }
 
-static class ESLint
-{
-    public static readonly int IndentLength = 2;
-    public static readonly int MaxCharLengthPerLine = 80;
-}
+
 
 static class TsxExporter
 {
+    public static async Task<Result<(IReadOnlyList<string> elementJsxTree, IReadOnlyList<string> importLines)>> CalculateElementTreeTsxCodes(ProjectConfig project, IReadOnlyDictionary<string, string> componentConfig, VisualElementModel rootVisualElement)
+    {
+        ReactNode rootNode;
+        {
+            var result = await ModelToNodeTransformer.ConvertVisualElementModelToReactNodeModel(project, rootVisualElement);
+            if (result.HasError)
+            {
+                return result.Error;
+            }
+
+            rootNode = result.Value;
+        }
+
+        rootNode = Plugin.AnalyzeNode(rootNode, componentConfig);
+
+        IReadOnlyList<string> elementJsxTree;
+        {
+            var result = await ConvertReactNodeModelToTsxCode(project, rootNode, null, 2);
+            if (result.HasError)
+            {
+                return result.Error;
+            }
+
+            elementJsxTree = result.Value;
+        }
+
+        var importLines = Plugin.CalculateImportLines(rootNode);
+
+        return (elementJsxTree, importLines.ToList());
+    }
+
     public static async Task<Result<string>> CalculateElementTsxCode(int projectId, IReadOnlyDictionary<string, string> componentConfig, VisualElementModel visualElement)
     {
         var project = GetProjectConfig(projectId);
@@ -121,37 +145,6 @@ static class TsxExporter
         return Success;
     }
 
-    internal static async Task<Result<(IReadOnlyList<string> elementJsxTree, IReadOnlyList<string> importLines)>> CalculateElementTreeTsxCodes(ProjectConfig project, IReadOnlyDictionary<string, string> componentConfig, VisualElementModel rootVisualElement)
-    {
-        ReactNode rootNode;
-        {
-            var result = await ConvertVisualElementModelToReactNodeModel(project, rootVisualElement);
-            if (result.HasError)
-            {
-                return result.Error;
-            }
-
-            rootNode = result.Value;
-        }
-
-        rootNode = Plugin.AnalyzeNode(rootNode, componentConfig);
-
-
-        IReadOnlyList<string> elementJsxTree;
-        {
-            var result = await ConvertReactNodeModelToTsxCode(project, rootNode, null, 2);
-            if (result.HasError)
-            {
-                return result.Error;
-            }
-            elementJsxTree = result.Value;
-        }
-        
-        var importLines = Plugin.CalculateImportLines(rootNode);
-
-        return (elementJsxTree, importLines.ToList());
-    }
-
     static async Task<Result<(string filePath, string fileContent)>> CalculateExportInfo(ExportInput input)
     {
         var (projectId, componentId, userName) = input;
@@ -220,7 +213,8 @@ static class TsxExporter
                 fileContentInDirectory = result.Value;
             }
 
-            IReadOnlyList<string> linesToInject; IReadOnlyList<string> importLines;
+            IReadOnlyList<string> linesToInject;
+            IReadOnlyList<string> importLines;
             {
                 var result = await CalculateElementTreeTsxCodes(project, data.Value.Component.GetConfig(), rootVisualElement);
                 if (result.HasError)
@@ -229,7 +223,7 @@ static class TsxExporter
                 }
 
                 linesToInject = result.Value.elementJsxTree;
-                
+
                 importLines = result.Value.importLines;
 
                 var formatResult = await Prettier.FormatCode(string.Join(Environment.NewLine, linesToInject));
@@ -242,10 +236,10 @@ static class TsxExporter
             // try import lines
             {
                 var fileContentInDirectoryAsList = fileContentInDirectory.ToList();
-                
+
                 foreach (var importLine in importLines)
                 {
-                    if (fileContentInDirectory.Any(x=>IsEqualsIgnoreWhitespace(x, importLine)))
+                    if (fileContentInDirectory.Any(x => IsEqualsIgnoreWhitespace(x, importLine)))
                     {
                         continue;
                     }
@@ -253,7 +247,7 @@ static class TsxExporter
                     var lastImportLineIndex = fileContentInDirectoryAsList.FindLastIndex(line => line.TrimStart().StartsWith("import "));
                     if (lastImportLineIndex >= 0)
                     {
-                        fileContentInDirectoryAsList.Insert(lastImportLineIndex+1, importLine);    
+                        fileContentInDirectoryAsList.Insert(lastImportLineIndex + 1, importLine);
                     }
                 }
 
@@ -327,7 +321,7 @@ static class TsxExporter
 
                     innerLines = result.Value;
                 }
-                
+
                 // import inner lines
                 // try clear begin - end brackets in innerLines 
                 // maybe conditional render
@@ -335,24 +329,23 @@ static class TsxExporter
                     for (var i = 0; i < innerLines.Count; i++)
                     {
                         var line = innerLines[i];
-                        
+
                         // is first line
                         if (i == 0)
                         {
                             line = line.TrimStart().RemoveFromStart("{");
                         }
-                        
+
                         // is last line
                         if (i == innerLines.Count - 1)
                         {
                             line = line.TrimEnd().RemoveFromEnd("}");
                         }
-                        
+
                         lines.Add(line);
                     }
-                    
                 }
-                
+
                 indentLevel--;
                 lines.Add(indent(indentLevel) + ");");
 
@@ -653,272 +646,10 @@ static class TsxExporter
 
         static string indent(int indentLevel)
         {
-            return new(' ', indentLevel * ESLint.IndentLength);
+            const int IndentLength = 2;
+            
+            return new(' ', indentLevel * IndentLength);
         }
-    }
-
-    static Result<(VisualElementModel modifiedElementModel, IReadOnlyList<(string name, string value)> inlineStyle)>
-        convertStyleToInlineStyleObject(VisualElementModel elementModel)
-    {
-        var inlineStyles = new List<(string name, string value)>();
-
-        foreach (var item in elementModel.Styles)
-        {
-            var styleAttribute = ParseStyleAttribute(item);
-
-            var name = kebabToCamelCase(styleAttribute.Name);
-
-            var value = styleAttribute.Value;
-
-            if (name == nameof(Style.fontWeight))
-            {
-                value = tryGetFontWeight(value);
-            }
-
-            if (double.TryParse(value, out var valueAsDouble))
-            {
-                value = valueAsDouble.AsPixel();
-            }
-
-            if (value?.StartsWith("request.") is true || value?.StartsWith("context.") is true)
-            {
-                value = TryClearStringValue(value);
-            }
-            else
-            {
-                value = '"' + TryClearStringValue(value) + '"';
-            }
-
-            inlineStyles.Add((name, value));
-        }
-
-        elementModel = elementModel with { Styles = [] };
-
-        return (elementModel, inlineStyles);
-
-        static string kebabToCamelCase(string kebab)
-        {
-            if (string.IsNullOrEmpty(kebab))
-            {
-                return kebab;
-            }
-
-            var camelCase = new StringBuilder();
-            var capitalizeNext = false;
-
-            foreach (var c in kebab)
-            {
-                if (c == '-')
-                {
-                    capitalizeNext = true;
-                }
-                else
-                {
-                    if (capitalizeNext)
-                    {
-                        camelCase.Append(char.ToUpper(c, CultureInfo.InvariantCulture));
-                        capitalizeNext = false;
-                    }
-                    else
-                    {
-                        camelCase.Append(c);
-                    }
-                }
-            }
-
-            return camelCase.ToString();
-        }
-
-        static string tryGetFontWeight(string weight)
-        {
-            if (!int.TryParse(weight, out var numericWeight))
-            {
-                return weight;
-            }
-
-            return numericWeight switch
-            {
-                100 => "thin",
-                200 => "extra-light",
-                300 => "light",
-                400 => "normal",
-                500 => "medium",
-                600 => "semi-bold",
-                700 => "bold",
-                800 => "extra-bold",
-                900 => "black",
-                _   => weight
-            };
-        }
-    }
-
-    static async Task<Result<ReactNode>> ConvertVisualElementModelToReactNodeModel(ProjectConfig project, VisualElementModel elementModel)
-    {
-        // Open tag
-        var tag = elementModel.Tag;
-
-        var node = new ReactNode
-        {
-            Tag = tag,
-
-            HtmlElementType = TryGetHtmlElementTypeByTagName(tag)
-        };
-
-        // arrange inline styles
-        {
-            if (project.ExportStylesAsInline)
-            {
-                // Transfer properties
-                foreach (var property in elementModel.Properties)
-                {
-                    var propertyIsSuccessfullyParsed = false;
-
-                    foreach (var (name, value) in TryParseProperty(property))
-                    {
-                        node = node with
-                        {
-                            Properties = node.Properties.Add(new()
-                            {
-                                Name  = name,
-                                Value = value
-                            })
-                        };
-
-                        propertyIsSuccessfullyParsed = true;
-                    }
-
-                    if (!propertyIsSuccessfullyParsed)
-                    {
-                        return new Exception($"PropertyParseError: {property}");
-                    }
-                }
-
-                var result = convertStyleToInlineStyleObject(elementModel);
-                if (result.HasError)
-                {
-                    return result.Error;
-                }
-
-                elementModel = result.Value.modifiedElementModel;
-
-                var inlineStyle = result.Value.inlineStyle;
-
-                if (inlineStyle.Any())
-                {
-                    var inlineStyleProperty = new ReactProperty
-                    {
-                        Name  = "style",
-                        Value = "{" + string.Join(", ", inlineStyle.Select(x => $"{x.name}: {x.value}")) + "}"
-                    };
-
-                    node = node with { Properties = node.Properties.Add(inlineStyleProperty) };
-                }
-            }
-        }
-
-        // arrange tailwind classes
-        {
-            if (project.ExportStylesAsTailwind)
-            {
-                List<string> classNames = [];
-
-                var classNameShouldBeTemplateLiteral = false;
-
-                // Transfer properties
-                foreach (var property in elementModel.Properties)
-                {
-                    string name, value;
-                    {
-                        var parseResult = TryParseProperty(property);
-                        if (parseResult.HasNoValue)
-                        {
-                            return new Exception($"PropertyParseError: {property}");
-                        }
-
-                        name  = parseResult.Value.Name;
-                        value = parseResult.Value.Value;
-                    }
-
-                    if (name == "class")
-                    {
-                        classNames.AddRange(value.Split(" ", StringSplitOptions.RemoveEmptyEntries));
-                        continue;
-                    }
-
-                    node = node with { Properties = node.Properties.Add(new() { Name = name, Value = value }) };
-                }
-
-                foreach (var styleItem in elementModel.Styles)
-                {
-                    string tailwindClassName;
-                    {
-                        var result = ConvertDesignerStyleItemToTailwindClassName(project, styleItem);
-                        if (result.HasError)
-                        {
-                            return result.Error;
-                        }
-
-                        tailwindClassName = result.Value;
-                    }
-
-                    if (tailwindClassName.StartsWith("${"))
-                    {
-                        classNameShouldBeTemplateLiteral = true;
-                    }
-
-                    classNames.Add(tailwindClassName);
-                }
-
-                if (classNames.Count > 0)
-                {
-                    var firstLastChar = classNameShouldBeTemplateLiteral ? "`" : "\"";
-
-                    node = node with { Properties = node.Properties.Add(new() { Name = "className", Value = firstLastChar + string.Join(" ", classNames) + firstLastChar }) };
-                }
-            }
-        }
-
-        var hasNoChildAndHasNoText = elementModel.Children.Count == 0 && elementModel.HasNoText();
-        if (hasNoChildAndHasNoText)
-        {
-            return node;
-        }
-
-        // Add text content
-        if (elementModel.HasText())
-        {
-            node = node with
-            {
-                Children = node.Children.Add(new()
-                {
-                    Text = elementModel.GetText(),
-
-                    HtmlElementType = None
-                })
-            };
-        }
-
-        // Add children
-        foreach (var child in elementModel.Children)
-        {
-            ReactNode childNode;
-            {
-                var result = await ConvertVisualElementModelToReactNodeModel(project, child);
-                if (result.HasError)
-                {
-                    return result.Error;
-                }
-
-                childNode = result.Value;
-            }
-
-            node = node with
-            {
-                Children = node.Children.Add(childNode)
-            };
-        }
-
-        return node;
     }
 
     static Result<string> InjectRender(IReadOnlyList<string> fileContent, string targetComponentName, IReadOnlyList<string> linesToInject)
@@ -968,25 +699,6 @@ static class TsxExporter
 
     class TsxLines : List<string>
     {
-        
     }
 }
 
-record ReactNode
-{
-    public ImmutableList<ReactNode> Children { get; init; } = [];
-
-    public ImmutableList<ReactProperty> Properties { get; init; } = [];
-
-    public string Tag { get; init; }
-
-    public string Text { get; init; }
-
-    internal required Maybe<Type> HtmlElementType { get; init; }
-}
-
-record ReactProperty
-{
-    public required string Name { get; init; }
-    public required string Value { get; init; }
-}
