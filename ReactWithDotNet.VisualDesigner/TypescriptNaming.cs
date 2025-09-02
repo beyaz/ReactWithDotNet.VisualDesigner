@@ -4,19 +4,14 @@ namespace ReactWithDotNet.VisualDesigner;
 
 static class TypescriptNaming
 {
-    #region Static Fields
-    static readonly CamelCasePropertyNamesContractResolver CamelCasePropertyNamesContractResolver = new CamelCasePropertyNamesContractResolver();
-    #endregion
-
-    #region Public Methods
-    public static string GetResolvedPropertyName(string propertyNameInCSharp)
-    {
-        return CamelCasePropertyNamesContractResolver.GetResolvedPropertyName(propertyNameInCSharp);
-    }
+    static readonly CamelCasePropertyNamesContractResolver CamelCasePropertyNamesContractResolver = new();
 
     public static string NormalizeBindingPath(string propertyNameInCSharp)
     {
-        return string.Join(".", propertyNameInCSharp.Split('.',StringSplitOptions.RemoveEmptyEntries).ToList().ConvertAll(GetResolvedPropertyName));
+        var names =
+            from name in propertyNameInCSharp.Split('.', StringSplitOptions.RemoveEmptyEntries)
+            select CamelCasePropertyNamesContractResolver.GetResolvedPropertyName(name);
+
+        return string.Join(".", names);
     }
-    #endregion
 }
