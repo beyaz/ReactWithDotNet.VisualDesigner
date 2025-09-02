@@ -2532,6 +2532,11 @@ sealed class ApplicationView : Component<ApplicationState>
             return Task.CompletedTask;
         }
 
+        Element View()
+        {
+            return null;
+        }
+
         protected override Element render()
         {
             return new FlexRowCentered(Border(1, solid, Theme.BorderColor), BorderRadius(4), Height(36))

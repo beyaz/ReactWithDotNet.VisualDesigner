@@ -322,7 +322,7 @@ static class ApplicationLogic
             }
         }
 
-        foreach (var (key, values) in project.Suggestions)
+        foreach (var (key, values) in CommonCssSuggestions.Map)
         {
             foreach (var value in values)
             {
