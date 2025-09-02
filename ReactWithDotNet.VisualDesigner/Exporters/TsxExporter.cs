@@ -528,7 +528,7 @@ static class TsxExporter
 
             if (node.Children.Count == 0 && node.Text.HasNoValue() && childrenProperty is null)
             {
-                return new TsxLines
+                return new LineCollection
                 {
                     $"{indent(indentLevel)}<{tag}{partProps} />"
                 };
@@ -540,7 +540,7 @@ static class TsxExporter
 
                 if (childrenProperty is not null)
                 {
-                    return new TsxLines
+                    return new LineCollection
                     {
                         $"{indent(indentLevel)}<{tag}{partProps}>",
                         $"{indent(indentLevel + 1)}{childrenProperty.Value}",
@@ -561,7 +561,7 @@ static class TsxExporter
 
                     if (IsConnectedValue(childrenText))
                     {
-                        return new TsxLines
+                        return new LineCollection
                         {
                             $"{indent(indentLevel)}<{tag}{partProps} >",
                             $"{indent(indentLevel + 1)}{childrenText}",
@@ -571,7 +571,7 @@ static class TsxExporter
                 }
             }
 
-            TsxLines lines =
+            LineCollection lines =
             [
                 $"{indent(indentLevel)}<{tag}{partProps}>"
             ];
@@ -678,7 +678,7 @@ static class TsxExporter
         return injectedFileContent;
     }
 
-    class TsxLines : List<string>
+    class LineCollection : List<string>
     {
     }
 }
