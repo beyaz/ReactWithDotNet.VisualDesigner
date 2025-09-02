@@ -1,6 +1,7 @@
 ﻿using System.Collections.Immutable;
 using System.Globalization;
 using System.Text;
+using Newtonsoft.Json;
 
 namespace ReactWithDotNet.VisualDesigner.Exporters;
 
@@ -20,7 +21,7 @@ static class ModelToNodeTransformer
 
         // arrange inline styles
         {
-            if (project.ExportStylesAsInline)
+            if (project.ExportStylesAsInline || project.ExportAsCSharp)
             {
                 // Transfer properties
                 foreach (var property in elementModel.Properties)
@@ -64,6 +65,14 @@ static class ModelToNodeTransformer
                         Name  = "style",
                         Value = "{" + string.Join(", ", inlineStyle.Select(x => $"{x.name}: {x.value}")) + "}"
                     };
+
+                    if (project.ExportAsCSharp)
+                    {
+                        inlineStyleProperty = inlineStyleProperty with
+                        {
+                            Value = JsonConvert.SerializeObject(inlineStyle)
+                        };
+                    }
 
                     node = node with { Properties = node.Properties.Add(inlineStyleProperty) };
                 }
@@ -132,6 +141,10 @@ static class ModelToNodeTransformer
             }
         }
 
+      
+      
+
+        
         var hasNoChildAndHasNoText = elementModel.Children.Count == 0 && elementModel.HasNoText();
         if (hasNoChildAndHasNoText)
         {
@@ -207,6 +220,12 @@ static class ModelToNodeTransformer
                 value = '"' + TryClearStringValue(value) + '"';
             }
 
+            if (styleAttribute.Pseudo.HasValue())
+            {
+                inlineStyles.Add((styleAttribute.Pseudo + ":" + name, value));
+                continue;
+            }
+            
             inlineStyles.Add((name, value));
         }
 

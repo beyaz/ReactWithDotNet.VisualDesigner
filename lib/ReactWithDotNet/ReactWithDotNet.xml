@@ -13426,6 +13426,16 @@
                 Default value is simple empty div element
             </summary>
         </member>
+        <member name="M:ReactWithDotNet.Transformers.ToModifierTransformerExtensions.RemoveFromEnd(System.String,System.String,System.StringComparison)">
+            <summary>
+                Removes from end.
+            </summary>
+        </member>
+        <member name="M:ReactWithDotNet.Transformers.ToModifierTransformerExtensions.RemoveFromStart(System.String,System.String,System.StringComparison)">
+            <summary>
+                Removes value from start of str
+            </summary>
+        </member>
         <member name="M:ReactWithDotNet.UIDesigner.ReactWithDotNetDesigner.IsInDesignMode(Microsoft.AspNetCore.Http.HttpContext)">
             <summary>
                 Indicates component is in design mode.

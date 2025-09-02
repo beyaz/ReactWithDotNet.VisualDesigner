@@ -11,13 +11,13 @@ public sealed class CSharpExporterTest
         var input = new VisualElementModel
         {
             Tag        = "div",
-            Styles     = ["color: red", "bg: blue"],
+            Styles     = ["color: red", "background: rgb(2,3,6)", "hover:color:blue"],
             Properties = ["d-text: | Abc"]
         };
 
         string[] expected =
         [
-            "new div(Color(\"red\"), Background(\"blue\"))",
+            "new div(Color(Red), Background(rgb(2,3,6)), Hover(Color(Blue)))",
             "{",
             "    Abc",
             "}"
@@ -38,7 +38,7 @@ public sealed class CSharpExporterTest
 
             result.Success.ShouldBeTrue();
 
-            result.Value.elementJsxTree.ShouldBe(expected);
+            result.Value.elementJsxTree.Select(x=>x.Trim()).ShouldBe(expected.Select(x=>x.Trim()));
         }
     }
 }

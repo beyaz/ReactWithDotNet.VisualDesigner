@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using Newtonsoft.Json;
+using ReactWithDotNet.Transformers;
+using System.IO;
 using System.Reflection;
 
 namespace ReactWithDotNet.VisualDesigner.Exporters;
@@ -400,11 +402,57 @@ static class CSharpExporter
                 {
                     foreach (var reactProperty in node.Properties.Where(p => p.Name.NotIn(Design.Text, Design.TextPreview, Design.Src, Design.Name)))
                     {
-                        var text = convertReactPropertyToString(elementType, reactProperty);
-                        if (text is not null)
+                        if (reactProperty.Name == "style")
                         {
-                            propsAsTextList.Add(text);
+
+                            var styleMap = JsonConvert.DeserializeObject<IReadOnlyList<(string name, string value)>>(reactProperty.Value);
+                            
+                            foreach (var (name,value) in styleMap)
+                            {
+                                var pseudo = string.Empty;
+                                var styleAttributeName = string.Empty;
+                                var names = name.Split(':', StringSplitOptions.RemoveEmptyEntries);
+                                if (names.Length == 1)
+                                {
+                                    styleAttributeName = names[0];
+                                }
+                                else if (names.Length == 2)
+                                {
+                                    pseudo = names[0];
+                                    styleAttributeName = names[1];
+                                }
+                                else
+                                {
+                                    return new ArgumentException($"InvalidStyle: {name}");
+                                }
+                                
+                                var (success, modifierCode) = ToModifierTransformer.TryConvertToModifier(elementType.Value.Name, styleAttributeName, TryClearStringValue(value));
+                                if (success)
+                                {
+                                    if (pseudo.HasValue())
+                                    {
+                                        if (pseudo.Equals("hover", StringComparison.OrdinalIgnoreCase))
+                                        {
+                                            pseudo = "Hover";
+                                        }
+                                        modifierCode = $"{pseudo}({modifierCode})";
+                                    }
+                                    propsAsTextList.Add(modifierCode);
+                                }
+                            }
+                            
+                            continue;
                         }
+
+                        {
+                            var text = convertReactPropertyToString(elementType, reactProperty);
+                            if (text is not null)
+                            {
+                                propsAsTextList.Add(text);
+                            }
+                        }
+                        
+                        
                     }
 
                     static string convertReactPropertyToString(Maybe<Type> elementType, ReactProperty reactProperty)
@@ -418,6 +466,17 @@ static class CSharpExporter
                             return null;
                         }
 
+                        if (elementType.HasValue)
+                        {
+                            
+                            var (success, modifierCode) = ToModifierTransformer.TryConvertToModifier(elementType.Value.Name, propertyName, propertyValue);
+                            if (success)
+                            {
+                                return modifierCode;
+                            }
+                        }
+                        
+                        
                         if (propertyValue == "true")
                         {
                             return propertyName;
@@ -465,11 +524,11 @@ static class CSharpExporter
 
                 if (propsAsTextList.Count > 0)
                 {
-                    partProps = " " + string.Join(" ", propsAsTextList);
+                    partProps = "(" + string.Join(", ", propsAsTextList) + ")";
                 }
                 else
                 {
-                    partProps = string.Empty;
+                    partProps = "()";
                 }
             }
 
@@ -489,9 +548,10 @@ static class CSharpExporter
                 {
                     return new LineCollection
                     {
-                        $"{indent(indentLevel)}<{tag}{partProps}>",
+                        $"{indent(indentLevel)}new {tag}{partProps}",
+                        indent(indentLevel) + "{",
                         $"{indent(indentLevel + 1)}{childrenProperty.Value}",
-                        $"{indent(indentLevel)}</{tag}>"
+                        indent(indentLevel) + "}"
                     };
                 }
             }
@@ -510,9 +570,10 @@ static class CSharpExporter
                     {
                         return new LineCollection
                         {
-                            $"{indent(indentLevel)}<{tag}{partProps} >",
+                            $"{indent(indentLevel)}new {tag}{partProps}",
+                            indent(indentLevel) + "{",
                             $"{indent(indentLevel + 1)}{childrenText}",
-                            $"{indent(indentLevel)}</{tag}>"
+                            indent(indentLevel) + "}"
                         };
                     }
                 }
@@ -520,7 +581,9 @@ static class CSharpExporter
 
             LineCollection lines =
             [
-                $"{indent(indentLevel)}<{tag}{partProps}>"
+                $"{indent(indentLevel)}new {tag}{partProps}",
+                indent(indentLevel) + "{",
+                
             ];
 
             // Add children
@@ -541,7 +604,7 @@ static class CSharpExporter
             }
 
             // Close tag
-            lines.Add($"{indent(indentLevel)}</{tag}>");
+            lines.Add(indent(indentLevel) + "}");
 
             return lines;
         }
