@@ -34,7 +34,7 @@ public sealed class CSharpExporterTest
                 ExportAsCSharp = true
             };
 
-            var result = await TsxExporter.CalculateElementTreeTsxCodes(project,new Dictionary<string, string>(), visualElementModel);
+            var result = await CSharpExporter.CalculateElementTreeSourceCodes(project,new Dictionary<string, string>(), visualElementModel);
 
             result.Success.ShouldBeTrue();
 

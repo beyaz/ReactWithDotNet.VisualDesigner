@@ -9,7 +9,7 @@ static class TsxExporter
     {
         var project = GetProjectConfig(projectId);
 
-        var result = await CalculateElementTreeTsxCodes(project, componentConfig, visualElement);
+        var result = await CalculateElementTreeSourceCodes(project, componentConfig, visualElement);
         if (result.HasError)
         {
             return result.Error;
@@ -60,7 +60,7 @@ static class TsxExporter
         return new ExportOutput { HasChange = true };
     }
 
-    internal static async Task<Result<(IReadOnlyList<string> elementJsxTree, IReadOnlyList<string> importLines)>> CalculateElementTreeTsxCodes(ProjectConfig project, IReadOnlyDictionary<string, string> componentConfig, VisualElementModel rootVisualElement)
+    internal static async Task<Result<(IReadOnlyList<string> elementJsxTree, IReadOnlyList<string> importLines)>> CalculateElementTreeSourceCodes(ProjectConfig project, IReadOnlyDictionary<string, string> componentConfig, VisualElementModel rootVisualElement)
     {
         ReactNode rootNode;
         {
@@ -162,7 +162,7 @@ static class TsxExporter
             IReadOnlyList<string> linesToInject;
             IReadOnlyList<string> importLines;
             {
-                var result = await CalculateElementTreeTsxCodes(project, data.Value.Component.GetConfig(), rootVisualElement);
+                var result = await CalculateElementTreeSourceCodes(project, data.Value.Component.GetConfig(), rootVisualElement);
                 if (result.HasError)
                 {
                     return result.Error;
