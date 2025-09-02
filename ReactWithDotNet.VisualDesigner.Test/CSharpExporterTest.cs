@@ -3,34 +3,35 @@
 namespace ReactWithDotNet.VisualDesigner.Test;
 
 [TestClass]
-public sealed class ExporterTest
+public sealed class CSharpExporterTest
 {
     [TestMethod]
-    public async Task Export_as_tailwind()
+    public async Task Export_as_csharp()
     {
         var input = new VisualElementModel
         {
             Tag        = "div",
-            Styles     = ["color: red", "bg: blue",  "hover:bg: yellow"],
+            Styles     = ["color: red", "bg: blue"],
             Properties = ["d-text: | Abc"]
         };
 
         string[] expected =
         [
-            "    <div className=\"text-[red] bg-[blue] hover:bg-[yellow]\">",
-            "      Abc",
-            "    </div>"
+            "new div(Color(\"red\"), Background(\"blue\"))",
+            "{",
+            "    Abc",
+            "}"
         ];
 
         await act(input, expected);
-
+        
         return;
 
         static async Task act(VisualElementModel visualElementModel, IReadOnlyList<string> expected)
         {
             var project = new ProjectConfig
             {
-                ExportStylesAsTailwind = true
+                ExportAsCSharp = true
             };
 
             var result = await TsxExporter.CalculateElementTreeTsxCodes(project,new Dictionary<string, string>(), visualElementModel);

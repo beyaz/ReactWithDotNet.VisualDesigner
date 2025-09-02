@@ -1,0 +1,631 @@
+﻿using System.IO;
+using System.Reflection;
+
+namespace ReactWithDotNet.VisualDesigner.Exporters;
+
+static class CSharpExporter
+{
+    public static async Task<Result<string>> CalculateElementTsxCode(int projectId, IReadOnlyDictionary<string, string> componentConfig, VisualElementModel visualElement)
+    {
+        var project = GetProjectConfig(projectId);
+
+        var result = await CalculateElementTreeTsxCodes(project, componentConfig, visualElement);
+        if (result.HasError)
+        {
+            return result.Error;
+        }
+
+        return string.Join(Environment.NewLine, result.Value.elementJsxTree);
+    }
+
+    public static async Task<Result<ExportOutput>> ExportToFileSystem(ExportInput input)
+    {
+        string filePath;
+        string fileContent;
+        {
+            var result = await CalculateExportInfo(input);
+            if (result.HasError)
+            {
+                return result.Error;
+            }
+
+            (filePath, fileContent) = result.Value;
+        }
+
+        string fileContentAtDisk;
+        {
+            var result = await IO.TryReadFile(filePath);
+            if (result.HasError)
+            {
+                return result.Error;
+            }
+
+            fileContentAtDisk = result.Value;
+        }
+
+        if (IsEqualsIgnoreWhitespace(fileContentAtDisk, fileContent))
+        {
+            return new ExportOutput();
+        }
+
+        // write to file system
+        {
+            var result = await IO.TryWriteToFile(filePath, fileContent);
+            if (result.HasError)
+            {
+                return result.Error;
+            }
+        }
+
+        return new ExportOutput { HasChange = true };
+    }
+
+    internal static async Task<Result<(IReadOnlyList<string> elementJsxTree, IReadOnlyList<string> importLines)>> CalculateElementTreeTsxCodes(ProjectConfig project, IReadOnlyDictionary<string, string> componentConfig, VisualElementModel rootVisualElement)
+    {
+        ReactNode rootNode;
+        {
+            var result = await ModelToNodeTransformer.ConvertVisualElementModelToReactNodeModel(project, rootVisualElement);
+            if (result.HasError)
+            {
+                return result.Error;
+            }
+
+            rootNode = result.Value;
+        }
+
+        rootNode = Plugin.AnalyzeNode(rootNode, componentConfig);
+
+        IReadOnlyList<string> elementJsxTree;
+        {
+            var result = await ConvertReactNodeModelToTsxCode(project, rootNode, null, 2);
+            if (result.HasError)
+            {
+                return result.Error;
+            }
+
+            elementJsxTree = result.Value;
+        }
+
+        var importLines = Plugin.CalculateImportLines(rootNode);
+
+        return (elementJsxTree, importLines.ToList());
+    }
+
+    static async Task<Result<(string filePath, string fileContent)>> CalculateExportInfo(ExportInput input)
+    {
+        var (projectId, componentId, userName) = input;
+
+        var user = await Store.TryGetUser(projectId, userName);
+
+        var project = GetProjectConfig(projectId);
+
+        var data = await GetComponentData(new() { ComponentId = componentId, UserName = userName });
+        if (data.HasError)
+        {
+            return data.Error;
+        }
+
+        VisualElementModel rootVisualElement;
+        {
+            var result = await GetComponentUserOrMainVersionAsync(componentId, userName);
+            if (result.HasError)
+            {
+                return result.Error;
+            }
+
+            rootVisualElement = result.Value;
+        }
+
+        string filePath, targetComponentName;
+        {
+            var result = await GetComponentFileLocation(componentId, user.LocalWorkspacePath);
+            if (result.HasError)
+            {
+                return result;
+            }
+
+            filePath            = result.Value.filePath;
+            targetComponentName = result.Value.targetComponentName;
+        }
+
+        // create File if not exists
+        {
+            if (filePath is null)
+            {
+                return new IOException("FilePathNotCalculated");
+            }
+
+            if (!File.Exists(filePath))
+            {
+                var fileContent =
+                    $"export default function {targetComponentName}()" + "{" + Environment.NewLine +
+                    "    return (" + Environment.NewLine +
+                    "    );" + Environment.NewLine +
+                    "}";
+                await File.WriteAllTextAsync(filePath, fileContent);
+            }
+        }
+
+        string fileNewContent;
+        {
+            IReadOnlyList<string> fileContentInDirectory;
+            {
+                var result = await IO.TryReadFileAllLines(filePath);
+                if (result.HasError)
+                {
+                    return result.Error;
+                }
+
+                fileContentInDirectory = result.Value;
+            }
+
+            IReadOnlyList<string> linesToInject;
+            IReadOnlyList<string> importLines;
+            {
+                var result = await CalculateElementTreeTsxCodes(project, data.Value.Component.GetConfig(), rootVisualElement);
+                if (result.HasError)
+                {
+                    return result.Error;
+                }
+
+                linesToInject = result.Value.elementJsxTree;
+
+                importLines = result.Value.importLines;
+
+                var formatResult = await Prettier.FormatCode(string.Join(Environment.NewLine, linesToInject));
+                if (formatResult.Success)
+                {
+                    linesToInject = formatResult.Value.Split(Environment.NewLine.ToCharArray());
+                }
+            }
+
+            // try import lines
+            {
+                var fileContentInDirectoryAsList = fileContentInDirectory.ToList();
+
+                foreach (var importLine in importLines)
+                {
+                    if (fileContentInDirectory.Any(x => IsEqualsIgnoreWhitespace(x, importLine)))
+                    {
+                        continue;
+                    }
+
+                    var lastImportLineIndex = fileContentInDirectoryAsList.FindLastIndex(line => line.TrimStart().StartsWith("import "));
+                    if (lastImportLineIndex >= 0)
+                    {
+                        fileContentInDirectoryAsList.Insert(lastImportLineIndex + 1, importLine);
+                    }
+                }
+
+                fileContentInDirectory = fileContentInDirectoryAsList;
+            }
+
+            string injectedVersion;
+            {
+                var newVersion = InjectRender(fileContentInDirectory, targetComponentName, linesToInject);
+                if (newVersion.HasError)
+                {
+                    return newVersion.Error;
+                }
+
+                injectedVersion = newVersion.Value;
+            }
+
+            fileNewContent = injectedVersion;
+        }
+
+        return (filePath, fileNewContent);
+    }
+
+    static async Task<Result<IReadOnlyList<string>>> ConvertReactNodeModelToTsxCode(ProjectConfig project, ReactNode node, ReactNode parentNode, int indentLevel)
+    {
+        var nodeTag = node.Tag;
+
+        if (nodeTag == TextNode.Tag)
+        {
+            return new List<string>
+            {
+                $"{indent(indentLevel)}{asFinalText(project, node.Children[0].Text)}"
+            };
+        }
+
+        if (nodeTag is null)
+        {
+            if (node.Text.HasValue())
+            {
+                return new List<string>
+                {
+                    $"{indent(indentLevel)}{asFinalText(project, node.Text)}"
+                };
+            }
+
+            return new ArgumentNullException(nameof(nodeTag));
+        }
+
+        // is mapping
+        {
+            List<string> lines = [];
+
+            var itemsSource = parentNode?.Properties.FirstOrDefault(x => x.Name is Design.ItemsSource);
+            if (itemsSource is not null)
+            {
+                parentNode = parentNode with { Properties = parentNode.Properties.Remove(itemsSource) };
+
+                lines.Add($"{indent(indentLevel)}{{{ClearConnectedValue(itemsSource.Value)}.map((_item, _index) => {{");
+                indentLevel++;
+
+                lines.Add(indent(indentLevel) + "return (");
+                indentLevel++;
+
+                IReadOnlyList<string> innerLines;
+                {
+                    var result = await ConvertReactNodeModelToTsxCode(project, node, parentNode, indentLevel);
+                    if (result.HasError)
+                    {
+                        return result.Error;
+                    }
+
+                    innerLines = result.Value;
+                }
+
+                // import inner lines
+                // try clear begin - end brackets in innerLines 
+                // maybe conditional render
+                {
+                    for (var i = 0; i < innerLines.Count; i++)
+                    {
+                        var line = innerLines[i];
+
+                        // is first line
+                        if (i == 0)
+                        {
+                            line = line.TrimStart().RemoveFromStart("{");
+                        }
+
+                        // is last line
+                        if (i == innerLines.Count - 1)
+                        {
+                            line = line.TrimEnd().RemoveFromEnd("}");
+                        }
+
+                        lines.Add(line);
+                    }
+                }
+
+                indentLevel--;
+                lines.Add(indent(indentLevel) + ");");
+
+                indentLevel--;
+                lines.Add(indent(indentLevel) + "})}");
+
+                return lines;
+            }
+        }
+
+        // show hide
+        {
+            var showIf = node.Properties.FirstOrDefault(x => x.Name is Design.ShowIf);
+            var hideIf = node.Properties.FirstOrDefault(x => x.Name is Design.HideIf);
+
+            if (showIf is not null)
+            {
+                node = node with { Properties = node.Properties.Remove(showIf) };
+
+                List<string> lines =
+                [
+                    $"{indent(indentLevel)}{{{showIf.Value} && ("
+                ];
+
+                indentLevel++;
+
+                IReadOnlyList<string> innerLines;
+                {
+                    var result = await ConvertReactNodeModelToTsxCode(project, node, parentNode, indentLevel);
+                    if (result.HasError)
+                    {
+                        return result.Error;
+                    }
+
+                    innerLines = result.Value;
+                }
+
+                lines.AddRange(innerLines);
+
+                indentLevel--;
+                lines.Add($"{indent(indentLevel)})}}");
+
+                return lines;
+            }
+
+            if (hideIf is not null)
+            {
+                node = node with { Properties = node.Properties.Remove(hideIf) };
+
+                List<string> lines =
+                [
+                    $"{indent(indentLevel)}{{!{hideIf.Value} && ("
+                ];
+                indentLevel++;
+
+                IReadOnlyList<string> innerLines;
+                {
+                    var result = await ConvertReactNodeModelToTsxCode(project, node, parentNode, indentLevel);
+                    if (result.HasError)
+                    {
+                        return result.Error;
+                    }
+
+                    innerLines = result.Value;
+                }
+
+                lines.AddRange(innerLines);
+
+                indentLevel--;
+                lines.Add($"{indent(indentLevel)})}}");
+
+                return lines;
+            }
+        }
+
+        {
+            var elementType = node.HtmlElementType;
+
+            var tag = nodeTag;
+            if (int.TryParse(nodeTag, out var componentId))
+            {
+                var component = await Store.TryGetComponent(componentId);
+                if (component is null)
+                {
+                    return new ArgumentNullException($"ComponentNotFound. {componentId}");
+                }
+
+                tag = component.GetName();
+            }
+
+            var childrenProperty = node.Properties.FirstOrDefault(x => x.Name == "children");
+            if (childrenProperty is not null)
+            {
+                node = node with { Properties = node.Properties.Remove(childrenProperty) };
+            }
+
+            var textProperty = node.Properties.FirstOrDefault(x => x.Name == Design.Text);
+            if (textProperty is not null)
+            {
+                node = node with { Properties = node.Properties.Remove(textProperty) };
+            }
+
+            string partProps;
+            {
+                var propsAsTextList = new List<string>();
+                {
+                    foreach (var reactProperty in node.Properties.Where(p => p.Name.NotIn(Design.Text, Design.TextPreview, Design.Src, Design.Name)))
+                    {
+                        var text = convertReactPropertyToString(elementType, reactProperty);
+                        if (text is not null)
+                        {
+                            propsAsTextList.Add(text);
+                        }
+                    }
+
+                    static string convertReactPropertyToString(Maybe<Type> elementType, ReactProperty reactProperty)
+                    {
+                        var propertyName = reactProperty.Name;
+
+                        var propertyValue = reactProperty.Value;
+
+                        if (propertyName is Design.ItemsSource || propertyName is Design.ItemsSourceDesignTimeCount)
+                        {
+                            return null;
+                        }
+
+                        if (propertyValue == "true")
+                        {
+                            return propertyName;
+                        }
+
+                        if (propertyName == Design.SpreadOperator)
+                        {
+                            return '{' + propertyValue + '}';
+                        }
+
+                        if (propertyName == nameof(HtmlElement.dangerouslySetInnerHTML))
+                        {
+                            return $"{propertyName}={{{{ __html: {propertyValue} }}}}";
+                        }
+
+                        if (IsStringValue(propertyValue))
+                        {
+                            return $"{propertyName}=\"{TryClearStringValue(propertyValue)}\"";
+                        }
+
+                        if (IsStringTemplate(propertyValue))
+                        {
+                            return $"{propertyName}={{{propertyValue}}}";
+                        }
+
+                        if (elementType.HasValue)
+                        {
+                            var propertyType = elementType.Value.GetProperty(propertyName, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance)?.PropertyType;
+                            if (propertyType is not null)
+                            {
+                                if (propertyType == typeof(string))
+                                {
+                                    var isString = propertyValue.Contains('/') || propertyValue.StartsWith('#') || propertyValue.Split(' ').Length > 1;
+                                    if (isString)
+                                    {
+                                        return $"{propertyName}=\"{propertyValue}\"";
+                                    }
+                                }
+                            }
+                        }
+
+                        return $"{propertyName}={{{propertyValue}}}";
+                    }
+                }
+
+                if (propsAsTextList.Count > 0)
+                {
+                    partProps = " " + string.Join(" ", propsAsTextList);
+                }
+                else
+                {
+                    partProps = string.Empty;
+                }
+            }
+
+            if (node.Children.Count == 0 && node.Text.HasNoValue() && childrenProperty is null)
+            {
+                return new LineCollection
+                {
+                    $"{indent(indentLevel)}<{tag}{partProps} />"
+                };
+            }
+
+            // children property
+            {
+                // sample: children: state.suggestionNodes
+
+                if (childrenProperty is not null)
+                {
+                    return new LineCollection
+                    {
+                        $"{indent(indentLevel)}<{tag}{partProps}>",
+                        $"{indent(indentLevel + 1)}{childrenProperty.Value}",
+                        $"{indent(indentLevel)}</{tag}>"
+                    };
+                }
+            }
+
+            // inner text
+            {
+                if (node.Children.Count == 1)
+                {
+                    var childrenText = node.Children[0].Text + string.Empty;
+                    if (textProperty is not null)
+                    {
+                        childrenText = asFinalText(project, ClearConnectedValue(textProperty.Value));
+                    }
+
+                    if (IsConnectedValue(childrenText))
+                    {
+                        return new LineCollection
+                        {
+                            $"{indent(indentLevel)}<{tag}{partProps} >",
+                            $"{indent(indentLevel + 1)}{childrenText}",
+                            $"{indent(indentLevel)}</{tag}>"
+                        };
+                    }
+                }
+            }
+
+            LineCollection lines =
+            [
+                $"{indent(indentLevel)}<{tag}{partProps}>"
+            ];
+
+            // Add children
+            foreach (var child in node.Children)
+            {
+                IReadOnlyList<string> childTsx;
+                {
+                    var result = await ConvertReactNodeModelToTsxCode(project, child, node, indentLevel + 1);
+                    if (result.HasError)
+                    {
+                        return result.Error;
+                    }
+
+                    childTsx = result.Value;
+                }
+
+                lines.AddRange(childTsx);
+            }
+
+            // Close tag
+            lines.Add($"{indent(indentLevel)}</{tag}>");
+
+            return lines;
+        }
+
+        static string asFinalText(ProjectConfig project, string text)
+        {
+            if (IsRawStringValue(text))
+            {
+                return $"{TryClearRawStringValue(text)}";
+            }
+
+            if (!IsStringValue(text))
+            {
+                return $"{{{text}}}";
+            }
+
+            // try to export with translation function
+            {
+                var translateFunction = project.TranslationFunctionName;
+                {
+                    if (translateFunction.HasValue())
+                    {
+                        return $"{{{translateFunction.Trim()}(\"{TryClearStringValue(text)}\")}}";
+                    }
+                }
+            }
+
+            return "{" + '"' + TryClearStringValue(text) + '"' + "}";
+        }
+
+        static string indent(int indentLevel)
+        {
+            const int IndentLength = 2;
+
+            return new(' ', indentLevel * IndentLength);
+        }
+    }
+
+    static Result<string> InjectRender(IReadOnlyList<string> fileContent, string targetComponentName, IReadOnlyList<string> linesToInject)
+    {
+        var lines = fileContent.ToList();
+
+        // focus to component code
+        int componentDeclarationLineIndex;
+        {
+            var result = GetComponentDeclarationLineIndex(fileContent, targetComponentName);
+            if (result.HasError)
+            {
+                return result.Error;
+            }
+
+            componentDeclarationLineIndex = result.Value;
+        }
+
+        var firstReturnLineIndex = lines.FindIndex(componentDeclarationLineIndex, l => l == "    return (");
+        if (firstReturnLineIndex < 0)
+        {
+            firstReturnLineIndex = lines.FindIndex(componentDeclarationLineIndex, l => l == "  return (");
+            if (firstReturnLineIndex < 0)
+            {
+                return new InvalidOperationException("No return found");
+            }
+        }
+
+        var firstReturnCloseLineIndex = lines.FindIndex(firstReturnLineIndex, l => l == "    );");
+        if (firstReturnCloseLineIndex < 0)
+        {
+            firstReturnCloseLineIndex = lines.FindIndex(firstReturnLineIndex, l => l == "  );");
+            if (firstReturnCloseLineIndex < 0)
+            {
+                return new InvalidOperationException("Return close not found");
+            }
+        }
+
+        lines.RemoveRange(firstReturnLineIndex + 1, firstReturnCloseLineIndex - firstReturnLineIndex - 1);
+
+        lines.InsertRange(firstReturnLineIndex + 1, linesToInject);
+
+        var injectedFileContent = string.Join(Environment.NewLine, lines);
+
+        return injectedFileContent;
+    }
+
+    class LineCollection : List<string>
+    {
+    }
+}
