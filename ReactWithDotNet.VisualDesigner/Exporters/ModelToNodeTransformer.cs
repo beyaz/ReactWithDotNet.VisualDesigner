@@ -174,7 +174,7 @@ static class ModelToNodeTransformer
 
         return node;
     }
-    
+
     static Result<(VisualElementModel modifiedElementModel, IReadOnlyList<(string name, string value)> inlineStyle)>
         convertStyleToInlineStyleObject(VisualElementModel elementModel)
     {
