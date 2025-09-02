@@ -311,6 +311,11 @@ static class Extensions
 
     public static async Task<Result<(string filePath, string targetComponentName)>> GetComponentFileLocation(int componentId, string userLocalWorkspacePath)
     {
+        if (userLocalWorkspacePath.HasNoValue())
+        {
+            return new ArgumentNullException(nameof(userLocalWorkspacePath));
+        }
+        
         var component = await Store.TryGetComponent(componentId);
 
         var exportFilePath = component.GetExportFilePath();

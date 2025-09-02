@@ -6,6 +6,19 @@ namespace ReactWithDotNet.VisualDesigner.Test;
 public sealed class CSharpExporterTest
 {
     [TestMethod]
+    public async Task Export()
+    {
+        var result = await CSharpExporter.ExportToFileSystem(new ExportInput()
+        {
+            ComponentId = 71,
+            ProjectId   = 3,
+            UserName    = "beyaz"
+        });
+        
+        
+        result.Success.ShouldBeTrue();
+    }
+    [TestMethod]
     public async Task Export_as_csharp()
     {
         var input = new VisualElementModel
