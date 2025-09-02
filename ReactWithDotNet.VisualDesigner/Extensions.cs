@@ -293,20 +293,46 @@ static class Extensions
         var lines = fileContent.ToList();
 
         var componentDeclarationLineIndex = lines.FindIndex(line => line.Contains($"function {targetComponentName}(", StringComparison.OrdinalIgnoreCase));
-        if (componentDeclarationLineIndex == -1)
+        if (componentDeclarationLineIndex >= 0)
         {
-            componentDeclarationLineIndex = lines.FindIndex(line => line.Contains($"const {targetComponentName} "));
-            if (componentDeclarationLineIndex == -1)
+            return componentDeclarationLineIndex;
+        }
+        
+        
+        componentDeclarationLineIndex = lines.FindIndex(line => line.Contains($"const {targetComponentName} "));
+        if (componentDeclarationLineIndex >= 0)
+        {
+            return componentDeclarationLineIndex;
+        }
+        
+        componentDeclarationLineIndex = lines.FindIndex(line => line.Contains($"const {targetComponentName}:"));
+        if (componentDeclarationLineIndex >= 0)
+        {
+            return componentDeclarationLineIndex;
+        }
+        
+        
+        // maybe  ZoomComponent:View
+        {
+            var names = targetComponentName.Split(':', StringSplitOptions.RemoveEmptyEntries);
+            if (names.Length == 2)
             {
-                componentDeclarationLineIndex = lines.FindIndex(line => line.Contains($"const {targetComponentName}:"));
-                if (componentDeclarationLineIndex == -1)
+                var className = names[0];
+                var methodName = names[1];
+                
+                var classDeclerationLineIndex = lines.FindIndex(line => line.Contains($"class {className} "));
+                if (classDeclerationLineIndex >= 0)
                 {
-                    return new ArgumentException($"ComponentDeclerationNotFoundInFile. {targetComponentName}");
+                    var methodDeclerationLineIndex = lines.FindIndex(classDeclerationLineIndex, line => line.Contains($" Element {methodName}("));
+                    if (methodDeclerationLineIndex >= 0)
+                    {
+                        return methodDeclerationLineIndex;
+                    }
                 }
             }
         }
 
-        return componentDeclarationLineIndex;
+        return new ArgumentException($"ComponentDeclerationNotFoundInFile. {targetComponentName}");
     }
 
     public static async Task<Result<(string filePath, string targetComponentName)>> GetComponentFileLocation(int componentId, string userLocalWorkspacePath)
