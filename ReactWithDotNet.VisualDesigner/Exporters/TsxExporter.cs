@@ -21,6 +21,7 @@ sealed record ExportInput
     public void Deconstruct(out int projectId, out int componentId,  out string userName)
     {
         projectId     = ProjectId;
+        
         componentId     = ComponentId;
         
         userName      = UserName;
