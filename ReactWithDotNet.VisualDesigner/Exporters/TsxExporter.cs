@@ -452,43 +452,47 @@ static class TsxExporter
                 {
                     foreach (var reactProperty in node.Properties.Where(p => p.Name.NotIn(Design.Text, Design.TextPreview, Design.Src, Design.Name)))
                     {
+                        var text = convertReactPropertyToString(elementType, reactProperty);
+                        if (text is not null)
+                        {
+                            propsAsText.Add(text);
+                        }
+                    }
+
+                    static string convertReactPropertyToString(Maybe<Type> elementType, ReactProperty reactProperty)
+                    {
                         var propertyName = reactProperty.Name;
 
                         var propertyValue = reactProperty.Value;
 
                         if (propertyName is Design.ItemsSource || propertyName is Design.ItemsSourceDesignTimeCount)
                         {
-                            continue;
+                            return null;
                         }
 
                         if (propertyValue == "true")
                         {
-                            propsAsText.Add($"{propertyName}");
-                            continue;
+                            return propertyName;
                         }
 
                         if (propertyName == Design.SpreadOperator)
                         {
-                            propsAsText.Add($"{{{propertyValue}}}");
-                            continue;
+                            return '{' + propertyValue + '}';
                         }
 
                         if (propertyName == nameof(HtmlElement.dangerouslySetInnerHTML))
                         {
-                            propsAsText.Add($"{propertyName}={{{{ __html: {propertyValue} }}}}");
-                            continue;
+                            return $"{propertyName}={{{{ __html: {propertyValue} }}}}";
                         }
 
                         if (IsStringValue(propertyValue))
                         {
-                            propsAsText.Add($"{propertyName}=\"{TryClearStringValue(propertyValue)}\"");
-                            continue;
+                            return $"{propertyName}=\"{TryClearStringValue(propertyValue)}\"";
                         }
 
                         if (IsStringTemplate(propertyValue))
                         {
-                            propsAsText.Add($"{propertyName}={{{propertyValue}}}");
-                            continue;
+                            return $"{propertyName}={{{propertyValue}}}";
                         }
 
                         if (elementType.HasValue)
@@ -501,14 +505,13 @@ static class TsxExporter
                                     var isString = propertyValue.Contains('/') || propertyValue.StartsWith('#') || propertyValue.Split(' ').Length > 1;
                                     if (isString)
                                     {
-                                        propsAsText.Add($"{propertyName}=\"{propertyValue}\"");
-                                        continue;
+                                        return $"{propertyName}=\"{propertyValue}\"";
                                     }
                                 }
                             }
                         }
 
-                        propsAsText.Add($"{propertyName}={{{propertyValue}}}");
+                        return $"{propertyName}={{{propertyValue}}}";
                     }
                 }
 
