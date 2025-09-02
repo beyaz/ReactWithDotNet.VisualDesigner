@@ -446,74 +446,72 @@ static class TsxExporter
                 node = node with { Properties = node.Properties.Remove(textProperty) };
             }
 
-           
-
             string partProps;
             {
-                 var propsAsText = new List<string>();
-            {
-                foreach (var reactProperty in node.Properties.Where(p => p.Name.NotIn(Design.Text, Design.TextPreview, Design.Src, Design.Name)))
+                var propsAsText = new List<string>();
                 {
-                    var propertyName = reactProperty.Name;
-
-                    var propertyValue = reactProperty.Value;
-
-                    if (propertyName is Design.ItemsSource || propertyName is Design.ItemsSourceDesignTimeCount)
+                    foreach (var reactProperty in node.Properties.Where(p => p.Name.NotIn(Design.Text, Design.TextPreview, Design.Src, Design.Name)))
                     {
-                        continue;
-                    }
+                        var propertyName = reactProperty.Name;
 
-                    if (propertyValue == "true")
-                    {
-                        propsAsText.Add($"{propertyName}");
-                        continue;
-                    }
+                        var propertyValue = reactProperty.Value;
 
-                    if (propertyName == Design.SpreadOperator)
-                    {
-                        propsAsText.Add($"{{{propertyValue}}}");
-                        continue;
-                    }
-
-                    if (propertyName == nameof(HtmlElement.dangerouslySetInnerHTML))
-                    {
-                        propsAsText.Add($"{propertyName}={{{{ __html: {propertyValue} }}}}");
-                        continue;
-                    }
-
-                    if (IsStringValue(propertyValue))
-                    {
-                        propsAsText.Add($"{propertyName}=\"{TryClearStringValue(propertyValue)}\"");
-                        continue;
-                    }
-
-                    if (IsStringTemplate(propertyValue))
-                    {
-                        propsAsText.Add($"{propertyName}={{{propertyValue}}}");
-                        continue;
-                    }
-
-                    if (elementType.HasValue)
-                    {
-                        var propertyType = elementType.Value.GetProperty(propertyName, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance)?.PropertyType;
-                        if (propertyType is not null)
+                        if (propertyName is Design.ItemsSource || propertyName is Design.ItemsSourceDesignTimeCount)
                         {
-                            if (propertyType == typeof(string))
+                            continue;
+                        }
+
+                        if (propertyValue == "true")
+                        {
+                            propsAsText.Add($"{propertyName}");
+                            continue;
+                        }
+
+                        if (propertyName == Design.SpreadOperator)
+                        {
+                            propsAsText.Add($"{{{propertyValue}}}");
+                            continue;
+                        }
+
+                        if (propertyName == nameof(HtmlElement.dangerouslySetInnerHTML))
+                        {
+                            propsAsText.Add($"{propertyName}={{{{ __html: {propertyValue} }}}}");
+                            continue;
+                        }
+
+                        if (IsStringValue(propertyValue))
+                        {
+                            propsAsText.Add($"{propertyName}=\"{TryClearStringValue(propertyValue)}\"");
+                            continue;
+                        }
+
+                        if (IsStringTemplate(propertyValue))
+                        {
+                            propsAsText.Add($"{propertyName}={{{propertyValue}}}");
+                            continue;
+                        }
+
+                        if (elementType.HasValue)
+                        {
+                            var propertyType = elementType.Value.GetProperty(propertyName, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance)?.PropertyType;
+                            if (propertyType is not null)
                             {
-                                var isString = propertyValue.Contains('/') || propertyValue.StartsWith('#') || propertyValue.Split(' ').Length > 1;
-                                if (isString)
+                                if (propertyType == typeof(string))
                                 {
-                                    propsAsText.Add($"{propertyName}=\"{propertyValue}\"");
-                                    continue;
+                                    var isString = propertyValue.Contains('/') || propertyValue.StartsWith('#') || propertyValue.Split(' ').Length > 1;
+                                    if (isString)
+                                    {
+                                        propsAsText.Add($"{propertyName}=\"{propertyValue}\"");
+                                        continue;
+                                    }
                                 }
                             }
                         }
-                    }
 
-                    propsAsText.Add($"{propertyName}={{{propertyValue}}}");
+                        propsAsText.Add($"{propertyName}={{{propertyValue}}}");
+                    }
                 }
-            }
-            
+
                 if (propsAsText.Count > 0)
                 {
                     partProps = " " + string.Join(" ", propsAsText);
@@ -523,7 +521,7 @@ static class TsxExporter
                     partProps = string.Empty;
                 }
             }
-            
+
             if (node.Children.Count == 0 && node.Text.HasNoValue() && childrenProperty is null)
             {
                 return new TsxLines
@@ -569,10 +567,11 @@ static class TsxExporter
                 }
             }
 
-            TsxLines lines = [
+            TsxLines lines =
+            [
                 $"{indent(indentLevel)}<{tag}{partProps}>"
             ];
-            
+
             // Add children
             foreach (var child in node.Children)
             {
