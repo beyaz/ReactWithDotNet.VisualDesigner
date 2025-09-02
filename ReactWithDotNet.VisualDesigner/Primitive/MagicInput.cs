@@ -257,11 +257,13 @@ sealed class MagicInput : Component<MagicInput.State>
     [StopPropagation]
     Task OnSuggestionItemClicked(MouseEvent e)
     {
+        var selectedSuggestionOffset = int.Parse(e.target.data["INDEX"]);
+            
         state = state with
         {
             ShowSuggestions = false,
-            SelectedSuggestionOffset = int.Parse(e.target.data["INDEX"]),
-            Value = state.FilteredSuggestions[state.SelectedSuggestionOffset!.Value]
+            SelectedSuggestionOffset = selectedSuggestionOffset,
+            Value = state.FilteredSuggestions[selectedSuggestionOffset]
         };
 
         DispatchEvent(OnChange, [Name, state.Value]);
