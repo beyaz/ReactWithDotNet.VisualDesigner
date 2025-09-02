@@ -15,6 +15,8 @@ public sealed record ProjectConfig
     public bool ExportStylesAsInline { get; init; }
     
     public string TranslationFunctionName { get; init; }
+    
+    public bool ExportAsCSharp { get; init; }
 }
 
 public sealed record CommonCssSuggestions
