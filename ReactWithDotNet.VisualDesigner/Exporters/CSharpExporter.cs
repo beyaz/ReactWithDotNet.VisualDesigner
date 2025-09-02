@@ -405,38 +405,29 @@ static class CSharpExporter
                         if (reactProperty.Name == "style")
                         {
 
-                            var styleMap = JsonConvert.DeserializeObject<IReadOnlyList<(string name, string value)>>(reactProperty.Value);
+                            var styles = JsonConvert.DeserializeObject<IReadOnlyList<StyleAttribute>>(reactProperty.Value);
                             
-                            foreach (var (name,value) in styleMap)
+                            foreach (var styleAttribute in styles)
                             {
-                                var pseudo = string.Empty;
-                                var styleAttributeName = string.Empty;
-                                var names = name.Split(':', StringSplitOptions.RemoveEmptyEntries);
-                                if (names.Length == 1)
-                                {
-                                    styleAttributeName = names[0];
-                                }
-                                else if (names.Length == 2)
-                                {
-                                    pseudo = names[0];
-                                    styleAttributeName = names[1];
-                                }
-                                else
-                                {
-                                    return new ArgumentException($"InvalidStyle: {name}");
-                                }
-                                
-                                var (success, modifierCode) = ToModifierTransformer.TryConvertToModifier(elementType.Value.Name, styleAttributeName, TryClearStringValue(value));
+                                var (success, modifierCode) = ToModifierTransformer.TryConvertToModifier(elementType.Value.Name, styleAttribute.Name, TryClearStringValue(styleAttribute.Value));
                                 if (success)
                                 {
+                                    var pseudo = styleAttribute.Pseudo;
                                     if (pseudo.HasValue())
                                     {
-                                        if (pseudo.Equals("hover", StringComparison.OrdinalIgnoreCase))
+                                        var result = ToModifierTransformer.TryGetPseudoForCSharp(styleAttribute.Pseudo);
+                                        if (!result.success)
                                         {
-                                            pseudo = "Hover";
+                                            return new ArgumentException("NotResolved:" + styleAttribute.Pseudo);
                                         }
+
+                                        pseudo = result.pseudo;
+                                        
                                         modifierCode = $"{pseudo}({modifierCode})";
                                     }
+                                    
+                                    
+                                   
                                     propsAsTextList.Add(modifierCode);
                                 }
                             }

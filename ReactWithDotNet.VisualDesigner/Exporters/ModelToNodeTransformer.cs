@@ -1,7 +1,7 @@
-﻿using System.Collections.Immutable;
+﻿using Newtonsoft.Json;
+using System.Collections.Immutable;
 using System.Globalization;
 using System.Text;
-using Newtonsoft.Json;
 
 namespace ReactWithDotNet.VisualDesigner.Exporters;
 
@@ -63,7 +63,7 @@ static class ModelToNodeTransformer
                     var inlineStyleProperty = new ReactProperty
                     {
                         Name  = "style",
-                        Value = "{" + string.Join(", ", inlineStyle.Select(x => $"{x.name}: {x.value}")) + "}"
+                        Value = "{" + string.Join(", ", inlineStyle.Select(x => $"{x.Name}: {x.Value}")) + "}"
                     };
 
                     if (project.ExportAsCSharp)
@@ -188,50 +188,49 @@ static class ModelToNodeTransformer
         return node;
     }
 
-    static Result<(VisualElementModel modifiedElementModel, IReadOnlyList<(string name, string value)> inlineStyle)>
+    static Result<(VisualElementModel modifiedElementModel, IReadOnlyList<StyleAttribute> inlineStyle)>
         convertStyleToInlineStyleObject(VisualElementModel elementModel)
     {
-        var inlineStyles = new List<(string name, string value)>();
 
-        foreach (var item in elementModel.Styles)
+
+        var styles = convertDesignerStyleItemsToStyleAttributes(elementModel.Styles);
+
+        return (elementModel with { Styles = [] },styles );
+
+    }
+    
+    static IReadOnlyList<StyleAttribute> convertDesignerStyleItemsToStyleAttributes(IReadOnlyList<string> designerStyleItems)
+    {
+        return (from text in designerStyleItems select process(ParseStyleAttribute(text))).ToList();
+
+        static StyleAttribute process(StyleAttribute styleAttribute)
         {
-            var styleAttribute = ParseStyleAttribute(item);
-
             var name = kebabToCamelCase(styleAttribute.Name);
 
             var value = styleAttribute.Value;
+            {
+                if (name == nameof(Style.fontWeight))
+                {
+                    value = tryGetFontWeight(value);
+                }
 
-            if (name == nameof(Style.fontWeight))
-            {
-                value = tryGetFontWeight(value);
-            }
+                if (double.TryParse(value, out var valueAsDouble))
+                {
+                    value = valueAsDouble.AsPixel();
+                }
 
-            if (double.TryParse(value, out var valueAsDouble))
-            {
-                value = valueAsDouble.AsPixel();
+                if (value?.StartsWith("request.") is true || value?.StartsWith("context.") is true)
+                {
+                    value = TryClearStringValue(value);
+                }
+                else
+                {
+                    value = '"' + TryClearStringValue(value) + '"';
+                }
             }
-
-            if (value?.StartsWith("request.") is true || value?.StartsWith("context.") is true)
-            {
-                value = TryClearStringValue(value);
-            }
-            else
-            {
-                value = '"' + TryClearStringValue(value) + '"';
-            }
-
-            if (styleAttribute.Pseudo.HasValue())
-            {
-                inlineStyles.Add((styleAttribute.Pseudo + ":" + name, value));
-                continue;
-            }
-            
-            inlineStyles.Add((name, value));
+           
+            return styleAttribute with { Name = name, Value = value };
         }
-
-        elementModel = elementModel with { Styles = [] };
-
-        return (elementModel, inlineStyles);
 
         static string kebabToCamelCase(string kebab)
         {
