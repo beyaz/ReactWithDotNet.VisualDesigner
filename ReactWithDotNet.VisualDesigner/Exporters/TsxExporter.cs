@@ -3,33 +3,6 @@ using System.Reflection;
 
 namespace ReactWithDotNet.VisualDesigner.Exporters;
 
-sealed record ExportOutput
-{
-    public bool HasChange { get; init; }
-}
-
-sealed record ExportInput
-{
-    // @formatter:off
-     
-    public required int ProjectId { get; init; }
-    
-    public required int ComponentId { get; init; }
-    
-    public required string UserName { get; init; }
-    
-    public void Deconstruct(out int projectId, out int componentId,  out string userName)
-    {
-        projectId     = ProjectId;
-        
-        componentId     = ComponentId;
-        
-        userName      = UserName;
-    }
-    
-    // @formatter:on
-}
-
 static class TsxExporter
 {
     public static async Task<Result<string>> CalculateElementTsxCode(int projectId, IReadOnlyDictionary<string, string> componentConfig, VisualElementModel visualElement)
