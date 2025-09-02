@@ -28,7 +28,10 @@ public sealed class ExporterTest
 
         static async Task act(VisualElementModel visualElementModel, IReadOnlyList<string> expected)
         {
-            var project = new ProjectConfig();
+            var project = new ProjectConfig
+            {
+                ExportStylesAsTailwind = true
+            };
 
             var result = await TsxExporter.CalculateElementTreeTsxCodes(project,new Dictionary<string, string>(), visualElementModel);
 
