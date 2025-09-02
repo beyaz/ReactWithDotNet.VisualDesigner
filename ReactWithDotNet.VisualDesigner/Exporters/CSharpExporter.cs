@@ -650,20 +650,21 @@ static class CSharpExporter
             componentDeclarationLineIndex = result.Value;
         }
 
-        var firstReturnLineIndex = lines.FindIndex(componentDeclarationLineIndex, l => l == "    return (");
+        
+        var firstReturnLineIndex = lines.FindIndex(componentDeclarationLineIndex, l => l == "            return ");
         if (firstReturnLineIndex < 0)
         {
-            firstReturnLineIndex = lines.FindIndex(componentDeclarationLineIndex, l => l == "  return (");
+            firstReturnLineIndex = lines.FindIndex(componentDeclarationLineIndex, l => l == "        return ");
             if (firstReturnLineIndex < 0)
             {
                 return new InvalidOperationException("No return found");
             }
         }
 
-        var firstReturnCloseLineIndex = lines.FindIndex(firstReturnLineIndex, l => l == "    );");
+        var firstReturnCloseLineIndex = lines.FindIndex(firstReturnLineIndex, l => l == "    };");
         if (firstReturnCloseLineIndex < 0)
         {
-            firstReturnCloseLineIndex = lines.FindIndex(firstReturnLineIndex, l => l == "  );");
+            firstReturnCloseLineIndex = lines.FindIndex(firstReturnLineIndex, l => l == "        };");
             if (firstReturnCloseLineIndex < 0)
             {
                 return new InvalidOperationException("Return close not found");
