@@ -448,14 +448,14 @@ static class TsxExporter
 
             string partProps;
             {
-                var propsAsText = new List<string>();
+                var propsAsTextList = new List<string>();
                 {
                     foreach (var reactProperty in node.Properties.Where(p => p.Name.NotIn(Design.Text, Design.TextPreview, Design.Src, Design.Name)))
                     {
                         var text = convertReactPropertyToString(elementType, reactProperty);
                         if (text is not null)
                         {
-                            propsAsText.Add(text);
+                            propsAsTextList.Add(text);
                         }
                     }
 
@@ -515,9 +515,9 @@ static class TsxExporter
                     }
                 }
 
-                if (propsAsText.Count > 0)
+                if (propsAsTextList.Count > 0)
                 {
-                    partProps = " " + string.Join(" ", propsAsText);
+                    partProps = " " + string.Join(" ", propsAsTextList);
                 }
                 else
                 {
