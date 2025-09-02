@@ -11,13 +11,13 @@ public sealed class ExporterTest
         var input = new VisualElementModel
         {
             Tag        = "div",
-            Styles     = ["color: red", "bg: blue"],
+            Styles     = ["color: red", "bg: blue",  "hover:bg: yellow"],
             Properties = ["d-text: | Abc"]
         };
 
         string[] expected =
         [
-            "    <div className=\"text-[red] bg-[blue]\">",
+            "    <div className=\"text-[red] bg-[blue] hover:bg-[yellow]\">",
             "      Abc",
             "    </div>"
         ];
