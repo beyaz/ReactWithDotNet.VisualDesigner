@@ -118,32 +118,6 @@ static class TsxExporter
         return new ExportOutput { HasChange = true };
     }
 
-    public static async Task<Result> ExportAll(int projectId)
-    {
-        var components = await Store.GetAllComponentsInProject(projectId);
-
-        foreach (var component in components)
-        {
-            if (component.GetConfig().TryGetValue("IsExportable", out var isExportable) && isExportable.Equals("False", StringComparison.OrdinalIgnoreCase))
-            {
-                continue;
-            }
-
-            var result = await Export(new()
-            {
-                ComponentId = component.Id,
-                ProjectId   = component.ProjectId,
-                UserName    = EnvironmentUserName
-            });
-            if (result.HasError)
-            {
-                return result.Error;
-            }
-        }
-
-        return Success;
-    }
-
     static async Task<Result<(string filePath, string fileContent)>> CalculateExportInfo(ExportInput input)
     {
         var (projectId, componentId, userName) = input;

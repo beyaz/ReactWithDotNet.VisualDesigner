@@ -1,5 +1,4 @@
 ﻿using ReactWithDotNet.VisualDesigner.Exporters;
-using ReactWithDotNet.VisualDesigner.FunctionalUtilities;
 
 namespace ReactWithDotNet.VisualDesigner.Test;
 
@@ -9,8 +8,26 @@ public sealed class NextJsExportTest
     [TestMethod]
     public async Task ExportAll()
     {
-        (await TsxExporter.ExportAll(1)).Success.ShouldBeTrue();
-        
+        const int projectId = 1;
+
+        var components = await Store.GetAllComponentsInProject(projectId);
+
+        foreach (var component in components)
+        {
+            if (component.GetConfig().TryGetValue("IsExportable", out var isExportable) && isExportable.Equals("False", StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            var result = await TsxExporter.Export(new()
+            {
+                ComponentId = component.Id,
+                ProjectId   = component.ProjectId,
+                UserName    = EnvironmentUserName
+            });
+
+            result.Success.ShouldBeTrue();
+        }
     }
 
     // [TestMethod]
@@ -32,20 +49,20 @@ public sealed class NextJsExportTest
         if (model.Tag == "a")
         {
             model = model with { Tag = "Link" };
-            
+
             var hrefIndex = model.Properties.ToList().FindIndex(x => x.Contains("href:"));
             foreach (var tuple in TryParseProperty(model.Properties[hrefIndex]))
             {
                 if (tuple.Value[0] == '/' || tuple.Value[0] == '#')
                 {
-                    model = model with { Properties = model.Properties.SetItem(hrefIndex, "href: "+'"'+tuple.Value + '"') };
+                    model = model with { Properties = model.Properties.SetItem(hrefIndex, "href: " + '"' + tuple.Value + '"') };
                 }
                 else
                 {
                     ;
                 }
             }
-            
+
             return model;
         }
 
