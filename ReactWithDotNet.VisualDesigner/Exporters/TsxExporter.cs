@@ -29,8 +29,6 @@ sealed record ExportInput
     // @formatter:on
 }
 
-
-
 static class TsxExporter
 {
     public static async Task<Result<(IReadOnlyList<string> elementJsxTree, IReadOnlyList<string> importLines)>> CalculateElementTreeTsxCodes(ProjectConfig project, IReadOnlyDictionary<string, string> componentConfig, VisualElementModel rootVisualElement)
@@ -448,82 +446,89 @@ static class TsxExporter
                 node = node with { Properties = node.Properties.Remove(textProperty) };
             }
 
-            var propsAsText = new List<string>();
+           
 
-            foreach (var reactProperty in node.Properties.Where(p => p.Name.NotIn(Design.Text, Design.TextPreview, Design.Src, Design.Name)))
+            string partProps;
             {
-                var propertyName = reactProperty.Name;
-
-                var propertyValue = reactProperty.Value;
-
-                if (propertyName is Design.ItemsSource || propertyName is Design.ItemsSourceDesignTimeCount)
+                 var propsAsText = new List<string>();
+            {
+                foreach (var reactProperty in node.Properties.Where(p => p.Name.NotIn(Design.Text, Design.TextPreview, Design.Src, Design.Name)))
                 {
-                    continue;
-                }
+                    var propertyName = reactProperty.Name;
 
-                if (propertyValue == "true")
-                {
-                    propsAsText.Add($"{propertyName}");
-                    continue;
-                }
+                    var propertyValue = reactProperty.Value;
 
-                if (propertyName == Design.SpreadOperator)
-                {
-                    propsAsText.Add($"{{{propertyValue}}}");
-                    continue;
-                }
-
-                if (propertyName == nameof(HtmlElement.dangerouslySetInnerHTML))
-                {
-                    propsAsText.Add($"{propertyName}={{{{ __html: {propertyValue} }}}}");
-                    continue;
-                }
-
-                if (IsStringValue(propertyValue))
-                {
-                    propsAsText.Add($"{propertyName}=\"{TryClearStringValue(propertyValue)}\"");
-                    continue;
-                }
-
-                if (IsStringTemplate(propertyValue))
-                {
-                    propsAsText.Add($"{propertyName}={{{propertyValue}}}");
-                    continue;
-                }
-
-                if (elementType.HasValue)
-                {
-                    var propertyType = elementType.Value.GetProperty(propertyName, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance)?.PropertyType;
-                    if (propertyType is not null)
+                    if (propertyName is Design.ItemsSource || propertyName is Design.ItemsSourceDesignTimeCount)
                     {
-                        if (propertyType == typeof(string))
+                        continue;
+                    }
+
+                    if (propertyValue == "true")
+                    {
+                        propsAsText.Add($"{propertyName}");
+                        continue;
+                    }
+
+                    if (propertyName == Design.SpreadOperator)
+                    {
+                        propsAsText.Add($"{{{propertyValue}}}");
+                        continue;
+                    }
+
+                    if (propertyName == nameof(HtmlElement.dangerouslySetInnerHTML))
+                    {
+                        propsAsText.Add($"{propertyName}={{{{ __html: {propertyValue} }}}}");
+                        continue;
+                    }
+
+                    if (IsStringValue(propertyValue))
+                    {
+                        propsAsText.Add($"{propertyName}=\"{TryClearStringValue(propertyValue)}\"");
+                        continue;
+                    }
+
+                    if (IsStringTemplate(propertyValue))
+                    {
+                        propsAsText.Add($"{propertyName}={{{propertyValue}}}");
+                        continue;
+                    }
+
+                    if (elementType.HasValue)
+                    {
+                        var propertyType = elementType.Value.GetProperty(propertyName, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance)?.PropertyType;
+                        if (propertyType is not null)
                         {
-                            var isString = propertyValue.Contains('/') || propertyValue.StartsWith('#') || propertyValue.Split(' ').Length > 1;
-                            if (isString)
+                            if (propertyType == typeof(string))
                             {
-                                propsAsText.Add($"{propertyName}=\"{propertyValue}\"");
-                                continue;
+                                var isString = propertyValue.Contains('/') || propertyValue.StartsWith('#') || propertyValue.Split(' ').Length > 1;
+                                if (isString)
+                                {
+                                    propsAsText.Add($"{propertyName}=\"{propertyValue}\"");
+                                    continue;
+                                }
                             }
                         }
                     }
+
+                    propsAsText.Add($"{propertyName}={{{propertyValue}}}");
                 }
-
-                propsAsText.Add($"{propertyName}={{{propertyValue}}}");
             }
-
-            if (node.Children.Count == 0 && node.Text.HasNoValue() && childrenProperty is null)
-            {
+            
                 if (propsAsText.Count > 0)
                 {
-                    return new TsxLines
-                    {
-                        $"{indent(indentLevel)}<{tag} {string.Join(" ", propsAsText)} />"
-                    };
+                    partProps = " " + string.Join(" ", propsAsText);
                 }
-
+                else
+                {
+                    partProps = string.Empty;
+                }
+            }
+            
+            if (node.Children.Count == 0 && node.Text.HasNoValue() && childrenProperty is null)
+            {
                 return new TsxLines
                 {
-                    $"{indent(indentLevel)}<{tag} />"
+                    $"{indent(indentLevel)}<{tag}{partProps} />"
                 };
             }
 
@@ -533,19 +538,9 @@ static class TsxExporter
 
                 if (childrenProperty is not null)
                 {
-                    if (propsAsText.Count > 0)
-                    {
-                        return new TsxLines
-                        {
-                            $"{indent(indentLevel)}<{tag} {string.Join(" ", propsAsText)}>",
-                            $"{indent(indentLevel + 1)}{childrenProperty.Value}",
-                            $"{indent(indentLevel)}</{tag}>"
-                        };
-                    }
-
                     return new TsxLines
                     {
-                        $"{indent(indentLevel)}<{tag}>",
+                        $"{indent(indentLevel)}<{tag}{partProps}>",
                         $"{indent(indentLevel + 1)}{childrenProperty.Value}",
                         $"{indent(indentLevel)}</{tag}>"
                     };
@@ -564,19 +559,9 @@ static class TsxExporter
 
                     if (IsConnectedValue(childrenText))
                     {
-                        if (propsAsText.Count > 0)
-                        {
-                            return new TsxLines
-                            {
-                                $"{indent(indentLevel)}<{tag} {string.Join(" ", propsAsText)}>",
-                                $"{indent(indentLevel + 1)}{childrenText}",
-                                $"{indent(indentLevel)}</{tag}>"
-                            };
-                        }
-
                         return new TsxLines
                         {
-                            $"{indent(indentLevel)}<{tag}>",
+                            $"{indent(indentLevel)}<{tag}{partProps} >",
                             $"{indent(indentLevel + 1)}{childrenText}",
                             $"{indent(indentLevel)}</{tag}>"
                         };
@@ -584,17 +569,10 @@ static class TsxExporter
                 }
             }
 
-            TsxLines lines = [];
-
-            if (propsAsText.Count > 0)
-            {
-                lines.Add($"{indent(indentLevel)}<{tag} {string.Join(" ", propsAsText)}>");
-            }
-            else
-            {
-                lines.Add($"{indent(indentLevel)}<{tag}>");
-            }
-
+            TsxLines lines = [
+                $"{indent(indentLevel)}<{tag}{partProps}>"
+            ];
+            
             // Add children
             foreach (var child in node.Children)
             {
@@ -647,7 +625,7 @@ static class TsxExporter
         static string indent(int indentLevel)
         {
             const int IndentLength = 2;
-            
+
             return new(' ', indentLevel * IndentLength);
         }
     }
@@ -701,4 +679,3 @@ static class TsxExporter
     {
     }
 }
-
