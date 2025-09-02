@@ -3,7 +3,6 @@ using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Text;
-using System.Text.RegularExpressions;
 
 namespace ReactWithDotNet.VisualDesigner.Exporters;
 
@@ -519,27 +518,13 @@ static class TsxExporter
                 propsAsText.Add($"{propertyName}={{{propertyValue}}}");
             }
 
-            var propsCanExportInOneLine =
-                propsAsText.Count == 0 || propsAsText.Count == 1 ||
-                tag.Length + " ".Length + string.Join(" ", propsAsText).Length <= ESLint.MaxCharLengthPerLine;
-
             if (node.Children.Count == 0 && node.Text.HasNoValue() && childrenProperty is null)
             {
                 if (propsAsText.Count > 0)
                 {
-                    if (propsCanExportInOneLine)
-                    {
-                        return new TsxLines
-                        {
-                            $"{indent(indentLevel)}<{tag} {string.Join(" ", propsAsText)} />"
-                        };
-                    }
-
                     return new TsxLines
                     {
-                        $"{indent(indentLevel)}<{tag}",
-                        propsAsMultiLines(propsAsText, indentLevel),
-                        $"{indent(indentLevel)}/>"
+                        $"{indent(indentLevel)}<{tag} {string.Join(" ", propsAsText)} />"
                     };
                 }
 
@@ -557,22 +542,9 @@ static class TsxExporter
                 {
                     if (propsAsText.Count > 0)
                     {
-                        if (propsCanExportInOneLine)
-                        {
-                            return new TsxLines
-                            {
-                                $"{indent(indentLevel)}<{tag} {string.Join(" ", propsAsText)}>",
-                                $"{indent(indentLevel + 1)}{childrenProperty.Value}",
-                                $"{indent(indentLevel)}</{tag}>"
-                            };
-                        }
-
                         return new TsxLines
                         {
-                            $"{indent(indentLevel)}<{tag}",
-                            propsAsMultiLines(propsAsText, indentLevel),
-                            $"{indent(indentLevel)}>",
-
+                            $"{indent(indentLevel)}<{tag} {string.Join(" ", propsAsText)}>",
                             $"{indent(indentLevel + 1)}{childrenProperty.Value}",
                             $"{indent(indentLevel)}</{tag}>"
                         };
@@ -601,22 +573,9 @@ static class TsxExporter
                     {
                         if (propsAsText.Count > 0)
                         {
-                            if (propsCanExportInOneLine)
-                            {
-                                return new TsxLines
-                                {
-                                    $"{indent(indentLevel)}<{tag} {string.Join(" ", propsAsText)}>",
-                                    $"{indent(indentLevel + 1)}{childrenText}",
-                                    $"{indent(indentLevel)}</{tag}>"
-                                };
-                            }
-
                             return new TsxLines
                             {
-                                $"{indent(indentLevel)}<{tag}",
-                                propsAsMultiLines(propsAsText, indentLevel),
-                                $"{indent(indentLevel)}>",
-
+                                $"{indent(indentLevel)}<{tag} {string.Join(" ", propsAsText)}>",
                                 $"{indent(indentLevel + 1)}{childrenText}",
                                 $"{indent(indentLevel)}</{tag}>"
                             };
@@ -636,18 +595,7 @@ static class TsxExporter
 
             if (propsAsText.Count > 0)
             {
-                if (propsCanExportInOneLine)
-                {
-                    lines.Add($"{indent(indentLevel)}<{tag} {string.Join(" ", propsAsText)}>");
-                }
-                else
-                {
-                    lines.Add($"{indent(indentLevel)}<{tag}");
-
-                    lines.AddRange(propsAsMultiLines(propsAsText, indentLevel));
-
-                    lines.Add($"{indent(indentLevel)}>");
-                }
+                lines.Add($"{indent(indentLevel)}<{tag} {string.Join(" ", propsAsText)}>");
             }
             else
             {
@@ -675,54 +623,6 @@ static class TsxExporter
             lines.Add($"{indent(indentLevel)}</{tag}>");
 
             return lines;
-        }
-
-        static IReadOnlyList<string> propsAsMultiLines(IReadOnlyList<string> propsAsText, int indentLevel)
-        {
-            List<string> lines = [];
-
-            foreach (var propItem in propsAsText)
-            {
-                if (propItem.StartsWith("className", StringComparison.OrdinalIgnoreCase))
-                {
-                    if (propItem.Contains("`"))
-                    {
-                        var items = splitClassName(propItem.RemoveFromStart("className={`").RemoveFromEnd("`}"));
-
-                        lines.Add(indent(indentLevel + 1) + "className={`");
-
-                        lines.AddRange(items.Select(x => indent(indentLevel + 2) + x));
-                        lines.Add(indent(indentLevel + 1) + "`}");
-                        continue;
-                    }
-                }
-
-                lines.Add(indent(indentLevel + 1) + propItem);
-            }
-
-            return lines;
-
-            static List<string> splitClassName(string input)
-            {
-                var result = new List<string>();
-
-                // ${...} patternini yakala
-                var pattern = @"(\$\{.*?\})";
-                var parts = Regex.Split(input, pattern);
-
-                foreach (var part in parts)
-                {
-                    var trimmed = part.Trim();
-                    if (string.IsNullOrWhiteSpace(trimmed))
-                    {
-                        continue;
-                    }
-
-                    result.Add(trimmed);
-                }
-
-                return result;
-            }
         }
 
         static string asFinalText(ProjectConfig project, string text)
@@ -1068,13 +968,7 @@ static class TsxExporter
 
     class TsxLines : List<string>
     {
-        public void Add(IEnumerable<string> lines)
-        {
-            foreach (var line in lines)
-            {
-                Add(line);
-            }
-        }
+        
     }
 }
 
