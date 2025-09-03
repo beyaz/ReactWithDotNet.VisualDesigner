@@ -1,4 +1,5 @@
 ﻿using ReactWithDotNet.VisualDesigner.Exporters;
+using ReactWithDotNet.VisualDesigner.FunctionalUtilities;
 
 namespace ReactWithDotNet.VisualDesigner.Test;
 
@@ -51,7 +52,7 @@ public sealed class CSharpExporterTest
 
             result.Success.ShouldBeTrue();
 
-            result.Value.elementJsxTree.Select(x=>x.Trim()).ShouldBe(expected.Select(x=>x.Trim()));
+            result.Value.elementTreeSourceLines.Select(x=>x.Trim()).ShouldBe(expected.Select(x=>x.Trim()));
         }
     }
 }

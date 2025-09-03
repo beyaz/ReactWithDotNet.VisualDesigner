@@ -17,7 +17,7 @@ static class CSharpExporter
             return result.Error;
         }
 
-        return string.Join(Environment.NewLine, result.Value.elementJsxTree);
+        return string.Join(Environment.NewLine, result.Value.elementTreeSourceLines);
     }
 
     public static async Task<Result<ExportOutput>> ExportToFileSystem(ExportInput input)
@@ -62,7 +62,7 @@ static class CSharpExporter
         return new ExportOutput { HasChange = true };
     }
 
-    internal static async Task<Result<(IReadOnlyList<string> elementJsxTree, IReadOnlyList<string> importLines)>> CalculateElementTreeSourceCodes(ProjectConfig project, IReadOnlyDictionary<string, string> componentConfig, VisualElementModel rootVisualElement)
+    internal static async Task<Result<(IReadOnlyList<string> elementTreeSourceLines, IReadOnlyList<string> importLines)>> CalculateElementTreeSourceCodes(ProjectConfig project, IReadOnlyDictionary<string, string> componentConfig, VisualElementModel rootVisualElement)
     {
         ReactNode rootNode;
         {
@@ -170,7 +170,7 @@ static class CSharpExporter
                     return result.Error;
                 }
 
-                linesToInject = result.Value.elementJsxTree;
+                linesToInject = result.Value.elementTreeSourceLines;
 
                 importLines = result.Value.importLines;
             }

@@ -1,4 +1,5 @@
 ﻿using ReactWithDotNet.VisualDesigner.Exporters;
+using ReactWithDotNet.VisualDesigner.FunctionalUtilities;
 
 namespace ReactWithDotNet.VisualDesigner.Test;
 
@@ -37,7 +38,7 @@ public sealed class ExporterTest
 
             result.Success.ShouldBeTrue();
 
-            result.Value.elementJsxTree.ShouldBe(expected);
+            result.Value.elementTreeSourceLines.ShouldBe(expected);
         }
     }
 }
