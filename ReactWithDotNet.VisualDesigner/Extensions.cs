@@ -347,23 +347,41 @@ static class Extensions
                     var methodDeclerationLineIndex = lines.FindIndex(classDeclerationLineIndex, line => line.Contains($" Element {methodName}("));
                     if (methodDeclerationLineIndex >= 0)
                     {
-                        var firstReturnLineIndex = lines.FindIndex(methodDeclerationLineIndex, l => l == "            return ");
-                        if (firstReturnLineIndex < 0)
+                        var firstReturnLineIndex=-1;
                         {
-                            firstReturnLineIndex = lines.FindIndex(methodDeclerationLineIndex, l => l == "        return ");
+                            for (int i = 1; i < 100; i++)
+                            {
+                                firstReturnLineIndex = lines.FindIndex(methodDeclerationLineIndex, l => l == string.Empty.PadRight(i,' ')+"return ");
+                                if (firstReturnLineIndex > 0)
+                                {
+                                    break;
+                                }
+                                
+                                firstReturnLineIndex = lines.FindIndex(methodDeclerationLineIndex, l => l == string.Empty.PadRight(i,' ')+"return null;");
+                                if (firstReturnLineIndex > 0)
+                                {
+                                    return (classDeclerationLineIndex, firstReturnLineIndex, firstReturnLineIndex);
+                                }
+                            }
                             if (firstReturnLineIndex < 0)
                             {
                                 return new InvalidOperationException("No return found");
                             }
                         }
-
-                        var firstReturnCloseLineIndex = lines.FindIndex(firstReturnLineIndex, l => l == "    };");
-                        if (firstReturnCloseLineIndex < 0)
+                        
+                        var firstReturnCloseLineIndex=-1;
                         {
-                            firstReturnCloseLineIndex = lines.FindIndex(firstReturnLineIndex, l => l == "        };");
+                            for (int i = 1; i < 100; i++)
+                            {
+                                firstReturnCloseLineIndex = lines.FindIndex(firstReturnLineIndex, l => l == string.Empty.PadRight(i,' ')+"};");
+                                if (firstReturnCloseLineIndex > 0)
+                                {
+                                    break;
+                                }
+                            }
                             if (firstReturnCloseLineIndex < 0)
                             {
-                                return new InvalidOperationException("Return close not found");
+                                return new InvalidOperationException("No return found");
                             }
                         }
 

@@ -651,7 +651,11 @@ static class CSharpExporter
             firstReturnCloseLineIndex     = result.Value.firstReturnCloseLineIndex;
         }
 
-        lines.RemoveRange(firstReturnLineIndex + 1, firstReturnCloseLineIndex - firstReturnLineIndex - 1);
+        if (firstReturnLineIndex != firstReturnCloseLineIndex)
+        {
+            lines.RemoveRange(firstReturnLineIndex + 1, firstReturnCloseLineIndex - firstReturnLineIndex - 1);    
+        }
+        
 
         lines.InsertRange(firstReturnLineIndex + 1, linesToInject);
 
