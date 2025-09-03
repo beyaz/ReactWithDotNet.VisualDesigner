@@ -79,7 +79,7 @@ static class CSharpExporter
 
         IReadOnlyList<string> elementJsxTree;
         {
-            var result = await ConvertReactNodeModelToTsxCode(project, rootNode, null, 2);
+            var result = await ConvertReactNodeModelToTsxCode(project, rootNode, null, 0);
             if (result.HasError)
             {
                 return result.Error;
@@ -173,12 +173,6 @@ static class CSharpExporter
                 linesToInject = result.Value.elementJsxTree;
 
                 importLines = result.Value.importLines;
-
-                var formatResult = await Prettier.FormatCode(string.Join(Environment.NewLine, linesToInject));
-                if (formatResult.Success)
-                {
-                    linesToInject = formatResult.Value.Split(Environment.NewLine.ToCharArray());
-                }
             }
 
             // try import lines
@@ -639,7 +633,7 @@ static class CSharpExporter
         var lines = fileContent.ToList();
 
         // focus to component code
-        int firstReturnLineIndex,firstReturnCloseLineIndex;
+        int firstReturnLineIndex,firstReturnCloseLineIndex, leftPaddingCount;
         {
             var result = GetComponentLineIndexPointsInCSharpFile(fileContent, targetComponentName);
             if (result.HasError)
@@ -647,6 +641,7 @@ static class CSharpExporter
                 return result.Error;
             }
 
+            leftPaddingCount = result.Value.leftPaddingCount;
             firstReturnLineIndex          = result.Value.firstReturnLineIndex;
             firstReturnCloseLineIndex     = result.Value.firstReturnCloseLineIndex;
         }
@@ -655,7 +650,15 @@ static class CSharpExporter
         {
             lines.RemoveRange(firstReturnLineIndex + 1, firstReturnCloseLineIndex - firstReturnLineIndex - 1);    
         }
-        
+
+        // apply padding
+        {
+            var temp = linesToInject.Select(line => new string(' ', leftPaddingCount) + line).ToList();
+            
+            temp[0] = new string(' ', leftPaddingCount) + "return "+temp[0].Trim();
+
+            linesToInject = temp;
+        }
 
         lines.InsertRange(firstReturnLineIndex + 1, linesToInject);
 

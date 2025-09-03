@@ -329,7 +329,7 @@ static class Extensions
         return (componentDeclarationLineIndex, firstReturnLineIndex, firstReturnCloseLineIndex);
     }
     
-    public static Result<(int classDeclerationLineIndex, int firstReturnLineIndex, int firstReturnCloseLineIndex)> GetComponentLineIndexPointsInCSharpFile(IReadOnlyList<string> fileContent, string targetComponentName)
+    public static Result<(int classDeclerationLineIndex, int leftPaddingCount, int firstReturnLineIndex, int firstReturnCloseLineIndex)> GetComponentLineIndexPointsInCSharpFile(IReadOnlyList<string> fileContent, string targetComponentName)
     {
         var lines = fileContent.ToList();
 
@@ -347,20 +347,22 @@ static class Extensions
                     var methodDeclerationLineIndex = lines.FindIndex(classDeclerationLineIndex, line => line.Contains($" Element {methodName}("));
                     if (methodDeclerationLineIndex >= 0)
                     {
-                        var firstReturnLineIndex=-1;
+                        var firstReturnLineIndex = -1; var leftPaddingCount =0;
                         {
                             for (int i = 1; i < 100; i++)
                             {
                                 firstReturnLineIndex = lines.FindIndex(methodDeclerationLineIndex, l => l == string.Empty.PadRight(i,' ')+"return ");
                                 if (firstReturnLineIndex > 0)
                                 {
+                                    leftPaddingCount = i;
                                     break;
                                 }
                                 
                                 firstReturnLineIndex = lines.FindIndex(methodDeclerationLineIndex, l => l == string.Empty.PadRight(i,' ')+"return null;");
                                 if (firstReturnLineIndex > 0)
                                 {
-                                    return (classDeclerationLineIndex, firstReturnLineIndex, firstReturnLineIndex);
+                                    leftPaddingCount = i;
+                                    return (classDeclerationLineIndex, leftPaddingCount, firstReturnLineIndex, firstReturnLineIndex);
                                 }
                             }
                             if (firstReturnLineIndex < 0)
@@ -385,7 +387,7 @@ static class Extensions
                             }
                         }
 
-                        return (classDeclerationLineIndex, firstReturnLineIndex, firstReturnCloseLineIndex);
+                        return (classDeclerationLineIndex, leftPaddingCount, firstReturnLineIndex, firstReturnCloseLineIndex);
                     }
                 }
             }
