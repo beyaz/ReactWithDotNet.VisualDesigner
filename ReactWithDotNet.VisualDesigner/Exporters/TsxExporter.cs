@@ -585,37 +585,18 @@ static class TsxExporter
         var lines = fileContent.ToList();
 
         // focus to component code
-        int componentDeclarationLineIndex;
+        int firstReturnLineIndex,firstReturnCloseLineIndex;
         {
-            var result = GetComponentDeclarationLineIndex(fileContent, targetComponentName);
+            var result = GetComponentLineIndexPointsInTsxFile(fileContent, targetComponentName);
             if (result.HasError)
             {
                 return result.Error;
             }
 
-            componentDeclarationLineIndex = result.Value;
+            firstReturnLineIndex          = result.Value.firstReturnLineIndex;
+            firstReturnCloseLineIndex     = result.Value.firstReturnCloseLineIndex;
         }
-
-        var firstReturnLineIndex = lines.FindIndex(componentDeclarationLineIndex, l => l == "    return (");
-        if (firstReturnLineIndex < 0)
-        {
-            firstReturnLineIndex = lines.FindIndex(componentDeclarationLineIndex, l => l == "  return (");
-            if (firstReturnLineIndex < 0)
-            {
-                return new InvalidOperationException("No return found");
-            }
-        }
-
-        var firstReturnCloseLineIndex = lines.FindIndex(firstReturnLineIndex, l => l == "    );");
-        if (firstReturnCloseLineIndex < 0)
-        {
-            firstReturnCloseLineIndex = lines.FindIndex(firstReturnLineIndex, l => l == "  );");
-            if (firstReturnCloseLineIndex < 0)
-            {
-                return new InvalidOperationException("Return close not found");
-            }
-        }
-
+        
         lines.RemoveRange(firstReturnLineIndex + 1, firstReturnCloseLineIndex - firstReturnLineIndex - 1);
 
         lines.InsertRange(firstReturnLineIndex + 1, linesToInject);

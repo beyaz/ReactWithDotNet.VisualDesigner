@@ -617,14 +617,14 @@ sealed class ApplicationView : Component<ApplicationState>
             return;
         }
 
-        var lineIndex = GetComponentDeclarationLineIndex(fileContent.Value, location.Value.targetComponentName);
+        var lineIndex = GetComponentLineIndexPointsInTsxFile(fileContent.Value, location.Value.targetComponentName);
         if (lineIndex.HasError)
         {
             this.FailNotification(lineIndex.Error.Message);
             return;
         }
 
-        var exception = IdeBridge.OpenEditor(location.Value.filePath, lineIndex.Value + 1);
+        var exception = IdeBridge.OpenEditor(location.Value.filePath, lineIndex.Value.componentDeclarationLineIndex + 1);
         if (exception is not null)
         {
             this.FailNotification(exception.Message);

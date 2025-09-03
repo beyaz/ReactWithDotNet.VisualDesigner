@@ -288,30 +288,51 @@ static class Extensions
         return node;
     }
 
-    public static Result<int> GetComponentDeclarationLineIndex(IReadOnlyList<string> fileContent, string targetComponentName)
+    public static Result<(int componentDeclarationLineIndex, int firstReturnLineIndex, int firstReturnCloseLineIndex)> GetComponentLineIndexPointsInTsxFile(IReadOnlyList<string> fileContent, string targetComponentName)
     {
         var lines = fileContent.ToList();
 
         var componentDeclarationLineIndex = lines.FindIndex(line => line.Contains($"function {targetComponentName}(", StringComparison.OrdinalIgnoreCase));
-        if (componentDeclarationLineIndex >= 0)
+        if (componentDeclarationLineIndex < 0)
         {
-            return componentDeclarationLineIndex;
+            componentDeclarationLineIndex = lines.FindIndex(line => line.Contains($"const {targetComponentName} "));
+            if (componentDeclarationLineIndex < 0)
+            {
+                componentDeclarationLineIndex = lines.FindIndex(line => line.Contains($"const {targetComponentName}:"));
+                if (componentDeclarationLineIndex < 0)
+                {
+                    return new ArgumentException($"ComponentDeclerationNotFoundInFile. {targetComponentName}");
+                }
+            }
         }
         
-        
-        componentDeclarationLineIndex = lines.FindIndex(line => line.Contains($"const {targetComponentName} "));
-        if (componentDeclarationLineIndex >= 0)
+        var firstReturnLineIndex = lines.FindIndex(componentDeclarationLineIndex, l => l == "    return (");
+        if (firstReturnLineIndex < 0)
         {
-            return componentDeclarationLineIndex;
+            firstReturnLineIndex = lines.FindIndex(componentDeclarationLineIndex, l => l == "  return (");
+            if (firstReturnLineIndex < 0)
+            {
+                return new InvalidOperationException("No return found");
+            }
         }
-        
-        componentDeclarationLineIndex = lines.FindIndex(line => line.Contains($"const {targetComponentName}:"));
-        if (componentDeclarationLineIndex >= 0)
+
+        var firstReturnCloseLineIndex = lines.FindIndex(firstReturnLineIndex, l => l == "    );");
+        if (firstReturnCloseLineIndex < 0)
         {
-            return componentDeclarationLineIndex;
+            firstReturnCloseLineIndex = lines.FindIndex(firstReturnLineIndex, l => l == "  );");
+            if (firstReturnCloseLineIndex < 0)
+            {
+                return new InvalidOperationException("Return close not found");
+            }
         }
-        
-        
+
+        return (componentDeclarationLineIndex, firstReturnLineIndex, firstReturnCloseLineIndex);
+    }
+    
+    public static Result<(int classDeclerationLineIndex, int firstReturnLineIndex, int firstReturnCloseLineIndex)> GetComponentLineIndexPointsInCSharpFile(IReadOnlyList<string> fileContent, string targetComponentName)
+    {
+        var lines = fileContent.ToList();
+
         // maybe  ZoomComponent:View
         {
             var names = targetComponentName.Split(':', StringSplitOptions.RemoveEmptyEntries);
@@ -326,11 +347,33 @@ static class Extensions
                     var methodDeclerationLineIndex = lines.FindIndex(classDeclerationLineIndex, line => line.Contains($" Element {methodName}("));
                     if (methodDeclerationLineIndex >= 0)
                     {
-                        return methodDeclerationLineIndex;
+                        var firstReturnLineIndex = lines.FindIndex(methodDeclerationLineIndex, l => l == "            return ");
+                        if (firstReturnLineIndex < 0)
+                        {
+                            firstReturnLineIndex = lines.FindIndex(methodDeclerationLineIndex, l => l == "        return ");
+                            if (firstReturnLineIndex < 0)
+                            {
+                                return new InvalidOperationException("No return found");
+                            }
+                        }
+
+                        var firstReturnCloseLineIndex = lines.FindIndex(firstReturnLineIndex, l => l == "    };");
+                        if (firstReturnCloseLineIndex < 0)
+                        {
+                            firstReturnCloseLineIndex = lines.FindIndex(firstReturnLineIndex, l => l == "        };");
+                            if (firstReturnCloseLineIndex < 0)
+                            {
+                                return new InvalidOperationException("Return close not found");
+                            }
+                        }
+
+                        return (classDeclerationLineIndex, firstReturnLineIndex, firstReturnCloseLineIndex);
                     }
                 }
             }
         }
+        
+       
 
         return new ArgumentException($"ComponentDeclerationNotFoundInFile. {targetComponentName}");
     }

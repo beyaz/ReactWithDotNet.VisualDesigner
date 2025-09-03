@@ -639,36 +639,16 @@ static class CSharpExporter
         var lines = fileContent.ToList();
 
         // focus to component code
-        int componentDeclarationLineIndex;
+        int firstReturnLineIndex,firstReturnCloseLineIndex;
         {
-            var result = GetComponentDeclarationLineIndex(fileContent, targetComponentName);
+            var result = GetComponentLineIndexPointsInCSharpFile(fileContent, targetComponentName);
             if (result.HasError)
             {
                 return result.Error;
             }
 
-            componentDeclarationLineIndex = result.Value;
-        }
-
-        
-        var firstReturnLineIndex = lines.FindIndex(componentDeclarationLineIndex, l => l == "            return ");
-        if (firstReturnLineIndex < 0)
-        {
-            firstReturnLineIndex = lines.FindIndex(componentDeclarationLineIndex, l => l == "        return ");
-            if (firstReturnLineIndex < 0)
-            {
-                return new InvalidOperationException("No return found");
-            }
-        }
-
-        var firstReturnCloseLineIndex = lines.FindIndex(firstReturnLineIndex, l => l == "    };");
-        if (firstReturnCloseLineIndex < 0)
-        {
-            firstReturnCloseLineIndex = lines.FindIndex(firstReturnLineIndex, l => l == "        };");
-            if (firstReturnCloseLineIndex < 0)
-            {
-                return new InvalidOperationException("Return close not found");
-            }
+            firstReturnLineIndex          = result.Value.firstReturnLineIndex;
+            firstReturnCloseLineIndex     = result.Value.firstReturnCloseLineIndex;
         }
 
         lines.RemoveRange(firstReturnLineIndex + 1, firstReturnCloseLineIndex - firstReturnLineIndex - 1);
