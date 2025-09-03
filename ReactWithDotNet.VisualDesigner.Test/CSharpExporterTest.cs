@@ -8,7 +8,7 @@ public sealed class CSharpExporterTest
     [TestMethod]
     public async Task Export()
     {
-        var result = await CSharpExporter.ExportToFileSystem(new ExportInput()
+        var result = await CSharpExporter.ExportToFileSystem(new()
         {
             ComponentId = 71,
             ProjectId   = 3,
