@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
+using System.Globalization;
 using System.IO;
 using System.Text.RegularExpressions;
 
@@ -288,7 +289,7 @@ static class Extensions
         return node;
     }
 
-    public static Result<(int componentDeclarationLineIndex, int firstReturnLineIndex, int firstReturnCloseLineIndex)> GetComponentLineIndexPointsInTsxFile(IReadOnlyList<string> fileContent, string targetComponentName)
+    public static Result<(int componentDeclarationLineIndex, int leftPaddingCount, int firstReturnLineIndex, int firstReturnCloseLineIndex)> GetComponentLineIndexPointsInTsxFile(IReadOnlyList<string> fileContent, string targetComponentName)
     {
         var lines = fileContent.ToList();
 
@@ -305,28 +306,34 @@ static class Extensions
                 }
             }
         }
+
+        var leftPaddingCount = 0;
+        int firstReturnLineIndex = -1;
+        {
+            for (int i = 1; i < 20; i++)
+            {
+                firstReturnLineIndex = lines.FindIndex(componentDeclarationLineIndex, l => l == new string(' ',i)+ "return (");
+                if (firstReturnLineIndex > 0)
+                {
+                    leftPaddingCount = i;
+                    break;
+                }
+            }
+        }
         
-        var firstReturnLineIndex = lines.FindIndex(componentDeclarationLineIndex, l => l == "    return (");
-        if (firstReturnLineIndex < 0)
+        int firstReturnCloseLineIndex = -1;
         {
-            firstReturnLineIndex = lines.FindIndex(componentDeclarationLineIndex, l => l == "  return (");
-            if (firstReturnLineIndex < 0)
+            for (int i = 1; i < 20; i++)
             {
-                return new InvalidOperationException("No return found");
+                firstReturnCloseLineIndex = lines.FindIndex(firstReturnLineIndex, l => l == new string(' ',i)+ ");");
+                if (firstReturnCloseLineIndex > 0)
+                {
+                    break;
+                }
             }
         }
 
-        var firstReturnCloseLineIndex = lines.FindIndex(firstReturnLineIndex, l => l == "    );");
-        if (firstReturnCloseLineIndex < 0)
-        {
-            firstReturnCloseLineIndex = lines.FindIndex(firstReturnLineIndex, l => l == "  );");
-            if (firstReturnCloseLineIndex < 0)
-            {
-                return new InvalidOperationException("Return close not found");
-            }
-        }
-
-        return (componentDeclarationLineIndex, firstReturnLineIndex, firstReturnCloseLineIndex);
+        return (componentDeclarationLineIndex,leftPaddingCount, firstReturnLineIndex, firstReturnCloseLineIndex);
     }
     
     public static Result<(int classDeclerationLineIndex, int leftPaddingCount, int firstReturnLineIndex, int firstReturnCloseLineIndex)> GetComponentLineIndexPointsInCSharpFile(IReadOnlyList<string> fileContent, string targetComponentName)

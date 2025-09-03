@@ -585,7 +585,7 @@ static class TsxExporter
         var lines = fileContent.ToList();
 
         // focus to component code
-        int firstReturnLineIndex,firstReturnCloseLineIndex;
+        int firstReturnLineIndex,firstReturnCloseLineIndex,leftPaddingCount;
         {
             var result = GetComponentLineIndexPointsInTsxFile(fileContent, targetComponentName);
             if (result.HasError)
@@ -593,13 +593,25 @@ static class TsxExporter
                 return result.Error;
             }
 
+            leftPaddingCount = result.Value.leftPaddingCount;
             firstReturnLineIndex          = result.Value.firstReturnLineIndex;
             firstReturnCloseLineIndex     = result.Value.firstReturnCloseLineIndex;
         }
         
-        lines.RemoveRange(firstReturnLineIndex + 1, firstReturnCloseLineIndex - firstReturnLineIndex - 1);
+        lines.RemoveRange(firstReturnLineIndex, firstReturnCloseLineIndex - firstReturnLineIndex+1);
+        
+        // apply padding
+        {
+            var temp = linesToInject.Select(line => new string(' ', leftPaddingCount+2) + line).ToList();
 
-        lines.InsertRange(firstReturnLineIndex + 1, linesToInject);
+            temp.Insert(0, new string(' ', leftPaddingCount) + "return (");
+            
+            temp.Add(new string(' ', leftPaddingCount) + ");");
+
+            linesToInject = temp;
+        }
+        
+        lines.InsertRange(firstReturnLineIndex, linesToInject);
 
         var injectedFileContent = string.Join(Environment.NewLine, lines);
 
