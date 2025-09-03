@@ -79,7 +79,7 @@ static class CSharpExporter
 
         IReadOnlyList<string> elementJsxTree;
         {
-            var result = await ConvertReactNodeModelToTsxCode(project, rootNode, null, 0);
+            var result = await ConvertReactNodeModelToElementTreeSourceLines(project, rootNode, null, 0);
             if (result.HasError)
             {
                 return result.Error;
@@ -213,7 +213,7 @@ static class CSharpExporter
         return (filePath, fileNewContent);
     }
 
-    static async Task<Result<IReadOnlyList<string>>> ConvertReactNodeModelToTsxCode(ProjectConfig project, ReactNode node, ReactNode parentNode, int indentLevel)
+    static async Task<Result<IReadOnlyList<string>>> ConvertReactNodeModelToElementTreeSourceLines(ProjectConfig project, ReactNode node, ReactNode parentNode, int indentLevel)
     {
         var nodeTag = node.Tag;
 
@@ -255,7 +255,7 @@ static class CSharpExporter
 
                 IReadOnlyList<string> innerLines;
                 {
-                    var result = await ConvertReactNodeModelToTsxCode(project, node, parentNode, indentLevel);
+                    var result = await ConvertReactNodeModelToElementTreeSourceLines(project, node, parentNode, indentLevel);
                     if (result.HasError)
                     {
                         return result.Error;
@@ -316,7 +316,7 @@ static class CSharpExporter
 
                 IReadOnlyList<string> innerLines;
                 {
-                    var result = await ConvertReactNodeModelToTsxCode(project, node, parentNode, indentLevel);
+                    var result = await ConvertReactNodeModelToElementTreeSourceLines(project, node, parentNode, indentLevel);
                     if (result.HasError)
                     {
                         return result.Error;
@@ -345,7 +345,7 @@ static class CSharpExporter
 
                 IReadOnlyList<string> innerLines;
                 {
-                    var result = await ConvertReactNodeModelToTsxCode(project, node, parentNode, indentLevel);
+                    var result = await ConvertReactNodeModelToElementTreeSourceLines(project, node, parentNode, indentLevel);
                     if (result.HasError)
                     {
                         return result.Error;
@@ -576,7 +576,7 @@ static class CSharpExporter
             {
                 IReadOnlyList<string> childTsx;
                 {
-                    var result = await ConvertReactNodeModelToTsxCode(project, child, node, indentLevel + 1);
+                    var result = await ConvertReactNodeModelToElementTreeSourceLines(project, child, node, indentLevel + 1);
                     if (result.HasError)
                     {
                         return result.Error;
