@@ -31,6 +31,23 @@ static class ExporterFactory
             return await CSharpExporter.CalculateElementTsxCode(projectId, componentConfig, visualElement);
         }
 
-        return await TsxExporter.CalculateElementTsxCode(projectId, componentConfig, visualElement);
+        string tsxCode;
+        {
+            var result =  await TsxExporter.CalculateElementTsxCode(projectId, componentConfig, visualElement);
+            if (result.HasError)
+            {
+                return result.Error;
+            }
+        
+            result = await Prettier.FormatCode(result.Value);
+            if (result.HasError)
+            {
+                return result.Error.Message;
+            }
+
+            tsxCode = result.Value;
+        }
+
+        return tsxCode;
     }
 }
