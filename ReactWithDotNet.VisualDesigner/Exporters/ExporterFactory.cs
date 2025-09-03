@@ -17,4 +17,20 @@ static class ExporterFactory
 
         return await TsxExporter.ExportToFileSystem(input);
     }
+
+    public static async Task<Result<string>> CalculateElementTsxCode(int projectId, IReadOnlyDictionary<string, string> componentConfig, VisualElementModel visualElement)
+    {
+        var project = GetProjectConfig(projectId);
+        if (project is null)
+        {
+            return new ArgumentNullException($"ProjectNotFound. {projectId}");
+        }
+        
+        if (project.ExportAsCSharp)
+        {
+            return await CSharpExporter.CalculateElementTsxCode(projectId, componentConfig, visualElement);
+        }
+
+        return await TsxExporter.CalculateElementTsxCode(projectId, componentConfig, visualElement);
+    }
 }
