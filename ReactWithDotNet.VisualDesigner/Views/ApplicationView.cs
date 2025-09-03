@@ -2530,7 +2530,12 @@ sealed class ApplicationView : Component<ApplicationState>
 
         Element View()
         {
-            return null;
+            var scaleText = $"%{state.Scale}";
+            
+            return new label(PositionAbsolute, Top(-4), Left(8), FontSize10, LineHeight7, Background("#eff3f8"), PaddingLeft(4), PaddingRight(4))
+            {
+                {"Zoom"}
+            };
         }
 
         protected override Element render()

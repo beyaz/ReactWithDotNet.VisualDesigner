@@ -455,7 +455,7 @@ static class CSharpExporter
                         if (elementType.HasValue)
                         {
                             
-                            var (success, modifierCode) = ToModifierTransformer.TryConvertToModifier(elementType.Value.Name, propertyName, propertyValue);
+                            var (success, modifierCode) = ToModifierTransformer.TryConvertToModifier(elementType.Value.Name, propertyName, TryClearStringValue(propertyValue));
                             if (success)
                             {
                                 return modifierCode;
@@ -522,7 +522,7 @@ static class CSharpExporter
             {
                 return new LineCollection
                 {
-                    $"{indent(indentLevel)}<{tag}{partProps} />"
+                    $"{indent(indentLevel)}new {tag}{partProps}"
                 };
             }
 
@@ -604,7 +604,7 @@ static class CSharpExporter
 
             if (!IsStringValue(text))
             {
-                return $"{{{text}}}";
+                return text;
             }
 
             // try to export with translation function
@@ -618,12 +618,12 @@ static class CSharpExporter
                 }
             }
 
-            return "{" + '"' + TryClearStringValue(text) + '"' + "}";
+            return '"' + TryClearStringValue(text) + '"';
         }
 
         static string indent(int indentLevel)
         {
-            const int IndentLength = 2;
+            const int IndentLength = 4;
 
             return new(' ', indentLevel * IndentLength);
         }

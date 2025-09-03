@@ -87,37 +87,14 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
             return new FlexRowCentered(SizeFull) { "Empty" };
         }
 
-        return new div(CursorDefault, Padding(5), OnMouseLeave(OnMouseLeaveHandler), OnKeyDown(On_Key_Down), TabIndex(0), OutlineNone)
+        return new div(CursorDefault, Padding(5), OnMouseLeave(OnMouseLeaveHandler), OutlineNone)
         {
             await ToVisual(Model, 0, "0"),
             WidthFull, HeightFull
         };
     }
 
-    [KeyboardEventCallOnly("CTRL+c", "CTRL+v", "Delete")]
-    Task On_Key_Down(KeyboardEvent e)
-    {
-        if (e.key == "Delete")
-        {
-            DispatchEvent(OnDelete, []);
-            return Task.CompletedTask;
-        }
-
-        if (e.key == "c")
-        {
-            state.CopiedTreeItemPath = SelectedPath;
-            return Task.CompletedTask;
-        }
-
-        if (e.key == "v" && state.CopiedTreeItemPath.HasValue())
-        {
-            DispatchEvent(CopyPaste, [state.CopiedTreeItemPath, SelectedPath]);
-
-            state.CopiedTreeItemPath = null;
-        }
-
-        return Task.CompletedTask;
-    }
+   
 
     [StopPropagation]
     Task OnDoubleClicked(MouseEvent e)
@@ -160,11 +137,34 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
         return Task.CompletedTask;
     }
 
-    [KeyboardEventCallOnly("F2")]
+    [KeyboardEventCallOnly("F2","CTRL+c", "CTRL+v", "Delete")]
     [StopPropagation]
     Task OnKeyDownHandler(KeyboardEvent e)
     {
-        DispatchEvent(EnterEditMode, [e.currentTarget.boundingClientRect]);
+        if (e.key == "Delete")
+        {
+            DispatchEvent(OnDelete, []);
+            return Task.CompletedTask;
+        }
+
+        if (e.key == "c")
+        {
+            state.CopiedTreeItemPath = SelectedPath;
+            return Task.CompletedTask;
+        }
+
+        if (e.key == "v" && state.CopiedTreeItemPath.HasValue())
+        {
+            DispatchEvent(CopyPaste, [state.CopiedTreeItemPath, SelectedPath]);
+
+            state.CopiedTreeItemPath = null;
+        }
+
+        if (e.key == "F2")
+        {
+            DispatchEvent(EnterEditMode, [e.currentTarget.boundingClientRect]);    
+        }
+        
         return Task.CompletedTask;
     }
 
