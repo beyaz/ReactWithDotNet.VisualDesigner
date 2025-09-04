@@ -2191,8 +2191,6 @@ sealed class ApplicationView : Component<ApplicationState>
                 return result.Error.Message;
             }
 
-            
-
             return result.Value;
         }
     }
@@ -2528,29 +2526,10 @@ sealed class ApplicationView : Component<ApplicationState>
             return Task.CompletedTask;
         }
 
-        Element View()
-        {
-            var scaleText = $"%{state.Scale}";
-            
-            // formatter:off
-            return new label(PositionAbsolute, Top(-4), Left(8), FontSize10, LineHeight7, Background("#eff3f8"), PaddingLeft(4), PaddingRight(4))
-            {
-               
-               
-                   
-
-            };
-            
-            // formatter:on
-        }
-
         protected override Element render()
         {
-            
-            return new FlexRowCentered(Border(1, solid, Theme.BorderColor), BorderRadius(4), Height(36))
+            return new FlexRowCentered(PositionRelative, Height(36), Border(1, solid, Theme.BorderColor), BorderRadius(4))
             {
-                PositionRelative,
-
                 new label(PositionAbsolute, Top(-4), Left(8), FontSize10, LineHeight7, BackgroundTheme, PaddingX(4))
                 {
                     "Zoom"
@@ -2569,51 +2548,24 @@ sealed class ApplicationView : Component<ApplicationState>
                         $"%{state.Scale}",
                         OnClick(ToggleZoomSuggestions)
                     },
-                    state.IsSuggestionsVisible ? new FlexColumnCentered(PositionFixed, Background(White), Border(1, solid, Gray300), BorderRadius(4), PaddingY(4), Left(state.SuggestionPopupLocationX), Top(state.SuggestionPopupLocationY))
-                    {
-                        new[] { "%25", "%50", "%75", "%100", "%125" }.Select(text => new FlexRowCentered(Padding(6, 12), BorderRadius(4), Hover(Background(Gray100)))
-                        {
-                            text,
-                            Id(text),
-                            OnClick(OnSuggestionItemClicked)
-                        })
-                    } : null,
 
                     new FlexRowCentered(BorderRadius(100), Padding(3), Background(Blue200), Hover(Background(Blue300)))
                     {
                         OnClick(OnPlusIconClicked),
                         new IconPlus()
                     }
+                },
+
+                !state.IsSuggestionsVisible ? null : new FlexColumnCentered(PositionFixed, Background(White), Border(1, solid, Gray300), BorderRadius(4), PaddingY(4), Left(state.SuggestionPopupLocationX), Top(state.SuggestionPopupLocationY))
+                {
+                    new[] { "%25", "%50", "%75", "%100", "%125" }.Select(text => new FlexRowCentered(Padding(6, 12), BorderRadius(4), Hover(Background(Gray100)))
+                    {
+                        text,
+                        Id(text),
+                        OnClick(OnSuggestionItemClicked)
+                    })
                 }
             };
-
-            Task ToggleZoomSuggestions(MouseEvent e)
-            {
-                var rect = e.target.boundingClientRect;
-
-                state = state with
-                {
-                    IsSuggestionsVisible = !state.IsSuggestionsVisible,
-                    SuggestionPopupLocationX = rect.left + rect.width / 2 - 24,
-                    SuggestionPopupLocationY = rect.top + rect.height + 8
-                };
-
-                return Task.CompletedTask;
-            }
-        }
-
-        Task OnPlusIconClicked(MouseEvent _)
-        {
-            if (state.Scale >= 200)
-            {
-                return Task.CompletedTask;
-            }
-
-            state = state with { Scale = state.Scale + 10 };
-
-            DispatchEvent(OnChange, [state.Scale]);
-
-            return Task.CompletedTask;
         }
 
         Task OnIconMinusClicked(MouseEvent _)
@@ -2624,6 +2576,20 @@ sealed class ApplicationView : Component<ApplicationState>
             }
 
             state = state with { Scale = state.Scale - 10 };
+
+            DispatchEvent(OnChange, [state.Scale]);
+
+            return Task.CompletedTask;
+        }
+
+        Task OnPlusIconClicked(MouseEvent _)
+        {
+            if (state.Scale >= 200)
+            {
+                return Task.CompletedTask;
+            }
+
+            state = state with { Scale = state.Scale + 10 };
 
             DispatchEvent(OnChange, [state.Scale]);
 
@@ -2641,6 +2607,30 @@ sealed class ApplicationView : Component<ApplicationState>
             DispatchEvent(OnChange, [state.Scale]);
 
             return Task.CompletedTask;
+        }
+
+        Task ToggleZoomSuggestions(MouseEvent e)
+        {
+            var rect = e.target.boundingClientRect;
+
+            state = state with
+            {
+                IsSuggestionsVisible = !state.IsSuggestionsVisible,
+                SuggestionPopupLocationX = rect.left + rect.width / 2 - 24,
+                SuggestionPopupLocationY = rect.top + rect.height + 8
+            };
+
+            return Task.CompletedTask;
+        }
+
+        Element View()
+        {
+            var scaleText = $"%{state.Scale}";
+
+            // formatter:off
+            return new label(PositionAbsolute, Top(-4), Left(8), FontSize10, LineHeight7, Background("#eff3f8"), PaddingLeft(4), PaddingRight(4));
+
+            // formatter:on
         }
 
         internal record State
