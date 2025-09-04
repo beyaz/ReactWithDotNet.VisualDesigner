@@ -2546,6 +2546,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
         protected override Element render()
         {
+            
             return new FlexRowCentered(Border(1, solid, Theme.BorderColor), BorderRadius(4), Height(36))
             {
                 PositionRelative,
@@ -2559,22 +2560,7 @@ sealed class ApplicationView : Component<ApplicationState>
                 {
                     new FlexRowCentered(BorderRadius(100), Padding(3), Background(Blue200), Hover(Background(Blue300)))
                     {
-                        OnClick(_ =>
-                        {
-                            if (state.Scale <= 20)
-                            {
-                                return Task.CompletedTask;
-                            }
-
-                            state = state with
-                            {
-                                Scale = state.Scale - 10
-                            };
-
-                            DispatchEvent(OnChange, [state.Scale]);
-
-                            return Task.CompletedTask;
-                        }),
+                        OnClick(OnIconMinusClicked),
                         new IconMinus()
                     },
 
@@ -2595,22 +2581,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
                     new FlexRowCentered(BorderRadius(100), Padding(3), Background(Blue200), Hover(Background(Blue300)))
                     {
-                        OnClick(_ =>
-                        {
-                            if (state.Scale >= 200)
-                            {
-                                return Task.CompletedTask;
-                            }
-
-                            state = state with
-                            {
-                                Scale = state.Scale + 10
-                            };
-
-                            DispatchEvent(OnChange, [state.Scale]);
-
-                            return Task.CompletedTask;
-                        }),
+                        OnClick(OnPlusIconClicked),
                         new IconPlus()
                     }
                 }
@@ -2629,6 +2600,34 @@ sealed class ApplicationView : Component<ApplicationState>
 
                 return Task.CompletedTask;
             }
+        }
+
+        Task OnPlusIconClicked(MouseEvent _)
+        {
+            if (state.Scale >= 200)
+            {
+                return Task.CompletedTask;
+            }
+
+            state = state with { Scale = state.Scale + 10 };
+
+            DispatchEvent(OnChange, [state.Scale]);
+
+            return Task.CompletedTask;
+        }
+
+        Task OnIconMinusClicked(MouseEvent _)
+        {
+            if (state.Scale <= 20)
+            {
+                return Task.CompletedTask;
+            }
+
+            state = state with { Scale = state.Scale - 10 };
+
+            DispatchEvent(OnChange, [state.Scale]);
+
+            return Task.CompletedTask;
         }
 
         Task OnSuggestionItemClicked(MouseEvent e)
