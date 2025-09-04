@@ -2290,11 +2290,6 @@
                 style.cy = <paramref name="value" />
             </summary>
         </member>
-        <member name="M:ReactWithDotNet.Mixin.D(System.String)">
-            <summary>
-                style.d = <paramref name="value" />
-            </summary>
-        </member>
         <member name="M:ReactWithDotNet.Mixin.DescentOverride(System.String)">
             <summary>
                 style.descentOverride = <paramref name="value" />

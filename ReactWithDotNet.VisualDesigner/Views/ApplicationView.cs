@@ -2648,44 +2648,42 @@ sealed class ApplicationView : Component<ApplicationState>
             {
                 new label(PositionAbsolute, Top(-4), Left(8), FontSize10, LineHeight7, Background("#eff3f8"), PaddingLeft(4), PaddingRight(4))
                 {
-                    "Zoom"
+                    "Zoom",
                 },
                 new div(DisplayFlex, WidthFull, PaddingLeft(4), PaddingRight(4), AlignItemsCenter, Gap(4))
                 {
-                    new div(DisplayFlex, JustifyContentCenter, AlignItemsCenter, BorderRadius(100), Padding(3), Background("#bfdbfe"), Hover(Background("#93c5fd")))
-                    {
-                        new svg(ViewBox(0, 0, 16, 16), svg.Width(16), svg.Height(16), Fill("currentcolor"))
-                        {
-                            new path(Fill("currentColor"))
-                            {
-                                d ="M12 8.667H4A.669.669 0 0 1 3.333 8c0-.367.3-.667.667-.667h8c.367 0 .667.3.667.667 0 .367-.3.667-.667.667Z"
-                            }
-                        }
-                    },
-                    new div(OnClick(ToggleZoomSuggestions))
-                    {
-                        $"%{state.Scale}"
-                    },
-                    new div(DisplayFlex, JustifyContentCenter, AlignItemsCenter, BorderRadius(100), Padding(3), Background("#bfdbfe"), Hover(Background("#93c5fd")))
+                    new div(OnClick(OnIconMinusClicked), DisplayFlex, JustifyContentCenter, AlignItemsCenter, BorderRadius(100), Padding(3), Background("#bfdbfe"), Hover(Background("#93c5fd")))
                     {
                         new svg(ViewBox(0, 0, 16, 16), Width(16), Height(16), Fill("currentcolor"))
                         {
-                            new path(Fill("currentColor"), D("M12 8.667H8.667V12c0 .367-.3.667-.667.667A.669.669 0 0 1 7.333 12V8.667H4A.669.669 0 0 1 3.333 8c0-.367.3-.667.667-.667h3.333V4c0-.366.3-.667.667-.667.367 0 .667.3.667.667v3.333H12c.367 0 .667.3.667.667 0 .367-.3.667-.667.667Z"))
-                        }
-                    }
+                            new path(Fill("currentColor"), path.D("M12 8.667H4A.669.669 0 0 1 3.333 8c0-.367.3-.667.667-.667h8c.367 0 .667.3.667.667 0 .367-.3.667-.667.667Z")),
+                        },
+                    },
+                    new div(OnClick(ToggleZoomSuggestions))
+                    {
+                        $"%{state.Scale}",
+                    },
+                    new div(OnClick(OnPlusIconClicked), DisplayFlex, JustifyContentCenter, AlignItemsCenter, BorderRadius(100), Padding(3), Background("#bfdbfe"), Hover(Background("#93c5fd")))
+                    {
+                        new svg(ViewBox(0, 0, 16, 16), Width(16), Height(16), Fill("currentcolor"))
+                        {
+                            new path(Fill("currentColor"), path.D("M12 8.667H8.667V12c0 .367-.3.667-.667.667A.669.669 0 0 1 7.333 12V8.667H4A.669.669 0 0 1 3.333 8c0-.367.3-.667.667-.667h3.333V4c0-.366.3-.667.667-.667.367 0 .667.3.667.667v3.333H12c.367 0 .667.3.667.667 0 .367-.3.667-.667.667Z")),
+                        },
+                    },
                 },
                 !state.IsSuggestionsVisible ? null :
                     new div(DisplayFlex, JustifyContentCenter, AlignItemsCenter, PositionFixed, Background(White), Border(1, solid, "Gray300"), BorderRadius(4), PaddingTop(4), PaddingBottom(4), Left("state.SuggestionPopupLocationX"), Top("state.SuggestionPopupLocationY"))
                     {
-                        new div
+                        new div()
                         {
                             from item in new[] { "%25", "%50", "%75", "%100", "%125" }
                             select new div(Id("item"), OnClick(OnSuggestionItemClicked), DisplayFlex, JustifyContentCenter, AlignItemsCenter, Padding("6 12"), BorderRadius(4), Hover(Background("#f3f4f6")))
                             {
-                                item
-                            }
-                        }
+                                item,
+                            },
+                        },
                     }
+                ,
             };
         }
 
