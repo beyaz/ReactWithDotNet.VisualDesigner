@@ -569,9 +569,11 @@ static class CSharpExporter
             ];
 
             // Add children
+            var childIndex = 0;
+            
             foreach (var child in node.Children)
             {
-                IReadOnlyList<string> childTsx;
+                IReadOnlyList<string> childElementSourceLines;
                 {
                     var result = await ConvertReactNodeModelToElementTreeSourceLines(project, child, node, indentLevel + 1);
                     if (result.HasError)
@@ -579,10 +581,17 @@ static class CSharpExporter
                         return result.Error;
                     }
 
-                    childTsx = result.Value;
+                    childElementSourceLines = result.Value;
                 }
 
-                lines.AddRange(childTsx);
+                if (childIndex < node.Children.Count && childElementSourceLines.Count > 0)
+                {
+                    childElementSourceLines = childElementSourceLines.SetItem(childElementSourceLines.Count -1, childElementSourceLines[^1] + ",");
+                }
+
+                lines.AddRange(childElementSourceLines);
+
+                childIndex++;
             }
 
             // Close tag
@@ -653,6 +662,8 @@ static class CSharpExporter
             var temp = linesToInject.Select(line => new string(' ', leftPaddingCount) + line).ToList();
             
             temp[0] = new string(' ', leftPaddingCount) + "return "+temp[0].Trim();
+
+            temp[^1] += ";";
 
             linesToInject = temp;
         }
