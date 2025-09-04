@@ -2532,10 +2532,16 @@ sealed class ApplicationView : Component<ApplicationState>
         {
             var scaleText = $"%{state.Scale}";
             
+            // formatter:off
             return new label(PositionAbsolute, Top(-4), Left(8), FontSize10, LineHeight7, Background("#eff3f8"), PaddingLeft(4), PaddingRight(4))
             {
-                {"Zoom"}
+               
+               
+                   
+
             };
+            
+            // formatter:on
         }
 
         protected override Element render()

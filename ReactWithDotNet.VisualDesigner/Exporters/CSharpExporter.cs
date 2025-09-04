@@ -248,11 +248,9 @@ static class CSharpExporter
             {
                 parentNode = parentNode with { Properties = parentNode.Properties.Remove(itemsSource) };
 
-                lines.Add($"{indent(indentLevel)}{{{ClearConnectedValue(itemsSource.Value)}.map((_item, _index) => {{");
-                indentLevel++;
+                lines.Add($"{indent(indentLevel)}from item in {itemsSource.Value}");
 
-                lines.Add(indent(indentLevel) + "return (");
-                indentLevel++;
+                lines.Add(indent(indentLevel) + "select ");
 
                 IReadOnlyList<string> innerLines;
                 {
@@ -276,24 +274,22 @@ static class CSharpExporter
                         // is first line
                         if (i == 0)
                         {
-                            line = line.TrimStart().RemoveFromStart("{");
+                            line = line.TrimStart().RemoveFromStart("(");
+
+                            lines[^1] += line;
+                            continue;
                         }
 
                         // is last line
                         if (i == innerLines.Count - 1)
                         {
-                            line = line.TrimEnd().RemoveFromEnd("}");
+                            line = line.TrimEnd().RemoveFromEnd(")");
                         }
 
                         lines.Add(line);
                     }
                 }
 
-                indentLevel--;
-                lines.Add(indent(indentLevel) + ");");
-
-                indentLevel--;
-                lines.Add(indent(indentLevel) + "})}");
 
                 return lines;
             }
@@ -310,7 +306,7 @@ static class CSharpExporter
 
                 List<string> lines =
                 [
-                    $"{indent(indentLevel)}{{{showIf.Value} && ("
+                    $"{indent(indentLevel)}!{showIf.Value} ? null :"
                 ];
 
                 indentLevel++;
@@ -329,7 +325,7 @@ static class CSharpExporter
                 lines.AddRange(innerLines);
 
                 indentLevel--;
-                lines.Add($"{indent(indentLevel)})}}");
+                lines.Add($"{indent(indentLevel)}");
 
                 return lines;
             }
@@ -340,7 +336,7 @@ static class CSharpExporter
 
                 List<string> lines =
                 [
-                    $"{indent(indentLevel)}{{!{hideIf.Value} && ("
+                    $"{indent(indentLevel)}{hideIf.Value} ? null :"
                 ];
                 indentLevel++;
 
@@ -358,7 +354,7 @@ static class CSharpExporter
                 lines.AddRange(innerLines);
 
                 indentLevel--;
-                lines.Add($"{indent(indentLevel)})}}");
+                lines.Add($"{indent(indentLevel)}");
 
                 return lines;
             }
