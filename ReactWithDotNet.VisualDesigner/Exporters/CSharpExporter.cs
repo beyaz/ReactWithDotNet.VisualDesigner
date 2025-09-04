@@ -387,6 +387,8 @@ static class CSharpExporter
                 node = node with { Properties = node.Properties.Remove(textProperty) };
             }
 
+            var hasNoBody = node.Children.Count == 0 && node.Text.HasNoValue() && childrenProperty is null;
+            
             string partProps;
             {
                 var propsAsTextList = new List<string>();
@@ -395,7 +397,6 @@ static class CSharpExporter
                     {
                         if (reactProperty.Name == "style")
                         {
-
                             var styles = JsonConvert.DeserializeObject<IReadOnlyList<StyleAttribute>>(reactProperty.Value);
                             
                             foreach (var styleAttribute in styles)
@@ -416,8 +417,6 @@ static class CSharpExporter
                                         
                                         modifierCode = $"{pseudo}({modifierCode})";
                                     }
-                                    
-                                    
                                    
                                     propsAsTextList.Add(modifierCode);
                                 }
@@ -430,6 +429,10 @@ static class CSharpExporter
                             var text = convertReactPropertyToString(elementType, reactProperty);
                             if (text is not null)
                             {
+                                if (!IsStringValue(reactProperty.Value))
+                                {
+                                    text = text.Replace('"' + reactProperty.Value + '"', reactProperty.Value);
+                                }
                                 propsAsTextList.Add(text);
                             }
                         }
@@ -510,11 +513,19 @@ static class CSharpExporter
                 }
                 else
                 {
-                    partProps = "()";
+                    if (hasNoBody)
+                    {
+                        partProps = "()";    
+                    }
+                    else
+                    {
+                        partProps = string.Empty;
+                    }
+                    
                 }
             }
 
-            if (node.Children.Count == 0 && node.Text.HasNoValue() && childrenProperty is null)
+            if (hasNoBody)
             {
                 return new LineCollection
                 {

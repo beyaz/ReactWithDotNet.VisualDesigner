@@ -2674,10 +2674,10 @@ sealed class ApplicationView : Component<ApplicationState>
                 !state.IsSuggestionsVisible ? null :
                     new div(DisplayFlex, JustifyContentCenter, AlignItemsCenter, PositionFixed, Background(White), Border(1, solid, "Gray300"), BorderRadius(4), PaddingTop(4), PaddingBottom(4), Left("state.SuggestionPopupLocationX"), Top("state.SuggestionPopupLocationY"))
                     {
-                        new div()
+                        new div
                         {
                             from item in new[] { "%25", "%50", "%75", "%100", "%125" }
-                            select new div(Id("item"), OnClick(OnSuggestionItemClicked), DisplayFlex, JustifyContentCenter, AlignItemsCenter, Padding("6 12"), BorderRadius(4), Hover(Background("#f3f4f6")))
+                            select new div(Id(item), OnClick(OnSuggestionItemClicked), DisplayFlex, JustifyContentCenter, AlignItemsCenter, Padding("6 12"), BorderRadius(4), Hover(Background("#f3f4f6")))
                             {
                                 item
                             }
