@@ -584,7 +584,7 @@ static class CSharpExporter
                     childElementSourceLines = result.Value;
                 }
 
-                if (childIndex < node.Children.Count && childElementSourceLines.Count > 0)
+                if (childIndex < node.Children.Count - 1 && childElementSourceLines.Count > 0)
                 {
                     childElementSourceLines = childElementSourceLines.SetItem(childElementSourceLines.Count -1, childElementSourceLines[^1] + ",");
                 }
