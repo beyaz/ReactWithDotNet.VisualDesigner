@@ -357,24 +357,22 @@ static class Extensions
                         {
                             for (int i = 1; i < 100; i++)
                             {
-                                firstReturnLineIndex = lines.FindIndex(methodDeclerationLineIndex, l => l == string.Empty.PadRight(i,' ')+"return ");
+                                firstReturnLineIndex = lines.FindIndex(methodDeclerationLineIndex, l => l.StartsWith(string.Empty.PadRight(i,' ')+"return "));
                                 if (firstReturnLineIndex > 0)
                                 {
                                     leftPaddingCount = i;
                                     break;
-                                }
-                                
-                                firstReturnLineIndex = lines.FindIndex(methodDeclerationLineIndex, l => l == string.Empty.PadRight(i,' ')+"return null;");
-                                if (firstReturnLineIndex > 0)
-                                {
-                                    leftPaddingCount = i;
-                                    return (classDeclerationLineIndex, leftPaddingCount, firstReturnLineIndex, firstReturnLineIndex);
                                 }
                             }
                             if (firstReturnLineIndex < 0)
                             {
                                 return new InvalidOperationException("No return found");
                             }
+                        }
+
+                        if (lines[firstReturnLineIndex].EndsWith(";"))
+                        {
+                            return (classDeclerationLineIndex, leftPaddingCount, firstReturnLineIndex, firstReturnLineIndex);
                         }
                         
                         var firstReturnCloseLineIndex=-1;

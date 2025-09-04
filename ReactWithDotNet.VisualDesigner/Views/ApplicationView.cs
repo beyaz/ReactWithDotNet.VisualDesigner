@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using System.Text;
 using ReactWithDotNet.ThirdPartyLibraries.MonacoEditorReact;
 using ReactWithDotNet.VisualDesigner.Exporters;
@@ -888,7 +888,14 @@ sealed class ApplicationView : Component<ApplicationState>
             }
         }
 
-        state = state with { PropertyItemDragDrop = new() };
+        state = state with
+        {
+            PropertyItemDragDrop = new(),
+            Selection = state.Selection with
+            {
+                SelectedPropertyIndex = null
+            }
+        };
 
         return Task.CompletedTask;
     }
@@ -935,11 +942,22 @@ sealed class ApplicationView : Component<ApplicationState>
         {
             if (dd.EndItemIndex.HasValue)
             {
-                CurrentVisualElement.Styles.MoveItemRelativeTo(dd.StartItemIndex.Value, dd.EndItemIndex.Value, dd.Position == AttributeDragPosition.Before);
+                UpdateCurrentVisualElement(m => m with
+                {
+                    Styles = m.Styles.MoveItemRelativeTo(dd.StartItemIndex.Value, dd.EndItemIndex.Value, dd.Position == AttributeDragPosition.Before)
+                });
+                
             }
         }
 
-        state = state with { StyleItemDragDrop = new() };
+        state = state with
+        {
+            StyleItemDragDrop = new(),
+            Selection = state.Selection with
+            {
+                SelectedStyleIndex = null
+            }
+        };
 
         return Task.CompletedTask;
     }
@@ -2628,7 +2646,11 @@ sealed class ApplicationView : Component<ApplicationState>
             var scaleText = $"%{state.Scale}";
 
             // formatter:off
-            return new label(PositionAbsolute, Top(-4), Left(8), FontSize10, LineHeight7, Background("#eff3f8"), PaddingLeft(4), PaddingRight(4));
+            return new div(DisplayFlex, AlignItemsCenter, JustifyContentCenter, PositionRelative, Border(1, solid, "#d5d5d8"), BorderRadius(4), Height(36), WidthFitContent)
+            {
+
+
+            };
 
             // formatter:on
         }
