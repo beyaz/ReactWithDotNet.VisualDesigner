@@ -654,7 +654,7 @@ static class CSharpExporter
 
         if (firstReturnLineIndex != firstReturnCloseLineIndex)
         {
-            lines.RemoveRange(firstReturnLineIndex + 1, firstReturnCloseLineIndex - firstReturnLineIndex - 1);    
+            lines.RemoveRange(firstReturnLineIndex, firstReturnCloseLineIndex - firstReturnLineIndex + 1);    
         }
 
         // apply padding
@@ -668,7 +668,7 @@ static class CSharpExporter
             linesToInject = temp;
         }
 
-        lines.InsertRange(firstReturnLineIndex + 1, linesToInject);
+        lines.InsertRange(firstReturnLineIndex, linesToInject);
 
         var injectedFileContent = string.Join(Environment.NewLine, lines);
 
