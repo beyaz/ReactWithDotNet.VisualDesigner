@@ -391,107 +391,111 @@ static class CSharpExporter
             {
                 var propsAsTextList = new List<string>();
                 {
-                    var propsWithoutStyle = 
-                        from reactProperty in from p in node.Properties where p.Name.NotIn(Design.Text, Design.TextPreview, Design.Src, Design.Name, "style") select p
-                        let text = convertReactPropertyToString(elementType, reactProperty)
-                        where text is not null
-                        select IsStringValue(reactProperty.Value) switch
-                        {
-                            true  => text,
-                            false => text.Replace('"' + reactProperty.Value + '"', reactProperty.Value)
-                        };
-                    propsAsTextList.AddRange(propsWithoutStyle);
-                    
-                    
-                    foreach (var result in from reactProperty in from p in node.Properties where p.Name == "style" select p
-                             from styleAttribute in JsonConvert.DeserializeObject<IReadOnlyList<StyleAttribute>>(reactProperty.Value)
-                             let tagName = elementType.Value?.Name
-                             let attributeValue = TryClearStringValue(styleAttribute.Value)
-                             from modifierCode in ToModifierTransformer.TryConvertToModifier(tagName, styleAttribute.Name, attributeValue).AsEnumerable()
-                             select styleAttribute.Pseudo.HasValue() switch
-                             {
-                                 false => (Result<string>)modifierCode,
-
-                                 true => ToModifierTransformer.TryGetPseudoForCSharp(styleAttribute.Pseudo) switch
-                                 {
-                                     (true, var validPseudo) => $"{validPseudo}({modifierCode})",
-
-                                     (false, _) => new ArgumentException("NotResolved:" + styleAttribute.Pseudo)
-                                 }
-                             })
+                    // import props except style
                     {
-                        if (result.HasError)
-                        {
-                            return result.Error;
-                        }
-
-                        propsAsTextList.Add(result.Value);
-                    }
-
-                    
-
-                    static string convertReactPropertyToString(Maybe<Type> elementType, ReactProperty reactProperty)
-                    {
-                        var propertyName = reactProperty.Name;
-
-                        var propertyValue = reactProperty.Value;
-
-                        if (propertyName is Design.ItemsSource || propertyName is Design.ItemsSourceDesignTimeCount)
-                        {
-                            return null;
-                        }
-
-                        if (elementType.HasValue)
-                        {
-                            var (success, modifierCode) = ToModifierTransformer.TryConvertToModifier(elementType.Value.Name, propertyName, TryClearStringValue(propertyValue));
-                            if (success)
+                        var propsWithoutStyle =
+                            from reactProperty in from p in node.Properties where p.Name.NotIn(Design.Text, Design.TextPreview, Design.Src, Design.Name, "style") select p
+                            let text = convertReactPropertyToString(elementType, reactProperty)
+                            where text is not null
+                            select IsStringValue(reactProperty.Value) switch
                             {
-                                return modifierCode;
+                                true  => text,
+                                false => text.Replace('"' + reactProperty.Value + '"', reactProperty.Value)
+                            };
+                        
+                        propsAsTextList.AddRange(propsWithoutStyle);
+
+                        static string convertReactPropertyToString(Maybe<Type> elementType, ReactProperty reactProperty)
+                        {
+                            var propertyName = reactProperty.Name;
+
+                            var propertyValue = reactProperty.Value;
+
+                            if (propertyName is Design.ItemsSource || propertyName is Design.ItemsSourceDesignTimeCount)
+                            {
+                                return null;
                             }
-                        }
 
-                        if (propertyValue == "true")
-                        {
-                            return propertyName;
-                        }
-
-                        if (propertyName == Design.SpreadOperator)
-                        {
-                            return '{' + propertyValue + '}';
-                        }
-
-                        if (propertyName == nameof(HtmlElement.dangerouslySetInnerHTML))
-                        {
-                            return $"{propertyName}={{{{ __html: {propertyValue} }}}}";
-                        }
-
-                        if (IsStringValue(propertyValue))
-                        {
-                            return $"{propertyName}=\"{TryClearStringValue(propertyValue)}\"";
-                        }
-
-                        if (IsStringTemplate(propertyValue))
-                        {
-                            return $"{propertyName}={{{propertyValue}}}";
-                        }
-
-                        if (elementType.HasValue)
-                        {
-                            var propertyType = elementType.Value.GetProperty(propertyName, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance)?.PropertyType;
-                            if (propertyType is not null)
+                            if (elementType.HasValue)
                             {
-                                if (propertyType == typeof(string))
+                                var (success, modifierCode) = ToModifierTransformer.TryConvertToModifier(elementType.Value.Name, propertyName, TryClearStringValue(propertyValue));
+                                if (success)
                                 {
-                                    var isString = propertyValue.Contains('/') || propertyValue.StartsWith('#') || propertyValue.Split(' ').Length > 1;
-                                    if (isString)
+                                    return modifierCode;
+                                }
+                            }
+
+                            if (propertyValue == "true")
+                            {
+                                return propertyName;
+                            }
+
+                            if (propertyName == Design.SpreadOperator)
+                            {
+                                return '{' + propertyValue + '}';
+                            }
+
+                            if (propertyName == nameof(HtmlElement.dangerouslySetInnerHTML))
+                            {
+                                return $"{propertyName}={{{{ __html: {propertyValue} }}}}";
+                            }
+
+                            if (IsStringValue(propertyValue))
+                            {
+                                return $"{propertyName}=\"{TryClearStringValue(propertyValue)}\"";
+                            }
+
+                            if (IsStringTemplate(propertyValue))
+                            {
+                                return $"{propertyName}={{{propertyValue}}}";
+                            }
+
+                            if (elementType.HasValue)
+                            {
+                                var propertyType = elementType.Value.GetProperty(propertyName, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance)?.PropertyType;
+                                if (propertyType is not null)
+                                {
+                                    if (propertyType == typeof(string))
                                     {
-                                        return $"{propertyName}=\"{propertyValue}\"";
+                                        var isString = propertyValue.Contains('/') || propertyValue.StartsWith('#') || propertyValue.Split(' ').Length > 1;
+                                        if (isString)
+                                        {
+                                            return $"{propertyName}=\"{propertyValue}\"";
+                                        }
                                     }
                                 }
                             }
-                        }
 
-                        return $"{propertyName}={{{propertyValue}}}";
+                            return $"{propertyName}={{{propertyValue}}}";
+                        }
+                    }
+
+                    // import style
+                    {
+                        foreach (var result in from reactProperty in from p in node.Properties where p.Name == "style" select p
+                                 from styleAttribute in JsonConvert.DeserializeObject<IReadOnlyList<StyleAttribute>>(reactProperty.Value)
+                                 let tagName = elementType.Value?.Name
+                                 let attributeValue = TryClearStringValue(styleAttribute.Value)
+                                 from modifierCode in ToModifierTransformer.TryConvertToModifier(tagName, styleAttribute.Name, attributeValue).AsEnumerable()
+                                 select styleAttribute.Pseudo.HasValue() switch
+                                 {
+                                     false => (Result<string>)modifierCode,
+
+                                     true => ToModifierTransformer.TryGetPseudoForCSharp(styleAttribute.Pseudo) switch
+                                     {
+                                         (true, var validPseudo) => $"{validPseudo}({modifierCode})",
+
+                                         (false, _) => new ArgumentException("NotResolved:" + styleAttribute.Pseudo)
+                                     }
+                                 })
+                        {
+                            if (result.HasError)
+                            {
+                                return result.Error;
+                            }
+
+                            propsAsTextList.Add(result.Value);
+                        }
                     }
                 }
 
