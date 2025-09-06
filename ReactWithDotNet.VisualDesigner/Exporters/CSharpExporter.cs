@@ -397,23 +397,20 @@ static class CSharpExporter
                     {
                         if (reactProperty.Name == "style")
                         {
-                            foreach (var styleAttribute in JsonConvert.DeserializeObject<IReadOnlyList<StyleAttribute>>(reactProperty.Value))
+                            foreach (var (attributeName, value, pseudo) in JsonConvert.DeserializeObject<IReadOnlyList<StyleAttribute>>(reactProperty.Value))
                             {
                                 var tagName = elementType.Value?.Name;
 
-                                var attributeName = styleAttribute.Name;
-
-                                var attributeValue = TryClearStringValue(styleAttribute.Value);
+                                var attributeValue = TryClearStringValue(value);
 
                                 foreach (var modifierCode in ToModifierTransformer.TryConvertToModifier(tagName, attributeName, attributeValue).AsEnumerable())
                                 {
-                                    var pseudo = styleAttribute.Pseudo;
                                     if (pseudo.HasValue())
                                     {
-                                        var result = ToModifierTransformer.TryGetPseudoForCSharp(styleAttribute.Pseudo);
+                                        var result = ToModifierTransformer.TryGetPseudoForCSharp(pseudo);
                                         if (!result.success)
                                         {
-                                            return new ArgumentException("NotResolved:" + styleAttribute.Pseudo);
+                                            return new ArgumentException("NotResolved:" + pseudo);
                                         }
 
                                         propsAsTextList.Add($"{result.pseudo}({modifierCode})"); 
