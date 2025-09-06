@@ -439,21 +439,30 @@ static class CSharpExporter
                             continue;
                         }
 
-                        {
-                            var text = convertReactPropertyToString(elementType, reactProperty);
-                            if (text is not null)
-                            {
-                                if (!IsStringValue(reactProperty.Value))
-                                {
-                                    text = text.Replace('"' + reactProperty.Value + '"', reactProperty.Value);
-                                }
+                        //{
+                        //    var text = convertReactPropertyToString(elementType, reactProperty);
+                        //    if (text is not null)
+                        //    {
+                        //        if (!IsStringValue(reactProperty.Value))
+                        //        {
+                        //            text = text.Replace('"' + reactProperty.Value + '"', reactProperty.Value);
+                        //        }
 
-                                propsAsTextList.Add(text);
-                            }
-                        }
+                        //        propsAsTextList.Add(text);
+                        //    }
+                        //}
                     }
-                    
-                    // from reactProperty in node.Properties.Where(p => p.Name.NotIn(Design.Text, Design.TextPreview, Design.Src, Design.Name, "style"))
+
+                    propsAsTextList
+                        .AddRange(from reactProperty in from p in node.Properties where p.Name.NotIn(Design.Text, Design.TextPreview, Design.Src, Design.Name, "style") select p
+                                  let text = convertReactPropertyToString(elementType, reactProperty)
+                                  where text is not null
+                                  select IsStringValue(reactProperty.Value) switch
+                                  {
+                                      true  => text,
+                                      false => text.Replace('"' + reactProperty.Value + '"', reactProperty.Value)
+                                  });
+                            
 
                     static string convertReactPropertyToString(Maybe<Type> elementType, ReactProperty reactProperty)
                     {
