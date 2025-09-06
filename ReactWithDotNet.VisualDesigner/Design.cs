@@ -22,6 +22,16 @@ static class Design
     
     public const string Name = "d-name";
 
+    public static bool IsDesignTimeName(string name)
+    {
+        if (name is null)
+        {
+            return false;
+        }
+        
+        return name.StartsWith("d-", StringComparison.OrdinalIgnoreCase);
+    }
+
 }
 
 static class TextNode

@@ -211,14 +211,37 @@ sealed class ApplicationPreview : Component
             }
 
             {
-                var result = model.Styles
-                                  .Select(x => CreateDesignerStyleItemFromText(scope.Project, x))
-                                  .ConvertAll(designerItem => designerItem.ToStyleModifier())
-                                  .Then(styleModifiers => element.Add(styleModifiers.ToArray()));
 
-                if (result.HasError)
+                foreach (var styleModifierResult in
+                         from designerStyleText in model.Styles
+                         from designerStyleItem in CreateDesignerStyleItemFromText(scope.Project, designerStyleText)
+                         from x in designerStyleItem.RawHtmlStyles 
+                         where x.Value?.StartsWith("state.",StringComparison.OrdinalIgnoreCase) is not true
+                         where x.Value?.StartsWith("props.",StringComparison.OrdinalIgnoreCase) is not true
+                         where !Design.IsDesignTimeName(x.Key)
+                         select designerStyleItem.ToStyleModifier())
                 {
-                    return result.Error;
+                    if (styleModifierResult.HasError)
+                    {
+                        return styleModifierResult.Error;
+                    }
+                    
+                    element.Add(styleModifierResult.Value);
+                }
+                
+                foreach (var styleModifierResult in
+                         from designerStyleText in model.Styles
+                         where Design.IsDesignTimeName(designerStyleText)
+                         from designerStyleItem in CreateDesignerStyleItemFromText(scope.Project, designerStyleText.RemoveFromStart("d-",StringComparison.OrdinalIgnoreCase))
+                         from x in designerStyleItem.RawHtmlStyles 
+                         select designerStyleItem.ToStyleModifier())
+                {
+                    if (styleModifierResult.HasError)
+                    {
+                        return styleModifierResult.Error;
+                    }
+                    
+                    element.Add(styleModifierResult.Value);
                 }
             }
 

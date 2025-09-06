@@ -995,10 +995,13 @@ public static class CssHelper
 
         var style = new Style();
 
-        var exception = style.TryImport(arrangeRawHtmlStyles(designerStyleItem.RawHtmlStyles));
-        if (exception is not null)
+        foreach (var (name, value) in arrangeRawHtmlStyles(designerStyleItem.RawHtmlStyles))
         {
-            return exception;
+            var exception = style.TrySet(name, tryFixValueForBorderColor(name, value));
+            if (exception is not null)
+            {
+                return exception;
+            }
         }
 
         if (designerStyleItem.Pseudo is not null)
@@ -1008,6 +1011,28 @@ public static class CssHelper
 
         return (StyleModifier)style;
 
+        static string tryFixValueForBorderColor(string styleAttributeName, string styleAttributeValue)
+        {
+            if (styleAttributeName == "border")
+            {
+                var valueParts = styleAttributeValue.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                if (valueParts.Length == 3)
+                {
+                    if (valueParts[0].EndsWith("px"))
+                    {
+                        var fieldInfo = typeof(Tailwind).GetField(valueParts[2], BindingFlags.Static | BindingFlags.Public);
+                        if (fieldInfo is not null)
+                        {
+                            return string.Join(' ', valueParts[0], valueParts[1], fieldInfo.GetValue(null));
+                        }
+                    }
+                }
+            }
+                
+                
+            return styleAttributeValue;
+        }
+
         static IReadOnlyDictionary<string, string> arrangeRawHtmlStyles(IReadOnlyDictionary<string, string> dictionary)
         {
             var map = new Dictionary<string, string>();
@@ -1015,9 +1040,12 @@ public static class CssHelper
             foreach (var (key, value) in dictionary)
             {
                 var item = arrangeHtmlStyleValue(key, value);
-                
+
                 map.Add(item.key, item.value);
             }
+
+            
+            
 
             return map;
             

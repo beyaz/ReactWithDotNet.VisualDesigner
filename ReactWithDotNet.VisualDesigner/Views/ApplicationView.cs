@@ -2528,7 +2528,7 @@ sealed class ApplicationView : Component<ApplicationState>
         public Func<double, Task> OnChange { get; init; }
 
         public double Scale { get; init; }
-
+        
         protected override Task OverrideStateFromPropsBeforeRender()
         {
             if (Math.Abs(state.ScaleInitialValue - Scale) > 1)
@@ -2652,7 +2652,7 @@ sealed class ApplicationView : Component<ApplicationState>
                 },
                 new div(DisplayFlex, WidthFull, PaddingLeft(4), PaddingRight(4), AlignItemsCenter, Gap(4))
                 {
-                    new div(OnClick(OnIconMinusClicked), DisplayFlex, JustifyContentCenter, AlignItemsCenter, BorderRadius(100), Padding(3), Background("#bfdbfe"), Hover(Background("#93c5fd")))
+                    new div(OnClick(OnIconMinusClicked), DisplayFlex, JustifyContentCenter, AlignItemsCenter, BorderRadius(100), Padding(3), Background(Blue200), Hover(Background(Blue300)))
                     {
                         new svg(ViewBox(0, 0, 16, 16), Width(16), Height(16), Fill("currentcolor"))
                         {
@@ -2663,7 +2663,7 @@ sealed class ApplicationView : Component<ApplicationState>
                     {
                         $"%{state.Scale}"
                     },
-                    new div(OnClick(OnPlusIconClicked), DisplayFlex, JustifyContentCenter, AlignItemsCenter, BorderRadius(100), Padding(3), Background("#bfdbfe"), Hover(Background("#93c5fd")))
+                    new div(OnClick(OnPlusIconClicked), DisplayFlex, JustifyContentCenter, AlignItemsCenter, BorderRadius(100), Padding(3), Background(Blue200), Hover(Background(Blue300)))
                     {
                         new svg(ViewBox(0, 0, 16, 16), Width(16), Height(16), Fill("currentcolor"))
                         {
@@ -2672,12 +2672,12 @@ sealed class ApplicationView : Component<ApplicationState>
                     }
                 },
                 !state.IsSuggestionsVisible ? null :
-                    new div(DisplayFlex, JustifyContentCenter, AlignItemsCenter, PositionFixed, Background(White), Border(1, solid, "Gray300"), BorderRadius(4), PaddingTop(4), PaddingBottom(4), Left("state.SuggestionPopupLocationX"), Top("state.SuggestionPopupLocationY"))
+                    new div(DisplayFlex, JustifyContentCenter, AlignItemsCenter, PositionFixed, Background(White), Border(1, solid, Gray300), BorderRadius(4), PaddingTop(4), PaddingBottom(4), Left(state.SuggestionPopupLocationX), Top(state.SuggestionPopupLocationY))
                     {
                         new div
                         {
                             from item in new[] { "%25", "%50", "%75", "%100", "%125" }
-                            select new div(Id(item), OnClick(OnSuggestionItemClicked), DisplayFlex, JustifyContentCenter, AlignItemsCenter, Padding(6,12), BorderRadius(4), Hover(Background("#f3f4f6")))
+                            select new div(Id(item), OnClick(OnSuggestionItemClicked), DisplayFlex, JustifyContentCenter, AlignItemsCenter, Padding(6, 12), BorderRadius(4), Hover(Background(Gray100)))
                             {
                                 item
                             }

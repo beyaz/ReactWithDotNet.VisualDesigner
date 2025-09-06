@@ -474,6 +474,7 @@ static class CSharpExporter
                     {
                         foreach (var result in from reactProperty in from p in node.Properties where p.Name == "style" select p
                                  from styleAttribute in JsonConvert.DeserializeObject<IReadOnlyList<StyleAttribute>>(reactProperty.Value)
+                                 where !Design.IsDesignTimeName(styleAttribute.Name)
                                  let tagName = elementType.Value?.Name
                                  let attributeValue = TryClearStringValue(styleAttribute.Value)
                                  from modifierCode in ToModifierTransformer.TryConvertToModifier(tagName, styleAttribute.Name, attributeValue).AsEnumerable()
