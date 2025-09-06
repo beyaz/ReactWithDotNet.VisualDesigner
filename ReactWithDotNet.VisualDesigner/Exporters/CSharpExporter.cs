@@ -424,6 +424,13 @@ static class CSharpExporter
                             
                             continue;
                             
+                            static Maybe<string> tryConvertModifier(StyleAttribute styleAttribute, Maybe<Type> elementType)
+                            {
+                                var tagName = elementType.Value.Name;
+                                
+                                return ToModifierTransformer.TryConvertToModifier(tagName, styleAttribute.Name, TryClearStringValue(styleAttribute.Value));
+                            }
+                            
                             static Result<string> applyPseudoIfNeed (StyleAttribute styleAttribute, string modifierCode)
                             {
                                 var pseudo = styleAttribute.Pseudo;
