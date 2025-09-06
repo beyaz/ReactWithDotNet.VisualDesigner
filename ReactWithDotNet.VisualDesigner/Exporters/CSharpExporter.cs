@@ -391,7 +391,7 @@ static class CSharpExporter
             {
                 var propsAsTextList = new List<string>();
                 {
-                    foreach (var reactProperty in node.Properties.Where(p => p.Name.NotIn(Design.Text, Design.TextPreview, Design.Src, Design.Name)))
+                    foreach (var reactProperty in from p in node.Properties where p.Name.NotIn(Design.Text, Design.TextPreview, Design.Src, Design.Name) select p)
                     {
                         if (reactProperty.Name == "style")
                         {
@@ -452,6 +452,8 @@ static class CSharpExporter
                             }
                         }
                     }
+                    
+                    // from reactProperty in node.Properties.Where(p => p.Name.NotIn(Design.Text, Design.TextPreview, Design.Src, Design.Name, "style"))
 
                     static string convertReactPropertyToString(Maybe<Type> elementType, ReactProperty reactProperty)
                     {
