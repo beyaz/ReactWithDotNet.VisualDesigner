@@ -2677,7 +2677,7 @@ sealed class ApplicationView : Component<ApplicationState>
                         new div
                         {
                             from item in new[] { "%25", "%50", "%75", "%100", "%125" }
-                            select new div(Id(item), OnClick(OnSuggestionItemClicked), DisplayFlex, JustifyContentCenter, AlignItemsCenter, Padding("6 12"), BorderRadius(4), Hover(Background("#f3f4f6")))
+                            select new div(Id(item), OnClick(OnSuggestionItemClicked), DisplayFlex, JustifyContentCenter, AlignItemsCenter, Padding(6,12), BorderRadius(4), Hover(Background("#f3f4f6")))
                             {
                                 item
                             }
