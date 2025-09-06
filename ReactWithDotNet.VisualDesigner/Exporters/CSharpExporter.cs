@@ -423,6 +423,25 @@ static class CSharpExporter
                             }
                             
                             continue;
+                            
+                            static Result<string> applyPseudoIfNeed (StyleAttribute styleAttribute, string modifierCode)
+                            {
+                                var pseudo = styleAttribute.Pseudo;
+                                if (pseudo.HasNoValue())
+                                {
+                                    return modifierCode;
+                                }
+
+                                var result = ToModifierTransformer.TryGetPseudoForCSharp(styleAttribute.Pseudo);
+                                if (!result.success)
+                                {
+                                    return new ArgumentException("NotResolved:" + styleAttribute.Pseudo);
+                                }
+
+                                pseudo = result.pseudo;
+
+                                return $"{pseudo}({modifierCode})";
+                            }
                         }
 
                         {
