@@ -200,6 +200,22 @@ static class FP
         action(maybe.Value);
     }
 
+    public static IEnumerable<T> AsEnumerable<T>(this (bool success, T value) tuple)
+    {
+        if (tuple.success)
+        {
+            yield return tuple.value;
+        }
+    }
+    
+    public static IEnumerable<string> AsEnumerable(this string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            yield return value;
+        }
+    }
+
     public static Maybe<B> HasValue<A, B>(this Maybe<A> maybe, Func<A, B> convertFunc)
     {
         if (maybe.HasNoValue)
