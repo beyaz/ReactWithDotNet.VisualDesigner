@@ -404,9 +404,8 @@ static class CSharpExporter
                                 var attributeName = styleAttribute.Name;
 
                                 var attributeValue = TryClearStringValue(styleAttribute.Value);
-                                
-                                var (success, modifierCode) = ToModifierTransformer.TryConvertToModifier(tagName, attributeName, attributeValue);
-                                if (success)
+
+                                foreach (var modifierCode in ToModifierTransformer.TryConvertToModifier(tagName, attributeName, attributeValue).AsEnumerable())
                                 {
                                     var pseudo = styleAttribute.Pseudo;
                                     if (pseudo.HasValue())
@@ -417,12 +416,11 @@ static class CSharpExporter
                                             return new ArgumentException("NotResolved:" + styleAttribute.Pseudo);
                                         }
 
-                                        pseudo = result.pseudo;
-                                        
-                                        modifierCode = $"{pseudo}({modifierCode})";
+                                        propsAsTextList.Add($"{result.pseudo}({modifierCode})"); 
+                                        continue;
                                     }
                                    
-                                    propsAsTextList.Add(modifierCode);
+                                    propsAsTextList.Add(modifierCode);   
                                 }
                             }
                             
