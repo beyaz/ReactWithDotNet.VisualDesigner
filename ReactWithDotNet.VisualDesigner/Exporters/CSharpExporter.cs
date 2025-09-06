@@ -391,6 +391,18 @@ static class CSharpExporter
             {
                 var propsAsTextList = new List<string>();
                 {
+                    var propsWithoutStyle = 
+                        from reactProperty in from p in node.Properties where p.Name.NotIn(Design.Text, Design.TextPreview, Design.Src, Design.Name, "style") select p
+                        let text = convertReactPropertyToString(elementType, reactProperty)
+                        where text is not null
+                        select IsStringValue(reactProperty.Value) switch
+                        {
+                            true  => text,
+                            false => text.Replace('"' + reactProperty.Value + '"', reactProperty.Value)
+                        };
+                    propsAsTextList.AddRange(propsWithoutStyle);
+                    
+                    
                     foreach (var result in from reactProperty in from p in node.Properties where p.Name == "style" select p
                              from styleAttribute in JsonConvert.DeserializeObject<IReadOnlyList<StyleAttribute>>(reactProperty.Value)
                              let tagName = elementType.Value?.Name
@@ -416,15 +428,7 @@ static class CSharpExporter
                         propsAsTextList.Add(result.Value);
                     }
 
-                    propsAsTextList
-                        .AddRange(from reactProperty in from p in node.Properties where p.Name.NotIn(Design.Text, Design.TextPreview, Design.Src, Design.Name, "style") select p
-                                  let text = convertReactPropertyToString(elementType, reactProperty)
-                                  where text is not null
-                                  select IsStringValue(reactProperty.Value) switch
-                                  {
-                                      true  => text,
-                                      false => text.Replace('"' + reactProperty.Value + '"', reactProperty.Value)
-                                  });
+                    
 
                     static string convertReactPropertyToString(Maybe<Type> elementType, ReactProperty reactProperty)
                     {
