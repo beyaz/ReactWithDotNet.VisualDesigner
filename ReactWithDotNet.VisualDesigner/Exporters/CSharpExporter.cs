@@ -397,9 +397,7 @@ static class CSharpExporter
                     {
                         if (reactProperty.Name == "style")
                         {
-                            var styles = JsonConvert.DeserializeObject<IReadOnlyList<StyleAttribute>>(reactProperty.Value);
-                            
-                            foreach (var styleAttribute in styles)
+                            foreach (var styleAttribute in JsonConvert.DeserializeObject<IReadOnlyList<StyleAttribute>>(reactProperty.Value))
                             {
                                 var (success, modifierCode) = ToModifierTransformer.TryConvertToModifier(elementType.Value.Name, styleAttribute.Name, TryClearStringValue(styleAttribute.Value));
                                 if (success)
