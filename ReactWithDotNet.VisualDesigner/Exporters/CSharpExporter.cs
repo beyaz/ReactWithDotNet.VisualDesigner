@@ -439,15 +439,12 @@ static class CSharpExporter
                                     return modifierCode;
                                 }
 
-                                var result = ToModifierTransformer.TryGetPseudoForCSharp(styleAttribute.Pseudo);
-                                if (!result.success)
+                                foreach (var validPseudo in (Maybe<string>)ToModifierTransformer.TryGetPseudoForCSharp(styleAttribute.Pseudo))
                                 {
-                                    return new ArgumentException("NotResolved:" + styleAttribute.Pseudo);
+                                    return $"{validPseudo}({modifierCode})";
                                 }
-
-                                pseudo = result.pseudo;
-
-                                return $"{pseudo}({modifierCode})";
+                                
+                                return new ArgumentException("NotResolved:" + styleAttribute.Pseudo);
                             }
                         }
 
