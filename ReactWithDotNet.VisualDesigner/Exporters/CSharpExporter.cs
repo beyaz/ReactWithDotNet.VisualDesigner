@@ -395,7 +395,7 @@ static class CSharpExporter
                     {
                         if (reactProperty.Name == "style")
                         {
-                            var items =
+                            IEnumerable<Result<string>> results =
                                 from styleAttribute in JsonConvert.DeserializeObject<IReadOnlyList<StyleAttribute>>(reactProperty.Value)
                                 let tagName = elementType.Value?.Name
                                 let attributeValue = TryClearStringValue(styleAttribute.Value)
