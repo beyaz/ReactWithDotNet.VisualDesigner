@@ -88,6 +88,11 @@ public sealed record Maybe<TValue> : IEnumerable<TValue>
     {
         return new() { Value = value, HasValue = value is not null };
     }
+    
+    public static implicit operator Maybe<TValue>((bool success, TValue value) tuple)
+    {
+        return new() { Value = tuple.value, HasValue = tuple.success };
+    }
 
     public static implicit operator Maybe<TValue>(NoneObject _)
     {
