@@ -397,6 +397,31 @@ static class CSharpExporter
                     {
                         if (reactProperty.Name == "style")
                         {
+
+                            
+                                IEnumerable<Result<string>> items =
+                                    from styleAttribute in JsonConvert.DeserializeObject<IReadOnlyList<StyleAttribute>>(reactProperty.Value)
+
+                                    let tagName = elementType.Value?.Name
+
+                                    let attributeValue = TryClearStringValue(styleAttribute.Value)
+
+                                    from modifierCode in ToModifierTransformer.TryConvertToModifier(tagName, styleAttribute.Name, attributeValue).AsEnumerable()
+
+                                    select styleAttribute.Pseudo.HasValue() switch
+                                    {
+                                        false => (Result<string>)modifierCode,
+                                        
+                                        true => ToModifierTransformer.TryGetPseudoForCSharp(styleAttribute.Pseudo) switch
+                                        {
+                                            (true, var validPseudo) => $"{validPseudo}({modifierCode})",
+                                            
+                                            (false, _) => new ArgumentException("NotResolved:" + styleAttribute.Pseudo)
+                                        }
+                                    };
+
+                            
+                            
                             foreach (var (attributeName, value, pseudo) in JsonConvert.DeserializeObject<IReadOnlyList<StyleAttribute>>(reactProperty.Value))
                             {
                                 var tagName = elementType.Value?.Name;
