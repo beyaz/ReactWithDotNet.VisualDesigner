@@ -1,13 +1,12 @@
-﻿using Newtonsoft.Json;
-using ReactWithDotNet.Transformers;
-using System.IO;
+﻿using System.IO;
 using System.Reflection;
+using Newtonsoft.Json;
+using ReactWithDotNet.Transformers;
 
 namespace ReactWithDotNet.VisualDesigner.Exporters;
 
 static class CSharpExporter
 {
-    
     public static async Task<Result<string>> CalculateElementTsxCode(int projectId, IReadOnlyDictionary<string, string> componentConfig, VisualElementModel visualElement)
     {
         var project = GetProjectConfig(projectId);
@@ -290,7 +289,6 @@ static class CSharpExporter
                     }
                 }
 
-
                 return lines;
             }
         }
@@ -388,7 +386,7 @@ static class CSharpExporter
             }
 
             var hasNoBody = node.Children.Count == 0 && node.Text.HasNoValue() && childrenProperty is null;
-            
+
             string partProps;
             {
                 var propsAsTextList = new List<string>();
@@ -397,31 +395,23 @@ static class CSharpExporter
                     {
                         if (reactProperty.Name == "style")
                         {
+                            var items =
+                                from styleAttribute in JsonConvert.DeserializeObject<IReadOnlyList<StyleAttribute>>(reactProperty.Value)
+                                let tagName = elementType.Value?.Name
+                                let attributeValue = TryClearStringValue(styleAttribute.Value)
+                                from modifierCode in ToModifierTransformer.TryConvertToModifier(tagName, styleAttribute.Name, attributeValue).AsEnumerable()
+                                select styleAttribute.Pseudo.HasValue() switch
+                                {
+                                    false => (Result<string>)modifierCode,
 
-                            
-                                IEnumerable<Result<string>> items =
-                                    from styleAttribute in JsonConvert.DeserializeObject<IReadOnlyList<StyleAttribute>>(reactProperty.Value)
-
-                                    let tagName = elementType.Value?.Name
-
-                                    let attributeValue = TryClearStringValue(styleAttribute.Value)
-
-                                    from modifierCode in ToModifierTransformer.TryConvertToModifier(tagName, styleAttribute.Name, attributeValue).AsEnumerable()
-
-                                    select styleAttribute.Pseudo.HasValue() switch
+                                    true => ToModifierTransformer.TryGetPseudoForCSharp(styleAttribute.Pseudo) switch
                                     {
-                                        false => (Result<string>)modifierCode,
-                                        
-                                        true => ToModifierTransformer.TryGetPseudoForCSharp(styleAttribute.Pseudo) switch
-                                        {
-                                            (true, var validPseudo) => $"{validPseudo}({modifierCode})",
-                                            
-                                            (false, _) => new ArgumentException("NotResolved:" + styleAttribute.Pseudo)
-                                        }
-                                    };
+                                        (true, var validPseudo) => $"{validPseudo}({modifierCode})",
 
-                            
-                            
+                                        (false, _) => new ArgumentException("NotResolved:" + styleAttribute.Pseudo)
+                                    }
+                                };
+
                             foreach (var (attributeName, value, pseudo) in JsonConvert.DeserializeObject<IReadOnlyList<StyleAttribute>>(reactProperty.Value))
                             {
                                 var tagName = elementType.Value?.Name;
@@ -438,24 +428,24 @@ static class CSharpExporter
                                             return new ArgumentException("NotResolved:" + pseudo);
                                         }
 
-                                        propsAsTextList.Add($"{result.pseudo}({modifierCode})"); 
+                                        propsAsTextList.Add($"{result.pseudo}({modifierCode})");
                                         continue;
                                     }
-                                   
-                                    propsAsTextList.Add(modifierCode);   
+
+                                    propsAsTextList.Add(modifierCode);
                                 }
                             }
-                            
+
                             continue;
-                            
+
                             static Maybe<string> tryConvertModifier(StyleAttribute styleAttribute, Maybe<Type> elementType)
                             {
                                 var tagName = elementType.Value.Name;
-                                
+
                                 return ToModifierTransformer.TryConvertToModifier(tagName, styleAttribute.Name, TryClearStringValue(styleAttribute.Value));
                             }
-                            
-                            static Result<string> applyPseudoIfNeed (StyleAttribute styleAttribute, string modifierCode)
+
+                            static Result<string> applyPseudoIfNeed(StyleAttribute styleAttribute, string modifierCode)
                             {
                                 var pseudo = styleAttribute.Pseudo;
                                 if (pseudo.HasNoValue())
@@ -467,7 +457,7 @@ static class CSharpExporter
                                 {
                                     return $"{validPseudo}({modifierCode})";
                                 }
-                                
+
                                 return new ArgumentException("NotResolved:" + styleAttribute.Pseudo);
                             }
                         }
@@ -480,11 +470,10 @@ static class CSharpExporter
                                 {
                                     text = text.Replace('"' + reactProperty.Value + '"', reactProperty.Value);
                                 }
+
                                 propsAsTextList.Add(text);
                             }
                         }
-                        
-                        
                     }
 
                     static string convertReactPropertyToString(Maybe<Type> elementType, ReactProperty reactProperty)
@@ -500,15 +489,13 @@ static class CSharpExporter
 
                         if (elementType.HasValue)
                         {
-                            
                             var (success, modifierCode) = ToModifierTransformer.TryConvertToModifier(elementType.Value.Name, propertyName, TryClearStringValue(propertyValue));
                             if (success)
                             {
                                 return modifierCode;
                             }
                         }
-                        
-                        
+
                         if (propertyValue == "true")
                         {
                             return propertyName;
@@ -562,13 +549,12 @@ static class CSharpExporter
                 {
                     if (hasNoBody)
                     {
-                        partProps = "()";    
+                        partProps = "()";
                     }
                     else
                     {
                         partProps = string.Empty;
                     }
-                    
                 }
             }
 
@@ -622,13 +608,12 @@ static class CSharpExporter
             LineCollection lines =
             [
                 $"{indent(indentLevel)}new {tag}{partProps}",
-                indent(indentLevel) + "{",
-                
+                indent(indentLevel) + "{"
             ];
 
             // Add children
             var childIndex = 0;
-            
+
             foreach (var child in node.Children)
             {
                 IReadOnlyList<string> childElementSourceLines;
@@ -644,7 +629,7 @@ static class CSharpExporter
 
                 if (childIndex < node.Children.Count - 1 && childElementSourceLines.Count > 0)
                 {
-                    childElementSourceLines = childElementSourceLines.SetItem(childElementSourceLines.Count -1, childElementSourceLines[^1] + ",");
+                    childElementSourceLines = childElementSourceLines.SetItem(childElementSourceLines.Count - 1, childElementSourceLines[^1] + ",");
                 }
 
                 lines.AddRange(childElementSourceLines);
@@ -697,7 +682,7 @@ static class CSharpExporter
         var lines = fileContent.ToList();
 
         // focus to component code
-        int firstReturnLineIndex,firstReturnCloseLineIndex, leftPaddingCount;
+        int firstReturnLineIndex, firstReturnCloseLineIndex, leftPaddingCount;
         {
             var result = GetComponentLineIndexPointsInCSharpFile(fileContent, targetComponentName);
             if (result.HasError)
@@ -705,21 +690,21 @@ static class CSharpExporter
                 return result.Error;
             }
 
-            leftPaddingCount = result.Value.leftPaddingCount;
-            firstReturnLineIndex          = result.Value.firstReturnLineIndex;
-            firstReturnCloseLineIndex     = result.Value.firstReturnCloseLineIndex;
+            leftPaddingCount          = result.Value.leftPaddingCount;
+            firstReturnLineIndex      = result.Value.firstReturnLineIndex;
+            firstReturnCloseLineIndex = result.Value.firstReturnCloseLineIndex;
         }
 
         if (firstReturnLineIndex != firstReturnCloseLineIndex)
         {
-            lines.RemoveRange(firstReturnLineIndex, firstReturnCloseLineIndex - firstReturnLineIndex + 1);    
+            lines.RemoveRange(firstReturnLineIndex, firstReturnCloseLineIndex - firstReturnLineIndex + 1);
         }
 
         // apply padding
         {
             var temp = linesToInject.Select(line => new string(' ', leftPaddingCount) + line).ToList();
-            
-            temp[0] = new string(' ', leftPaddingCount) + "return "+temp[0].Trim();
+
+            temp[0] = new string(' ', leftPaddingCount) + "return " + temp[0].Trim();
 
             temp[^1] += ";";
 
