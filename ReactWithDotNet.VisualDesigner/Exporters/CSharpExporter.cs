@@ -399,7 +399,13 @@ static class CSharpExporter
                         {
                             foreach (var styleAttribute in JsonConvert.DeserializeObject<IReadOnlyList<StyleAttribute>>(reactProperty.Value))
                             {
-                                var (success, modifierCode) = ToModifierTransformer.TryConvertToModifier(elementType.Value.Name, styleAttribute.Name, TryClearStringValue(styleAttribute.Value));
+                                var tagName = elementType.Value?.Name;
+
+                                var attributeName = styleAttribute.Name;
+
+                                var attributeValue = TryClearStringValue(styleAttribute.Value);
+                                
+                                var (success, modifierCode) = ToModifierTransformer.TryConvertToModifier(tagName, attributeName, attributeValue);
                                 if (success)
                                 {
                                     var pseudo = styleAttribute.Pseudo;
