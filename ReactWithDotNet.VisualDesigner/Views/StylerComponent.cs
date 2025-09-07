@@ -121,7 +121,10 @@ sealed class StylerComponent : Component<StylerComponent.State>
                         new div(GridRow(3), GridColumn(1), Background(Gray100), BorderRadius(4)),
                         new div(GridRow(4), GridColumn(1), Background(Gray100), BorderRadius(4)),
                         new div(GridRow(5), GridColumn(1), Background(Gray100), BorderRadius(4)),
-                        new SubGroupItem{Row = 6, Col = 2, SelectionChange=OnSubGroupItemChanged, Label=TryGetSubGroupLabelAt(0)},
+                        new div(GridRow(6), GridColumn(2))
+                        {
+                            new SubGroupItem{Row = 6, Col = 2, SelectionChange=OnSubGroupItemChanged, Label=TryGetSubGroupLabelAt(0)}
+                        },
                         new div(OnMouseEnter(OnSubGroupItemMouseEnter), Id(TryGetSubGroupLabelAt(1)), GridRow(6), GridColumn(3), Background(Gray100), BorderRadius(4))
                         {
                             TryGetSubGroupLabelAt(1)
