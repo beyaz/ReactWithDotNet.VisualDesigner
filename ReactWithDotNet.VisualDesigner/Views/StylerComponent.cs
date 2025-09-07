@@ -1,119 +1,95 @@
 namespace ReactWithDotNet.VisualDesigner.Views;
 
-
 sealed class StylerComponent : Component<StylerComponent.State>
 {
-
-
-    class SubGroupItem: Component
-    {
-        public string Position { get; set; }
-        
-        string Row => Position.Split(":/-")[0].Trim();
-        
-        string Col => Position.Split(":/-")[1].Trim();
-
-
-        public required string Label { get; init; }
-
-        public required int? Index { get; init; }
-        
-        protected override Element render()
-        {
-            return base.render();
-            
-        }
-    }
-    
-    
     static readonly Dictionary<string, Dictionary<string, IReadOnlyList<Option>>> AllData = new()
     {
         ["Layout"] = new()
         {
-            ["display"]=
+            ["display"] =
             [
-                new ()
+                new()
                 {
                     Label = "flex",
                     Value = "display: flex"
                 },
-                new ()
+                new()
                 {
                     Label = "grid",
                     Value = "display: grid"
                 }
             ],
-            
-            ["position"]=
+
+            ["position"] =
             [
-                new ()
-                { 
+                new()
+                {
                     Label = "absolute",
                     Value = "position: absolute"
                 },
-                new ()
+                new()
                 {
                     Label = "relative",
                     Value = "position: relative"
                 }
             ]
         },
-        
+
         ["Spacing"] = new()
         {
-            ["display"]=
+            ["display"] =
             [
-                new ()
+                new()
                 {
                     Label = "flex",
                     Value = "display: flex"
                 },
-                new ()
+                new()
                 {
                     Label = "grid",
                     Value = "display: grid"
                 }
             ],
-            
-            ["position"]=
+
+            ["position"] =
             [
-                new ()
-                { 
+                new()
+                {
                     Label = "absolute",
                     Value = "position: absolute"
                 },
-                new ()
+                new()
                 {
                     Label = "relative",
                     Value = "position: relative"
                 }
             ]
         },
-        
+
         ["Typeograpth"] = new()
         {
-            ["font-size"]=
+            ["font-size"] =
             [
-                new ()
+                new()
                 {
                     Label = "10",
                     Value = "font-size: 10px"
                 },
-                new ()
+                new()
                 {
                     Label = "11",
                     Value = "font-size: 10px"
                 }
             ],
-            
-            ["font-weight"]=
+
+            ["font-weight"] =
             [
-                new ()
-                { 
+                new()
+                {
                     Label = "thin",
                     Value = "position: absolute"
                 },
-                new ()
+                new()
                 {
                     Label = "bold",
                     Value = "position: relative"
@@ -121,12 +97,9 @@ sealed class StylerComponent : Component<StylerComponent.State>
             ]
         }
     };
-    
-   
-    
+
     IReadOnlyList<string> GroupNames => AllData.Keys.ToList();
-    
-  
+
     protected override Element render()
     {
         return new div(Padding(4), DisplayFlex, FlexDirectionColumn, Gap(8), CursorDefault)
@@ -175,8 +148,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                             item
                         }
                     }
-                }
-            ,
+                },
             new div(OnMouseEnter(TogglePopup), TextAlignCenter, WidthFitContent, PositionFixed, Right(16), Bottom(16))
             {
                 new svg(svg.Xmlns("http://www.w3.org/2000/svg"), svg.Width(23), svg.Height(23), ViewBox(0, 0, 23, 23), Fill(none))
@@ -188,45 +160,6 @@ sealed class StylerComponent : Component<StylerComponent.State>
         };
     }
 
-    Task TogglePopup(MouseEvent e)
-    {
-        state = state with
-        {
-            IsPopupVisible = !state.IsPopupVisible,
-        };
-
-        return Task.CompletedTask;
-    }
-    
-    Task OnGroupItemMouseEnter(MouseEvent e)
-    {
-        var selectedGroupName = e.target.id;
-        
-        state = state with
-        {
-            SelectedGroupName = selectedGroupName,
-            
-            SelectedSubGroupName = null
-        };
-        
-        return Task.CompletedTask;
-    }
-    
-    Task OnSubGroupItemMouseEnter(MouseEvent e)
-    {
-        var selectedSubGroupName = e.target.id;
-        
-        state = state with
-        {
-            SelectedSubGroupName = selectedSubGroupName
-        };
-        
-        return Task.CompletedTask;
-    }
-    
-    
-    
-
     IReadOnlyList<Option> GetOptions()
     {
         var groupName = state.SelectedGroupName;
@@ -234,16 +167,52 @@ sealed class StylerComponent : Component<StylerComponent.State>
         {
             return [];
         }
-        
+
         var subGroupName = state.SelectedSubGroupName;
         if (subGroupName is null)
         {
             return [];
         }
 
-        return  AllData[groupName][subGroupName];
+        return AllData[groupName][subGroupName];
     }
-     
+
+    Task OnGroupItemMouseEnter(MouseEvent e)
+    {
+        var selectedGroupName = e.target.id;
+
+        state = state with
+        {
+            SelectedGroupName = selectedGroupName,
+
+            SelectedSubGroupName = null
+        };
+
+        return Task.CompletedTask;
+    }
+
+    Task OnSubGroupItemMouseEnter(MouseEvent e)
+    {
+        var selectedSubGroupName = e.target.id;
+
+        state = state with
+        {
+            SelectedSubGroupName = selectedSubGroupName
+        };
+
+        return Task.CompletedTask;
+    }
+
+    Task TogglePopup(MouseEvent e)
+    {
+        state = state with
+        {
+            IsPopupVisible = !state.IsPopupVisible
+        };
+
+        return Task.CompletedTask;
+    }
+
     string TryGetSubGroupLabelAt(int index)
     {
         var groupName = state.SelectedGroupName;
@@ -260,24 +229,56 @@ sealed class StylerComponent : Component<StylerComponent.State>
 
         return null;
     }
-    
-    
-    
-    
-    
+
+    class SubGroupItem : Component
+    {
+        [CustomEvent]
+        public Func<string, Task> SelectionChange { get; init; }
+        
+        public required int? Index { get; init; }
+
+        public required string Label { get; init; }
+        
+        public string Position { get; set; }
+
+        string Col => Position.Split(":/-")[1].Trim();
+
+        string Row => Position.Split(":/-")[0].Trim();
+
+        protected override Element render()
+        {
+            if (Label is null)
+            {
+                return null;
+            }
+            
+            return new div(OnMouseEnter(OnSubGroupItemMouseEnter), Id(Label), GridRow("Row"), GridColumn("Col"), Background(Gray100), BorderRadius(4), DisplayFlex, JustifyContentCenter, AlignItemsCenter)
+            {
+                Label
+            };
+        }
+        
+        Task OnSubGroupItemMouseEnter(MouseEvent e)
+        {
+            DispatchEvent(SelectionChange,[Label]);
+
+            return Task.CompletedTask;
+        }
+    }
+
     internal record State
     {
         public bool IsPopupVisible { get; init; }
-        
+
         public string SelectedGroupName { get; init; }
-        
+
         public string SelectedSubGroupName { get; init; }
     }
 
-    internal sealed record Option 
+    internal sealed record Option
     {
         public string Label { get; init; }
-        
+
         public string Value { get; init; }
     }
 }
