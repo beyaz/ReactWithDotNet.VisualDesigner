@@ -383,14 +383,14 @@ sealed class StylerComponent : Component<StylerComponent.State>
         return new div(Padding(4), DisplayFlex, FlexDirectionColumn, Gap(8), CursorDefault)
         {
             !state.IsPopupVisible ? null :
-                new div(OnMouseLeave(TogglePopup), DisplayFlex, FlexDirectionColumn, Gap(8), PositionFixed, Right(32), Width(500), Bottom(32), Bottom(32), Border(1, solid, Gray300), BorderRadius(4), Background(White), Height(500))
+                new div(OnMouseLeave(TogglePopup), DisplayFlex, FlexDirectionColumn, Gap(8), PositionFixed, Right(32), Width(500), Bottom(32), Bottom(32), Border(1, solid, Gray300), BorderRadius(4), Background(White), Height(500), ZIndex(2), BoxShadow("0 1px 3px rgba(0,0,0,0.2)"))
                 {
                     new div(Display("grid"), GridTemplateRows("1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr"), GridTemplateColumns("1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr"), Gap(4), BorderRadius(4), Flex(1, 1, 0), Padding(8))
                     {
-                        new div(GridArea("3 / 3 / 7 / 7"), Background(White), DisplayFlex, Gap(8), Padding(8), FlexWrap, AlignContentCenter, JustifyContentCenter)
+                        new div(GridArea("3 / 3 / 7 / 7"), Background(White), DisplayFlex, Gap(8), Padding(8), FlexWrap, AlignContentCenter, JustifyContentCenter, Width(239), Height(239), OverflowAuto)
                         {
                             from item in GetOptions()
-                            select new div(Id(item.Label), OnClick(OnOptionItemClicked), Background(Stone100), Padding(4), MinWidth(50), WidthFitContent, HeightFitContent, MinHeight(30), BorderRadius(4), Hover(Background(Stone200)), DisplayFlex, JustifyContentCenter, AlignItemsCenter)
+                            select new div(Id(item.Label), OnClick(OnOptionItemClicked), Border(1, solid, Gray200), Padding(2, 4), MinWidth(50), WidthFitContent, HeightFitContent, MinHeight(30), BorderRadius(4), Hover(Border(1, solid, Gray400)), DisplayFlex, JustifyContentCenter, AlignItemsCenter)
                             {
                                 item.Label
                             }
@@ -543,27 +543,27 @@ sealed class StylerComponent : Component<StylerComponent.State>
                         {
                             new GroupItem
                             {
-                                Label=TryGetGroupLabelAt(6),
+                                Label=TryGetGroupLabelAt(99),
                                 SelectionChange=OnGroupItemChanged,
-                                IsSelected=IsSelectedGroup(6)
+                                IsSelected=IsSelectedGroup(99)
                             }
                         },
                         new div(GridArea("1 /4 / 1 / 6"))
                         {
                             new GroupItem
                             {
-                                Label=TryGetGroupLabelAt(7),
+                                Label=TryGetGroupLabelAt(99),
                                 SelectionChange=OnGroupItemChanged,
-                                IsSelected=IsSelectedGroup(7)
+                                IsSelected=IsSelectedGroup(99)
                             }
                         },
                         new div(GridArea("1 /6 / 1 / 8"))
                         {
                             new GroupItem
                             {
-                                Label=TryGetGroupLabelAt(8),
+                                Label=TryGetGroupLabelAt(99),
                                 SelectionChange=OnGroupItemChanged,
-                                IsSelected=IsSelectedGroup(8)
+                                IsSelected=IsSelectedGroup(99)
                             }
                         },
                         new div(GridArea("8 /6 / 8 / 8"))
@@ -650,7 +650,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                     }
                 }
             ,
-            new div(OnMouseEnter(TogglePopup), TextAlignCenter, WidthFitContent, PositionFixed, Right(16), Bottom(16))
+            new div(OnMouseEnter(TogglePopup), TextAlignCenter, WidthFitContent, PositionFixed, Right(24), Bottom(24))
             {
                 new svg(svg.Xmlns("http://www.w3.org/2000/svg"), svg.Width(23), svg.Height(23), ViewBox(0, 0, 23, 23), Fill(none))
                 {
@@ -708,7 +708,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
     Task OnSubGroupItemChanged(string subGroupName)
     {
         state = state with
-        {
+        {  
             SelectedSubGroupName = subGroupName
         };
 
@@ -735,7 +735,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
         };
 
         return Task.CompletedTask;
-    }
+    }  
 
     string TryGetSubGroupLabelAt(int index)
     {
@@ -782,7 +782,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                 return null;
             }
 
-            return new div(OnMouseEnter(OnSubGroupItemMouseEnter), Id(Label), Background(IsSelected ? Gray200 : Gray100), BorderRadius(4), DisplayFlex, JustifyContentCenter, AlignItemsCenter, WidthFull, HeightFull, TextAlignCenter)
+            return new div(OnMouseEnter(OnSubGroupItemMouseEnter), Id(Label), BorderColor(IsSelected ? Gray400 : Gray200), BorderRadius(4), DisplayFlex, JustifyContentCenter, AlignItemsCenter, WidthFull, HeightFull, TextAlignCenter, Border(1, solid, Gray200))
             {
                 Label
             };
@@ -810,15 +810,18 @@ sealed class StylerComponent : Component<StylerComponent.State>
         {
             if (Label is null)
             {
-                return null;
+                return new div(BorderColor(Gray200), BorderRadius(4), DisplayFlex, JustifyContentCenter, AlignItemsCenter, WidthFull, HeightFull, TextAlignCenter, Border(1, solid, Gray200))
+                {
+                   
+                };
             }
 
-            return new div(OnMouseEnter(OnGroupItemMouseEnter), Id(Label), Background(IsSelected ? Gray200 : Gray100), BorderRadius(4), DisplayFlex, JustifyContentCenter, AlignItemsCenter, WidthFull, HeightFull, TextAlignCenter)
+            return new div(OnMouseEnter(OnGroupItemMouseEnter), Id(Label), BorderColor(IsSelected ?  Gray400 : Gray200), BorderRadius(4), DisplayFlex, JustifyContentCenter, AlignItemsCenter, WidthFull, HeightFull, TextAlignCenter, Border(1, solid, Gray200))
             {
                 Label
             };
         }
-
+             
         Task OnGroupItemMouseEnter(MouseEvent e)
         {
             DispatchEvent(SelectionChange, [Label]);
