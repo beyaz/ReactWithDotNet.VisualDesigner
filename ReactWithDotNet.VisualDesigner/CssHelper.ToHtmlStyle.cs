@@ -123,6 +123,9 @@ partial class CssHelper
             case "flex-shrink":
             case "grid-template-columns":
             case "grid-template-rows":
+            case "grid-row":
+            case "grid-column":
+            case "grid-area":
             case "letter-spacing":
             case "page-break-after":
             case "backdrop-filter":
