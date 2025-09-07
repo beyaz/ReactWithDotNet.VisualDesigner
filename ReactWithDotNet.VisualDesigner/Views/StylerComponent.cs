@@ -55,7 +55,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                     new div(Background(Gray50), DisplayFlex, JustifyContentSpaceBetween, Padding(8), BorderRadius(4), Gap(8))
                     {
                         from item in state.GroupNames
-                        select new div(Id(item), OnMouseEnter(OnGroupItemMouseEnter), Background(Gray100), WidthFull, TextAlignCenter, Padding(8), BorderRadius(4))
+                        select new div(Id(item), OnMouseEnter(OnGroupItemMouseEnter), Background(item == state.SelectedGroup ? Gray300 : Gray100), WidthFull, TextAlignCenter, Padding(8), BorderRadius(4))
                         {
                             item
                         }
@@ -115,7 +115,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
         public string SelectedGroup { get; init; }
     }
 
-    internal sealed record Option
+    internal sealed record Option 
     {
         public string Label { get; init; }
         public string Value { get; init; }
