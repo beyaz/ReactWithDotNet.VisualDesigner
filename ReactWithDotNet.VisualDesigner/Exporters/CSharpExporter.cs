@@ -2,7 +2,6 @@
 using ReactWithDotNet.Transformers;
 using System.IO;
 using System.Reflection;
-using YamlDotNet.Core.Tokens;
 
 namespace ReactWithDotNet.VisualDesigner.Exporters;
 
