@@ -461,9 +461,9 @@ static class CSharpExporter
                 List<string> propsAsTextList;
                 string partProps;
                 {
-                    propsAsTextList = new();
+                    propsAsTextList = [];
                     {
-                        // import props except style
+                        // import props
                         {
                             var propsWithoutStyle =
                                 from reactProperty in node.Properties
