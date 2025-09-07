@@ -45,6 +45,14 @@ public sealed class CssHelperTest
         
             value.RawHtmlStyles["width"].ShouldBe("400px");
         }
+        
+        [TestMethod]
+        public void ShouldBeParseTailwindColors()
+        {
+            var value = Call("bg: Gray300");
+            
+            value.RawHtmlStyles["background"].ShouldBe(Gray300);
+        }
     }
  
    
