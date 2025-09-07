@@ -58,7 +58,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
         ["flex"] = new()
         {
             ["direction"] =
-            [
+            [ 
                 new() { Label = "row", Value            = "flex-direction: row" },
                 new() { Label = "row-reverse", Value    = "flex-direction: row-reverse" },
                 new() { Label = "column", Value         = "flex-direction: column" },
@@ -624,27 +624,27 @@ sealed class StylerComponent : Component<StylerComponent.State>
                         {
                             new GroupItem
                             {
-                                Label=TryGetGroupLabelAt(9),
+                                Label=TryGetGroupLabelAt(8),
                                 SelectionChange=OnGroupItemChanged,
-                                IsSelected=IsSelectedGroup(9)
+                                IsSelected=IsSelectedGroup(8)
                             }
                         },
                         new div(GridArea("4 /8 / 6 / 8"))
                         {
                             new GroupItem
                             {
-                                Label=TryGetGroupLabelAt(10),
+                                Label=TryGetGroupLabelAt(7),
                                 SelectionChange=OnGroupItemChanged,
-                                IsSelected=IsSelectedGroup(10)
+                                IsSelected=IsSelectedGroup(7)
                             }
                         },
                         new div(GridArea("6 /8 / 8 / 8"))
                         {
                             new GroupItem
                             {
-                                Label=TryGetGroupLabelAt(11),
+                                Label=TryGetGroupLabelAt(6),
                                 SelectionChange=OnGroupItemChanged,
-                                IsSelected=IsSelectedGroup(11)
+                                IsSelected=IsSelectedGroup(6)
                             }
                         }
                     }
