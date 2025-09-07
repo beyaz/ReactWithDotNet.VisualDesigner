@@ -580,28 +580,7 @@ static class CSharpExporter
                 }
             }
 
-            // inner text
-            {
-                if (node.Children.Count == 1)
-                {
-                    var childrenText = node.Children[0].Text + string.Empty;
-                    if (textProperty is not null)
-                    {
-                        childrenText = asFinalText(project, ClearConnectedValue(textProperty.Value));
-                    }
-
-                    if (IsConnectedValue(childrenText))
-                    {
-                        return new LineCollection
-                        {
-                            $"{indent(indentLevel)}new {tag}{partProps}",
-                            indent(indentLevel) + "{",
-                            $"{indent(indentLevel + 1)}{childrenText}",
-                            indent(indentLevel) + "}"
-                        };
-                    }
-                }
-            }
+            
 
             LineCollection lines =
             [
@@ -867,28 +846,7 @@ static class CSharpExporter
                 }
             }
 
-            // inner text
-            {
-                if (node.Children.Count == 1)
-                {
-                    var childrenText = node.Children[0].Text + string.Empty;
-                    if (textProperty is not null)
-                    {
-                        childrenText = asFinalText(project, ClearConnectedValue(textProperty.Value));
-                    }
-
-                    if (IsConnectedValue(childrenText))
-                    {
-                        return new LineCollection
-                        {
-                            $"{indent(indentLevel)}new {tag}{partProps}",
-                            indent(indentLevel) + "{",
-                            $"{indent(indentLevel + 1)}{childrenText}",
-                            indent(indentLevel) + "}"
-                        };
-                    }
-                }
-            }
+            
 
             LineCollection lines =
             [
