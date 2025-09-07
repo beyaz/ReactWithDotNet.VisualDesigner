@@ -23,6 +23,14 @@ sealed class StylerComponent : Component<StylerComponent.State>
                 new() { Label = "fixed", Value    = "position: fixed" },
                 new() { Label = "sticky", Value   = "position: sticky" }
             ],
+            ["flex-direction"] =
+            [
+                new() { Label = "row", Value         = "flex-direction: row" },
+                new() { Label = "row-reverse", Value         = "flex-direction: row-reverse" },
+                new() { Label = "column", Value        = "flex-direction: column" },
+                new() { Label = "column-reverse", Value       = "flex-direction: column-reverse" }
+            ], 
+            
             ["overflow"] =
             [
                 new() { Label = "visible", Value = "overflow: visible" },
@@ -52,19 +60,25 @@ sealed class StylerComponent : Component<StylerComponent.State>
         {
             ["width"] =
             [
-                new() { Label = "auto", Value = "width: auto" },
-                new() { Label = "25%", Value  = "width: 25%" },
-                new() { Label = "50%", Value  = "width: 50%" },
+                new() { Label = "auto", Value        = "width: auto" },
+                new() { Label = "fit-content", Value = "width: fit-content" },
+                new() { Label = "max-content", Value = "width: max-content" },
+                new() { Label = "min-content", Value = "width: min-content" },
+                new() { Label = "100%", Value = "width: 100%" },
                 new() { Label = "75%", Value  = "width: 75%" },
-                new() { Label = "100%", Value = "width: 100%" }
+                new() { Label = "50%", Value  = "width: 50%" },
+                new() { Label = "25%", Value  = "width: 25%" },
             ],
             ["height"] =
             [
-                new() { Label = "auto", Value = "height: auto" },
-                new() { Label = "25%", Value  = "height: 25%" },
-                new() { Label = "50%", Value  = "height: 50%" },
-                new() { Label = "75%", Value  = "height: 75%" },
-                new() { Label = "100%", Value = "height: 100%" }
+                new() { Label = "auto", Value        = "height: auto" },
+                new() { Label = "fit-content", Value = "height: fit-content" },
+                new() { Label = "max-content", Value = "height: max-content" },
+                new() { Label = "min-content", Value = "height: min-content" },
+                new() { Label = "100%", Value        = "height: 100%" },
+                new() { Label = "75%", Value         = "height: 75%" },
+                new() { Label = "50%", Value         = "height: 50%" },
+                new() { Label = "25%", Value         = "height: 25%" }
             ]
         },
 
@@ -274,10 +288,10 @@ sealed class StylerComponent : Component<StylerComponent.State>
         {
             !state.IsPopupVisible ? null :
                 new div(OnMouseLeave(TogglePopup), DisplayFlex, FlexDirectionColumn, Gap(8), PositionFixed, Right(32), Width(600), Height(400), Bottom(32), Bottom(32), Border(1, solid, Gray300), BorderRadius(4), Background(White))
-                {
+                { 
                     new div(Display("grid"), GridTemplateRows("1fr 1fr 1fr 1fr 1fr 1fr"), GridTemplateColumns("1fr 1fr 1fr 1fr 1fr 1fr"), Gap(4), BorderRadius(4), Flex(1, 1, 0), Padding(8))
                     {
-                        new div(GridArea("2 / 2 / 6 / 6"), Background(White), DisplayFlex, Gap(8), Padding(16), AlignItemsFlexEnd)
+                        new div(GridArea("2 / 2 / 6 / 6"), Background(White), DisplayFlex, Gap(8), Padding(16), AlignItemsFlexEnd, FlexWrap)
                         {
                             from item in GetOptions()
                             select new div(Id(item.Label), OnClick(OnOptionItemClicked), Background(Stone100), Padding(4), MinWidth(50), WidthFitContent, HeightFitContent, MinHeight(30), BorderRadius(4), Hover(Background(Stone200)), DisplayFlex, JustifyContentCenter, AlignItemsCenter)
