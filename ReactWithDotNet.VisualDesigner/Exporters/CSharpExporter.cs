@@ -722,10 +722,7 @@ static class CSharpExporter
             firstReturnCloseLineIndex = result.Value.firstReturnCloseLineIndex;
         }
 
-        if (firstReturnLineIndex != firstReturnCloseLineIndex)
-        {
-            lines.RemoveRange(firstReturnLineIndex, firstReturnCloseLineIndex - firstReturnLineIndex + 1);
-        }
+        lines.RemoveRange(firstReturnLineIndex, firstReturnCloseLineIndex - firstReturnLineIndex + 1);
 
         // apply padding
         {
