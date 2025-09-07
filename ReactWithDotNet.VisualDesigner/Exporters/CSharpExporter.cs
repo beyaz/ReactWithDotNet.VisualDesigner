@@ -439,6 +439,242 @@ static class CSharpExporter
                 }
 
                 var tag = component.GetName();
+                if (tag.EndsWith("::render"))
+                {
+                    tag = tag.Replace("::render", string.Empty);
+                }
+                
+                var elementType = node.HtmlElementType;
+                
+                 var childrenProperty = node.Properties.FirstOrDefault(x => x.Name == "children");
+            if (childrenProperty is not null)
+            {
+                node = node with { Properties = node.Properties.Remove(childrenProperty) };
+            }
+
+            var textProperty = node.Properties.FirstOrDefault(x => x.Name == Design.Text);
+            if (textProperty is not null)
+            {
+                node = node with { Properties = node.Properties.Remove(textProperty) };
+            }
+
+            var hasNoBody = node.Children.Count == 0 && node.Text.HasNoValue() && childrenProperty is null;
+
+
+            string partProps;
+            {
+                var propsAsTextList = new List<string>();
+                    {
+                        // import props except style
+                        {
+                            var propsWithoutStyle =
+                                from reactProperty in from p in node.Properties where p.Name.NotIn(Design.Text, Design.TextPreview, Design.Src, Design.Name, "style") select p
+                                let text = convertReactPropertyToString(elementType, reactProperty)
+                                where text is not null
+                                select IsStringValue(reactProperty.Value) switch
+                                {
+                                    true  => text,
+                                    false => text.Replace('"' + reactProperty.Value + '"', reactProperty.Value)
+                                };
+
+                            propsAsTextList.AddRange(propsWithoutStyle);
+
+                            static string convertReactPropertyToString(Maybe<Type> elementType, ReactProperty reactProperty)
+                            {
+                                var propertyName = reactProperty.Name;
+
+                                var propertyValue = reactProperty.Value;
+
+                                if (propertyName is Design.ItemsSource || propertyName is Design.ItemsSourceDesignTimeCount)
+                                {
+                                    return null;
+                                }
+
+                                if (elementType.HasValue)
+                                {
+                                    var (success, modifierCode) = ToModifierTransformer.TryConvertToModifier(elementType.Value.Name, propertyName, TryClearStringValue(propertyValue));
+                                    if (success)
+                                    {
+                                        return modifierCode;
+                                    }
+                                }
+
+                                if (propertyValue == "true")
+                                {
+                                    return propertyName;
+                                }
+
+                                if (propertyName == Design.SpreadOperator)
+                                {
+                                    return '{' + propertyValue + '}';
+                                }
+
+                                if (propertyName == nameof(HtmlElement.dangerouslySetInnerHTML))
+                                {
+                                    return $"{propertyName}={{{{ __html: {propertyValue} }}}}";
+                                }
+
+                                if (IsStringValue(propertyValue))
+                                {
+                                    return $"{propertyName}=\"{TryClearStringValue(propertyValue)}\"";
+                                }
+
+                                if (IsStringTemplate(propertyValue))
+                                {
+                                    return $"{propertyName}={{{propertyValue}}}";
+                                }
+
+                                if (elementType.HasValue)
+                                {
+                                    var propertyType = elementType.Value.GetProperty(propertyName, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance)?.PropertyType;
+                                    if (propertyType is not null)
+                                    {
+                                        if (propertyType == typeof(string))
+                                        {
+                                            var isString = propertyValue.Contains('/') || propertyValue.StartsWith('#') || propertyValue.Split(' ').Length > 1;
+                                            if (isString)
+                                            {
+                                                return $"{propertyName}=\"{propertyValue}\"";
+                                            }
+                                        }
+                                    }
+                                }
+
+                                return $"{propertyName}={propertyValue}";
+                            }
+                        }
+
+                        // import style
+                        {
+                            foreach (var result in from reactProperty in from p in node.Properties where p.Name == "style" select p
+                                     from styleAttribute in JsonConvert.DeserializeObject<IReadOnlyList<StyleAttribute>>(reactProperty.Value)
+                                     where !Design.IsDesignTimeName(styleAttribute.Name)
+                                     let tagName = elementType.Value?.Name
+                                     let attributeValue = TryClearStringValue(styleAttribute.Value)
+                                     from modifierCode in ToModifierTransformer.TryConvertToModifier(tagName, styleAttribute.Name, attributeValue).AsEnumerable()
+                                     select styleAttribute.Pseudo.HasValue() switch
+                                     {
+                                         false => (Result<string>)modifierCode,
+
+                                         true => ToModifierTransformer.TryGetPseudoForCSharp(styleAttribute.Pseudo) switch
+                                         {
+                                             (true, var validPseudo) => $"{validPseudo}({modifierCode})",
+
+                                             (false, _) => new ArgumentException("NotResolved:" + styleAttribute.Pseudo)
+                                         }
+                                     })
+                            {
+                                if (result.HasError)
+                                {
+                                    return result.Error;
+                                }
+
+                                propsAsTextList.Add(result.Value);
+                            }
+                        }
+                    }
+
+                    if (propsAsTextList.Count > 0)
+                    {
+                        partProps = "(" + string.Join(", ", propsAsTextList) + ")";
+                    }
+                    else
+                    {
+                        if (hasNoBody)
+                        {
+                            partProps = "()";
+                        }
+                        else
+                        {
+                            partProps = string.Empty;
+                        }
+                    }
+            }
+
+            if (hasNoBody)
+            {
+                return new LineCollection
+                {
+                    $"{indent(indentLevel)}new {tag}{partProps}"
+                };
+            }
+
+            // children property
+            {
+                // sample: children: state.suggestionNodes
+
+                if (childrenProperty is not null)
+                {
+                    return new LineCollection
+                    {
+                        $"{indent(indentLevel)}new {tag}{partProps}",
+                        indent(indentLevel) + "{",
+                        $"{indent(indentLevel + 1)}{childrenProperty.Value}",
+                        indent(indentLevel) + "}"
+                    };
+                }
+            }
+
+            // inner text
+            {
+                if (node.Children.Count == 1)
+                {
+                    var childrenText = node.Children[0].Text + string.Empty;
+                    if (textProperty is not null)
+                    {
+                        childrenText = asFinalText(project, ClearConnectedValue(textProperty.Value));
+                    }
+
+                    if (IsConnectedValue(childrenText))
+                    {
+                        return new LineCollection
+                        {
+                            $"{indent(indentLevel)}new {tag}{partProps}",
+                            indent(indentLevel) + "{",
+                            $"{indent(indentLevel + 1)}{childrenText}",
+                            indent(indentLevel) + "}"
+                        };
+                    }
+                }
+            }
+
+            LineCollection lines =
+            [
+                $"{indent(indentLevel)}new {tag}{partProps}",
+                indent(indentLevel) + "{"
+            ];
+
+            // Add children
+            var childIndex = 0;
+
+            foreach (var child in node.Children)
+            {
+                IReadOnlyList<string> childElementSourceLines;
+                {
+                    var result = await ConvertReactNodeModelToElementTreeSourceLines(project, child, node, indentLevel + 1);
+                    if (result.HasError)
+                    {
+                        return result.Error;
+                    }
+
+                    childElementSourceLines = result.Value;
+
+                    // add comma at end of child element except last
+                    if (childIndex < node.Children.Count - 1 && childElementSourceLines.Count > 0)
+                    {
+                        childElementSourceLines = childElementSourceLines.SetItem(childElementSourceLines.Count - 1, childElementSourceLines[^1] + ",");
+                    }
+                }
+                
+                lines.AddRange(childElementSourceLines);
+
+                childIndex++;
+            }
+
+            // Close tag
+            lines.Add(indent(indentLevel) + "}");
+
+            return lines;
 
                 
             }
