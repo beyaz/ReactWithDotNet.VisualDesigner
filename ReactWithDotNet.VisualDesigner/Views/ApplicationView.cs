@@ -1567,7 +1567,18 @@ sealed class ApplicationView : Component<ApplicationState>
                 new div { Height(1), FlexGrow(1), Background(Gray200) }
             },
             viewStyles(CurrentVisualElement.Styles),
-            new StylerComponent(),
+            new StylerComponent
+            {
+                OptionSelected = newValue =>
+                {
+                    UpdateCurrentVisualElement(x => x with
+                    {
+                        Styles = x.Styles.Add(newValue)
+                    });
+                    
+                    return Task.CompletedTask;
+                }
+            },
             SpaceY(16)
         };
 

@@ -261,7 +261,12 @@ sealed class StylerComponent : Component<StylerComponent.State>
         }
     };
 
-    IReadOnlyList<string> GroupNames => AllData.Keys.ToList();
+    static IReadOnlyList<string> GroupNames => AllData.Keys.ToList();
+
+    
+    [CustomEvent]
+    public required Func<string, Task> OptionSelected { get; init; }
+
 
     protected override Element render()
     {
@@ -467,6 +472,22 @@ sealed class StylerComponent : Component<StylerComponent.State>
         return state.SelectedSubGroupName == TryGetSubGroupLabelAt(index);
     }
 
+    Task OnOptionItemClicked(MouseEvent e)
+    {
+        var optionLabel = e.target.id;
+
+        var option = GetOptions().First(x => x.Label == optionLabel);
+
+        state = state with
+        {
+            IsPopupVisible = false
+        };
+        
+        DispatchEvent(OptionSelected,[option.Value]);
+
+        return Task.CompletedTask;
+    }
+    
     Task OnGroupItemMouseEnter(MouseEvent e)
     {
         var selectedGroupName = e.target.id;
