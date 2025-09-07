@@ -19,28 +19,91 @@ sealed class StylerComponent : Component<StylerComponent.State>
                     Label = "grid",
                     Value = "display: grid"
                 }
+            ],
+            
+            ["position"]=
+            [
+                new ()
+                { 
+                    Label = "absolute",
+                    Value = "position: absolute"
+                },
+                new ()
+                {
+                    Label = "relative",
+                    Value = "position: relative"
+                }
+            ]
+        },
+        
+        ["Spacing"] = new()
+        {
+            ["display"]=
+            [
+                new ()
+                {
+                    Label = "flex",
+                    Value = "display: flex"
+                },
+                new ()
+                {
+                    Label = "grid",
+                    Value = "display: grid"
+                }
+            ],
+            
+            ["position"]=
+            [
+                new ()
+                { 
+                    Label = "absolute",
+                    Value = "position: absolute"
+                },
+                new ()
+                {
+                    Label = "relative",
+                    Value = "position: relative"
+                }
+            ]
+        },
+        
+        ["Typeograpth"] = new()
+        {
+            ["font-size"]=
+            [
+                new ()
+                {
+                    Label = "10",
+                    Value = "font-size: 10px"
+                },
+                new ()
+                {
+                    Label = "11",
+                    Value = "font-size: 10px"
+                }
+            ],
+            
+            ["font-weight"]=
+            [
+                new ()
+                { 
+                    Label = "thin",
+                    Value = "position: absolute"
+                },
+                new ()
+                {
+                    Label = "bold",
+                    Value = "position: relative"
+                }
             ]
         }
     };
     
-    protected override Task constructor()
-    {
-        state = new()
-        {
-            GroupNames =
-            [
-                "Layout",
-                "Spacing",
-                "Border",
-                "Corner",
-                "Typeography",
-            ],
-            Options = []
-        };
-        
-        return Task.CompletedTask;
-    }
-
+   
+    
+    IReadOnlyList<string> GroupNames => AllData.Keys.ToList();
+    
+  
     protected override Element render()
     {
         return new div(Padding(4), DisplayFlex, FlexDirectionColumn, Gap(8), CursorDefault)
@@ -52,18 +115,24 @@ sealed class StylerComponent : Component<StylerComponent.State>
                     {
                         new div(GridArea("2 / 2 / 6 / 6"), Background(White), DisplayFlex, Gap(8), Padding(16))
                         {
-                            from item in state.Options
-                            select new div(Background(Stone100), Padding(4), MinWidth(50), WidthFitContent, HeightFitContent, MinHeight(30), BorderRadius(4), Hover(Background(Stone200)))
+                            from item in GetOptions()
+                            select new div(Background(Stone100), Padding(4), MinWidth(50), WidthFitContent, HeightFitContent, MinHeight(30), BorderRadius(4), Hover(Background(Stone200)), DisplayFlex, JustifyContentCenter, AlignItemsCenter)
+                            {
+                                item.Label
+                            }
                         },
                         new div(GridRow(2), GridColumn(1), Background(Gray100), BorderRadius(4)),
                         new div(GridRow(3), GridColumn(1), Background(Gray100), BorderRadius(4)),
                         new div(GridRow(4), GridColumn(1), Background(Gray100), BorderRadius(4)),
                         new div(GridRow(5), GridColumn(1), Background(Gray100), BorderRadius(4)),
-                        new div(GridRow(6), GridColumn(2), Background(Gray100), BorderRadius(4), DisplayFlex, JustifyContentCenter, AlignItemsCenter)
+                        new div(OnMouseEnter(OnSubGroupItemMouseEnter), Id(TryGetSubGroupLabelAt(0)), GridRow(6), GridColumn(2), Background(Gray100), BorderRadius(4), DisplayFlex, JustifyContentCenter, AlignItemsCenter)
                         {
-                            TryGetOptionLabelAt(0)
+                            TryGetSubGroupLabelAt(0)
                         },
-                        new div(GridRow(6), GridColumn(3), Background(Gray100), BorderRadius(4)),
+                        new div(OnMouseEnter(OnSubGroupItemMouseEnter), Id(TryGetSubGroupLabelAt(1)), GridRow(6), GridColumn(3), Background(Gray100), BorderRadius(4))
+                        {
+                            TryGetSubGroupLabelAt(1)
+                        },
                         new div(GridRow(6), GridColumn(4), Background(Gray100), BorderRadius(4)),
                         new div(GridRow(6), GridColumn(5), Background(Gray100), BorderRadius(4)),
                         new div(GridRow(2), GridColumn(6), Background(Gray100), BorderRadius(4)),
@@ -77,7 +146,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                     },
                     new div(Background(Gray50), DisplayFlex, JustifyContentSpaceBetween, Padding(8), BorderRadius(4), Gap(8))
                     {
-                        from item in state.GroupNames
+                        from item in GroupNames
                         select new div(Id(item), OnMouseEnter(OnGroupItemMouseEnter), Background(item == state.SelectedGroupName ? Gray300 : Gray100), WidthFull, TextAlignCenter, Padding(8), BorderRadius(4))
                         {
                             item
@@ -108,35 +177,73 @@ sealed class StylerComponent : Component<StylerComponent.State>
     
     Task OnGroupItemMouseEnter(MouseEvent e)
     {
-      
-
+        var selectedGroupName = e.target.id;
+        
         state = state with
         {
-            SelectedGroupName = e.target.id
+            SelectedGroupName = selectedGroupName,
+            
+            SelectedSubGroupName = null
         };
-
+        
         return Task.CompletedTask;
     }
-
-    string TryGetOptionLabelAt(int optionIndex)
+    
+    Task OnSubGroupItemMouseEnter(MouseEvent e)
     {
-        if (state.Options.Count > optionIndex)
+        var selectedSubGroupName = e.target.id;
+        
+        state = state with
         {
-            return state.Options[optionIndex].Label;
+            SelectedSubGroupName = selectedSubGroupName
+        };
+        
+        return Task.CompletedTask;
+    }
+    
+    
+    
+
+    IReadOnlyList<Option> GetOptions()
+    {
+        var groupName = state.SelectedGroupName;
+        if (groupName is null)
+        {
+            return [];
+        }
+        
+        var subGroupName = state.SelectedSubGroupName;
+        if (subGroupName is null)
+        {
+            return [];
+        }
+
+        return  AllData[groupName][subGroupName];
+    }
+     
+    string TryGetSubGroupLabelAt(int index)
+    {
+        var groupName = state.SelectedGroupName;
+        if (groupName is null)
+        {
+            return null;
+        }
+
+        var subGroupNames = AllData[groupName].Keys.ToList();
+        if (subGroupNames.Count > index)
+        {
+            return subGroupNames[index];
         }
 
         return null;
     }
     
     
+    
+    
+    
     internal record State
     {
-        public IReadOnlyList<string> GroupNames { get; init; }
-        
-        public IReadOnlyList<string> SubGroupNames { get; init; }
-        
-        public IReadOnlyList<Option> Options { get; init; }
-        
         public bool IsPopupVisible { get; init; }
         
         public string SelectedGroupName { get; init; }
@@ -147,8 +254,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
     internal sealed record Option 
     {
         public string Label { get; init; }
-        public string Value { get; init; }
         
-       
+        public string Value { get; init; }
     }
 }
