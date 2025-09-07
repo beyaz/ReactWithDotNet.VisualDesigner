@@ -3,6 +3,29 @@ namespace ReactWithDotNet.VisualDesigner.Views;
 
 sealed class StylerComponent : Component<StylerComponent.State>
 {
+
+
+    class SubGroupItem: Component
+    {
+        public string Position { get; set; }
+        
+        string Row => Position.Split(":/-")[0].Trim();
+        
+        string Col => Position.Split(":/-")[1].Trim();
+
+
+        public required string Label { get; init; }
+
+        public required int? Index { get; init; }
+        
+        protected override Element render()
+        {
+            return base.render();
+            
+        }
+    }
+    
+    
     static readonly Dictionary<string, Dictionary<string, IReadOnlyList<Option>>> AllData = new()
     {
         ["Layout"] = new()
