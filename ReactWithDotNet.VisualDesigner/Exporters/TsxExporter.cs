@@ -495,29 +495,7 @@ static class TsxExporter
                     };
                 }
             }
-
-            // inner text
-            {
-                if (node.Children.Count == 1)
-                {
-                    var childrenText = node.Children[0].Text + string.Empty;
-                    if (textProperty is not null)
-                    {
-                        childrenText = asFinalText(project, ClearConnectedValue(textProperty.Value));
-                    }
-
-                    if (IsConnectedValue(childrenText))
-                    {
-                        return new LineCollection
-                        {
-                            $"{indent(indentLevel)}<{tag}{partProps} >",
-                            $"{indent(indentLevel + 1)}{childrenText}",
-                            $"{indent(indentLevel)}</{tag}>"
-                        };
-                    }
-                }
-            }
-
+            
             LineCollection lines =
             [
                 $"{indent(indentLevel)}<{tag}{partProps}>"
