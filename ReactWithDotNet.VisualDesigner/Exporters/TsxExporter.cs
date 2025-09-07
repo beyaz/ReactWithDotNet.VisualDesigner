@@ -580,6 +580,53 @@ static class TsxExporter
         }
     }
 
+    public static Result<(int componentDeclarationLineIndex, int leftPaddingCount, int firstReturnLineIndex, int firstReturnCloseLineIndex)> GetComponentLineIndexPointsInTsxFile(IReadOnlyList<string> fileContent, string targetComponentName)
+    {
+        var lines = fileContent.ToList();
+
+        var componentDeclarationLineIndex = lines.FindIndex(line => line.Contains($"function {targetComponentName}(", StringComparison.OrdinalIgnoreCase));
+        if (componentDeclarationLineIndex < 0)
+        {
+            componentDeclarationLineIndex = lines.FindIndex(line => line.Contains($"const {targetComponentName} "));
+            if (componentDeclarationLineIndex < 0)
+            {
+                componentDeclarationLineIndex = lines.FindIndex(line => line.Contains($"const {targetComponentName}:"));
+                if (componentDeclarationLineIndex < 0)
+                {
+                    return new ArgumentException($"ComponentDeclerationNotFoundInFile. {targetComponentName}");
+                }
+            }
+        }
+
+        var leftPaddingCount = 0;
+        int firstReturnLineIndex = -1;
+        {
+            for (int i = 1; i < 20; i++)
+            {
+                firstReturnLineIndex = lines.FindIndex(componentDeclarationLineIndex, l => l == new string(' ',i)+ "return (");
+                if (firstReturnLineIndex > 0)
+                {
+                    leftPaddingCount = i;
+                    break;
+                }
+            }
+        }
+        
+        int firstReturnCloseLineIndex = -1;
+        {
+            for (int i = 1; i < 20; i++)
+            {
+                firstReturnCloseLineIndex = lines.FindIndex(firstReturnLineIndex, l => l == new string(' ',i)+ ");");
+                if (firstReturnCloseLineIndex > 0)
+                {
+                    break;
+                }
+            }
+        }
+
+        return (componentDeclarationLineIndex,leftPaddingCount, firstReturnLineIndex, firstReturnCloseLineIndex);
+    }
+    
     static Result<string> InjectRender(IReadOnlyList<string> fileContent, string targetComponentName, IReadOnlyList<string> linesToInject)
     {
         var lines = fileContent.ToList();

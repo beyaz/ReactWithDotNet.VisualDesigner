@@ -7,6 +7,74 @@ namespace ReactWithDotNet.VisualDesigner.Exporters;
 
 static class CSharpExporter
 {
+     public static Result<(int classDeclerationLineIndex, int leftPaddingCount, int firstReturnLineIndex, int firstReturnCloseLineIndex)> GetComponentLineIndexPointsInCSharpFile(IReadOnlyList<string> fileContent, string targetComponentName)
+    {
+        var lines = fileContent.ToList();
+
+        // maybe  ZoomComponent:View
+        {
+            var names = targetComponentName.Split(':', StringSplitOptions.RemoveEmptyEntries);
+            if (names.Length == 2)
+            {
+                var className = names[0];
+                var methodName = names[1];
+                
+                var classDeclerationLineIndex = lines.FindIndex(line => line.Contains($"class {className} "));
+                if (classDeclerationLineIndex >= 0)
+                {
+                    var methodDeclerationLineIndex = lines.FindIndex(classDeclerationLineIndex, line => line.Contains($" Element {methodName}("));
+                    if (methodDeclerationLineIndex >= 0)
+                    {
+                        var firstReturnLineIndex = -1; var leftPaddingCount =0;
+                        {
+                            for (int i = 1; i < 100; i++)
+                            {
+                                firstReturnLineIndex = lines.FindIndex(methodDeclerationLineIndex, l => l.StartsWith(string.Empty.PadRight(i,' ')+"return "));
+                                if (firstReturnLineIndex > 0)
+                                {
+                                    leftPaddingCount = i;
+                                    break;
+                                }
+                            }
+                            if (firstReturnLineIndex < 0)
+                            {
+                                return new InvalidOperationException("No return found");
+                            }
+                        }
+
+                        if (lines[firstReturnLineIndex].EndsWith(";"))
+                        {
+                            return (classDeclerationLineIndex, leftPaddingCount, firstReturnLineIndex, firstReturnLineIndex);
+                        }
+                        
+                        var firstReturnCloseLineIndex=-1;
+                        {
+                            for (int i = 1; i < 100; i++)
+                            {
+                                firstReturnCloseLineIndex = lines.FindIndex(firstReturnLineIndex, l => l == string.Empty.PadRight(i,' ')+"};");
+                                if (firstReturnCloseLineIndex > 0)
+                                {
+                                    break;
+                                }
+                            }
+                            if (firstReturnCloseLineIndex < 0)
+                            {
+                                return new InvalidOperationException("No return found");
+                            }
+                        }
+
+                        return (classDeclerationLineIndex, leftPaddingCount, firstReturnLineIndex, firstReturnCloseLineIndex);
+                    }
+                }
+            }
+        }
+        
+       
+
+        return new ArgumentException($"ComponentDeclerationNotFoundInFile. {targetComponentName}");
+    }
+
+     
     public static async Task<Result<string>> CalculateElementTsxCode(int projectId, IReadOnlyDictionary<string, string> componentConfig, VisualElementModel visualElement)
     {
         var project = GetProjectConfig(projectId);

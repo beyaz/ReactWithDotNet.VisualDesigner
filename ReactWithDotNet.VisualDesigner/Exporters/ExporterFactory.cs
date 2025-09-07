@@ -18,6 +18,21 @@ static class ExporterFactory
         return await TsxExporter.ExportToFileSystem(input);
     }
 
+    public static Result<(int componentDeclarationLineIndex, int leftPaddingCount, int firstReturnLineIndex, int firstReturnCloseLineIndex)> GetComponentLineIndexPointsInSourceFile(int projectId, IReadOnlyList<string> fileContent, string targetComponentName)
+    {
+        var project = GetProjectConfig(projectId);
+        if (project is null)
+        {
+            return new ArgumentNullException($"ProjectNotFound. {projectId}");
+        }
+        
+        if (project.ExportAsCSharp)
+        {
+            return CSharpExporter.GetComponentLineIndexPointsInCSharpFile(fileContent, targetComponentName);
+        }
+        
+        return TsxExporter.GetComponentLineIndexPointsInTsxFile(fileContent, targetComponentName);
+    }
     public static async Task<Result<string>> CalculateElementTsxCode(int projectId, IReadOnlyDictionary<string, string> componentConfig, VisualElementModel visualElement)
     {
         var project = GetProjectConfig(projectId);

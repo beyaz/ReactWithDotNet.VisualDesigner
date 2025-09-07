@@ -617,7 +617,7 @@ sealed class ApplicationView : Component<ApplicationState>
             return;
         }
 
-        var lineIndex = GetComponentLineIndexPointsInTsxFile(fileContent.Value, location.Value.targetComponentName);
+        var lineIndex = ExporterFactory.GetComponentLineIndexPointsInSourceFile(state.ProjectId,fileContent.Value, location.Value.targetComponentName);
         if (lineIndex.HasError)
         {
             this.FailNotification(lineIndex.Error.Message);
