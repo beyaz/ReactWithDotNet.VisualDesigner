@@ -23,13 +23,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                 new() { Label = "fixed", Value    = "position: fixed" },
                 new() { Label = "sticky", Value   = "position: sticky" }
             ],
-            ["flex-direction"] =
-            [
-                new() { Label = "row", Value         = "flex-direction: row" },
-                new() { Label = "row-reverse", Value         = "flex-direction: row-reverse" },
-                new() { Label = "column", Value        = "flex-direction: column" },
-                new() { Label = "column-reverse", Value       = "flex-direction: column-reverse" }
-            ], 
+           
             
             ["overflow"] =
             [
@@ -37,6 +31,11 @@ sealed class StylerComponent : Component<StylerComponent.State>
                 new() { Label = "hidden", Value  = "overflow: hidden" },
                 new() { Label = "scroll", Value  = "overflow: scroll" },
                 new() { Label = "auto", Value    = "overflow: auto" }
+            ],
+            ["transform"] =
+            [
+                new() { Label = "translateY(-50%)", Value = "transform: translateY(-50%)" },
+                new() { Label = "translateX(-50%)", Value  = "transform: translateX(-50%)" }
             ],
             ["z-index"] =
             [
@@ -56,6 +55,39 @@ sealed class StylerComponent : Component<StylerComponent.State>
             ]
         },
 
+        ["flex"] = new()
+        {
+            ["direction"] =
+            [
+                new() { Label = "row", Value            = "flex-direction: row" },
+                new() { Label = "row-reverse", Value    = "flex-direction: row-reverse" },
+                new() { Label = "column", Value         = "flex-direction: column" },
+                new() { Label = "column-reverse", Value = "flex-direction: column-reverse" }
+            ],
+            ["justify"] =
+            [
+                new() { Label = "flex-start", Value    = "justify-content: flex-start" },
+                new() { Label = "flex-end", Value      = "justify-content: flex-end" },
+                new() { Label = "center", Value        = "justify-content: center" },
+                new() { Label = "space-between", Value = "justify-content: space-between" },
+                new() { Label = "space-around", Value = "justify-content: space-around" },
+                new() { Label = "space-evenly", Value = "justify-content: space-evenly" }
+            ],
+            ["align"] =
+            [
+                new() { Label = "flex-start", Value    = "align-items: flex-start" },
+                new() { Label = "flex-end", Value      = "align-items: flex-end" },
+                new() { Label = "center", Value        = "align-items: center" },
+                new() { Label = "stretch", Value = "align-items: stretch" }
+            ],
+            ["wrap"] =
+            [
+                new() { Label = "wrap", Value         = "flex-wrap: wrap" },
+                new() { Label = "wrap-reverse", Value = "flex-wrap: wrap-reverse" },
+                new() { Label = "nowrap", Value = "flex-wrap: nowrap" }
+            ]
+        },
+        
         ["Size"] = new()
         {
             ["width"] =
@@ -79,6 +111,26 @@ sealed class StylerComponent : Component<StylerComponent.State>
                 new() { Label = "75%", Value         = "height: 75%" },
                 new() { Label = "50%", Value         = "height: 50%" },
                 new() { Label = "25%", Value         = "height: 25%" }
+            ],
+            ["min-width"] =
+            [
+                new() { Label = "50px", Value = "min-width: 50px" },
+                new() { Label = "100px", Value = "min-width: 100px" },
+                new() { Label = "150px", Value = "min-width: 150px" },
+                new() { Label = "200px", Value = "min-width: 200px" },
+                new() { Label = "300px", Value = "min-width: 300px" },
+                new() { Label = "400px", Value = "min-width: 400px" },
+                new() { Label = "500px", Value = "min-width: 500px" }
+            ],
+            ["min-height"] =  
+            [
+                new() { Label = "50px", Value  = "min-height: 50px" },
+                new() { Label = "100px", Value = "min-height: 100px" },
+                new() { Label = "150px", Value = "min-height: 150px" },
+                new() { Label = "200px", Value = "min-height: 200px" },
+                new() { Label = "300px", Value = "min-height: 300px" },
+                new() { Label = "400px", Value = "min-height: 400px" },
+                new() { Label = "500px", Value = "min-height: 500px" }
             ]
         },
 
@@ -148,15 +200,35 @@ sealed class StylerComponent : Component<StylerComponent.State>
             ],
             ["font-size"] =
             [
+                new() { Label = "small", Value = "font-size: small" },
+                new() { Label = "medium", Value = "font-size: medium" },
+                new() { Label = "large", Value = "font-size: large" },
+                new() { Label = "10px", Value = "font-size: 10px" },
+                new() { Label = "11px", Value = "font-size: 11px" },
                 new() { Label = "12px", Value = "font-size: 12px" },
+                new() { Label = "13px", Value = "font-size: 13px" },
                 new() { Label = "14px", Value = "font-size: 14px" },
+                new() { Label = "15px", Value = "font-size: 15px" },
                 new() { Label = "16px", Value = "font-size: 16px" },
-                new() { Label = "20px", Value = "font-size: 20px" }
+                new() { Label = "17px", Value = "font-size: 17px" },
+                new() { Label = "18px", Value = "font-size: 18px" },
+                new() { Label = "19px", Value = "font-size: 19px" },    
+                new() { Label = "20px", Value = "font-size: 20px" },
+                new() { Label = "24px", Value = "font-size: 24px" },
+                new() { Label = "28px", Value = "font-size: 28px" },
+                new() { Label = "32px", Value = "font-size: 32px" },
+                new() { Label = "36px", Value = "font-size: 36px" },
+                new() { Label = "40px", Value = "font-size: 40px" },
+                new() { Label = "44px", Value = "font-size: 44px" },
+                new() { Label = "48px", Value = "font-size: 48px" },
+                new() { Label = "56px", Value = "font-size: 56px" },
+                new() { Label = "64px", Value = "font-size: 64px" },
             ],
             ["font-weight"] =
             [
                 new() { Label = "normal", Value  = "font-weight: normal" },
                 new() { Label = "bold", Value    = "font-weight: bold" },
+                new() { Label = "bolder", Value    = "font-weight: bolder" },
                 new() { Label = "lighter", Value = "font-weight: lighter" },
                 new() { Label = "100", Value     = "font-weight: 100" },
                 new() { Label = "900", Value     = "font-weight: 900" }
@@ -182,9 +254,17 @@ sealed class StylerComponent : Component<StylerComponent.State>
             ],
             ["text-decoration"] =
             [
-                new() { Label = "none", Value         = "text-decoration: none" },
                 new() { Label = "underline", Value    = "text-decoration: underline" },
+                new() { Label = "overline", Value    = "text-decoration: overline" },
                 new() { Label = "line-through", Value = "text-decoration: line-through" }
+            ],
+            ["white-space"] =
+            [
+                new() { Label = "normal", Value = "white-space: normal" },
+                new() { Label = "nowrap", Value = "white-space: nowrap" },
+                new() { Label = "pre", Value    = "white-space: pre" },
+                new() { Label = "pre-wrap", Value    = "white-space: pre-wrap" },
+                new() { Label = "pre-line", Value = "white-space: pre-line" }
             ],
             ["color"] =
             [
@@ -224,9 +304,15 @@ sealed class StylerComponent : Component<StylerComponent.State>
         {
             ["opacity"] =
             [
-                new() { Label = "0", Value   = "opacity: 0" },
+                new() { Label = "0.1", Value = "opacity: 0.1" },
+                new() { Label = "0.2", Value = "opacity: 0.2" },
+                new() { Label = "0.3", Value = "opacity: 0.3" },
+                new() { Label = "0.4", Value = "opacity: 0.4" },
                 new() { Label = "0.5", Value = "opacity: 0.5" },
-                new() { Label = "1", Value   = "opacity: 1" }
+                new() { Label = "0.6", Value = "opacity: 0.6" },
+                new() { Label = "0.7", Value = "opacity: 0.7" },
+                new() { Label = "0.8", Value = "opacity: 0.8" },
+                new() { Label = "0.9", Value = "opacity: 0.9" }
             ],
             ["transition"] =
             [
@@ -248,12 +334,24 @@ sealed class StylerComponent : Component<StylerComponent.State>
 
         ["Other"] = new()
         {
+            ["object-fit"] =
+            [
+                new() { Label = "cover", Value = "object-fit: cover" },
+                new() { Label = "contain", Value  = "object-fit: contain" },
+                new() { Label = "fill", Value  = "object-fit: fill" },
+                new() { Label = "none", Value  = "object-fit: none" },
+                new() { Label = "scale-down", Value  = "object-fit: scale-down" }
+            ],
             ["cursor"] =
             [
+                new() { Label = "auto", Value    = "cursor: auto" },
                 new() { Label = "default", Value = "cursor: default" },
                 new() { Label = "pointer", Value = "cursor: pointer" },
+                new() { Label = "wait", Value    = "cursor: wait" },
                 new() { Label = "text", Value    = "cursor: text" },
-                new() { Label = "move", Value    = "cursor: move" }
+                new() { Label = "move", Value    = "cursor: move" },
+                new() { Label = "not-allowed", Value    = "cursor: not-allowed" },
+                new() { Label = "crosshair", Value    = "cursor: crosshair" }
             ],
             ["visibility"] =
             [
@@ -291,13 +389,13 @@ sealed class StylerComponent : Component<StylerComponent.State>
                 {
                     new div(Display("grid"), GridTemplateRows("1fr 1fr 1fr 1fr 1fr 1fr"), GridTemplateColumns("1fr 1fr 1fr 1fr 1fr 1fr"), Gap(4), BorderRadius(4), Flex(1, 1, 0), Padding(8))
                     {
-                        new div(GridArea("2 / 2 / 6 / 6"), Background(White), DisplayFlex, Gap(8), Padding(16), AlignItemsFlexEnd, FlexWrap)
+                        new div(GridArea("2 / 2 / 6 / 6"), Background(White), DisplayFlex, Gap(8), Padding(16), FlexWrap, OverflowHidden, JustifyContentSpaceAround)
                         {
                             from item in GetOptions()
                             select new div(Id(item.Label), OnClick(OnOptionItemClicked), Background(Stone100), Padding(4), MinWidth(50), WidthFitContent, HeightFitContent, MinHeight(30), BorderRadius(4), Hover(Background(Stone200)), DisplayFlex, JustifyContentCenter, AlignItemsCenter)
                             {
                                 item.Label
-                            } 
+                            }
                         },
                         new div(GridRow(2), GridColumn(1))
                         {
