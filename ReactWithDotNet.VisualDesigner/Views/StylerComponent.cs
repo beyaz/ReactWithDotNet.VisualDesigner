@@ -3,6 +3,26 @@ namespace ReactWithDotNet.VisualDesigner.Views;
 
 sealed class StylerComponent : Component<StylerComponent.State>
 {
+    static readonly Dictionary<string, Dictionary<string, IReadOnlyList<Option>>> AllData = new()
+    {
+        ["Layout"] = new()
+        {
+            ["display"]=
+            [
+                new ()
+                {
+                    Label = "flex",
+                    Value = "display: flex"
+                },
+                new ()
+                {
+                    Label = "grid",
+                    Value = "display: grid"
+                }
+            ]
+        }
+    };
+    
     protected override Task constructor()
     {
         state = new()
@@ -39,7 +59,10 @@ sealed class StylerComponent : Component<StylerComponent.State>
                         new div(GridRow(3), GridColumn(1), Background(Gray100), BorderRadius(4)),
                         new div(GridRow(4), GridColumn(1), Background(Gray100), BorderRadius(4)),
                         new div(GridRow(5), GridColumn(1), Background(Gray100), BorderRadius(4)),
-                        new div(GridRow(6), GridColumn(2), Background(Gray100), BorderRadius(4)),
+                        new div(GridRow(6), GridColumn(2), Background(Gray100), BorderRadius(4), DisplayFlex, JustifyContentCenter, AlignItemsCenter)
+                        {
+                            TryGetOptionLabelAt(0)
+                        },
                         new div(GridRow(6), GridColumn(3), Background(Gray100), BorderRadius(4)),
                         new div(GridRow(6), GridColumn(4), Background(Gray100), BorderRadius(4)),
                         new div(GridRow(6), GridColumn(5), Background(Gray100), BorderRadius(4)),
@@ -55,7 +78,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                     new div(Background(Gray50), DisplayFlex, JustifyContentSpaceBetween, Padding(8), BorderRadius(4), Gap(8))
                     {
                         from item in state.GroupNames
-                        select new div(Id(item), OnMouseEnter(OnGroupItemMouseEnter), Background(item == state.SelectedGroup ? Gray300 : Gray100), WidthFull, TextAlignCenter, Padding(8), BorderRadius(4))
+                        select new div(Id(item), OnMouseEnter(OnGroupItemMouseEnter), Background(item == state.SelectedGroupName ? Gray300 : Gray100), WidthFull, TextAlignCenter, Padding(8), BorderRadius(4))
                         {
                             item
                         }
@@ -75,13 +98,9 @@ sealed class StylerComponent : Component<StylerComponent.State>
 
     Task TogglePopup(MouseEvent e)
     {
-        var rect = e.target.boundingClientRect;
-
         state = state with
         {
             IsPopupVisible = !state.IsPopupVisible,
-            PopupLocationX = rect.left + rect.width / 2 - 24,
-            PopupLocationY = rect.top + rect.height + 8
         };
 
         return Task.CompletedTask;
@@ -93,10 +112,20 @@ sealed class StylerComponent : Component<StylerComponent.State>
 
         state = state with
         {
-            SelectedGroup = e.target.id
+            SelectedGroupName = e.target.id
         };
 
         return Task.CompletedTask;
+    }
+
+    string TryGetOptionLabelAt(int optionIndex)
+    {
+        if (state.Options.Count > optionIndex)
+        {
+            return state.Options[optionIndex].Label;
+        }
+
+        return null;
     }
     
     
@@ -104,15 +133,15 @@ sealed class StylerComponent : Component<StylerComponent.State>
     {
         public IReadOnlyList<string> GroupNames { get; init; }
         
+        public IReadOnlyList<string> SubGroupNames { get; init; }
+        
         public IReadOnlyList<Option> Options { get; init; }
         
-        public double PopupLocationX { get; init; }
-
-        public double PopupLocationY { get; init; }
-
         public bool IsPopupVisible { get; init; }
         
-        public string SelectedGroup { get; init; }
+        public string SelectedGroupName { get; init; }
+        
+        public string SelectedSubGroupName { get; init; }
     }
 
     internal sealed record Option 
