@@ -121,7 +121,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                         new div(GridRow(3), GridColumn(1), Background(Gray100), BorderRadius(4)),
                         new div(GridRow(4), GridColumn(1), Background(Gray100), BorderRadius(4)),
                         new div(GridRow(5), GridColumn(1), Background(Gray100), BorderRadius(4)),
-                        new SubGroupItem{Position="6 / 2", SelectionChange=OnSubGroupItemChanged, Label=TryGetSubGroupLabelAt(0)},
+                        new SubGroupItem{Row = 6, Col = 2, SelectionChange=OnSubGroupItemChanged, Label=TryGetSubGroupLabelAt(0)},
                         new div(OnMouseEnter(OnSubGroupItemMouseEnter), Id(TryGetSubGroupLabelAt(1)), GridRow(6), GridColumn(3), Background(Gray100), BorderRadius(4))
                         {
                             TryGetSubGroupLabelAt(1)
@@ -245,11 +245,10 @@ sealed class StylerComponent : Component<StylerComponent.State>
         
         public required string Label { get; init; }
         
-        public string Position { get; set; }
+        public required int Row { get; init; }
+        public required int Col { get; init; }
 
-        string Col => Position.Split(":/-")[1].Trim();
-
-        string Row => Position.Split(":/-")[0].Trim();
+        
 
         protected override Element render()
         {
