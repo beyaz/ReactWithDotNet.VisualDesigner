@@ -280,7 +280,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                         new div(GridArea("2 / 2 / 6 / 6"), Background(White), DisplayFlex, Gap(8), Padding(16), AlignItemsFlexEnd)
                         {
                             from item in GetOptions()
-                            select new div(Background(Stone100), Padding(4), MinWidth(50), WidthFitContent, HeightFitContent, MinHeight(30), BorderRadius(4), Hover(Background(Stone200)), DisplayFlex, JustifyContentCenter, AlignItemsCenter)
+                            select new div(Id(item.Label), OnClick(OnOptionItemClicked), Background(Stone100), Padding(4), MinWidth(50), WidthFitContent, HeightFitContent, MinHeight(30), BorderRadius(4), Hover(Background(Stone200)), DisplayFlex, JustifyContentCenter, AlignItemsCenter)
                             {
                                 item.Label
                             }
@@ -289,144 +289,144 @@ sealed class StylerComponent : Component<StylerComponent.State>
                         {
                             new SubGroupItem
                             {
-                                Label           = TryGetSubGroupLabelAt(7),
-                                SelectionChange = OnSubGroupItemChanged,
-                                IsSelected      = IsSelectedSubGroup(7)
+                                Label=TryGetSubGroupLabelAt(7),
+                                SelectionChange=OnSubGroupItemChanged,
+                                IsSelected=IsSelectedSubGroup(7)
                             }
                         },
                         new div(GridRow(3), GridColumn(1))
                         {
                             new SubGroupItem
                             {
-                                Label           = TryGetSubGroupLabelAt(6),
-                                SelectionChange = OnSubGroupItemChanged,
-                                IsSelected      = IsSelectedSubGroup(6)
+                                Label=TryGetSubGroupLabelAt(6),
+                                SelectionChange=OnSubGroupItemChanged,
+                                IsSelected=IsSelectedSubGroup(6)
                             }
                         },
                         new div(GridRow(4), GridColumn(1))
                         {
                             new SubGroupItem
                             {
-                                Label           = TryGetSubGroupLabelAt(5),
-                                SelectionChange = OnSubGroupItemChanged,
-                                IsSelected      = IsSelectedSubGroup(5)
+                                Label=TryGetSubGroupLabelAt(5),
+                                SelectionChange=OnSubGroupItemChanged,
+                                IsSelected=IsSelectedSubGroup(5)
                             }
                         },
                         new div(GridRow(5), GridColumn(1))
                         {
                             new SubGroupItem
                             {
-                                Label           = TryGetSubGroupLabelAt(4),
-                                SelectionChange = OnSubGroupItemChanged,
-                                IsSelected      = IsSelectedSubGroup(4)
+                                Label=TryGetSubGroupLabelAt(4),
+                                SelectionChange=OnSubGroupItemChanged,
+                                IsSelected=IsSelectedSubGroup(4)
                             }
                         },
                         new div(GridRow(6), GridColumn(2))
                         {
                             new SubGroupItem
                             {
-                                Label           = TryGetSubGroupLabelAt(0),
-                                SelectionChange = OnSubGroupItemChanged,
-                                IsSelected      = IsSelectedSubGroup(0)
+                                Label=TryGetSubGroupLabelAt(0),
+                                SelectionChange=OnSubGroupItemChanged,
+                                IsSelected=IsSelectedSubGroup(0)
                             }
                         },
                         new div(GridRow(6), GridColumn(3))
                         {
                             new SubGroupItem
                             {
-                                Label           = TryGetSubGroupLabelAt(1),
-                                SelectionChange = OnSubGroupItemChanged,
-                                IsSelected      = IsSelectedSubGroup(1)
+                                Label=TryGetSubGroupLabelAt(1),
+                                SelectionChange=OnSubGroupItemChanged,
+                                IsSelected=IsSelectedSubGroup(1)
                             }
                         },
                         new div(GridRow(6), GridColumn(4))
                         {
                             new SubGroupItem
                             {
-                                Label           = TryGetSubGroupLabelAt(2),
-                                SelectionChange = OnSubGroupItemChanged,
-                                IsSelected      = IsSelectedSubGroup(2)
+                                Label=TryGetSubGroupLabelAt(2),
+                                SelectionChange=OnSubGroupItemChanged,
+                                IsSelected=IsSelectedSubGroup(2)
                             }
                         },
                         new div(GridRow(6), GridColumn(5))
                         {
                             new SubGroupItem
                             {
-                                Label           = TryGetSubGroupLabelAt(3),
-                                SelectionChange = OnSubGroupItemChanged,
-                                IsSelected      = IsSelectedSubGroup(3)
+                                Label=TryGetSubGroupLabelAt(3),
+                                SelectionChange=OnSubGroupItemChanged,
+                                IsSelected=IsSelectedSubGroup(3)
                             }
                         },
                         new div(GridRow(2), GridColumn(6))
                         {
                             new SubGroupItem
                             {
-                                Label           = TryGetSubGroupLabelAt(12),
-                                SelectionChange = OnSubGroupItemChanged,
-                                IsSelected      = IsSelectedSubGroup(12)
+                                Label=TryGetSubGroupLabelAt(12),
+                                SelectionChange=OnSubGroupItemChanged,
+                                IsSelected=IsSelectedSubGroup(12)
                             }
                         },
                         new div(GridRow(3), GridColumn(6))
                         {
                             new SubGroupItem
                             {
-                                Label           = TryGetSubGroupLabelAt(13),
-                                SelectionChange = OnSubGroupItemChanged,
-                                IsSelected      = IsSelectedSubGroup(13)
+                                Label=TryGetSubGroupLabelAt(13),
+                                SelectionChange=OnSubGroupItemChanged,
+                                IsSelected=IsSelectedSubGroup(13)
                             }
                         },
                         new div(GridRow(4), GridColumn(6))
                         {
                             new SubGroupItem
                             {
-                                Label           = TryGetSubGroupLabelAt(14),
-                                SelectionChange = OnSubGroupItemChanged,
-                                IsSelected      = IsSelectedSubGroup(14)
+                                Label=TryGetSubGroupLabelAt(14),
+                                SelectionChange=OnSubGroupItemChanged,
+                                IsSelected=IsSelectedSubGroup(14)
                             }
                         },
                         new div(GridRow(5), GridColumn(6))
                         {
                             new SubGroupItem
                             {
-                                Label           = TryGetSubGroupLabelAt(15),
-                                SelectionChange = OnSubGroupItemChanged,
-                                IsSelected      = IsSelectedSubGroup(15)
+                                Label=TryGetSubGroupLabelAt(15),
+                                SelectionChange=OnSubGroupItemChanged,
+                                IsSelected=IsSelectedSubGroup(15)
                             }
                         },
                         new div(GridRow(1), GridColumn(2))
                         {
                             new SubGroupItem
                             {
-                                Label           = TryGetSubGroupLabelAt(8),
-                                SelectionChange = OnSubGroupItemChanged,
-                                IsSelected      = IsSelectedSubGroup(8)
+                                Label=TryGetSubGroupLabelAt(8),
+                                SelectionChange=OnSubGroupItemChanged,
+                                IsSelected=IsSelectedSubGroup(8)
                             }
                         },
                         new div(GridRow(1), GridColumn(3))
                         {
                             new SubGroupItem
                             {
-                                Label           = TryGetSubGroupLabelAt(9),
-                                SelectionChange = OnSubGroupItemChanged,
-                                IsSelected      = IsSelectedSubGroup(9)
+                                Label=TryGetSubGroupLabelAt(9),
+                                SelectionChange=OnSubGroupItemChanged,
+                                IsSelected=IsSelectedSubGroup(9)
                             }
                         },
                         new div(GridRow(1), GridColumn(4))
                         {
                             new SubGroupItem
                             {
-                                Label           = TryGetSubGroupLabelAt(10),
-                                SelectionChange = OnSubGroupItemChanged,
-                                IsSelected      = IsSelectedSubGroup(10)
+                                Label=TryGetSubGroupLabelAt(10),
+                                SelectionChange=OnSubGroupItemChanged,
+                                IsSelected=IsSelectedSubGroup(10)
                             }
                         },
                         new div(GridRow(1), GridColumn(5))
                         {
                             new SubGroupItem
                             {
-                                Label           = TryGetSubGroupLabelAt(11),
-                                SelectionChange = OnSubGroupItemChanged,
-                                IsSelected      = IsSelectedSubGroup(11)
+                                Label=TryGetSubGroupLabelAt(11),
+                                SelectionChange=OnSubGroupItemChanged,
+                                IsSelected=IsSelectedSubGroup(11)
                             }
                         }
                     },
@@ -438,7 +438,8 @@ sealed class StylerComponent : Component<StylerComponent.State>
                             item
                         }
                     }
-                },
+                }
+            ,
             new div(OnMouseEnter(TogglePopup), TextAlignCenter, WidthFitContent, PositionFixed, Right(16), Bottom(16))
             {
                 new svg(svg.Xmlns("http://www.w3.org/2000/svg"), svg.Width(23), svg.Height(23), ViewBox(0, 0, 23, 23), Fill(none))
@@ -473,7 +474,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
     }
 
     Task OnOptionItemClicked(MouseEvent e)
-    {
+    { 
         var optionLabel = e.target.id;
 
         var option = GetOptions().First(x => x.Label == optionLabel);
