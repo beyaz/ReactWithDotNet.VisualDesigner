@@ -288,7 +288,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
         {
             !state.IsPopupVisible ? null :
                 new div(OnMouseLeave(TogglePopup), DisplayFlex, FlexDirectionColumn, Gap(8), PositionFixed, Right(32), Width(600), Height(400), Bottom(32), Bottom(32), Border(1, solid, Gray300), BorderRadius(4), Background(White))
-                { 
+                {
                     new div(Display("grid"), GridTemplateRows("1fr 1fr 1fr 1fr 1fr 1fr"), GridTemplateColumns("1fr 1fr 1fr 1fr 1fr 1fr"), Gap(4), BorderRadius(4), Flex(1, 1, 0), Padding(8))
                     {
                         new div(GridArea("2 / 2 / 6 / 6"), Background(White), DisplayFlex, Gap(8), Padding(16), AlignItemsFlexEnd, FlexWrap)
@@ -297,7 +297,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                             select new div(Id(item.Label), OnClick(OnOptionItemClicked), Background(Stone100), Padding(4), MinWidth(50), WidthFitContent, HeightFitContent, MinHeight(30), BorderRadius(4), Hover(Background(Stone200)), DisplayFlex, JustifyContentCenter, AlignItemsCenter)
                             {
                                 item.Label
-                            }
+                            } 
                         },
                         new div(GridRow(2), GridColumn(1))
                         {
@@ -570,7 +570,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                 return null;
             }
 
-            return new div(OnMouseEnter(OnSubGroupItemMouseEnter), Id(Label), Background(IsSelected ? Gray200 : Gray100), BorderRadius(4), DisplayFlex, JustifyContentCenter, AlignItemsCenter, WidthFull, HeightFull)
+            return new div(OnMouseEnter(OnSubGroupItemMouseEnter), Id(Label), Background(IsSelected ? Gray200 : Gray100), BorderRadius(4), DisplayFlex, JustifyContentCenter, AlignItemsCenter, WidthFull, HeightFull, TextAlignCenter)
             {
                 Label
             };
