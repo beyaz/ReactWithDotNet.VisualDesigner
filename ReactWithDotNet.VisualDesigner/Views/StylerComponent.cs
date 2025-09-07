@@ -1,5 +1,6 @@
 namespace ReactWithDotNet.VisualDesigner.Views;
 
+
 sealed class StylerComponent : Component<StylerComponent.State>
 {
     protected override Task constructor()
@@ -13,7 +14,8 @@ sealed class StylerComponent : Component<StylerComponent.State>
                 "Border",
                 "Corner",
                 "Typeography",
-            ]
+            ],
+            Options = []
         };
         
         return Task.CompletedTask;
@@ -27,5 +29,13 @@ sealed class StylerComponent : Component<StylerComponent.State>
     internal record State
     {
         public IReadOnlyList<string> GroupNames { get; init; }
+        
+        public IReadOnlyList<Option> Options { get; init; }
+    }
+
+    internal sealed record Option
+    {
+        public string Label { get; init; }
+        public string Value { get; init; }
     }
 }
