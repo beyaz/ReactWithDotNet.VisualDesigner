@@ -237,7 +237,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
         {
             return subGroupNames[index];
         }
-
+         
         return null;
     }
 
@@ -260,7 +260,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                 return null;
             }
             
-            return new div(OnMouseEnter(OnSubGroupItemMouseEnter), Id(Label), GridRow(Row), GridColumn(Col), Background(Gray100), BorderRadius(4), DisplayFlex, JustifyContentCenter, AlignItemsCenter)
+            return new div(OnMouseEnter(OnSubGroupItemMouseEnter), Id(Label), GridRow("Row"), GridColumn("Col"), Background(Gray100), BorderRadius(4), DisplayFlex, JustifyContentCenter, AlignItemsCenter, WidthFull, HeightFull)
             {
                 Label
             };
