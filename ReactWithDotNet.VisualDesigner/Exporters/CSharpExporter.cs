@@ -1,7 +1,8 @@
-﻿using System.IO;
-using System.Reflection;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using ReactWithDotNet.Transformers;
+using System.IO;
+using System.Reflection;
+using YamlDotNet.Core.Tokens;
 
 namespace ReactWithDotNet.VisualDesigner.Exporters;
 
@@ -426,10 +427,27 @@ static class CSharpExporter
             }
         }
 
+
+        // is component
+        {
+            if (int.TryParse(nodeTag, out var componentId))
+            {
+                var component = await Store.TryGetComponent(componentId);
+                if (component is null)
+                {
+                    return new ArgumentNullException($"ComponentNotFound. {componentId}");
+                }
+
+                var tag = component.GetName();
+
+                
+            }
+        }
+        
+        
         {
             var elementType = node.HtmlElementType;
 
-            var isComponent = false;
             
             var tag = nodeTag;
             if (int.TryParse(nodeTag, out var componentId))
@@ -442,7 +460,6 @@ static class CSharpExporter
 
                 tag = component.GetName();
 
-                isComponent = true;
             }
 
             var childrenProperty = node.Properties.FirstOrDefault(x => x.Name == "children");
@@ -459,23 +476,10 @@ static class CSharpExporter
 
             var hasNoBody = node.Children.Count == 0 && node.Text.HasNoValue() && childrenProperty is null;
 
-            if (isComponent)
-            {
-                if (node.Properties.Count > 0)
-                {
-                    hasNoBody = false;
-                }
-            }
 
             string partProps;
             {
-                if (isComponent && node.Properties.Count > 0)
-                {
-                    partProps = string.Empty;
-                }
-                else
-                {
-                    var propsAsTextList = new List<string>();
+                var propsAsTextList = new List<string>();
                     {
                         // import props except style
                         {
@@ -601,7 +605,6 @@ static class CSharpExporter
                             partProps = string.Empty;
                         }
                     }
-                }
             }
 
             if (hasNoBody)
