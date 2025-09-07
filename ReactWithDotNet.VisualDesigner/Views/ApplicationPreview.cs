@@ -214,6 +214,7 @@ sealed class ApplicationPreview : Component
 
                 foreach (var styleModifierResult in
                          from designerStyleText in model.Styles
+                         where !designerStyleText.StartsWith("d-")
                          from designerStyleItem in CreateDesignerStyleItemFromText(scope.Project, designerStyleText)
                          from x in designerStyleItem.RawHtmlStyles 
                          where x.Value?.StartsWith("state.",StringComparison.OrdinalIgnoreCase) is not true

@@ -1567,6 +1567,7 @@ sealed class ApplicationView : Component<ApplicationState>
                 new div { Height(1), FlexGrow(1), Background(Gray200) }
             },
             viewStyles(CurrentVisualElement.Styles),
+            new StylerComponent(),
             SpaceY(16)
         };
 

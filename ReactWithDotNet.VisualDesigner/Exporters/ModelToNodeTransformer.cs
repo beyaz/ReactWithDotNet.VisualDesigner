@@ -214,6 +214,15 @@ static class ModelToNodeTransformer
                     value = tryGetFontWeight(value);
                 }
 
+                if(nameof(Style.gridRow).Equals(name,StringComparison.OrdinalIgnoreCase)||
+                   nameof(Style.gridColumn).Equals(name,StringComparison.OrdinalIgnoreCase))
+                {
+                    if (int.TryParse(value, out _))
+                    {
+                        return styleAttribute with { Name = name, Value = value };
+                    }
+                }
+
                 if (double.TryParse(value, out var valueAsDouble))
                 {
                     value = valueAsDouble.AsPixel();
