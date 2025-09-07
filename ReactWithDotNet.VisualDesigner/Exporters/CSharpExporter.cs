@@ -651,16 +651,6 @@ static class CSharpExporter
             var elementType = node.HtmlElementType;
 
             var tag = nodeTag;
-            if (int.TryParse(nodeTag, out var componentId))
-            {
-                var component = await Store.TryGetComponent(componentId);
-                if (component is null)
-                {
-                    return new ArgumentNullException($"ComponentNotFound. {componentId}");
-                }
-
-                tag = component.GetName();
-            }
 
             var childrenProperty = node.Properties.FirstOrDefault(x => x.Name == "children");
             if (childrenProperty is not null)
