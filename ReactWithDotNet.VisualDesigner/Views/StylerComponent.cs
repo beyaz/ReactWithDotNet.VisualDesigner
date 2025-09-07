@@ -275,7 +275,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
             !state.IsPopupVisible ? null :
                 new div(OnMouseLeave(TogglePopup), DisplayFlex, FlexDirectionColumn, Gap(8), PositionFixed, Right(32), Width(600), Height(400), Bottom(32), Bottom(32), Border(1, solid, Gray300), BorderRadius(4), Background(White))
                 {
-                    new div(Display("grid"), GridTemplateRows("1fr 1fr 1fr 1fr 1fr 1fr"), GridTemplateColumns("1fr 1fr 1fr 1fr 1fr 1fr"), Gap(4), BorderRadius(4), Flex(1, 1, 0))
+                    new div(Display("grid"), GridTemplateRows("1fr 1fr 1fr 1fr 1fr 1fr"), GridTemplateColumns("1fr 1fr 1fr 1fr 1fr 1fr"), Gap(4), BorderRadius(4), Flex(1, 1, 0), Padding(8))
                     {
                         new div(GridArea("2 / 2 / 6 / 6"), Background(White), DisplayFlex, Gap(8), Padding(16), AlignItemsFlexEnd)
                         {
@@ -464,7 +464,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
         {
             return [];
         }
-
+         
         return AllData[groupName][subGroupName];
     }
 
@@ -482,7 +482,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
         state = state with
         {
             IsPopupVisible = false
-        };
+        }; 
         
         DispatchEvent(OptionSelected,[option.Value]);
 
