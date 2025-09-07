@@ -2652,7 +2652,7 @@ sealed class ApplicationView : Component<ApplicationState>
                 },
                 new div(DisplayFlex, WidthFull, PaddingLeft(4), PaddingRight(4), AlignItemsCenter, Gap(4))
                 {
-                    new div(OnClick(OnIconMinusClicked), DisplayFlex, JustifyContentCenter, AlignItemsCenter, BorderRadius(100), Padding(3), Background(Blue200), Hover(Background(Gray100)))
+                    new div(OnClick(OnIconMinusClicked), DisplayFlex, JustifyContentCenter, AlignItemsCenter, BorderRadius(100), Padding(3), Background(Blue200), Hover(Background(Blue300)))
                     {
                         new svg(ViewBox(0, 0, 16, 16), Width(16), Height(16), Fill("currentcolor"))
                         {
