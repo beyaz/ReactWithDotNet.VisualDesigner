@@ -121,10 +121,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                         new div(GridRow(3), GridColumn(1), Background(Gray100), BorderRadius(4)),
                         new div(GridRow(4), GridColumn(1), Background(Gray100), BorderRadius(4)),
                         new div(GridRow(5), GridColumn(1), Background(Gray100), BorderRadius(4)),
-                        new div(OnMouseEnter(OnSubGroupItemMouseEnter), Id(TryGetSubGroupLabelAt(0)), GridRow(6), GridColumn(2), Background(Gray100), BorderRadius(4), DisplayFlex, JustifyContentCenter, AlignItemsCenter)
-                        {
-                            TryGetSubGroupLabelAt(0)
-                        },
+                        new SubGroupItem{Position="6 / 2", SelectionChange=OnSubGroupItemChanged, Label=TryGetSubGroupLabelAt(0)},
                         new div(OnMouseEnter(OnSubGroupItemMouseEnter), Id(TryGetSubGroupLabelAt(1)), GridRow(6), GridColumn(3), Background(Gray100), BorderRadius(4))
                         {
                             TryGetSubGroupLabelAt(1)
@@ -148,7 +145,8 @@ sealed class StylerComponent : Component<StylerComponent.State>
                             item
                         }
                     }
-                },
+                }
+            ,
             new div(OnMouseEnter(TogglePopup), TextAlignCenter, WidthFitContent, PositionFixed, Right(16), Bottom(16))
             {
                 new svg(svg.Xmlns("http://www.w3.org/2000/svg"), svg.Width(23), svg.Height(23), ViewBox(0, 0, 23, 23), Fill(none))
@@ -202,6 +200,16 @@ sealed class StylerComponent : Component<StylerComponent.State>
 
         return Task.CompletedTask;
     }
+    Task OnSubGroupItemChanged(string subGroupName)
+    {
+        state = state with
+        {
+            SelectedSubGroupName = subGroupName
+        };
+
+        return Task.CompletedTask;
+    }
+    
 
     Task TogglePopup(MouseEvent e)
     {
@@ -235,8 +243,6 @@ sealed class StylerComponent : Component<StylerComponent.State>
         [CustomEvent]
         public Func<string, Task> SelectionChange { get; init; }
         
-        public required int? Index { get; init; }
-
         public required string Label { get; init; }
         
         public string Position { get; set; }
@@ -252,7 +258,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                 return null;
             }
             
-            return new div(OnMouseEnter(OnSubGroupItemMouseEnter), Id(Label), GridRow("Row"), GridColumn("Col"), Background(Gray100), BorderRadius(4), DisplayFlex, JustifyContentCenter, AlignItemsCenter)
+            return new div(OnMouseEnter(OnSubGroupItemMouseEnter), Id(Label), GridRow(Row), GridColumn(Col), Background(Gray100), BorderRadius(4), DisplayFlex, JustifyContentCenter, AlignItemsCenter)
             {
                 Label
             };
