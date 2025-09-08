@@ -15,6 +15,11 @@ static class ExporterFactory
             return await CSharpExporter.ExportToFileSystem(input);
         }
 
+        if (project.ExportAsCSharpString)
+        {
+            return await CSharpStringExporter.ExportToFileSystem(input);
+        }
+        
         return await TsxExporter.ExportToFileSystem(input);
     }
 
@@ -26,9 +31,14 @@ static class ExporterFactory
             return new ArgumentNullException($"ProjectNotFound. {projectId}");
         }
         
-        if (project.ExportAsCSharp || project.ExportAsCSharpString)
+        if (project.ExportAsCSharp )
         {
             return CSharpExporter.GetComponentLineIndexPointsInCSharpFile(fileContent, targetComponentName);
+        }
+        
+        if (project.ExportAsCSharpString)
+        {
+            return CSharpStringExporter.GetComponentLineIndexPointsInCSharpFile(fileContent, targetComponentName);
         }
         
         return TsxExporter.GetComponentLineIndexPointsInTsxFile(fileContent, targetComponentName);
@@ -44,6 +54,11 @@ static class ExporterFactory
         if (project.ExportAsCSharp)
         {
             return await CSharpExporter.CalculateElementTsxCode(projectId, componentConfig, visualElement);
+        }
+        
+        if (project.ExportAsCSharpString)
+        {
+            return await CSharpStringExporter.CalculateElementTsxCode(projectId, componentConfig, visualElement);
         }
 
         string tsxCode;
