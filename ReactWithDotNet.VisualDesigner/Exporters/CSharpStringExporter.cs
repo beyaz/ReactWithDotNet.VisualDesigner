@@ -666,6 +666,8 @@ static class CSharpStringExporter
 
             var hasNoBody = node.Children.Count == 0 && node.Text.HasNoValue() && childrenProperty is null;
 
+            List<string> styleLines = [];
+            
             string partProps;
             {
                 var propsAsTextList = new List<string>();
@@ -751,43 +753,30 @@ static class CSharpStringExporter
 
                     // import style
                     {
-                        foreach (var result in from reactProperty in from p in node.Properties where p.Name == "style" select p
-                                 from styleAttribute in JsonConvert.DeserializeObject<IReadOnlyList<StyleAttribute>>(reactProperty.Value)
-                                 where !Design.IsDesignTimeName(styleAttribute.Name)
-                                 let tagName = elementType.Value?.Name
-                                 let attributeValue = TryClearStringValue(styleAttribute.Value)
-                                 from modifierCode in ToModifierTransformer.TryConvertToModifier(tagName, styleAttribute.Name, attributeValue).AsEnumerable()
-                                 select styleAttribute.Pseudo.HasValue() switch
-                                 {
-                                     false => (Result<string>)modifierCode,
-
-                                     true => ToModifierTransformer.TryGetPseudoForCSharp(styleAttribute.Pseudo) switch
-                                     {
-                                         (true, var validPseudo) => $"{validPseudo}({modifierCode})",
-
-                                         (false, _) => new ArgumentException("NotResolved:" + styleAttribute.Pseudo)
-                                     }
-                                 })
-                        {
-                            if (result.HasError)
-                            {
-                                return result.Error;
-                            }
-
-                            propsAsTextList.Add(result.Value);
-                        }
+                        styleLines = (from reactProperty in from p in node.Properties where p.Name == "style" select p
+                            from styleAttribute in JsonConvert.DeserializeObject<IReadOnlyList<StyleAttribute>>(reactProperty.Value)
+                            where !Design.IsDesignTimeName(styleAttribute.Name)
+                            where styleAttribute.Pseudo is null
+                            let tagName = elementType.Value?.Name
+                            let attributeValue = TryClearStringValue(styleAttribute.Value)
+                            select $"{styleAttribute.Name}: {styleAttribute.Value}").ToList();
                     }
                 }
 
-                if (propsAsTextList.Count > 0)
+                if (styleLines.Count > 0)
                 {
-                    partProps = "(" + string.Join(", ", propsAsTextList) + ")";
+                    propsAsTextList.Add($"style = \"{string.Join("; ", styleLines)}\"");
+                }
+                
+                if (propsAsTextList.Count > 0 || styleLines.Count > 0)
+                {
+                    partProps = " " + string.Join(" ", propsAsTextList) + ">";
                 }
                 else
                 {
                     if (hasNoBody)
                     {
-                        partProps = "()";
+                        partProps = " />";
                     }
                     else
                     {
@@ -822,8 +811,7 @@ static class CSharpStringExporter
 
             LineCollection lines =
             [
-                $"{indent(indentLevel)}new {tag}{partProps}",
-                indent(indentLevel) + "{"
+                $"{indent(indentLevel)}\"<{tag}{partProps}",
             ];
 
             // Add children
@@ -854,7 +842,7 @@ static class CSharpStringExporter
             }
 
             // Close tag
-            lines.Add(indent(indentLevel) + "}");
+            lines.Add(indent(indentLevel) + $"\"</{tag}>\"");
 
             return lines;
         }
