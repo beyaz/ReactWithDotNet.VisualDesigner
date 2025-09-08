@@ -1571,10 +1571,28 @@ sealed class ApplicationView : Component<ApplicationState>
             {
                 OptionSelected = newValue =>
                 {
-                    UpdateCurrentVisualElement(x => x with
+                    var existingItemIndex =
+                        (from item in CurrentVisualElement.Styles.Select((text, index) => new { text, index })
+                            let styleItem = ParseStyleAttribute(item.text)
+                            where styleItem.Name == ParseStyleAttribute(newValue).Name
+                            select (int?)item.index).FirstOrDefault();
+
+                    if (existingItemIndex is null)
                     {
-                        Styles = x.Styles.Add(newValue)
-                    });
+                        UpdateCurrentVisualElement(x => x with
+                        {
+                            Styles = x.Styles.Add(newValue)
+                        });
+                    }
+                    else
+                    {
+                        UpdateCurrentVisualElement(x => x with
+                        {
+                            Styles = x.Styles.SetItem(existingItemIndex.Value, newValue)
+                        });
+                    }
+
+                   
                     
                     return Task.CompletedTask;
                 }
@@ -2558,45 +2576,6 @@ sealed class ApplicationView : Component<ApplicationState>
         protected override Element render()
         {
             return View();
-            
-            return new FlexRowCentered(PositionRelative, Height(36), Border(1, solid, Theme.BorderColor), BorderRadius(4))
-            {
-                new label(PositionAbsolute, Top(-4), Left(8), FontSize10, LineHeight7, BackgroundTheme, PaddingX(4))
-                {
-                    "Zoom"
-                },
-
-                new FlexRow(WidthFull, PaddingLeftRight(4), AlignItemsCenter, Gap(4))
-                {
-                    new FlexRowCentered(BorderRadius(100), Padding(3), Background(Blue200), Hover(Background(Blue300)))
-                    {
-                        OnClick(OnIconMinusClicked),
-                        new IconMinus()
-                    },
-
-                    new div
-                    {
-                        $"%{state.Scale}",
-                        OnClick(ToggleZoomSuggestions)
-                    },
-
-                    new FlexRowCentered(BorderRadius(100), Padding(3), Background(Blue200), Hover(Background(Blue300)))
-                    {
-                        OnClick(OnPlusIconClicked),
-                        new IconPlus()
-                    }
-                },
-
-                !state.IsSuggestionsVisible ? null : new FlexColumnCentered(PositionFixed, Background(White), Border(1, solid, Gray300), BorderRadius(4), PaddingY(4), Left(state.SuggestionPopupLocationX), Top(state.SuggestionPopupLocationY))
-                {
-                    new[] { "%25", "%50", "%75", "%100", "%125" }.Select(text => new FlexRowCentered(Padding(6, 12), BorderRadius(4), Hover(Background(Gray100)))
-                    {
-                        text,
-                        Id(text),
-                        OnClick(OnSuggestionItemClicked)
-                    })
-                }
-            };
         }
 
         Task OnIconMinusClicked(MouseEvent _)
