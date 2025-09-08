@@ -954,7 +954,8 @@ sealed class ApplicationView : Component<ApplicationState>
             StyleItemDragDrop = new(),
             Selection = state.Selection with
             {
-                SelectedStyleIndex = null
+                SelectedStyleIndex = null,
+                HoveredStyleIndex = null
             }
         };
 
@@ -1636,7 +1637,14 @@ sealed class ApplicationView : Component<ApplicationState>
                         styles.Select((value, index) => attributeItem(index, value)),
                         OnClick([StopPropagation](_) =>
                         {
-                            state = state with { Selection = state.Selection with { SelectedStyleIndex = null } };
+                            state = state with
+                            {
+                                Selection = state.Selection with
+                                {
+                                    SelectedStyleIndex = null,
+                                    HoveredStyleIndex = null
+                                }
+                            };
 
                             return Task.CompletedTask;
                         })
@@ -1678,7 +1686,14 @@ sealed class ApplicationView : Component<ApplicationState>
                             });
                         }
 
-                        state = state with { Selection = state.Selection with { SelectedStyleIndex = null } };
+                        state = state with
+                        {
+                            Selection = state.Selection with
+                            {
+                                SelectedStyleIndex = null,
+                                HoveredStyleIndex = null
+                            }
+                        };
 
                         return Task.CompletedTask;
                     },
@@ -1690,12 +1705,30 @@ sealed class ApplicationView : Component<ApplicationState>
             {
                 var closeIcon = CreateAttributeItemCloseIcon(OnClick([StopPropagation](_) =>
                 {
-                    UpdateCurrentVisualElement(x => x with
+                    if (state.Selection.SelectedStyleIndex.HasValue)
                     {
-                        Styles = x.Styles.RemoveAt(state.Selection.SelectedStyleIndex!.Value)
-                    });
+                        UpdateCurrentVisualElement(x => x with
+                        {
+                            Styles = x.Styles.RemoveAt(state.Selection.SelectedStyleIndex.Value)
+                        });
+                    }
+                    else if (state.Selection.HoveredStyleIndex.HasValue)
+                    {
+                        UpdateCurrentVisualElement(x => x with
+                        {
+                            Styles = x.Styles.RemoveAt(state.Selection.HoveredStyleIndex.Value)
+                        });
+                    }
+                    
 
-                    state = state with { Selection = state.Selection with { SelectedStyleIndex = null } };
+                    state = state with
+                    {
+                        Selection = state.Selection with
+                        {
+                            SelectedStyleIndex = null,
+                            HoveredStyleIndex = null
+                        }
+                    };
 
                     return Task.CompletedTask;
                 }));
@@ -1712,22 +1745,61 @@ sealed class ApplicationView : Component<ApplicationState>
                 }
 
                 var isSelected = index == state.Selection.SelectedStyleIndex;
-
+                var isHovered = index == state.Selection.HoveredStyleIndex;
                 if (state.StyleItemDragDrop.StartItemIndex == index)
                 {
                     isSelected = false;
+                    isHovered  = false;
                 }
-
+                
                 var styleItem = new FlexRowCentered(CursorDefault, Padding(4, 8), BorderRadius(16), UserSelect(none))
                 {
                     Background(isSelected ? Gray200 : Gray50),
                     Border(1, solid, Gray100),
 
-                    isSelected ? PositionRelative : null,
-                    isSelected ? closeIcon : null,
+                    PositionRelative,
+                    isSelected || isHovered ? closeIcon : null,
 
                     content,
                     Id(index),
+                    
+                    state.Selection.SelectedStyleIndex.HasValue ? null:
+                    OnMouseEnter([StopPropagation](e) =>
+                    {
+                        var styleIndex = int.Parse(e.currentTarget.id);
+                        
+                        state = state with
+                        {
+                            Selection = new()
+                            {
+                                VisualElementTreeItemPath = state.Selection.VisualElementTreeItemPath,
+
+                                HoveredStyleIndex = styleIndex
+                            }
+                        };
+                        
+                        return Task.CompletedTask;
+                    }),
+                    
+                    state.Selection.SelectedStyleIndex.HasValue ? null:
+                    OnMouseLeave([StopPropagation](e) =>
+                    {
+                        var styleIndex = int.Parse(e.currentTarget.id);
+
+                        if (styleIndex == state.Selection.HoveredStyleIndex)
+                        {
+                            state = state with
+                            {
+                                Selection = state.Selection with
+                                {
+                                    HoveredStyleIndex = null
+                                }
+                            };
+                        }
+                        
+                        return Task.CompletedTask;
+                    }),
+                    
                     OnClick([StopPropagation](e) =>
                     {
                         var styleIndex = int.Parse(e.currentTarget.id);
