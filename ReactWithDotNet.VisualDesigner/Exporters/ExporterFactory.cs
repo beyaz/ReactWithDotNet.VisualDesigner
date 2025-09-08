@@ -26,14 +26,14 @@ static class ExporterFactory
             return new ArgumentNullException($"ProjectNotFound. {projectId}");
         }
         
-        if (project.ExportAsCSharp)
+        if (project.ExportAsCSharp || project.ExportAsCSharpString)
         {
             return CSharpExporter.GetComponentLineIndexPointsInCSharpFile(fileContent, targetComponentName);
         }
         
         return TsxExporter.GetComponentLineIndexPointsInTsxFile(fileContent, targetComponentName);
     }
-    public static async Task<Result<string>> CalculateElementTsxCode(int projectId, IReadOnlyDictionary<string, string> componentConfig, VisualElementModel visualElement)
+    public static async Task<Result<string>> CalculateElementSourceCode(int projectId, IReadOnlyDictionary<string, string> componentConfig, VisualElementModel visualElement)
     {
         var project = GetProjectConfig(projectId);
         if (project is null)

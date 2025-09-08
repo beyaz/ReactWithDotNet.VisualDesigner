@@ -21,7 +21,7 @@ static class ModelToNodeTransformer
 
         // arrange inline styles
         {
-            if (project.ExportStylesAsInline || project.ExportAsCSharp)
+            if (project.ExportStylesAsInline || project.ExportAsCSharp|| project.ExportAsCSharpString)
             {
                 // Transfer properties
                 foreach (var property in elementModel.Properties)
@@ -66,7 +66,7 @@ static class ModelToNodeTransformer
                         Value = "{" + string.Join(", ", inlineStyle.Select(x => $"{x.Name}: {x.Value}")) + "}"
                     };
 
-                    if (project.ExportAsCSharp)
+                    if (project.ExportAsCSharp || project.ExportAsCSharpString)
                     {
                         inlineStyleProperty = inlineStyleProperty with
                         {

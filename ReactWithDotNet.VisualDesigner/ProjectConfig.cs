@@ -17,6 +17,8 @@ public sealed record ProjectConfig
     public string TranslationFunctionName { get; init; }
     
     public bool ExportAsCSharp { get; init; }
+    
+    public bool ExportAsCSharpString { get; init; }
 }
 
 public sealed record CommonCssSuggestions
