@@ -811,7 +811,7 @@ static class CSharpStringExporter
 
             LineCollection lines =
             [
-                $"{indent(indentLevel)}\"<{tag}{partProps}",
+                $"{indent(indentLevel)}\"\"\"<{tag}{partProps}\"\"\"",
             ];
 
             // Add children
@@ -842,7 +842,7 @@ static class CSharpStringExporter
             }
 
             // Close tag
-            lines.Add(indent(indentLevel) + $"\"</{tag}>\"");
+            lines.Add(indent(indentLevel) + $"\"\"\"</{tag}>\"\"\"");
 
             return lines;
         }
@@ -870,7 +870,7 @@ static class CSharpStringExporter
                 }
             }
 
-            return '"' + TryClearStringValue(text) + '"';
+            return "\"\"\"" + TryClearStringValue(text) + "\"\"\"";
         }
 
         static string indent(int indentLevel)
