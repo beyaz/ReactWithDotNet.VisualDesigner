@@ -298,7 +298,7 @@ static class CSharpStringExporter
         {
             return new List<string>
             {
-                $"{indent(indentLevel)}{asFinalText(project, node.Children[0].Text)}"
+                $"{indent(indentLevel)}{asFinalText( node.Children[0].Text)}"
             };
         }
 
@@ -308,7 +308,7 @@ static class CSharpStringExporter
             {
                 return new List<string>
                 {
-                    $"{indent(indentLevel)}{asFinalText(project, node.Text)}"
+                    $"{indent(indentLevel)}{asFinalText(node.Text)}"
                 };
             }
 
@@ -851,34 +851,18 @@ static class CSharpStringExporter
             }
 
             // Close tag
-            lines.Add(indent(indentLevel) + $"\"\"\"</{tag}>\"\"\"");
+            lines.Add(indent(indentLevel) + '"'+$"</{tag}>"+'"');
 
             return lines;
         }
 
-        static string asFinalText(ProjectConfig project, string text)
+        static string asFinalText(string text)
         {
-            if (IsRawStringValue(text))
-            {
-                return $"{TryClearRawStringValue(text)}";
-            }
-
             if (!IsStringValue(text))
             {
                 return text;
             }
-
-            // try to export with translation function
-            {
-                var translateFunction = project.TranslationFunctionName;
-                {
-                    if (translateFunction.HasValue())
-                    {
-                        return $"{{{translateFunction.Trim()}(\"{TryClearStringValue(text)}\")}}";
-                    }
-                }
-            }
-
+            
             return (
 
                 from x in (Maybe<string>)text
