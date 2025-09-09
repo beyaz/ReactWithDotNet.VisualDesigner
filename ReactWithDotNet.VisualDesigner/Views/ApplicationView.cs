@@ -624,7 +624,7 @@ sealed class ApplicationView : Component<ApplicationState>
             return;
         }
 
-        var exception = IdeBridge.OpenEditor(location.Value.filePath, lineIndex.Value.componentDeclarationLineIndex + 1);
+        var exception = IdeBridge.OpenEditor(location.Value.filePath, lineIndex.Value.firstReturnLineIndex);
         if (exception is not null)
         {
             this.FailNotification(exception.Message);

@@ -558,7 +558,7 @@ static class TsxExporter
         }
     }
 
-    public static Result<(int componentDeclarationLineIndex, int leftPaddingCount, int firstReturnLineIndex, int firstReturnCloseLineIndex)> GetComponentLineIndexPointsInTsxFile(IReadOnlyList<string> fileContent, string targetComponentName)
+    public static Result<(int leftPaddingCount, int firstReturnLineIndex, int firstReturnCloseLineIndex)> GetComponentLineIndexPointsInTsxFile(IReadOnlyList<string> fileContent, string targetComponentName)
     {
         var lines = fileContent.ToList();
 
@@ -602,7 +602,7 @@ static class TsxExporter
             }
         }
 
-        return (componentDeclarationLineIndex,leftPaddingCount, firstReturnLineIndex, firstReturnCloseLineIndex);
+        return (leftPaddingCount, firstReturnLineIndex, firstReturnCloseLineIndex);
     }
     
     static Result<string> InjectRender(IReadOnlyList<string> fileContent, string targetComponentName, IReadOnlyList<string> linesToInject)
