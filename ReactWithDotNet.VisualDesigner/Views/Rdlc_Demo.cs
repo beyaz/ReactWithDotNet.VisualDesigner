@@ -2,18 +2,18 @@
 
 static class Rdlc_Demo
 {
-    
-    class LineCollection : List<string>
-    {
-    }
-
     static LineCollection GenerateHtml()
     {
+        #region Designer Generated Code
 
         return
         [
-
         ];
+
+        #endregion
     }
 
+    class LineCollection : List<string>
+    {
+    }
 }

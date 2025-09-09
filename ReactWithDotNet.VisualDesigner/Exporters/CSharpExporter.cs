@@ -64,7 +64,7 @@ static class CSharpExporter
 
     public static Result<(int classDeclerationLineIndex, int leftPaddingCount, int firstReturnLineIndex, int firstReturnCloseLineIndex)> GetComponentLineIndexPointsInCSharpFile(IReadOnlyList<string> fileContent, string targetComponentName)
     {
-        var lines = fileContent.ToList();
+         var lines = fileContent.ToList();
 
         // maybe  ZoomComponent:View
         {
@@ -81,18 +81,14 @@ static class CSharpExporter
                     if (methodDeclerationLineIndex >= 0)
                     {
                         var firstReturnLineIndex = -1;
-                        var leftPaddingCount = 0;
+                        var leftPaddingCount = -1;
                         {
-                            for (var i = 1; i < 100; i++)
+                            foreach (var item in lines.FindLineIndexStartsWith(methodDeclerationLineIndex, "return "))
                             {
-                                firstReturnLineIndex = lines.FindIndex(methodDeclerationLineIndex, l => l.StartsWith(string.Empty.PadRight(i, ' ') + "return "));
-                                if (firstReturnLineIndex > 0)
-                                {
-                                    leftPaddingCount = i;
-                                    break;
-                                }
+                                firstReturnLineIndex = item.index;
+                                leftPaddingCount     = item.leftPaddingCount;
                             }
-
+                            
                             if (firstReturnLineIndex < 0)
                             {
                                 return new InvalidOperationException("No return found");
@@ -106,15 +102,11 @@ static class CSharpExporter
 
                         var firstReturnCloseLineIndex = -1;
                         {
-                            for (var i = 1; i < 100; i++)
+                            foreach (var item in lines.FindLineIndexStartsWith(firstReturnLineIndex, "};"))
                             {
-                                firstReturnCloseLineIndex = lines.FindIndex(firstReturnLineIndex, l => l == string.Empty.PadRight(i, ' ') + "};");
-                                if (firstReturnCloseLineIndex > 0)
-                                {
-                                    break;
-                                }
+                                firstReturnCloseLineIndex = item.index;
                             }
-
+                            
                             if (firstReturnCloseLineIndex < 0)
                             {
                                 return new InvalidOperationException("No return found");
