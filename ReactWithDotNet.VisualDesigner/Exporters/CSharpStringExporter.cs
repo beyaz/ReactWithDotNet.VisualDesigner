@@ -880,11 +880,14 @@ static class CSharpStringExporter
                 }
             }
 
-            if (TryClearStringValue(text).Contains('"'))
-            {
-                return "\"\"\"" + TryClearStringValue(text) + "\"\"\"";    
-            }
-            return '"' + TryClearStringValue(text) + '"';
+            return (
+                    from x in (Maybe<string>)text
+                    let clear = TryClearStringValue(text)
+                    let quoteCount = clear.Contains('"') ? 3 : 1
+                    let quote = new string('"', quoteCount)
+                    select quote + clear + quote
+                )
+                .FirstOrDefault();
         }
 
         static string indent(int indentLevel)
