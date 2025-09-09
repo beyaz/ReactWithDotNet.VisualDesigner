@@ -137,7 +137,6 @@ static class CSharpStringExporter
             return (leftPaddingCount, firstReturnLineIndex, firstReturnCloseLineIndex);
         }
 
-        return new ArgumentException($"ComponentDeclerationNotFoundInFile. {targetComponentName}");
     }
 
     internal static async Task<Result<(IReadOnlyList<string> elementTreeSourceLines, IReadOnlyList<string> importLines)>> CalculateElementTreeSourceCodes(ProjectConfig project, IReadOnlyDictionary<string, string> componentConfig, VisualElementModel rootVisualElement)
@@ -880,12 +879,19 @@ static class CSharpStringExporter
                 }
             }
 
-            return (from x in (Maybe<string>)text
-                    let clear = TryClearStringValue(text)
-                    let quoteCount = clear.Contains('"') ? 3 : 1
-                    let quote = new string('"', quoteCount)
-                    select quote + clear + quote
-                ).First();
+            return (
+
+                from x in (Maybe<string>)text
+
+                let clear = TryClearStringValue(text)
+
+                let quoteCount = clear.Contains('"') ? 3 : 1
+
+                let quote = new string('"', quoteCount)
+
+                select quote + clear + quote
+
+            ).First();
         }
 
         static string indent(int indentLevel)
