@@ -62,61 +62,79 @@ static class CSharpStringExporter
         return new ExportOutput { HasChange = true };
     }
 
-    public static Result<(int leftPaddingCount, int firstReturnLineIndex, int firstReturnCloseLineIndex)> GetComponentLineIndexPointsInCSharpFile(IReadOnlyList<string> fileContent, string targetComponentName)
+    public static Result<(int leftPaddingCount, int firstReturnLineIndex, int firstReturnCloseLineIndex)>
+        GetComponentLineIndexPointsInCSharpFile(IReadOnlyList<string> fileContent, string targetComponentName)
     {
         var lines = fileContent.ToList();
 
         // maybe  ZoomComponent:View
         {
             var names = targetComponentName.Split(':', StringSplitOptions.RemoveEmptyEntries);
-            if (names.Length == 2)
+            if (names.Length != 2)
             {
-                var className = names[0];
-                var methodName = names[1];
+                return new ArgumentException($"ComponentDeclerationNotFoundInFile. {targetComponentName}");
+            }
 
-                var classDeclerationLineIndex = lines.FindIndex(line => line.Contains($"class {className} "));
-                if (classDeclerationLineIndex >= 0)
+            var className = names[0];
+            var methodName = names[1];
+
+            var methodDeclerationLineIndex = -1;
+            {
+                foreach (var lineIndex in RoslynHelper.FindMethodStartLineIndexInCSharpCode(lines, className, methodName))
                 {
-                    var methodDeclerationLineIndex = lines.FindIndex(classDeclerationLineIndex, line => line.Contains($" Element {methodName}("));
-                    if (methodDeclerationLineIndex >= 0)
+                    methodDeclerationLineIndex = lineIndex;
+                }
+
+                if (methodDeclerationLineIndex < 0)
+                {
+                    var classDeclerationLineIndex = lines.FindIndex(line => line.Contains($"class {className} "));
+                    if (classDeclerationLineIndex < 0)
                     {
-                        var firstReturnLineIndex = -1;
-                        var leftPaddingCount = -1;
-                        {
-                            foreach (var item in lines.FindLineIndexStartsWith(methodDeclerationLineIndex, "return "))
-                            {
-                                firstReturnLineIndex = item.index;
-                                leftPaddingCount     = item.leftPaddingCount;
-                            }
-                            
-                            if (firstReturnLineIndex < 0)
-                            {
-                                return new InvalidOperationException("No return found");
-                            }
-                        }
+                        return new ArgumentException($"ComponentDeclerationNotFoundInFile. {targetComponentName}");
+                    }
 
-                        if (lines[firstReturnLineIndex].EndsWith(";"))
-                        {
-                            return (leftPaddingCount, firstReturnLineIndex, firstReturnLineIndex);
-                        }
-
-                        var firstReturnCloseLineIndex = -1;
-                        {
-                            foreach (var item in lines.FindLineIndexStartsWith(firstReturnLineIndex, "};"))
-                            {
-                                firstReturnCloseLineIndex = item.index;
-                            }
-                            
-                            if (firstReturnCloseLineIndex < 0)
-                            {
-                                return new InvalidOperationException("No return found");
-                            }
-                        }
-
-                        return (leftPaddingCount, firstReturnLineIndex, firstReturnCloseLineIndex);
+                    methodDeclerationLineIndex = lines.FindIndex(classDeclerationLineIndex, line => line.Contains($" Element {methodName}("));
+                    if (methodDeclerationLineIndex < 0)
+                    {
+                        return new ArgumentException($"ComponentDeclerationNotFoundInFile. {targetComponentName}");
                     }
                 }
             }
+
+            var firstReturnLineIndex = -1;
+            var leftPaddingCount = -1;
+            {
+                foreach (var item in lines.FindLineIndexStartsWith(methodDeclerationLineIndex, "return ", "return"))
+                {
+                    firstReturnLineIndex = item.index;
+                    leftPaddingCount     = item.leftPaddingCount;
+                }
+
+                if (firstReturnLineIndex < 0)
+                {
+                    return new InvalidOperationException("No return found");
+                }
+            }
+
+            if (lines[firstReturnLineIndex].EndsWith(";"))
+            {
+                return (leftPaddingCount, firstReturnLineIndex, firstReturnLineIndex);
+            }
+
+            var firstReturnCloseLineIndex = -1;
+            {
+                foreach (var item in lines.FindLineIndexStartsWith(firstReturnLineIndex, "};", "];"))
+                {
+                    firstReturnCloseLineIndex = item.index;
+                }
+
+                if (firstReturnCloseLineIndex < 0)
+                {
+                    return new InvalidOperationException("No return found");
+                }
+            }
+
+            return (leftPaddingCount, firstReturnLineIndex, firstReturnCloseLineIndex);
         }
 
         return new ArgumentException($"ComponentDeclerationNotFoundInFile. {targetComponentName}");
@@ -659,7 +677,7 @@ static class CSharpStringExporter
             var hasNoBody = node.Children.Count == 0 && node.Text.HasNoValue() && childrenProperty is null;
 
             List<string> styleLines = [];
-            
+
             string partProps;
             {
                 var propsAsTextList = new List<string>();
@@ -759,7 +777,7 @@ static class CSharpStringExporter
                 {
                     propsAsTextList.Add($"style = \"{string.Join("; ", styleLines)}\"");
                 }
-                
+
                 if (propsAsTextList.Count > 0 || styleLines.Count > 0)
                 {
                     partProps = " " + string.Join(" ", propsAsTextList) + ">";
@@ -803,7 +821,7 @@ static class CSharpStringExporter
 
             LineCollection lines =
             [
-                $"{indent(indentLevel)}\"\"\"<{tag}{partProps}\"\"\"",
+                $"{indent(indentLevel)}\"\"\"<{tag}{partProps}\"\"\""
             ];
 
             // Add children

@@ -5,6 +5,10 @@ namespace ReactWithDotNet.VisualDesigner.Toolbox;
 
 static class RoslynHelper
 {
+    public static Maybe<int> FindMethodStartLineIndexInCSharpCode(IReadOnlyList<string> lines, string className, string methodName)
+    {
+        return FindMethodStartLineIndexInCSharpCode(string.Join(Environment.NewLine, lines), className, methodName);
+    }
     public static Maybe<int> FindMethodStartLineIndexInCSharpCode(string code, string className, string methodName)
     {
         var tree = CSharpSyntaxTree.ParseText(code);
