@@ -675,109 +675,57 @@ static class CSharpStringExporter
 
             var hasNoBody = node.Children.Count == 0 && node.Text.HasNoValue() && childrenProperty is null;
 
-            List<string> styleLines = [];
+            
 
             string partProps;
             {
+                
+                
                 var propsAsTextList = new List<string>();
                 {
                     // import props except style
                     {
                         var propsWithoutStyle =
-                            from reactProperty in from p in node.Properties where p.Name.NotIn(Design.Text, Design.TextPreview, Design.Src, Design.Name, "style") select p
-                            let text = convertReactPropertyToString(elementType, reactProperty)
-                            where text is not null
-                            select IsStringValue(reactProperty.Value) switch
+
+                            from reactProperty in from p in node.Properties where p.Name.NotIn(Design.ItemsSource, Design.ItemsSourceDesignTimeCount, Design.Text, Design.TextPreview, Design.Src, Design.Name, "style") select p
+
+                            let value = reactProperty.Value
+
+                            let finalValue = IsStringValue(value) switch
                             {
-                                true  => text,
-                                false => text.Replace('"' + reactProperty.Value + '"', reactProperty.Value)
-                            };
+                                true  => TryClearStringValue(value),
+                                false => value
+                            }
+
+                            select $"{reactProperty.Name}={finalValue}";
 
                         propsAsTextList.AddRange(propsWithoutStyle);
 
-                        static string convertReactPropertyToString(Maybe<Type> elementType, ReactProperty reactProperty)
-                        {
-                            var propertyName = reactProperty.Name;
-
-                            var propertyValue = reactProperty.Value;
-
-                            if (propertyName is Design.ItemsSource || propertyName is Design.ItemsSourceDesignTimeCount)
-                            {
-                                return null;
-                            }
-
-                            if (elementType.HasValue)
-                            {
-                                var (success, modifierCode) = ToModifierTransformer.TryConvertToModifier(elementType.Value.Name, propertyName, TryClearStringValue(propertyValue));
-                                if (success)
-                                {
-                                    return modifierCode;
-                                }
-                            }
-
-                            if (propertyValue == "true")
-                            {
-                                return propertyName;
-                            }
-
-                            if (propertyName == Design.SpreadOperator)
-                            {
-                                return '{' + propertyValue + '}';
-                            }
-
-                            if (propertyName == nameof(HtmlElement.dangerouslySetInnerHTML))
-                            {
-                                return $"{propertyName}={{{{ __html: {propertyValue} }}}}";
-                            }
-
-                            if (IsStringValue(propertyValue))
-                            {
-                                return $"{propertyName}=\"{TryClearStringValue(propertyValue)}\"";
-                            }
-
-                            if (IsStringTemplate(propertyValue))
-                            {
-                                return $"{propertyName}={{{propertyValue}}}";
-                            }
-
-                            if (elementType.HasValue)
-                            {
-                                var propertyType = elementType.Value.GetProperty(propertyName, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance)?.PropertyType;
-                                if (propertyType is not null)
-                                {
-                                    if (propertyType == typeof(string))
-                                    {
-                                        var isString = propertyValue.Contains('/') || propertyValue.StartsWith('#') || propertyValue.Split(' ').Length > 1;
-                                        if (isString)
-                                        {
-                                            return $"{propertyName}=\"{propertyValue}\"";
-                                        }
-                                    }
-                                }
-                            }
-
-                            return $"{propertyName}={propertyValue}";
-                        }
                     }
 
                     // import style
                     {
-                        styleLines = (from reactProperty in from p in node.Properties where p.Name == "style" select p
-                            from styleAttribute in JsonConvert.DeserializeObject<IReadOnlyList<StyleAttribute>>(reactProperty.Value)
-                            where !Design.IsDesignTimeName(styleAttribute.Name)
-                            where styleAttribute.Pseudo is null
-                            let tagName = elementType.Value?.Name
-                            let attributeValue = TryClearStringValue(styleAttribute.Value)
-                            select $"{styleAttribute.Name}: {styleAttribute.Value}").ToList();
+                        var styleLines = ListFrom
+                            (
+                             from reactProperty in from p in node.Properties where p.Name == "style" select p
+                             from styleAttribute in JsonConvert.DeserializeObject<IReadOnlyList<StyleAttribute>>(reactProperty.Value)
+                             where !Design.IsDesignTimeName(styleAttribute.Name)
+                             where styleAttribute.Pseudo is null
+                             let tagName = elementType.Value?.Name
+                             let attributeValue = TryClearStringValue(styleAttribute.Value)
+                             select $"{styleAttribute.Name}: {styleAttribute.Value}"
+                            );
+                        
+                        if (styleLines.Count > 0)
+                        {
+                            propsAsTextList.Add($"style = \"{string.Join("; ", styleLines)}\"");
+                        }
                     }
                 }
 
-                if (styleLines.Count > 0)
-                {
-                    propsAsTextList.Add($"style = \"{string.Join("; ", styleLines)}\"");
-                }
+               
 
-                if (propsAsTextList.Count > 0 || styleLines.Count > 0)
+                if (propsAsTextList.Count > 0)
                 {
                     partProps = " " + string.Join(" ", propsAsTextList) + ">";
                 }
@@ -798,7 +746,7 @@ static class CSharpStringExporter
             {
                 return new LineCollection
                 {
-                    $"{indent(indentLevel)}new {tag}{partProps}"
+                    asFinalText('"'+$"{indent(indentLevel)}new {tag}{partProps}"+'"')
                 };
             }
 
