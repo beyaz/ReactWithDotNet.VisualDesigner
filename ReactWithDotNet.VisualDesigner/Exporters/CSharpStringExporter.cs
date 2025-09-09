@@ -880,14 +880,12 @@ static class CSharpStringExporter
                 }
             }
 
-            return (
-                    from x in (Maybe<string>)text
+            return (from x in (Maybe<string>)text
                     let clear = TryClearStringValue(text)
                     let quoteCount = clear.Contains('"') ? 3 : 1
                     let quote = new string('"', quoteCount)
                     select quote + clear + quote
-                )
-                .FirstOrDefault();
+                ).First();
         }
 
         static string indent(int indentLevel)
