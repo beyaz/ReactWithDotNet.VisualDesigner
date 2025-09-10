@@ -1,7 +1,7 @@
-﻿using Newtonsoft.Json;
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 using System.Globalization;
 using System.Text;
+using Newtonsoft.Json;
 
 namespace ReactWithDotNet.VisualDesigner.Exporters;
 
@@ -21,7 +21,7 @@ static class ModelToNodeTransformer
 
         // arrange inline styles
         {
-            if (project.ExportStylesAsInline || project.ExportAsCSharp|| project.ExportAsCSharpString)
+            if (project.ExportStylesAsInline || project.ExportAsCSharp || project.ExportAsCSharpString)
             {
                 // Transfer properties
                 foreach (var property in elementModel.Properties)
@@ -141,10 +141,6 @@ static class ModelToNodeTransformer
             }
         }
 
-      
-      
-
-        
         var hasNoChildAndHasNoText = elementModel.Children.Count == 0 && elementModel.HasNoText();
         if (hasNoChildAndHasNoText)
         {
@@ -188,17 +184,6 @@ static class ModelToNodeTransformer
         return node;
     }
 
-    static Result<(VisualElementModel modifiedElementModel, IReadOnlyList<StyleAttribute> inlineStyle)>
-        convertStyleToInlineStyleObject(VisualElementModel elementModel)
-    {
-
-
-        var styles = convertDesignerStyleItemsToStyleAttributes(elementModel.Styles);
-
-        return (elementModel with { Styles = [] },styles );
-
-    }
-    
     static IReadOnlyList<StyleAttribute> convertDesignerStyleItemsToStyleAttributes(IReadOnlyList<string> designerStyleItems)
     {
         return (from text in designerStyleItems select process(ParseStyleAttribute(text))).ToList();
@@ -214,10 +199,10 @@ static class ModelToNodeTransformer
                     value = tryGetFontWeight(value);
                 }
 
-                if(nameof(Style.gridRow).Equals(name,StringComparison.OrdinalIgnoreCase)||
-                   nameof(Style.gridColumn).Equals(name,StringComparison.OrdinalIgnoreCase)||
-                   nameof(Style.zIndex).Equals(name,StringComparison.OrdinalIgnoreCase))
-                {  
+                if (nameof(Style.gridRow).Equals(name, StringComparison.OrdinalIgnoreCase) ||
+                    nameof(Style.gridColumn).Equals(name, StringComparison.OrdinalIgnoreCase) ||
+                    nameof(Style.zIndex).Equals(name, StringComparison.OrdinalIgnoreCase))
+                {
                     if (int.TryParse(value, out _))
                     {
                         return styleAttribute with { Name = name, Value = value };
@@ -238,7 +223,7 @@ static class ModelToNodeTransformer
                     value = '"' + TryClearStringValue(value) + '"';
                 }
             }
-           
+
             return styleAttribute with { Name = name, Value = value };
         }
 
@@ -296,6 +281,14 @@ static class ModelToNodeTransformer
                 _   => weight
             };
         }
+    }
+
+    static Result<(VisualElementModel modifiedElementModel, IReadOnlyList<StyleAttribute> inlineStyle)>
+        convertStyleToInlineStyleObject(VisualElementModel elementModel)
+    {
+        var styles = convertDesignerStyleItemsToStyleAttributes(elementModel.Styles);
+
+        return (elementModel with { Styles = [] }, styles);
     }
 }
 
