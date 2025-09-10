@@ -190,7 +190,7 @@ static class ModelToNodeTransformer
 
         static StyleAttribute process(StyleAttribute styleAttribute)
         {
-            var name = kebabToCamelCase(styleAttribute.Name);
+            var name = KebabToCamelCase(styleAttribute.Name);
 
             var value = styleAttribute.Value;
             {
@@ -227,7 +227,7 @@ static class ModelToNodeTransformer
             return styleAttribute with { Name = name, Value = value };
         }
 
-        static string kebabToCamelCase(string kebab)
+        static string KebabToCamelCase(string kebab)
         {
             if (string.IsNullOrEmpty(kebab))
             {
