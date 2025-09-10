@@ -1,12 +1,44 @@
 ﻿using System.Globalization;
 using System.IO;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace ReactWithDotNet.VisualDesigner;
 
 static class Extensions
 {
-   
+    public static string KebabToCamelCase(string kebab)
+    {
+        if (string.IsNullOrEmpty(kebab))
+        {
+            return kebab;
+        }
+
+        var camelCase = new StringBuilder();
+        var capitalizeNext = false;
+
+        foreach (var c in kebab)
+        {
+            if (c == '-')
+            {
+                capitalizeNext = true;
+            }
+            else
+            {
+                if (capitalizeNext)
+                {
+                    camelCase.Append(char.ToUpper(c, CultureInfo.InvariantCulture));
+                    capitalizeNext = false;
+                }
+                else
+                {
+                    camelCase.Append(c);
+                }
+            }
+        }
+
+        return camelCase.ToString();
+    }
     
     public static string EnvironmentUserName => Environment.UserName;
     

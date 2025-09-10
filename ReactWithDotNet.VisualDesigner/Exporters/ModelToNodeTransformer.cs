@@ -1,6 +1,4 @@
 ﻿using System.Collections.Immutable;
-using System.Globalization;
-using System.Text;
 using Newtonsoft.Json;
 
 namespace ReactWithDotNet.VisualDesigner.Exporters;
@@ -225,39 +223,6 @@ static class ModelToNodeTransformer
             }
 
             return styleAttribute with { Name = name, Value = value };
-        }
-
-        static string KebabToCamelCase(string kebab)
-        {
-            if (string.IsNullOrEmpty(kebab))
-            {
-                return kebab;
-            }
-
-            var camelCase = new StringBuilder();
-            var capitalizeNext = false;
-
-            foreach (var c in kebab)
-            {
-                if (c == '-')
-                {
-                    capitalizeNext = true;
-                }
-                else
-                {
-                    if (capitalizeNext)
-                    {
-                        camelCase.Append(char.ToUpper(c, CultureInfo.InvariantCulture));
-                        capitalizeNext = false;
-                    }
-                    else
-                    {
-                        camelCase.Append(c);
-                    }
-                }
-            }
-
-            return camelCase.ToString();
         }
 
         static string tryGetFontWeight(string weight)
