@@ -17,7 +17,6 @@ public sealed class SampleAddressInfo
     public string ZipCode { get; set; }
 }
 
-
 [TestClass]
 public class CecilHelperTest
 {
