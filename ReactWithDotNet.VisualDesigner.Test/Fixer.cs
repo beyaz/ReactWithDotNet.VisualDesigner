@@ -60,6 +60,12 @@ public class Fixer
                 continue;
             }
             
+            if (style.Name == "font-medium")
+            {
+                styles = styles.SetItem(i, "font-weight: 500");
+                continue;
+            }
+            
             continue;
 
             if (style.Value is null)
