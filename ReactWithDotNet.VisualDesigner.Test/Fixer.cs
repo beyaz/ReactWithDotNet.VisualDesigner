@@ -19,56 +19,28 @@ public  class Fixer
 
     static VisualElementModel Fix(VisualElementModel model)
     {
-        if (model.Tag == "a")
+        var styles = model.Styles;
+        
+        for (int i = 0; i < styles.Count; i++)
         {
-            model = model with { Tag = "Link" };
-
-            var hrefIndex = model.Properties.ToList().FindIndex(x => x.Contains("href:"));
-            foreach (var tuple in TryParseProperty(model.Properties[hrefIndex]))
+            var text = styles[i];
+            var style = ParseStyleAttribute(text);
+            if (style.Name == "width")
             {
-                if (tuple.Value[0] == '/' || tuple.Value[0] == '#')
+                if (double.TryParse(style.Value, out _))
                 {
-                    model = model with { Properties = model.Properties.SetItem(hrefIndex, "href: " + '"' + tuple.Value + '"') };
-                }
-                else
-                {
-                    ;
+                    styles = styles.SetItem(i, $"width: {style.Value.Trim()}px");
                 }
             }
-
-            return model;
         }
 
-        if (model.Tag == "img")
+        var children = model.Children;
+        
+        for (var i = 0; i < children.Count; i++)
         {
-            model = model with { Tag = "Image" };
-
-            if (model.Properties.Any(x => x.Contains("width:")) is false &&
-                model.Properties.Any(x => x.Contains("height:")) is false)
-            {
-                model = model with { Properties = model.Properties.Add("fill: true") };
-            }
-
-            var srcIndex = model.Properties.ToList().FindIndex(x => x.Contains("src:"));
-            foreach (var tuple in TryParseProperty(model.Properties[srcIndex]))
-            {
-                if (tuple.Value.Contains("/", StringComparison.OrdinalIgnoreCase) && tuple.Value[0] != '"')
-                {
-                    model = model with { Properties = model.Properties.SetItem(srcIndex, "src: " + '"' + tuple.Value + '"') };
-                }
-            }
-
-            return model;
+            children = children.SetItem(i, Fix(children[i]));
         }
 
-        for (var i = 0; i < model.Children.Count; i++)
-        {
-            model = model with
-            {
-                Children = model.Children.SetItem(i, Fix(model.Children[i]))
-            };
-        }
-
-        return model;
+        return model with { Styles = styles, Children = children };
     }
 }
