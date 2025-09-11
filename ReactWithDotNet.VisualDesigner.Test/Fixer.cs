@@ -36,15 +36,27 @@ public class Fixer
             
             var style = ParseStyleAttribute(text);
 
-            if (style.Name == "max-w-44")
+            if (style.Name == "max-h-44")
             {
-                styles = styles.SetItem(i, "max-width: 176px");
+                styles = styles.SetItem(i, "max-height: 176px");
                 continue;
             }
             
-            if (style.Name == "min-width-56")
+            if (style.Name == "min-h-44")
+            {
+                styles = styles.SetItem(i, "min-height: 176px");
+                continue;
+            }
+            
+            if (style.Name == "min-w-56")
             {
                 styles = styles.SetItem(i, "min-width: 224px");
+                continue;
+            }
+            
+            if (style.Name == "max-w-56")
+            {
+                styles = styles.SetItem(i, "max-width: 224px");
                 continue;
             }
             
