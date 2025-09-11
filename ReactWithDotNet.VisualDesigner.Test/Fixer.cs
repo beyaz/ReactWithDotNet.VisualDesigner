@@ -38,6 +38,15 @@ public class Fixer
                 continue;
             }
 
+
+            // todo:
+            {
+                if (style.Name =="background" && style.Value=="white")
+                { 
+                    continue;
+                }
+            }
+
             {
                 if (style.Name == "color" || style.Name == "background"|| style.Name == "bg")
                 {
