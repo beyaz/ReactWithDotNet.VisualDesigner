@@ -33,6 +33,8 @@ public sealed record CommonCssSuggestions
         ["justify-content"] = new List<string> { "flex-start", "flex-end", "center", "space-between", "space-around", "space-evenly", "inherit", "initial", "unset" },
         ["align-items"]     = new List<string> { "stretch", "flex-start", "flex-end", "center", "baseline", "inherit", "initial", "unset" },
         ["overflow"]        = new List<string> { "visible", "hidden", "scroll", "auto", "clip", "inherit", "initial", "unset" },
+        ["overflow-x"]        = new List<string> { "visible", "hidden", "scroll", "auto", "clip", "inherit", "initial", "unset" },
+        ["overflow-y"]        = new List<string> { "visible", "hidden", "scroll", "auto", "clip", "inherit", "initial", "unset" },
         ["visibility"]      = new List<string> { "visible", "hidden", "collapse", "inherit", "initial", "unset" },
         ["opacity"]         = new List<string> { "0", "0.1", "0.5", "1", "inherit", "initial", "unset" },
         ["cursor"]          = new List<string> { "auto", "default", "pointer", "wait", "text", "move", "not-allowed", "crosshair", "inherit", "initial", "unset" },

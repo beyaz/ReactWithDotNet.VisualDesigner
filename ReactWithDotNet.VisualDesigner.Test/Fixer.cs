@@ -166,13 +166,13 @@ public class Fixer
                     
                     if (double.TryParse(style.Value.RemoveFromEnd("%"), out _))
                     {
-                        styles = styles.SetItem(i, $"{name}: {style.Value.Trim()}%");
+                        styles = styles.SetItem(i, $"{name}: {style.Value.Trim()}");
                         continue;
                     }
                     
                     if (double.TryParse(style.Value.RemoveFromEnd("px"), out _))
                     {
-                        styles = styles.SetItem(i, $"{name}: {style.Value.Trim()}px");
+                        styles = styles.SetItem(i, $"{name}: {style.Value.Trim()}");
                         continue;
                     }
                 }
