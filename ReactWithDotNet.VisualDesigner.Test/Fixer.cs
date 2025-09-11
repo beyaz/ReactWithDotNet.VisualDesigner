@@ -3,10 +3,12 @@
 [TestClass]
 public class Fixer
 {
+    const int ProjectId = 1;
+    
     [TestMethod]
     public async Task FixAll()
     {
-        foreach (var component in await Store.GetAllComponentsInProject(1))
+        foreach (var component in await Store.GetAllComponentsInProject(ProjectId))
         {
             var visualElementModel = DeserializeFromYaml<VisualElementModel>(component.RootElementAsYaml);
 
@@ -36,6 +38,17 @@ public class Fixer
                 continue;
             }
 
+            {
+                if (style.Name == "color" || style.Name == "background"|| style.Name == "bg")
+                {
+                    if (GetProjectConfig(ProjectId).Colors.ContainsKey(style.Value))
+                    {
+                        continue;
+                    }    
+                }
+                
+            }
+            // is  common css suggestion
             {
                 if (CommonCssSuggestions.Map.ContainsKey(style.Name))
                 {
