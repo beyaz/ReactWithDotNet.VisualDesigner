@@ -41,7 +41,18 @@ public class Fixer
 
             // todo:
             {
-                if (style.Name =="background" && style.Value=="white")
+                
+                if (style.Name.StartsWith("border") )
+                { 
+                    continue;
+                }
+                
+                if (style.Name =="background")
+                { 
+                    continue;
+                }
+                
+                if (style.Name =="color")
                 { 
                     continue;
                 }
@@ -217,6 +228,13 @@ public class Fixer
                 {
                     styles = styles.SetItem(i, $"padding-left: {style.Value.Trim()}px");
                     styles = styles.Insert(i + 1, $"padding-right: {style.Value.Trim()}px");
+                    continue;
+                }
+                
+                if (style.Value.EndsWith("rem"))
+                {
+                    styles = styles.SetItem(i, $"padding-left: {style.Value.Trim()}");
+                    styles = styles.Insert(i + 1, $"padding-right: {style.Value.Trim()}");
                     continue;
                 }
             }

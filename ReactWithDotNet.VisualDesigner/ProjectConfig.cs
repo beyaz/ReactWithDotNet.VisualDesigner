@@ -47,13 +47,16 @@ public sealed record CommonCssSuggestions
         ["pointer-events"]  = new List<string> { "auto", "none", "inherit", "initial", "unset" },
         ["object-fit"]      = new List<string> { "cover", "contain", "fill", "none", "scale-down" },
         ["border-width"]    = new List<string> { "1px", "1.5px", "2px", "4px" },
-        ["transform"]       = new List<string> { "translateY(-50%)", "translateX(-50%)" },
+        ["border-style"]    = new List<string> { "solid", "dashed", "dottet" },
+        ["align-self"]=["stretch"],
+        
+        ["transform"]       = new List<string> { "translateY(-50%)", "translateX(-50%)","rotate(-180deg)" },
         ["flex-wrap"]       = new List<string> { "nowrap", "wrap", "wrap-reverse", "inherit", "initial", "unset" },
         ["min-width"]       = new List<string> { "100px" },
         ["min-height"]      = new List<string> { "100px" },
         ["flex"]            = new List<string> { "1 1 0" },
         ["outline"]         = new List<string> { "none" },
-        ["user-select"]         = new List<string> { "none" },
+        ["user-select"]     = new List<string> { "none" },
         ["grid-template-columns"] = new List<string>
         {
             "1fr", "1fr 1fr", "1fr 1fr 1fr", "1fr 1fr 1fr 1fr", "1fr 1fr 1fr 1fr 1fr",
