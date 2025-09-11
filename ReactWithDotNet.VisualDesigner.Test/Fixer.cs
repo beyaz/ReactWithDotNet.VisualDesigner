@@ -66,6 +66,34 @@ public class Fixer
                 continue;
             }
             
+            if (style.Name == "line-height")
+            {
+                if (style.Value == "24px" || style.Value == "32px")
+                {
+                    continue;
+                }
+            }
+
+            if (style.Name == "font-family")
+            {
+                if (style.Value == "Host Grotesk")
+                {
+                    continue;
+                }
+            }
+            
+            if (style.Name == "bg")
+            {
+                styles = styles.SetItem(i, $"background: {style.Value}");
+                continue;
+            }
+            
+            if (style.Name == "visibility")
+            {
+                // todo: condition
+                continue;
+            }
+            
             continue;
 
             if (style.Value is null)
