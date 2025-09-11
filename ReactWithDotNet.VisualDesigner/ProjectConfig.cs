@@ -27,7 +27,7 @@ public sealed record CommonCssSuggestions
     {
         ["width"]           = new List<string> { "auto", "fit-content", "max-content", "min-content", "inherit", "initial", "unset", "100%", "75%", "50%", "25%" },
         ["height"]          = new List<string> { "auto", "fit-content", "max-content", "min-content", "inherit", "initial", "unset", "100%", "75%", "50%", "25%" },
-        ["display"]         = new List<string> { "flex", "grid" },
+        ["display"]         = new List<string> { "flex", "grid","inline-flex" },
         ["position"]        = new List<string> { "static", "relative", "absolute", "fixed", "sticky", "inherit", "initial", "unset" },
         ["flex-direction"]  = new List<string> { "row", "row-reverse", "column", "column-reverse", "inherit", "initial", "unset" },
         ["justify-content"] = new List<string> { "flex-start", "flex-end", "center", "space-between", "space-around", "space-evenly", "inherit", "initial", "unset" },

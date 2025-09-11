@@ -45,6 +45,21 @@ public class Fixer
                 { 
                     continue;
                 }
+                
+                if (style.Name =="background" && style.Value.StartsWith("rgb"))
+                { 
+                    continue;
+                }
+                
+                if (style.Name =="bg" && style.Value=="white")
+                { 
+                    continue;
+                }
+                
+                if (style.Name =="color" && style.Value=="white")
+                { 
+                    continue;
+                }
             }
 
             {
@@ -180,6 +195,12 @@ public class Fixer
                     }
                     
                     if (double.TryParse(style.Value.RemoveFromEnd("px"), out _))
+                    {
+                        styles = styles.SetItem(i, $"{name}: {style.Value.Trim()}");
+                        continue;
+                    }
+                    
+                    if (double.TryParse(style.Value.RemoveFromEnd("rem"), out _))
                     {
                         styles = styles.SetItem(i, $"{name}: {style.Value.Trim()}");
                         continue;
