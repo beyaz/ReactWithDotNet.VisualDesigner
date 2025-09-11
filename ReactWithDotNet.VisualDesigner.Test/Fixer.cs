@@ -33,7 +33,22 @@ public class Fixer
         for (var i = 0; i < styles.Count; i++)
         {
             var text = styles[i];
+            
             var style = ParseStyleAttribute(text);
+
+            if (style.Name == "max-w-44")
+            {
+                styles = styles.SetItem(i, "max-width: 176px");
+                continue;
+            }
+            
+            if (style.Name == "min-width-56")
+            {
+                styles = styles.SetItem(i, "min-width: 224px");
+                continue;
+            }
+            
+            continue;
 
             if (style.Value is null)
             {
@@ -42,6 +57,9 @@ public class Fixer
                     continue;
                 }
             }
+            
+            
+            
 
             // todo:
             {
