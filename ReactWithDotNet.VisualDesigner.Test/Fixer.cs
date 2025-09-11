@@ -26,31 +26,54 @@ public class Fixer
             var text = styles[i];
             var style = ParseStyleAttribute(text);
 
-
+            // can be numeric
+            {
+                
+                var canBeNumeric = "z-index,opacity,flex-grow,font-weight".Split(',',StringSplitOptions.RemoveEmptyEntries);
+                if (Array.IndexOf(canBeNumeric,style.Name) >= 0)
+                {
+                    if (double.TryParse(style.Value, out _))
+                    {
+                        continue;
+                    }
+                }
+            }
+            
             {
                 var name = style.Name;
 
-                var map = new Dictionary<string, string>
+                var nameIsValidCssAttributeName = name.In(["width", "height", "font-size", "gap", "border-radius"]);
+                if (!nameIsValidCssAttributeName)
                 {
-                    ["p"] = "padding",
-                    ["pt"] = "padding-top",
-                    ["pb"] = "padding-bottom",
-                    ["pl"] = "padding-left",
-                    ["pr"] = "padding-right",
+                    var map = new Dictionary<string, string>
+                    {
+                        ["p"]  = "padding",
+                        ["pt"] = "padding-top",
+                        ["pb"] = "padding-bottom",
+                        ["pl"] = "padding-left",
+                        ["pr"] = "padding-right",
                     
-                    ["m"]  = "margin",
-                    ["mt"] = "margin-top",
-                    ["mb"] = "margin-bottom",
-                    ["ml"] = "margin-left",
-                    ["mr"] = "margin-right",
+                        ["m"]  = "margin",
+                        ["mt"] = "margin-top",
+                        ["mb"] = "margin-bottom",
+                        ["ml"] = "margin-left",
+                        ["mr"] = "margin-right",
                     
-                    ["w"] = "width",
-                    ["h"] = "height"
-                };
-                
+                        ["w"] = "width",
+                        ["h"] = "height"
+                    };
+
+                    if (map.ContainsKey(name))
+                    {
+                        name = map[name];
+                        
+                        nameIsValidCssAttributeName = true;
+                    }
+                    
+                }
                
                 
-                if (name.In(["width", "height", "font-size", "gap", "border-radius"]))
+                if (nameIsValidCssAttributeName)
                 {
                     if (double.TryParse(style.Value, out _))
                     {
@@ -59,9 +82,8 @@ public class Fixer
                     }
                 }
             }
-            
 
-            
+
 
 
             if (style.Name == "px")
