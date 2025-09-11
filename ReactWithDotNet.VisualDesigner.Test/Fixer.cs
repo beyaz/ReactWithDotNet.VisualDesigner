@@ -4,7 +4,11 @@
 public class Fixer
 {
     const int ProjectId = 1;
-    
+
+    static readonly ProjectConfig Project = GetProjectConfig(ProjectId);
+
+    static readonly List<string> Temp = [];
+
     [TestMethod]
     public async Task FixAll()
     {
@@ -18,12 +22,10 @@ public class Fixer
             });
         }
 
+        // ReSharper disable once ReturnValueOfPureMethodIsNotUsed
         Temp.ToArray();
     }
 
-    static List<string> Temp = [];
-    
-    
     static VisualElementModel Fix(VisualElementModel model)
     {
         var styles = model.Styles;
@@ -35,68 +37,63 @@ public class Fixer
 
             if (style.Value is null)
             {
-                if (GetProjectConfig(ProjectId).Styles.ContainsKey(style.Name))
+                if (Project.Styles.ContainsKey(style.Name))
                 {
-                    
-                    continue;    
+                    continue;
                 }
-                
             }
-
 
             // todo:
             {
-                
-                if (style.Name.StartsWith( "outline" ))
-                { 
+                if (style.Name.StartsWith("outline"))
+                {
                     continue;
                 }
-                
-                if (style.Name == "padding" )
-                { 
+
+                if (style.Name == "padding")
+                {
                     continue;
                 }
-                
-                if (style.Name.StartsWith("border") )
-                { 
+
+                if (style.Name.StartsWith("border"))
+                {
                     continue;
                 }
-                
-                if (style.Name =="background")
-                { 
+
+                if (style.Name == "background")
+                {
                     continue;
                 }
-                
-                if (style.Name =="color")
-                { 
+
+                if (style.Name == "color")
+                {
                     continue;
                 }
-                
-                if (style.Name =="background" && style.Value.StartsWith("rgb"))
-                { 
+
+                if (style.Name == "background" && style.Value.StartsWith("rgb"))
+                {
                     continue;
                 }
-                
-                if (style.Name =="bg" && style.Value=="white")
-                { 
+
+                if (style.Name == "bg" && style.Value == "white")
+                {
                     continue;
                 }
-                
-                if (style.Name =="color" && style.Value=="white")
-                { 
+
+                if (style.Name == "color" && style.Value == "white")
+                {
                     continue;
                 }
             }
 
             {
-                if (style.Name == "color" || style.Name == "background"|| style.Name == "bg")
+                if (style.Name == "color" || style.Name == "background" || style.Name == "bg")
                 {
-                    if (GetProjectConfig(ProjectId).Colors.ContainsKey(style.Value))
+                    if (Project.Colors.ContainsKey(style.Value))
                     {
                         continue;
-                    }    
+                    }
                 }
-                
             }
             // is  common css suggestion
             {
@@ -111,9 +108,8 @@ public class Fixer
 
             // can be numeric
             {
-                
-                var canBeNumeric = "z-index,opacity,flex-grow,font-weight".Split(',',StringSplitOptions.RemoveEmptyEntries);
-                if (Array.IndexOf(canBeNumeric,style.Name) >= 0)
+                var canBeNumeric = "z-index,opacity,flex-grow,font-weight".Split(',', StringSplitOptions.RemoveEmptyEntries);
+                if (Array.IndexOf(canBeNumeric, style.Name) >= 0)
                 {
                     if (double.TryParse(style.Value, out _))
                     {
@@ -121,60 +117,54 @@ public class Fixer
                     }
                 }
             }
-            
+
             {
                 var name = style.Name;
 
                 var nameIsValidCssAttributeName = name.In([
-                    
-                    
-                    
-                    "font-size", 
-                    
-                    "gap", 
-                    
+                    "font-size",
+
+                    "gap",
+
                     "top", "right", "bottom", "left",
-                    
+
                     "width",
-                    "max-width", 
+                    "max-width",
                     "min-width",
-                    
+
                     "height",
-                    "max-height", 
+                    "max-height",
                     "min-height",
-                    
+
                     "border-width",
                     "border-bottom-width",
                     "border-top-width",
                     "border-lef-width",
                     "border-right-width",
-                    
+
                     "border-radius",
                     "border-top-left-radius",
                     "border-top-right-radius",
                     "border-bottom-left-radius",
                     "border-bottom-right-radius",
-                    
+
                     "inset",
-                    
-                    
+
                     "padding",
                     "padding-top",
                     "padding-bottom",
                     "padding-left",
                     "padding-right",
-                    
+
                     "margin",
                     "margin-top",
                     "margin-bottom",
                     "margin-left",
                     "margin-right",
-                    
+
                     "flex",
                     "flex-grow",
                     "flex-shrink"
-                    
-
                 ]);
                 if (!nameIsValidCssAttributeName)
                 {
@@ -185,13 +175,13 @@ public class Fixer
                         ["pb"] = "padding-bottom",
                         ["pl"] = "padding-left",
                         ["pr"] = "padding-right",
-                    
+
                         ["m"]  = "margin",
                         ["mt"] = "margin-top",
                         ["mb"] = "margin-bottom",
                         ["ml"] = "margin-left",
                         ["mr"] = "margin-right",
-                    
+
                         ["w"] = "width",
                         ["h"] = "height"
                     };
@@ -199,13 +189,11 @@ public class Fixer
                     if (map.ContainsKey(name))
                     {
                         name = map[name];
-                        
+
                         nameIsValidCssAttributeName = true;
                     }
-                    
                 }
-               
-                
+
                 if (nameIsValidCssAttributeName)
                 {
                     if (double.TryParse(style.Value, out _))
@@ -213,19 +201,19 @@ public class Fixer
                         styles = styles.SetItem(i, $"{name}: {style.Value.Trim()}px");
                         continue;
                     }
-                    
+
                     if (double.TryParse(style.Value.RemoveFromEnd("%"), out _))
                     {
                         styles = styles.SetItem(i, $"{name}: {style.Value.Trim()}");
                         continue;
                     }
-                    
+
                     if (double.TryParse(style.Value.RemoveFromEnd("px"), out _))
                     {
                         styles = styles.SetItem(i, $"{name}: {style.Value.Trim()}");
                         continue;
                     }
-                    
+
                     if (double.TryParse(style.Value.RemoveFromEnd("rem"), out _))
                     {
                         styles = styles.SetItem(i, $"{name}: {style.Value.Trim()}");
@@ -233,9 +221,6 @@ public class Fixer
                     }
                 }
             }
-
-
-
 
             if (style.Name == "px")
             {
@@ -245,7 +230,7 @@ public class Fixer
                     styles = styles.Insert(i + 1, $"padding-right: {style.Value.Trim()}px");
                     continue;
                 }
-                
+
                 if (style.Value.EndsWith("rem"))
                 {
                     styles = styles.SetItem(i, $"padding-left: {style.Value.Trim()}");
@@ -263,7 +248,7 @@ public class Fixer
                     continue;
                 }
             }
-            
+
             if (style.Name == "size")
             {
                 if (double.TryParse(style.Value, out _))
@@ -284,7 +269,7 @@ public class Fixer
                 continue;
             }
 
-            Temp.Add(style.Name +" : "+ style.Value);
+            Temp.Add(style.Name + " : " + style.Value);
         }
 
         var children = model.Children;
