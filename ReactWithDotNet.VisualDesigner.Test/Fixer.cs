@@ -36,6 +36,16 @@ public class Fixer
                 continue;
             }
 
+            {
+                if (CommonCssSuggestions.Map.ContainsKey(style.Name))
+                {
+                    if (CommonCssSuggestions.Map[style.Name].Contains(style.Value))
+                    {
+                        continue;
+                    }
+                }
+            }
+
             // can be numeric
             {
                 
