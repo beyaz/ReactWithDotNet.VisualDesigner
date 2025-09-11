@@ -35,12 +35,27 @@ public class Fixer
 
             if (style.Value is null)
             {
-                continue;
+                if (GetProjectConfig(ProjectId).Styles.ContainsKey(style.Name))
+                {
+                    
+                    continue;    
+                }
+                
             }
 
 
             // todo:
             {
+                
+                if (style.Name.StartsWith( "outline" ))
+                { 
+                    continue;
+                }
+                
+                if (style.Name == "padding" )
+                { 
+                    continue;
+                }
                 
                 if (style.Name.StartsWith("border") )
                 { 

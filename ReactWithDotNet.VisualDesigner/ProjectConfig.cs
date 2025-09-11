@@ -49,6 +49,7 @@ public sealed record CommonCssSuggestions
         ["border-width"]    = new List<string> { "1px", "1.5px", "2px", "4px" },
         ["border-style"]    = new List<string> { "solid", "dashed", "dottet" },
         ["align-self"]=["stretch"],
+        ["word-wrap"]=["break-word"],
         
         ["transform"]       = new List<string> { "translateY(-50%)", "translateX(-50%)","rotate(-180deg)" },
         ["flex-wrap"]       = new List<string> { "nowrap", "wrap", "wrap-reverse", "inherit", "initial", "unset" },
