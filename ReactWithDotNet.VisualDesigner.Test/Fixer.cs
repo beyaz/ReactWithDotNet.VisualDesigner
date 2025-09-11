@@ -15,8 +15,13 @@ public class Fixer
                 RootElementAsYaml = SerializeToYaml(Fix(visualElementModel))
             });
         }
+
+        Temp.ToArray();
     }
 
+    static List<string> Temp = [];
+    
+    
     static VisualElementModel Fix(VisualElementModel model)
     {
         var styles = model.Styles;
@@ -25,6 +30,11 @@ public class Fixer
         {
             var text = styles[i];
             var style = ParseStyleAttribute(text);
+
+            if (style.Value is null)
+            {
+                continue;
+            }
 
             // can be numeric
             {
@@ -42,7 +52,57 @@ public class Fixer
             {
                 var name = style.Name;
 
-                var nameIsValidCssAttributeName = name.In(["width", "height", "font-size", "gap", "border-radius"]);
+                var nameIsValidCssAttributeName = name.In([
+                    
+                    
+                    
+                    "font-size", 
+                    
+                    "gap", 
+                    
+                    "top", "right", "bottom", "left",
+                    
+                    "width",
+                    "max-width", 
+                    "min-width",
+                    
+                    "height",
+                    "max-height", 
+                    "min-height",
+                    
+                    "border-width",
+                    "border-bottom-width",
+                    "border-top-width",
+                    "border-lef-width",
+                    "border-right-width",
+                    
+                    "border-radius",
+                    "border-top-left-radius",
+                    "border-top-right-radius",
+                    "border-bottom-left-radius",
+                    "border-bottom-right-radius",
+                    
+                    "inset",
+                    
+                    
+                    "padding",
+                    "padding-top",
+                    "padding-bottom",
+                    "padding-left",
+                    "padding-right",
+                    
+                    "margin",
+                    "margin-top",
+                    "margin-bottom",
+                    "margin-left",
+                    "margin-right",
+                    
+                    "flex",
+                    "flex-grow",
+                    "flex-shrink"
+                    
+
+                ]);
                 if (!nameIsValidCssAttributeName)
                 {
                     var map = new Dictionary<string, string>
@@ -80,6 +140,18 @@ public class Fixer
                         styles = styles.SetItem(i, $"{name}: {style.Value.Trim()}px");
                         continue;
                     }
+                    
+                    if (double.TryParse(style.Value.RemoveFromEnd("%"), out _))
+                    {
+                        styles = styles.SetItem(i, $"{name}: {style.Value.Trim()}%");
+                        continue;
+                    }
+                    
+                    if (double.TryParse(style.Value.RemoveFromEnd("px"), out _))
+                    {
+                        styles = styles.SetItem(i, $"{name}: {style.Value.Trim()}px");
+                        continue;
+                    }
                 }
             }
 
@@ -105,11 +177,28 @@ public class Fixer
                     continue;
                 }
             }
+            
+            if (style.Name == "size")
+            {
+                if (double.TryParse(style.Value, out _))
+                {
+                    styles = styles.SetItem(i, $"width: {style.Value.Trim()}px");
+                    styles = styles.Insert(i + 1, $"height: {style.Value.Trim()}px");
+                    continue;
+                }
+            }
 
             if (double.TryParse(style.Value, out _))
             {
                 ;
             }
+
+            if (Temp.Contains(style.Name))
+            {
+                continue;
+            }
+
+            Temp.Add(style.Name +" : "+ style.Value);
         }
 
         var children = model.Children;
