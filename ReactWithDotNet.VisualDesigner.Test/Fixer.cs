@@ -268,6 +268,11 @@ public class Fixer
                     {
                         continue;
                     }
+                    
+                    if (TryGetWebColorByName(style.Value) is not null )
+                    {
+                        continue;
+                    }
                 }
             }
           
