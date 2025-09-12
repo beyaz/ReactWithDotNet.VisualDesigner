@@ -250,6 +250,17 @@ public class Fixer
                 }
             }
             
+            // is  common css suggestion
+            {
+                if (CommonCssSuggestions.Map.ContainsKey(style.Name))
+                {
+                    if (CommonCssSuggestions.Map[style.Name].Contains(style.Value))
+                    {
+                        continue;
+                    }
+                }
+            }
+            
             continue;
 
             
@@ -309,16 +320,7 @@ public class Fixer
                     }
                 }
             }
-            // is  common css suggestion
-            {
-                if (CommonCssSuggestions.Map.ContainsKey(style.Name))
-                {
-                    if (CommonCssSuggestions.Map[style.Name].Contains(style.Value))
-                    {
-                        continue;
-                    }
-                }
-            }
+            
 
             
 
