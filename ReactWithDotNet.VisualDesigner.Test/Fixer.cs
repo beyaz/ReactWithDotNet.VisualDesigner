@@ -104,6 +104,34 @@ public class Fixer
                 }
             }
             
+            if (style.Name == "px")
+            {
+                if (double.TryParse(style.Value, out _))
+                {
+                    styles = styles.SetItem(i, $"padding-left: {style.Value.Trim()}px");
+                    styles = styles.Insert(i + 1, $"padding-right: {style.Value.Trim()}px");
+                    continue;
+                }
+
+                if (style.Value.EndsWith("rem"))
+                {
+                    styles = styles.SetItem(i, $"padding-left: {style.Value.Trim()}");
+                    styles = styles.Insert(i + 1, $"padding-right: {style.Value.Trim()}");
+                    continue;
+                }
+            }
+            
+            if (style.Name == "py")
+            {
+                if (double.TryParse(style.Value, out _))
+                {
+                    styles = styles.SetItem(i, $"padding-top: {style.Value.Trim()}px");
+                    styles = styles.Insert(i + 1, $"padding-bottom: {style.Value.Trim()}px");
+                    continue;
+                }
+            }
+
+            
             continue;
 
             if (style.Value is null)
@@ -296,33 +324,9 @@ public class Fixer
                 }
             }
 
-            if (style.Name == "px")
-            {
-                if (double.TryParse(style.Value, out _))
-                {
-                    styles = styles.SetItem(i, $"padding-left: {style.Value.Trim()}px");
-                    styles = styles.Insert(i + 1, $"padding-right: {style.Value.Trim()}px");
-                    continue;
-                }
+           
 
-                if (style.Value.EndsWith("rem"))
-                {
-                    styles = styles.SetItem(i, $"padding-left: {style.Value.Trim()}");
-                    styles = styles.Insert(i + 1, $"padding-right: {style.Value.Trim()}");
-                    continue;
-                }
-            }
-
-            if (style.Name == "py")
-            {
-                if (double.TryParse(style.Value, out _))
-                {
-                    styles = styles.SetItem(i, $"padding-top: {style.Value.Trim()}px");
-                    styles = styles.Insert(i + 1, $"padding-bottom: {style.Value.Trim()}px");
-                    continue;
-                }
-            }
-
+           
             
 
             if (double.TryParse(style.Value, out _))
