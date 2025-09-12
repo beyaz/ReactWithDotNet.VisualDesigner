@@ -1,5 +1,4 @@
 ﻿using System.Reflection;
-using System.Text.RegularExpressions;
 
 namespace ReactWithDotNet.VisualDesigner;
 
@@ -208,7 +207,7 @@ public static partial class CssHelper
 
             static (string key, string value) arrangeHtmlStyleValue(string key, string value)
             {
-                var (success, _, left, right) = TextParser.TryParseConditionalValue(value);
+                var (success, _, left, right) = TryParseConditionalValue(value);
                 if (success)
                 {
                     if (right is not null)
@@ -230,31 +229,6 @@ public static partial class CssHelper
         {
             return GetPseudoFunction(pseudo).Then(pseudoFunction => pseudoFunction([.. styleModifiers]));
         }
-    }
-}
-
-static class TextParser
-{
-    public static (bool success, string condition, string left, string right) TryParseConditionalValue(string value)
-    {
-        if (string.IsNullOrWhiteSpace(value))
-        {
-            return (false, null, null, null);
-        }
-
-        // condition ? left : right  (right opsiyonel)
-        var pattern = @"^\s*(?<condition>[^?]+?)\s*\?\s*(?<left>[^:]+?)\s*(?::\s*(?<right>.+))?$";
-        var match = Regex.Match(value, pattern);
-
-        if (match.Success)
-        {
-            var condition = match.Groups["condition"].Value.Trim();
-            var left = match.Groups["left"].Value.Trim();
-            var right = match.Groups["right"].Success ? match.Groups["right"].Value.Trim() : null;
-            return (true, condition, left, right);
-        }
-
-        return (false, null, null, null);
     }
 }
 

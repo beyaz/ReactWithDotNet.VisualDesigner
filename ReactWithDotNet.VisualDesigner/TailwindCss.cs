@@ -137,7 +137,7 @@ static class TailwindCss
 
             // check is conditional sample: border-width: {props.isSelected} ? 2 : 5
             {
-                var (success, condition, left, right) = TextParser.TryParseConditionalValue(cssAttributeValue);
+                var (success, condition, left, right) = ConditionalCssTextParser.TryParseConditionalValue(cssAttributeValue);
                 if (success)
                 {
                     string lefTailwindClass;

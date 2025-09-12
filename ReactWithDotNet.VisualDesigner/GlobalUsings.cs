@@ -15,6 +15,8 @@ global using ReactWithDotNet.VisualDesigner.DataAccess;
 global using static ReactWithDotNet.VisualDesigner.Extensions;
 global using static ReactWithDotNet.VisualDesigner.PseudoHelper;
 global using static ReactWithDotNet.VisualDesigner.TailwindCss;
+global using static ReactWithDotNet.VisualDesigner.ConditionalCssTextParser;
+    
 
 
 global using static ReactWithDotNet.VisualDesigner.Primitive.NotificationHelper;
