@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using System.Collections.Specialized;
 using System.Globalization;
 using System.Reflection;
 using System.Text.RegularExpressions;
@@ -892,7 +893,10 @@ public static partial class CssHelper
                 return new DesignerStyleItem
                 {
                     Pseudo        = pseudo,
-                    RawHtmlStyles = htmlStyle.Value
+                    RawHtmlStyles = new Dictionary<string, string>
+                    {
+                        [htmlStyle.Value.name] = htmlStyle.Value.value
+                    }
                 };
             }
 
