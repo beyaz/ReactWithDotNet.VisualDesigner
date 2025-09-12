@@ -94,6 +94,16 @@ public class Fixer
                 continue;
             }
             
+            if (style.Name == "size")
+            {
+                if (double.TryParse(style.Value, out _))
+                {
+                    styles = styles.SetItem(i, $"width: {style.Value.Trim()}px");
+                    styles = styles.Insert(i + 1, $"height: {style.Value.Trim()}px");
+                    continue;
+                }
+            }
+            
             continue;
 
             if (style.Value is null)
@@ -313,15 +323,7 @@ public class Fixer
                 }
             }
 
-            if (style.Name == "size")
-            {
-                if (double.TryParse(style.Value, out _))
-                {
-                    styles = styles.SetItem(i, $"width: {style.Value.Trim()}px");
-                    styles = styles.Insert(i + 1, $"height: {style.Value.Trim()}px");
-                    continue;
-                }
-            }
+            
 
             if (double.TryParse(style.Value, out _))
             {

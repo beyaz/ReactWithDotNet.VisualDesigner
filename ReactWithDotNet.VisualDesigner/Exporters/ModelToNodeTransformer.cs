@@ -109,6 +109,48 @@ static class ModelToNodeTransformer
                     node = node with { Properties = node.Properties.Add(new() { Name = name, Value = value }) };
                 }
 
+                // todo : optimize styles, for example width and height to size
+                {
+                    var width = FirstOrDefaultOf
+                        (from x in elementModel.Styles.Select((text, index) => new { text, index })
+                         let styleItem = ParseStyleAttribute(x.text)
+                         where styleItem.Name == "width"
+                         select new
+                         {
+                             styleItem.Value,
+                             x.index
+                         });
+                    
+                    var height = FirstOrDefaultOf
+                        (from x in elementModel.Styles.Select((text, index) => new { text, index })
+                         let styleItem = ParseStyleAttribute(x.text)
+                         where styleItem.Name == "height"
+                         select new
+                         {
+                             styleItem.Value,
+                             x.index
+                         });
+                    
+                    var size = FirstOrDefaultOf
+                        (from x in elementModel.Styles.Select((text, index) => new { text, index })
+                         let styleItem = ParseStyleAttribute(x.text)
+                         where styleItem.Name == "size"
+                         select new
+                         {
+                             styleItem.Value,
+                             x.index
+                         });
+                    
+
+                    if (width is not null && height is not null && width.Value == height.Value && height.Value.EndsWith("px") && size is null)
+                    {
+                        elementModel = elementModel with
+                        {
+                            Styles = elementModel.Styles.SetItem(width.index, $"size: {width.Value}").RemoveAt(height.index)
+                        };
+                    }
+                }
+                
                 foreach (var styleItem in elementModel.Styles)
                 {
                     string tailwindClassName;

@@ -7,6 +7,8 @@ namespace ReactWithDotNet.VisualDesigner;
 
 static class Extensions
 {
+    public static T FirstOrDefaultOf<T>(IEnumerable<T> items) => items.FirstOrDefault();
+    
     public static string KebabToCamelCase(string kebab)
     {
         if (string.IsNullOrEmpty(kebab))
