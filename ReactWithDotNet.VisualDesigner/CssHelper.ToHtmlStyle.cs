@@ -4,15 +4,9 @@ partial class CssHelper
 {
     static Result<IReadOnlyDictionary<string, string>> ToHtmlStyle(ProjectConfig project, string name, string value)
     {
-       
-
         ArgumentNullException.ThrowIfNull(name);
 
-        ArgumentNullException.ThrowIfNull(value);
-
-        value = value.Trim();
-        
-        ArgumentNullException.ThrowIfNull(value);
+        ArgumentException.ThrowIfNullOrWhiteSpace(value);
 
         switch (name)
         {
@@ -110,7 +104,7 @@ partial class CssHelper
                 if (parts.Length == 3)
                 {
                     parts[2] = resolveColor(parts[2]);
-                    
+
                     value = string.Join(" ", parts);
                 }
 
@@ -128,18 +122,15 @@ partial class CssHelper
             {
                 return asDictionary((name, resolveColor(value)));
             }
-
         }
 
         return new Exception($"{name}: {value} is not recognized");
-
-       
 
         static Dictionary<string, string> asDictionary(params (string Name, string Value)[] items)
         {
             return items.ToDictionary(x => x.Name, x => x.Value);
         }
-        
+
         string resolveColor(string val)
         {
             return project.Colors.GetValueOrDefault(val) ?? TryGetTailwindColorByName(val) ?? val;
