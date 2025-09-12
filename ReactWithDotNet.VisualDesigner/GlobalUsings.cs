@@ -21,6 +21,7 @@ global using static ReactWithDotNet.VisualDesigner.CssHelper;
 global using static ReactWithDotNet.VisualDesigner.Toolbox.YamlHelper;
 
 global using static ReactWithDotNet.Tailwind;
+global using static ReactWithDotNet.WebColors;
 global using static ReactWithDotNet.VisualDesigner.Mappers.Mapper;
 global using ReactWithDotNet.VisualDesigner.Toolbox;
 

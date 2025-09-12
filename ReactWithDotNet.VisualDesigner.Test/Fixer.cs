@@ -261,6 +261,17 @@ public class Fixer
                 }
             }
             
+            {
+                if (style.Name == "color" || style.Name == "background")
+                {
+                    if (Project.Colors.ContainsKey(style.Value))
+                    {
+                        continue;
+                    }
+                }
+            }
+          
+            
             //continue;
 
             
@@ -311,15 +322,7 @@ public class Fixer
                 }
             }
 
-            {
-                if (style.Name == "color" || style.Name == "background" || style.Name == "bg")
-                {
-                    if (Project.Colors.ContainsKey(style.Value))
-                    {
-                        continue;
-                    }
-                }
-            }
+            
             
 
             
