@@ -232,7 +232,7 @@ public class Fixer
             
             // can be numeric
             {
-                var canBeNumeric = "z-index,opacity,flex-grow,font-weight".Split(',', StringSplitOptions.RemoveEmptyEntries);
+                var canBeNumeric = "z-index,opacity,flex,flex-shrink,flex-grow,font-weight".Split(',', StringSplitOptions.RemoveEmptyEntries);
                 if (Array.IndexOf(canBeNumeric, style.Name) >= 0)
                 {
                     if (double.TryParse(style.Value, out _))
@@ -261,7 +261,7 @@ public class Fixer
                 }
             }
             
-            continue;
+            //continue;
 
             
             
