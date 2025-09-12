@@ -11,12 +11,7 @@ partial class CssHelper
         ArgumentNullException.ThrowIfNull(value);
 
         value = value.Trim();
-
-        foreach (var newValue in tryFixValuesForShorthandDeclarations(name, value))
-        {
-            value = newValue;
-        }
-
+        
         ArgumentNullException.ThrowIfNull(value);
 
         var isValueDouble = double.TryParse(value, out var valueAsDouble);
@@ -207,32 +202,7 @@ partial class CssHelper
 
         return new Exception($"{name}: {value} is not recognized");
 
-        static Maybe<string> tryFixValuesForShorthandDeclarations(string name, string value)
-        {
-            foreach (var newValue in tryFixPaddingAndMarginShorthandDeclaration(name, value))
-            {
-                return newValue;
-            }
-
-            return None;
-
-            static Maybe<string> tryFixPaddingAndMarginShorthandDeclaration(string name, string value)
-            {
-                if ((name == "padding" || name == "margin") && value.Contains(' '))
-                {
-                    var parts = value.Split(" ", StringSplitOptions.RemoveEmptyEntries);
-                    if (parts.Length == 2)
-                    {
-                        if (parts[0].IsDouble() && parts[1].IsDouble())
-                        {
-                            return $"{parts[0]}px {parts[1]}px";
-                        }
-                    }
-                }
-
-                return None;
-            }
-        }
+       
 
         static Dictionary<string, string> asDictionary(params (string Name, string Value)[] items)
         {
