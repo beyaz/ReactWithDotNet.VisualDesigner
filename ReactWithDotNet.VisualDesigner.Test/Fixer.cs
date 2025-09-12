@@ -242,8 +242,6 @@ public class Fixer
                 }
             }
             
-            continue;
-
             if (style.Value is null)
             {
                 if (Project.Styles.ContainsKey(style.Name))
@@ -251,6 +249,10 @@ public class Fixer
                     continue;
                 }
             }
+            
+            continue;
+
+            
             
             
             
