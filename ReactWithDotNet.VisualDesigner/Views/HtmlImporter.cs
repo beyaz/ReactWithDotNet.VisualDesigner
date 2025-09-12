@@ -166,7 +166,7 @@ static class HtmlImporter
 
                 static (Maybe<string> className, IReadOnlyList<string> styles) processClassName(ProjectConfig project, string className)
                 {
-                    foreach (var designerStyleItem in TryConvertCssUtilityClassToHtmlStyle(project, className))
+                    foreach (var designerStyleItem in TryConvertTailwindUtilityClassToHtmlStyle(project, className))
                     {
                         var returnStyles = new List<string>();
 

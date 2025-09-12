@@ -856,7 +856,7 @@ public static partial class CssHelper
         }
 
         {
-            foreach (var item in TryConvertCssUtilityClassToHtmlStyle(project, designerStyleItem))
+            foreach (var item in TryConvertTailwindUtilityClassToHtmlStyle(project, designerStyleItem))
             {
                 return item;
             }
@@ -1071,7 +1071,7 @@ public static partial class CssHelper
         }
     }
 
-    public static Maybe<DesignerStyleItem> TryConvertCssUtilityClassToHtmlStyle(ProjectConfig project, string utilityCssClassName)
+    public static Maybe<DesignerStyleItem> TryConvertTailwindUtilityClassToHtmlStyle(ProjectConfig project, string utilityCssClassName)
     {
         string pseudo = null;
         {
