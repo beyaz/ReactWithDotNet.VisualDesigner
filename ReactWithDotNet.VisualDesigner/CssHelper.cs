@@ -6,6 +6,11 @@ using System.Text.RegularExpressions;
 
 namespace ReactWithDotNet.VisualDesigner;
 
+
+static class TailwindCss
+{
+    
+}
 public static partial class CssHelper
 {
     
