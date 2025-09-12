@@ -230,6 +230,18 @@ public class Fixer
                 }
             }
             
+            // can be numeric
+            {
+                var canBeNumeric = "z-index,opacity,flex-grow,font-weight".Split(',', StringSplitOptions.RemoveEmptyEntries);
+                if (Array.IndexOf(canBeNumeric, style.Name) >= 0)
+                {
+                    if (double.TryParse(style.Value, out _))
+                    {
+                        continue;
+                    }
+                }
+            }
+            
             continue;
 
             if (style.Value is null)
@@ -306,117 +318,9 @@ public class Fixer
                 }
             }
 
-            // can be numeric
-            {
-                var canBeNumeric = "z-index,opacity,flex-grow,font-weight".Split(',', StringSplitOptions.RemoveEmptyEntries);
-                if (Array.IndexOf(canBeNumeric, style.Name) >= 0)
-                {
-                    if (double.TryParse(style.Value, out _))
-                    {
-                        continue;
-                    }
-                }
-            }
+            
 
-            {
-                var name = style.Name;
-
-                var nameIsValidCssAttributeName = name.In([
-                    "font-size",
-
-                    "gap",
-
-                    "top", "right", "bottom", "left",
-
-                    "width",
-                    "max-width",
-                    "min-width",
-
-                    "height",
-                    "max-height",
-                    "min-height",
-
-                    "border-width",
-                    "border-bottom-width",
-                    "border-top-width",
-                    "border-lef-width",
-                    "border-right-width",
-
-                    "border-radius",
-                    "border-top-left-radius",
-                    "border-top-right-radius",
-                    "border-bottom-left-radius",
-                    "border-bottom-right-radius",
-
-                    "inset",
-
-                    "padding",
-                    "padding-top",
-                    "padding-bottom",
-                    "padding-left",
-                    "padding-right",
-
-                    "margin",
-                    "margin-top",
-                    "margin-bottom",
-                    "margin-left",
-                    "margin-right",
-                ]);
-                if (!nameIsValidCssAttributeName)
-                {
-                    var map = new Dictionary<string, string>
-                    {
-                        ["p"]  = "padding",
-                        ["pt"] = "padding-top",
-                        ["pb"] = "padding-bottom",
-                        ["pl"] = "padding-left",
-                        ["pr"] = "padding-right",
-
-                        ["m"]  = "margin",
-                        ["mt"] = "margin-top",
-                        ["mb"] = "margin-bottom",
-                        ["ml"] = "margin-left",
-                        ["mr"] = "margin-right",
-
-                        ["w"] = "width",
-                        ["h"] = "height"
-                    };
-
-                    if (map.ContainsKey(name))
-                    {
-                        name = map[name];
-
-                        nameIsValidCssAttributeName = true;
-                    }
-                }
-
-                if (nameIsValidCssAttributeName)
-                {
-                    if (double.TryParse(style.Value, out _))
-                    {
-                        styles = styles.SetItem(i, $"{name}: {style.Value.Trim()}px");
-                        continue;
-                    }
-
-                    if (double.TryParse(style.Value.RemoveFromEnd("%"), out _))
-                    {
-                        styles = styles.SetItem(i, $"{name}: {style.Value.Trim()}");
-                        continue;
-                    }
-
-                    if (double.TryParse(style.Value.RemoveFromEnd("px"), out _))
-                    {
-                        styles = styles.SetItem(i, $"{name}: {style.Value.Trim()}");
-                        continue;
-                    }
-
-                    if (double.TryParse(style.Value.RemoveFromEnd("rem"), out _))
-                    {
-                        styles = styles.SetItem(i, $"{name}: {style.Value.Trim()}");
-                        continue;
-                    }
-                }
-            }
+            
 
            
 
