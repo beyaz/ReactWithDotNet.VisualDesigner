@@ -263,7 +263,7 @@ public sealed record DesignerStyleItem
     }
 }
 
-public sealed record FinalStyleAttribute
+public sealed record FinalCssItem
 {
     public required string Name { get; init; }
     
