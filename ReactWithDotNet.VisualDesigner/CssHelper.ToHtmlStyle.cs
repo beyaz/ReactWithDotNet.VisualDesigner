@@ -2,7 +2,7 @@
 
 partial class CssHelper
 {
-    static Result<IReadOnlyDictionary<string, string>> ToHtmlStyle(ProjectConfig project, string name, string value)
+    static Result<(string name, string value)> ToHtmlStyle(ProjectConfig project, string name, string value)
     {
         ArgumentNullException.ThrowIfNull(name);
 
@@ -91,7 +91,7 @@ partial class CssHelper
             case "pointer-events":
             case "transform":
             {
-                return asDictionary((name, value));
+                return (name, value);
             }
 
             case "border-top":
@@ -108,7 +108,7 @@ partial class CssHelper
                     value = string.Join(" ", parts);
                 }
 
-                return asDictionary((name, value));
+                return (name, value);
             }
 
             // c o l o r s
@@ -120,20 +120,18 @@ partial class CssHelper
             case "border-left-color":
             case "border-right-color":
             {
-                return asDictionary((name, resolveColor(value)));
+                return (name, resolveColor(value));
             }
         }
 
         return new Exception($"{name}: {value} is not recognized");
 
-        static Dictionary<string, string> asDictionary(params (string Name, string Value)[] items)
-        {
-            return items.ToDictionary(x => x.Name, x => x.Value);
-        }
-
         string resolveColor(string val)
         {
-            return project.Colors.GetValueOrDefault(val) ?? TryGetTailwindColorByName(val) ?? val;
+            return project.Colors.GetValueOrDefault(val)
+                   ??
+                   TryGetTailwindColorByName(val)
+                   ?? val;
         }
     }
 }
