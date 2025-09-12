@@ -144,10 +144,11 @@ static class ModelToNodeTransformer
 
                     if (width is not null && height is not null && width.Value == height.Value && height.Value.EndsWith("px") && size is null)
                     {
-                        elementModel = elementModel with
-                        {
-                            Styles = elementModel.Styles.SetItem(width.index, $"size: {width.Value}").RemoveAt(height.index)
-                        };
+                        // todo: ??
+                        //elementModel = elementModel with
+                        //{
+                        //    Styles = elementModel.Styles.SetItem(width.index, $"size: {width.Value}").RemoveAt(height.index)
+                        //};
                     }
                 }
                 
