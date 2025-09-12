@@ -158,6 +158,77 @@ public class Fixer
                 }
             }
 
+            // common ends with px
+            {
+                var nameIsValidCssAttributeName = style.Name.In([
+                    "font-size",
+
+                    "gap",
+
+                    "top", "right", "bottom", "left",
+
+                    "width",
+                    "max-width",
+                    "min-width",
+
+                    "height",
+                    "max-height",
+                    "min-height",
+
+                    "border-width",
+                    "border-bottom-width",
+                    "border-top-width",
+                    "border-lef-width",
+                    "border-right-width",
+
+                    "border-radius",
+                    "border-top-left-radius",
+                    "border-top-right-radius",
+                    "border-bottom-left-radius",
+                    "border-bottom-right-radius",
+
+                    "inset",
+
+                    "padding",
+                    "padding-top",
+                    "padding-bottom",
+                    "padding-left",
+                    "padding-right",
+
+                    "margin",
+                    "margin-top",
+                    "margin-bottom",
+                    "margin-left",
+                    "margin-right",
+                ]);
+                
+                if (nameIsValidCssAttributeName)
+                {
+                    if (double.TryParse(style.Value, out _))
+                    {
+                        styles = styles.SetItem(i, $"{style.Name}: {style.Value.Trim()}px");
+                        continue;
+                    }
+
+                    if (double.TryParse(style.Value.RemoveFromEnd("%"), out _))
+                    {
+                        styles = styles.SetItem(i, $"{style.Name}: {style.Value.Trim()}");
+                        continue;
+                    }
+
+                    if (double.TryParse(style.Value.RemoveFromEnd("px"), out _))
+                    {
+                        styles = styles.SetItem(i, $"{style.Name}: {style.Value.Trim()}");
+                        continue;
+                    }
+
+                    if (double.TryParse(style.Value.RemoveFromEnd("rem"), out _))
+                    {
+                        styles = styles.SetItem(i, $"{style.Name}: {style.Value.Trim()}");
+                        continue;
+                    }
+                }
+            }
             
             continue;
 
@@ -290,10 +361,6 @@ public class Fixer
                     "margin-bottom",
                     "margin-left",
                     "margin-right",
-
-                    "flex",
-                    "flex-grow",
-                    "flex-shrink"
                 ]);
                 if (!nameIsValidCssAttributeName)
                 {
