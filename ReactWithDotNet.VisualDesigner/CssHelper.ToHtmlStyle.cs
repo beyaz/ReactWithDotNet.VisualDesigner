@@ -14,11 +14,9 @@ partial class CssHelper
         
         ArgumentNullException.ThrowIfNull(value);
 
-        var isValueDouble = double.TryParse(value, out var valueAsDouble);
-        
         switch (name)
         {
-            // AS PIXEL
+            // AS SAME
             case "width":
             case "height":
             case "max-width":
@@ -51,16 +49,6 @@ partial class CssHelper
             case "border-radius":
             case "line-height":
             case "outline-offset":
-            {
-                if (isValueDouble)
-                {
-                    value = valueAsDouble.AsPixel();
-                }
-
-                return asDictionary((name, value));
-            }
-
-            // S A M E
             case "align-items":
             case "justify-items":
             case "justify-content":
@@ -107,6 +95,7 @@ partial class CssHelper
             case "break-after":
             case "box-sizing":
             case "pointer-events":
+            case "transform":
             {
                 return asDictionary((name, value));
             }
@@ -128,35 +117,6 @@ partial class CssHelper
                 return asDictionary((name, value));
             }
 
-            // m u l t i p l e
-            case "px":
-            {
-                if (isValueDouble)
-                {
-                    value = valueAsDouble.AsPixel();
-                }
-
-                return asDictionary(("padding-left", value), ("padding-right", value));
-            }
-            case "py":
-            {
-                if (isValueDouble)
-                {
-                    value = valueAsDouble.AsPixel();
-                }
-
-                return asDictionary(("padding-top", value), ("padding-bottom", value));
-            }
-            case "size":
-            {
-                if (isValueDouble)
-                {
-                    value = valueAsDouble.AsPixel();
-                }
-
-                return asDictionary(("width", value), ("height", value));
-            }
-
             // c o l o r s
             case "background-color":
             case "background":
@@ -166,16 +126,6 @@ partial class CssHelper
                 return asDictionary((name, resolveColor(value)));
             }
 
-            // SPECIAL
-            case "transform":
-            {
-                if (isValueDouble)
-                {
-                    value = valueAsDouble + "deg";
-                }
-
-                return asDictionary((name, value));
-            }
         }
 
         return new Exception($"{name}: {value} is not recognized");
