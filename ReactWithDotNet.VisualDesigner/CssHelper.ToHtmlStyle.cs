@@ -15,29 +15,7 @@ partial class CssHelper
         ArgumentNullException.ThrowIfNull(value);
 
         var isValueDouble = double.TryParse(value, out var valueAsDouble);
-
-        name = name switch
-        {
-            "p"  => "padding",
-            "pl" => "padding-left",
-            "pr" => "padding-right",
-            "pt" => "padding-top",
-            "pb" => "padding-bottom",
-
-            "m"  => "margin",
-            "ml" => "margin-left",
-            "mr" => "margin-right",
-            "mt" => "margin-top",
-            "mb" => "margin-bottom",
-
-            "w" => "width",
-            "h" => "height",
-
-            "bg" => "background",
-
-            _ => name
-        };
-
+        
         switch (name)
         {
             // AS PIXEL
