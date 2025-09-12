@@ -273,6 +273,13 @@ public class Fixer
                     {
                         continue;
                     }
+
+                    if (style.Value?.StartsWith("rgb(") is true ||
+                        style.Value?.StartsWith("rgba(") is true ||
+                        style.Value?.StartsWith("#") is true)
+                    {
+                        continue;
+                    }
                 }
             }
           
@@ -291,40 +298,18 @@ public class Fixer
                     continue;
                 }
 
-                if (style.Name == "padding")
-                {
-                    continue;
-                }
+                
 
                 if (style.Name.StartsWith("border"))
                 {
                     continue;
                 }
 
-                if (style.Name == "background")
-                {
-                    continue;
-                }
+                
 
-                if (style.Name == "color")
-                {
-                    continue;
-                }
+               
 
-                if (style.Name == "background" && style.Value.StartsWith("rgb"))
-                {
-                    continue;
-                }
-
-                if (style.Name == "bg" && style.Value == "white")
-                {
-                    continue;
-                }
-
-                if (style.Name == "color" && style.Value == "white")
-                {
-                    continue;
-                }
+               
             }
 
             
