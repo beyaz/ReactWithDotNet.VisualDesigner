@@ -130,6 +130,33 @@ public class Fixer
                     continue;
                 }
             }
+            
+            // resolve names
+            {
+                var map = new Dictionary<string, string>
+                {
+                    ["p"]  = "padding",
+                    ["pt"] = "padding-top",
+                    ["pb"] = "padding-bottom",
+                    ["pl"] = "padding-left",
+                    ["pr"] = "padding-right",
+
+                    ["m"]  = "margin",
+                    ["mt"] = "margin-top",
+                    ["mb"] = "margin-bottom",
+                    ["ml"] = "margin-left",
+                    ["mr"] = "margin-right",
+
+                    ["w"] = "width",
+                    ["h"] = "height"
+                };
+
+                if (map.ContainsKey(style.Name))
+                {
+                    styles = styles.SetItem(i, $"{map[style.Name]}: {style.Value}");
+                    continue;
+                }
+            }
 
             
             continue;
