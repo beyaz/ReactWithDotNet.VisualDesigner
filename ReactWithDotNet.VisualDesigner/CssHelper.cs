@@ -242,6 +242,19 @@ public sealed record DesignerStyleItem
 
     public static implicit operator DesignerStyleItem((string Pseudo, (string Name, string Value)[] RawHtmlStyles) tuple)
     {
+        foreach (var (name, value) in tuple.RawHtmlStyles)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                throw new ArgumentException("Style name cannot be null or whitespace.", nameof(tuple));
+            }
+
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                throw new ArgumentException("Style value cannot be whitespace.", nameof(tuple));
+            }
+        }
+
         return new()
         {
             Pseudo        = tuple.Pseudo,
