@@ -122,6 +122,9 @@ partial class CssHelper
             case "background":
             case "color":
             case "border-top-color":
+            case "border-bottom-color":
+            case "border-left-color":
+            case "border-right-color":
             {
                 return asDictionary((name, resolveColor(value)));
             }
