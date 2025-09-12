@@ -239,6 +239,8 @@ public sealed record DesignerStyleItem
     public string Pseudo { get; init; }
 
     public IReadOnlyDictionary<string, string> RawHtmlStyles { get; init; }
+    
+    public IReadOnlyList<FinalCssItem> FinalCssItems { get; init; }
 
     public static implicit operator DesignerStyleItem((string Pseudo, (string Name, string Value)[] RawHtmlStyles) tuple)
     {
