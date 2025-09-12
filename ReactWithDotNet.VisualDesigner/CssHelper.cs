@@ -262,3 +262,15 @@ public sealed record DesignerStyleItem
         };
     }
 }
+
+public sealed record FinalStyleAttribute
+{
+    public required string Name { get; init; }
+    
+    public required string Value { get; init; }
+
+    public override string ToString()
+    {
+        return $"{Name}: {Value};";
+    }
+}
