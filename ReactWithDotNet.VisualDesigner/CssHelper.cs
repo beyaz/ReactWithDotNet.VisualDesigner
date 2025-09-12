@@ -234,18 +234,8 @@ public static partial class CssHelper
 
 public sealed record DesignerStyleItem
 {
-    public DesignerStyleItem((string Pseudo, (string Name, string Value)[] RawHtmlStyles) tuple)
-    {
-        Pseudo = tuple.Pseudo;
-
-        RawHtmlStyles = tuple.RawHtmlStyles.ToDictionary(x => x.Name, x => x.Value);
-    }
-
-    public DesignerStyleItem()
-    {
-    }
-
     public string OriginalText { get; init; }
+    
     public string Pseudo { get; init; }
 
     public IReadOnlyDictionary<string, string> RawHtmlStyles { get; init; }
