@@ -225,7 +225,16 @@ static class ModelToNodeTransformer
         return node;
     }
 
-    static IReadOnlyList<StyleAttribute> convertDesignerStyleItemsToStyleAttributes(IReadOnlyList<string> designerStyleItems)
+    
+
+    static Result<(VisualElementModel modifiedElementModel, IReadOnlyList<StyleAttribute> inlineStyle)>
+        convertStyleToInlineStyleObject(VisualElementModel elementModel)
+    {
+        var styles = convertDesignerStyleItemsToStyleAttributes(elementModel.Styles);
+
+        return (elementModel with { Styles = [] }, styles);
+        
+        static IReadOnlyList<StyleAttribute> convertDesignerStyleItemsToStyleAttributes(IReadOnlyList<string> designerStyleItems)
     {
         return (from text in designerStyleItems select process(ParseStyleAttribute(text))).ToList();
 
@@ -290,13 +299,6 @@ static class ModelToNodeTransformer
             };
         }
     }
-
-    static Result<(VisualElementModel modifiedElementModel, IReadOnlyList<StyleAttribute> inlineStyle)>
-        convertStyleToInlineStyleObject(VisualElementModel elementModel)
-    {
-        var styles = convertDesignerStyleItemsToStyleAttributes(elementModel.Styles);
-
-        return (elementModel with { Styles = [] }, styles);
     }
 }
 
