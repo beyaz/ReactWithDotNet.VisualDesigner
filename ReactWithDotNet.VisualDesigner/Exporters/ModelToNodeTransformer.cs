@@ -46,7 +46,7 @@ static class ModelToNodeTransformer
                     }
                 }
 
-                var result = convertStyleToInlineStyleObject(elementModel);
+                var result = convertStyleToInlineStyleObject(project, elementModel);
                 if (result.HasError)
                 {
                     return result.Error;
@@ -185,7 +185,7 @@ static class ModelToNodeTransformer
     }
 
     static Result<(VisualElementModel modifiedElementModel, IReadOnlyList<StyleAttribute> inlineStyle)>
-        convertStyleToInlineStyleObject(VisualElementModel elementModel)
+        convertStyleToInlineStyleObject(ProjectConfig project,VisualElementModel elementModel)
     {
         var styles = convertDesignerStyleItemsToStyleAttributes(elementModel.Styles);
 
