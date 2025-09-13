@@ -1,5 +1,5 @@
-﻿using Newtonsoft.Json;
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
+using Newtonsoft.Json;
 
 namespace ReactWithDotNet.VisualDesigner.Exporters;
 
@@ -109,8 +109,6 @@ static class ModelToNodeTransformer
                     node = node with { Properties = node.Properties.Add(new() { Name = name, Value = value }) };
                 }
 
-              
-
                 foreach (var styleItem in elementModel.Styles)
                 {
                     string tailwindClassName;
@@ -185,10 +183,8 @@ static class ModelToNodeTransformer
     }
 
     static Result<(VisualElementModel modifiedElementModel, IReadOnlyList<FinalCssItem> inlineStyle)>
-        convertStyleToInlineStyleObject(ProjectConfig project,VisualElementModel elementModel)
+        convertStyleToInlineStyleObject(ProjectConfig project, VisualElementModel elementModel)
     {
-
-
         var finalCssList =
             ListFrom(from text in elementModel.Styles
                      let item = CreateDesignerStyleItemFromText(project, text)
@@ -199,7 +195,6 @@ static class ModelToNodeTransformer
                          var x when x.Value.Pseudo is not null => [new NotSupportedException("Pseudo styles are not supported in inline styles.")],
 
                          _ => from x in item.Value.FinalCssItems
-
                              select CreateFinalCssItem
                                  (new()
                                   {
@@ -215,24 +210,16 @@ static class ModelToNodeTransformer
                                       }
                                   }
                                  )
-
                      }
                      from x in finalCssItems
                      select x);
-
 
         if (finalCssList.HasError)
         {
             return finalCssList.Error;
         }
-        
 
         return (elementModel with { Styles = [] }, finalCssList.Value);
-
-            
-        
-        
-
     }
 }
 
