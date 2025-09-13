@@ -708,17 +708,6 @@ sealed class ApplicationPreview : Component
                                         }
                                     }
                                 }
-
-                                if (dummySrc.HasNoValue())
-                                {
-                                    foreach (var size in model.Properties.TryGetPropertyValue("size"))
-                                    {
-                                        if (int.TryParse(size, out var sizeAsNumber))
-                                        {
-                                            dummySrc = DummySrc(sizeAsNumber);
-                                        }
-                                    }
-                                }
                             }
 
                             if (dummySrc.HasValue())
