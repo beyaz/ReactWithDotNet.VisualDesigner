@@ -187,12 +187,37 @@ static class ModelToNodeTransformer
     static Result<(VisualElementModel modifiedElementModel, IReadOnlyList<StyleAttribute> inlineStyle)>
         convertStyleToInlineStyleObject(ProjectConfig project,VisualElementModel elementModel)
     {
+
+
+        IEnumerable<Result<FinalCssItem>> finalCss = from text in elementModel.Styles
+            let item = CreateDesignerStyleItemFromText(project, text)
+            let finalCssItems = item switch
+            {
+                var x when x.HasError => [item.Error],
+                
+                var x when x.Value.Pseudo is not null => [new NotSupportedException("Pseudo styles are not supported in inline styles.")],
+                
+                _ => from x in item.Value.FinalCssItems select (Result<FinalCssItem>)x
+
+            }
+            from x in finalCssItems select x;
+
+
+
+
+            
+        
+        
         var styles = convertDesignerStyleItemsToStyleAttributes(elementModel.Styles);
 
         return (elementModel with { Styles = [] }, styles);
 
         static IReadOnlyList<StyleAttribute> convertDesignerStyleItemsToStyleAttributes(IReadOnlyList<string> designerStyleItems)
         {
+
+           
+            
+            
             return (from text in designerStyleItems select process(ParseStyleAttribute(text))).ToList();
 
             static StyleAttribute process(StyleAttribute styleAttribute)
