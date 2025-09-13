@@ -35,7 +35,6 @@ public sealed class FinalCssItem
 
     public required string Value { get; init; }
 
-
     public override string ToString()
     {
         return $"{Name}: {Value};";
