@@ -13,8 +13,9 @@ global using System.Threading.Tasks;
 
 global using ReactWithDotNet.VisualDesigner.DataAccess;
 global using static ReactWithDotNet.VisualDesigner.Extensions;
-global using static ReactWithDotNet.VisualDesigner.PseudoHelper;
-global using static ReactWithDotNet.VisualDesigner.TailwindCss;
+global using ReactWithDotNet.VisualDesigner.CssDomain;
+global using static ReactWithDotNet.VisualDesigner.CssDomain.PseudoHelper;
+global using static ReactWithDotNet.VisualDesigner.CssDomain.TailwindCss;
 global using static ReactWithDotNet.VisualDesigner.ConditionalCssTextParser;
     
 
@@ -23,7 +24,7 @@ global using static ReactWithDotNet.VisualDesigner.Primitive.NotificationHelper;
 global using static ReactWithDotNet.VisualDesigner.Primitive.Animation;
 global using static ReactWithDotNet.VisualDesigner.Views.ApplicationLogic;
 global using static ReactWithDotNet.VisualDesigner.Views.ApplicationStateMemoryCache;
-global using static ReactWithDotNet.VisualDesigner.CssHelper;
+global using static ReactWithDotNet.VisualDesigner.CssDomain.CssHelper;
 global using static ReactWithDotNet.VisualDesigner.Toolbox.YamlHelper;
 
 global using static ReactWithDotNet.Tailwind;

@@ -1,6 +1,6 @@
-﻿global using static ReactWithDotNet.VisualDesigner.FinalCssItemFactory;
+﻿global using static ReactWithDotNet.VisualDesigner.CssDomain.FinalCssItemFactory;
 
-namespace ReactWithDotNet.VisualDesigner;
+namespace ReactWithDotNet.VisualDesigner.CssDomain;
 
 static class FinalCssItemFactory
 {
