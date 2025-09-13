@@ -791,7 +791,7 @@ sealed class ApplicationPreview : Component
 
                     if (propName == "id")
                     {
-                        if (element is HtmlElement htmlElement)
+                        if (element is HtmlElement)
                         {
                             return data with { IsProcessed = true };
                         }
