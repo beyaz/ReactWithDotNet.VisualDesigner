@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using ReactWithDotNet.VisualDesigner.PropertyDomain;
+using System.IO;
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
@@ -901,7 +902,7 @@ sealed class ApplicationPreview : Component
                         return None;
                     }
 
-                    propertyValue = maybe.Value.propertyValue;
+                    propertyValue = maybe.Value.Value;
                 }
 
                 foreach (var callerProperty in from p in scope.ParentModel.Properties from v in ParseProperty(p) select v)
@@ -937,11 +938,11 @@ sealed class ApplicationPreview : Component
 
                 return None;
 
-                static Maybe<(string propertyName, string propertyValue)> tryGetProperty(VisualElementModel model, string propertyName)
+                static Maybe<IParsedProperty> tryGetProperty(VisualElementModel model, string propertyName)
                 {
-                    foreach (var (name, value) in from p in model.Properties from v in TryParseProperty(p) where v.Name == propertyName select v)
+                    foreach (IParsedProperty parsedProperty in from p in model.Properties from v in ParseProperty(p) where v.Name == propertyName select v)
                     {
-                        return (name, value);
+                        return Maybe<IParsedProperty>.Some(parsedProperty);
                     }
 
                     return None;
