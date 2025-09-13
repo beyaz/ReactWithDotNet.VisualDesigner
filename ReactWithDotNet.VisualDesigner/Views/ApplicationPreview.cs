@@ -1063,7 +1063,7 @@ static class ApplicationPreviewExtensions
                 
                 select parseResult.success switch
                 {
-                    false=> Result.From(finalCssItem),
+                    false=> ResultFrom(finalCssItem),
                     true=> (parseResult.right is not null) switch
                     {
                         true=>CreateFinalCssItem(finalCssItem.Name, parseResult.right),

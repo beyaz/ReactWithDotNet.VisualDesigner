@@ -16,10 +16,6 @@ public sealed record Result
 
     public bool Success { get; init; }
 
-    public static Result<T> From<T>(T value)
-    {
-        return new() { Success = true, Value = value };
-    }
 
     public static implicit operator Result(Exception failInfo)
     {
@@ -139,6 +135,14 @@ public sealed class NoneObject
 
 static class FP
 {
+    
+    
+    public static Result<T> ResultFrom<T>(T value)
+    {
+        return new() { Success = true, Value = value };
+    }
+    
+    
     public static readonly Result Success = new() { Success = true };
 
     public static NoneObject None => NoneObject.Instance;
@@ -520,7 +524,7 @@ public sealed record Pipe<Tin, Tout>: IEnumerable<Func<Tin, Task<Result<Tout>>>>
     
     public void Add(Func<Tin, Tout> value)
     {
-        var fn = (Tin x) => Task.FromResult(Result.From(value(x)));
+        var fn = (Tin x) => Task.FromResult(ResultFrom(value(x)));
         
         _items.Add(fn);
     }
