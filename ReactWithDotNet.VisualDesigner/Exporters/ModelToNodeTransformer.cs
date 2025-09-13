@@ -201,18 +201,12 @@ static class ModelToNodeTransformer
                 {
                     Name = KebabToCamelCase(styleAttribute.Name),
                     
-                    Value = FirstOf(from x in new[] { styleAttribute.Value }
-                                    select (x is null) switch
-                                    {
-                                        true => null,
-                                        false => (x.StartsWith("request.") || x.StartsWith("context.")) switch
-                                        {
-                                            true  => x,
-                                            false => '"' + TryClearStringValue(x) + '"'
-                                        }
-                                    }
-                                   )
-
+                    Value =  styleAttribute.Value switch
+                    {
+                        null=> null,
+                        var x when x.StartsWith("request.") || x.StartsWith("context.") => x,
+                        var x => '"' + TryClearStringValue(x) + '"'
+                    }
                 };
             }
         }
