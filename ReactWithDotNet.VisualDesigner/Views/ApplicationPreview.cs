@@ -1055,13 +1055,20 @@ static class ApplicationPreviewExtensions
 
         static IEnumerable<Result<FinalCssItem>> arrangeCondition(IReadOnlyList<FinalCssItem> finalCssItems)
         {
-            return from finalCssItem in finalCssItems
+            return 
+                from finalCssItem in finalCssItems
+                
                 let parseResult = TryParseConditionalValue(finalCssItem.Value)
-                select parseResult.success
-                    ? parseResult.right is not null
-                        ? CreateFinalCssItem(finalCssItem.Name, parseResult.right)
-                        : CreateFinalCssItem(finalCssItem.Name, parseResult.left)
-                    : finalCssItem;
+                
+                select parseResult.success switch
+                {
+                    false=> finalCssItem,
+                    true=> (parseResult.right is not null) switch
+                    {
+                        true=>CreateFinalCssItem(finalCssItem.Name, parseResult.right),
+                        false=>CreateFinalCssItem(finalCssItem.Name, parseResult.left)
+                    }
+                };
         }
 
         static Result<StyleModifier> ApplyPseudo(string pseudo, IReadOnlyList<StyleModifier> styleModifiers)
