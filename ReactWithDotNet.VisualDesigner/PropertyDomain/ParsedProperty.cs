@@ -1,4 +1,5 @@
 ﻿global using static ReactWithDotNet.VisualDesigner.PropertyDomain.ParsedPropertyFactory;
+global using static ReactWithDotNet.VisualDesigner.PropertyDomain.ParsedPropertyExtensions;
 
 namespace ReactWithDotNet.VisualDesigner.PropertyDomain;
 
@@ -9,7 +10,7 @@ public interface ParsedProperty
     public string Value { get; }
 }
 
-static class ParsedPropertyFactory
+static class ParsedPropertyExtensions
 {
     public static bool Is(this Result<ParsedProperty> result, string name, string value)
     {
@@ -30,7 +31,10 @@ static class ParsedPropertyFactory
 
         return nextFunc(result.Value);
     }
+}
 
+static class ParsedPropertyFactory
+{
     public static Result<ParsedProperty> ParseProperty(string nameValueCombined)
     {
         if (string.IsNullOrWhiteSpace(nameValueCombined))
