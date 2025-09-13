@@ -1,6 +1,6 @@
-﻿global using static ReactWithDotNet.VisualDesigner.DesignerStyleItemFactory;
+﻿global using static ReactWithDotNet.VisualDesigner.CssDomain.DesignerStyleItemFactory;
 
-namespace ReactWithDotNet.VisualDesigner;
+namespace ReactWithDotNet.VisualDesigner.CssDomain;
 
 static class DesignerStyleItemFactory
 {

@@ -1,4 +1,4 @@
-﻿namespace ReactWithDotNet.VisualDesigner;
+﻿namespace ReactWithDotNet.VisualDesigner.CssDomain;
 
 public sealed record CommonCssSuggestions
 {

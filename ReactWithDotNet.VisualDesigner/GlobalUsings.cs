@@ -16,7 +16,7 @@ global using static ReactWithDotNet.VisualDesigner.Extensions;
 global using ReactWithDotNet.VisualDesigner.CssDomain;
 global using static ReactWithDotNet.VisualDesigner.CssDomain.PseudoHelper;
 global using static ReactWithDotNet.VisualDesigner.CssDomain.TailwindCss;
-global using static ReactWithDotNet.VisualDesigner.ConditionalCssTextParser;
+global using static ReactWithDotNet.VisualDesigner.CssDomain.ConditionalCssTextParser;
     
 
 

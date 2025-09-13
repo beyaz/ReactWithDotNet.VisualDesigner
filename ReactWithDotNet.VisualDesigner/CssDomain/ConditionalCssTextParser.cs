@@ -1,6 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 
-namespace ReactWithDotNet.VisualDesigner;
+namespace ReactWithDotNet.VisualDesigner.CssDomain;
 
 static class ConditionalCssTextParser
 {
