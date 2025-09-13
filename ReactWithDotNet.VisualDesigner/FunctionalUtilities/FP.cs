@@ -358,6 +358,16 @@ static class FP
 
         return convertFunc(result.Value);
     }
+    
+    public static Result<A> Then<A>(this Result result, Func<A> onSuccessFunc)
+    {
+        if (result.HasError)
+        {
+            return result.Error;
+        }
+
+        return onSuccessFunc();
+    }
 
     public static Result Then<A>(this Result<A> result, Action<A> action)
     {

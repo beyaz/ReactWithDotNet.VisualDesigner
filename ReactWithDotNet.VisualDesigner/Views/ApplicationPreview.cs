@@ -623,15 +623,18 @@ sealed class ApplicationPreview : Component
                         return data;
                     }
 
-                    var isValueDouble = double.TryParse(propValue, out var valueAsDouble);
+                    var isValueDouble = double.TryParse(propValue, out _);
 
                     if (propName.Equals("height", StringComparison.OrdinalIgnoreCase))
                     {
                         if (isValueDouble)
                         {
-                            ReflectionHelper.SetPropertyValue(element, "height", propValue);
+                            return ReflectionHelper.SetPropertyValue(element, "height", propValue)
+                                .Then(() => data with
+                                {
+                                    IsProcessed = true
+                                });
                             
-                            return data with { IsProcessed = true };
                         }
                     }
 
@@ -639,9 +642,11 @@ sealed class ApplicationPreview : Component
                     {
                         if (isValueDouble)
                         {
-                            ReflectionHelper.SetPropertyValue(element, "width", propValue);
-                            
-                            return data with { IsProcessed = true };
+                            return ReflectionHelper.SetPropertyValue(element, "width", propValue)
+                                .Then(() => data with
+                                {
+                                    IsProcessed = true
+                                });
                         }
                     }
 
