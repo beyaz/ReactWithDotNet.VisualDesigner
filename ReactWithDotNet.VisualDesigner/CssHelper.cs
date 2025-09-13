@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-
+﻿
 namespace ReactWithDotNet.VisualDesigner;
 
 public static partial class CssHelper
@@ -46,11 +45,7 @@ public static partial class CssHelper
                     return htmlStyle.Error;
                 }
 
-                return new DesignerStyleItem
-                {
-                    Pseudo = pseudo,
-                    FinalCssItems = [htmlStyle.Value]
-                };
+                return CreateDesignerStyleItem(pseudo, htmlStyle.Value);
             }
 
             return new Exception("Value is required");
@@ -76,22 +71,15 @@ public static partial class CssHelper
 
             if (project.Styles.TryGetValue(designerStyleItem, out var cssText))
             {
-                return Style.ParseCssAsDictionary(cssText).Then(styleMap => new DesignerStyleItem
-                {
-                    Pseudo = pseudo,
-
-                    FinalCssItems = ListFrom(from pair in styleMap select CreateFinalCssItem(pair))
-                });
+                return Style.ParseCssAsDictionary(cssText)
+                    .Then(styleMap 
+                              => CreateDesignerStyleItem(pseudo, ListFrom(from pair in styleMap select CreateFinalCssItem(pair)))
+                );
             }
 
             if (name == "color" && value is not null && project.Colors.TryGetValue(value, out var realColor))
             {
-                return new DesignerStyleItem
-                {
-                    Pseudo = pseudo, 
-                    
-                    FinalCssItems = [CreateFinalCssItem("color",realColor)]
-                };
+                return CreateDesignerStyleItem(pseudo, CreateFinalCssItem("color", realColor));
             }
 
             return None;
@@ -179,17 +167,4 @@ public static partial class CssHelper
             return GetPseudoFunction(pseudo).Then(pseudoFunction => pseudoFunction([.. styleModifiers]));
         }
     }
-}
-
-public sealed record DesignerStyleItem
-{
-    public string Pseudo { get; init; }
-
-    public IReadOnlyList<FinalCssItem> FinalCssItems { get; init; }
-
-    public DesignerStyleItem()
-    {
-        
-    }
-
 }

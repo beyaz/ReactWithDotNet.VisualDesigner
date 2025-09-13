@@ -792,11 +792,11 @@ static class TailwindCss
                 var (map, exception) = Style.ParseCssAsDictionary(cssText);
                 if (exception is null)
                 {
-                    return new DesignerStyleItem
+                    return CreateDesignerStyleItem2(new()
                     {
                         Pseudo        = pseudo,
-                        FinalCssItems = ListFrom( from x in map select CreateFinalCssItem(x)),
-                    };
+                        FinalCssItems = from x in map select CreateFinalCssItem(x)
+                    });
                 }
             }
         }
@@ -827,12 +827,12 @@ static class TailwindCss
                 {
                     return None;
                 }
-
-                return new DesignerStyleItem
+                
+                return CreateDesignerStyleItem2(new()
                 {
                     Pseudo        = pseudo,
-                    FinalCssItems = [CreateFinalCssItem(styleName, numberSuffix.Value * 4 + "px")],
-                };
+                    FinalCssItems = [CreateFinalCssItem(styleName, numberSuffix.Value * 4 + "px")]
+                });
             }
         }
 
@@ -853,11 +853,11 @@ static class TailwindCss
 
             if (fontWeightMap.TryGetValue(utilityCssClassName, out var weightAsNumber))
             {
-                return new DesignerStyleItem
+                return CreateDesignerStyleItem2(new()
                 {
                     Pseudo        = pseudo,
-                    FinalCssItems = [CreateFinalCssItem("font-weight", weightAsNumber)],
-                };
+                    FinalCssItems = [CreateFinalCssItem("font-weight", weightAsNumber)]
+                });
             }
         }
 
@@ -872,11 +872,13 @@ static class TailwindCss
 
             if (fontFamilyMap.TryGetValue(utilityCssClassName, out var value))
             {
-                return new DesignerStyleItem
+                return CreateDesignerStyleItem2(new()
                 {
                     Pseudo        = pseudo,
                     FinalCssItems = [CreateFinalCssItem("font-family", value)],
-                };
+                });
+                
+               
             }
         }
 
@@ -888,11 +890,13 @@ static class TailwindCss
                 var tailwindColor = tryGetTailwindColor(color, number);
                 if (tailwindColor.HasValue)
                 {
-                    return new DesignerStyleItem
+                    return CreateDesignerStyleItem2(new()
                     {
                         Pseudo        = pseudo,
                         FinalCssItems = [CreateFinalCssItem("color", tailwindColor.Value)],
-                    };
+                    });
+                    
+                    
                 }
             }
         }
@@ -905,11 +909,12 @@ static class TailwindCss
                 var tailwindColor = tryGetTailwindColor(color, number);
                 if (tailwindColor.HasValue)
                 {
-                    return new DesignerStyleItem
+                    return CreateDesignerStyleItem2(new()
                     {
                         Pseudo        = pseudo,
                         FinalCssItems = [CreateFinalCssItem("background", tailwindColor.Value)],
-                    };
+                    });
+                    
                 }
             }
         }
@@ -926,11 +931,12 @@ static class TailwindCss
 
             if (map.TryGetValue(utilityCssClassName, out var value))
             {
-                return new DesignerStyleItem
+                
+                return CreateDesignerStyleItem2(new()
                 {
                     Pseudo        = pseudo,
                     FinalCssItems = [CreateFinalCssItem("text-decoration-line", value)],
-                };
+                });
             }
         }
 
@@ -939,11 +945,13 @@ static class TailwindCss
             var (name, value, _) = ParseStyleAttribute(utilityCssClassName);
             if (name == "color" && value is not null && project.Colors.TryGetValue(value, out var realColor))
             {
-                return new DesignerStyleItem
+                
+                
+                return CreateDesignerStyleItem2(new()
                 {
                     Pseudo        = pseudo,
                     FinalCssItems = [CreateFinalCssItem("color", realColor)],
-                };
+                });
             }
         }
 
@@ -951,11 +959,13 @@ static class TailwindCss
         {
             foreach (var (htmlStyleName, htmlStyleValue) in TailwindSpacingScale.Try_Convert_From_TailwindClass_to_HtmlStyle(utilityCssClassName))
             {
-                return new DesignerStyleItem
+               
+                
+                return CreateDesignerStyleItem2(new()
                 {
                     Pseudo        = pseudo,
                     FinalCssItems = [CreateFinalCssItem(htmlStyleName, htmlStyleValue)],
-                };
+                });
             }
         }
 
@@ -973,11 +983,12 @@ static class TailwindCss
                 var arbitrary = tryGetArbitraryValue(utilityCssClassName, tailwindPrefix);
                 if (arbitrary.HasValue && arbitrary.Value.EndsWith("px"))
                 {
-                    return new DesignerStyleItem
+                    
+                    return CreateDesignerStyleItem2(new()
                     {
                         Pseudo        = pseudo,
                         FinalCssItems = [CreateFinalCssItem(styleName, arbitrary.Value)],
-                    };
+                    });
                 }
             }
         }
@@ -1006,11 +1017,12 @@ static class TailwindCss
                         color = realColor;
                     }
 
-                    return new DesignerStyleItem
+                    
+                    return CreateDesignerStyleItem2(new()
                     {
                         Pseudo        = pseudo,
                         FinalCssItems = [CreateFinalCssItem(styleName, color)],
-                    };
+                    });
                 }
             }
         }
