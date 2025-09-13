@@ -77,9 +77,9 @@ static class HtmlImporter
         {
             foreach (var designerStyleItem in CreateDesignerStyleItemFromText(project, designerStyleText))
             {
-                if (designerStyleItem.RawHtmlStyles.Count == 1)
+                if (designerStyleItem.FinalCssItems.Count == 1)
                 {
-                    foreach (var (key, value) in designerStyleItem.RawHtmlStyles)
+                    foreach (var (key, value) in designerStyleItem.FinalCssItems)
                     {
                         if (key == htmlAttributeName && TryClearStringValue(value) == TryClearStringValue(htmlAttributeValue))
                         {
@@ -171,17 +171,17 @@ static class HtmlImporter
                         var returnStyles = new List<string>();
 
                         var pseudo = designerStyleItem.Pseudo;
-                        var styles = designerStyleItem.RawHtmlStyles;
+                        var styles = designerStyleItem.FinalCssItems;
 
-                        foreach (var (name, value) in styles)
+                        foreach (var finalCssItem in styles)
                         {
                             if (pseudo.HasValue())
                             {
-                                returnStyles.Add(pseudo + ":" + name + ": " + value);
+                                returnStyles.Add(pseudo + ":" + finalCssItem.Name + ": " + finalCssItem.Value);
                             }
                             else
                             {
-                                returnStyles.Add(name + ": " + value);
+                                returnStyles.Add(finalCssItem.Name + ": " + finalCssItem.Value);
                             }
                         }
 

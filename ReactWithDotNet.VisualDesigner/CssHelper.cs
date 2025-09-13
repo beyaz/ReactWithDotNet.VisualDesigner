@@ -49,21 +49,11 @@ public static partial class CssHelper
                 return new DesignerStyleItem
                 {
                     Pseudo = pseudo,
-                    RawHtmlStyles = new Dictionary<string, string>
-                    {
-                        [htmlStyle.Value.name] = htmlStyle.Value.value
-                    }
+                    FinalCssItems = [htmlStyle.Value]
                 };
             }
 
-            return new DesignerStyleItem
-            {
-                Pseudo = pseudo,
-                RawHtmlStyles = new Dictionary<string, string>
-                {
-                    { name, null }
-                }
-            };
+            return new Exception("Value is required");
         }
 
         static Result<DesignerStyleItem> tryProcessByProjectConfig(ProjectConfig project, string designerStyleItem)
@@ -90,7 +80,7 @@ public static partial class CssHelper
                 {
                     Pseudo = pseudo,
 
-                    RawHtmlStyles = styleMap
+                    FinalCssItems = ListFrom(from pair in styleMap select FinalCssItem.Create(pair))
                 });
             }
 
@@ -98,12 +88,9 @@ public static partial class CssHelper
             {
                 return new DesignerStyleItem
                 {
-                    Pseudo = pseudo,
-
-                    RawHtmlStyles = new Dictionary<string, string>
-                    {
-                        { "color", realColor }
-                    }
+                    Pseudo = pseudo, 
+                    
+                    FinalCssItems = [FinalCssItem.Create("color",realColor)]
                 };
             }
 
@@ -155,9 +142,9 @@ public static partial class CssHelper
 
         var style = new Style();
 
-        foreach (var (name, value) in arrangeRawHtmlStyles(designerStyleItem.RawHtmlStyles))
+        foreach (var finalCssItem in arrangeCondition(designerStyleItem.FinalCssItems))
         {
-            var exception = style.TrySet(name, tryFixValueForBorderColor(name, value));
+            var exception = style.TrySet(finalCssItem.Name, finalCssItem.Value);
             if (exception is not null)
             {
                 return exception;
@@ -171,58 +158,20 @@ public static partial class CssHelper
 
         return (StyleModifier)style;
 
-        static string tryFixValueForBorderColor(string styleAttributeName, string styleAttributeValue)
+        static IEnumerable<FinalCssItem> arrangeCondition(IReadOnlyList<FinalCssItem> finalCssItems)
         {
-            if (styleAttributeName == "border")
-            {
-                var valueParts = styleAttributeValue.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-                if (valueParts.Length == 3)
-                {
-                    if (valueParts[0].EndsWith("px"))
-                    {
-                        var fieldInfo = typeof(Tailwind).GetField(valueParts[2], BindingFlags.Static | BindingFlags.Public);
-                        if (fieldInfo is not null)
-                        {
-                            return string.Join(' ', valueParts[0], valueParts[1], fieldInfo.GetValue(null));
-                        }
-                    }
-                }
-            }
 
-            return styleAttributeValue;
-        }
+            return from finalCssItem in finalCssItems
 
-        static IReadOnlyDictionary<string, string> arrangeRawHtmlStyles(IReadOnlyDictionary<string, string> dictionary)
-        {
-            var map = new Dictionary<string, string>();
+                let parseResult = TryParseConditionalValue(finalCssItem.Value)
 
-            foreach (var (key, value) in dictionary)
-            {
-                var item = arrangeHtmlStyleValue(key, value);
+                select parseResult.success 
+                    ? parseResult.right is not null 
+                        ? FinalCssItem.Create(finalCssItem.Name, parseResult.right) 
+                        : FinalCssItem.Create(finalCssItem.Name, parseResult.left)
+                    : finalCssItem;
 
-                map.Add(item.key, item.value);
-            }
 
-            return map;
-
-            static (string key, string value) arrangeHtmlStyleValue(string key, string value)
-            {
-                var (success, _, left, right) = TryParseConditionalValue(value);
-                if (success)
-                {
-                    if (right is not null)
-                    {
-                        return (key, right);
-                    }
-
-                    if (left is not null)
-                    {
-                        return (key, left);
-                    }
-                }
-
-                return (key, value);
-            }
         }
 
         static Result<StyleModifier> ApplyPseudo(string pseudo, IReadOnlyList<StyleModifier> styleModifiers)
@@ -238,34 +187,11 @@ public sealed record DesignerStyleItem
     
     public string Pseudo { get; init; }
 
-    public IReadOnlyDictionary<string, string> RawHtmlStyles { get; init; }
-    
     public IReadOnlyList<FinalCssItem> FinalCssItems { get; init; }
 
-    public static implicit operator DesignerStyleItem((string Pseudo, (string Name, string Value)[] RawHtmlStyles) tuple)
-    {
-        foreach (var (name, value) in tuple.RawHtmlStyles)
-        {
-            if (string.IsNullOrWhiteSpace(name))
-            {
-                throw new ArgumentException("Style name cannot be null or whitespace.", nameof(tuple));
-            }
-
-            if (string.IsNullOrWhiteSpace(value))
-            {
-                throw new ArgumentException("Style value cannot be whitespace.", nameof(tuple));
-            }
-        }
-
-        return new()
-        {
-            Pseudo        = tuple.Pseudo,
-            RawHtmlStyles = tuple.RawHtmlStyles.ToDictionary(x => x.Name, x => x.Value)
-        };
-    }
 }
 
-public sealed record FinalCssItem
+public sealed class FinalCssItem
 {
     public required string Name { get; init; }
     
@@ -274,5 +200,37 @@ public sealed record FinalCssItem
     public override string ToString()
     {
         return $"{Name}: {Value};";
+    }
+
+    FinalCssItem()
+    {
+        
+    }
+    
+    public void Deconstruct(out string name, out string value) =>
+        (name, value) = (Name, Value);
+   
+    
+    public static FinalCssItem Create(string name, string value)
+    {
+       
+        
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            throw new ArgumentException("Style name cannot be null or whitespace.", nameof(name));
+        }
+
+        
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            throw new ArgumentException("Style value cannot be whitespace.", nameof(value));
+        }
+        
+        return new() { Name = name, Value = value };
+    }
+
+    public static FinalCssItem Create(KeyValuePair<string, string> keyValuePair)
+    {
+        return Create(keyValuePair.Key, keyValuePair.Value);
     }
 }

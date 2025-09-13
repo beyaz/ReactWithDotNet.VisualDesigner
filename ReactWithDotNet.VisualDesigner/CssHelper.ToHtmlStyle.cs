@@ -2,7 +2,7 @@
 
 partial class CssHelper
 {
-    static Result<(string name, string value)> ToHtmlStyle(ProjectConfig project, string name, string value)
+    static Result<FinalCssItem> ToHtmlStyle(ProjectConfig project, string name, string value)
     {
         ArgumentNullException.ThrowIfNull(name);
 
@@ -91,7 +91,7 @@ partial class CssHelper
             case "pointer-events":
             case "transform":
             {
-                return (name, value);
+                return FinalCssItem.Create(name, value);
             }
 
             case "border-top":
@@ -108,7 +108,7 @@ partial class CssHelper
                     value = string.Join(" ", parts);
                 }
 
-                return (name, value);
+                return FinalCssItem.Create(name, value);
             }
 
             // c o l o r s
@@ -120,7 +120,7 @@ partial class CssHelper
             case "border-left-color":
             case "border-right-color":
             {
-                return (name, resolveColor(value));
+                return FinalCssItem.Create(name, resolveColor(value));
             }
         }
 

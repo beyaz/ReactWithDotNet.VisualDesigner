@@ -216,10 +216,10 @@ sealed class ApplicationPreview : Component
                          from designerStyleText in model.Styles
                          where !designerStyleText.StartsWith("d-")
                          from designerStyleItem in CreateDesignerStyleItemFromText(scope.Project, designerStyleText)
-                         from x in designerStyleItem.RawHtmlStyles 
+                         from x in designerStyleItem.FinalCssItems 
                          where x.Value?.StartsWith("state.",StringComparison.OrdinalIgnoreCase) is not true
                          where x.Value?.StartsWith("props.",StringComparison.OrdinalIgnoreCase) is not true
-                         where !Design.IsDesignTimeName(x.Key)
+                         where !Design.IsDesignTimeName(x.Name)
                          select designerStyleItem.ToStyleModifier())
                 {
                     if (styleModifierResult.HasError)
@@ -234,7 +234,7 @@ sealed class ApplicationPreview : Component
                          from designerStyleText in model.Styles
                          where Design.IsDesignTimeName(designerStyleText)
                          from designerStyleItem in CreateDesignerStyleItemFromText(scope.Project, designerStyleText.RemoveFromStart("d-",StringComparison.OrdinalIgnoreCase))
-                         from x in designerStyleItem.RawHtmlStyles 
+                         from x in designerStyleItem.FinalCssItems 
                          select designerStyleItem.ToStyleModifier())
                 {
                     if (styleModifierResult.HasError)
