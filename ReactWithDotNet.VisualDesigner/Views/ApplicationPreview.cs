@@ -656,9 +656,12 @@ sealed class ApplicationPreview : Component
                         {
                             foreach (var srcValue in await calculateSrcFromValue(scope, model, propValue))
                             {
-                                ReflectionHelper.SetPropertyValue(element, "src", srcValue);
-
-                                return data with { IsProcessed = true };
+                                
+                                return ReflectionHelper.SetPropertyValue(element, "src", srcValue)
+                                    .Then(() => data with
+                                    {
+                                        IsProcessed = true
+                                    });
                             }
                         }
 
@@ -676,9 +679,14 @@ sealed class ApplicationPreview : Component
                             {
                                 foreach (var srcValue in await calculateSrcFromValue(scope, model, designTimeSrc))
                                 {
-                                    ReflectionHelper.SetPropertyValue(element, "src", srcValue);
 
-                                    return data with { IsProcessed = true };
+                                    return ReflectionHelper.SetPropertyValue(element, "src", srcValue)
+                                        .Then(() => data with
+                                        {
+                                            IsProcessed = true
+                                        });
+                                    
+                                    
                                 }
                             }
                         }
@@ -715,15 +723,21 @@ sealed class ApplicationPreview : Component
 
                             if (dummySrc.HasValue())
                             {
-                                ReflectionHelper.SetPropertyValue(element, "src", dummySrc);
-
-                                return data with { IsProcessed = true };
+                                return ReflectionHelper.SetPropertyValue(element, "src", dummySrc)
+                                    .Then(() => data with
+                                    {
+                                        IsProcessed = true
+                                    });
+                                
                             }
                         }
 
-                        ReflectionHelper.SetPropertyValue(element, "src", DummySrc(500));
-
-                        return data with { IsProcessed = true };
+                        
+                        return ReflectionHelper.SetPropertyValue(element, "src", DummySrc(500))
+                            .Then(() => data with
+                            {
+                                IsProcessed = true
+                            });
 
                         static async Task<Maybe<string>> calculateSrcFromValue(RenderPreviewScope scope, VisualElementModel model, string value)
                         {
