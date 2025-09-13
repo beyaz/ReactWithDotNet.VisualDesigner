@@ -447,16 +447,16 @@ static class Plugin
         {
             foreach (var p in node.Properties)
             {
-                foreach (var (name, value) in TryParseProperty(p))
+                foreach (var property in ParseProperty(p))
                 {
-                    if (name == "direction")
+                    if (property.Name == "direction")
                     {
-                        if (TryClearStringValue(value).Contains("column", StringComparison.OrdinalIgnoreCase))
+                        if (TryClearStringValue(property.Value).Contains("column", StringComparison.OrdinalIgnoreCase))
                         {
                             return new IconFlexColumn();
                         }
 
-                        if (TryClearStringValue(value).Contains("row", StringComparison.OrdinalIgnoreCase))
+                        if (TryClearStringValue(property.Value).Contains("row", StringComparison.OrdinalIgnoreCase))
                         {
                             return new IconFlexRow();
                         }

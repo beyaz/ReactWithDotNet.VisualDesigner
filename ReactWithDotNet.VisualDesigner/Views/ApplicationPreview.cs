@@ -173,7 +173,7 @@ sealed class ApplicationPreview : Component
             model = model with
             {
                 Properties = ListFrom(from p in model.Properties
-                                      from x in TryParseProperty(p)
+                                      from x in ParseProperty(p)
                                       where x.Name.NotIn(Design.Text, Design.TextPreview, Design.Src, Design.Name)
                                       select p)
             };
@@ -182,7 +182,7 @@ sealed class ApplicationPreview : Component
             {
                 var propText = model.Properties[0];
 
-                var prop = TryParseProperty(propText).Value;
+                var prop = ParseProperty(propText).Value;
 
                 var propertyProcessScope = new PropertyProcessScope
                 {
@@ -535,7 +535,7 @@ sealed class ApplicationPreview : Component
 
                                 Properties = ListFrom(data.model.Properties.Where(p =>
                                 {
-                                    foreach (var prop in TryParseProperty(p))
+                                    foreach (var prop in ParseProperty(p))
                                     {
                                         if (prop.Name == Design.ItemsSourceDesignTimeCount)
                                         {
@@ -556,17 +556,17 @@ sealed class ApplicationPreview : Component
                             {
                                 Properties = ListFrom(m.Properties.Select(p =>
                                 {
-                                    foreach (var (name, value) in TryParseProperty(p))
+                                    foreach (var prop in ParseProperty(p))
                                     {
-                                        if (value.StartsWith("_item.", StringComparison.OrdinalIgnoreCase))
+                                        if (prop.Value.StartsWith("_item.", StringComparison.OrdinalIgnoreCase))
                                         {
                                             var _item = arr[index];
 
-                                            var path = value.RemoveFromStart("_item.");
+                                            var path = prop.Value.RemoveFromStart("_item.");
 
                                             foreach (var realValue in JsonHelper.ReadValueAtPathFromJsonObject(_item, path))
                                             {
-                                                return $"{name}: \"{realValue}\"";
+                                                return $"{prop.Name}: \"{realValue}\"";
                                             }
                                         }
                                     }
@@ -904,33 +904,33 @@ sealed class ApplicationPreview : Component
                     propertyValue = maybe.Value.propertyValue;
                 }
 
-                foreach (var (callerPropertyName, callerPropertyValue) in from p in scope.ParentModel.Properties from v in TryParseProperty(p) select v)
+                foreach (var callerProperty in from p in scope.ParentModel.Properties from v in ParseProperty(p) select v)
                 {
-                    if (ClearConnectedValue(propertyValue) == $"props.{callerPropertyName}")
+                    if (ClearConnectedValue(propertyValue) == $"props.{callerProperty.Name}")
                     {
-                        if (IsStringValue(ClearConnectedValue(callerPropertyValue)))
+                        if (IsStringValue(ClearConnectedValue(callerProperty.Value)))
                         {
-                            return TryClearStringValue(ClearConnectedValue(callerPropertyValue));
+                            return TryClearStringValue(ClearConnectedValue(callerProperty.Value));
                         }
 
-                        if (IsRawStringValue(ClearConnectedValue(callerPropertyValue)))
+                        if (IsRawStringValue(ClearConnectedValue(callerProperty.Value)))
                         {
-                            return TryClearRawStringValue(ClearConnectedValue(callerPropertyValue));
+                            return TryClearRawStringValue(ClearConnectedValue(callerProperty.Value));
                         }
 
-                        if (callerPropertyValue == "true" || callerPropertyValue == "false")
+                        if (callerProperty.Value == "true" || callerProperty.Value == "false")
                         {
-                            return callerPropertyValue;
+                            return callerProperty.Value;
                         }
 
-                        if (IsJsonArray(callerPropertyValue))
+                        if (IsJsonArray(callerProperty.Value))
                         {
-                            return callerPropertyValue;
+                            return callerProperty.Value;
                         }
 
-                        foreach (var _ in TryParseDouble(callerPropertyValue))
+                        foreach (var _ in TryParseDouble(callerProperty.Value))
                         {
-                            return callerPropertyValue;
+                            return callerProperty.Value;
                         }
                     }
                 }

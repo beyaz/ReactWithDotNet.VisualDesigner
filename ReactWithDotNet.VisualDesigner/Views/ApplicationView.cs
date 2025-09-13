@@ -325,7 +325,7 @@ sealed class ApplicationView : Component<ApplicationState>
             {
                 var nameValue = CurrentVisualElement.Properties[propertyIndex];
 
-                TryParseProperty(nameValue).HasValue(parseResult =>
+                ParseProperty(nameValue).Then(parseResult =>
                 {
                     var startIndex = nameValue.LastIndexOf(parseResult.Value ?? string.Empty, StringComparison.OrdinalIgnoreCase);
                     var endIndex = nameValue.Length;
@@ -1514,7 +1514,7 @@ sealed class ApplicationView : Component<ApplicationState>
                     {
                         // has already declered
                         if ((from p in CurrentVisualElement.Properties
-                                from prop in TryParseProperty(p)
+                                from prop in ParseProperty(p)
                                 where propertyInfo.Name.Equals(prop.Name, StringComparison.OrdinalIgnoreCase)
                                 select prop).Any())
                         {
@@ -1735,7 +1735,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
                 Element content = value;
                 {
-                    TryParseProperty(value).HasValue(x =>
+                    ParseProperty(value).Then(x =>
                     {
                         content = new FlexRow(AlignItemsCenter, FlexWrap)
                         {
@@ -1830,7 +1830,7 @@ sealed class ApplicationView : Component<ApplicationState>
                             // calculate text selection in edit input
                             {
                                 var nameValue = CurrentVisualElement.Styles[styleIndex];
-                                TryParseProperty(nameValue).HasValue(parseResult =>
+                                ParseProperty(nameValue).Then(parseResult =>
                                 {
                                     var startIndex = nameValue.LastIndexOf(parseResult.Value, StringComparison.OrdinalIgnoreCase);
                                     var endIndex = nameValue.Length;
@@ -1998,7 +1998,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
                 Element content = value;
                 {
-                    TryParseProperty(value).HasValue(x =>
+                    ParseProperty(value).Then(x =>
                     {
                         if (x.Name == Design.SpreadOperator)
                         {
