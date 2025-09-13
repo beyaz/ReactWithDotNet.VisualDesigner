@@ -1,5 +1,4 @@
-﻿
-global using static ReactWithDotNet.VisualDesigner.PropertyDomain.ParsedPropertyFactory;
+﻿global using static ReactWithDotNet.VisualDesigner.PropertyDomain.ParsedPropertyFactory;
 
 namespace ReactWithDotNet.VisualDesigner.PropertyDomain;
 
@@ -12,8 +11,7 @@ public interface ParsedProperty
 
 static class ParsedPropertyFactory
 {
-    
-    public static bool Is(this Result<PropertyDomain.ParsedProperty> result, string name, string value)
+    public static bool Is(this Result<ParsedProperty> result, string name, string value)
     {
         if (result.HasError)
         {
@@ -22,8 +20,8 @@ static class ParsedPropertyFactory
 
         return result.Value.Name == name && result.Value.Value == value;
     }
-    
-    public static bool Is(this Result<PropertyDomain.ParsedProperty> result, Func<PropertyDomain.ParsedProperty, bool> nextFunc)
+
+    public static bool Is(this Result<ParsedProperty> result, Func<ParsedProperty, bool> nextFunc)
     {
         if (result.HasError)
         {
@@ -32,8 +30,8 @@ static class ParsedPropertyFactory
 
         return nextFunc(result.Value);
     }
-    
-    public static Result<PropertyDomain.ParsedProperty> ParseProperty(string nameValueCombined)
+
+    public static Result<ParsedProperty> ParseProperty(string nameValueCombined)
     {
         if (string.IsNullOrWhiteSpace(nameValueCombined))
         {
@@ -42,7 +40,7 @@ static class ParsedPropertyFactory
 
         if (nameValueCombined.StartsWith("..."))
         {
-            return new ParsedProperty
+            return new ParsedPropertyImpl
             {
                 Name  = Design.SpreadOperator,
                 Value = nameValueCombined
@@ -63,14 +61,14 @@ static class ParsedPropertyFactory
             return new ArgumentNullException($"{nameValueCombined} should contains value");
         }
 
-        return new ParsedProperty
+        return new ParsedPropertyImpl
         {
             Name  = name.Trim(),
             Value = value
         };
     }
 
-    sealed class ParsedProperty : PropertyDomain.ParsedProperty
+    sealed class ParsedPropertyImpl : ParsedProperty
     {
         public string Name { get; init; }
 
