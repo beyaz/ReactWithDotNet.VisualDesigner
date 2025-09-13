@@ -80,7 +80,7 @@ public static partial class CssHelper
                 {
                     Pseudo = pseudo,
 
-                    FinalCssItems = ListFrom(from pair in styleMap select FinalCssItem.CreateFinalCssItem(pair))
+                    FinalCssItems = ListFrom(from pair in styleMap select CreateFinalCssItem(pair))
                 });
             }
 
@@ -90,7 +90,7 @@ public static partial class CssHelper
                 {
                     Pseudo = pseudo, 
                     
-                    FinalCssItems = [FinalCssItem.CreateFinalCssItem("color",realColor)]
+                    FinalCssItems = [CreateFinalCssItem("color",realColor)]
                 };
             }
 
@@ -167,8 +167,8 @@ public static partial class CssHelper
 
                 select parseResult.success 
                     ? parseResult.right is not null 
-                        ? FinalCssItem.CreateFinalCssItem(finalCssItem.Name, parseResult.right) 
-                        : FinalCssItem.CreateFinalCssItem(finalCssItem.Name, parseResult.left)
+                        ? CreateFinalCssItem(finalCssItem.Name, parseResult.right) 
+                        : CreateFinalCssItem(finalCssItem.Name, parseResult.left)
                     : finalCssItem;
 
 
@@ -192,48 +192,4 @@ public sealed record DesignerStyleItem
         
     }
 
-}
-
-public sealed class FinalCssItem
-{
-    public required string Name { get; init; }
-    
-    public required string Value { get; init; }
-
-    public override string ToString()
-    {
-        return $"{Name}: {Value};";
-    }
-
-    FinalCssItem()
-    {
-        
-    }
-    
-    public void Deconstruct(out string name, out string value) =>
-        (name, value) = (Name, Value);
-   
-    
-    public static FinalCssItem CreateFinalCssItem(string name, string value)
-    {
-       
-        
-        if (string.IsNullOrWhiteSpace(name))
-        {
-            throw new ArgumentException("Style name cannot be null or whitespace.", nameof(name));
-        }
-
-        
-        if (string.IsNullOrWhiteSpace(value))
-        {
-            throw new ArgumentException("Style value cannot be whitespace.", nameof(value));
-        }
-        
-        return new() { Name = name, Value = value };
-    }
-
-    public static FinalCssItem CreateFinalCssItem(KeyValuePair<string, string> keyValuePair)
-    {
-        return CreateFinalCssItem(keyValuePair.Key, keyValuePair.Value);
-    }
 }

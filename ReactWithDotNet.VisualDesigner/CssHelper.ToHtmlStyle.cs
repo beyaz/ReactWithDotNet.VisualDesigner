@@ -91,7 +91,7 @@ partial class CssHelper
             case "pointer-events":
             case "transform":
             {
-                return FinalCssItem.CreateFinalCssItem(name, value);
+                return CreateFinalCssItem(name, value);
             }
 
             case "border-top":
@@ -108,7 +108,7 @@ partial class CssHelper
                     value = string.Join(" ", parts);
                 }
 
-                return FinalCssItem.CreateFinalCssItem(name, value);
+                return CreateFinalCssItem(name, value);
             }
 
             // c o l o r s
@@ -120,7 +120,7 @@ partial class CssHelper
             case "border-left-color":
             case "border-right-color":
             {
-                return FinalCssItem.CreateFinalCssItem(name, resolveColor(value));
+                return CreateFinalCssItem(name, resolveColor(value));
             }
         }
 

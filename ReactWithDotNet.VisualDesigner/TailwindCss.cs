@@ -146,7 +146,7 @@ static class TailwindCss
                 {
                     string lefTailwindClass;
                     {
-                        var result = ConvertToTailwindClass(project, FinalCssItem.CreateFinalCssItem(cssAttributeName, left));
+                        var result = ConvertToTailwindClass(project, CreateFinalCssItem(cssAttributeName, left));
                         if (result.HasError)
                         {
                             return result.Error;
@@ -160,7 +160,7 @@ static class TailwindCss
                     if (right.HasValue())
                     {
                         {
-                            var result = ConvertToTailwindClass(project, FinalCssItem.CreateFinalCssItem(cssAttributeName, right));
+                            var result = ConvertToTailwindClass(project, CreateFinalCssItem(cssAttributeName, right));
                             if (result.HasError)
                             {
                                 return result.Error;
@@ -795,7 +795,7 @@ static class TailwindCss
                     return new DesignerStyleItem
                     {
                         Pseudo        = pseudo,
-                        FinalCssItems = ListFrom( from x in map select FinalCssItem.CreateFinalCssItem(x)),
+                        FinalCssItems = ListFrom( from x in map select CreateFinalCssItem(x)),
                     };
                 }
             }
@@ -831,7 +831,7 @@ static class TailwindCss
                 return new DesignerStyleItem
                 {
                     Pseudo        = pseudo,
-                    FinalCssItems = [FinalCssItem.CreateFinalCssItem(styleName, numberSuffix.Value * 4 + "px")],
+                    FinalCssItems = [CreateFinalCssItem(styleName, numberSuffix.Value * 4 + "px")],
                 };
             }
         }
@@ -856,7 +856,7 @@ static class TailwindCss
                 return new DesignerStyleItem
                 {
                     Pseudo        = pseudo,
-                    FinalCssItems = [FinalCssItem.CreateFinalCssItem("font-weight", weightAsNumber)],
+                    FinalCssItems = [CreateFinalCssItem("font-weight", weightAsNumber)],
                 };
             }
         }
@@ -875,7 +875,7 @@ static class TailwindCss
                 return new DesignerStyleItem
                 {
                     Pseudo        = pseudo,
-                    FinalCssItems = [FinalCssItem.CreateFinalCssItem("font-family", value)],
+                    FinalCssItems = [CreateFinalCssItem("font-family", value)],
                 };
             }
         }
@@ -891,7 +891,7 @@ static class TailwindCss
                     return new DesignerStyleItem
                     {
                         Pseudo        = pseudo,
-                        FinalCssItems = [FinalCssItem.CreateFinalCssItem("color", tailwindColor.Value)],
+                        FinalCssItems = [CreateFinalCssItem("color", tailwindColor.Value)],
                     };
                 }
             }
@@ -908,7 +908,7 @@ static class TailwindCss
                     return new DesignerStyleItem
                     {
                         Pseudo        = pseudo,
-                        FinalCssItems = [FinalCssItem.CreateFinalCssItem("background", tailwindColor.Value)],
+                        FinalCssItems = [CreateFinalCssItem("background", tailwindColor.Value)],
                     };
                 }
             }
@@ -929,7 +929,7 @@ static class TailwindCss
                 return new DesignerStyleItem
                 {
                     Pseudo        = pseudo,
-                    FinalCssItems = [FinalCssItem.CreateFinalCssItem("text-decoration-line", value)],
+                    FinalCssItems = [CreateFinalCssItem("text-decoration-line", value)],
                 };
             }
         }
@@ -942,7 +942,7 @@ static class TailwindCss
                 return new DesignerStyleItem
                 {
                     Pseudo        = pseudo,
-                    FinalCssItems = [FinalCssItem.CreateFinalCssItem("color", realColor)],
+                    FinalCssItems = [CreateFinalCssItem("color", realColor)],
                 };
             }
         }
@@ -954,7 +954,7 @@ static class TailwindCss
                 return new DesignerStyleItem
                 {
                     Pseudo        = pseudo,
-                    FinalCssItems = [FinalCssItem.CreateFinalCssItem(htmlStyleName, htmlStyleValue)],
+                    FinalCssItems = [CreateFinalCssItem(htmlStyleName, htmlStyleValue)],
                 };
             }
         }
@@ -976,7 +976,7 @@ static class TailwindCss
                     return new DesignerStyleItem
                     {
                         Pseudo        = pseudo,
-                        FinalCssItems = [FinalCssItem.CreateFinalCssItem(styleName, arbitrary.Value)],
+                        FinalCssItems = [CreateFinalCssItem(styleName, arbitrary.Value)],
                     };
                 }
             }
@@ -1009,7 +1009,7 @@ static class TailwindCss
                     return new DesignerStyleItem
                     {
                         Pseudo        = pseudo,
-                        FinalCssItems = [FinalCssItem.CreateFinalCssItem(styleName, color)],
+                        FinalCssItems = [CreateFinalCssItem(styleName, color)],
                     };
                 }
             }
