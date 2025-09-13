@@ -45,7 +45,11 @@ public static partial class CssHelper
                     return htmlStyle.Error;
                 }
 
-                return CreateDesignerStyleItem(pseudo, htmlStyle.Value);
+                return CreateDesignerStyleItem2(new ()
+                {
+                    Pseudo = pseudo, 
+                    FinalCssItems = [htmlStyle.Value]
+                });
             }
 
             return new Exception("Value is required");
@@ -73,13 +77,22 @@ public static partial class CssHelper
             {
                 return Style.ParseCssAsDictionary(cssText)
                     .Then(styleMap 
-                              => CreateDesignerStyleItem(pseudo, ListFrom(from pair in styleMap select CreateFinalCssItem(pair)))
+                              => CreateDesignerStyleItem2(new ()
+                              {
+                                  Pseudo        = pseudo, 
+                                  FinalCssItems = from pair in styleMap select CreateFinalCssItem(pair)
+                              })
+                              
                 );
             }
 
             if (name == "color" && value is not null && project.Colors.TryGetValue(value, out var realColor))
             {
-                return CreateDesignerStyleItem(pseudo, CreateFinalCssItem("color", realColor));
+                return CreateDesignerStyleItem2(new()
+                {
+                    Pseudo        = pseudo,
+                    FinalCssItems = [CreateFinalCssItem("color", realColor)]
+                });
             }
 
             return None;

@@ -4,56 +4,38 @@ namespace ReactWithDotNet.VisualDesigner;
 
 static class DesignerStyleItemFactory
 {
-    public static DesignerStyleItem CreateDesignerStyleItem(string maybePseudo, params IReadOnlyList<FinalCssItem> finalCssItems)
+    public static DesignerStyleItem CreateDesignerStyleItem2(CreateDesignerStyleItemInput input)
     {
-        if (finalCssItems.Count == 0)
-        {
-            throw new ArgumentException("finalCssItems.Length cannot be zero");
-        }
-     
-        return new DesignerStyleItem
-        {
-            Pseudo        = maybePseudo,
-            FinalCssItems = finalCssItems
-        };
-    }
-    
-    public static DesignerStyleItem CreateDesignerStyleItem2(DesignerStyleItemParameter parameter)
-    {
+        var finalCssItems = input.FinalCssItems.ToList();
 
-        var finalCssItems = parameter.FinalCssItems.ToList();
-        
         if (finalCssItems.Count == 0)
         {
             throw new ArgumentException("finalCssItems.Length cannot be zero");
         }
-     
-        return new DesignerStyleItem
+
+        return new()
         {
-            Pseudo        = parameter.Pseudo,
-            
+            Pseudo = input.Pseudo,
+
             FinalCssItems = finalCssItems
         };
     }
 }
 
-public sealed class DesignerStyleItemParameter
+public sealed class CreateDesignerStyleItemInput
 {
-    public string Pseudo { get; init; }
-
     public IEnumerable<FinalCssItem> FinalCssItems { get; init; }
 
+    public string Pseudo { get; init; }
 }
 
 public sealed class DesignerStyleItem
 {
-    public string Pseudo { get; init; }
+    internal DesignerStyleItem()
+    {
+    }
 
     public IReadOnlyList<FinalCssItem> FinalCssItems { get; init; }
 
-    public DesignerStyleItem()
-    {
-        
-    }
-
+    public string Pseudo { get; init; }
 }
