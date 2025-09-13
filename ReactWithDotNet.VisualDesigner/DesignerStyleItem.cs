@@ -4,7 +4,7 @@ namespace ReactWithDotNet.VisualDesigner;
 
 static class DesignerStyleItemFactory
 {
-    public static DesignerStyleItem CreateDesignerStyleItem2(CreateDesignerStyleItemInput input)
+    public static DesignerStyleItem CreateDesignerStyleItem(CreateDesignerStyleItemInput input)
     {
         var finalCssItems = input.FinalCssItems.ToList();
 

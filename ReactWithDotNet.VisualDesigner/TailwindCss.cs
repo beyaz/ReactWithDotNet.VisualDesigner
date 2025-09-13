@@ -792,7 +792,7 @@ static class TailwindCss
                 var (map, exception) = Style.ParseCssAsDictionary(cssText);
                 if (exception is null)
                 {
-                    return CreateDesignerStyleItem2(new()
+                    return CreateDesignerStyleItem(new()
                     {
                         Pseudo        = pseudo,
                         FinalCssItems = from x in map select CreateFinalCssItem(x)
@@ -828,7 +828,7 @@ static class TailwindCss
                     return None;
                 }
                 
-                return CreateDesignerStyleItem2(new()
+                return CreateDesignerStyleItem(new()
                 {
                     Pseudo        = pseudo,
                     FinalCssItems = [CreateFinalCssItem(styleName, numberSuffix.Value * 4 + "px")]
@@ -853,7 +853,7 @@ static class TailwindCss
 
             if (fontWeightMap.TryGetValue(utilityCssClassName, out var weightAsNumber))
             {
-                return CreateDesignerStyleItem2(new()
+                return CreateDesignerStyleItem(new()
                 {
                     Pseudo        = pseudo,
                     FinalCssItems = [CreateFinalCssItem("font-weight", weightAsNumber)]
@@ -872,7 +872,7 @@ static class TailwindCss
 
             if (fontFamilyMap.TryGetValue(utilityCssClassName, out var value))
             {
-                return CreateDesignerStyleItem2(new()
+                return CreateDesignerStyleItem(new()
                 {
                     Pseudo        = pseudo,
                     FinalCssItems = [CreateFinalCssItem("font-family", value)],
@@ -890,7 +890,7 @@ static class TailwindCss
                 var tailwindColor = tryGetTailwindColor(color, number);
                 if (tailwindColor.HasValue)
                 {
-                    return CreateDesignerStyleItem2(new()
+                    return CreateDesignerStyleItem(new()
                     {
                         Pseudo        = pseudo,
                         FinalCssItems = [CreateFinalCssItem("color", tailwindColor.Value)],
@@ -909,7 +909,7 @@ static class TailwindCss
                 var tailwindColor = tryGetTailwindColor(color, number);
                 if (tailwindColor.HasValue)
                 {
-                    return CreateDesignerStyleItem2(new()
+                    return CreateDesignerStyleItem(new()
                     {
                         Pseudo        = pseudo,
                         FinalCssItems = [CreateFinalCssItem("background", tailwindColor.Value)],
@@ -932,7 +932,7 @@ static class TailwindCss
             if (map.TryGetValue(utilityCssClassName, out var value))
             {
                 
-                return CreateDesignerStyleItem2(new()
+                return CreateDesignerStyleItem(new()
                 {
                     Pseudo        = pseudo,
                     FinalCssItems = [CreateFinalCssItem("text-decoration-line", value)],
@@ -947,7 +947,7 @@ static class TailwindCss
             {
                 
                 
-                return CreateDesignerStyleItem2(new()
+                return CreateDesignerStyleItem(new()
                 {
                     Pseudo        = pseudo,
                     FinalCssItems = [CreateFinalCssItem("color", realColor)],
@@ -961,7 +961,7 @@ static class TailwindCss
             {
                
                 
-                return CreateDesignerStyleItem2(new()
+                return CreateDesignerStyleItem(new()
                 {
                     Pseudo        = pseudo,
                     FinalCssItems = [CreateFinalCssItem(htmlStyleName, htmlStyleValue)],
@@ -984,7 +984,7 @@ static class TailwindCss
                 if (arbitrary.HasValue && arbitrary.Value.EndsWith("px"))
                 {
                     
-                    return CreateDesignerStyleItem2(new()
+                    return CreateDesignerStyleItem(new()
                     {
                         Pseudo        = pseudo,
                         FinalCssItems = [CreateFinalCssItem(styleName, arbitrary.Value)],
@@ -1018,7 +1018,7 @@ static class TailwindCss
                     }
 
                     
-                    return CreateDesignerStyleItem2(new()
+                    return CreateDesignerStyleItem(new()
                     {
                         Pseudo        = pseudo,
                         FinalCssItems = [CreateFinalCssItem(styleName, color)],

@@ -45,7 +45,7 @@ public static partial class CssHelper
                     return htmlStyle.Error;
                 }
 
-                return CreateDesignerStyleItem2(new ()
+                return CreateDesignerStyleItem(new ()
                 {
                     Pseudo = pseudo, 
                     FinalCssItems = [htmlStyle.Value]
@@ -77,7 +77,7 @@ public static partial class CssHelper
             {
                 return Style.ParseCssAsDictionary(cssText)
                     .Then(styleMap 
-                              => CreateDesignerStyleItem2(new ()
+                              => CreateDesignerStyleItem(new ()
                               {
                                   Pseudo        = pseudo, 
                                   FinalCssItems = from pair in styleMap select CreateFinalCssItem(pair)
@@ -88,7 +88,7 @@ public static partial class CssHelper
 
             if (name == "color" && value is not null && project.Colors.TryGetValue(value, out var realColor))
             {
-                return CreateDesignerStyleItem2(new()
+                return CreateDesignerStyleItem(new()
                 {
                     Pseudo        = pseudo,
                     FinalCssItems = [CreateFinalCssItem("color", realColor)]
