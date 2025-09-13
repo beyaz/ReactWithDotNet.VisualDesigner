@@ -6,22 +6,35 @@ static class FinalCssItemFactory
 {
     public static Result<FinalCssItem> CreateFinalCssItem(string name, string value)
     {
-        if (string.IsNullOrWhiteSpace(name))
-        {
-            return new ArgumentException("Style name cannot be null or whitespace.", nameof(name));
-        }
-
-        if (string.IsNullOrWhiteSpace(value))
-        {
-            return new ArgumentException("Style value cannot be whitespace.", nameof(value));
-        }
-
-        return new FinalCssItem { Name = name, Value = value };
+        return CreateFinalCssItem(new(){Name = name, Value = value});
     }
-
-    public static Result<FinalCssItem> CreateFinalCssItem(KeyValuePair<string, string> keyValuePair)
+    
+    public static Result<FinalCssItem> CreateFinalCssItem(CreateFinalCssItemInput input)
     {
-        return CreateFinalCssItem(keyValuePair.Key, keyValuePair.Value);
+        if (string.IsNullOrWhiteSpace(input.Name))
+        {
+            return new ArgumentException("Style name cannot be null or whitespace.", nameof(input.Name));
+        }
+
+        if (string.IsNullOrWhiteSpace(input.Value))
+        {
+            return new ArgumentException("Style value cannot be whitespace.", nameof(input.Value));
+        }
+
+        return new FinalCssItem { Name = input.Name, Value = input.Value };
+    }
+    
+}
+
+public sealed record CreateFinalCssItemInput
+{
+    public required string Name { get; init; }
+
+    public required string Value { get; init; }
+    
+    public static implicit operator CreateFinalCssItemInput(KeyValuePair<string, string> keyValuePair)
+    {
+        return new() { Name = keyValuePair.Key, Value = keyValuePair.Value };
     }
 }
 
