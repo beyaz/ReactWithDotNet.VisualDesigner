@@ -198,17 +198,23 @@ static class ModelToNodeTransformer
 
                          var x when x.Value.Pseudo is not null => [new NotSupportedException("Pseudo styles are not supported in inline styles.")],
 
-                         _ => from x in item.Value.FinalCssItems select CreateFinalCssItem(
-                                                                                           KebabToCamelCase(x.Name),
-                                                                                                               
-                                                                                                               
-                                                                                                               x.Value switch
-                                                                                                               {
-                                                                                                                   null                                                            => null,
-                                                                                                                   var y when y.StartsWith("request.") || y.StartsWith("context.") => y,
-                                                                                                                   var y                                                           => '"' + TryClearStringValue(y) + '"'
-                                                                                                               }
-                                                                                                               )
+                         _ => from x in item.Value.FinalCssItems
+
+                             select CreateFinalCssItem
+                                 (new()
+                                  {
+                                      Name = KebabToCamelCase(x.Name),
+
+                                      Value = x.Value switch
+                                      {
+                                          null => null,
+
+                                          var y when y.StartsWith("request.") || y.StartsWith("context.") => y,
+
+                                          var y => '"' + TryClearStringValue(y) + '"'
+                                      }
+                                  }
+                                 )
 
                      }
                      from x in finalCssItems
