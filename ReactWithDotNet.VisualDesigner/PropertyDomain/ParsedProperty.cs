@@ -12,6 +12,27 @@ public interface IParsedProperty
 
 static class ParsedPropertyFactory
 {
+    
+    public static bool Is(this Result<IParsedProperty> result, string name, string value)
+    {
+        if (result.HasError)
+        {
+            return false;
+        }
+
+        return result.Value.Name == name && result.Value.Value == value;
+    }
+    
+    public static bool Is(this Result<IParsedProperty> result, Func<IParsedProperty, bool> nextFunc)
+    {
+        if (result.HasError)
+        {
+            return false;
+        }
+
+        return nextFunc(result.Value);
+    }
+    
     public static Result<IParsedProperty> ParseProperty(string nameValueCombined)
     {
         if (string.IsNullOrWhiteSpace(nameValueCombined))

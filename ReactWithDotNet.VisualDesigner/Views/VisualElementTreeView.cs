@@ -317,7 +317,7 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
 
         string nameText = null;
         {
-            foreach (var name in from p in node.Properties from pair in TryParseProperty(p) where pair.Name == Design.Name select pair.Value)
+            foreach (var name in from p in node.Properties from pair in ParseProperty(p) where pair.Name == Design.Name select pair.Value)
             {
                 nameText = TryClearStringValue(name);
             }
@@ -388,7 +388,7 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
 
         static bool hasNamedProperty(VisualElementModel node, string propertyName)
         {
-            foreach (var _ in from p in node.Properties from pair in TryParseProperty(p) where pair.Name == propertyName select pair)
+            foreach (var _ in from p in node.Properties from pair in ParseProperty(p) where pair.Name == propertyName select pair)
             {
                 return true;
             }
@@ -436,17 +436,17 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
             var hasCol = styles.Contains("col") || styles.Contains("flex-col-centered");
             var hasRow = styles.Contains("row") || styles.Contains("flex-row-centered");
 
-            var hasFlex = styles.Any(x => TryParseProperty(x).Is("display", "flex") || TryParseProperty(x).Is("display", "inline-flex"));
+            var hasFlex = styles.Any(x => ParseProperty(x).Is("display", "flex") || ParseProperty(x).Is("display", "inline-flex"));
 
-            var hasGrid = styles.Any(x => TryParseProperty(x).Is("display", "grid") || TryParseProperty(x).Is("display", "inline-grid"));
+            var hasGrid = styles.Any(x => ParseProperty(x).Is("display", "grid") || ParseProperty(x).Is("display", "inline-grid"));
 
-            var hasFlexDirectionColumn = styles.Any(x => TryParseProperty(x).Is("flex-direction", "column"));
+            var hasFlexDirectionColumn = styles.Any(x => ParseProperty(x).Is("flex-direction", "column"));
 
-            var hasFlexDirectionRow = styles.Any(x => TryParseProperty(x).Is("flex-direction", "row"));
+            var hasFlexDirectionRow = styles.Any(x => ParseProperty(x).Is("flex-direction", "row"));
 
-            var hasHeightWithConstantValue = styles.Any(x => TryParseProperty(x).Is(r => r.Value.IsDouble() && r.Name.In("h", "height")));
+            var hasHeightWithConstantValue = styles.Any(x => ParseProperty(x).Is(r => r.Value.IsDouble() && r.Name.In("h", "height")));
 
-            var hasWidthWithConstantValue = styles.Any(x => TryParseProperty(x).Is(r => r.Value.IsDouble() && r.Name.In("w", "width")));
+            var hasWidthWithConstantValue = styles.Any(x => ParseProperty(x).Is(r => r.Value.IsDouble() && r.Name.In("w", "width")));
 
             if (hasGrid)
             {
