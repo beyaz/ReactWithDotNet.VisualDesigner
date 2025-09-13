@@ -1,4 +1,6 @@
 ﻿
+using static Dapper.SqlMapper;
+
 namespace ReactWithDotNet.VisualDesigner;
 
 public static partial class CssHelper
@@ -75,15 +77,11 @@ public static partial class CssHelper
 
             if (project.Styles.TryGetValue(designerStyleItem, out var cssText))
             {
-                return Style.ParseCssAsDictionary(cssText)
-                    .Then(styleMap 
-                              => CreateDesignerStyleItem(new ()
-                              {
-                                  Pseudo        = pseudo, 
-                                  FinalCssItems = from pair in styleMap select CreateFinalCssItem(pair)
-                              })
-                              
-                );
+                return Style.ParseCssAsDictionary(cssText).Then(styleMap => CreateDesignerStyleItem(new()
+                {
+                    Pseudo        = pseudo,
+                    FinalCssItems = from pair in styleMap select CreateFinalCssItem(pair)
+                }));
             }
 
             if (name == "color" && value is not null && project.Colors.TryGetValue(value, out var realColor))

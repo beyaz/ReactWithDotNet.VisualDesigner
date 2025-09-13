@@ -4,16 +4,16 @@ namespace ReactWithDotNet.VisualDesigner;
 
 static class DesignerStyleItemFactory
 {
-    public static DesignerStyleItem CreateDesignerStyleItem(CreateDesignerStyleItemInput input)
+    public static Result<DesignerStyleItem> CreateDesignerStyleItem(CreateDesignerStyleItemInput input)
     {
         var finalCssItems = input.FinalCssItems.ToList();
 
         if (finalCssItems.Count == 0)
         {
-            throw new ArgumentException("finalCssItems.Length cannot be zero");
+            return new ArgumentException("finalCssItems.Length cannot be zero");
         }
 
-        return new()
+        return new DesignerStyleItem
         {
             Pseudo = input.Pseudo,
 

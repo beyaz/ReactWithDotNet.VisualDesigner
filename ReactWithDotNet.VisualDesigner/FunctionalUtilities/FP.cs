@@ -338,6 +338,16 @@ static class FP
 
         return convertFunc(result.value);
     }
+    
+    public static Result<B> Then<A, B>(this (A value, Exception exception) result, Func<A, Result<B>> convertFunc)
+    {
+        if (result.exception is not null)
+        {
+            return result.exception;
+        }
+
+        return convertFunc(result.value);
+    }
 
     public static Result<B> Then<A, B>(this Result<A> result, Func<A, B> convertFunc)
     {
