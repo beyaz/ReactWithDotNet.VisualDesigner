@@ -773,7 +773,7 @@ static class TailwindCss
         }
     }
 
-    public static Maybe<DesignerStyleItem> TryConvertTailwindUtilityClassToHtmlStyle(ProjectConfig project, string utilityCssClassName)
+    public static Result<DesignerStyleItem> TryConvertTailwindUtilityClassToHtmlStyle(ProjectConfig project, string utilityCssClassName)
     {
         string pseudo = null;
         {
