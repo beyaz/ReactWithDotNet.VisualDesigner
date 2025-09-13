@@ -26,14 +26,14 @@ static class ModelToNodeTransformer
                 {
                     var propertyIsSuccessfullyParsed = false;
 
-                    foreach (var (name, value) in TryParseProperty(property))
+                    foreach (var parsedProperty in ParseProperty(property))
                     {
                         node = node with
                         {
                             Properties = node.Properties.Add(new()
                             {
-                                Name  = name,
-                                Value = value
+                                Name  = parsedProperty.Name,
+                                Value = parsedProperty.Value
                             })
                         };
 
