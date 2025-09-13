@@ -80,7 +80,7 @@ public static partial class CssHelper
                 {
                     Pseudo = pseudo,
 
-                    FinalCssItems = ListFrom(from pair in styleMap select FinalCssItem.Create(pair))
+                    FinalCssItems = ListFrom(from pair in styleMap select FinalCssItem.CreateFinalCssItem(pair))
                 });
             }
 
@@ -90,7 +90,7 @@ public static partial class CssHelper
                 {
                     Pseudo = pseudo, 
                     
-                    FinalCssItems = [FinalCssItem.Create("color",realColor)]
+                    FinalCssItems = [FinalCssItem.CreateFinalCssItem("color",realColor)]
                 };
             }
 
@@ -167,8 +167,8 @@ public static partial class CssHelper
 
                 select parseResult.success 
                     ? parseResult.right is not null 
-                        ? FinalCssItem.Create(finalCssItem.Name, parseResult.right) 
-                        : FinalCssItem.Create(finalCssItem.Name, parseResult.left)
+                        ? FinalCssItem.CreateFinalCssItem(finalCssItem.Name, parseResult.right) 
+                        : FinalCssItem.CreateFinalCssItem(finalCssItem.Name, parseResult.left)
                     : finalCssItem;
 
 
@@ -214,7 +214,7 @@ public sealed class FinalCssItem
         (name, value) = (Name, Value);
    
     
-    public static FinalCssItem Create(string name, string value)
+    public static FinalCssItem CreateFinalCssItem(string name, string value)
     {
        
         
@@ -232,8 +232,8 @@ public sealed class FinalCssItem
         return new() { Name = name, Value = value };
     }
 
-    public static FinalCssItem Create(KeyValuePair<string, string> keyValuePair)
+    public static FinalCssItem CreateFinalCssItem(KeyValuePair<string, string> keyValuePair)
     {
-        return Create(keyValuePair.Key, keyValuePair.Value);
+        return CreateFinalCssItem(keyValuePair.Key, keyValuePair.Value);
     }
 }
