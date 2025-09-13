@@ -6,8 +6,6 @@ using System.Text.Json.Nodes;
 
 namespace ReactWithDotNet.VisualDesigner.Views;
 
-
-
 sealed class ApplicationPreview : Component
 {
     public Task Refresh()
@@ -152,7 +150,7 @@ sealed class ApplicationPreview : Component
             }
 
             element ??= Plugin.TryCreateElementForPreview(model.Tag, path, scope.OnTreeItemClicked);
-            
+
             if (element is null)
             {
                 return new ArgumentException($"{model.Tag} is not resolved.");
@@ -171,8 +169,6 @@ sealed class ApplicationPreview : Component
                     }
                 }
             }
-            
-           
 
             model = model with
             {
@@ -211,14 +207,13 @@ sealed class ApplicationPreview : Component
             }
 
             {
-
                 foreach (var styleModifierResult in
                          from designerStyleText in model.Styles
                          where !designerStyleText.StartsWith("d-")
                          from designerStyleItem in CreateDesignerStyleItemFromText(scope.Project, designerStyleText)
-                         from x in designerStyleItem.FinalCssItems 
-                         where x.Value?.StartsWith("state.",StringComparison.OrdinalIgnoreCase) is not true
-                         where x.Value?.StartsWith("props.",StringComparison.OrdinalIgnoreCase) is not true
+                         from x in designerStyleItem.FinalCssItems
+                         where x.Value?.StartsWith("state.", StringComparison.OrdinalIgnoreCase) is not true
+                         where x.Value?.StartsWith("props.", StringComparison.OrdinalIgnoreCase) is not true
                          where !Design.IsDesignTimeName(x.Name)
                          select designerStyleItem.ToStyleModifier())
                 {
@@ -226,22 +221,22 @@ sealed class ApplicationPreview : Component
                     {
                         return styleModifierResult.Error;
                     }
-                    
+
                     element.Add(styleModifierResult.Value);
                 }
-                
+
                 foreach (var styleModifierResult in
                          from designerStyleText in model.Styles
                          where Design.IsDesignTimeName(designerStyleText)
-                         from designerStyleItem in CreateDesignerStyleItemFromText(scope.Project, designerStyleText.RemoveFromStart("d-",StringComparison.OrdinalIgnoreCase))
-                         from x in designerStyleItem.FinalCssItems 
+                         from designerStyleItem in CreateDesignerStyleItemFromText(scope.Project, designerStyleText.RemoveFromStart("d-", StringComparison.OrdinalIgnoreCase))
+                         from x in designerStyleItem.FinalCssItems
                          select designerStyleItem.ToStyleModifier())
                 {
                     if (styleModifierResult.HasError)
                     {
                         return styleModifierResult.Error;
                     }
-                    
+
                     element.Add(styleModifierResult.Value);
                 }
             }
@@ -254,17 +249,17 @@ sealed class ApplicationPreview : Component
                     {
                         return new DeveloperException("Element.Id not set yet");
                     }
-                
+
                     scope.Client.RunJavascript(getJsCodeToHighlightElement(htmlElement.id));
                 }
-                
+
                 if (scope.HighlightedElementPath == path && element is PluginComponentBase componentBase)
                 {
                     if (componentBase.id.HasNoValue())
                     {
                         return new DeveloperException("Element.Id not set yet");
                     }
-                
+
                     scope.Client.RunJavascript(getJsCodeToHighlightElement(componentBase.id));
                 }
             }
@@ -450,6 +445,7 @@ sealed class ApplicationPreview : Component
                 {
                     return result.Error;
                 }
+
                 data = result.Value;
 
                 if (data.IsProcessed)
@@ -626,7 +622,7 @@ sealed class ApplicationPreview : Component
                     {
                         return data;
                     }
-                    
+
                     var isValueDouble = double.TryParse(propValue, out var valueAsDouble);
 
                     if (propName.Equals("height", StringComparison.OrdinalIgnoreCase))
@@ -664,7 +660,7 @@ sealed class ApplicationPreview : Component
                             foreach (var srcValue in await calculateSrcFromValue(scope, model, propValue))
                             {
                                 ReflectionHelper.SetPropertyValue(element, "src", srcValue);
-                                
+
                                 return data with { IsProcessed = true };
                             }
                         }
@@ -684,7 +680,7 @@ sealed class ApplicationPreview : Component
                                 foreach (var srcValue in await calculateSrcFromValue(scope, model, designTimeSrc))
                                 {
                                     ReflectionHelper.SetPropertyValue(element, "src", srcValue);
-                                    
+
                                     return data with { IsProcessed = true };
                                 }
                             }
@@ -834,33 +830,32 @@ sealed class ApplicationPreview : Component
                         propertyInfo.SetValue(element, (UnionProp<string, double>)propValue);
                         return data with { IsProcessed = true };
                     }
-                    
+
                     if (propertyInfo.PropertyType == typeof(bool) || propertyInfo.PropertyType == typeof(bool?))
                     {
                         if (bool.TryParse(TryClearStringValue(propValue), out var result))
                         {
                             propertyInfo.SetValue(element, result);
                         }
-                        
+
                         return data with { IsProcessed = true };
                     }
-                    
+
                     if (propertyInfo.PropertyType == typeof(int) || propertyInfo.PropertyType == typeof(int?))
                     {
                         if (int.TryParse(TryClearStringValue(propValue), out var result))
                         {
                             propertyInfo.SetValue(element, result);
                         }
-                        
+
                         return data with { IsProcessed = true };
                     }
 
                     return data;
                 }
-                
+
                 static PropertyProcessScope tryProcessHtmlElementDataAttribute(PropertyProcessScope data)
                 {
-                    
                     var propName = data.propName;
                     var propValue = data.propValue;
                     var element = data.element;
@@ -870,25 +865,23 @@ sealed class ApplicationPreview : Component
                         if (element is HtmlElement htmlElement)
                         {
                             var dataKey = propName.RemoveFromStart("data-", StringComparison.OrdinalIgnoreCase);
-                            
+
                             htmlElement.data.TryAdd(dataKey, propValue);
-                            
+
                             return data with { IsProcessed = true };
                         }
                     }
 
                     return data;
                 }
-                
+
                 static PropertyProcessScope tryProcessHtmlElementUnknowAttribute(PropertyProcessScope data)
                 {
-                    if (data.element is HtmlElement )
+                    if (data.element is HtmlElement)
                     {
                         return data with { IsProcessed = true };
-                            
-                            
                     }
-                    
+
                     return data;
                 }
             }
@@ -979,19 +972,19 @@ sealed class ApplicationPreview : Component
 
         return Task.CompletedTask;
     }
-    
+
     static class ReflectionHelper
     {
         public static Result SetPropertyValue(object obj, string propertyName, object value)
         {
             var type = obj.GetType();
-            
+
             var propertyInfo = type.GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
             if (propertyInfo is null)
             {
                 return new MissingMemberException(type.FullName + "::" + propertyName);
             }
-            
+
             if (!propertyInfo.CanWrite)
             {
                 return new MissingMemberException(type.FullName + "::" + propertyName + " has no set property");
@@ -1002,17 +995,17 @@ sealed class ApplicationPreview : Component
             if (propertyType == typeof(string))
             {
                 propertyInfo.SetValue(obj, value?.ToString());
-                
+
                 return Success;
             }
 
-            if (propertyType == typeof(double) || propertyType == typeof(double?)  && value is double)
+            if (propertyType == typeof(double) || (propertyType == typeof(double?) && value is double))
             {
                 propertyInfo.SetValue(obj, value);
 
                 return Success;
             }
-            
+
             if (propertyType == typeof(UnionProp<string, double?>))
             {
                 if (value is double d)
@@ -1020,17 +1013,16 @@ sealed class ApplicationPreview : Component
                     propertyInfo.SetValue(obj, (UnionProp<string, double?>)d);
                     return Success;
                 }
-               
+
                 propertyInfo.SetValue(obj, (UnionProp<string, double?>)value.ToString());
 
                 return Success;
             }
-            
+
             return new Exception("PropertyTypeNotImplementedForReflection:" + propertyType.FullName);
         }
     }
 }
-
 
 static class ApplicationPreviewExtensions
 {
@@ -1046,7 +1038,7 @@ static class ApplicationPreviewExtensions
             {
                 return finalCssItemResult.Error;
             }
-            
+
             var exception = style.TrySet(finalCssItemResult.Value.Name, finalCssItemResult.Value.Value);
             if (exception is not null)
             {
@@ -1063,18 +1055,13 @@ static class ApplicationPreviewExtensions
 
         static IEnumerable<Result<FinalCssItem>> arrangeCondition(IReadOnlyList<FinalCssItem> finalCssItems)
         {
-
             return from finalCssItem in finalCssItems
-
                 let parseResult = TryParseConditionalValue(finalCssItem.Value)
-
-                select parseResult.success 
-                    ? parseResult.right is not null 
-                        ? CreateFinalCssItem(finalCssItem.Name, parseResult.right) 
+                select parseResult.success
+                    ? parseResult.right is not null
+                        ? CreateFinalCssItem(finalCssItem.Name, parseResult.right)
                         : CreateFinalCssItem(finalCssItem.Name, parseResult.left)
                     : finalCssItem;
-
-
         }
 
         static Result<StyleModifier> ApplyPseudo(string pseudo, IReadOnlyList<StyleModifier> styleModifiers)
@@ -1087,6 +1074,8 @@ static class ApplicationPreviewExtensions
 sealed record RenderPreviewScope
 {
     public Client Client { get; init; }
+
+    public string HighlightedElementPath { get; init; }
 
     public required MouseEventHandler OnTreeItemClicked { get; init; }
 
@@ -1103,19 +1092,17 @@ sealed record RenderPreviewScope
     public required ReactContext ReactContext { get; init; }
 
     public required string UserName { get; init; }
-
-    public string HighlightedElementPath { get; init; }
 }
 
 sealed record PropertyProcessScope
 {
     public Element element { get; init; }
+
+    public bool IsProcessed { get; init; }
     public VisualElementModel model { get; init; }
     public string propName { get; init; }
     public string propValue { get; init; }
     public RenderPreviewScope scope { get; init; }
-
-    public bool IsProcessed { get; init; }
 }
 
 static class JsonHelper
@@ -1151,4 +1138,3 @@ public class PluginComponentBase : Component
     public string id;
     public MouseEventHandler onMouseClick;
 }
-
