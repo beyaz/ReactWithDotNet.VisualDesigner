@@ -13,18 +13,26 @@ static class DesignerStyleItemFactory
             return new ArgumentException("finalCssItems.Length cannot be zero");
         }
 
+        foreach (var result in finalCssItems)
+        {
+            if (result.HasError)
+            {
+                return result.Error;
+            }
+        }
+
         return new DesignerStyleItem
         {
             Pseudo = input.Pseudo,
 
-            FinalCssItems = finalCssItems
+            FinalCssItems = ListFrom(from x in finalCssItems select x.Value)
         };
     }
 }
 
 public sealed class CreateDesignerStyleItemInput
 {
-    public IEnumerable<FinalCssItem> FinalCssItems { get; init; }
+    public IEnumerable<Result<FinalCssItem>> FinalCssItems { get; init; }
 
     public string Pseudo { get; init; }
 }

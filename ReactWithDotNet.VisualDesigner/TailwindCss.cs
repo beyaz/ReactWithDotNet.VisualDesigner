@@ -146,7 +146,13 @@ static class TailwindCss
                 {
                     string lefTailwindClass;
                     {
-                        var result = ConvertToTailwindClass(project, CreateFinalCssItem(cssAttributeName, left));
+                        var cssItem = CreateFinalCssItem(cssAttributeName, left);
+                        if (cssItem.HasError)
+                        {
+                            return cssItem.Error;
+                        }
+                        
+                        var result = ConvertToTailwindClass(project, cssItem.Value);
                         if (result.HasError)
                         {
                             return result.Error;
@@ -159,15 +165,21 @@ static class TailwindCss
 
                     if (right.HasValue())
                     {
+                        
+                        var cssItem = CreateFinalCssItem(cssAttributeName, right);
+                        if (cssItem.HasError)
                         {
-                            var result = ConvertToTailwindClass(project, CreateFinalCssItem(cssAttributeName, right));
+                            return cssItem.Error;
+                        }
+                        
+                            var result = ConvertToTailwindClass(project, cssItem.Value);
                             if (result.HasError)
                             {
                                 return result.Error;
                             }
 
                             rightTailwindClass = result.Value;
-                        }
+                        
                     }
 
                     return "${" + $"{ClearConnectedValue(condition)} ? \"{lefTailwindClass}\" : \"{rightTailwindClass}\"" + '}';

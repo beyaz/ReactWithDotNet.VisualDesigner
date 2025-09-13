@@ -1,6 +1,4 @@
 ﻿
-using static Dapper.SqlMapper;
-
 namespace ReactWithDotNet.VisualDesigner;
 
 public static partial class CssHelper
@@ -141,9 +139,14 @@ public static partial class CssHelper
 
         var style = new Style();
 
-        foreach (var finalCssItem in arrangeCondition(designerStyleItem.FinalCssItems))
+        foreach (var finalCssItemResult in arrangeCondition(designerStyleItem.FinalCssItems))
         {
-            var exception = style.TrySet(finalCssItem.Name, finalCssItem.Value);
+            if (finalCssItemResult.HasError)
+            {
+                return finalCssItemResult.Error;
+            }
+            
+            var exception = style.TrySet(finalCssItemResult.Value.Name, finalCssItemResult.Value.Value);
             if (exception is not null)
             {
                 return exception;
@@ -157,7 +160,7 @@ public static partial class CssHelper
 
         return (StyleModifier)style;
 
-        static IEnumerable<FinalCssItem> arrangeCondition(IReadOnlyList<FinalCssItem> finalCssItems)
+        static IEnumerable<Result<FinalCssItem>> arrangeCondition(IReadOnlyList<FinalCssItem> finalCssItems)
         {
 
             return from finalCssItem in finalCssItems

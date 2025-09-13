@@ -4,22 +4,22 @@ namespace ReactWithDotNet.VisualDesigner;
 
 static class FinalCssItemFactory
 {
-    public static FinalCssItem CreateFinalCssItem(string name, string value)
+    public static Result<FinalCssItem> CreateFinalCssItem(string name, string value)
     {
         if (string.IsNullOrWhiteSpace(name))
         {
-            throw new ArgumentException("Style name cannot be null or whitespace.", nameof(name));
+            return new ArgumentException("Style name cannot be null or whitespace.", nameof(name));
         }
 
         if (string.IsNullOrWhiteSpace(value))
         {
-            throw new ArgumentException("Style value cannot be whitespace.", nameof(value));
+            return new ArgumentException("Style value cannot be whitespace.", nameof(value));
         }
 
-        return new() { Name = name, Value = value };
+        return new FinalCssItem { Name = name, Value = value };
     }
 
-    public static FinalCssItem CreateFinalCssItem(KeyValuePair<string, string> keyValuePair)
+    public static Result<FinalCssItem> CreateFinalCssItem(KeyValuePair<string, string> keyValuePair)
     {
         return CreateFinalCssItem(keyValuePair.Key, keyValuePair.Value);
     }
