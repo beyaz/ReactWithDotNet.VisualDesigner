@@ -1,59 +1,40 @@
-﻿
-namespace ReactWithDotNet.VisualDesigner;
+﻿namespace ReactWithDotNet.VisualDesigner;
 
 public static partial class CssHelper
 {
     public static Result<DesignerStyleItem> CreateDesignerStyleItemFromText(ProjectConfig project, string designerStyleItem)
     {
-        // try process from plugin
+        var styleAttribute = ParseStyleAttribute(designerStyleItem);
+
+        // H t m l
+        if (styleAttribute.Value is not null)
         {
-            var result = tryProcessByProjectConfig(project, designerStyleItem);
-            if (result.HasError)
+            var htmlStyle = ToHtmlStyle(project, styleAttribute.Name, styleAttribute.Value);
+            if (htmlStyle.HasError)
             {
-                return result.Error;
+                return htmlStyle.Error;
             }
 
-            if (result.Value is not null)
+            return CreateDesignerStyleItem(new()
             {
-                return result.Value;
-            }
+                Pseudo        = styleAttribute.Pseudo,
+                FinalCssItems = [htmlStyle.Value]
+            });
         }
 
+        // P r o j e c t
+        foreach (var item in tryProcessByProjectConfig(project, designerStyleItem))
         {
-            foreach (var item in TryConvertTailwindUtilityClassToHtmlStyle(project, designerStyleItem))
-            {
-                return item;
-            }
+            return item;
         }
 
-        // final calculation
+        // T a i l w i n d
+        foreach (var item in TryConvertTailwindUtilityClassToHtmlStyle(project, designerStyleItem))
         {
-            string name, value, pseudo;
-            {
-                var attribute = ParseStyleAttribute(designerStyleItem);
-
-                name   = attribute.Name;
-                value  = attribute.Value;
-                pseudo = attribute.Pseudo;
-            }
-
-            if (value is not null)
-            {
-                var htmlStyle = ToHtmlStyle(project, name, value);
-                if (htmlStyle.HasError)
-                {
-                    return htmlStyle.Error;
-                }
-
-                return CreateDesignerStyleItem(new ()
-                {
-                    Pseudo = pseudo, 
-                    FinalCssItems = [htmlStyle.Value]
-                });
-            }
-
-            return new Exception("Value is required");
+            return item;
         }
+
+        return new ArgumentOutOfRangeException($"{designerStyleItem} is not valid.");
 
         static Result<DesignerStyleItem> tryProcessByProjectConfig(ProjectConfig project, string designerStyleItem)
         {
@@ -91,7 +72,7 @@ public static partial class CssHelper
                 });
             }
 
-            return None;
+            return new ArgumentOutOfRangeException($"{designerStyleItem} is not a valid project style.");
         }
     }
 
@@ -132,6 +113,4 @@ public static partial class CssHelper
             Pseudo = pseudo
         };
     }
-
-   
 }

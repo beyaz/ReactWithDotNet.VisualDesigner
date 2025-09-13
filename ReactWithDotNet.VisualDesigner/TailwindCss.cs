@@ -1039,7 +1039,19 @@ static class TailwindCss
             }
         }
 
-        return None;
+        // cursor-
+        {
+            if (utilityCssClassName.StartsWith("cursor-"))
+            {
+                return CreateDesignerStyleItem(new()
+                {
+                    Pseudo        = pseudo,
+                    FinalCssItems = [CreateFinalCssItem("cursor", utilityCssClassName.RemoveFromStart("cursor-"))],
+                });
+            }
+        }
+
+        return new ArgumentOutOfRangeException($"{utilityCssClassName} is not a valid Tailwind class.");
 
         static double? hasMatch(string text, string prefix)
         {
