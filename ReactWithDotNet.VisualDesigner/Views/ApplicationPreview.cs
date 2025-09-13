@@ -1059,15 +1059,14 @@ static class ApplicationPreviewExtensions
             return
                 from finalCssItem in finalCssItems
 
-                let parseResult = TryParseConditionalValue(finalCssItem.Value)
 
-                select parseResult switch
+                select TryParseConditionalValue(finalCssItem.Value) switch
                 {
-                    var x when x.success => parseResult switch
+                    var x when x.success => x switch
                     {
-                        var r when r.right is not null => CreateFinalCssItem(finalCssItem.Name, r.right),
+                        _ when x.right is not null => CreateFinalCssItem(finalCssItem.Name, x.right),
 
-                        _ => CreateFinalCssItem(finalCssItem.Name, parseResult.left)
+                        _ => CreateFinalCssItem(finalCssItem.Name, x.left)
                     },
                     _ => ResultFrom(finalCssItem)
                 };
