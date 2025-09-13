@@ -1056,19 +1056,20 @@ static class ApplicationPreviewExtensions
 
         static IEnumerable<Result<FinalCssItem>> arrangeCondition(IReadOnlyList<FinalCssItem> finalCssItems)
         {
-            return 
+            return
                 from finalCssItem in finalCssItems
-                
+
                 let parseResult = TryParseConditionalValue(finalCssItem.Value)
-                
-                select parseResult.success switch
+
+                select parseResult switch
                 {
-                    false=> ResultFrom(finalCssItem),
-                    true=> parseResult switch
+                    var x when x.success => parseResult switch
                     {
-                        var x when x.right is not null =>CreateFinalCssItem(finalCssItem.Name, parseResult.right),
-                        _=>CreateFinalCssItem(finalCssItem.Name, parseResult.left)
-                    }
+                        var r when r.right is not null => CreateFinalCssItem(finalCssItem.Name, r.right),
+
+                        _ => CreateFinalCssItem(finalCssItem.Name, parseResult.left)
+                    },
+                    _ => ResultFrom(finalCssItem)
                 };
         }
 
