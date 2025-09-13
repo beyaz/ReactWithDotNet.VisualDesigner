@@ -183,11 +183,14 @@ public static partial class CssHelper
 
 public sealed record DesignerStyleItem
 {
-    public string OriginalText { get; init; }
-    
     public string Pseudo { get; init; }
 
     public IReadOnlyList<FinalCssItem> FinalCssItems { get; init; }
+
+    public DesignerStyleItem()
+    {
+        
+    }
 
 }
 

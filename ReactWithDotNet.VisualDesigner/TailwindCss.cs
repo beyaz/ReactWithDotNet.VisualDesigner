@@ -796,7 +796,6 @@ static class TailwindCss
                     {
                         Pseudo        = pseudo,
                         FinalCssItems = ListFrom( from x in map select FinalCssItem.Create(x)),
-                        OriginalText  = utilityCssClassName
                     };
                 }
             }
@@ -833,7 +832,6 @@ static class TailwindCss
                 {
                     Pseudo        = pseudo,
                     FinalCssItems = [FinalCssItem.Create(styleName, numberSuffix.Value * 4 + "px")],
-                    OriginalText  = utilityCssClassName
                 };
             }
         }
@@ -859,7 +857,6 @@ static class TailwindCss
                 {
                     Pseudo        = pseudo,
                     FinalCssItems = [FinalCssItem.Create("font-weight", weightAsNumber)],
-                    OriginalText  = utilityCssClassName
                 };
             }
         }
@@ -879,7 +876,6 @@ static class TailwindCss
                 {
                     Pseudo        = pseudo,
                     FinalCssItems = [FinalCssItem.Create("font-family", value)],
-                    OriginalText  = utilityCssClassName
                 };
             }
         }
@@ -896,7 +892,6 @@ static class TailwindCss
                     {
                         Pseudo        = pseudo,
                         FinalCssItems = [FinalCssItem.Create("color", tailwindColor.Value)],
-                        OriginalText  = utilityCssClassName
                     };
                 }
             }
@@ -914,7 +909,6 @@ static class TailwindCss
                     {
                         Pseudo        = pseudo,
                         FinalCssItems = [FinalCssItem.Create("background", tailwindColor.Value)],
-                        OriginalText  = utilityCssClassName
                     };
                 }
             }
@@ -936,7 +930,6 @@ static class TailwindCss
                 {
                     Pseudo        = pseudo,
                     FinalCssItems = [FinalCssItem.Create("text-decoration-line", value)],
-                    OriginalText  = utilityCssClassName
                 };
             }
         }
@@ -950,7 +943,6 @@ static class TailwindCss
                 {
                     Pseudo        = pseudo,
                     FinalCssItems = [FinalCssItem.Create("color", realColor)],
-                    OriginalText  = utilityCssClassName
                 };
             }
         }
@@ -963,7 +955,6 @@ static class TailwindCss
                 {
                     Pseudo        = pseudo,
                     FinalCssItems = [FinalCssItem.Create(htmlStyleName, htmlStyleValue)],
-                    OriginalText  = utilityCssClassName
                 };
             }
         }
@@ -986,7 +977,6 @@ static class TailwindCss
                     {
                         Pseudo        = pseudo,
                         FinalCssItems = [FinalCssItem.Create(styleName, arbitrary.Value)],
-                        OriginalText  = utilityCssClassName
                     };
                 }
             }
@@ -1020,7 +1010,6 @@ static class TailwindCss
                     {
                         Pseudo        = pseudo,
                         FinalCssItems = [FinalCssItem.Create(styleName, color)],
-                        OriginalText  = utilityCssClassName
                     };
                 }
             }
