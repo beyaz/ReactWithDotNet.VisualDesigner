@@ -954,8 +954,8 @@ static class TailwindCss
 
         // try read from project config
         {
-            var (name, value, _) = ParseStyleAttribute(utilityCssClassName);
-            if (name == "color" && value is not null && project.Colors.TryGetValue(value, out var realColor))
+            var cssItem = ParseStyleAttribute(utilityCssClassName);
+            if (cssItem.Name == "color" && cssItem.Value is not null && project.Colors.TryGetValue(cssItem.Value, out var realColor))
             {
                 
                 
