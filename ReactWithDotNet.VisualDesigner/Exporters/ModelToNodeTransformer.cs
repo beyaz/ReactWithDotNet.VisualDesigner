@@ -88,25 +88,20 @@ static class ModelToNodeTransformer
                 // Transfer properties
                 foreach (var property in elementModel.Properties)
                 {
-                    string name, value;
+                    var parsedProperty = ParseProperty(property);
+                    if (parsedProperty.HasError)
                     {
-                        var parseResult = TryParseProperty(property);
-                        if (parseResult.HasNoValue)
-                        {
-                            return new Exception($"PropertyParseError: {property}");
-                        }
-
-                        name  = parseResult.Value.Name;
-                        value = parseResult.Value.Value;
+                        return parsedProperty.Error;
                     }
+                    
 
-                    if (name == "class")
+                    if (parsedProperty.Value.Name == "class")
                     {
-                        classNames.AddRange(value.Split(" ", StringSplitOptions.RemoveEmptyEntries));
+                        classNames.AddRange(parsedProperty.Value.Value.Split(" ", StringSplitOptions.RemoveEmptyEntries));
                         continue;
                     }
 
-                    node = node with { Properties = node.Properties.Add(new() { Name = name, Value = value }) };
+                    node = node with { Properties = node.Properties.Add(new() { Name = parsedProperty.Value.Name, Value = parsedProperty.Value.Value }) };
                 }
 
                 foreach (var styleItem in elementModel.Styles)
