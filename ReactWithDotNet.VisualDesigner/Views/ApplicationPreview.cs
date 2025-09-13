@@ -629,28 +629,20 @@ sealed class ApplicationPreview : Component
                     {
                         if (isValueDouble)
                         {
-                            ReflectionHelper.SetPropertyValue(element, "height", valueAsDouble.AsPixel());
-                        }
-                        else
-                        {
                             ReflectionHelper.SetPropertyValue(element, "height", propValue);
+                            
+                            return data with { IsProcessed = true };
                         }
-
-                        return data with { IsProcessed = true };
                     }
 
                     if (propName.Equals("width", StringComparison.OrdinalIgnoreCase))
                     {
                         if (isValueDouble)
                         {
-                            ReflectionHelper.SetPropertyValue(element, "width", valueAsDouble.AsPixel());
-                        }
-                        else
-                        {
                             ReflectionHelper.SetPropertyValue(element, "width", propValue);
+                            
+                            return data with { IsProcessed = true };
                         }
-
-                        return data with { IsProcessed = true };
                     }
 
                     if (propName.Equals("src", StringComparison.OrdinalIgnoreCase))
