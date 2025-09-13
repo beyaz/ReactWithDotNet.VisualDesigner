@@ -1031,6 +1031,59 @@ sealed class ApplicationPreview : Component
     }
 }
 
+
+static class ApplicationPreviewExtensions
+{
+    public static Result<StyleModifier> ToStyleModifier(this DesignerStyleItem designerStyleItem)
+    {
+        ArgumentNullException.ThrowIfNull(designerStyleItem);
+
+        var style = new Style();
+
+        foreach (var finalCssItemResult in arrangeCondition(designerStyleItem.FinalCssItems))
+        {
+            if (finalCssItemResult.HasError)
+            {
+                return finalCssItemResult.Error;
+            }
+            
+            var exception = style.TrySet(finalCssItemResult.Value.Name, finalCssItemResult.Value.Value);
+            if (exception is not null)
+            {
+                return exception;
+            }
+        }
+
+        if (designerStyleItem.Pseudo is not null)
+        {
+            return ApplyPseudo(designerStyleItem.Pseudo, [CreateStyleModifier(x => x.Import(style))]);
+        }
+
+        return (StyleModifier)style;
+
+        static IEnumerable<Result<FinalCssItem>> arrangeCondition(IReadOnlyList<FinalCssItem> finalCssItems)
+        {
+
+            return from finalCssItem in finalCssItems
+
+                let parseResult = TryParseConditionalValue(finalCssItem.Value)
+
+                select parseResult.success 
+                    ? parseResult.right is not null 
+                        ? CreateFinalCssItem(finalCssItem.Name, parseResult.right) 
+                        : CreateFinalCssItem(finalCssItem.Name, parseResult.left)
+                    : finalCssItem;
+
+
+        }
+
+        static Result<StyleModifier> ApplyPseudo(string pseudo, IReadOnlyList<StyleModifier> styleModifiers)
+        {
+            return GetPseudoFunction(pseudo).Then(pseudoFunction => pseudoFunction([.. styleModifiers]));
+        }
+    }
+}
+
 sealed record RenderPreviewScope
 {
     public Client Client { get; init; }
