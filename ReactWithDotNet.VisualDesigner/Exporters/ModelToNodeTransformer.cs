@@ -109,49 +109,8 @@ static class ModelToNodeTransformer
                     node = node with { Properties = node.Properties.Add(new() { Name = name, Value = value }) };
                 }
 
-                // todo : optimize styles, for example width and height to size
-                {
-                    var width = FirstOrDefaultOf
-                        (from x in elementModel.Styles.Select((text, index) => new { text, index })
-                         let styleItem = ParseStyleAttribute(x.text)
-                         where styleItem.Name == "width"
-                         select new
-                         {
-                             styleItem.Value,
-                             x.index
-                         });
-                    
-                    var height = FirstOrDefaultOf
-                        (from x in elementModel.Styles.Select((text, index) => new { text, index })
-                         let styleItem = ParseStyleAttribute(x.text)
-                         where styleItem.Name == "height"
-                         select new
-                         {
-                             styleItem.Value,
-                             x.index
-                         });
-                    
-                    var size = FirstOrDefaultOf
-                        (from x in elementModel.Styles.Select((text, index) => new { text, index })
-                         let styleItem = ParseStyleAttribute(x.text)
-                         where styleItem.Name == "size"
-                         select new
-                         {
-                             styleItem.Value,
-                             x.index
-                         });
-                    
+              
 
-                    if (width is not null && height is not null && width.Value == height.Value && height.Value.EndsWith("px") && size is null)
-                    {
-                        // todo: ??
-                        //elementModel = elementModel with
-                        //{
-                        //    Styles = elementModel.Styles.SetItem(width.index, $"size: {width.Value}").RemoveAt(height.index)
-                        //};
-                    }
-                }
-                
                 foreach (var styleItem in elementModel.Styles)
                 {
                     string tailwindClassName;
@@ -225,80 +184,36 @@ static class ModelToNodeTransformer
         return node;
     }
 
-    
-
     static Result<(VisualElementModel modifiedElementModel, IReadOnlyList<StyleAttribute> inlineStyle)>
         convertStyleToInlineStyleObject(VisualElementModel elementModel)
     {
         var styles = convertDesignerStyleItemsToStyleAttributes(elementModel.Styles);
 
         return (elementModel with { Styles = [] }, styles);
-        
+
         static IReadOnlyList<StyleAttribute> convertDesignerStyleItemsToStyleAttributes(IReadOnlyList<string> designerStyleItems)
-    {
-        return (from text in designerStyleItems select process(ParseStyleAttribute(text))).ToList();
-
-        static StyleAttribute process(StyleAttribute styleAttribute)
         {
-            var name = KebabToCamelCase(styleAttribute.Name);
+            return (from text in designerStyleItems select process(ParseStyleAttribute(text))).ToList();
 
-            var value = styleAttribute.Value;
+            static StyleAttribute process(StyleAttribute styleAttribute)
             {
-                if (name == nameof(Style.fontWeight))
-                {
-                    value = tryGetFontWeight(value);
-                }
+                var name = KebabToCamelCase(styleAttribute.Name);
 
-                if (nameof(Style.gridRow).Equals(name, StringComparison.OrdinalIgnoreCase) ||
-                    nameof(Style.gridColumn).Equals(name, StringComparison.OrdinalIgnoreCase) ||
-                    nameof(Style.zIndex).Equals(name, StringComparison.OrdinalIgnoreCase))
+                var value = styleAttribute.Value;
                 {
-                    if (int.TryParse(value, out _))
+                    if (value?.StartsWith("request.") is true || value?.StartsWith("context.") is true)
                     {
-                        return styleAttribute with { Name = name, Value = value };
+                        value = TryClearStringValue(value);
+                    }
+                    else
+                    {
+                        value = '"' + TryClearStringValue(value) + '"';
                     }
                 }
 
-                if (double.TryParse(value, out var valueAsDouble))
-                {
-                    value = valueAsDouble.AsPixel();
-                }
-
-                if (value?.StartsWith("request.") is true || value?.StartsWith("context.") is true)
-                {
-                    value = TryClearStringValue(value);
-                }
-                else
-                {
-                    value = '"' + TryClearStringValue(value) + '"';
-                }
+                return styleAttribute with { Name = name, Value = value };
             }
-
-            return styleAttribute with { Name = name, Value = value };
         }
-
-        static string tryGetFontWeight(string weight)
-        {
-            if (!int.TryParse(weight, out var numericWeight))
-            {
-                return weight;
-            }
-
-            return numericWeight switch
-            {
-                100 => "thin",
-                200 => "extra-light",
-                300 => "light",
-                400 => "normal",
-                500 => "medium",
-                600 => "semi-bold",
-                700 => "bold",
-                800 => "extra-bold",
-                900 => "black",
-                _   => weight
-            };
-        }
-    }
     }
 }
 
