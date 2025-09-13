@@ -197,21 +197,23 @@ static class ModelToNodeTransformer
 
             static StyleAttribute process(StyleAttribute styleAttribute)
             {
-                var name = KebabToCamelCase(styleAttribute.Name);
-
-                var value = styleAttribute.Value;
+                return styleAttribute with
                 {
-                    if (value?.StartsWith("request.") is true || value?.StartsWith("context.") is true)
-                    {
-                        value = TryClearStringValue(value);
-                    }
-                    else
-                    {
-                        value = '"' + TryClearStringValue(value) + '"';
-                    }
-                }
+                    Name = KebabToCamelCase(styleAttribute.Name),
+                    
+                    Value = FirstOf(from x in new[] { styleAttribute.Value }
+                                    select (x is null) switch
+                                    {
+                                        true => null,
+                                        false => (x.StartsWith("request.") || x.StartsWith("context.")) switch
+                                        {
+                                            true  => x,
+                                            false => '"' + TryClearStringValue(x) + '"'
+                                        }
+                                    }
+                                   )
 
-                return styleAttribute with { Name = name, Value = value };
+                };
             }
         }
     }
