@@ -1,5 +1,5 @@
-﻿using System.Collections.Immutable;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
+using System.Collections.Immutable;
 
 namespace ReactWithDotNet.VisualDesigner.Exporters;
 
@@ -184,57 +184,49 @@ static class ModelToNodeTransformer
         return node;
     }
 
-    static Result<(VisualElementModel modifiedElementModel, IReadOnlyList<StyleAttribute> inlineStyle)>
+    static Result<(VisualElementModel modifiedElementModel, IReadOnlyList<FinalCssItem> inlineStyle)>
         convertStyleToInlineStyleObject(ProjectConfig project,VisualElementModel elementModel)
     {
 
 
-        IEnumerable<Result<FinalCssItem>> finalCss = from text in elementModel.Styles
-            let item = CreateDesignerStyleItemFromText(project, text)
-            let finalCssItems = item switch
-            {
-                var x when x.HasError => [item.Error],
-                
-                var x when x.Value.Pseudo is not null => [new NotSupportedException("Pseudo styles are not supported in inline styles.")],
-                
-                _ => from x in item.Value.FinalCssItems select (Result<FinalCssItem>)x
+        var finalCssList =
+            ListFrom(from text in elementModel.Styles
+                     let item = CreateDesignerStyleItemFromText(project, text)
+                     let finalCssItems = item switch
+                     {
+                         var x when x.HasError => [item.Error],
 
-            }
-            from x in finalCssItems select x;
+                         var x when x.Value.Pseudo is not null => [new NotSupportedException("Pseudo styles are not supported in inline styles.")],
+
+                         _ => from x in item.Value.FinalCssItems select CreateFinalCssItem(
+                                                                                           KebabToCamelCase(x.Name),
+                                                                                                               
+                                                                                                               
+                                                                                                               x.Value switch
+                                                                                                               {
+                                                                                                                   null                                                            => null,
+                                                                                                                   var y when y.StartsWith("request.") || y.StartsWith("context.") => y,
+                                                                                                                   var y                                                           => '"' + TryClearStringValue(y) + '"'
+                                                                                                               }
+                                                                                                               )
+
+                     }
+                     from x in finalCssItems
+                     select x);
 
 
-
-
-            
-        
-        
-        var styles = convertDesignerStyleItemsToStyleAttributes(elementModel.Styles);
-
-        return (elementModel with { Styles = [] }, styles);
-
-        static IReadOnlyList<StyleAttribute> convertDesignerStyleItemsToStyleAttributes(IReadOnlyList<string> designerStyleItems)
+        if (finalCssList.HasError)
         {
-
-           
-            
-            
-            return (from text in designerStyleItems select process(ParseStyleAttribute(text))).ToList();
-
-            static StyleAttribute process(StyleAttribute styleAttribute)
-            {
-                return styleAttribute with
-                {
-                    Name = KebabToCamelCase(styleAttribute.Name),
-                    
-                    Value =  styleAttribute.Value switch
-                    {
-                        null=> null,
-                        var x when x.StartsWith("request.") || x.StartsWith("context.") => x,
-                        var x => '"' + TryClearStringValue(x) + '"'
-                    }
-                };
-            }
+            return finalCssList.Error;
         }
+        
+
+        return (elementModel with { Styles = [] }, finalCssList.Value);
+
+            
+        
+        
+
     }
 }
 

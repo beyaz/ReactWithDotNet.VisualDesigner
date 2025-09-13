@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -462,6 +463,23 @@ static class Extensions
     public static List<T> ListFrom<T>(IEnumerable<T> enumerable)
     {
         return enumerable.ToList();
+    }
+    
+    public static Result<List<T>> ListFrom<T>(IEnumerable<Result<T>> enumerable)
+    {
+        var items = new List<T>();
+
+        foreach (var item in enumerable)
+        {
+            if (item.HasError)
+            {
+                return item.Error;
+            }
+
+            items.Add(item.Value);
+        }
+
+        return items;
     }
 
     public static IReadOnlyDictionary<string, string> MapFrom((string key, string value)[] items)
