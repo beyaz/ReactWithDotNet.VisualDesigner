@@ -21,9 +21,20 @@ static class FinalCssItemFactory
             return new ArgumentException("Style value cannot be whitespace.", nameof(input.Value));
         }
 
-        return new FinalCssItem { Name = input.Name, Value = input.Value };
+        return new FinalCssItemImp { Name = input.Name, Value = input.Value };
     }
     
+    sealed class FinalCssItemImp : FinalCssItem
+    {
+        public required string Name { get; init; }
+
+        public required string Value { get; init; }
+
+        public override string ToString()
+        {
+            return $"{Name}: {Value};";
+        }
+    }
 }
 
 public sealed record CreateFinalCssItemInput
@@ -38,18 +49,9 @@ public sealed record CreateFinalCssItemInput
     }
 }
 
-public sealed class FinalCssItem
+public interface FinalCssItem
 {
-    internal FinalCssItem()
-    {
-    }
+    public string Name { get;  }
 
-    public required string Name { get; init; }
-
-    public required string Value { get; init; }
-
-    public override string ToString()
-    {
-        return $"{Name}: {Value};";
-    }
+    public string Value { get;  }
 }

@@ -18,7 +18,7 @@ public static partial class CssHelper
             return CreateDesignerStyleItem(new()
             {
                 Pseudo        = styleAttribute.Pseudo,
-                FinalCssItems = [htmlStyle.Value]
+                FinalCssItems = [Result.From(htmlStyle.Value)]
             });
         }
 
