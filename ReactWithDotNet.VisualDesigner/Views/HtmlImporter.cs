@@ -79,9 +79,9 @@ static class HtmlImporter
             {
                 if (designerStyleItem.FinalCssItems.Count == 1)
                 {
-                    foreach (var (key, value) in designerStyleItem.FinalCssItems)
+                    foreach (var finalCssItem in designerStyleItem.FinalCssItems)
                     {
-                        if (key == htmlAttributeName && TryClearStringValue(value) == TryClearStringValue(htmlAttributeValue))
+                        if (finalCssItem.Name == htmlAttributeName && TryClearStringValue(finalCssItem.Value) == TryClearStringValue(htmlAttributeValue))
                         {
                             return true;
                         }

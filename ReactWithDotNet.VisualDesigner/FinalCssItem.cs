@@ -35,10 +35,6 @@ public sealed class FinalCssItem
 
     public required string Value { get; init; }
 
-    public void Deconstruct(out string name, out string value)
-    {
-        (name, value) = (Name, Value);
-    }
 
     public override string ToString()
     {
