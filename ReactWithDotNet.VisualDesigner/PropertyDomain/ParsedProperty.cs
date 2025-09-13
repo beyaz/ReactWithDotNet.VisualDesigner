@@ -3,7 +3,7 @@ global using static ReactWithDotNet.VisualDesigner.PropertyDomain.ParsedProperty
 
 namespace ReactWithDotNet.VisualDesigner.PropertyDomain;
 
-public interface IParsedProperty
+public interface ParsedProperty
 {
     public string Name { get; }
 
@@ -13,7 +13,7 @@ public interface IParsedProperty
 static class ParsedPropertyFactory
 {
     
-    public static bool Is(this Result<IParsedProperty> result, string name, string value)
+    public static bool Is(this Result<PropertyDomain.ParsedProperty> result, string name, string value)
     {
         if (result.HasError)
         {
@@ -23,7 +23,7 @@ static class ParsedPropertyFactory
         return result.Value.Name == name && result.Value.Value == value;
     }
     
-    public static bool Is(this Result<IParsedProperty> result, Func<IParsedProperty, bool> nextFunc)
+    public static bool Is(this Result<PropertyDomain.ParsedProperty> result, Func<PropertyDomain.ParsedProperty, bool> nextFunc)
     {
         if (result.HasError)
         {
@@ -33,7 +33,7 @@ static class ParsedPropertyFactory
         return nextFunc(result.Value);
     }
     
-    public static Result<IParsedProperty> ParseProperty(string nameValueCombined)
+    public static Result<PropertyDomain.ParsedProperty> ParseProperty(string nameValueCombined)
     {
         if (string.IsNullOrWhiteSpace(nameValueCombined))
         {
@@ -70,7 +70,7 @@ static class ParsedPropertyFactory
         };
     }
 
-    sealed class ParsedProperty : IParsedProperty
+    sealed class ParsedProperty : PropertyDomain.ParsedProperty
     {
         public string Name { get; init; }
 

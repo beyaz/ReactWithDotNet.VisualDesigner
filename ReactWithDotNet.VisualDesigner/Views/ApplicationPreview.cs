@@ -938,11 +938,11 @@ sealed class ApplicationPreview : Component
 
                 return None;
 
-                static Maybe<IParsedProperty> tryGetProperty(VisualElementModel model, string propertyName)
+                static Maybe<ParsedProperty> tryGetProperty(VisualElementModel model, string propertyName)
                 {
-                    foreach (IParsedProperty parsedProperty in from p in model.Properties from v in ParseProperty(p) where v.Name == propertyName select v)
+                    foreach (ParsedProperty parsedProperty in from p in model.Properties from v in ParseProperty(p) where v.Name == propertyName select v)
                     {
-                        return Maybe<IParsedProperty>.Some(parsedProperty);
+                        return Maybe<ParsedProperty>.Some(parsedProperty);
                     }
 
                     return None;
