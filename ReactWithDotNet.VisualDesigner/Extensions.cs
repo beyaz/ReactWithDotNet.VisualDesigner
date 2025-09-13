@@ -350,7 +350,7 @@ static class Extensions
     {
         var query =
             from p in model.Properties
-            from v in TryParseProperty(p)
+            from v in ParseProperty(p)
             where v.Name == Design.TextPreview
             select v.Value;
 
@@ -361,7 +361,7 @@ static class Extensions
     {
         var query =
             from p in model.Properties
-            from v in TryParseProperty(p)
+            from v in ParseProperty(p)
             where v.Name == Design.Text
             select v.Value;
 
@@ -682,17 +682,13 @@ static class Extensions
     {
         foreach (var property in properties)
         {
-            var parseResult = TryParseProperty(property);
-            if (parseResult.HasValue)
+            foreach (var parsedProperty in ParseProperty(property))
             {
-                var name = parseResult.Value.Name;
-                var value = parseResult.Value.Value;
-
                 foreach (var propertyName in propertyNameWithAlias)
                 {
-                    if (name.Equals(propertyName, StringComparison.OrdinalIgnoreCase))
+                    if (parsedProperty.Name.Equals(propertyName, StringComparison.OrdinalIgnoreCase))
                     {
-                        return value;
+                        return parsedProperty.Value;
                     }
                 }
             }
@@ -729,41 +725,7 @@ static class Extensions
         return None;
     }
 
-    public static Maybe<(string Name, string Value)> TryParseProperty(string nameValueCombined)
-    {
-        if (string.IsNullOrWhiteSpace(nameValueCombined))
-        {
-            return None;
-        }
-
-        if (nameValueCombined.StartsWith("..."))
-        {
-            return (
-                Name: Design.SpreadOperator,
-                Value: nameValueCombined
-            );
-        }
-
-        var colonIndex = nameValueCombined.IndexOf(':');
-        if (colonIndex < 0)
-        {
-            return None;
-        }
-
-        var name = nameValueCombined[..colonIndex];
-
-        var value = nameValueCombined[(colonIndex + 1)..].Trim();
-        if (value == string.Empty)
-        {
-            value = null;
-        }
-
-        return (
-            Name: name.Trim(),
-            Value: value
-        );
-    }
-
+   
     public static Maybe<int> TryReadTagAsDesignerComponentId(VisualElementModel model)
     {
         if (int.TryParse(model.Tag, out var componentId))
