@@ -1,5 +1,4 @@
 ﻿using System.IO;
-using System.Reflection;
 using Newtonsoft.Json;
 using ReactWithDotNet.Transformers;
 
@@ -136,7 +135,6 @@ static class CSharpStringExporter
 
             return (leftPaddingCount, firstReturnLineIndex, firstReturnCloseLineIndex);
         }
-
     }
 
     internal static async Task<Result<(IReadOnlyList<string> elementTreeSourceLines, IReadOnlyList<string> importLines)>> CalculateElementTreeSourceCodes(ProjectConfig project, IReadOnlyDictionary<string, string> componentConfig, VisualElementModel rootVisualElement)
@@ -298,7 +296,7 @@ static class CSharpStringExporter
         {
             return new List<string>
             {
-                $"{indent(indentLevel)}{asFinalText( node.Children[0].Text)}"
+                $"{indent(indentLevel)}{asFinalText(node.Children[0].Text)}"
             };
         }
 
@@ -675,32 +673,23 @@ static class CSharpStringExporter
 
             var hasNoBody = node.Children.Count == 0 && node.Text.HasNoValue() && childrenProperty is null;
 
-            
-
             string partProps;
             {
-                
-                
                 var propsAsTextList = new List<string>();
                 {
                     // import props except style
                     {
                         var propsWithoutStyle =
-
                             from reactProperty in from p in node.Properties where p.Name.NotIn(Design.ItemsSource, Design.ItemsSourceDesignTimeCount, Design.Text, Design.TextPreview, Design.Src, Design.Name, "style") select p
-
                             let value = reactProperty.Value
-
                             let finalValue = IsStringValue(value) switch
                             {
                                 true  => TryClearStringValue(value),
                                 false => value
                             }
-
                             select $"{reactProperty.Name}={finalValue}";
 
                         propsAsTextList.AddRange(propsWithoutStyle);
-
                     }
 
                     // import style
@@ -715,15 +704,13 @@ static class CSharpStringExporter
                              let attributeValue = TryClearStringValue(styleAttribute.Value)
                              select $"{styleAttribute.Name}: {styleAttribute.Value}"
                             );
-                        
+
                         if (styleLines.Count > 0)
                         {
                             propsAsTextList.Add($"style = \"{string.Join("; ", styleLines)}\"");
                         }
                     }
                 }
-
-               
 
                 if (propsAsTextList.Count > 0)
                 {
@@ -746,7 +733,7 @@ static class CSharpStringExporter
             {
                 return new LineCollection
                 {
-                    asFinalText('"'+$"{indent(indentLevel)}new {tag}{partProps}"+'"')
+                    asFinalText('"' + $"{indent(indentLevel)}new {tag}{partProps}" + '"')
                 };
             }
 
@@ -799,7 +786,7 @@ static class CSharpStringExporter
             }
 
             // Close tag
-            lines.Add(indent(indentLevel) + '"'+$"</{tag}>"+'"');
+            lines.Add(indent(indentLevel) + '"' + $"</{tag}>" + '"');
 
             return lines;
         }
@@ -810,20 +797,15 @@ static class CSharpStringExporter
             {
                 return text;
             }
-            
-            return (
 
-                from x in (Maybe<string>)text
-
-                let clear = TryClearStringValue(text)
-
-                let quoteCount = clear.Contains('"') ? 3 : 1
-
-                let quote = new string('"', quoteCount)
-
-                select quote + clear + quote
-
-            ).First();
+            return FirstOf
+                (
+                 from x in new[] { text }
+                 let clear = TryClearStringValue(x)
+                 let quoteCount = clear.Contains('"') ? 3 : 1
+                 let quote = new string('"', quoteCount)
+                 select quote + clear + quote
+                );
         }
 
         static string indent(int indentLevel)
