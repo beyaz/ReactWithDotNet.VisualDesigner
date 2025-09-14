@@ -7,16 +7,7 @@ static class ModelToNodeTransformer
 {
     public static async Task<Result<ReactNode>> ConvertVisualElementModelToReactNodeModel(ProjectConfig project, VisualElementModel elementModel)
     {
-        // Open tag
-
-        var node = new ReactNode
-        {
-            Tag = elementModel.Tag,
-
-            HtmlElementType = TryGetHtmlElementTypeByTagName(elementModel.Tag)
-        };
-
-        // calculate properties
+        ImmutableList<ReactProperty> properties;
         {
             var props = project switch
             {
@@ -34,16 +25,20 @@ static class ModelToNodeTransformer
                 return props.Error;
             }
 
-            node = node with
-            {
-                Properties = props.Value.ToImmutableList()
-            };
+            properties = props.Value.ToImmutableList();
         }
 
         var hasNoChildAndHasNoText = elementModel.Children.Count == 0 && elementModel.HasNoText();
         if (hasNoChildAndHasNoText)
         {
-            return node;
+            return new ReactNode
+            {
+                Tag = elementModel.Tag,
+
+                HtmlElementType = TryGetHtmlElementTypeByTagName(elementModel.Tag),
+
+                Properties = properties
+            };
         }
 
         List<ReactNode> children = [];
@@ -77,8 +72,14 @@ static class ModelToNodeTransformer
             }
         }
 
-        return node with
+        return new ReactNode
         {
+            Tag = elementModel.Tag,
+
+            HtmlElementType = TryGetHtmlElementTypeByTagName(elementModel.Tag),
+
+            Properties = properties,
+
             Children = children.ToImmutableList()
         };
 
