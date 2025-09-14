@@ -854,9 +854,9 @@ static class CSharpStringExporter
         {
             var temp = linesToInject.Select(line => new string(' ', leftPaddingCount) + line).ToList();
 
-            temp[0] = new string(' ', leftPaddingCount) + "return " + temp[0].Trim();
+            temp[0] = new string(' ', leftPaddingCount) + "return [" + temp[0].Trim();
 
-            temp[^1] += ";";
+            temp[^1] += "];";
 
             linesToInject = temp;
         }
