@@ -77,14 +77,14 @@ static class CSharpStringExporter
             var className = names[0];
             var methodName = names[1];
 
-            var methodDeclerationLineIndex = -1;
+            var methodDeclarationLineIndex = -1;
             {
                 foreach (var lineIndex in RoslynHelper.FindMethodStartLineIndexInCSharpCode(lines, className, methodName))
                 {
-                    methodDeclerationLineIndex = lineIndex;
+                    methodDeclarationLineIndex = lineIndex;
                 }
 
-                if (methodDeclerationLineIndex < 0)
+                if (methodDeclarationLineIndex < 0)
                 {
                     var classDeclerationLineIndex = lines.FindIndex(line => line.Contains($"class {className} "));
                     if (classDeclerationLineIndex < 0)
@@ -92,8 +92,8 @@ static class CSharpStringExporter
                         return new ArgumentException($"ComponentDeclerationNotFoundInFile. {targetComponentName}");
                     }
 
-                    methodDeclerationLineIndex = lines.FindIndex(classDeclerationLineIndex, line => line.Contains($" Element {methodName}("));
-                    if (methodDeclerationLineIndex < 0)
+                    methodDeclarationLineIndex = lines.FindIndex(classDeclerationLineIndex, line => line.Contains($" Element {methodName}("));
+                    if (methodDeclarationLineIndex < 0)
                     {
                         return new ArgumentException($"ComponentDeclerationNotFoundInFile. {targetComponentName}");
                     }
@@ -103,7 +103,7 @@ static class CSharpStringExporter
             var firstReturnLineIndex = -1;
             var leftPaddingCount = -1;
             {
-                foreach (var item in lines.FindLineIndexStartsWith(methodDeclerationLineIndex, "return ", "return"))
+                foreach (var item in lines.FindLineIndexStartsWith(methodDeclarationLineIndex, "return ", "return"))
                 {
                     firstReturnLineIndex = item.index;
                     leftPaddingCount     = item.leftPaddingCount;
@@ -744,7 +744,7 @@ static class CSharpStringExporter
                     }
                     else
                     {
-                        partProps = string.Empty;
+                        partProps = ">";
                     }
                 }
             }
