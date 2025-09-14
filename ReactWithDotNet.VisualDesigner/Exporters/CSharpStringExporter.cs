@@ -161,11 +161,25 @@ static class CSharpStringExporter
             }
 
             elementJsxTree = result.Value;
+
+            elementJsxTree = appendCommaEndOfLine(elementJsxTree);
         }
 
         var importLines = Plugin.CalculateImportLines(rootNode);
 
         return (elementJsxTree, importLines.ToList());
+
+        static List<string> appendCommaEndOfLine(IReadOnlyList<string> lines)
+        {
+            return ListFrom(from line in lines.Select((line, index) => new { text = line, index })
+                            let length = lines.Count - 1
+                            select line switch
+                            {
+                                _ when line.index < length => line.text + ",",
+
+                                _ => line.text
+                            });
+        }
     }
 
     static async Task<Result<(string filePath, string fileContent)>> CalculateExportInfo(ExportInput input)
@@ -626,7 +640,7 @@ static class CSharpStringExporter
                             // add comma at end of child element except last
                             if (childIndex < node.Children.Count - 1 && childElementSourceLines.Count > 0)
                             {
-                                childElementSourceLines = childElementSourceLines.SetItem(childElementSourceLines.Count - 1, childElementSourceLines[^1] + ",");
+                                // childElementSourceLines = childElementSourceLines.SetItem(childElementSourceLines.Count - 1, childElementSourceLines[^1] + ",");
                             }
                         }
 
@@ -776,7 +790,7 @@ static class CSharpStringExporter
                     // add comma at end of child element except last
                     if (childIndex < node.Children.Count - 1 && childElementSourceLines.Count > 0)
                     {
-                        childElementSourceLines = childElementSourceLines.SetItem(childElementSourceLines.Count - 1, childElementSourceLines[^1] + ",");
+                        // childElementSourceLines = childElementSourceLines.SetItem(childElementSourceLines.Count - 1, childElementSourceLines[^1] + ",");
                     }
                 }
 
@@ -786,7 +800,7 @@ static class CSharpStringExporter
             }
 
             // Close tag
-            lines.Add( '"' + $"{indent(indentLevel)}</{tag}>" + '"');
+            lines.Add('"' + $"{indent(indentLevel)}</{tag}>" + '"');
 
             return lines;
         }
@@ -804,7 +818,7 @@ static class CSharpStringExporter
                  let clear = TryClearStringValue(x)
                  let quoteCount = clear.Contains('"') ? 3 : 1
                  let quote = new string('"', quoteCount)
-                 select  clear + quote
+                 select clear + quote
                 );
         }
 
