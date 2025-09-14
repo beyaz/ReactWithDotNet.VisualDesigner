@@ -147,6 +147,71 @@ static class ModelToNodeTransformer
             }
         }
 
+        static Result<IReadOnlyList<ReactProperty>> calculatePropsForTailwind(ProjectConfig project, IReadOnlyList<string> properties, IReadOnlyList<string> styles)
+        {
+            var props = new List<ReactProperty>();
+            
+            List<string> classNames = [];
+
+            var classNameShouldBeTemplateLiteral = false;
+
+            // Transfer properties
+            foreach (var property in properties)
+            {
+                var parsedProperty = ParseProperty(property);
+                if (parsedProperty.HasError)
+                {
+                    return parsedProperty.Error;
+                }
+
+                if (parsedProperty.Value.Name == "class")
+                {
+                    classNames.AddRange(parsedProperty.Value.Value.Split(" ", StringSplitOptions.RemoveEmptyEntries));
+                    continue;
+                }
+
+                props.Add(new()
+                {
+                    Name  = parsedProperty.Value.Name,
+                    Value = parsedProperty.Value.Value
+                });
+            }
+
+            foreach (var styleItem in styles)
+            {
+                string tailwindClassName;
+                {
+                    var result = ConvertDesignerStyleItemToTailwindClassName(project, styleItem);
+                    if (result.HasError)
+                    {
+                        return result.Error;
+                    }
+
+                    tailwindClassName = result.Value;
+                }
+
+                if (tailwindClassName.StartsWith("${"))
+                {
+                    classNameShouldBeTemplateLiteral = true;
+                }
+
+                classNames.Add(tailwindClassName);
+            }
+
+            if (classNames.Count > 0)
+            {
+                var firstLastChar = classNameShouldBeTemplateLiteral ? "`" : "\"";
+
+                props.Add(new()
+                {
+                    Name  = "className",
+                    Value = firstLastChar + string.Join(" ", classNames) + firstLastChar
+                });
+            }
+
+            return props;
+        }
+
         var hasNoChildAndHasNoText = elementModel.Children.Count == 0 && elementModel.HasNoText();
         if (hasNoChildAndHasNoText)
         {
