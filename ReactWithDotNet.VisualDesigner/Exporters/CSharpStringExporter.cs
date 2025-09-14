@@ -200,7 +200,7 @@ static class CSharpStringExporter
 
                             select line switch
                             {
-                                _ when lineStartsWithDoubleQuote && lineContainsLeftBracket => '$'+line.text,
+                                _ when lineStartsWithDoubleQuote && lineContainsLeftBracket => '$'+line.text.TrimStart(),
 
                                 _ => line.text
                             });
