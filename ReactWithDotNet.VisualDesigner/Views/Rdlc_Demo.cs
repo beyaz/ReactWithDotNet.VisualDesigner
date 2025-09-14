@@ -2,7 +2,9 @@
 
 static class Rdlc_Demo
 {
-    static LineCollection GenerateHtml(string UpLogoDataUrl)
+    
+    
+    static LineCollection GenerateHtml(string UpLogoDataUrl, IReadOnlyList<AnyRecord> records)
     {
         #region Designer Generated Code
 
@@ -16,5 +18,12 @@ static class Rdlc_Demo
 
     class LineCollection : List<string>
     {
+    }
+    
+    class AnyRecord
+    {
+        public string Name { get; set; }
+        
+        public string Amount { get; set; }
     }
 }
