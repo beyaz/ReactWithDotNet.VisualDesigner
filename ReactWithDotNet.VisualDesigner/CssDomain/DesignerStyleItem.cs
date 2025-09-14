@@ -21,29 +21,32 @@ static class DesignerStyleItemFactory
             }
         }
 
-        return new DesignerStyleItem
+        return new DesignerStyleItemImp
         {
             Pseudo = input.Pseudo,
 
             FinalCssItems = ListFrom(from x in finalCssItems select x.Value)
         };
     }
-}
 
-public sealed class CreateDesignerStyleItemInput
-{
-    public IEnumerable<Result<FinalCssItem>> FinalCssItems { get; init; }
-
-    public string Pseudo { get; init; }
-}
-
-public sealed class DesignerStyleItem
-{
-    internal DesignerStyleItem()
+    public sealed class CreateDesignerStyleItemInput
     {
+        public IEnumerable<Result<FinalCssItem>> FinalCssItems { get; init; }
+
+        public string Pseudo { get; init; }
     }
 
-    public IReadOnlyList<FinalCssItem> FinalCssItems { get; init; }
+    class DesignerStyleItemImp : DesignerStyleItem
+    {
+        public IReadOnlyList<FinalCssItem> FinalCssItems { get; init; }
 
-    public string Pseudo { get; init; }
+        public string Pseudo { get; init; }
+    }
+}
+
+public interface DesignerStyleItem
+{
+    public IReadOnlyList<FinalCssItem> FinalCssItems { get; }
+
+    public string Pseudo { get; }
 }

@@ -25,13 +25,13 @@ public static partial class CssHelper
         // P r o j e c t
         foreach (var item in tryProcessByProjectConfig(project, designerStyleItem))
         {
-            return item;
+            return ResultFrom(item);
         }
 
         // T a i l w i n d
         foreach (var item in TryConvertTailwindUtilityClassToHtmlStyle(project, designerStyleItem))
         {
-            return item;
+            return ResultFrom(item);
         }
 
         return new ArgumentOutOfRangeException($"{designerStyleItem} is not valid.");
