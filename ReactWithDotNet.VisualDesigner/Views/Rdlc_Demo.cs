@@ -22,7 +22,7 @@ static class Rdlc_Demo
             {
             
                 "        <span style=\"font-size: 10.6667px; font-weight: 800; margin-left: auto\">",
-                $"            {item}",
+                $"            {item.Name}",
                 "        </span>"
             
             }
