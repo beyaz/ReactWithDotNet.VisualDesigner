@@ -733,7 +733,7 @@ sealed class ApplicationPreview : Component
                         {
                             var src = TryClearStringValue(value);
 
-                            if (src.StartsWith("https://"))
+                            if (src.StartsWith("https://") || src.StartsWith("data:"))
                             {
                                 return src;
                             }

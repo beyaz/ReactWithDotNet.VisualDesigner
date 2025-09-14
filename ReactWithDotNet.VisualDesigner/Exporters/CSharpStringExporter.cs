@@ -122,7 +122,7 @@ static class CSharpStringExporter
 
             var firstReturnCloseLineIndex = -1;
             {
-                foreach (var item in lines.FindLineIndexStartsWith(firstReturnLineIndex, "};", "];"))
+                foreach (var item in lines.FindLineIndexStartsWith(firstReturnLineIndex, "};"))
                 {
                     firstReturnCloseLineIndex = item.index;
                 }
@@ -704,7 +704,7 @@ static class CSharpStringExporter
                             let value = reactProperty.Value
                             let finalValue = IsStringValue(value) switch
                             {
-                                true  => TryClearStringValue(value),
+                                true  => '\\'.ToString() + '"' + TryClearStringValue(value) + '\\'+ '"',
                                 false => value
                             }
                             select $"{reactProperty.Name}={finalValue}";
@@ -858,11 +858,13 @@ static class CSharpStringExporter
 
         // apply padding
         {
-            var temp = linesToInject.Select(line => new string(' ', leftPaddingCount) + line).ToList();
+            var temp = linesToInject.Select(line => new string(' ', leftPaddingCount+4) + line).ToList();
 
-            temp[0] = new string(' ', leftPaddingCount) + "return [" + temp[0].Trim();
-
-            temp[^1] += "];";
+            temp.Insert(0,new string(' ', leftPaddingCount) + "return new LineCollection");
+            
+            temp.Insert(1,new string(' ', leftPaddingCount) + "{");
+            
+            temp.Add(new string(' ', leftPaddingCount) + "};");
 
             linesToInject = temp;
         }
