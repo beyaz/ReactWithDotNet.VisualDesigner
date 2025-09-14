@@ -17,73 +17,22 @@ static class ModelToNodeTransformer
             HtmlElementType = TryGetHtmlElementTypeByTagName(tag)
         };
 
-        static Result<IReadOnlyList<ReactProperty>> calculatePropsForInlineStyle(ProjectConfig project, IReadOnlyList<string> properties, IReadOnlyList<string> styles)
-        {
-            var props = new List<ReactProperty>();
-
-            
-
-            return props;
-        }
-        
-        
         // arrange inline styles
         {
             if (project.ExportStylesAsInline || project.ExportAsCSharp || project.ExportAsCSharpString)
             {
-                // Transfer properties
-                foreach (var property in elementModel.Properties)
+                
+                var props = calculatePropsForInlineStyle(project, elementModel.Properties, elementModel.Styles);
+                if (props.HasError)
                 {
-                    var propertyIsSuccessfullyParsed = false;
-
-                    foreach (var parsedProperty in ParseProperty(property))
-                    {
-                        node = node with
-                        {
-                            Properties = node.Properties.Add(new()
-                            {
-                                Name  = parsedProperty.Name,
-                                Value = parsedProperty.Value
-                            })
-                        };
-
-                        propertyIsSuccessfullyParsed = true;
-                    }
-
-                    if (!propertyIsSuccessfullyParsed)
-                    {
-                        return new Exception($"PropertyParseError: {property}");
-                    }
+                    return props.Error;
                 }
 
-                var result = convertStyleToInlineStyleObject(project, elementModel);
-                if (result.HasError)
+                node = node with
                 {
-                    return result.Error;
-                }
-
-                elementModel = result.Value.modifiedElementModel;
-
-                var inlineStyle = result.Value.inlineStyle;
-
-                if (inlineStyle.Any())
-                {
-                    var inlineStyleProperty = new ReactProperty
-                    {
-                        Name  = "style",
-                        Value = "{" + string.Join(", ", inlineStyle.Select(x => $"{x.Name}: {x.Value}")) + "}"
-                    };
-
-                    if (project.ExportAsCSharp || project.ExportAsCSharpString)
-                    {
-                        inlineStyleProperty = inlineStyleProperty with
-                        {
-                            Value = JsonConvert.SerializeObject(inlineStyle)
-                        };
-                    }
-
-                    node = node with { Properties = node.Properties.Add(inlineStyleProperty) };
-                }
+                    Properties = props.Value.ToImmutableList()
+                };
+                
             }
         }
 
@@ -145,6 +94,85 @@ static class ModelToNodeTransformer
         }
 
         return node;
+
+        static Result<IReadOnlyList<ReactProperty>> calculatePropsForInlineStyle(ProjectConfig project, IReadOnlyList<string> properties, IReadOnlyList<string> styles)
+        {
+            var props = new List<ReactProperty>();
+
+            // Transfer properties
+            foreach (var property in properties)
+            {
+                var parsedProperty = ParseProperty(property);
+                if (parsedProperty.HasError)
+                {
+                    return parsedProperty.Error;
+                }
+                
+                props.Add(new()
+                {
+                    Name  = parsedProperty.Value.Name,
+                    Value = parsedProperty.Value.Value
+                });
+            }
+
+            
+            var finalCssList = ListFrom(from text in styles
+                                        let item = CreateDesignerStyleItemFromText(project, text)
+                                        let finalCssItems = item switch
+                                        {
+                                            var x when x.HasError => [item.Error],
+
+                                            var x when x.Value.Pseudo is not null => [new NotSupportedException("Pseudo styles are not supported in inline styles.")],
+
+                                            _ => from x in item.Value.FinalCssItems
+                                                select CreateFinalCssItem
+                                                    (new()
+                                                     {
+                                                         Name = KebabToCamelCase(x.Name),
+
+                                                         Value = x.Value switch
+                                                         {
+                                                             null => null,
+
+                                                             var y when y.StartsWith("request.") || y.StartsWith("context.") => y,
+
+                                                             var y => '"' + TryClearStringValue(y) + '"'
+                                                         }
+                                                     }
+                                                    )
+                                        }
+                                        from x in finalCssItems
+                                        select x);
+
+            if (finalCssList.HasError)
+            {
+                return finalCssList.Error;
+            }
+            
+            var inlineStyle = finalCssList.Value;
+            
+
+            if (inlineStyle.Any())
+            {
+                var inlineStyleProperty = new ReactProperty
+                {
+                    Name  = "style",
+                    Value = "{" + string.Join(", ", inlineStyle.Select(x => $"{x.Name}: {x.Value}")) + "}"
+                };
+
+                if (project.ExportAsCSharp || project.ExportAsCSharpString)
+                {
+                    inlineStyleProperty = inlineStyleProperty with
+                    {
+                        Value = JsonConvert.SerializeObject(inlineStyle)
+                    };
+                }
+
+                props.Add(inlineStyleProperty);
+            }
+
+            return props;
+        }
 
         static Result<IReadOnlyList<ReactProperty>> calculatePropsForTailwind(ProjectConfig project, IReadOnlyList<string> properties, IReadOnlyList<string> styles)
         {
@@ -212,45 +240,6 @@ static class ModelToNodeTransformer
         }
     }
 
-    static Result<(VisualElementModel modifiedElementModel, IReadOnlyList<FinalCssItem> inlineStyle)>
-        convertStyleToInlineStyleObject(ProjectConfig project, VisualElementModel elementModel)
-    {
-        var finalCssList =
-            ListFrom(from text in elementModel.Styles
-                     let item = CreateDesignerStyleItemFromText(project, text)
-                     let finalCssItems = item switch
-                     {
-                         var x when x.HasError => [item.Error],
-
-                         var x when x.Value.Pseudo is not null => [new NotSupportedException("Pseudo styles are not supported in inline styles.")],
-
-                         _ => from x in item.Value.FinalCssItems
-                             select CreateFinalCssItem
-                                 (new()
-                                  {
-                                      Name = KebabToCamelCase(x.Name),
-
-                                      Value = x.Value switch
-                                      {
-                                          null => null,
-
-                                          var y when y.StartsWith("request.") || y.StartsWith("context.") => y,
-
-                                          var y => '"' + TryClearStringValue(y) + '"'
-                                      }
-                                  }
-                                 )
-                     }
-                     from x in finalCssItems
-                     select x);
-
-        if (finalCssList.HasError)
-        {
-            return finalCssList.Error;
-        }
-
-        return (elementModel with { Styles = [] }, finalCssList.Value);
-    }
 }
 
 record ReactNode
