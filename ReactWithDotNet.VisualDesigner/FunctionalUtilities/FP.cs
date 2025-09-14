@@ -174,6 +174,39 @@ static class FP
     {
         return new() { Success = false, HasError = true, Error = new(message) };
     }
+    
+    public static Result<T> Fail<T>(Exception exception)
+    {
+        return new() { Success = false,  Error = exception };
+    }
+    
+    public static bool HasError<T>(this IEnumerable<Result<T>> results)
+    {
+        foreach (var result in results)
+        {
+            if (result.HasError)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+    
+    
+    
+    public static Exception GetError<T>(this IEnumerable<Result<T>> results)
+    {
+        foreach (var result in results)
+        {
+            if (result.HasError)
+            {
+                return result.Error;
+            }
+        }
+
+        return new ArgumentException("results has no error.");
+    }
 
     public static Result FoldThen<A>(this IEnumerable<Result<IReadOnlyList<A>>> response, Action<IReadOnlyList<A>> nextAction)
     {
