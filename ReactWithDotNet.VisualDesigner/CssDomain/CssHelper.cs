@@ -17,7 +17,10 @@ public static partial class CssHelper
 
             return CreateDesignerStyleItem(new()
             {
-                Pseudo        = styleAttribute.Pseudo,
+                OriginalText = designerStyleItem,
+
+                Pseudo = styleAttribute.Pseudo,
+
                 FinalCssItems = [ResultFrom(htmlStyle.Value)]
             });
         }
@@ -58,7 +61,10 @@ public static partial class CssHelper
             {
                 return Style.ParseCssAsDictionary(cssText).Then(styleMap => CreateDesignerStyleItem(new()
                 {
-                    Pseudo        = pseudo,
+                    OriginalText = designerStyleItem,
+
+                    Pseudo = pseudo,
+
                     FinalCssItems = from pair in styleMap select CreateFinalCssItem(pair)
                 }));
             }
@@ -67,7 +73,10 @@ public static partial class CssHelper
             {
                 return CreateDesignerStyleItem(new()
                 {
-                    Pseudo        = pseudo,
+                    OriginalText = designerStyleItem,
+
+                    Pseudo = pseudo,
+
                     FinalCssItems = [CreateFinalCssItem("color", realColor)]
                 });
             }

@@ -7,6 +7,8 @@ public interface DesignerStyleItem
     public IReadOnlyList<FinalCssItem> FinalCssItems { get; }
 
     public string Pseudo { get; }
+    
+    public string OriginalText { get; }
 }
 
 static class DesignerStyleItemFactory
@@ -18,6 +20,11 @@ static class DesignerStyleItemFactory
         if (finalCssItems.Count == 0)
         {
             return new ArgumentException("finalCssItems.Length cannot be zero");
+        }
+
+        if (input.OriginalText.HasNoValue())
+        {
+            return new ArgumentException(nameof(input.OriginalText));
         }
 
         return finalCssItems switch
@@ -38,6 +45,8 @@ static class DesignerStyleItemFactory
         public IReadOnlyList<FinalCssItem> FinalCssItems { get; init; }
 
         public string Pseudo { get; init; }
+        
+        public string OriginalText { get; init; }
     }
 
     public sealed record CreateDesignerStyleItemInput
@@ -45,5 +54,7 @@ static class DesignerStyleItemFactory
         public IEnumerable<Result<FinalCssItem>> FinalCssItems { get; init; }
 
         public string Pseudo { get; init; }
+        
+        public string OriginalText { get; init; }
     }
 }
