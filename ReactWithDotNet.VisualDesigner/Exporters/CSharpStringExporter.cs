@@ -173,9 +173,19 @@ static class CSharpStringExporter
         {
             return ListFrom(from line in lines.Select((line, index) => new { text = line, index })
                             let length = lines.Count - 1
+                            let isLastLine = line.index == lines.Count - 1
+                            let lineStartsWithDoubleQuote = line.text.TrimStart().StartsWith('"')
+                            let lineEndsWithDoubleQuote = line.text.TrimEnd().EndsWith('"')
+                            let hasNextLine = !isLastLine
+                            
+                            let nextLineIsEndOfMapping = hasNextLine && lines[line.index + 1].TrimStart().StartsWith("},")
+
                             select line switch
                             {
-                                _ when line.index < length => line.text + ",",
+                                _ when !isLastLine && 
+                                       lineStartsWithDoubleQuote && 
+                                       lineEndsWithDoubleQuote &&
+                                       !nextLineIsEndOfMapping => line.text + ",",
 
                                 _ => line.text
                             });
