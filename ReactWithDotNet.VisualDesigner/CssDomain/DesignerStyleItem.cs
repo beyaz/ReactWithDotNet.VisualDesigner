@@ -5,6 +5,8 @@ namespace ReactWithDotNet.VisualDesigner.CssDomain;
 public interface DesignerStyleItem
 {
     public IReadOnlyList<FinalCssItem> FinalCssItems { get; }
+    
+    public FinalCssItem FinalCssItem { get; }
 
     public string Pseudo { get; }
 }
@@ -41,11 +43,15 @@ static class DesignerStyleItemFactory
         public IReadOnlyList<FinalCssItem> FinalCssItems { get; init; }
 
         public string Pseudo { get; init; }
+        
+        public FinalCssItem FinalCssItem { get; init; }
     }
 
     public sealed record CreateDesignerStyleItemInput
     {
         public IEnumerable<Result<FinalCssItem>> FinalCssItems { get; init; }
+        
+        public Result<FinalCssItem> FinalCssItem { get; init; }
 
         public string Pseudo { get; init; }
     }
