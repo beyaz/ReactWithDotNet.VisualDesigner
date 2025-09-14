@@ -81,76 +81,65 @@ static class ModelToNodeTransformer
         {
             if (project.ExportStylesAsTailwind)
             {
-                List<string> classNames = [];
-
-                var classNameShouldBeTemplateLiteral = false;
-
-                // Transfer properties
-                foreach (var property in elementModel.Properties)
+                var props = calculatePropsForTailwind(project, elementModel.Properties, elementModel.Styles);
+                if (props.HasError)
                 {
-                    var parsedProperty = ParseProperty(property);
-                    if (parsedProperty.HasError)
-                    {
-                        return parsedProperty.Error;
-                    }
-
-                    if (parsedProperty.Value.Name == "class")
-                    {
-                        classNames.AddRange(parsedProperty.Value.Value.Split(" ", StringSplitOptions.RemoveEmptyEntries));
-                        continue;
-                    }
-
-                    node = node with
-                    {
-                        Properties = node.Properties.Add(new()
-                        {
-                            Name  = parsedProperty.Value.Name,
-                            Value = parsedProperty.Value.Value
-                        })
-                    };
+                    return props.Error;
                 }
 
-                foreach (var styleItem in elementModel.Styles)
+                node = node with
                 {
-                    string tailwindClassName;
-                    {
-                        var result = ConvertDesignerStyleItemToTailwindClassName(project, styleItem);
-                        if (result.HasError)
-                        {
-                            return result.Error;
-                        }
-
-                        tailwindClassName = result.Value;
-                    }
-
-                    if (tailwindClassName.StartsWith("${"))
-                    {
-                        classNameShouldBeTemplateLiteral = true;
-                    }
-
-                    classNames.Add(tailwindClassName);
-                }
-
-                if (classNames.Count > 0)
-                {
-                    var firstLastChar = classNameShouldBeTemplateLiteral ? "`" : "\"";
-
-                    node = node with
-                    {
-                        Properties = node.Properties.Add(new()
-                        {
-                            Name  = "className",
-                            Value = firstLastChar + string.Join(" ", classNames) + firstLastChar
-                        })
-                    };
-                }
+                    Properties = props.Value.ToImmutableList()
+                };
             }
         }
+
+        var hasNoChildAndHasNoText = elementModel.Children.Count == 0 && elementModel.HasNoText();
+        if (hasNoChildAndHasNoText)
+        {
+            return node;
+        }
+
+        // Add text content
+        if (elementModel.HasText())
+        {
+            node = node with
+            {
+                Children = node.Children.Add(new()
+                {
+                    Text = elementModel.GetText(),
+
+                    HtmlElementType = None
+                })
+            };
+        }
+
+        // Add children
+        foreach (var child in elementModel.Children)
+        {
+            ReactNode childNode;
+            {
+                var result = await ConvertVisualElementModelToReactNodeModel(project, child);
+                if (result.HasError)
+                {
+                    return result.Error;
+                }
+
+                childNode = result.Value;
+            }
+
+            node = node with
+            {
+                Children = node.Children.Add(childNode)
+            };
+        }
+
+        return node;
 
         static Result<IReadOnlyList<ReactProperty>> calculatePropsForTailwind(ProjectConfig project, IReadOnlyList<string> properties, IReadOnlyList<string> styles)
         {
             var props = new List<ReactProperty>();
-            
+
             List<string> classNames = [];
 
             var classNameShouldBeTemplateLiteral = false;
@@ -211,48 +200,6 @@ static class ModelToNodeTransformer
 
             return props;
         }
-
-        var hasNoChildAndHasNoText = elementModel.Children.Count == 0 && elementModel.HasNoText();
-        if (hasNoChildAndHasNoText)
-        {
-            return node;
-        }
-
-        // Add text content
-        if (elementModel.HasText())
-        {
-            node = node with
-            {
-                Children = node.Children.Add(new()
-                {
-                    Text = elementModel.GetText(),
-
-                    HtmlElementType = None
-                })
-            };
-        }
-
-        // Add children
-        foreach (var child in elementModel.Children)
-        {
-            ReactNode childNode;
-            {
-                var result = await ConvertVisualElementModelToReactNodeModel(project, child);
-                if (result.HasError)
-                {
-                    return result.Error;
-                }
-
-                childNode = result.Value;
-            }
-
-            node = node with
-            {
-                Children = node.Children.Add(childNode)
-            };
-        }
-
-        return node;
     }
 
     static Result<(VisualElementModel modifiedElementModel, IReadOnlyList<FinalCssItem> inlineStyle)>
