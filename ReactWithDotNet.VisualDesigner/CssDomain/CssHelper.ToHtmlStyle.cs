@@ -90,6 +90,9 @@ partial class CssHelper
             case "box-sizing":
             case "pointer-events":
             case "transform":
+            case "object-fit":
+            case "border-collapse":
+            case "table-layout":
             {
                 return CreateFinalCssItem(name, value);
             }
