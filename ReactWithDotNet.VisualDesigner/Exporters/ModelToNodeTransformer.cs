@@ -118,7 +118,11 @@ static class ModelToNodeTransformer
                                                 select CreateFinalCssItem
                                                     (new()
                                                      {
-                                                         Name = KebabToCamelCase(x.Name),
+                                                         Name = project.ExportAsCSharpString switch
+                                                         {
+                                                             true  =>  x.Name,
+                                                             false =>KebabToCamelCase(x.Name)
+                                                         },
 
                                                          Value = x.Value switch
                                                          {
@@ -126,7 +130,11 @@ static class ModelToNodeTransformer
 
                                                              var y when y.StartsWith("request.") || y.StartsWith("context.") => y,
 
-                                                             var y => '"' + TryClearStringValue(y) + '"'
+                                                             var y => project.ExportAsCSharpString switch
+                                                             {
+                                                                 true=>  TryClearStringValue(y),
+                                                                 false=>'"' + TryClearStringValue(y) + '"'
+                                                             }
                                                          }
                                                      }
                                                     )

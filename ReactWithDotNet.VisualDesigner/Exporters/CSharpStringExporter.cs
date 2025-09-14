@@ -296,7 +296,7 @@ static class CSharpStringExporter
         {
             return new List<string>
             {
-                $"{indent(indentLevel)}{asFinalText(node.Children[0].Text)}"
+                '"' + $"{indent(indentLevel)}{asFinalText(node.Children[0].Text)}"
             };
         }
 
@@ -306,7 +306,7 @@ static class CSharpStringExporter
             {
                 return new List<string>
                 {
-                    $"{indent(indentLevel)}{asFinalText(node.Text)}"
+                    '"' + $"{indent(indentLevel)}{asFinalText(node.Text)}"
                 };
             }
 
@@ -707,7 +707,7 @@ static class CSharpStringExporter
 
                         if (styleLines.Count > 0)
                         {
-                            propsAsTextList.Add($"style = \"{string.Join("; ", styleLines)}\"");
+                            propsAsTextList.Add($"style=\\\"{string.Join("; ", styleLines)}\\\"");
                         }
                     }
                 }
@@ -733,7 +733,7 @@ static class CSharpStringExporter
             {
                 return new LineCollection
                 {
-                    asFinalText('"' + $"{indent(indentLevel)}new {tag}{partProps}" + '"')
+                    '"' + $"{indent(indentLevel)}<{tag}{partProps}" + '"'
                 };
             }
 
@@ -755,7 +755,7 @@ static class CSharpStringExporter
 
             LineCollection lines =
             [
-                $"{indent(indentLevel)}\"\"\"<{tag}{partProps}\"\"\""
+                $"\"{indent(indentLevel)}<{tag}{partProps}\""
             ];
 
             // Add children
@@ -786,7 +786,7 @@ static class CSharpStringExporter
             }
 
             // Close tag
-            lines.Add(indent(indentLevel) + '"' + $"</{tag}>" + '"');
+            lines.Add( '"' + $"{indent(indentLevel)}</{tag}>" + '"');
 
             return lines;
         }
@@ -804,7 +804,7 @@ static class CSharpStringExporter
                  let clear = TryClearStringValue(x)
                  let quoteCount = clear.Contains('"') ? 3 : 1
                  let quote = new string('"', quoteCount)
-                 select quote + clear + quote
+                 select  clear + quote
                 );
         }
 
