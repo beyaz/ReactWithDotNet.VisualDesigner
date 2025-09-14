@@ -8,13 +8,12 @@ static class ModelToNodeTransformer
     public static async Task<Result<ReactNode>> ConvertVisualElementModelToReactNodeModel(ProjectConfig project, VisualElementModel elementModel)
     {
         // Open tag
-        var tag = elementModel.Tag;
 
         var node = new ReactNode
         {
-            Tag = tag,
+            Tag = elementModel.Tag,
 
-            HtmlElementType = TryGetHtmlElementTypeByTagName(tag)
+            HtmlElementType = TryGetHtmlElementTypeByTagName(elementModel.Tag)
         };
 
         // calculate properties
@@ -29,7 +28,7 @@ static class ModelToNodeTransformer
 
                 _ => Fail<IReadOnlyList<ReactProperty>>(new ArgumentException("Style export not specified"))
             };
-        
+
             if (props.HasError)
             {
                 return props.Error;
@@ -40,7 +39,6 @@ static class ModelToNodeTransformer
                 Properties = props.Value.ToImmutableList()
             };
         }
-        
 
         var hasNoChildAndHasNoText = elementModel.Children.Count == 0 && elementModel.HasNoText();
         if (hasNoChildAndHasNoText)
@@ -48,41 +46,41 @@ static class ModelToNodeTransformer
             return node;
         }
 
-        // Add text content
-        if (elementModel.HasText())
+        List<ReactNode> children = [];
         {
-            node = node with
+            // Add text content
+            if (elementModel.HasText())
             {
-                Children = node.Children.Add(new()
+                children.Add(new()
                 {
                     Text = elementModel.GetText(),
 
                     HtmlElementType = None
-                })
-            };
-        }
-
-        // Add children
-        foreach (var child in elementModel.Children)
-        {
-            ReactNode childNode;
-            {
-                var result = await ConvertVisualElementModelToReactNodeModel(project, child);
-                if (result.HasError)
-                {
-                    return result.Error;
-                }
-
-                childNode = result.Value;
+                });
             }
 
-            node = node with
+            // Add children
+            foreach (var child in elementModel.Children)
             {
-                Children = node.Children.Add(childNode)
-            };
+                ReactNode childNode;
+                {
+                    var result = await ConvertVisualElementModelToReactNodeModel(project, child);
+                    if (result.HasError)
+                    {
+                        return result.Error;
+                    }
+
+                    childNode = result.Value;
+                }
+
+                children.Add(childNode);
+            }
         }
 
-        return node;
+        return node with
+        {
+            Children = children.ToImmutableList()
+        };
 
         static Result<IReadOnlyList<ReactProperty>> calculatePropsForInlineStyle(ProjectConfig project, IReadOnlyList<string> properties, IReadOnlyList<string> styles)
         {
@@ -96,7 +94,7 @@ static class ModelToNodeTransformer
                 {
                     return parsedProperty.Error;
                 }
-                
+
                 props.Add(new()
                 {
                     Name  = parsedProperty.Value.Name,
@@ -104,7 +102,6 @@ static class ModelToNodeTransformer
                 });
             }
 
-            
             var finalCssList = ListFrom(from text in styles
                                         let item = CreateDesignerStyleItemFromText(project, text)
                                         let finalCssItems = item switch
@@ -137,9 +134,8 @@ static class ModelToNodeTransformer
             {
                 return finalCssList.Error;
             }
-            
+
             var inlineStyle = finalCssList.Value;
-            
 
             if (inlineStyle.Any())
             {
@@ -228,7 +224,6 @@ static class ModelToNodeTransformer
             return props;
         }
     }
-
 }
 
 record ReactNode
