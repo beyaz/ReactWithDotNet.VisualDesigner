@@ -542,7 +542,13 @@ sealed class ApplicationView : Component<ApplicationState>
             }
         };
 
-        Client.RunJavascript("document.getElementById('TagEditor').focus();");
+        Client.RunJavascript("""
+                             var el = document.getElementById('TagEditor');
+                             
+                             el.setSelectionRange(0, el.value.length);
+                             
+                             el.focus();
+                             """);
 
         return inputTag;
     }
@@ -1219,6 +1225,8 @@ sealed class ApplicationView : Component<ApplicationState>
                 {
                     ElementTreeEditPosition = rect
                 };
+                
+                
 
                 return Task.CompletedTask;
             },
