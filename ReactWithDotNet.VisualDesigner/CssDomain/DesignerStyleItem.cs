@@ -15,6 +15,25 @@ static class DesignerStyleItemFactory
 {
     public static Result<DesignerStyleItem> CreateDesignerStyleItem(CreateDesignerStyleItemInput input)
     {
+        var finalCssItem = input.FinalCssItem;
+        if (finalCssItem is not null)
+        {
+            if (finalCssItem.HasError)
+            {
+                return finalCssItem.Error;
+            }
+            
+            return new DesignerStyleItemImp
+            {
+                Pseudo = input.Pseudo,
+
+                FinalCssItems = [finalCssItem.Value],
+                
+                FinalCssItem = finalCssItem.Value
+            };
+            
+        }
+        
         var finalCssItems = input.FinalCssItems.ToList();
 
         if (finalCssItems.Count == 0)
