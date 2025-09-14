@@ -58,6 +58,7 @@ static class DesignerStyleItemFactory
     class DesignerStyleItemImp : DesignerStyleItem
     {
         public FinalCssItem FinalCssItem { get; init; }
+
         public IReadOnlyList<FinalCssItem> FinalCssItems { get; init; }
 
         public string Pseudo { get; init; }
@@ -66,6 +67,7 @@ static class DesignerStyleItemFactory
     public sealed record CreateDesignerStyleItemInput
     {
         public Result<FinalCssItem> FinalCssItem { get; init; }
+
         public IEnumerable<Result<FinalCssItem>> FinalCssItems { get; init; }
 
         public string Pseudo { get; init; }
