@@ -17,41 +17,30 @@ static class ModelToNodeTransformer
             HtmlElementType = TryGetHtmlElementTypeByTagName(tag)
         };
 
-        // arrange inline styles
+        // calculate properties
         {
-            if (project.ExportStylesAsInline || project.ExportAsCSharp || project.ExportAsCSharpString)
+            var props = project switch
             {
-                
-                var props = calculatePropsForInlineStyle(project, elementModel.Properties, elementModel.Styles);
-                if (props.HasError)
-                {
-                    return props.Error;
-                }
+                _ when project.ExportStylesAsInline || project.ExportAsCSharp || project.ExportAsCSharpString
+                    => calculatePropsForInlineStyle(project, elementModel.Properties, elementModel.Styles),
 
-                node = node with
-                {
-                    Properties = props.Value.ToImmutableList()
-                };
-                
-            }
-        }
+                _ when project.ExportStylesAsTailwind
+                    => calculatePropsForTailwind(project, elementModel.Properties, elementModel.Styles),
 
-        // arrange tailwind classes
-        {
-            if (project.ExportStylesAsTailwind)
+                _ => Fail<IReadOnlyList<ReactProperty>>(new ArgumentOutOfRangeException("Style export not specified"))
+            };
+        
+            if (props.HasError)
             {
-                var props = calculatePropsForTailwind(project, elementModel.Properties, elementModel.Styles);
-                if (props.HasError)
-                {
-                    return props.Error;
-                }
-
-                node = node with
-                {
-                    Properties = props.Value.ToImmutableList()
-                };
+                return props.Error;
             }
+
+            node = node with
+            {
+                Properties = props.Value.ToImmutableList()
+            };
         }
+        
 
         var hasNoChildAndHasNoText = elementModel.Children.Count == 0 && elementModel.HasNoText();
         if (hasNoChildAndHasNoText)
