@@ -93,7 +93,6 @@ static class ModelToNodeTransformer
                     {
                         return parsedProperty.Error;
                     }
-                    
 
                     if (parsedProperty.Value.Name == "class")
                     {
@@ -101,7 +100,14 @@ static class ModelToNodeTransformer
                         continue;
                     }
 
-                    node = node with { Properties = node.Properties.Add(new() { Name = parsedProperty.Value.Name, Value = parsedProperty.Value.Value }) };
+                    node = node with
+                    {
+                        Properties = node.Properties.Add(new()
+                        {
+                            Name  = parsedProperty.Value.Name,
+                            Value = parsedProperty.Value.Value
+                        })
+                    };
                 }
 
                 foreach (var styleItem in elementModel.Styles)
@@ -129,7 +135,14 @@ static class ModelToNodeTransformer
                 {
                     var firstLastChar = classNameShouldBeTemplateLiteral ? "`" : "\"";
 
-                    node = node with { Properties = node.Properties.Add(new() { Name = "className", Value = firstLastChar + string.Join(" ", classNames) + firstLastChar }) };
+                    node = node with
+                    {
+                        Properties = node.Properties.Add(new()
+                        {
+                            Name  = "className",
+                            Value = firstLastChar + string.Join(" ", classNames) + firstLastChar
+                        })
+                    };
                 }
             }
         }
