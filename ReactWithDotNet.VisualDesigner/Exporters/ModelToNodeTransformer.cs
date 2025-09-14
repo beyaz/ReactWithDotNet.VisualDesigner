@@ -7,6 +7,8 @@ static class ModelToNodeTransformer
 {
     public static async Task<Result<ReactNode>> ConvertVisualElementModelToReactNodeModel(ProjectConfig project, VisualElementModel elementModel)
     {
+        var htmlElementType = TryGetHtmlElementTypeByTagName(elementModel.Tag);
+
         ImmutableList<ReactProperty> properties;
         {
             var props = project switch
@@ -29,13 +31,14 @@ static class ModelToNodeTransformer
         }
 
         var hasNoChildAndHasNoText = elementModel.Children.Count == 0 && elementModel.HasNoText();
+
         if (hasNoChildAndHasNoText)
         {
             return new ReactNode
             {
                 Tag = elementModel.Tag,
 
-                HtmlElementType = TryGetHtmlElementTypeByTagName(elementModel.Tag),
+                HtmlElementType = htmlElementType,
 
                 Properties = properties
             };
@@ -76,7 +79,7 @@ static class ModelToNodeTransformer
         {
             Tag = elementModel.Tag,
 
-            HtmlElementType = TryGetHtmlElementTypeByTagName(elementModel.Tag),
+            HtmlElementType = htmlElementType,
 
             Properties = properties,
 
