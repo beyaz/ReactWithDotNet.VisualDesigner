@@ -322,7 +322,7 @@ static class CSharpStringExporter
         {
             return new List<string>
             {
-                '"' + $"{indent(indentLevel)}{asFinalText(node.Children[0].Text)}"
+                $"{indent(indentLevel)}{asFinalText(node.Children[0].Text)}"
             };
         }
 
@@ -332,7 +332,7 @@ static class CSharpStringExporter
             {
                 return new List<string>
                 {
-                    '"' + $"{indent(indentLevel)}{asFinalText(node.Text)}"
+                     $"{indent(indentLevel)}{asFinalText(node.Text)}"
                 };
             }
 
@@ -821,7 +821,7 @@ static class CSharpStringExporter
         {
             if (!IsStringValue(text))
             {
-                return text;
+                return text + ",";
             }
 
             return FirstOf
@@ -830,7 +830,7 @@ static class CSharpStringExporter
                  let clear = TryClearStringValue(x)
                  let quoteCount = clear.Contains('"') ? 3 : 1
                  let quote = new string('"', quoteCount)
-                 select clear + quote
+                 select quote + clear + quote
                 );
         }
 
