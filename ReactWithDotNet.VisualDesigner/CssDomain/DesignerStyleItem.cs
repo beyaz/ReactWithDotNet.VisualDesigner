@@ -4,9 +4,8 @@ namespace ReactWithDotNet.VisualDesigner.CssDomain;
 
 public interface DesignerStyleItem
 {
-    public IReadOnlyList<FinalCssItem> FinalCssItems { get; }
-    
     public FinalCssItem FinalCssItem { get; }
+    public IReadOnlyList<FinalCssItem> FinalCssItems { get; }
 
     public string Pseudo { get; }
 }
@@ -18,22 +17,21 @@ static class DesignerStyleItemFactory
         var finalCssItem = input.FinalCssItem;
         if (finalCssItem is not null)
         {
-            if (finalCssItem.HasError)
+            return finalCssItem switch
             {
-                return finalCssItem.Error;
-            }
-            
-            return new DesignerStyleItemImp
-            {
-                Pseudo = input.Pseudo,
+                { HasError: true } => finalCssItem.Error,
 
-                FinalCssItems = [finalCssItem.Value],
-                
-                FinalCssItem = finalCssItem.Value
+                _ => new DesignerStyleItemImp
+                {
+                    Pseudo = input.Pseudo,
+
+                    FinalCssItems = [finalCssItem.Value],
+
+                    FinalCssItem = finalCssItem.Value
+                }
             };
-            
         }
-        
+
         var finalCssItems = input.FinalCssItems.ToList();
 
         if (finalCssItems.Count == 0)
@@ -59,18 +57,16 @@ static class DesignerStyleItemFactory
 
     class DesignerStyleItemImp : DesignerStyleItem
     {
+        public FinalCssItem FinalCssItem { get; init; }
         public IReadOnlyList<FinalCssItem> FinalCssItems { get; init; }
 
         public string Pseudo { get; init; }
-        
-        public FinalCssItem FinalCssItem { get; init; }
     }
 
     public sealed record CreateDesignerStyleItemInput
     {
-        public IEnumerable<Result<FinalCssItem>> FinalCssItems { get; init; }
-        
         public Result<FinalCssItem> FinalCssItem { get; init; }
+        public IEnumerable<Result<FinalCssItem>> FinalCssItems { get; init; }
 
         public string Pseudo { get; init; }
     }
