@@ -63,10 +63,6 @@ static class TailwindCss
 
         var tailwindClassNames = new List<string>();
         {
-
-
-           
-            
             DesignerStyleItem designerStyleItem;
             {
                 var result = CreateDesignerStyleItemFromText(project, designerStyleItemText);
@@ -136,8 +132,6 @@ static class TailwindCss
         {
             var cssAttributeName = finalCssItem.Name;
             var cssAttributeValue = finalCssItem.Value;
-            
-            
 
             // check is conditional sample: border-width: {props.isSelected} ? 2 : 5
             {
@@ -151,7 +145,7 @@ static class TailwindCss
                         {
                             return cssItem.Error;
                         }
-                        
+
                         var result = ConvertToTailwindClass(project, cssItem.Value);
                         if (result.HasError)
                         {
@@ -165,21 +159,19 @@ static class TailwindCss
 
                     if (right.HasValue())
                     {
-                        
                         var cssItem = CreateFinalCssItem(cssAttributeName, right);
                         if (cssItem.HasError)
                         {
                             return cssItem.Error;
                         }
-                        
-                            var result = ConvertToTailwindClass(project, cssItem.Value);
-                            if (result.HasError)
-                            {
-                                return result.Error;
-                            }
 
-                            rightTailwindClass = result.Value;
-                        
+                        var result = ConvertToTailwindClass(project, cssItem.Value);
+                        if (result.HasError)
+                        {
+                            return result.Error;
+                        }
+
+                        rightTailwindClass = result.Value;
                     }
 
                     return "${" + $"{ClearConnectedValue(condition)} ? \"{lefTailwindClass}\" : \"{rightTailwindClass}\"" + '}';
@@ -839,7 +831,7 @@ static class TailwindCss
                 {
                     return None;
                 }
-                
+
                 return CreateDesignerStyleItem(new()
                 {
                     Pseudo        = pseudo,
@@ -887,10 +879,8 @@ static class TailwindCss
                 return CreateDesignerStyleItem(new()
                 {
                     Pseudo        = pseudo,
-                    FinalCssItems = [CreateFinalCssItem("font-family", value)],
+                    FinalCssItems = [CreateFinalCssItem("font-family", value)]
                 });
-                
-               
             }
         }
 
@@ -905,10 +895,8 @@ static class TailwindCss
                     return CreateDesignerStyleItem(new()
                     {
                         Pseudo        = pseudo,
-                        FinalCssItems = [CreateFinalCssItem("color", tailwindColor.Value)],
+                        FinalCssItems = [CreateFinalCssItem("color", tailwindColor.Value)]
                     });
-                    
-                    
                 }
             }
         }
@@ -924,9 +912,8 @@ static class TailwindCss
                     return CreateDesignerStyleItem(new()
                     {
                         Pseudo        = pseudo,
-                        FinalCssItems = [CreateFinalCssItem("background", tailwindColor.Value)],
+                        FinalCssItems = [CreateFinalCssItem("background", tailwindColor.Value)]
                     });
-                    
                 }
             }
         }
@@ -943,11 +930,10 @@ static class TailwindCss
 
             if (map.TryGetValue(utilityCssClassName, out var value))
             {
-                
                 return CreateDesignerStyleItem(new()
                 {
                     Pseudo        = pseudo,
-                    FinalCssItems = [CreateFinalCssItem("text-decoration-line", value)],
+                    FinalCssItems = [CreateFinalCssItem("text-decoration-line", value)]
                 });
             }
         }
@@ -957,12 +943,10 @@ static class TailwindCss
             var cssItem = ParseStyleAttribute(utilityCssClassName);
             if (cssItem.Name == "color" && cssItem.Value is not null && project.Colors.TryGetValue(cssItem.Value, out var realColor))
             {
-                
-                
                 return CreateDesignerStyleItem(new()
                 {
                     Pseudo        = pseudo,
-                    FinalCssItems = [CreateFinalCssItem("color", realColor)],
+                    FinalCssItems = [CreateFinalCssItem("color", realColor)]
                 });
             }
         }
@@ -971,12 +955,10 @@ static class TailwindCss
         {
             foreach (var (htmlStyleName, htmlStyleValue) in TailwindSpacingScale.Try_Convert_From_TailwindClass_to_HtmlStyle(utilityCssClassName))
             {
-               
-                
                 return CreateDesignerStyleItem(new()
                 {
                     Pseudo        = pseudo,
-                    FinalCssItems = [CreateFinalCssItem(htmlStyleName, htmlStyleValue)],
+                    FinalCssItems = [CreateFinalCssItem(htmlStyleName, htmlStyleValue)]
                 });
             }
         }
@@ -995,11 +977,10 @@ static class TailwindCss
                 var arbitrary = tryGetArbitraryValue(utilityCssClassName, tailwindPrefix);
                 if (arbitrary.HasValue && arbitrary.Value.EndsWith("px"))
                 {
-                    
                     return CreateDesignerStyleItem(new()
                     {
                         Pseudo        = pseudo,
-                        FinalCssItems = [CreateFinalCssItem(styleName, arbitrary.Value)],
+                        FinalCssItems = [CreateFinalCssItem(styleName, arbitrary.Value)]
                     });
                 }
             }
@@ -1029,11 +1010,10 @@ static class TailwindCss
                         color = realColor;
                     }
 
-                    
                     return CreateDesignerStyleItem(new()
                     {
                         Pseudo        = pseudo,
-                        FinalCssItems = [CreateFinalCssItem(styleName, color)],
+                        FinalCssItems = [CreateFinalCssItem(styleName, color)]
                     });
                 }
             }
@@ -1046,7 +1026,7 @@ static class TailwindCss
                 return CreateDesignerStyleItem(new()
                 {
                     Pseudo        = pseudo,
-                    FinalCssItems = [CreateFinalCssItem("cursor", utilityCssClassName.RemoveFromStart("cursor-"))],
+                    FinalCssItems = [CreateFinalCssItem("cursor", utilityCssClassName.RemoveFromStart("cursor-"))]
                 });
             }
         }
