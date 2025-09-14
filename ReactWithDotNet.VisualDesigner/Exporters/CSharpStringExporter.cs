@@ -185,9 +185,12 @@ static class CSharpStringExporter
         {
             return ListFrom(from line in lines.Select((line, index) => new { text = line, index })
                             let length = lines.Count
+                            let lineStartsWithDoubleQuote = line.text.TrimStart().StartsWith('"')
+                            let lineContainsLeftBracket = line.text.Contains('{')
+
                             select line switch
                             {
-                                _ when line.text.Contains("{") => '$'+line.text,
+                                _ when lineStartsWithDoubleQuote && lineContainsLeftBracket => '$'+line.text,
 
                                 _ => line.text
                             });
@@ -350,7 +353,7 @@ static class CSharpStringExporter
 
                 lines.Add($"{indent(indentLevel)}from item in {itemsSource.Value}");
 
-                lines.Add(indent(indentLevel) + "select ");
+              
 
                 IReadOnlyList<string> innerLines;
                 {
@@ -363,32 +366,13 @@ static class CSharpStringExporter
                     innerLines = result.Value;
                 }
 
-                // import inner lines
-                // try clear begin - end brackets in innerLines 
-                // maybe conditional render
-                {
-                    for (var i = 0; i < innerLines.Count; i++)
-                    {
-                        var line = innerLines[i];
+                lines.Add(indent(indentLevel) + "select new LineCollection");
+                lines.Add(indent(indentLevel) + "{");
+                
+                lines.AddRange(innerLines);
 
-                        // is first line
-                        if (i == 0)
-                        {
-                            line = line.TrimStart().RemoveFromStart("(");
+                lines.Add(indent(indentLevel) + "},");
 
-                            lines[^1] += line;
-                            continue;
-                        }
-
-                        // is last line
-                        if (i == innerLines.Count - 1)
-                        {
-                            line = line.TrimEnd().RemoveFromEnd(")");
-                        }
-
-                        lines.Add(line);
-                    }
-                }
 
                 return lines;
             }
