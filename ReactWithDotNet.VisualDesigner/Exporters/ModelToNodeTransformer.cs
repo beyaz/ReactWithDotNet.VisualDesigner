@@ -17,6 +17,16 @@ static class ModelToNodeTransformer
             HtmlElementType = TryGetHtmlElementTypeByTagName(tag)
         };
 
+        static Result<IReadOnlyList<ReactProperty>> calculatePropsForInlineStyle(ProjectConfig project, IReadOnlyList<string> properties, IReadOnlyList<string> styles)
+        {
+            var props = new List<ReactProperty>();
+
+            
+
+            return props;
+        }
+        
+        
         // arrange inline styles
         {
             if (project.ExportStylesAsInline || project.ExportAsCSharp || project.ExportAsCSharpString)
