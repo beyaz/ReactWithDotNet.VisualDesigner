@@ -162,7 +162,7 @@ static class CSharpStringExporter
 
             elementJsxTree = result.Value;
 
-            elementJsxTree = appendCommaEndOfLine(elementJsxTree);
+            elementJsxTree = appendDolarAtLineStartIfNeed(appendCommaEndOfLine(elementJsxTree));
         }
 
         var importLines = Plugin.CalculateImportLines(rootNode);
@@ -176,6 +176,18 @@ static class CSharpStringExporter
                             select line switch
                             {
                                 _ when line.index < length => line.text + ",",
+
+                                _ => line.text
+                            });
+        }
+        
+        static List<string> appendDolarAtLineStartIfNeed(IReadOnlyList<string> lines)
+        {
+            return ListFrom(from line in lines.Select((line, index) => new { text = line, index })
+                            let length = lines.Count
+                            select line switch
+                            {
+                                _ when line.text.Contains("{") => '$'+line.text,
 
                                 _ => line.text
                             });
