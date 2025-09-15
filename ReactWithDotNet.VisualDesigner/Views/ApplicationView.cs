@@ -1565,7 +1565,7 @@ sealed class ApplicationView : Component<ApplicationState>
             },
             viewProps(visualElementModel.Properties),
 
-            shadowProps,
+            shadowProps, new ShadowPropertyView.PopupView(),
 
             SpaceY(16),
 
@@ -2482,6 +2482,171 @@ sealed class ApplicationView : Component<ApplicationState>
 
     class ShadowPropertyView : Component<ShadowPropertyView.State>
     {
+        protected override Task constructor()
+        {
+            var sender = SHADOW_PROP_PREFIX + PropertyName;
+            
+            Client.ListenEvent<PopupItemSelect>(e =>
+            {
+                DispatchEvent(OnChange, [PropertyName, e.Value]);
+                
+                return Task.CompletedTask;
+                
+            }, sender);
+            
+            return base.constructor();
+        }
+
+        delegate Task SenderMouseEnter(SenderMouseEnterArgs e);
+        
+        delegate Task PopupItemSelect(PopupItemSelectArgs e);
+        
+        delegate Task SenderMouseLeave(SenderMouseLeaveArgs e);
+        
+        class PopupItemSelectArgs
+        {
+            public string Value { get; init; }
+
+            public string Sender { get; init; }
+        }
+        
+        class SenderMouseLeaveArgs
+        {
+            public string Sender { get; init; }
+        }
+        
+        public class SenderMouseEnterArgs
+        {
+            public IReadOnlyList<string> Suggestions { get; init; }
+            
+            public double SuggestionPopupLocationX { get; init; }
+
+            public double SuggestionPopupLocationY { get; init; }
+
+            public string Sender { get; init; }
+        }
+        
+        
+        public class PopupView: Component<PopupView.PopupViewState>
+        {
+            public record PopupViewState
+            {
+                public bool IsSuggestionsVisible { get; init; }
+
+                public SenderMouseEnterArgs EventArgs { get; init; }
+                
+                public string SenderWhenMouseEntered { get; init; }
+            }
+            
+            protected override Task constructor()
+            {
+                Client.ListenEvent<SenderMouseEnter>( e =>
+                {
+                    state = state with
+                    {
+                        IsSuggestionsVisible = true,
+                        EventArgs = e
+                    };
+                    
+                    return Task.CompletedTask;
+                });
+                
+                Client.ListenEvent<SenderMouseLeave>( e =>
+                {
+                    if (e.Sender == state.SenderWhenMouseEntered)
+                    {
+                        return Task.CompletedTask;
+                    }
+                    
+                    if (e.Sender == state.EventArgs?.Sender)
+                    {
+                        state = state with
+                        {
+                            EventArgs = null,
+                            
+                            IsSuggestionsVisible = false
+                        };
+                    }
+                    
+                    return Task.CompletedTask;
+                });
+                
+                return Task.CompletedTask;
+            }
+
+            [StopPropagation]
+            Task ClosePopup(MouseEvent _)
+            {
+                state = state with
+                {
+                    IsSuggestionsVisible = false
+                };
+
+                return Task.CompletedTask;
+            }
+
+            [StopPropagation]
+            Task OnSuggestionItemClicked(MouseEvent e)
+            {
+                var value = e.target.id;
+                
+                state = state with
+                {
+                    IsSuggestionsVisible = false
+                };
+
+                var args = new PopupItemSelectArgs
+                {
+                    Sender = state.EventArgs.Sender,
+                    Value  = value
+                };
+                
+                Client.DispatchEvent<PopupItemSelect>([args],state.SenderWhenMouseEntered);
+
+                return Task.CompletedTask;
+            }
+            
+            protected override Element render()
+            {
+                var args = state.EventArgs;
+                if (args is null)
+                {
+                    return null;
+                }
+                var suggestions = args.Suggestions ?? [];
+                
+                if (suggestions.Count == 0 || !state.IsSuggestionsVisible)
+                {
+                    return null;
+                }
+
+                return new FlexColumnCentered(MinWidth(50), PositionFixed, Zindex2, Background(Gray50), Border(1, solid, Gray100), BorderRadius(16), PaddingY(4), Left(args.SuggestionPopupLocationX), Top(args.SuggestionPopupLocationY))
+                {
+                    CursorDefault,
+                    
+                    OnMouseEnter(_ =>
+                    {
+                        state = state with
+                        {
+                            SenderWhenMouseEntered = state.EventArgs.Sender
+                        };
+                        
+                        return Task.CompletedTask;
+                    }),
+                    
+                    suggestions.Select(text => new FlexRowCentered(Padding(6, 12), BorderRadius(16), Hover(Background(Gray100)))
+                    {
+                        text,
+                        Id(text),
+                        OnClick(OnSuggestionItemClicked)
+                    }),
+
+                    OnMouseLeave(ClosePopup)
+                };
+            }
+        }
+        
+        
         const string SHADOW_PROP_PREFIX = "SHADOW_PROP-";
 
         [CustomEvent]
@@ -2525,13 +2690,42 @@ sealed class ApplicationView : Component<ApplicationState>
             {
                 Id(SHADOW_PROP_PREFIX + PropertyName),
 
-                state.IsSuggestionsVisible ? null : OnMouseEnter(ToggleZoomSuggestions),
+                OnMouseEnter([StopPropagation](e) =>
+                {
+                    var rect = e.target.boundingClientRect;
 
-                state.IsSuggestionsVisible ? null : Opacity(0.4),
+                    var args = new SenderMouseEnterArgs
+                    {
+                        Suggestions = Suggestions,
+                        SuggestionPopupLocationX = rect.left + rect.width / 2 - 24,
+                        SuggestionPopupLocationY = rect.top + rect.height,
+                        Sender = SHADOW_PROP_PREFIX + PropertyName
+                    };
 
-                !state.IsSuggestionsVisible ? null : Background(Gray50),
+                    Client.DispatchEvent<SenderMouseEnter>([args]);
+                    
+                    return Task.CompletedTask;
+                }),
+                
+                OnMouseLeave([StopPropagation][DebounceTimeout(200)](_) =>
+                {
+                    var args = new SenderMouseLeaveArgs
+                    {
+                        Sender = SHADOW_PROP_PREFIX + PropertyName
+                    };
+                    
+                    Client.DispatchEvent<SenderMouseLeave>([args]);
+                    
+                    return Task.CompletedTask;
+                }),
+                
+                
 
-                OnMouseLeave(OnPropertyNameMouseLeved),
+                Opacity(0.4),
+
+                Background(Gray50),
+
+               
 
                 new label
                 {
@@ -2540,49 +2734,12 @@ sealed class ApplicationView : Component<ApplicationState>
                 new FlexRowCentered(Size(16))
                 {
                     new IconArrowRightOrDown { IsArrowDown = true, style = { Width(16) } }
-                },
-
-                !state.IsSuggestionsVisible ? null : new FlexColumnCentered(MinWidth(50), PositionFixed, Zindex2, Background(Gray50), Border(1, solid, Gray100), BorderRadius(16), PaddingY(4), Left(state.SuggestionPopupLocationX), Top(state.SuggestionPopupLocationY))
-                {
-                    Suggestions?.Select(text => new FlexRowCentered(Padding(6, 12), BorderRadius(16), Hover(Background(Gray100)))
-                    {
-                        text,
-                        Id(text),
-                        OnClick(OnSuggestionItemClicked)
-                    }),
-
-                    OnMouseEnter(OnSuggestionBoxEntered),
-                    OnMouseLeave(ToggleZoomSuggestions)
                 }
             };
 
-            [StopPropagation]
-            Task ToggleZoomSuggestions(MouseEvent e)
-            {
-                var rect = e.target.boundingClientRect;
-
-                state = state with
-                {
-                    IsSuggestionsVisible = !state.IsSuggestionsVisible,
-                    SuggestionPopupLocationX = rect.left + rect.width / 2 - 24,
-                    SuggestionPopupLocationY = rect.top + rect.height
-                };
-
-                return Task.CompletedTask;
-            }
         }
 
-        [StopPropagation]
-        [DebounceTimeout(200)]
-        Task OnPropertyNameMouseLeved(MouseEvent e)
-        {
-            if (state.IsEnteredSuggestionsBox is false)
-            {
-                state = state with { IsSuggestionsVisible = false };
-            }
-
-            return Task.CompletedTask;
-        }
+        
 
         Task OnShadowPropClicked(MouseEvent e)
         {
@@ -2590,43 +2747,12 @@ sealed class ApplicationView : Component<ApplicationState>
 
             return Task.CompletedTask;
         }
+        
 
-        [StopPropagation]
-        Task OnSuggestionBoxEntered(MouseEvent e)
-        {
-            state = state with
-            {
-                IsEnteredSuggestionsBox = true
-            };
-
-            return Task.CompletedTask;
-        }
-
-        [StopPropagation]
-        Task OnSuggestionItemClicked(MouseEvent e)
-        {
-            state = state with
-            {
-                Value = e.target.id,
-                IsSuggestionsVisible = false
-            };
-
-            DispatchEvent(OnChange, [PropertyName, state.Value]);
-
-            return Task.CompletedTask;
-        }
 
         internal record State
         {
             public string InitialValue { get; init; }
-
-            public bool IsEnteredSuggestionsBox { get; init; }
-
-            public bool IsSuggestionsVisible { get; init; }
-
-            public double SuggestionPopupLocationX { get; init; }
-
-            public double SuggestionPopupLocationY { get; init; }
 
             public string Value { get; init; }
         }
