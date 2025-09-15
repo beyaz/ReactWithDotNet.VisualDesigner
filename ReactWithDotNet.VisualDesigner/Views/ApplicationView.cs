@@ -544,9 +544,9 @@ sealed class ApplicationView : Component<ApplicationState>
 
         Client.RunJavascript("""
                              var el = document.getElementById('TagEditor');
-                             
+
                              el.setSelectionRange(0, el.value.length);
-                             
+
                              el.focus();
                              """);
 
@@ -623,7 +623,7 @@ sealed class ApplicationView : Component<ApplicationState>
             return;
         }
 
-        var lineIndex = ExporterFactory.GetComponentLineIndexPointsInSourceFile(state.ProjectId,fileContent.Value, location.Value.targetComponentName);
+        var lineIndex = ExporterFactory.GetComponentLineIndexPointsInSourceFile(state.ProjectId, fileContent.Value, location.Value.targetComponentName);
         if (lineIndex.HasError)
         {
             this.FailNotification(lineIndex.Error.Message);
@@ -1225,8 +1225,6 @@ sealed class ApplicationView : Component<ApplicationState>
                 {
                     ElementTreeEditPosition = rect
                 };
-                
-                
 
                 return Task.CompletedTask;
             },
@@ -1601,8 +1599,6 @@ sealed class ApplicationView : Component<ApplicationState>
                         });
                     }
 
-                   
-                    
                     return Task.CompletedTask;
                 }
             },
@@ -1727,7 +1723,6 @@ sealed class ApplicationView : Component<ApplicationState>
                             Styles = x.Styles.RemoveAt(state.Selection.HoveredStyleIndex.Value)
                         });
                     }
-                    
 
                     state = state with
                     {
@@ -1759,7 +1754,7 @@ sealed class ApplicationView : Component<ApplicationState>
                     isSelected = false;
                     isHovered  = false;
                 }
-                
+
                 var styleItem = new FlexRowCentered(CursorDefault, Padding(4, 8), BorderRadius(16), UserSelect(none))
                 {
                     Background(isSelected ? Gray200 : Gray50),
@@ -1770,44 +1765,44 @@ sealed class ApplicationView : Component<ApplicationState>
 
                     content,
                     Id(index),
-                    
-                    state.Selection.SelectedStyleIndex.HasValue ? null:
-                    OnMouseEnter([StopPropagation](e) =>
-                    {
-                        var styleIndex = int.Parse(e.currentTarget.id);
-                        
-                        state = state with
-                        {
-                            Selection = new()
-                            {
-                                VisualElementTreeItemPath = state.Selection.VisualElementTreeItemPath,
 
-                                HoveredStyleIndex = styleIndex
-                            }
-                        };
-                        
-                        return Task.CompletedTask;
-                    }),
-                    
-                    state.Selection.SelectedStyleIndex.HasValue ? null:
-                    OnMouseLeave([StopPropagation](e) =>
-                    {
-                        var styleIndex = int.Parse(e.currentTarget.id);
-
-                        if (styleIndex == state.Selection.HoveredStyleIndex)
+                    state.Selection.SelectedStyleIndex.HasValue ? null :
+                        OnMouseEnter([StopPropagation](e) =>
                         {
+                            var styleIndex = int.Parse(e.currentTarget.id);
+
                             state = state with
                             {
-                                Selection = state.Selection with
+                                Selection = new()
                                 {
-                                    HoveredStyleIndex = null
+                                    VisualElementTreeItemPath = state.Selection.VisualElementTreeItemPath,
+
+                                    HoveredStyleIndex = styleIndex
                                 }
                             };
-                        }
-                        
-                        return Task.CompletedTask;
-                    }),
-                    
+
+                            return Task.CompletedTask;
+                        }),
+
+                    state.Selection.SelectedStyleIndex.HasValue ? null :
+                        OnMouseLeave([StopPropagation](e) =>
+                        {
+                            var styleIndex = int.Parse(e.currentTarget.id);
+
+                            if (styleIndex == state.Selection.HoveredStyleIndex)
+                            {
+                                state = state with
+                                {
+                                    Selection = state.Selection with
+                                    {
+                                        HoveredStyleIndex = null
+                                    }
+                                };
+                            }
+
+                            return Task.CompletedTask;
+                        }),
+
                     OnClick([StopPropagation](e) =>
                     {
                         var styleIndex = int.Parse(e.currentTarget.id);
@@ -2482,173 +2477,13 @@ sealed class ApplicationView : Component<ApplicationState>
 
     class ShadowPropertyView : Component<ShadowPropertyView.State>
     {
-        protected override Task constructor()
-        {
-            var sender = SHADOW_PROP_PREFIX + PropertyName;
-            
-            Client.ListenEvent<PopupItemSelect>(e =>
-            {
-                DispatchEvent(OnChange, [PropertyName, e.Value]);
-                
-                return Task.CompletedTask;
-                
-            }, sender);
-            
-            return base.constructor();
-        }
+        const string SHADOW_PROP_PREFIX = "SHADOW_PROP-";
+
+        delegate Task PopupItemSelect(PopupItemSelectArgs e);
 
         delegate Task SenderMouseEnter(SenderMouseEnterArgs e);
-        
-        delegate Task PopupItemSelect(PopupItemSelectArgs e);
-        
+
         delegate Task SenderMouseLeave(SenderMouseLeaveArgs e);
-        
-        class PopupItemSelectArgs
-        {
-            public string Value { get; init; }
-
-            public string Sender { get; init; }
-        }
-        
-        class SenderMouseLeaveArgs
-        {
-            public string Sender { get; init; }
-        }
-        
-         class SenderMouseEnterArgs
-        {
-            public IReadOnlyList<string> Suggestions { get; init; }
-            
-            public double SuggestionPopupLocationX { get; init; }
-
-            public double SuggestionPopupLocationY { get; init; }
-
-            public string Sender { get; init; }
-        }
-
-        public static Element CreatePopupHandlerView() => new PopupView();
-
-        class PopupView: Component<PopupView.PopupViewState>
-        {
-            public record PopupViewState
-            {
-                public bool IsSuggestionsVisible { get; init; }
-
-                public SenderMouseEnterArgs EventArgs { get; init; }
-                
-                public string SenderWhenMouseEntered { get; init; }
-            }
-            
-            protected override Task constructor()
-            {
-                Client.ListenEvent<SenderMouseEnter>( e =>
-                {
-                    state = state with
-                    {
-                        IsSuggestionsVisible = true,
-                        EventArgs = e
-                    };
-                    
-                    return Task.CompletedTask;
-                });
-                
-                Client.ListenEvent<SenderMouseLeave>( e =>
-                {
-                    if (e.Sender == state.SenderWhenMouseEntered)
-                    {
-                        return Task.CompletedTask;
-                    }
-                    
-                    if (e.Sender == state.EventArgs?.Sender)
-                    {
-                        state = state with
-                        {
-                            EventArgs = null,
-                            
-                            IsSuggestionsVisible = false
-                        };
-                    }
-                    
-                    return Task.CompletedTask;
-                });
-                
-                return Task.CompletedTask;
-            }
-
-            [StopPropagation]
-            Task ClosePopup(MouseEvent _)
-            {
-                state = state with
-                {
-                    IsSuggestionsVisible = false
-                };
-
-                return Task.CompletedTask;
-            }
-
-            [StopPropagation]
-            Task OnSuggestionItemClicked(MouseEvent e)
-            {
-                var value = e.target.id;
-                
-                state = state with
-                {
-                    IsSuggestionsVisible = false
-                };
-
-                var args = new PopupItemSelectArgs
-                {
-                    Sender = state.EventArgs.Sender,
-                    Value  = value
-                };
-                
-                Client.DispatchEvent<PopupItemSelect>([args],state.SenderWhenMouseEntered);
-
-                return Task.CompletedTask;
-            }
-            
-            protected override Element render()
-            {
-                var args = state.EventArgs;
-                if (args is null)
-                {
-                    return null;
-                }
-                var suggestions = args.Suggestions ?? [];
-                
-                if (suggestions.Count == 0 || !state.IsSuggestionsVisible)
-                {
-                    return null;
-                }
-
-                return new FlexColumnCentered(MinWidth(50), PositionFixed, Zindex2, Background(Gray50), Border(1, solid, Gray100), BorderRadius(16), PaddingY(4), Left(args.SuggestionPopupLocationX), Top(args.SuggestionPopupLocationY))
-                {
-                    CursorDefault,
-                    
-                    OnMouseEnter(_ =>
-                    {
-                        state = state with
-                        {
-                            SenderWhenMouseEntered = state.EventArgs.Sender
-                        };
-                        
-                        return Task.CompletedTask;
-                    }),
-                    
-                    suggestions.Select(text => new FlexRowCentered(Padding(6, 12), BorderRadius(16), Hover(Background(Gray100)))
-                    {
-                        text,
-                        Id(text),
-                        OnClick(OnSuggestionItemClicked)
-                    }),
-
-                    OnMouseLeave(ClosePopup)
-                };
-            }
-        }
-        
-        
-        const string SHADOW_PROP_PREFIX = "SHADOW_PROP-";
 
         [CustomEvent]
         public Func<string, string, Task> OnChange { get; init; }
@@ -2658,6 +2493,25 @@ sealed class ApplicationView : Component<ApplicationState>
         public string PropertyType { get; init; }
 
         public IReadOnlyList<string> Suggestions { get; init; }
+
+        public static Element CreatePopupHandlerView()
+        {
+            return new PopupView();
+        }
+
+        protected override Task constructor()
+        {
+            var sender = SHADOW_PROP_PREFIX + PropertyName;
+
+            Client.ListenEvent<PopupItemSelect>(e =>
+            {
+                DispatchEvent(OnChange, [PropertyName, e.Value]);
+
+                return Task.CompletedTask;
+            }, sender);
+
+            return base.constructor();
+        }
 
         protected override Task OverrideStateFromPropsBeforeRender()
         {
@@ -2697,36 +2551,32 @@ sealed class ApplicationView : Component<ApplicationState>
 
                     var args = new SenderMouseEnterArgs
                     {
-                        Suggestions = Suggestions,
+                        Suggestions              = Suggestions,
                         SuggestionPopupLocationX = rect.left + rect.width / 2 - 24,
                         SuggestionPopupLocationY = rect.top + rect.height,
-                        Sender = SHADOW_PROP_PREFIX + PropertyName
+                        Sender                   = SHADOW_PROP_PREFIX + PropertyName
                     };
 
                     Client.DispatchEvent<SenderMouseEnter>([args]);
-                    
+
                     return Task.CompletedTask;
                 }),
-                
-                OnMouseLeave([StopPropagation][DebounceTimeout(200)](_) =>
+
+                OnMouseLeave([StopPropagation] [DebounceTimeout(200)](_) =>
                 {
                     var args = new SenderMouseLeaveArgs
                     {
                         Sender = SHADOW_PROP_PREFIX + PropertyName
                     };
-                    
+
                     Client.DispatchEvent<SenderMouseLeave>([args]);
-                    
+
                     return Task.CompletedTask;
                 }),
-                
-                
 
                 Opacity(0.4),
 
                 Background(Gray50),
-
-               
 
                 new label
                 {
@@ -2737,10 +2587,7 @@ sealed class ApplicationView : Component<ApplicationState>
                     new IconArrowRightOrDown { IsArrowDown = true, style = { Width(16) } }
                 }
             };
-
         }
-
-        
 
         Task OnShadowPropClicked(MouseEvent e)
         {
@@ -2748,8 +2595,146 @@ sealed class ApplicationView : Component<ApplicationState>
 
             return Task.CompletedTask;
         }
-        
 
+        class PopupItemSelectArgs
+        {
+            public string Sender { get; init; }
+            public string Value { get; init; }
+        }
+
+        class PopupView : Component<PopupView.PopupViewState>
+        {
+            protected override Task constructor()
+            {
+                Client.ListenEvent<SenderMouseEnter>(e =>
+                {
+                    state = state with
+                    {
+                        IsSuggestionsVisible = true,
+                        EventArgs = e
+                    };
+
+                    return Task.CompletedTask;
+                });
+
+                Client.ListenEvent<SenderMouseLeave>(e =>
+                {
+                    if (e.Sender == state.SenderWhenMouseEntered)
+                    {
+                        return Task.CompletedTask;
+                    }
+
+                    if (e.Sender == state.EventArgs?.Sender)
+                    {
+                        state = state with
+                        {
+                            EventArgs = null,
+
+                            IsSuggestionsVisible = false
+                        };
+                    }
+
+                    return Task.CompletedTask;
+                });
+
+                return Task.CompletedTask;
+            }
+
+            protected override Element render()
+            {
+                var args = state.EventArgs;
+                if (args is null)
+                {
+                    return null;
+                }
+
+                var suggestions = args.Suggestions ?? [];
+
+                if (suggestions.Count == 0 || !state.IsSuggestionsVisible)
+                {
+                    return null;
+                }
+
+                return new FlexColumnCentered(MinWidth(50), PositionFixed, Zindex2, Background(Gray50), Border(1, solid, Gray100), BorderRadius(16), PaddingY(4), Left(args.SuggestionPopupLocationX), Top(args.SuggestionPopupLocationY))
+                {
+                    CursorDefault,
+
+                    OnMouseEnter(_ =>
+                    {
+                        state = state with
+                        {
+                            SenderWhenMouseEntered = state.EventArgs.Sender
+                        };
+
+                        return Task.CompletedTask;
+                    }),
+
+                    suggestions.Select(text => new FlexRowCentered(Padding(6, 12), BorderRadius(16), Hover(Background(Gray100)))
+                    {
+                        text,
+                        Id(text),
+                        OnClick(OnSuggestionItemClicked)
+                    }),
+
+                    OnMouseLeave(ClosePopup)
+                };
+            }
+
+            [StopPropagation]
+            Task ClosePopup(MouseEvent _)
+            {
+                state = state with
+                {
+                    IsSuggestionsVisible = false
+                };
+
+                return Task.CompletedTask;
+            }
+
+            [StopPropagation]
+            Task OnSuggestionItemClicked(MouseEvent e)
+            {
+                var value = e.target.id;
+
+                state = state with
+                {
+                    IsSuggestionsVisible = false
+                };
+
+                var args = new PopupItemSelectArgs
+                {
+                    Sender = state.EventArgs.Sender,
+                    Value  = value
+                };
+
+                Client.DispatchEvent<PopupItemSelect>([args], state.SenderWhenMouseEntered);
+
+                return Task.CompletedTask;
+            }
+
+            public record PopupViewState
+            {
+                public SenderMouseEnterArgs EventArgs { get; init; }
+                public bool IsSuggestionsVisible { get; init; }
+
+                public string SenderWhenMouseEntered { get; init; }
+            }
+        }
+
+        class SenderMouseEnterArgs
+        {
+            public string Sender { get; init; }
+
+            public double SuggestionPopupLocationX { get; init; }
+
+            public double SuggestionPopupLocationY { get; init; }
+            public IReadOnlyList<string> Suggestions { get; init; }
+        }
+
+        class SenderMouseLeaveArgs
+        {
+            public string Sender { get; init; }
+        }
 
         internal record State
         {
@@ -2765,7 +2750,7 @@ sealed class ApplicationView : Component<ApplicationState>
         public Func<double, Task> OnChange { get; init; }
 
         public double Scale { get; init; }
-        
+
         protected override Task OverrideStateFromPropsBeforeRender()
         {
             if (Math.Abs(state.ScaleInitialValue - Scale) > 1)
@@ -2881,7 +2866,6 @@ sealed class ApplicationView : Component<ApplicationState>
                             }
                         }
                     }
-                
             };
         }
 
