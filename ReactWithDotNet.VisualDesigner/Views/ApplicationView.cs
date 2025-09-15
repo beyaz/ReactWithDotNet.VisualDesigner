@@ -1565,7 +1565,7 @@ sealed class ApplicationView : Component<ApplicationState>
             },
             viewProps(visualElementModel.Properties),
 
-            shadowProps, new ShadowPropertyView.PopupView(),
+            shadowProps, ShadowPropertyView.CreatePopupHandlerView(),
 
             SpaceY(16),
 
@@ -2515,7 +2515,7 @@ sealed class ApplicationView : Component<ApplicationState>
             public string Sender { get; init; }
         }
         
-        public class SenderMouseEnterArgs
+         class SenderMouseEnterArgs
         {
             public IReadOnlyList<string> Suggestions { get; init; }
             
@@ -2525,9 +2525,10 @@ sealed class ApplicationView : Component<ApplicationState>
 
             public string Sender { get; init; }
         }
-        
-        
-        public class PopupView: Component<PopupView.PopupViewState>
+
+        public static Element CreatePopupHandlerView() => new PopupView();
+
+        class PopupView: Component<PopupView.PopupViewState>
         {
             public record PopupViewState
             {
