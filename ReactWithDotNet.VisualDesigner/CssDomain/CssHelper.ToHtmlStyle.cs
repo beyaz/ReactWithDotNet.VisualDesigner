@@ -93,6 +93,7 @@ partial class CssHelper
             case "object-fit":
             case "border-collapse":
             case "table-layout":
+            case "vertical-align":
             {
                 return CreateFinalCssItem(name, value);
             }
