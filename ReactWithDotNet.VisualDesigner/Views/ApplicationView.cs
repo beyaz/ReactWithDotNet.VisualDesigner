@@ -11,18 +11,73 @@ sealed class ApplicationView : Component<ApplicationState>
 {
     static readonly Dictionary<string,IReadOnlyList<(string Name, IReadOnlyList<string> Suggestions)>> HtmlPropSuggestions =new()
     {
+        [nameof(table)] = 
+        [
+            (nameof(table.border), [ "0", "1"]),
+            (nameof(table.cellspacing), [ "0", "1", "2"]),
+            (nameof(table.cellpadding), [ "0", "1","2"]),
+            (nameof(table.align), [ "left", "center", "right"]),
+            (nameof(table.rules), [ "all", "cols", "rows", "groups", "none"]),
+            (nameof(table.frame), [ "void", "above", "below", "hsides", "lhs", "rhs", "vsides", "box", "border" ]),
+        ],
+        
+        [nameof(th)] = 
+        [
+            (nameof(th.align), [ "left", "center", "right", "justify"]),
+            (nameof(th.valign), ["top", "middle", "bottom", "baseline"]),
+            (nameof(th.scope), ["row", "col", "rowgroup", "colgroup"])
+        ],
+        
         [nameof(tr)] = 
         [
             (nameof(tr.colSpan), ["2","3","4","5","6","7","8","9","10"]),
-            (nameof(tr.rowSpan), ["2","3","4","5","6","7","8","9","10"])
+            (nameof(tr.rowSpan), ["2","3","4","5","6","7","8","9","10"]),
+            (nameof(tr.align), ["left", "center", "right", "justify"]),
+            (nameof(tr.valign), ["top", "middle", "bottom", "baseline"])
         ],
         
         [nameof(td)] = 
         [
             (nameof(td.colSpan), ["2","3","4","5","6","7","8","9","10"]),
-            (nameof(td.rowSpan), ["2","3","4","5","6","7","8","9","10"])
-        ]
+            (nameof(td.rowSpan), ["2","3","4","5","6","7","8","9","10"]),
+            (nameof(td.align), ["left","right","center","justify","char"]),
+            (nameof(td.valign), ["top", "middle", "bottom", "baseline"]),
+            (nameof(td.nowrap), ["true", "false"]),
+            (nameof(td.scope), ["row", "col", "rowgroup", "colgroup"])
+        ],
         
+        [nameof(input)] = 
+        [
+            (nameof(input.type), ["text", "password", "email", "number", "checkbox", "radio", "submit", "button"]),
+            (nameof(input.disabled), ["true", "false"]),
+            (nameof(input.readOnly),  ["true", "false"]),
+            (nameof(input.required),  ["true", "false"])
+        ],
+        
+        [nameof(a)] = 
+        [
+            (nameof(a.rel), ["nofollow", "noopener", "noreferrer"]),
+        ],
+        
+        [nameof(img)] = 
+        [
+            (nameof(img.loading), ["lazy", "eager"]),
+            (nameof(img.decoding), ["sync", "async", "auto"]),
+        ],
+        
+        
+        [nameof(button)] = 
+        [
+            (nameof(button.type), ["button", "submit", "reset" ]),
+            (nameof(button.disabled), ["true", "false"]),
+        ],
+        
+        [nameof(form)] = 
+        [
+            (nameof(form.method), ["get", "post" ]),
+            (nameof(form.enctype), ["application/x-www-form-urlencoded", "multipart/form-data", "text/plain"]),
+            (nameof(form.novalidate), [ "true", "false" ]),
+        ]
     };
 
     static readonly IReadOnlyList<string> MediaSizes = ["M", "SM", "MD", "LG", "XL", "XXL"];
