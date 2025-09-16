@@ -386,188 +386,196 @@ sealed class StylerComponent : Component<StylerComponent.State>
         return new div(Padding(4), DisplayFlex, FlexDirectionColumn, Gap(8), CursorDefault)
         {
             !state.IsPopupVisible ? null :
-                new div(OnMouseLeave(TogglePopup), DisplayFlex, FlexDirectionColumn, Gap(8), PositionFixed, Right(32), Width(600), Bottom(32), Bottom(32), Border(1, solid, Gray300), BorderRadius(4), Background(White), Height(500), ZIndex(2), BoxShadow("0 1px 3px rgba(0,0,0,0.2)"))
+                new div(OnMouseLeave(TogglePopup), DisplayFlex, FlexDirectionColumn, Gap(8), PositionFixed, Right(32), Width(600), Bottom(32), Bottom(32), Border(1, solid, Gray300), BorderRadius(4), Background("white"), Height(500), ZIndex(2), BoxShadow("0 1px 3px rgba(0,0,0,0.2)"))
                 {
                     new div(Display("grid"), GridTemplateRows("1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr"), GridTemplateColumns("1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr"), Gap(4), BorderRadius(4), Flex(1, 1, 0), Padding(8))
                     {
-                        new div(GridArea("3 / 3 / 7 / 7"), Background(White), DisplayFlex, Gap(8), Padding(8), FlexWrap, AlignContentCenter, JustifyContentCenter, OverflowAuto, HeightFull)
+                        new div(GridArea("3 / 3 / 7 / 7"), DisplayFlex)
                         {
-                            from item in GetOptions()
-                            select new div(Id(item.Label), OnClick(OnOptionItemClicked), Border(1, solid, Gray200), Padding(2, 4), MinWidth(50), WidthFitContent, HeightFitContent, MinHeight(30), BorderRadius(4), Hover(Border(1, solid, Gray400)), DisplayFlex, JustifyContentCenter, AlignItemsCenter)
+                            new div(Background("white"), DisplayFlex, Gap(8), Padding(8), FlexWrap, AlignContentCenter, JustifyContentCenter, OverflowAuto, HeightFull)
                             {
-                                item.Label
+                                from item in GetOptions()
+                                select new div(Id(item.Label), OnClick(OnOptionItemClicked), Border(1, solid, Gray200), Padding(2, 4), MinWidth(50), WidthFitContent, HeightFitContent, MinHeight(30), BorderRadius(4), DisplayFlex, JustifyContentCenter, AlignItemsCenter, Border(1, solid, Gray400))
+                                {
+                                    item.Label
+                                }
+                            },
+                            new div(PaddingLeft(8), DisplayNone)
+                            {
+                                new CssUnitEditor()
                             }
                         },
                         new div(GridArea("7 / 3 / 7 / 7"), DisplayFlex, Gap(4))
                         {
                             new SubGroupItem
                             {
-                                Label           = TryGetSubGroupLabelAt(0),
-                                SelectionChange = OnSubGroupItemChanged,
-                                IsSelected      = IsSelectedSubGroup(0)
+                                Label=TryGetSubGroupLabelAt(0),
+                                SelectionChange=OnSubGroupItemChanged,
+                                IsSelected=IsSelectedSubGroup(0)
                             },
                             new SubGroupItem
                             {
-                                Label           = TryGetSubGroupLabelAt(1),
-                                SelectionChange = OnSubGroupItemChanged,
-                                IsSelected      = IsSelectedSubGroup(1)
+                                Label=TryGetSubGroupLabelAt(1),
+                                SelectionChange=OnSubGroupItemChanged,
+                                IsSelected=IsSelectedSubGroup(1)
                             },
                             new SubGroupItem
                             {
-                                Label           = TryGetSubGroupLabelAt(2),
-                                SelectionChange = OnSubGroupItemChanged,
-                                IsSelected      = IsSelectedSubGroup(2)
+                                Label=TryGetSubGroupLabelAt(2),
+                                SelectionChange=OnSubGroupItemChanged,
+                                IsSelected=IsSelectedSubGroup(2)
                             }
                         },
                         new div(GridArea("2 / 3 / 2 / 7"), DisplayFlex, Gap(4))
                         {
                             new SubGroupItem
                             {
-                                Label           = TryGetSubGroupLabelAt(10),
-                                SelectionChange = OnSubGroupItemChanged,
-                                IsSelected      = IsSelectedSubGroup(10)
+                                Label=TryGetSubGroupLabelAt(10),
+                                SelectionChange=OnSubGroupItemChanged,
+                                IsSelected=IsSelectedSubGroup(10)
                             },
                             new SubGroupItem
                             {
-                                Label           = TryGetSubGroupLabelAt(9),
-                                SelectionChange = OnSubGroupItemChanged,
-                                IsSelected      = IsSelectedSubGroup(9)
+                                Label=TryGetSubGroupLabelAt(9),
+                                SelectionChange=OnSubGroupItemChanged,
+                                IsSelected=IsSelectedSubGroup(9)
                             },
                             new SubGroupItem
                             {
-                                Label           = TryGetSubGroupLabelAt(11),
-                                SelectionChange = OnSubGroupItemChanged,
-                                IsSelected      = IsSelectedSubGroup(11)
+                                Label=TryGetSubGroupLabelAt(11),
+                                SelectionChange=OnSubGroupItemChanged,
+                                IsSelected=IsSelectedSubGroup(11)
                             }
                         },
                         new div(GridArea("3 / 2 / 7 / 2"), GridColumn(2), DisplayFlex, Gap(4), FlexDirectionColumn, WidthFull)
                         {
                             new SubGroupItem
                             {
-                                Label           = TryGetSubGroupLabelAt(7),
-                                SelectionChange = OnSubGroupItemChanged,
-                                IsSelected      = IsSelectedSubGroup(7)
+                                Label=TryGetSubGroupLabelAt(7),
+                                SelectionChange=OnSubGroupItemChanged,
+                                IsSelected=IsSelectedSubGroup(7)
                             },
                             new SubGroupItem
                             {
-                                Label           = TryGetSubGroupLabelAt(5),
-                                SelectionChange = OnSubGroupItemChanged,
-                                IsSelected      = IsSelectedSubGroup(5)
+                                Label=TryGetSubGroupLabelAt(5),
+                                SelectionChange=OnSubGroupItemChanged,
+                                IsSelected=IsSelectedSubGroup(5)
                             },
                             new SubGroupItem
                             {
-                                Label           = TryGetSubGroupLabelAt(3),
-                                SelectionChange = OnSubGroupItemChanged,
-                                IsSelected      = IsSelectedSubGroup(3)
+                                Label=TryGetSubGroupLabelAt(3),
+                                SelectionChange=OnSubGroupItemChanged,
+                                IsSelected=IsSelectedSubGroup(3)
                             }
                         },
                         new div(GridArea("3 / 7 / 7 / 7"), DisplayFlex, FlexDirectionColumn, Gap(4))
                         {
                             new SubGroupItem
                             {
-                                Label           = TryGetSubGroupLabelAt(8),
-                                SelectionChange = OnSubGroupItemChanged,
-                                IsSelected      = IsSelectedSubGroup(8)
+                                Label=TryGetSubGroupLabelAt(8),
+                                SelectionChange=OnSubGroupItemChanged,
+                                IsSelected=IsSelectedSubGroup(8)
                             },
                             new SubGroupItem
                             {
-                                Label           = TryGetSubGroupLabelAt(6),
-                                SelectionChange = OnSubGroupItemChanged,
-                                IsSelected      = IsSelectedSubGroup(6)
+                                Label=TryGetSubGroupLabelAt(6),
+                                SelectionChange=OnSubGroupItemChanged,
+                                IsSelected=IsSelectedSubGroup(6)
                             },
                             new SubGroupItem
                             {
-                                Label           = TryGetSubGroupLabelAt(4),
-                                SelectionChange = OnSubGroupItemChanged,
-                                IsSelected      = IsSelectedSubGroup(4)
+                                Label=TryGetSubGroupLabelAt(4),
+                                SelectionChange=OnSubGroupItemChanged,
+                                IsSelected=IsSelectedSubGroup(4)
                             }
                         },
                         new div(GridArea("1 /2 / 1 / 8"), DisplayFlex, Gap(4))
                         {
                             new GroupItem
                             {
-                                Label           = TryGetGroupLabelAt(10),
-                                SelectionChange = OnGroupItemChanged,
-                                IsSelected      = IsSelectedGroup(10)
+                                Label=TryGetGroupLabelAt(10),
+                                SelectionChange=OnGroupItemChanged,
+                                IsSelected=IsSelectedGroup(10)
                             },
                             new GroupItem
                             {
-                                Label           = TryGetGroupLabelAt(9),
-                                SelectionChange = OnGroupItemChanged,
-                                IsSelected      = IsSelectedGroup(9)
+                                Label=TryGetGroupLabelAt(9),
+                                SelectionChange=OnGroupItemChanged,
+                                IsSelected=IsSelectedGroup(9)
                             },
                             new GroupItem
                             {
-                                Label           = TryGetGroupLabelAt(11),
-                                SelectionChange = OnGroupItemChanged,
-                                IsSelected      = IsSelectedGroup(11)
+                                Label=TryGetGroupLabelAt(11),
+                                SelectionChange=OnGroupItemChanged,
+                                IsSelected=IsSelectedGroup(11)
                             }
                         },
                         new div(GridArea("8 /2 / 8 / 8"), DisplayFlex, Gap(4))
                         {
                             new GroupItem
                             {
-                                Label           = TryGetGroupLabelAt(0),
-                                SelectionChange = OnGroupItemChanged,
-                                IsSelected      = IsSelectedGroup(0)
+                                Label=TryGetGroupLabelAt(0),
+                                SelectionChange=OnGroupItemChanged,
+                                IsSelected=IsSelectedGroup(0)
                             },
                             new GroupItem
                             {
-                                Label           = TryGetGroupLabelAt(1),
-                                SelectionChange = OnGroupItemChanged,
-                                IsSelected      = IsSelectedGroup(1)
+                                Label=TryGetGroupLabelAt(1),
+                                SelectionChange=OnGroupItemChanged,
+                                IsSelected=IsSelectedGroup(1)
                             },
                             new GroupItem
                             {
-                                Label           = TryGetGroupLabelAt(2),
-                                SelectionChange = OnGroupItemChanged,
-                                IsSelected      = IsSelectedGroup(2)
+                                Label=TryGetGroupLabelAt(2),
+                                SelectionChange=OnGroupItemChanged,
+                                IsSelected=IsSelectedGroup(2)
                             }
                         },
                         new div(GridArea("2 /1 / 8 / 1"), DisplayFlex, Gap(4), FlexDirectionColumn)
                         {
                             new GroupItem
                             {
-                                Label           = TryGetGroupLabelAt(7),
-                                SelectionChange = OnGroupItemChanged,
-                                IsSelected      = IsSelectedGroup(7)
+                                Label=TryGetGroupLabelAt(7),
+                                SelectionChange=OnGroupItemChanged,
+                                IsSelected=IsSelectedGroup(7)
                             },
                             new GroupItem
                             {
-                                Label           = TryGetGroupLabelAt(5),
-                                SelectionChange = OnGroupItemChanged,
-                                IsSelected      = IsSelectedGroup(5)
+                                Label=TryGetGroupLabelAt(5),
+                                SelectionChange=OnGroupItemChanged,
+                                IsSelected=IsSelectedGroup(5)
                             },
                             new GroupItem
                             {
-                                Label           = TryGetGroupLabelAt(3),
-                                SelectionChange = OnGroupItemChanged,
-                                IsSelected      = IsSelectedGroup(3)
+                                Label=TryGetGroupLabelAt(3),
+                                SelectionChange=OnGroupItemChanged,
+                                IsSelected=IsSelectedGroup(3)
                             }
                         },
                         new div(GridArea("2 /8 / 8 / 8"), DisplayFlex, Gap(4), FlexDirectionColumn)
                         {
                             new GroupItem
                             {
-                                Label           = TryGetGroupLabelAt(8),
-                                SelectionChange = OnGroupItemChanged,
-                                IsSelected      = IsSelectedGroup(8)
+                                Label=TryGetGroupLabelAt(8),
+                                SelectionChange=OnGroupItemChanged,
+                                IsSelected=IsSelectedGroup(8)
                             },
                             new GroupItem
                             {
-                                Label           = TryGetGroupLabelAt(6),
-                                SelectionChange = OnGroupItemChanged,
-                                IsSelected      = IsSelectedGroup(6)
+                                Label=TryGetGroupLabelAt(6),
+                                SelectionChange=OnGroupItemChanged,
+                                IsSelected=IsSelectedGroup(6)
                             },
                             new GroupItem
                             {
-                                Label           = TryGetGroupLabelAt(4),
-                                SelectionChange = OnGroupItemChanged,
-                                IsSelected      = IsSelectedGroup(4)
+                                Label=TryGetGroupLabelAt(4),
+                                SelectionChange=OnGroupItemChanged,
+                                IsSelected=IsSelectedGroup(4)
                             }
                         }
                     }
-                },
+                }
+            ,
             new div(OnMouseEnter(TogglePopup), TextAlignCenter, WidthFitContent, PositionFixed, Right(24), Bottom(24))
             {
                 new svg(svg.Xmlns("http://www.w3.org/2000/svg"), svg.Width(23), svg.Height(23), ViewBox(0, 0, 23, 23), Fill(none))
@@ -764,7 +772,7 @@ class CssUnitEditor : Component<CssUnitEditor.State>
     }
 
     protected override Element render()
-    {
+    { 
         return new FlexRow(Width(160), FlexWrap, Border(1, solid, Gray200), Padding(2), Gap(8), CursorDefault)
         {
             from number in new[]{ "1", "2", "3","4","5","6","7","8","9","","0",""} select 
@@ -774,4 +782,4 @@ class CssUnitEditor : Component<CssUnitEditor.State>
             }
         };
     }
-}
+} 

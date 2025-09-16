@@ -112,7 +112,7 @@ static class ModelToNodeTransformer
                                         {
                                             var x when x.HasError => [item.Error],
 
-                                            var x when x.Value.Pseudo is not null => [new NotSupportedException("Pseudo styles are not supported in inline styles.")],
+                                            var x when x.Value.Pseudo is not null && project.ExportAsCSharpString => [new NotSupportedException($"Pseudo styles are not supported in inline styles. Pseudo: {x.Value.Pseudo}")],
 
                                             _ => from x in item.Value.FinalCssItems
                                                 select CreateFinalCssItem
