@@ -1549,7 +1549,14 @@ sealed class ApplicationView : Component<ApplicationState>
                     where type.Name == CurrentVisualElement.Tag
                     from propertyInfo in type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly)
                     where !alreadyContainsProp(propertyInfo.Name)
-                    select createShadowProperty(propertyInfo);
+                    select new ShadowPropertyView
+                    {
+                        PropertyName = propertyInfo.Name,
+                        PropertyType = propertyInfo.GetCustomAttribute<JsTypeInfoAttribute>()?.JsType.ToString().ToLower(),
+
+                        OnChange    = OnShadowPropClicked,
+                        Suggestions = propertyInfo.GetCustomAttribute<SuggestionsAttribute>()?.Suggestions
+                    };
 
                 bool alreadyContainsProp(string propName)
                 {
@@ -1565,17 +1572,7 @@ sealed class ApplicationView : Component<ApplicationState>
                 shadowProps = null;
             }
 
-            Element createShadowProperty(PropertyInfo propertyInfo)
-            {
-                return new ShadowPropertyView
-                {
-                    PropertyName = propertyInfo.Name,
-                    PropertyType = propertyInfo.GetCustomAttribute<JsTypeInfoAttribute>()?.JsType.ToString().ToLower(),
-
-                    OnChange    = OnShadowPropClicked,
-                    Suggestions = propertyInfo.GetCustomAttribute<SuggestionsAttribute>()?.Suggestions
-                };
-            }
+            
         }
 
         return new FlexColumn(BorderLeft(1, dotted, "#d9d9d9"), PaddingX(2), Gap(8), OverflowYAuto, Background(White))
