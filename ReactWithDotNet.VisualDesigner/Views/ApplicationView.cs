@@ -9,6 +9,22 @@ namespace ReactWithDotNet.VisualDesigner.Views;
 
 sealed class ApplicationView : Component<ApplicationState>
 {
+    static readonly Dictionary<string,IReadOnlyList<(string name, IReadOnlyList<string> suggestions)>> HtmlPropSuggestions =new()
+    {
+        [nameof(tr)] = 
+        [
+            (nameof(tr.colSpan), ["2","3","4","5","6","7","8","9","10"]),
+            (nameof(tr.rowSpan), ["2","3","4","5","6","7","8","9","10"])
+        ],
+        
+        [nameof(td)] = 
+        [
+            (nameof(td.colSpan), ["2","3","4","5","6","7","8","9","10"]),
+            (nameof(td.rowSpan), ["2","3","4","5","6","7","8","9","10"])
+        ]
+        
+    };
+
     static readonly IReadOnlyList<string> MediaSizes = ["M", "SM", "MD", "LG", "XL", "XXL"];
 
     enum Icon
