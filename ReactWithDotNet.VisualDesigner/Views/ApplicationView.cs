@@ -373,11 +373,23 @@ sealed class ApplicationView : Component<ApplicationState>
             return Task.CompletedTask;
         }
 
-        UpdateCurrentVisualElement(x => x with
+        UpdateCurrentVisualElement(parent => parent with
         {
-            Children = x.Children.Add(new()
+
+            Children = parent.Children.Add(new()
             {
-                Tag = "div"
+                Tag = parent.Tag switch
+                {
+                    var x when x == nameof(tr) => nameof(td),
+
+                    var x when x == nameof(tbody) || x == nameof(thead) || x == nameof(tfoot) => nameof(tr),
+
+                    var x when x == nameof(table) && parent.Children.All(c => c.Tag != nameof(thead)) => nameof(thead),
+                    var x when x == nameof(table) && parent.Children.All(c => c.Tag != nameof(tbody)) => nameof(tbody),
+                    var x when x == nameof(table) && parent.Children.All(c => c.Tag != nameof(tfoot)) => nameof(tfoot),
+
+                    _ => nameof(div)
+                }
             })
         });
 

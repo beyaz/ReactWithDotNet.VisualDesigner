@@ -94,14 +94,18 @@ sealed class StylerComponent : Component<StylerComponent.State>
         {
             ["width"] =
             [
+                new() { Label = "100%", Value        = "width: 100%" },
+                new() { Label = "75%", Value         = "width: 75%" },
+                new() { Label = "50%", Value         = "width: 50%" },
+                new() { Label = "25%", Value         = "width: 25%" },
                 new() { Label = "auto", Value        = "width: auto" },
                 new() { Label = "fit-content", Value = "width: fit-content" },
                 new() { Label = "max-content", Value = "width: max-content" },
                 new() { Label = "min-content", Value = "width: min-content" },
-                new() { Label = "100%", Value        = "width: 100%" },
-                new() { Label = "75%", Value         = "width: 75%" },
-                new() { Label = "50%", Value         = "width: 50%" },
-                new() { Label = "25%", Value         = "width: 25%" }
+                
+                
+                new() { Label = "16px"  ,  Value = "16px" }
+               
             ],
             ["height"] =
             [
