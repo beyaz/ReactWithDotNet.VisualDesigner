@@ -1,0 +1,522 @@
+tag: html
+children:
+- tag: body
+  children:
+  - tag: div
+    styles:
+    - 'width: 793.70px'
+    - 'margin: 0 auto'
+    - 'background-color: #ffffff'
+    - 'box-shadow: rgba(0, 0, 0, 0.08) 0px 0px 7.55906px 0px'
+    - 'padding-top: 20px'
+    - 'padding-left: 64px'
+    - 'padding-right: 64px'
+    children:
+    - tag: header
+      styles:
+      - 'display: flex'
+      - 'justify-content: space-between'
+      - 'align-items: center'
+      - 'padding-bottom: 20px'
+      - 'border-bottom: 1px solid #ccc'
+      children:
+      - tag: img
+        properties:
+        - 'src: "data:image/png;base64, iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg=="'
+        styles:
+        - 'width: 177.65px'
+        - 'height: 81.5547px'
+        - 'object-fit: contain'
+      - tag: div
+        properties:
+        - "d-text: 'KREDİ KARTI HESAP ÖZETİ'"
+        - "d-text-preview: 'KREDİ KARTI HESAP ÖZETİ'"
+        styles:
+        - 'background-color: #000'
+        - 'color: #fff'
+        - 'font-family: Verdana, Arial, sans-serif'
+        - 'font-weight: 700'
+        - 'padding: 5px 10px'
+        - 'white-space: nowrap'
+    - tag: table
+      styles:
+      - 'padding-top: 20px'
+      - 'width: 100%'
+      children:
+      - tag: tr
+        children:
+        - tag: td
+          styles:
+          - 'width: 300px'
+          - 'vertical-align: top'
+          children:
+          - tag: table
+            styles:
+            - 'background: red'
+            - 'width: 100%'
+            children:
+            - tag: tr
+              children:
+              - tag: td
+                styles:
+                - 'height: 150px'
+          - tag: div
+            styles:
+            - 'width: 250px'
+            children:
+            - tag: div
+              styles:
+              - 'display: flex'
+              - 'align-items: center'
+              - 'margin-bottom: 10px'
+              children:
+              - tag: span
+                properties:
+                - "d-text: 'Son Ödeme Tarihi:'"
+                - "d-text-preview: 'Son Ödeme Tarihi:'"
+                styles:
+                - "font-family: 'Arial Black', Arial, sans-serif"
+                - 'font-size: 10.6667px'
+                - 'color: #ff0000'
+                - 'font-weight: 700'
+              - tag: span
+                properties:
+                - 'd-text: m.ExpiryDateWithoutDayName'
+                - 'd-text-preview: "11.02.2025"'
+                styles:
+                - 'font-size: 10.6667px'
+                - 'font-weight: 800'
+                - 'margin-left: auto'
+            - tag: div
+              properties:
+              - 'd-text: m.CustomerNameAndSurname'
+              - 'd-text-preview: "Adem Yılmaz"'
+              styles:
+              - 'font-size: 10.6667px'
+              - 'font-weight: 800'
+              - 'margin-bottom: 10px'
+            - tag: div
+              properties:
+              - 'd-text: m.FullAddress'
+              - "d-text-preview: 'Bağcılar / İstanbul'"
+              styles:
+              - 'font-size: 10.6667px'
+              - 'font-weight: 700'
+              - 'white-space: pre-line'
+        - tag: td
+          styles:
+          - 'width: 300px'
+          children:
+          - tag: div
+            styles:
+            - 'display: flex'
+            - 'flex-direction: column'
+            children:
+            - tag: div
+              styles:
+              - 'margin-bottom: 20px'
+              children:
+              - tag: div
+                properties:
+                - "d-text: 'Kart ve Müşteri Bilgileriniz'"
+                - "d-text-preview: 'Kart ve Müşteri Bilgileriniz'"
+                styles:
+                - "font-family: 'Arial Black', Arial, sans-serif"
+                - 'font-size: 10.6667px'
+                - 'color: #006f51'
+                - 'margin-bottom: 5px'
+              - tag: hr
+                styles:
+                - 'border-top: 1px solid #000'
+                - 'margin-bottom: 5px'
+              - tag: table
+                styles:
+                - 'width: 100%'
+                - 'border-collapse: collapse'
+                - 'font-family: Arial, Helvetica, sans-serif'
+                children:
+                - tag: tbody
+                  children:
+                  - tag: tr
+                    children:
+                    - tag: td
+                      properties:
+                      - "d-text: 'Müşteri No'"
+                      - "d-text-preview: 'Müşteri No'"
+                      styles:
+                      - 'font-weight: 700'
+                      - 'color: #006f51'
+                      - 'font-size: 10.6667px'
+                      - 'padding: 2px'
+                    - tag: td
+                      properties:
+                      - 'd-text: m.CustomerNo'
+                      styles:
+                      - 'font-weight: 700'
+                      - 'text-align: right'
+                      - 'font-size: 10.6667px'
+                      - 'padding: 2px'
+                  - tag: tr
+                    children:
+                    - tag: td
+                      properties:
+                      - "d-text: 'Kart No'"
+                      - "d-text-preview: 'Kart No'"
+                      styles:
+                      - 'font-weight: 700'
+                      - 'color: #006f51'
+                      - 'font-size: 10.6667px'
+                      - 'padding: 2px'
+                    - tag: td
+                      properties:
+                      - 'd-text: m.CardNumberHidden'
+                      styles:
+                      - 'font-weight: 700'
+                      - 'text-align: right'
+                      - 'font-size: 10.6667px'
+                      - 'padding: 2px'
+                  - tag: tr
+                    children:
+                    - tag: td
+                      properties:
+                      - "d-text: 'Kart Limitiniz'"
+                      - "d-text-preview: 'Kart Limitiniz'"
+                      styles:
+                      - 'font-weight: 700'
+                      - 'color: #006f51'
+                      - 'font-size: 10.6667px'
+                      - 'padding: 2px'
+                    - tag: td
+                      properties:
+                      - "d-text: '{m.CreditLimitInland} TL'"
+                      styles:
+                      - 'font-weight: 700'
+                      - 'text-align: right'
+                      - 'font-size: 10.6667px'
+                      - 'padding: 2px'
+                  - tag: tr
+                    children:
+                    - tag: td
+                      properties:
+                      - "d-text: 'Kullanılabilir Limitiniz'"
+                      - "d-text-preview: 'Kullanılabilir Limitiniz'"
+                      styles:
+                      - 'color: #ff0000'
+                      - 'font-weight: 700'
+                      - 'font-size: 10.6667px'
+                      - 'padding: 2px'
+                    - tag: td
+                      properties:
+                      - "d-text: '{m.RemainCreditLimitInland} TL'"
+                      styles:
+                      - 'font-weight: 700'
+                      - 'text-align: right'
+                      - 'font-size: 10.6667px'
+                      - 'padding: 2px'
+                  - tag: tr
+                    styles:
+                    - 'display: {{ShowSegmentRow}}'
+                    children:
+                    - tag: td
+                      properties:
+                      - "d-text: 'Kart Segmenti'"
+                      - "d-text-preview: 'Kart Segmenti'"
+                      styles:
+                      - 'font-weight: 700'
+                      - 'color: #006f51'
+                      - 'font-size: 10.6667px'
+                      - 'padding: 2px'
+                    - tag: td
+                      properties:
+                      - 'd-text: m.MilesSmilesCardSegment'
+                      styles:
+                      - 'font-weight: 700'
+                      - 'text-align: right'
+                      - 'font-size: 10.6667px'
+                      - 'padding: 2px'
+            - tag: div
+              styles:
+              - 'margin-bottom: 20px'
+              children:
+              - tag: div
+                properties:
+                - "d-text: 'Hesap Bilgileriniz'"
+                - "d-text-preview: 'Hesap Bilgileriniz'"
+                styles:
+                - "font-family: 'Arial Black', Arial, sans-serif"
+                - 'font-size: 10.6667px'
+                - 'color: #006f51'
+                - 'margin-bottom: 5px'
+              - tag: hr
+                styles:
+                - 'border-top: 1px solid #000'
+                - 'margin-bottom: 5px'
+              - tag: table
+                styles:
+                - 'width: 100%'
+                - 'border-collapse: collapse'
+                - 'font-family: Arial, Helvetica, sans-serif'
+                children:
+                - tag: tbody
+                  children:
+                  - tag: tr
+                    children:
+                    - tag: td
+                      properties:
+                      - "d-text: 'Hesap Kesim Tarihi'"
+                      - "d-text-preview: 'Hesap Kesim Tarihi'"
+                      styles:
+                      - 'font-weight: 700'
+                      - 'color: #006f51'
+                      - 'font-size: 10.6667px'
+                      - 'padding: 2px'
+                    - tag: td
+                      properties:
+                      - 'd-text: m.CreateDateWithoutDayNameRepl'
+                      styles:
+                      - 'font-weight: 700'
+                      - 'text-align: right'
+                      - 'font-size: 10.6667px'
+                      - 'padding: 2px'
+                  - tag: tr
+                    children:
+                    - tag: td
+                      properties:
+                      - "d-text: 'Son Ödeme Tarihi'"
+                      - "d-text-preview: 'Son Ödeme Tarihi'"
+                      styles:
+                      - 'font-weight: 700'
+                      - 'color: #ff0000'
+                      - 'font-size: 10.6667px'
+                      - 'padding: 2px'
+                    - tag: td
+                      properties:
+                      - 'd-text: m.ExpiryDateWithoutDayNameRepl'
+                      styles:
+                      - 'font-weight: 700'
+                      - 'text-align: right'
+                      - 'font-size: 10.6667px'
+                      - 'padding: 2px'
+                  - tag: tr
+                    children:
+                    - tag: td
+                      properties:
+                      - "d-text: 'Dönem Borcunuz'"
+                      - "d-text-preview: 'Dönem Borcunuz'"
+                      styles:
+                      - 'font-weight: 700'
+                      - 'color: #ff0000'
+                      - 'font-size: 10.6667px'
+                      - 'padding: 2px'
+                    - tag: td
+                      properties:
+                      - "d-text: '{m.ExtractDeptAmountInland} TL'"
+                      styles:
+                      - 'font-weight: 700'
+                      - 'text-align: right'
+                      - 'font-size: 10.6667px'
+                      - 'padding: 2px'
+                  - tag: tr
+                    children:
+                    - tag: td
+                      properties:
+                      - "d-text: 'Asgari Ödeme Tutarı'"
+                      - "d-text-preview: 'Asgari Ödeme Tutarı'"
+                      styles:
+                      - 'font-weight: 700'
+                      - 'color: #ff0000'
+                      - 'font-size: 10.6667px'
+                      - 'padding: 2px'
+                    - tag: td
+                      properties:
+                      - "d-text: '{m.MinPaymentAmount} TL'"
+                      styles:
+                      - 'font-weight: 700'
+                      - 'text-align: right'
+                      - 'font-size: 10.6667px'
+                      - 'padding: 2px'
+                  - tag: tr
+                    children:
+                    - tag: td
+                      properties:
+                      - "d-text: 'Bekleyen Taksit Toplamı'"
+                      - "d-text-preview: 'Bekleyen Taksit Toplamı'"
+                      styles:
+                      - 'font-weight: 700'
+                      - 'color: #006f51'
+                      - 'font-size: 10.6667px'
+                      - 'padding: 2px'
+                    - tag: td
+                      properties:
+                      - "d-text: '{m.RemainInstallmentAmount} TL'"
+                      styles:
+                      - 'font-weight: 700'
+                      - 'text-align: right'
+                      - 'font-size: 10.6667px'
+                      - 'padding: 2px'
+              hideInDesigner: true
+            - tag: div
+              styles:
+              - 'margin-bottom: 20px'
+              children:
+              - tag: div
+                properties:
+                - "d-text: 'Bir Sonraki Dönem Bilgileri'"
+                - "d-text-preview: 'Bir Sonraki Dönem Bilgileri'"
+                styles:
+                - "font-family: 'Arial Black', Arial, sans-serif"
+                - 'font-size: 10.6667px'
+                - 'color: #006f51'
+                - 'margin-bottom: 5px'
+              - tag: hr
+                styles:
+                - 'border-top: 1px solid #000'
+                - 'margin-bottom: 5px'
+              - tag: table
+                styles:
+                - 'width: 100%'
+                - 'border-collapse: collapse'
+                - 'font-family: Arial, Helvetica, sans-serif'
+                children:
+                - tag: tbody
+                  children:
+                  - tag: tr
+                    children:
+                    - tag: td
+                      properties:
+                      - "d-text: 'Hesap Kesim Tarihi'"
+                      - "d-text-preview: 'Hesap Kesim Tarihi'"
+                      styles:
+                      - 'font-weight: 700'
+                      - 'color: #006f51'
+                      - 'font-size: 10.6667px'
+                      - 'padding: 2px'
+                    - tag: td
+                      properties:
+                      - 'd-text: m.NextCreateDateWithDayNameRepl'
+                      styles:
+                      - 'font-weight: 700'
+                      - 'text-align: right'
+                      - 'font-size: 10.6667px'
+                      - 'padding: 2px'
+                  - tag: tr
+                    children:
+                    - tag: td
+                      properties:
+                      - "d-text: 'Son Ödeme Tarihi'"
+                      - "d-text-preview: 'Son Ödeme Tarihi'"
+                      styles:
+                      - 'font-weight: 700'
+                      - 'color: #006f51'
+                      - 'font-size: 10.6667px'
+                      - 'padding: 2px'
+                    - tag: td
+                      properties:
+                      - 'd-text: m.NextExpiryDateWithDayNameRepl'
+                      styles:
+                      - 'font-weight: 700'
+                      - 'text-align: right'
+                      - 'font-size: 10.6667px'
+                      - 'padding: 2px'
+            - tag: div
+              styles:
+              - 'display: {{ShowMilesSmiles}}'
+              - 'margin-bottom: 20px'
+              children:
+              - tag: div
+                properties:
+                - "d-text: 'Mil Bilgileri'"
+                - "d-text-preview: 'Mil Bilgileri'"
+                styles:
+                - "font-family: 'Arial Black', Arial, sans-serif"
+                - 'font-size: 10.6667px'
+                - 'color: #006f51'
+                - 'margin-bottom: 5px'
+              - tag: hr
+                styles:
+                - 'border-top: 1px solid #000'
+                - 'margin-bottom: 5px'
+              - tag: table
+                styles:
+                - 'width: 100%'
+                - 'border-collapse: collapse'
+                - 'font-family: Arial, Helvetica, sans-serif'
+                children:
+                - tag: tbody
+                  children:
+                  - tag: tr
+                    children:
+                    - tag: td
+                      properties:
+                      - "d-text: 'TK Numarası'"
+                      - "d-text-preview: 'TK Numarası'"
+                      styles:
+                      - 'font-weight: 700'
+                      - 'color: #006f51'
+                      - 'font-size: 10.6667px'
+                      - 'padding: 2px'
+                    - tag: td
+                      properties:
+                      - 'd-text: m.MainCardTKMemberId'
+                      styles:
+                      - 'font-weight: 700'
+                      - 'text-align: right'
+                      - 'font-size: 10.6667px'
+                      - 'padding: 2px'
+                  - tag: tr
+                    children:
+                    - tag: td
+                      properties:
+                      - "d-text: 'Bu Dönem Kazanılan Mil'"
+                      - "d-text-preview: 'Bu Dönem Kazanılan Mil'"
+                      styles:
+                      - 'font-weight: 700'
+                      - 'color: #006f51'
+                      - 'font-size: 10.6667px'
+                      - 'padding: 2px'
+                    - tag: td
+                      properties:
+                      - 'd-text: m.TotalMilScore'
+                      styles:
+                      - 'font-weight: 700'
+                      - 'text-align: right'
+                      - 'font-size: 10.6667px'
+                      - 'padding: 2px'
+                  - tag: tr
+                    children:
+                    - tag: td
+                      properties:
+                      - "d-text: 'Alışveriş Mili'"
+                      - "d-text-preview: 'Alışveriş Mili'"
+                      styles:
+                      - 'font-weight: 700'
+                      - 'color: #006f51'
+                      - 'font-size: 10.6667px'
+                      - 'padding: 2px'
+                    - tag: td
+                      properties:
+                      - 'd-text: m.TotalShoppingMilScore'
+                      styles:
+                      - 'font-weight: 700'
+                      - 'text-align: right'
+                      - 'font-size: 10.6667px'
+                      - 'padding: 2px'
+                  - tag: tr
+                    children:
+                    - tag: td
+                      properties:
+                      - "d-text: 'Kampanya ve Diğer Miller'"
+                      - "d-text-preview: 'Kampanya ve Diğer Miller'"
+                      styles:
+                      - 'font-weight: 700'
+                      - 'color: #006f51'
+                      - 'font-size: 10.6667px'
+                      - 'padding: 2px'
+                    - tag: td
+                      properties:
+                      - 'd-text: m.TotalOtherMilScore'
+                      styles:
+                      - 'font-weight: 700'
+                      - 'text-align: right'
+                      - 'font-size: 10.6667px'
+                      - 'padding: 2px'
