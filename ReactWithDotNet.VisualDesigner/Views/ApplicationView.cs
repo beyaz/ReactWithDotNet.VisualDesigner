@@ -14,8 +14,8 @@ sealed class ApplicationView : Component<ApplicationState>
         [nameof(table)] = 
         [
             (nameof(table.border), [ "0", "1"]),
-            (nameof(table.cellspacing), [ "0", "1", "2"]),
-            (nameof(table.cellpadding), [ "0", "1","2"]),
+            (nameof(table.cellSpacing), [ "0", "1", "2"]),
+            (nameof(table.cellPadding), [ "0", "1","2"]),
             (nameof(table.align), [ "left", "center", "right"]),
             (nameof(table.rules), [ "all", "cols", "rows", "groups", "none"]),
             (nameof(table.frame), [ "void", "above", "below", "hsides", "lhs", "rhs", "vsides", "box", "border" ]),
@@ -25,7 +25,9 @@ sealed class ApplicationView : Component<ApplicationState>
         [
             (nameof(th.align), [ "left", "center", "right", "justify"]),
             (nameof(th.valign), ["top", "middle", "bottom", "baseline"]),
-            (nameof(th.scope), ["row", "col", "rowgroup", "colgroup"])
+            (nameof(th.scope), ["row", "col", "rowgroup", "colgroup"]),
+            (nameof(th.colSpan), ["2","3","4","5","6","7","8","9","10"]),
+            (nameof(th.rowSpan), ["2","3","4","5","6","7","8","9","10"]),
         ],
         
         [nameof(tr)] = 
