@@ -9,7 +9,7 @@ namespace ReactWithDotNet.VisualDesigner.Views;
 
 sealed class ApplicationView : Component<ApplicationState>
 {
-    static readonly Dictionary<string,IReadOnlyList<(string name, IReadOnlyList<string> suggestions)>> HtmlPropSuggestions =new()
+    static readonly Dictionary<string,IReadOnlyList<(string Name, IReadOnlyList<string> Suggestions)>> HtmlPropSuggestions =new()
     {
         [nameof(tr)] = 
         [
@@ -1530,20 +1530,33 @@ sealed class ApplicationView : Component<ApplicationState>
 
             IEnumerable<Element> calculateShadowProps()
             {
-                foreach (var type in from type in Plugin.GetAllCustomComponents() where type.Name == CurrentVisualElement.Tag select type)
+                if (HtmlPropSuggestions.TryGetValue(CurrentVisualElement.Tag, out var list))
                 {
-                    foreach (var propertyInfo in from propertyInfo in type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly) select propertyInfo)
-                    {
-                        // has already declered
-                        if (HasAny(from p in CurrentVisualElement.Properties
-                                from prop in ParseProperty(p) where propertyInfo.Name.Equals(prop.Name, StringComparison.OrdinalIgnoreCase)
-                                select prop))
+                    return 
+                        from x in list
+                        where !alreadyContainsProp(x.Name)
+                        select new ShadowPropertyView
                         {
-                            continue;
-                        }
+                            PropertyName = x.Name,
+                            PropertyType = "string",
+                            OnChange     = OnShadowPropClicked,
+                            Suggestions  = x.Suggestions
+                        };
+                }
 
-                        yield return createShadowProperty(propertyInfo);
-                    }
+                return 
+                    from type in Plugin.GetAllCustomComponents()
+                    where type.Name == CurrentVisualElement.Tag
+                    from propertyInfo in type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly)
+                    where !alreadyContainsProp(propertyInfo.Name)
+                    select createShadowProperty(propertyInfo);
+
+                bool alreadyContainsProp(string propName)
+                {
+                    return HasAny(from p in CurrentVisualElement.Properties
+                                  from prop in ParseProperty(p)
+                                  where propName.Equals(prop.Name, StringComparison.OrdinalIgnoreCase)
+                                  select prop);
                 }
             }
 
