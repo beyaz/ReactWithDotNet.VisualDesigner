@@ -753,3 +753,25 @@ sealed class StylerComponent : Component<StylerComponent.State>
         public string Value { get; init; }
     }
 }
+
+class CssUnitEditor : Component<CssUnitEditor.State>
+{
+    internal record State
+    {
+        public string Value { get; init; } = "16";
+
+        public string Unit { get; init; } = "px";
+    }
+
+    protected override Element render()
+    {
+        return new FlexRow(Width(160), FlexWrap, Border(1, solid, Gray200), Padding(2), Gap(8), CursorDefault)
+        {
+            from number in new[]{ "1", "2", "3","4","5","6","7","8","9","","0",""} select 
+            new FlexRowCentered(Size(40), Border(1,solid,Gray200), Hover(BorderColor(Gray300),Background(Gray50)), BorderRadius(50))
+            {
+                number
+            }
+        };
+    }
+}
