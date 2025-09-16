@@ -808,6 +808,30 @@ static class Plugin
                         
                 //    }
                 //};
+                /* <BDigitalTransactionConfirm
+                                              senderData={{
+                                                  titleText: getMessage("MoneyTransferSenderLabel"),
+                                                  item1: { value: getMessage("GeneralKuveytTurkBankNameLabel"), valueVariant: "body1" },
+                                                  item2: { text: getMessage("GeneralAccountNo2Label"), textVariant: "body2", value: model.selectedAccount.fullAccountNumber, valueVariant: "body1" },
+                                                  item3: { text: `${getMessage("GeneralBalanceLabel")}:`, textVariant: "body2", value: `${BLocalization.formatMoney(model.selectedAccount.balance)} ${model.selectedAccount.fecCode}`, valueVariant: "body1" }
+                                              }}
+                                              receiverData={{
+                                                  titleText: getMessage("MoneyTransferReceiverLabel"),
+                                                  item1: { value: getMessage("FindeksLabel"), valueVariant: "body1" },
+                                                  item2: { text: `${getMessage("GeneralTransactionLabel")}:`, textVariant: "body2", value: getMessage("FindeksRiskReport"), valueVariant: "body1" }
+                                              }}
+                                              transferAmount={`${BLocalization.formatMoney(model.amount)} ${model.fecCode}`}
+                                              transferAmountVariant="h6"
+                                              transactionDetailList={[
+                                                  {
+                                                      text: getMessage("GeneralTransactionDate2Label"),
+                                                      textVariant: "body2",
+                                                      value: BLocalization.formatDateTime(model.transactionDate, Constant.Format.DateCommon),
+                                                      valueVariant: "body1",
+                                                  }
+                                              ]}
+                                          />
+                                      </BDigitalBox>*/
             }
         }
         
