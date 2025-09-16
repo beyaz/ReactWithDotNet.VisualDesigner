@@ -11,6 +11,8 @@ static class Extensions
     
     public static T FirstOf<T>(IEnumerable<T> items) => items.First();
     
+    public static bool HasAny<T>(IEnumerable<T> items) => items.Any();
+    
     public static string KebabToCamelCase(string kebab)
     {
         if (string.IsNullOrEmpty(kebab))

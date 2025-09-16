@@ -1519,10 +1519,9 @@ sealed class ApplicationView : Component<ApplicationState>
                     foreach (var propertyInfo in from propertyInfo in type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly) select propertyInfo)
                     {
                         // has already declered
-                        if ((from p in CurrentVisualElement.Properties
-                                from prop in ParseProperty(p)
-                                where propertyInfo.Name.Equals(prop.Name, StringComparison.OrdinalIgnoreCase)
-                                select prop).Any())
+                        if (HasAny(from p in CurrentVisualElement.Properties
+                                from prop in ParseProperty(p) where propertyInfo.Name.Equals(prop.Name, StringComparison.OrdinalIgnoreCase)
+                                select prop))
                         {
                             continue;
                         }
