@@ -20,7 +20,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
             ],
             ["position"] =
             [
-                new() { Label = "static", Value   = "position: static" },
+                new() { Label = "static", Value   = "position: static" }, 
                 new() { Label = "relative", Value = "position: relative" },
                 new() { Label = "absolute", Value = "position: absolute" },
                 new() { Label = "fixed", Value    = "position: fixed" },
@@ -92,21 +92,17 @@ sealed class StylerComponent : Component<StylerComponent.State>
 
         ["Size"] = new()
         {
-            ["width"] =
+            ["min width"] =
             [
-                new() { Label = "100%", Value        = "width: 100%" },
-                new() { Label = "75%", Value         = "width: 75%" },
-                new() { Label = "50%", Value         = "width: 50%" },
-                new() { Label = "25%", Value         = "width: 25%" },
-                new() { Label = "auto", Value        = "width: auto" },
-                new() { Label = "fit-content", Value = "width: fit-content" },
-                new() { Label = "max-content", Value = "width: max-content" },
-                new() { Label = "min-content", Value = "width: min-content" },
-                
-                
-                new() { Label = "16px"  ,  Value = "16px" }
-               
+                new() { Label = "50px", Value  = "min-width: 50px" },
+                new() { Label = "100px", Value = "min-width: 100px" },
+                new() { Label = "150px", Value = "min-width: 150px" },
+                new() { Label = "200px", Value = "min-width: 200px" },
+                new() { Label = "300px", Value = "min-width: 300px" },
+                new() { Label = "400px", Value = "min-width: 400px" },
+                new() { Label = "500px", Value = "min-width: 500px" }
             ],
+            
             ["height"] =
             [
                 new() { Label = "auto", Value        = "height: auto" },
@@ -118,16 +114,34 @@ sealed class StylerComponent : Component<StylerComponent.State>
                 new() { Label = "50%", Value         = "height: 50%" },
                 new() { Label = "25%", Value         = "height: 25%" }
             ],
-            ["min width"] =
+            
+            ["width"] =
             [
-                new() { Label = "50px", Value  = "min-width: 50px" },
-                new() { Label = "100px", Value = "min-width: 100px" },
-                new() { Label = "150px", Value = "min-width: 150px" },
-                new() { Label = "200px", Value = "min-width: 200px" },
-                new() { Label = "300px", Value = "min-width: 300px" },
-                new() { Label = "400px", Value = "min-width: 400px" },
-                new() { Label = "500px", Value = "min-width: 500px" }
+                new() { Label = "100%", Value        = "width: 100%" },
+                new() { Label = "75%", Value         = "width: 75%" },
+                new() { Label = "50%", Value         = "width: 50%" },
+                new() { Label = "25%", Value         = "width: 25%" },
+                new() { Label = "auto", Value        = "width: auto" },
+                new() { Label = "fit-content", Value = "width: fit-content" },
+                new() { Label = "max-content", Value = "width: max-content" },
+                new() { Label = "min-content", Value = "width: min-content" },
+                
+                new() { Label = "8px"  ,  Value  = "width: 8px" },
+                new() { Label = "12px"  ,  Value = "width: 12px" },
+                new() { Label = "16px"  ,  Value = "width: 16px" },
+                new() { Label = "20px"  ,  Value = "width: 20px" },
+                new() { Label = "24px"  ,  Value = "width: 24px" },
+                new() { Label = "32px"  ,  Value = "width: 32px" },
+                new() { Label = "36px"  ,  Value = "width: 36px" },
+                new() { Label = "40px"  ,  Value = "width: 40px" },
+                new() { Label = "50px"  ,  Value = "width: 50px" },
+                new() { Label = "80px"  ,  Value = "width: 80px" },
+                new() { Label = "100px" ,  Value = "width: 100px"},
+                new() { Label = "200px" ,  Value = "width: 200px"}
+               
             ],
+           
+            
             ["min height"] =
             [
                 new() { Label = "50px", Value  = "min-height: 50px" },
@@ -386,16 +400,16 @@ sealed class StylerComponent : Component<StylerComponent.State>
         return new div(Padding(4), DisplayFlex, FlexDirectionColumn, Gap(8), CursorDefault)
         {
             !state.IsPopupVisible ? null :
-                new div(OnMouseLeave(TogglePopup), DisplayFlex, FlexDirectionColumn, Gap(8), PositionFixed, Right(32), Width(600), Bottom(32), Bottom(32), Border(1, solid, Gray300), BorderRadius(4), Background("white"), Height(500), ZIndex(2), BoxShadow("0 1px 3px rgba(0,0,0,0.2)"))
+                new div(OnMouseLeave(TogglePopup), DisplayFlex, FlexDirectionColumn, Gap(8), PositionFixed, Right(32), Width(600), Bottom(32), Bottom(32), Border(1, solid, Gray300), BorderRadius(4), Background(White), Height(500), ZIndex(2), BoxShadow("0 1px 3px rgba(0,0,0,0.2)"))
                 {
                     new div(Display("grid"), GridTemplateRows("1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr"), GridTemplateColumns("1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr"), Gap(4), BorderRadius(4), Flex(1, 1, 0), Padding(8))
                     {
                         new div(GridArea("3 / 3 / 7 / 7"), DisplayFlex)
                         {
-                            new div(Background("white"), DisplayFlex, Gap(8), Padding(8), FlexWrap, AlignContentCenter, JustifyContentCenter, OverflowAuto, HeightFull)
+                            new div(Background(White), DisplayFlex, Gap(8), Padding(8), FlexWrap, AlignContentCenter, JustifyContentCenter, OverflowAuto, HeightFull)
                             {
                                 from item in GetOptions()
-                                select new div(Id(item.Label), OnClick(OnOptionItemClicked), Border(1, solid, Gray200), Padding(2, 4), MinWidth(50), WidthFitContent, HeightFitContent, MinHeight(30), BorderRadius(4), DisplayFlex, JustifyContentCenter, AlignItemsCenter, Border(1, solid, Gray400))
+                                select new div(Id(item.Label), OnClick(OnOptionItemClicked), Border(1, solid, Gray200), Padding(2, 4), MinWidth(50), WidthFitContent, HeightFitContent, MinHeight(30), BorderRadius(4), DisplayFlex, JustifyContentCenter, AlignItemsCenter, Hover(Border(1, solid, Gray400)))
                                 {
                                     item.Label
                                 }
@@ -698,7 +712,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
         {
             if (Label is null)
             {
-                return new div(BorderColor(Gray200), BorderRadius(4), DisplayFlex, JustifyContentCenter, AlignItemsCenter, WidthFull, HeightFull, TextAlignCenter, Border(1, solid, Gray200));
+                return new div(Opacity(0.2), BorderColor(Gray200), BorderRadius(4), DisplayFlex, JustifyContentCenter, AlignItemsCenter, WidthFull, HeightFull, TextAlignCenter, Border(1, solid, Gray200));
             }
 
             return new div(OnMouseEnter(OnGroupItemMouseEnter), Id(Label), BorderColor(IsSelected ? Gray400 : Gray200), BorderRadius(4), DisplayFlex, JustifyContentCenter, AlignItemsCenter, WidthFull, HeightFull, TextAlignCenter, Border(1, solid, Gray200), Padding(2))
@@ -728,7 +742,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
         {
             if (Label is null)
             {
-                return new div(BorderRadius(4), DisplayFlex, JustifyContentCenter, AlignItemsCenter, WidthFull, HeightFull, TextAlignCenter, Border(1, solid, Gray200));
+                return new div(Opacity(0.2),BorderRadius(4), DisplayFlex, JustifyContentCenter, AlignItemsCenter, WidthFull, HeightFull, TextAlignCenter, Border(1, solid, Gray200));
             }
 
             return new div(OnMouseEnter(OnSubGroupItemMouseEnter), Id(Label), BorderColor(IsSelected ? Gray400 : Gray200), BorderRadius(4), DisplayFlex, JustifyContentCenter, AlignItemsCenter, WidthFull, HeightFull, TextAlignCenter, Border(1, solid, Gray200), Padding(2))

@@ -106,6 +106,69 @@ static class ModelToNodeTransformer
                 });
             }
 
+            if (project.ExportAsCSharp)
+            {
+                if (styles.Count == 0)
+                {
+                    return props;
+                }
+
+                string stlyeValueAsJson;
+                {
+                    var styleAttributeList = ListFrom(from text in styles
+                                                      let item = CreateDesignerStyleItemFromText(project, text)
+                                                      let styleAttributes = item switch
+                                                      {
+                                                          var x when x.HasError => [item.Error],
+
+                                                          var x when x.Value.Pseudo is not null && project.ExportAsCSharpString => [new NotSupportedException($"Pseudo styles are not supported in inline styles. Pseudo: {x.Value.Pseudo}")],
+
+                                                          _ => from x in item.Value.FinalCssItems
+                                                              select ResultFrom(new StyleAttribute
+                                                                                {
+                                                                                    Pseudo = item.Value.Pseudo,
+                                                                                    Name = project.ExportAsCSharpString switch
+                                                                                    {
+                                                                                        true  => x.Name,
+                                                                                        false => KebabToCamelCase(x.Name)
+                                                                                    },
+
+                                                                                    Value = x.Value switch
+                                                                                    {
+                                                                                        null => null,
+
+                                                                                        var y when y.StartsWith("request.") || y.StartsWith("context.") => y,
+
+                                                                                        var y => project.ExportAsCSharpString switch
+                                                                                        {
+                                                                                            true  => TryClearStringValue(y),
+                                                                                            false => '"' + TryClearStringValue(y) + '"'
+                                                                                        }
+                                                                                    }
+                                                                                }
+                                                                               )
+                                                      }
+                                                      from x in styleAttributes
+                                                      select x);
+
+                    if (styleAttributeList.HasError)
+                    {
+                        return styleAttributeList.Error;
+                    }
+
+                    stlyeValueAsJson = JsonConvert.SerializeObject(styleAttributeList.Value);
+                }
+
+                props.Add(new ()
+                {
+                    Name = "style",
+                    Value = stlyeValueAsJson
+                });
+                
+                return props;
+                
+            }
+            
             var finalCssList = ListFrom(from text in styles
                                         let item = CreateDesignerStyleItemFromText(project, text)
                                         let finalCssItems = item switch

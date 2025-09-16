@@ -384,6 +384,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
                     var x when x == nameof(tbody) || x == nameof(thead) || x == nameof(tfoot) => nameof(tr),
 
+                    var x when x == nameof(table) && parent.Children.Any(c => c.Tag == nameof(tr)) => nameof(tr),
                     var x when x == nameof(table) && parent.Children.All(c => c.Tag != nameof(thead)) => nameof(thead),
                     var x when x == nameof(table) && parent.Children.All(c => c.Tag != nameof(tbody)) => nameof(tbody),
                     var x when x == nameof(table) && parent.Children.All(c => c.Tag != nameof(tfoot)) => nameof(tfoot),
@@ -2949,7 +2950,7 @@ sealed class ApplicationView : Component<ApplicationState>
                     }
                 },
                 !state.IsSuggestionsVisible ? null :
-                    new div(DisplayFlex, JustifyContentCenter, AlignItemsCenter, PositionFixed, Background(White), Border(1, solid, Gray300), BorderRadius(4), PaddingTop(4), PaddingBottom(4), Left(state.SuggestionPopupLocationX), Top(state.SuggestionPopupLocationY))
+                    new div(ZIndex(3),DisplayFlex, JustifyContentCenter, AlignItemsCenter, PositionFixed, Background(White), Border(1, solid, Gray300), BorderRadius(4), PaddingTop(4), PaddingBottom(4), Left(state.SuggestionPopupLocationX), Top(state.SuggestionPopupLocationY))
                     {
                         new div
                         {
