@@ -1,6 +1,5 @@
-﻿using Newtonsoft.Json;
-using System.Collections.Immutable;
-using static System.Net.Mime.MediaTypeNames;
+﻿using System.Collections.Immutable;
+using Newtonsoft.Json;
 
 namespace ReactWithDotNet.VisualDesigner.Exporters;
 
@@ -176,29 +175,29 @@ static class ModelToNodeTransformer
                     return props;
                 }
 
-
-                var error = FirstOrDefaultOf
-                    (from text in styles
-                     let item = CreateDesignerStyleItemFromText(project, text)
-                     let exception = item switch
-                     {
-                         var x when x.HasError => item.Error,
-
-                         var x when x.Value.Pseudo is not null =>
-                             new NotSupportedException($"Pseudo styles are not supported in inline styles. {text}"),
-
-                         _ => null
-                     }
-                     where exception is not null
-                     select exception);
-                        
-                    
-                    
-                if (error is not null)
+                // check pseudo
                 {
-                    return error;
+                    var error = FirstOrDefaultOf
+                        (from text in styles
+                         let item = CreateDesignerStyleItemFromText(project, text)
+                         let exception = item switch
+                         {
+                             var x when x.HasError => item.Error,
+
+                             var x when x.Value.Pseudo is not null =>
+                                 new NotSupportedException($"Pseudo styles are not supported in inline styles. {text}"),
+
+                             _ => null
+                         }
+                         where exception is not null
+                         select exception);
+
+                    if (error is not null)
+                    {
+                        return error;
+                    }
                 }
-                
+
                 var finalCssList = ListFrom(from text in styles
                                             let item = CreateDesignerStyleItemFromText(project, text)
                                             let finalCssItems = item switch
