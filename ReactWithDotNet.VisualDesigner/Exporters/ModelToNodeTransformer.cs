@@ -1,5 +1,6 @@
-﻿using System.Collections.Immutable;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
+using System.Collections.Immutable;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace ReactWithDotNet.VisualDesigner.Exporters;
 
@@ -159,76 +160,102 @@ static class ModelToNodeTransformer
                     stlyeValueAsJson = JsonConvert.SerializeObject(styleAttributeList.Value);
                 }
 
-                props.Add(new ()
-                {
-                    Name = "style",
-                    Value = stlyeValueAsJson
-                });
-                
-                return props;
-                
-            }
-            
-            var finalCssList = ListFrom(from text in styles
-                                        let item = CreateDesignerStyleItemFromText(project, text)
-                                        let finalCssItems = item switch
-                                        {
-                                            var x when x.HasError => [item.Error],
-
-                                            var x when x.Value.Pseudo is not null && project.ExportAsCSharpString => [new NotSupportedException($"Pseudo styles are not supported in inline styles. Pseudo: {x.Value.Pseudo}")],
-
-                                            _ => from x in item.Value.FinalCssItems
-                                                select CreateFinalCssItem
-                                                    (new()
-                                                     {
-                                                         Name = project.ExportAsCSharpString switch
-                                                         {
-                                                             true  =>  x.Name,
-                                                             false =>KebabToCamelCase(x.Name)
-                                                         },
-
-                                                         Value = x.Value switch
-                                                         {
-                                                             null => null,
-
-                                                             var y when y.StartsWith("request.") || y.StartsWith("context.") => y,
-
-                                                             var y => project.ExportAsCSharpString switch
-                                                             {
-                                                                 true=>  TryClearStringValue(y),
-                                                                 false=>'"' + TryClearStringValue(y) + '"'
-                                                             }
-                                                         }
-                                                     }
-                                                    )
-                                        }
-                                        from x in finalCssItems
-                                        select x);
-
-            if (finalCssList.HasError)
-            {
-                return finalCssList.Error;
-            }
-
-            var inlineStyle = finalCssList.Value;
-
-            if (inlineStyle.Any())
-            {
-                var inlineStyleProperty = new ReactProperty
+                props.Add(new()
                 {
                     Name  = "style",
-                    Value = "{" + string.Join(", ", inlineStyle.Select(x => $"{x.Name}: {x.Value}")) + "}"
-                };
+                    Value = stlyeValueAsJson
+                });
 
-                if (project.ExportAsCSharp || project.ExportAsCSharpString)
+                return props;
+            }
+
+            if (project.ExportAsCSharpString)
+            {
+                if (styles.Count == 0)
                 {
-                    inlineStyleProperty = inlineStyleProperty with
-                    {
-                        Value = JsonConvert.SerializeObject(inlineStyle)
-                    };
+                    return props;
                 }
 
-                props.Add(inlineStyleProperty);
+
+                var error = FirstOrDefaultOf
+                    (from text in styles
+                     let item = CreateDesignerStyleItemFromText(project, text)
+                     let r = item switch
+                     {
+                         var x when x.HasError => item.Error,
+
+                         var x when x.Value.Pseudo is not null =>
+                             new NotSupportedException($"Pseudo styles are not supported in inline styles. {text}"),
+
+                         _ => ResultFrom(true)
+                     }
+                     where r.HasError
+                     select r.Error);
+                        
+                    
+                    
+                if (error is not null)
+                {
+                    return error;
+                }
+                
+                var finalCssList = ListFrom(from text in styles
+                                            let item = CreateDesignerStyleItemFromText(project, text)
+                                            let finalCssItems = item switch
+                                            {
+                                                _ => from x in item.Value.FinalCssItems
+                                                    select CreateFinalCssItem
+                                                        (new()
+                                                         {
+                                                             Name = project.ExportAsCSharpString switch
+                                                             {
+                                                                 true  => x.Name,
+                                                                 false => KebabToCamelCase(x.Name)
+                                                             },
+
+                                                             Value = x.Value switch
+                                                             {
+                                                                 null => null,
+
+                                                                 var y when y.StartsWith("request.") || y.StartsWith("context.") => y,
+
+                                                                 var y => project.ExportAsCSharpString switch
+                                                                 {
+                                                                     true  => TryClearStringValue(y),
+                                                                     false => '"' + TryClearStringValue(y) + '"'
+                                                                 }
+                                                             }
+                                                         }
+                                                        )
+                                            }
+                                            from x in finalCssItems
+                                            select x);
+
+                if (finalCssList.HasError)
+                {
+                    return finalCssList.Error;
+                }
+
+                var inlineStyle = finalCssList.Value;
+
+                if (inlineStyle.Any())
+                {
+                    var inlineStyleProperty = new ReactProperty
+                    {
+                        Name  = "style",
+                        Value = "{" + string.Join(", ", inlineStyle.Select(x => $"{x.Name}: {x.Value}")) + "}"
+                    };
+
+                    if (project.ExportAsCSharp || project.ExportAsCSharpString)
+                    {
+                        inlineStyleProperty = inlineStyleProperty with
+                        {
+                            Value = JsonConvert.SerializeObject(inlineStyle)
+                        };
+                    }
+
+                    props.Add(inlineStyleProperty);
+                }
             }
 
             return props;
