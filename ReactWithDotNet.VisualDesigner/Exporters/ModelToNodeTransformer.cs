@@ -180,17 +180,17 @@ static class ModelToNodeTransformer
                 var error = FirstOrDefaultOf
                     (from text in styles
                      let item = CreateDesignerStyleItemFromText(project, text)
-                     let r = item switch
+                     let exception = item switch
                      {
                          var x when x.HasError => item.Error,
 
                          var x when x.Value.Pseudo is not null =>
                              new NotSupportedException($"Pseudo styles are not supported in inline styles. {text}"),
 
-                         _ => ResultFrom(true)
+                         _ => null
                      }
-                     where r.HasError
-                     select r.Error);
+                     where exception is not null
+                     select exception);
                         
                     
                     
