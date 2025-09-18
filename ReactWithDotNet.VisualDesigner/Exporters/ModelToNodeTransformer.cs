@@ -237,25 +237,11 @@ static class ModelToNodeTransformer
                 }
 
                 var inlineStyle = finalCssList.Value;
-
-                if (inlineStyle.Any())
+                props.Add(new()
                 {
-                    var inlineStyleProperty = new ReactProperty
-                    {
-                        Name  = "style",
-                        Value = "{" + string.Join(", ", inlineStyle.Select(x => $"{x.Name}: {x.Value}")) + "}"
-                    };
-
-                    if (project.ExportAsCSharp || project.ExportAsCSharpString)
-                    {
-                        inlineStyleProperty = inlineStyleProperty with
-                        {
-                            Value = JsonConvert.SerializeObject(inlineStyle)
-                        };
-                    }
-
-                    props.Add(inlineStyleProperty);
-                }
+                    Name  = "style",
+                    Value = JsonConvert.SerializeObject(inlineStyle)
+                });
             }
 
             return props;
