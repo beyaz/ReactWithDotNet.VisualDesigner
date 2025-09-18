@@ -175,7 +175,7 @@ static class ModelToNodeTransformer
                     return props;
                 }
 
-                // check pseudo
+                // check has no pseudo
                 {
                     var error = FirstOrDefaultOf
                         (from text in styles
@@ -198,38 +198,12 @@ static class ModelToNodeTransformer
                     }
                 }
 
-                var finalCssList = ListFrom(from text in styles
-                                            let item = CreateDesignerStyleItemFromText(project, text)
-                                            let finalCssItems = item switch
-                                            {
-                                                _ => from x in item.Value.FinalCssItems
-                                                    select
-                                                        CreateFinalCssItem
-                                                            (new()
-                                                             {
-                                                                 Name = project.ExportAsCSharpString switch
-                                                                 {
-                                                                     true  => x.Name,
-                                                                     false => KebabToCamelCase(x.Name)
-                                                                 },
 
-                                                                 Value = x.Value switch
-                                                                 {
-                                                                     null => null,
-
-                                                                     var y when y.StartsWith("request.") || y.StartsWith("context.") => y,
-
-                                                                     var y => project.ExportAsCSharpString switch
-                                                                     {
-                                                                         true  => TryClearStringValue(y),
-                                                                         false => '"' + TryClearStringValue(y) + '"'
-                                                                     }
-                                                                 }
-                                                             }
-                                                            )
-                                            }
-                                            from x in finalCssItems
-                                            select x);
+                var finalCssList = ListFrom
+                    (from text in styles
+                     let designerStyleItem = CreateDesignerStyleItemFromText(project, text)
+                     from x in designerStyleItem.Value.FinalCssItems
+                     select reCreateFinalCssItem(x));
 
                 if (finalCssList.HasError)
                 {
@@ -245,6 +219,28 @@ static class ModelToNodeTransformer
             }
 
             return props;
+            
+            
+            Result<FinalCssItem> reCreateFinalCssItem(FinalCssItem x) => CreateFinalCssItem(new()
+            {
+                Name = project.ExportAsCSharpString switch
+                {
+                    true  => x.Name,
+                    false => KebabToCamelCase(x.Name)
+                },
+                Value = x.Value switch
+                {
+                    null => null,
+
+                    var y when y.StartsWith("request.") || y.StartsWith("context.") => y,
+
+                    var y => project.ExportAsCSharpString switch
+                    {
+                        true  => TryClearStringValue(y),
+                        false => '"' + TryClearStringValue(y) + '"'
+                    }
+                }
+            });
         }
 
         static Result<IReadOnlyList<ReactProperty>> calculatePropsForTailwind(ProjectConfig project, IReadOnlyList<string> properties, IReadOnlyList<string> styles)
