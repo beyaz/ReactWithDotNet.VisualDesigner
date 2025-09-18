@@ -203,29 +203,30 @@ static class ModelToNodeTransformer
                                             let finalCssItems = item switch
                                             {
                                                 _ => from x in item.Value.FinalCssItems
-                                                    select CreateFinalCssItem
-                                                        (new()
-                                                         {
-                                                             Name = project.ExportAsCSharpString switch
+                                                    select
+                                                        CreateFinalCssItem
+                                                            (new()
                                                              {
-                                                                 true  => x.Name,
-                                                                 false => KebabToCamelCase(x.Name)
-                                                             },
-
-                                                             Value = x.Value switch
-                                                             {
-                                                                 null => null,
-
-                                                                 var y when y.StartsWith("request.") || y.StartsWith("context.") => y,
-
-                                                                 var y => project.ExportAsCSharpString switch
+                                                                 Name = project.ExportAsCSharpString switch
                                                                  {
-                                                                     true  => TryClearStringValue(y),
-                                                                     false => '"' + TryClearStringValue(y) + '"'
+                                                                     true  => x.Name,
+                                                                     false => KebabToCamelCase(x.Name)
+                                                                 },
+
+                                                                 Value = x.Value switch
+                                                                 {
+                                                                     null => null,
+
+                                                                     var y when y.StartsWith("request.") || y.StartsWith("context.") => y,
+
+                                                                     var y => project.ExportAsCSharpString switch
+                                                                     {
+                                                                         true  => TryClearStringValue(y),
+                                                                         false => '"' + TryClearStringValue(y) + '"'
+                                                                     }
                                                                  }
                                                              }
-                                                         }
-                                                        )
+                                                            )
                                             }
                                             from x in finalCssItems
                                             select x);
