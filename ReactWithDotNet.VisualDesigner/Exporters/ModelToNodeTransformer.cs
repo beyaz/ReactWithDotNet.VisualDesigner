@@ -198,7 +198,6 @@ static class ModelToNodeTransformer
                     }
                 }
 
-
                 var finalCssList = ListFrom
                     (from text in styles
                      let designerStyleItem = CreateDesignerStyleItemFromText(project, text)
@@ -219,28 +218,30 @@ static class ModelToNodeTransformer
             }
 
             return props;
-            
-            
-            Result<FinalCssItem> reCreateFinalCssItem(FinalCssItem x) => CreateFinalCssItem(new()
+
+            Result<FinalCssItem> reCreateFinalCssItem(FinalCssItem x)
             {
-                Name = project.ExportAsCSharpString switch
+                return CreateFinalCssItem(new()
                 {
-                    true  => x.Name,
-                    false => KebabToCamelCase(x.Name)
-                },
-                Value = x.Value switch
-                {
-                    null => null,
-
-                    var y when y.StartsWith("request.") || y.StartsWith("context.") => y,
-
-                    var y => project.ExportAsCSharpString switch
+                    Name = project.ExportAsCSharpString switch
                     {
-                        true  => TryClearStringValue(y),
-                        false => '"' + TryClearStringValue(y) + '"'
+                        true  => x.Name,
+                        false => KebabToCamelCase(x.Name)
+                    },
+                    Value = x.Value switch
+                    {
+                        null => null,
+
+                        var y when y.StartsWith("request.") || y.StartsWith("context.") => y,
+
+                        var y => project.ExportAsCSharpString switch
+                        {
+                            true  => TryClearStringValue(y),
+                            false => '"' + TryClearStringValue(y) + '"'
+                        }
                     }
-                }
-            });
+                });
+            }
         }
 
         static Result<IReadOnlyList<ReactProperty>> calculatePropsForTailwind(ProjectConfig project, IReadOnlyList<string> properties, IReadOnlyList<string> styles)
