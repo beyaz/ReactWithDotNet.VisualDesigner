@@ -20,7 +20,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
             ],
             ["position"] =
             [
-                new() { Label = "static", Value   = "position: static" }, 
+                new() { Label = "static", Value   = "position: static" },
                 new() { Label = "relative", Value = "position: relative" },
                 new() { Label = "absolute", Value = "position: absolute" },
                 new() { Label = "fixed", Value    = "position: fixed" },
@@ -61,9 +61,9 @@ sealed class StylerComponent : Component<StylerComponent.State>
         {
             ["direction"] =
             [
-                new() { Label = "row", Value         = "flex-direction: row" },
-                new() { Label = "column", Value      = "flex-direction: column" },
-                new() { Label = "row-reverse", Value = "flex-direction: row-reverse" },
+                new() { Label = "row", Value            = "flex-direction: row" },
+                new() { Label = "column", Value         = "flex-direction: column" },
+                new() { Label = "row-reverse", Value    = "flex-direction: row-reverse" },
                 new() { Label = "column-reverse", Value = "flex-direction: column-reverse" }
             ],
             ["justify content"] =
@@ -102,7 +102,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                 new() { Label = "400px", Value = "min-width: 400px" },
                 new() { Label = "500px", Value = "min-width: 500px" }
             ],
-            
+
             ["height"] =
             [
                 new() { Label = "auto", Value        = "height: auto" },
@@ -114,7 +114,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                 new() { Label = "50%", Value         = "height: 50%" },
                 new() { Label = "25%", Value         = "height: 25%" }
             ],
-            
+
             ["width"] =
             [
                 new() { Label = "100%", Value        = "width: 100%" },
@@ -125,23 +125,21 @@ sealed class StylerComponent : Component<StylerComponent.State>
                 new() { Label = "fit-content", Value = "width: fit-content" },
                 new() { Label = "max-content", Value = "width: max-content" },
                 new() { Label = "min-content", Value = "width: min-content" },
-                
-                new() { Label = "8px"  ,  Value  = "width: 8px" },
-                new() { Label = "12px"  ,  Value = "width: 12px" },
-                new() { Label = "16px"  ,  Value = "width: 16px" },
-                new() { Label = "20px"  ,  Value = "width: 20px" },
-                new() { Label = "24px"  ,  Value = "width: 24px" },
-                new() { Label = "32px"  ,  Value = "width: 32px" },
-                new() { Label = "36px"  ,  Value = "width: 36px" },
-                new() { Label = "40px"  ,  Value = "width: 40px" },
-                new() { Label = "50px"  ,  Value = "width: 50px" },
-                new() { Label = "80px"  ,  Value = "width: 80px" },
-                new() { Label = "100px" ,  Value = "width: 100px"},
-                new() { Label = "200px" ,  Value = "width: 200px"}
-               
+
+                new() { Label = "8px", Value   = "width: 8px" },
+                new() { Label = "12px", Value  = "width: 12px" },
+                new() { Label = "16px", Value  = "width: 16px" },
+                new() { Label = "20px", Value  = "width: 20px" },
+                new() { Label = "24px", Value  = "width: 24px" },
+                new() { Label = "32px", Value  = "width: 32px" },
+                new() { Label = "36px", Value  = "width: 36px" },
+                new() { Label = "40px", Value  = "width: 40px" },
+                new() { Label = "50px", Value  = "width: 50px" },
+                new() { Label = "80px", Value  = "width: 80px" },
+                new() { Label = "100px", Value = "width: 100px" },
+                new() { Label = "200px", Value = "width: 200px" }
             ],
-           
-            
+
             ["min height"] =
             [
                 new() { Label = "50px", Value  = "min-height: 50px" },
@@ -423,173 +421,172 @@ sealed class StylerComponent : Component<StylerComponent.State>
                         {
                             new SubGroupItem
                             {
-                                Label=TryGetSubGroupLabelAt(0),
-                                SelectionChange=OnSubGroupItemChanged,
-                                IsSelected=IsSelectedSubGroup(0)
+                                Label           = TryGetSubGroupLabelAt(0),
+                                SelectionChange = OnSubGroupItemChanged,
+                                IsSelected      = IsSelectedSubGroup(0)
                             },
                             new SubGroupItem
                             {
-                                Label=TryGetSubGroupLabelAt(1),
-                                SelectionChange=OnSubGroupItemChanged,
-                                IsSelected=IsSelectedSubGroup(1)
+                                Label           = TryGetSubGroupLabelAt(1),
+                                SelectionChange = OnSubGroupItemChanged,
+                                IsSelected      = IsSelectedSubGroup(1)
                             },
                             new SubGroupItem
                             {
-                                Label=TryGetSubGroupLabelAt(2),
-                                SelectionChange=OnSubGroupItemChanged,
-                                IsSelected=IsSelectedSubGroup(2)
+                                Label           = TryGetSubGroupLabelAt(2),
+                                SelectionChange = OnSubGroupItemChanged,
+                                IsSelected      = IsSelectedSubGroup(2)
                             }
                         },
                         new div(GridArea("2 / 3 / 2 / 7"), DisplayFlex, Gap(4))
                         {
                             new SubGroupItem
                             {
-                                Label=TryGetSubGroupLabelAt(10),
-                                SelectionChange=OnSubGroupItemChanged,
-                                IsSelected=IsSelectedSubGroup(10)
+                                Label           = TryGetSubGroupLabelAt(10),
+                                SelectionChange = OnSubGroupItemChanged,
+                                IsSelected      = IsSelectedSubGroup(10)
                             },
                             new SubGroupItem
                             {
-                                Label=TryGetSubGroupLabelAt(9),
-                                SelectionChange=OnSubGroupItemChanged,
-                                IsSelected=IsSelectedSubGroup(9)
+                                Label           = TryGetSubGroupLabelAt(9),
+                                SelectionChange = OnSubGroupItemChanged,
+                                IsSelected      = IsSelectedSubGroup(9)
                             },
                             new SubGroupItem
                             {
-                                Label=TryGetSubGroupLabelAt(11),
-                                SelectionChange=OnSubGroupItemChanged,
-                                IsSelected=IsSelectedSubGroup(11)
+                                Label           = TryGetSubGroupLabelAt(11),
+                                SelectionChange = OnSubGroupItemChanged,
+                                IsSelected      = IsSelectedSubGroup(11)
                             }
                         },
                         new div(GridArea("3 / 2 / 7 / 2"), GridColumn(2), DisplayFlex, Gap(4), FlexDirectionColumn, WidthFull)
                         {
                             new SubGroupItem
                             {
-                                Label=TryGetSubGroupLabelAt(7),
-                                SelectionChange=OnSubGroupItemChanged,
-                                IsSelected=IsSelectedSubGroup(7)
+                                Label           = TryGetSubGroupLabelAt(7),
+                                SelectionChange = OnSubGroupItemChanged,
+                                IsSelected      = IsSelectedSubGroup(7)
                             },
                             new SubGroupItem
                             {
-                                Label=TryGetSubGroupLabelAt(5),
-                                SelectionChange=OnSubGroupItemChanged,
-                                IsSelected=IsSelectedSubGroup(5)
+                                Label           = TryGetSubGroupLabelAt(5),
+                                SelectionChange = OnSubGroupItemChanged,
+                                IsSelected      = IsSelectedSubGroup(5)
                             },
                             new SubGroupItem
                             {
-                                Label=TryGetSubGroupLabelAt(3),
-                                SelectionChange=OnSubGroupItemChanged,
-                                IsSelected=IsSelectedSubGroup(3)
+                                Label           = TryGetSubGroupLabelAt(3),
+                                SelectionChange = OnSubGroupItemChanged,
+                                IsSelected      = IsSelectedSubGroup(3)
                             }
                         },
                         new div(GridArea("3 / 7 / 7 / 7"), DisplayFlex, FlexDirectionColumn, Gap(4))
                         {
                             new SubGroupItem
                             {
-                                Label=TryGetSubGroupLabelAt(8),
-                                SelectionChange=OnSubGroupItemChanged,
-                                IsSelected=IsSelectedSubGroup(8)
+                                Label           = TryGetSubGroupLabelAt(8),
+                                SelectionChange = OnSubGroupItemChanged,
+                                IsSelected      = IsSelectedSubGroup(8)
                             },
                             new SubGroupItem
                             {
-                                Label=TryGetSubGroupLabelAt(6),
-                                SelectionChange=OnSubGroupItemChanged,
-                                IsSelected=IsSelectedSubGroup(6)
+                                Label           = TryGetSubGroupLabelAt(6),
+                                SelectionChange = OnSubGroupItemChanged,
+                                IsSelected      = IsSelectedSubGroup(6)
                             },
                             new SubGroupItem
                             {
-                                Label=TryGetSubGroupLabelAt(4),
-                                SelectionChange=OnSubGroupItemChanged,
-                                IsSelected=IsSelectedSubGroup(4)
+                                Label           = TryGetSubGroupLabelAt(4),
+                                SelectionChange = OnSubGroupItemChanged,
+                                IsSelected      = IsSelectedSubGroup(4)
                             }
                         },
                         new div(GridArea("1 /2 / 1 / 8"), DisplayFlex, Gap(4))
                         {
                             new GroupItem
                             {
-                                Label=TryGetGroupLabelAt(10),
-                                SelectionChange=OnGroupItemChanged,
-                                IsSelected=IsSelectedGroup(10)
+                                Label           = TryGetGroupLabelAt(10),
+                                SelectionChange = OnGroupItemChanged,
+                                IsSelected      = IsSelectedGroup(10)
                             },
                             new GroupItem
                             {
-                                Label=TryGetGroupLabelAt(9),
-                                SelectionChange=OnGroupItemChanged,
-                                IsSelected=IsSelectedGroup(9)
+                                Label           = TryGetGroupLabelAt(9),
+                                SelectionChange = OnGroupItemChanged,
+                                IsSelected      = IsSelectedGroup(9)
                             },
                             new GroupItem
                             {
-                                Label=TryGetGroupLabelAt(11),
-                                SelectionChange=OnGroupItemChanged,
-                                IsSelected=IsSelectedGroup(11)
+                                Label           = TryGetGroupLabelAt(11),
+                                SelectionChange = OnGroupItemChanged,
+                                IsSelected      = IsSelectedGroup(11)
                             }
                         },
                         new div(GridArea("8 /2 / 8 / 8"), DisplayFlex, Gap(4))
                         {
                             new GroupItem
                             {
-                                Label=TryGetGroupLabelAt(0),
-                                SelectionChange=OnGroupItemChanged,
-                                IsSelected=IsSelectedGroup(0)
+                                Label           = TryGetGroupLabelAt(0),
+                                SelectionChange = OnGroupItemChanged,
+                                IsSelected      = IsSelectedGroup(0)
                             },
                             new GroupItem
                             {
-                                Label=TryGetGroupLabelAt(1),
-                                SelectionChange=OnGroupItemChanged,
-                                IsSelected=IsSelectedGroup(1)
+                                Label           = TryGetGroupLabelAt(1),
+                                SelectionChange = OnGroupItemChanged,
+                                IsSelected      = IsSelectedGroup(1)
                             },
                             new GroupItem
                             {
-                                Label=TryGetGroupLabelAt(2),
-                                SelectionChange=OnGroupItemChanged,
-                                IsSelected=IsSelectedGroup(2)
+                                Label           = TryGetGroupLabelAt(2),
+                                SelectionChange = OnGroupItemChanged,
+                                IsSelected      = IsSelectedGroup(2)
                             }
                         },
                         new div(GridArea("2 /1 / 8 / 1"), DisplayFlex, Gap(4), FlexDirectionColumn)
                         {
                             new GroupItem
                             {
-                                Label=TryGetGroupLabelAt(7),
-                                SelectionChange=OnGroupItemChanged,
-                                IsSelected=IsSelectedGroup(7)
+                                Label           = TryGetGroupLabelAt(7),
+                                SelectionChange = OnGroupItemChanged,
+                                IsSelected      = IsSelectedGroup(7)
                             },
                             new GroupItem
                             {
-                                Label=TryGetGroupLabelAt(5),
-                                SelectionChange=OnGroupItemChanged,
-                                IsSelected=IsSelectedGroup(5)
+                                Label           = TryGetGroupLabelAt(5),
+                                SelectionChange = OnGroupItemChanged,
+                                IsSelected      = IsSelectedGroup(5)
                             },
                             new GroupItem
                             {
-                                Label=TryGetGroupLabelAt(3),
-                                SelectionChange=OnGroupItemChanged,
-                                IsSelected=IsSelectedGroup(3)
+                                Label           = TryGetGroupLabelAt(3),
+                                SelectionChange = OnGroupItemChanged,
+                                IsSelected      = IsSelectedGroup(3)
                             }
                         },
                         new div(GridArea("2 /8 / 8 / 8"), DisplayFlex, Gap(4), FlexDirectionColumn)
                         {
                             new GroupItem
                             {
-                                Label=TryGetGroupLabelAt(8),
-                                SelectionChange=OnGroupItemChanged,
-                                IsSelected=IsSelectedGroup(8)
+                                Label           = TryGetGroupLabelAt(8),
+                                SelectionChange = OnGroupItemChanged,
+                                IsSelected      = IsSelectedGroup(8)
                             },
                             new GroupItem
                             {
-                                Label=TryGetGroupLabelAt(6),
-                                SelectionChange=OnGroupItemChanged,
-                                IsSelected=IsSelectedGroup(6)
+                                Label           = TryGetGroupLabelAt(6),
+                                SelectionChange = OnGroupItemChanged,
+                                IsSelected      = IsSelectedGroup(6)
                             },
                             new GroupItem
                             {
-                                Label=TryGetGroupLabelAt(4),
-                                SelectionChange=OnGroupItemChanged,
-                                IsSelected=IsSelectedGroup(4)
+                                Label           = TryGetGroupLabelAt(4),
+                                SelectionChange = OnGroupItemChanged,
+                                IsSelected      = IsSelectedGroup(4)
                             }
                         }
                     }
-                }
-            ,
+                },
             new div(OnMouseEnter(TogglePopup), TextAlignCenter, WidthFitContent, PositionFixed, Right(24), Bottom(24))
             {
                 new svg(svg.Xmlns("http://www.w3.org/2000/svg"), svg.Width(23), svg.Height(23), ViewBox(0, 0, 23, 23), Fill(none))
@@ -742,7 +739,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
         {
             if (Label is null)
             {
-                return new div(Opacity(0.2),BorderRadius(4), DisplayFlex, JustifyContentCenter, AlignItemsCenter, WidthFull, HeightFull, TextAlignCenter, Border(1, solid, Gray200));
+                return new div(Opacity(0.2), BorderRadius(4), DisplayFlex, JustifyContentCenter, AlignItemsCenter, WidthFull, HeightFull, TextAlignCenter, Border(1, solid, Gray200));
             }
 
             return new div(OnMouseEnter(OnSubGroupItemMouseEnter), Id(Label), BorderColor(IsSelected ? Gray400 : Gray200), BorderRadius(4), DisplayFlex, JustifyContentCenter, AlignItemsCenter, WidthFull, HeightFull, TextAlignCenter, Border(1, solid, Gray200), Padding(2))
@@ -778,22 +775,22 @@ sealed class StylerComponent : Component<StylerComponent.State>
 
 class CssUnitEditor : Component<CssUnitEditor.State>
 {
-    internal record State
-    {
-        public string Value { get; init; } = "16";
-
-        public string Unit { get; init; } = "px";
-    }
-
     protected override Element render()
-    { 
+    {
         return new FlexRow(Width(160), FlexWrap, Border(1, solid, Gray200), Padding(2), Gap(8), CursorDefault)
         {
-            from number in new[]{ "1", "2", "3","4","5","6","7","8","9","","0",""} select 
-            new FlexRowCentered(Size(40), Border(1,solid,Gray200), Hover(BorderColor(Gray300),Background(Gray50)), BorderRadius(50))
-            {
-                number
-            }
+            from number in new[] { "1", "2", "3", "4", "5", "6", "7", "8", "9", "", "0", "" }
+            select
+                new FlexRowCentered(Size(40), Border(1, solid, Gray200), Hover(BorderColor(Gray300), Background(Gray50)), BorderRadius(50))
+                {
+                    number
+                }
         };
     }
-} 
+
+    internal record State
+    {
+        public string Unit { get; init; } = "px";
+        public string Value { get; init; } = "16";
+    }
+}
