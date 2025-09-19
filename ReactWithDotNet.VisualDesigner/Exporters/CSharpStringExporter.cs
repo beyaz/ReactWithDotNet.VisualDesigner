@@ -100,13 +100,15 @@ static class CSharpStringExporter
                 }
             }
 
+            var leftSpaceCount = Array.FindIndex(lines[methodDeclarationLineIndex].ToCharArray(), c => c != ' ');
+            
             var firstReturnLineIndex = -1;
             var leftPaddingCount = -1;
             {
-                foreach (var item in lines.FindLineIndexStartsWith(methodDeclarationLineIndex, "return ", "return"))
+                foreach (var item in lines.FindLineIndexStartsWith(methodDeclarationLineIndex,leftSpaceCount+4, "return ", "return"))
                 {
-                    firstReturnLineIndex = item.index;
-                    leftPaddingCount     = item.leftPaddingCount;
+                    firstReturnLineIndex = item;
+                    leftPaddingCount     = item+4;
                 }
 
                 if (firstReturnLineIndex < 0)
@@ -122,9 +124,9 @@ static class CSharpStringExporter
 
             var firstReturnCloseLineIndex = -1;
             {
-                foreach (var item in lines.FindLineIndexStartsWith(firstReturnLineIndex, "};"))
+                foreach (var item in lines.FindLineIndexStartsWith(firstReturnLineIndex, leftSpaceCount + 4, "};"))
                 {
-                    firstReturnCloseLineIndex = item.index;
+                    firstReturnCloseLineIndex = item;
                 }
 
                 if (firstReturnCloseLineIndex < 0)
