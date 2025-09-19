@@ -414,8 +414,10 @@ sealed class StylerComponent : Component<StylerComponent.State>
         }
     };
 
+    bool IsFontSizeEditor => TryGetSubGroupLabelAt(0) == "size";
+    
     protected override Element render()
-    {
+    {  
         return new div(OnMouseEnter(OnMouseEntered), OnMouseLeave(OnMouseLeaved), WidthFull, Height(300), Padding(16), DisplayFlex, FlexDirectionColumn, FontSize14, Background(White), Opacity(state.Opacity), CursorDefault, UserSelect(none), MinHeight(400))
         {
             new div(WidthFull, HeightFull, Border(1, solid, Gray200), BorderRadius(4), PositionRelative, Background(White), Padding(24))
@@ -566,20 +568,36 @@ sealed class StylerComponent : Component<StylerComponent.State>
                             IsSelected=IsSelectedSubGroup(6)
                         }
                     },
-                    new div(DisplayFlex, Padding(16), HeightFull, WidthFull)
+                    new div(DisplayFlex, Padding(16), HeightFull, WidthFull, AlignItemsCenter, JustifyContentCenter)
                     {
-                        new div(Background(White), DisplayFlex, Gap(8), Padding(8), FlexWrap, AlignContentCenter, JustifyContentCenter, OverflowAuto, HeightFull)
-                        {
-                            from item in GetOptions()
-                            select new div(Id(item.Label), OnClick(OnOptionItemClicked), Border(1, solid, Gray200), Padding(2, 4), MinWidth(50), WidthFitContent, HeightFitContent, MinHeight(30), BorderRadius(4), DisplayFlex, JustifyContentCenter, AlignItemsCenter, Hover(Border(1, solid, Gray400)))
+                        !IsFontSizeEditor ? null :
+                            new div(WidthFull, HeightFull, DisplayFlex)
                             {
-                                item.Label
+                                new div(Width("50%"), DisplayFlex, AlignContentCenter, JustifyContentCenter, Gap(4), FlexWrap)
+                                {
+                                    new CssValueItem
+                                    {
+                                        Label="small",
+                                        Value="font-size: small",
+                                        Click=OnCssItemClicked
+                                    },
+                                    new CssValueItem
+                                    {
+                                        Label="medium",
+                                        Value="font-size: medium",
+                                        Click=OnCssItemClicked
+                                    }
+                                },
+                                new div(Width("50%"), DisplayFlex, AlignItemsCenter, JustifyContentCenter)
+                                {
+                                    new CssUnitEditor
+                                    {
+                                        Change=OnCssItemClicked,
+                                        CssName="font-size"
+                                    }
+                                }
                             }
-                        },
-                        new div(PaddingLeft(8))
-                        {
-                            new CssUnitEditor()
-                        }
+                        
                     }
                 }
             }
@@ -647,6 +665,13 @@ sealed class StylerComponent : Component<StylerComponent.State>
 
         return Task.CompletedTask;
     }
+    Task OnCssItemClicked(string cssValue)
+    {
+        DispatchEvent(OptionSelected, [cssValue]);
+
+        return Task.CompletedTask;
+    }
+    
 
     Task OnSubGroupItemChanged(string subGroupName)
     {
@@ -784,6 +809,38 @@ sealed class StylerComponent : Component<StylerComponent.State>
         }
     }
 
+    class CssValueItem : Component
+    {
+        public required string Label { get; init; }
+        
+        public required string Value { get; init; }
+        
+        [CustomEvent]
+        public required Func<string, Task> Click { get; init; }
+        
+
+
+        protected override Element render()
+        {
+            if (Label is null)
+            {
+                return new div(Opacity(0.2), BorderColor(Gray200), BorderRadius(4), DisplayFlex, JustifyContentCenter, AlignItemsCenter, WidthFull, HeightFull, TextAlignCenter, Border(1, solid, Gray200));
+            }
+
+            return new div(OnClick(OnClicked), Border(1, solid, Gray200), Padding(2, 4), MinWidth(50), WidthFitContent, HeightFitContent, MinHeight(30), BorderRadius(4), DisplayFlex, JustifyContentCenter, AlignItemsCenter, Hover(Border(1, solid, Gray400)))
+            {
+                Label
+            };
+        } 
+         
+        Task OnClicked(MouseEvent e)
+        {
+            DispatchEvent(Click, [Value]);
+
+            return Task.CompletedTask;
+        }
+    }
+    
     internal record State
     {
         public bool IsPopupVisible { get; init; }
@@ -805,22 +862,61 @@ sealed class StylerComponent : Component<StylerComponent.State>
 
 class CssUnitEditor : Component<CssUnitEditor.State>
 {
+    public string CssName { get; init; }
+    
+    [CustomEvent]
+    public Func<string, Task> Change { get; init; }
+    
     protected override Element render()
     {
-        return new FlexRow(Width(160), FlexWrap, Border(1, solid, Gray200), Padding(2), Gap(8), CursorDefault)
+        return new div(WidthFitContent, Border(1, solid, Gray200), DisplayFlex, FlexDirectionColumn)
         {
-            from number in new[] { "1", "2", "3", "4", "5", "6", "7", "8", "9", "", "0", "" }
-            select
-                new FlexRowCentered(Size(40), Border(1, solid, Gray200), Hover(BorderColor(Gray300), Background(Gray50)), BorderRadius(50))
+            new div(DisplayFlex, BackgroundColor("#ffffff"), Height(36), Gap(4), JustifyContentSpaceEvenly, BorderRadius(4), AlignItemsCenter)
+            {
+                new div(),
+                new div(),
+                new div(),
+                new div(HeightFull, Width(1), Background(Gray200)),
+                new div
                 {
-                    number
+                    "px"
                 }
+            },
+            new div(WidthFull, Height(1), Background(Gray200)),
+            new div(DisplayFlex, Width(120), FlexWrap, Padding(4), Gap(8), CursorDefault, JustifyContentSpaceAround)
+            {
+                from item in new[]{ "1", "2", "3","4","5","6","7","8","9","-","0","."}
+                select new div(OnClick(OnButtonClicked), Id(item), Width(30), Height(30), BorderRadius(50), AlignItemsCenter, JustifyContentCenter, DisplayFlex, Border(1, solid, Gray200), Hover(BorderColor(Gray300)), Hover(Background(Gray50)), BorderWidth(string.IsNullOrWhiteSpace(item ) ? "0px" : "1px"))
+                {
+                    item
+                }
+            }
         };
+        
+        
+    }
+
+    Task OnButtonClicked(MouseEvent e)
+    {
+        var charachter = e.target.id;
+        if (charachter.HasNoValue())
+        {
+            return Task.CompletedTask;    
+        }
+
+        state = state with
+        {
+            Value = state.Value + charachter
+        };
+        
+        DispatchEvent(Change,[CssName +":"+state.Value + state.Unit]);
+        
+        return Task.CompletedTask;
     }
 
     internal record State
     {
         public string Unit { get; init; } = "px";
-        public string Value { get; init; } = "16";
+        public string Value { get; init; }
     }
-}
+} 
