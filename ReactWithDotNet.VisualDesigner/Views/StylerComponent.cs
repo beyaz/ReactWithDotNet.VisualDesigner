@@ -736,7 +736,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                         IsSelected=IsSelectedGroup(2)
                     }
                 },
-                new div(PositionAbsolute, Left(0), Bottom(-4), DisplayFlex, Right(0), JustifyContentSpaceAround)
+                new div(PositionAbsolute, Left(0), Bottom(-8), DisplayFlex, Right(0), JustifyContentSpaceAround)
                 {
                     new GroupItem
                     {
@@ -757,21 +757,19 @@ sealed class StylerComponent : Component<StylerComponent.State>
                         IsSelected=IsSelectedGroup(9)
                     }
                 },
-                new div(PositionAbsolute, Left(-6), Top(0), DisplayFlex, Bottom(0), JustifyContentSpaceAround, FlexDirectionColumn, Width(7))
+                new div(PositionAbsolute, Left(-8), Top(0), DisplayFlex, Bottom(0), JustifyContentSpaceAround, FlexDirectionColumn, Width(7))
                 {
                     new GroupItem
                     {
                         Label=TryGetGroupLabelAt(3),
                         SelectionChange=OnGroupItemChanged,
-                        IsSelected=IsSelectedGroup(3),
-                        IsVerticle=true
+                        IsSelected=IsSelectedGroup(3)
                     },
                     new GroupItem
                     {
                         Label=TryGetGroupLabelAt(4),
                         SelectionChange=OnGroupItemChanged,
-                        IsSelected=IsSelectedGroup(4),
-                        IsVerticle=true
+                        IsSelected=IsSelectedGroup(4)
                     }
                 },
                 new div(PositionAbsolute, Right(-2), Top(0), DisplayFlex, Bottom(0), JustifyContentSpaceAround, FlexDirectionColumn, Width(7))
@@ -998,8 +996,6 @@ sealed class StylerComponent : Component<StylerComponent.State>
 
         public required string Label { get; init; }
 
-        public bool IsVerticle { get; init; }
-        
         IReadOnlyList<string> GetChars()
         {
             if (Label is null)
@@ -1019,7 +1015,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                 return new div(Opacity(0.2), BorderColor(Gray200), BorderRadius(4), DisplayFlex, JustifyContentCenter, AlignItemsCenter, WidthFull, HeightFull, TextAlignCenter, Border(1, solid, Gray200));
             }
 
-            return new div(OnMouseEnter(OnGroupItemMouseEnter), Id(Label), BorderRadius(4), DisplayFlex, JustifyContentCenter, AlignItemsCenter, WidthFitContent, HeightFitContent, TextAlignCenter, Padding(4), LineHeight16, Background(White), DisplayFlex, IsVerticle ? FlexWrap : FlexNoWrap, Gap(5), IsSelected ? BorderColor(Gray400) : BorderColor(Gray100), Border(1, solid, transparent))
+            return new div(OnMouseEnter(OnGroupItemMouseEnter), Id(Label), BorderRadius(4), DisplayFlex, JustifyContentCenter, AlignItemsCenter, WidthFitContent, HeightFitContent, TextAlignCenter, Padding(4), LineHeight16, Background(White), DisplayFlex, Gap(5), IsSelected ? BorderColor(Gray400) : BorderColor(Gray100), Border(1, solid, transparent), FlexWrap)
             {
                 from item in GetChars()
                 select new div(WidthFitContent, HeightFitContent, LineHeight7)

@@ -426,10 +426,14 @@ sealed class ApplicationPreview : Component
 
             static async Task<Result<PropertyProcessScope>> processProp(PropertyProcessScope data)
             {
-                foreach (var propRealValue in tryGetPropValueFromCaller(data.scope, data.model, data.propName))
+                if (data.propName != Design.ItemsSourceDesignTimeCount)
                 {
-                    data = data with { propValue = propRealValue };
+                    foreach (var propRealValue in tryGetPropValueFromCaller(data.scope, data.model, data.propName))
+                    {
+                        data = data with { propValue = propRealValue };
+                    }    
                 }
+                
 
                 var result = await RunWhile(data, x => !x.IsProcessed,
                 [
@@ -907,6 +911,11 @@ sealed class ApplicationPreview : Component
 
                 foreach (var callerProperty in from p in scope.ParentModel.Properties from v in ParseProperty(p) select v)
                 {
+                    if (callerProperty.Value?.In("true","false") is true)
+                    {
+                        return callerProperty.Value;
+                    }
+                    
                     if (ClearConnectedValue(propertyValue) == $"props.{callerProperty.Name}")
                     {
                         if (IsStringValue(ClearConnectedValue(callerProperty.Value)))
