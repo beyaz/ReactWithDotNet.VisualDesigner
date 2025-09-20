@@ -1007,12 +1007,12 @@ sealed class StylerComponent : Component<StylerComponent.State>
 
         protected override Element render()
         {
-            if (Label is null)
+            if (Label.HasNoValue())
             {
-                return new div(Opacity(0.2), BorderColor(Gray200), BorderRadius(4), DisplayFlex, JustifyContentCenter, AlignItemsCenter, WidthFull, HeightFull, TextAlignCenter, Border(1, solid, Gray200));
+                return new div();
             }
 
-            return new div(OnMouseEnter(OnGroupItemMouseEnter), Id(Label), BorderRadius(4), DisplayFlex, JustifyContentCenter, AlignItemsCenter, WidthFitContent, HeightFitContent, TextAlignCenter, Padding(4), LineHeight16, Background(White), DisplayFlex, Gap(5), IsSelected ? BorderColor(Gray400) : BorderColor(Gray100), Border(1, solid, transparent), FlexWrap)
+            return new div(OnMouseEnter(OnGroupItemMouseEnter), Id(Label), BorderRadius(4), DisplayFlex, JustifyContentCenter, AlignItemsCenter, WidthFitContent, HeightFitContent, TextAlignCenter, Padding(4), LineHeight16, Background(White), DisplayFlex, Gap(8), IsSelected ? Background(Gray200) : Background(White), Border(1, solid, Gray300), FlexWrap)
             {
                 from item in GetChars()
                 select new div(WidthFitContent, HeightFitContent, LineHeight7)
@@ -1056,10 +1056,10 @@ sealed class StylerComponent : Component<StylerComponent.State>
                 return string.Empty;
             }
 
-            return new div(OnMouseEnter(OnSubGroupItemMouseEnter), Id(Label), BorderColor(IsSelected ?  Gray400 : Gray100), BorderRadius(4), DisplayFlex, JustifyContentCenter, AlignItemsCenter, WidthFitContent, HeightFitContent, TextAlignCenter, Padding(3), LineHeight16, Background(White), DisplayFlex, FlexWrap, Gap(4), Border(1, solid, transparent))
+            return new div(OnMouseEnter(OnSubGroupItemMouseEnter), Id(Label), BorderRadius(4), DisplayFlex, JustifyContentCenter, AlignItemsCenter, WidthFitContent, HeightFitContent, TextAlignCenter, Padding(4), LineHeight16, Background(White), DisplayFlex, Gap(2), IsSelected ? Background(Gray200) : Background(White), Border(1, solid, Gray300), FlexWrap, FontSize13)
             {
                 from item in GetChars()
-                select new div(WidthFitContent, HeightFitContent, LineHeight7)
+                select new div(WidthFitContent, HeightFitContent, LineHeight7, FontSize14)
                 {
                     item
                 }
