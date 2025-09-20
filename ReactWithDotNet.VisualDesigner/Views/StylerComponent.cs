@@ -205,16 +205,19 @@ sealed class StylerComponent : Component<StylerComponent.State>
             [
                 new()
                 {
-                    Label = "min-width",
+                    Label = "width",
 
-                    TargetCssName = "min-width",
+                    TargetCssName = "width",
 
                     IsCssUnitEnabled = true,
 
                     Suggestions =
                     [
-                        new("50px"),
-                        new("100px")
+                        new("100%"),
+                        new("50%"),
+                        new("fit-content"),
+                        new("max-content"),
+                        new("min-content")
                     ]
                 },
                 new()
@@ -228,31 +231,26 @@ sealed class StylerComponent : Component<StylerComponent.State>
                     Suggestions =
                     [
                         new("100%"),
-                        new("75%"),
                         new("50%"),
-                        new("25%"),
                         new("fit-content"),
                         new("max-content"),
                         new("min-content")
                     ]
                 },
+                
+                
                 new()
                 {
-                    Label = "width",
+                    Label = "min-width",
 
-                    TargetCssName = "width",
+                    TargetCssName = "min-width",
 
                     IsCssUnitEnabled = true,
 
                     Suggestions =
                     [
-                        new("100%"),
-                        new("75%"),
-                        new("50%"),
-                        new("25%"),
-                        new("fit-content"),
-                        new("max-content"),
-                        new("min-content")
+                        new("50px"),
+                        new("100px")
                     ]
                 },
                 new()
@@ -326,19 +324,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                     ]
                 },
 
-                new()
-                {
-                    Label = "decoration",
-
-                    TargetCssName = "text-decoration",
-
-                    Suggestions =
-                    [
-                        new("underline"),
-                        new("overline"),
-                        new("line-through"),
-                    ]
-                },
+               
 
                 new()
                 {
@@ -366,6 +352,36 @@ sealed class StylerComponent : Component<StylerComponent.State>
                     ]
                 },
 
+               
+
+            ]
+        },
+        
+        new()
+        {
+            Label = "Text",
+            
+            SubGroups =
+            [
+                
+
+                new()
+                {
+                    Label = "decoration",
+
+                    TargetCssName = "text-decoration",
+
+                    Suggestions =
+                    [
+                        new("underline"),
+                        new("overline"),
+                        new("line-through"),
+                    ]
+                },
+
+            
+
+                
                 new()
                 {
                     Label = "align",
@@ -698,11 +714,6 @@ sealed class StylerComponent : Component<StylerComponent.State>
             ]
         },
         
-        new ()
-        {
-            Label = "",
-            SubGroups = []
-        }
     ];
     
     [CustomEvent]
