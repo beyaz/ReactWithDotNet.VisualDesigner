@@ -1669,7 +1669,7 @@ sealed class ApplicationView : Component<ApplicationState>
                 new div { Height(1), FlexGrow(1), Background(Gray200) }
             },
             viewStyles(CurrentVisualElement.Styles),
-            new FlexColumn(Flex(1,1,0), JustifyContentFlexEnd)
+            new FlexColumn(Flex(1,1,0), JustifyContentFlexEnd, AlignItemsCenter)
             {
                 new StylerComponent
                 {

@@ -722,7 +722,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
     
     protected override Element render()
     {  
-        return new div(OnMouseEnter(OnMouseEntered), OnMouseLeave(OnMouseLeaved), WidthFull, Height(300), Padding(16), DisplayFlex, FlexDirectionColumn, FontSize14, Background(White), Opacity(state.Opacity), CursorDefault, UserSelect(none), MinHeight(300))
+        return new div(OnMouseEnter(OnMouseEntered), OnMouseLeave(OnMouseLeaved), WidthFull, Height(300), Padding(12), DisplayFlex, FlexDirectionColumn, FontSize14, Background(White), Opacity(state.Opacity), CursorDefault, UserSelect(none), MinHeight(300))
         {
             new div(WidthFull, HeightFull, Border(1, solid, Gray200), BorderRadius(4), PositionRelative, Background(White), Padding(24))
             {
@@ -768,7 +768,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                         IsSelected=IsSelectedGroup(9)
                     }
                 },
-                new div(PositionAbsolute, Left(-8), Top(0), DisplayFlex, Bottom(0), JustifyContentSpaceAround, FlexDirectionColumn, Width(7))
+                new div(PositionAbsolute, Left(-9), Top(0), DisplayFlex, Bottom(0), JustifyContentSpaceAround, FlexDirectionColumn, Width(7))
                 {
                     new GroupItem
                     {
@@ -783,7 +783,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                         IsSelected=IsSelectedGroup(4)
                     }
                 },
-                new div(PositionAbsolute, Right(0), Top(0), DisplayFlex, Bottom(0), JustifyContentSpaceAround, FlexDirectionColumn, Width(7))
+                new div(PositionAbsolute, Right(1), Top(0), DisplayFlex, Bottom(0), JustifyContentSpaceAround, FlexDirectionColumn, Width(7))
                 {
                     new GroupItem
                     {
@@ -842,7 +842,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                             IsSelected=IsSelectedSubGroup(9)
                         }
                     },
-                    new div(PositionAbsolute, Left(-8), Top(0), DisplayFlex, Bottom(0), JustifyContentSpaceAround, FlexDirectionColumn, Width(7))
+                    new div(PositionAbsolute, Left(-9), Top(0), DisplayFlex, Bottom(0), JustifyContentSpaceAround, FlexDirectionColumn, Width(7))
                     {
                         new SubGroupItem
                         {
@@ -857,7 +857,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                             IsSelected=IsSelectedSubGroup(4)
                         }
                     },
-                    new div(PositionAbsolute, Right(0), Top(0), DisplayFlex, Bottom(0), JustifyContentSpaceAround, FlexDirectionColumn, Width(7))
+                    new div(PositionAbsolute, Right(1), Top(0), DisplayFlex, Bottom(0), JustifyContentSpaceAround, FlexDirectionColumn, Width(7))
                     {
                         new SubGroupItem
                         {
@@ -1070,7 +1070,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                 return string.Empty;
             }
 
-            return new div(OnMouseEnter(OnSubGroupItemMouseEnter), Id(Label), BorderRadius(4), DisplayFlex, JustifyContentCenter, AlignItemsCenter, WidthFitContent, HeightFitContent, TextAlignCenter, Padding(4), LineHeight16, Background(White), DisplayFlex, Gap(2.5), IsSelected ? Background(Gray200) : Background(White), Border(1, solid, Gray300), FlexWrap, FontSize13)
+            return new div(OnMouseEnter(OnSubGroupItemMouseEnter), Id(Label), BorderRadius(4), DisplayFlex, JustifyContentCenter, AlignItemsCenter, WidthFitContent, HeightFitContent, TextAlignCenter, Padding(4), LineHeight16, Background(White), DisplayFlex, Gap(3), IsSelected ? Background(Gray200) : Background(White), Border(1, solid, Gray300), FlexWrap, FontSize13)
             {
                 from item in GetChars()
                 select new div(WidthFitContent, HeightFitContent, LineHeight7, FontSize14)
