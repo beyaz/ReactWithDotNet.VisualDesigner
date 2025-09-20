@@ -276,6 +276,40 @@ sealed class StylerComponent : Component<StylerComponent.State>
                       new("medium"),
                       new("large")
                   ]
+              },
+              
+              new()
+              {
+                  Label = "weight",
+                  
+                  TargetCssName = "font-weight",
+                  
+                  IsCssUnitEnabled = true,
+                  
+                  Suggestions =
+                  [
+                      new("lighter"),
+                      new("light"),
+                      new("normal"),
+                      new("bold"),
+                      new("bolder")
+                  ]
+              },
+              
+              new()
+              {
+                  Label = "family",
+                  
+                  TargetCssName = "font-family",
+                  
+                  IsCssUnitEnabled = true,
+                  
+                  Suggestions =
+                  [
+                      new("Arial, sans-serif"),
+                      new("'Times New Roman', serif"),
+                      new("'Courier New', monospace")
+                  ]
               }
           ]
       }
@@ -294,21 +328,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
 
         ["Font"] = new()
         {
-            ["weight"] =
-            [
-                new() { Label = "normal", Value  = "font-weight: normal" },
-                new() { Label = "bold", Value    = "font-weight: bold" },
-                new() { Label = "bolder", Value  = "font-weight: bolder" },
-                new() { Label = "lighter", Value = "font-weight: lighter" },
-                new() { Label = "100", Value     = "font-weight: 100" },
-                new() { Label = "900", Value     = "font-weight: 900" }
-            ],
-            ["family"] =
-            [
-                new() { Label = "Arial", Value           = "font-family: Arial, sans-serif" },
-                new() { Label = "Times New Roman", Value = "font-family: 'Times New Roman', serif" },
-                new() { Label = "Courier New", Value     = "font-family: 'Courier New', monospace" }
-            ],
+           
             ["decoration"] =
             [
                 new() { Label = "underline", Value    = "text-decoration: underline" },
