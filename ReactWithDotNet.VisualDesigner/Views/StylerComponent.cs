@@ -324,6 +324,19 @@ sealed class StylerComponent : Component<StylerComponent.State>
                       new("overline"),
                       new("line-through"),
                   ]
+              },
+              
+              new()
+              {
+                  Label = "height",
+                  
+                  TargetCssName = "line-height",
+                  
+                  IsCssUnitEnabled = true,
+                  
+                  Suggestions =
+                  [
+                  ]
               }
           ]
       }
@@ -343,12 +356,6 @@ sealed class StylerComponent : Component<StylerComponent.State>
         ["Font"] = new()
         {
            
-            ["height"] =
-            [
-                new() { Label = "1", Value   = "line-height: 1" },
-                new() { Label = "1.5", Value = "line-height: 1.5" },
-                new() { Label = "2", Value   = "line-height: 2" }
-            ],
             ["spacing"] =
             [
                 new() { Label = "normal", Value = "letter-spacing: normal" },
