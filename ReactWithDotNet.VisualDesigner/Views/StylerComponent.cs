@@ -2,6 +2,91 @@ namespace ReactWithDotNet.VisualDesigner.Views;
 
 sealed class StylerComponent : Component<StylerComponent.State>
 {
+    record SubGroupItemModel
+    {
+        public required string Label { get; init; }
+        
+        public required IReadOnlyList<Option> Suggestions { get; init; }
+        
+        public required string TargetCssName { get; init; }
+        
+        public bool IsCssUnitEnabled { get; init; }
+    }
+    
+    record GroupModel
+    {
+        public required string Label { get; init; }
+        
+        public required IReadOnlyList<SubGroupItemModel> SubGroups { get; init; }
+    }
+
+    static IReadOnlyList<GroupModel> AllGroups => 
+    [
+      new ()
+      {
+          Label = "Layout",
+          
+          SubGroups =
+          [
+              new()
+              {
+                  Label = "display",
+                  
+                  TargetCssName = "display",
+                  
+                  Suggestions =
+                  [
+                      new()
+                      {
+                          Label = "flex", Value = "flex"
+                      },
+                      new()
+                      {
+                          Label = "grid", Value = "grid"
+                      },
+                      new()
+                      {
+                          Label = "block", Value = "block"
+                      }
+                  ]
+              }
+          ]
+      },
+      
+      new ()
+      {
+          Label = "Font",
+          
+          SubGroups =
+          [
+              new()
+              {
+                  Label = "size",
+                  
+                  TargetCssName = "font-size",
+                  
+                  IsCssUnitEnabled = true,
+                  
+                  Suggestions =
+                  [
+                      new()
+                      {
+                          Label = "small", Value = "small"
+                      },
+                      new()
+                      {
+                          Label = "medium", Value = "medium"
+                      },
+                      new()
+                      {
+                          Label = "large", Value = "large"
+                      }
+                  ]
+              }
+          ]
+      }
+    ];
+    
     [CustomEvent]
     public required Func<string, Task> OptionSelected { get; init; }
 
@@ -706,23 +791,12 @@ sealed class StylerComponent : Component<StylerComponent.State>
         return Task.CompletedTask;
     }
 
-    Task TogglePopup(MouseEvent e)
+
+    static string TryGetGroupLabelAt(int index)
     {
-        state = state with
+        if (AllGroups.Count > index)
         {
-            IsPopupVisible = !state.IsPopupVisible
-        };
-
-        return Task.CompletedTask;
-    }
-
-    string TryGetGroupLabelAt(int index)
-    {
-        var groupNames = AllData.Keys.ToList();
-
-        if (groupNames.Count > index)
-        {
-            return groupNames[index];
+            return AllGroups[index].Label;
         }
 
         return null;
@@ -736,10 +810,10 @@ sealed class StylerComponent : Component<StylerComponent.State>
             return null;
         }
 
-        var subGroupNames = AllData[groupName].Keys.ToList();
-        if (subGroupNames.Count > index)
+        var groupModel = AllGroups.First(x => x.Label == groupName);
+        if (groupModel.SubGroups.Count > index)
         {
-            return subGroupNames[index];
+            return groupModel.SubGroups[index].Label;
         }
 
         return null;
