@@ -275,7 +275,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
         new()
         {
             Label = "Font",
-
+            
             SubGroups =
             [
                 new()
@@ -763,13 +763,15 @@ sealed class StylerComponent : Component<StylerComponent.State>
                     {
                         Label=TryGetGroupLabelAt(3),
                         SelectionChange=OnGroupItemChanged,
-                        IsSelected=IsSelectedGroup(3)
+                        IsSelected=IsSelectedGroup(3),
+                        IsVerticle=true
                     },
                     new GroupItem
                     {
                         Label=TryGetGroupLabelAt(4),
                         SelectionChange=OnGroupItemChanged,
-                        IsSelected=IsSelectedGroup(4)
+                        IsSelected=IsSelectedGroup(4),
+                        IsVerticle=true
                     }
                 },
                 new div(PositionAbsolute, Right(-2), Top(0), DisplayFlex, Bottom(0), JustifyContentSpaceAround, FlexDirectionColumn, Width(7))
@@ -875,7 +877,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                                             Label=item.Label,
                                             Value=item.Value,
                                             Click=OnCssItemClicked,
-                                            TargetCssName= ActiveSubGroup.TargetCssName
+                                            TargetCssName=ActiveSubGroup.TargetCssName
                                         }
                                     }
                                 ,
@@ -927,7 +929,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
     {
         return state.SelectedGroupName == TryGetGroupLabelAt(index);
     }
-
+    
     bool IsSelectedSubGroup(int index)
     {
         return state.SelectedSubGroupName == TryGetSubGroupLabelAt(index);
