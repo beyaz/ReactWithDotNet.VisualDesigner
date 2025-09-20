@@ -910,7 +910,6 @@ sealed class StylerComponent : Component<StylerComponent.State>
         return Task.CompletedTask;
     }
 
-    bool HasAnyActiveGroup=>ActiveGroup != null;
     
     bool HasAnyActiveSubGroup=>ActiveSubGroup != null;
     
@@ -920,35 +919,10 @@ sealed class StylerComponent : Component<StylerComponent.State>
                 select g);
     
     SubGroupItemModel ActiveSubGroup =>
-        FirstOrDefaultOf(from g in AllGroups
-                         where g.Label == state.SelectedGroupName
-                         from sg in g.SubGroups
+        FirstOrDefaultOf(from sg in ActiveGroup?.SubGroups ?? []
                          where sg.Label == state.SelectedSubGroupName
                          select sg);
     
-    IReadOnlyList<Option> GetOptions()
-    {
-        var groupName = state.SelectedGroupName;
-        if (groupName is null)
-        {
-            return [];
-        }
-
-        var subGroupName = state.SelectedSubGroupName;
-        if (subGroupName is null)
-        {
-            return [];
-        }
-
-        FirstOf(from g in AllGroups
-                where g.Label == groupName
-                from sg in g.SubGroups
-                where sg.Label == subGroupName
-                select sg);
-        
-        return AllGroups.First(x => x.Label == groupName).SubGroups.First(x => x.Label == subGroupName).Suggestions;
-    }
-
     bool IsSelectedGroup(int index)
     {
         return state.SelectedGroupName == TryGetGroupLabelAt(index);
