@@ -132,6 +132,22 @@ sealed class StylerComponent : Component<StylerComponent.State>
                         new("column-reverse")
                     ]
                 },
+                
+                new()
+                {
+                    Label = "gap",
+                    
+                    TargetCssName = "gap",
+                    
+                    IsCssUnitEnabled = true,
+                    
+                    Suggestions =
+                    [
+                        new("4px"),
+                        new("8px"),
+                        new("16px"),
+                    ]
+                },
 
                 new()
                 {
@@ -463,6 +479,104 @@ sealed class StylerComponent : Component<StylerComponent.State>
                     ]
                 }
             ]
+        },
+        
+        new()
+        {
+            Label = "Space",
+
+            SubGroups =
+            [
+                new()
+                {
+                    Label = "margin",
+                    
+                    TargetCssName = "margin",
+                    
+                    IsCssUnitEnabled = true,
+                    
+                    Suggestions =
+                    [
+                        new("4px"),
+                        new("8px"),
+                        new("16px"),
+                        new("auto")
+                    ]
+                },
+                
+                new()
+                {
+                    Label = "padding",
+                    
+                    TargetCssName = "padding",
+                    
+                    IsCssUnitEnabled = true,
+                    
+                    Suggestions =
+                    [
+                        new("4px"),
+                        new("8px"),
+                        new("16px"),
+                        new("auto")
+                    ]
+                },
+                
+            ]
+        },
+        
+        new()
+        {
+            Label = "Bg",
+
+            SubGroups =
+            [
+                new()
+                {
+                    Label = "color",
+                    
+                    TargetCssName = "background-color",
+                    
+                    Suggestions =
+                    [
+                        new("White"),
+                        new("Black"),
+                        new("Gray"),
+                        new("transparent")
+                    ]
+                },
+                
+                new()
+                {
+                    Label = "size",
+                    
+                    TargetCssName = "background-size",
+                    
+                    Suggestions =
+                    [
+                        new("auto"),
+                        new("cover"),
+                        new("contain")
+                    ]
+                },
+                
+                new()
+                {
+                    Label = "repeat",
+                    
+                    TargetCssName = "background-repeat",
+                    
+                    Suggestions =
+                    [
+                        new("no-repeat"),
+                        new("repeat"),
+                        new("repeat-x"),
+                        new("repeat-y")
+                    ]
+                },
+                
+              
+                
+            ]
         }
     ];
     
@@ -473,57 +587,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
     {
         
 
-        ["Space"] = new()
-        {
-            ["margin"] =
-            [
-                new() { Label = "0", Value    = "margin: 0" },
-                new() { Label = "4px", Value  = "margin: 4px" },
-                new() { Label = "8px", Value  = "margin: 8px" },
-                new() { Label = "16px", Value = "margin: 16px" },
-                new() { Label = "auto", Value = "margin: auto" }
-            ],
-            ["padding"] =
-            [
-                new() { Label = "0", Value    = "padding: 0" },
-                new() { Label = "4px", Value  = "padding: 4px" },
-                new() { Label = "8px", Value  = "padding: 8px" },
-                new() { Label = "16px", Value = "padding: 16px" }
-            ],
-            ["gap"] =
-            [
-                new() { Label = "2px", Value  = "gap: 2px" },
-                new() { Label = "4px", Value  = "gap: 4px" },
-                new() { Label = "8px", Value  = "gap: 8px" },
-                new() { Label = "12px", Value = "gap: 12px" },
-                new() { Label = "16px", Value = "gap: 16px" }
-            ]
-        },
-
-        ["bg"] = new()
-        {
-            ["background color"] =
-            [
-                new() { Label = "White", Value       = "background-color: #ffffff" },
-                new() { Label = "Black", Value       = "background-color: #000000" },
-                new() { Label = "Red", Value         = "background-color: red" },
-                new() { Label = "Blue", Value        = "background-color: blue" },
-                new() { Label = "Transparent", Value = "background-color: transparent" }
-            ],
-            ["background size"] =
-            [
-                new() { Label = "auto", Value    = "background-size: auto" },
-                new() { Label = "cover", Value   = "background-size: cover" },
-                new() { Label = "contain", Value = "background-size: contain" }
-            ],
-            ["background repeat"] =
-            [
-                new() { Label = "no-repeat", Value = "background-repeat: no-repeat" },
-                new() { Label = "repeat", Value    = "background-repeat: repeat" },
-                new() { Label = "repeat-x", Value  = "background-repeat: repeat-x" },
-                new() { Label = "repeat-y", Value  = "background-repeat: repeat-y" }
-            ]
-        },
+       
 
         ["Effects"] = new()
         {
