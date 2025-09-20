@@ -36,18 +36,11 @@ sealed class StylerComponent : Component<StylerComponent.State>
                   
                   Suggestions =
                   [
-                      new()
-                      {
-                          Label = "flex", Value = "flex"
-                      },
-                      new()
-                      {
-                          Label = "grid", Value = "grid"
-                      },
-                      new()
-                      {
-                          Label = "block", Value = "block"
-                      }
+                      new("flex"),
+                      new("grid"),
+                      new("block"),
+                      new("inline"),
+                      new("inline-block")
                   ]
               }
           ]
@@ -67,22 +60,10 @@ sealed class StylerComponent : Component<StylerComponent.State>
                   
                   Suggestions =
                   [
-                      new()
-                      {
-                          Label = "row", Value = "row"
-                      },
-                      new()
-                      {
-                          Label = "column", Value = "column"
-                      },
-                      new()
-                      {
-                          Label = "row-reverse", Value = "row-reverse"
-                      },
-                      new()
-                      {
-                          Label = "column-reverse", Value = "column-reverse"
-                      }
+                      new("row"),
+                      new("column"),
+                      new("row-reverse"),
+                      new("column-reverse")
                   ]
               }
           ]
@@ -980,6 +961,16 @@ sealed class StylerComponent : Component<StylerComponent.State>
 
     internal sealed record Option
     {
+        public Option()
+        {
+            
+        }
+
+        public Option(string value)
+        {
+            Label = Value = value;
+        }
+        
         public string Label { get; init; }
 
         public string Value { get; init; }
