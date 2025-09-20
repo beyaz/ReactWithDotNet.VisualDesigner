@@ -656,54 +656,31 @@ sealed class StylerComponent : Component<StylerComponent.State>
                     },
                     new div(DisplayFlex, Padding(16), HeightFull, WidthFull, AlignItemsCenter, JustifyContentCenter)
                     {
-                        !IsFontSizeEditor ? null :
-                            new div(WidthFull, HeightFull, DisplayFlex)
+                        !HasAnyActiveSubGroup ? null :
+                            new div(WidthFull, HeightFull, DisplayFlex, Gap(8))
                             {
-                                new div(Width("50%"), DisplayFlex, AlignContentCenter, JustifyContentCenter, Gap(4), FlexWrap)
-                                {
-                                    new CssValueItem
+                                !ActiveSubGroup.Suggestions.Any() ? null :
+                                    new div(DisplayFlex, AlignContentCenter, JustifyContentCenter, Gap(4), FlexWrap)
                                     {
-                                        Label="small",
-                                        Value="font-size: small",
-                                        Click=OnCssItemClicked
-                                    },
-                                    new CssValueItem
-                                    {
-                                        Label="medium",
-                                        Value="font-size: medium",
-                                        Click=OnCssItemClicked
+                                        from item in ActiveSubGroup.Suggestions
+                                        select new CssValueItem
+                                        {
+                                            Label="small",
+                                            Value="font-size: small",
+                                            Click=OnCssItemClicked
+                                        }
                                     }
-                                },
-                                new div(Width("50%"), DisplayFlex, AlignItemsCenter, JustifyContentCenter)
-                                {
-                                    new CssUnitEditor
+                                ,
+                                !ActiveSubGroup.IsCssUnitEnabled ? null :
+                                    new div(DisplayFlex, AlignItemsCenter, JustifyContentCenter)
                                     {
-                                        Change=OnCssItemClicked,
-                                        CssName="font-size"
+                                        new CssUnitEditor
+                                        {
+                                            Change=OnCssItemClicked,
+                                            CssName=ActiveSubGroup.TargetCssName
+                                        } 
                                     }
-                                }
-                            }
-                        ,
-                        !true ? null :
-                            new div(WidthFull, HeightFull, DisplayFlex)
-                            {
-                                new div(Width("50%"), DisplayFlex, AlignContentCenter, JustifyContentCenter, Gap(4), FlexWrap)
-                                {
-                                    new CssValueItem
-                                    {
-                                        Label="normal",
-                                        Value="letter-spacing: normal",
-                                        Click=OnCssItemClicked
-                                    }
-                                },
-                                new div(Width("50%"), DisplayFlex, AlignItemsCenter, JustifyContentCenter)
-                                {
-                                    new CssUnitEditor
-                                    {
-                                        Change=OnCssItemClicked,
-                                        CssName="letter-spacing"
-                                    }
-                                }
+                                
                             }
                         
                     }
@@ -856,7 +833,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                 return new div(Opacity(0.2), BorderColor(Gray200), BorderRadius(4), DisplayFlex, JustifyContentCenter, AlignItemsCenter, WidthFull, HeightFull, TextAlignCenter, Border(1, solid, Gray200));
             }
 
-            return new div(OnMouseEnter(OnGroupItemMouseEnter), Id(Label), BorderRadius(4), DisplayFlex, JustifyContentCenter, AlignItemsCenter, WidthFitContent, HeightFitContent, TextAlignCenter, Padding(4), LineHeight16, Background(White), DisplayFlex, FlexWrap, Gap(5), BorderColor(IsSelected ?  Gray400 : Gray100), Border(1, solid, transparent))
+            return new div(OnMouseEnter(OnGroupItemMouseEnter), Id(Label), BorderRadius(4), DisplayFlex, JustifyContentCenter, AlignItemsCenter, WidthFitContent, HeightFitContent, TextAlignCenter, Padding(4), LineHeight16, Background(White), DisplayFlex, Gap(5), BorderColor(IsSelected ?  Gray400 : Gray100), Border(1, solid, transparent))
             {
                 from item in GetChars()
                 select new div(WidthFitContent, HeightFitContent, LineHeight7)
