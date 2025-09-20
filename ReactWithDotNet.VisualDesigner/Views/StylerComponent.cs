@@ -55,6 +55,40 @@ sealed class StylerComponent : Component<StylerComponent.State>
       
       new ()
       {
+          Label = "Flex",
+          
+          SubGroups =
+          [
+              new()
+              {
+                  Label = "direction",
+                  
+                  TargetCssName = "flex-direction",
+                  
+                  Suggestions =
+                  [
+                      new()
+                      {
+                          Label = "row", Value = "row"
+                      },
+                      new()
+                      {
+                          Label = "column", Value = "column"
+                      },
+                      new()
+                      {
+                          Label = "row-reverse", Value = "row-reverse"
+                      },
+                      new()
+                      {
+                          Label = "column-reverse", Value = "column-reverse"
+                      }
+                  ]
+              }
+          ]
+      },
+      new ()
+      {
           Label = "Font",
           
           SubGroups =
@@ -665,9 +699,10 @@ sealed class StylerComponent : Component<StylerComponent.State>
                                         from item in ActiveSubGroup.Suggestions
                                         select new CssValueItem
                                         {
-                                            Label="small",
-                                            Value="font-size: small",
-                                            Click=OnCssItemClicked
+                                            Label=item.Label,
+                                            Value=item.Value,
+                                            Click=OnCssItemClicked,
+                                            TargetCssName= ActiveSubGroup.TargetCssName
                                         }
                                     }
                                 ,
@@ -678,7 +713,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                                         {
                                             Change=OnCssItemClicked,
                                             CssName=ActiveSubGroup.TargetCssName
-                                        } 
+                                        }
                                     }
                                 
                             }
@@ -813,6 +848,8 @@ sealed class StylerComponent : Component<StylerComponent.State>
         public required bool IsSelected { get; init; }
 
         public required string Label { get; init; }
+
+        public bool IsVerticle { get; init; }
         
         IReadOnlyList<string> GetChars()
         {
@@ -833,7 +870,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                 return new div(Opacity(0.2), BorderColor(Gray200), BorderRadius(4), DisplayFlex, JustifyContentCenter, AlignItemsCenter, WidthFull, HeightFull, TextAlignCenter, Border(1, solid, Gray200));
             }
 
-            return new div(OnMouseEnter(OnGroupItemMouseEnter), Id(Label), BorderRadius(4), DisplayFlex, JustifyContentCenter, AlignItemsCenter, WidthFitContent, HeightFitContent, TextAlignCenter, Padding(4), LineHeight16, Background(White), DisplayFlex, Gap(5), BorderColor(IsSelected ?  Gray400 : Gray100), Border(1, solid, transparent))
+            return new div(OnMouseEnter(OnGroupItemMouseEnter), Id(Label), BorderRadius(4), DisplayFlex, JustifyContentCenter, AlignItemsCenter, WidthFitContent, HeightFitContent, TextAlignCenter, Padding(4), LineHeight16, Background(White), DisplayFlex, IsVerticle ? FlexWrap : FlexNoWrap, Gap(5), IsSelected ? BorderColor(Gray400) : BorderColor(Gray100), Border(1, solid, transparent))
             {
                 from item in GetChars()
                 select new div(WidthFitContent, HeightFitContent, LineHeight7)
@@ -901,6 +938,9 @@ sealed class StylerComponent : Component<StylerComponent.State>
         
         public required string Value { get; init; }
         
+        public required string TargetCssName { get; init; }
+        
+        
         [CustomEvent]
         public required Func<string, Task> Click { get; init; }
         
@@ -921,7 +961,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
          
         Task OnClicked(MouseEvent e)
         {
-            DispatchEvent(Click, [Value]);
+            DispatchEvent(Click, [$"{TargetCssName}: {Value}"]);
 
             return Task.CompletedTask;
         }

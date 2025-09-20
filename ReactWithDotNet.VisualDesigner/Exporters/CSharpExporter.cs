@@ -755,25 +755,50 @@ static class CSharpExporter
                                 var tagName = elementType.Value?.Name;
                                 
                                 var attributeValue = TryClearStringValue(styleAttribute.Value);
-
-                                var modifierCode = ToModifierTransformer.TryConvertToModifier(tagName, styleAttribute.Name, attributeValue);
-                                if (modifierCode.success)
+                                
+                                // try parse condition
                                 {
-                                    if (styleAttribute.Pseudo.HasNoValue())
+                                    var (success, condition, left, right) = TryParseConditionalValue(TryClearStringValue(styleAttribute.Value));
+                                    if (success)
                                     {
-                                        styleList.Add(modifierCode.modifierCode);
-                                        continue;
-                                    }
+                                        if (left.HasValue() && right.HasValue())
+                                        {
+                                            var modifierCodeForLeft = ToModifierTransformer.TryConvertToModifier(tagName, styleAttribute.Name, TryClearStringValue(left));    
+                                            
+                                            var modifierCodeForRight = ToModifierTransformer.TryConvertToModifier(tagName, styleAttribute.Name, TryClearStringValue(right));
 
-                                    var pseudo = ToModifierTransformer.TryGetPseudoForCSharp(styleAttribute.Pseudo);
-                                    if (pseudo.success)
+                                            if (modifierCodeForLeft.success && modifierCodeForRight.success)
+                                            {
+                                                styleList.Add($"{condition} ? {modifierCodeForLeft.modifierCode} : {modifierCodeForRight.modifierCode}");
+                                                continue;
+                                            }
+                                        }
+                                        
+                                    }
+                                }
+
+                                // try import from modifier
+                                {
+                                    
+                                    var modifierCode = ToModifierTransformer.TryConvertToModifier(tagName, styleAttribute.Name, attributeValue);
+                                    if (modifierCode.success)
                                     {
-                                        styleList.Add($"{pseudo.pseudo}({modifierCode})");
-                                        continue;
+                                        if (styleAttribute.Pseudo.HasNoValue())
+                                        {
+                                            styleList.Add(modifierCode.modifierCode);
+                                            continue;
+                                        }
+
+                                        var pseudo = ToModifierTransformer.TryGetPseudoForCSharp(styleAttribute.Pseudo);
+                                        if (pseudo.success)
+                                        {
+                                            styleList.Add($"{pseudo.pseudo}({modifierCode})");
+                                            continue;
+                                        }
+
+                                        return new ArgumentException("NotResolved:" + styleAttribute.Pseudo);
+
                                     }
-
-                                    return new ArgumentException("NotResolved:" + styleAttribute.Pseudo);
-
                                 }
                                 
                                 styleList.Add($"CreateStyleModifier(x=>x.{styleAttribute.Name} = ({styleAttribute.Value})");
