@@ -181,6 +181,80 @@ sealed class StylerComponent : Component<StylerComponent.State>
           ]
       },
       
+      new ()
+      {
+          Label = "Size",
+          
+          SubGroups =
+          [
+              new()
+              {
+                  Label = "min-width",
+                  
+                  TargetCssName = "min-width",
+                  
+                  IsCssUnitEnabled = true,
+                  
+                  Suggestions =
+                  [
+                      new("50px"),
+                      new("100px")
+                  ]
+              },
+              new()
+              {
+                  Label = "height",
+                  
+                  TargetCssName = "height",
+                  
+                  IsCssUnitEnabled = true,
+                  
+                  Suggestions =
+                  [
+                      new("100%"),
+                      new("75%"),
+                      new("50%"),
+                      new("25%"),
+                      new("fit-content"),
+                      new("max-content"),
+                      new("min-content")
+                  ]
+              },
+              new()
+              {
+                  Label = "width",
+                  
+                  TargetCssName = "width",
+                  
+                  IsCssUnitEnabled = true,
+                  
+                  Suggestions =
+                  [
+                      new("100%"),
+                      new("75%"),
+                      new("50%"),
+                      new("25%"),
+                      new("fit-content"),
+                      new("max-content"),
+                      new("min-content")
+                  ]
+              },
+              new()
+              {
+                  Label = "min-height",
+                  
+                  TargetCssName = "min-height",
+                  
+                  IsCssUnitEnabled = true,
+                  
+                  Suggestions =
+                  [
+                      new("50px"),
+                      new("100px")
+                  ]
+              }
+          ]
+      },
       
       new ()
       {
@@ -216,76 +290,10 @@ sealed class StylerComponent : Component<StylerComponent.State>
 
         
 
-        ["Size"] = new()
-        {
-            ["min width"] =
-            [
-                new() { Label = "50px", Value  = "min-width: 50px" },
-                new() { Label = "100px", Value = "min-width: 100px" },
-                new() { Label = "150px", Value = "min-width: 150px" },
-                new() { Label = "200px", Value = "min-width: 200px" },
-                new() { Label = "300px", Value = "min-width: 300px" },
-                new() { Label = "400px", Value = "min-width: 400px" },
-                new() { Label = "500px", Value = "min-width: 500px" }
-            ],
-
-            ["height"] =
-            [
-                new() { Label = "auto", Value        = "height: auto" },
-                new() { Label = "fit-content", Value = "height: fit-content" },
-                new() { Label = "max-content", Value = "height: max-content" },
-                new() { Label = "min-content", Value = "height: min-content" },
-                new() { Label = "100%", Value        = "height: 100%" },
-                new() { Label = "75%", Value         = "height: 75%" },
-                new() { Label = "50%", Value         = "height: 50%" },
-                new() { Label = "25%", Value         = "height: 25%" }
-            ],
-
-            ["width"] =
-            [
-                new() { Label = "100%", Value        = "width: 100%" },
-                new() { Label = "75%", Value         = "width: 75%" },
-                new() { Label = "50%", Value         = "width: 50%" },
-                new() { Label = "25%", Value         = "width: 25%" },
-                new() { Label = "auto", Value        = "width: auto" },
-                new() { Label = "fit-content", Value = "width: fit-content" },
-                new() { Label = "max-content", Value = "width: max-content" },
-                new() { Label = "min-content", Value = "width: min-content" },
-
-                new() { Label = "8px", Value   = "width: 8px" },
-                new() { Label = "12px", Value  = "width: 12px" },
-                new() { Label = "16px", Value  = "width: 16px" },
-                new() { Label = "20px", Value  = "width: 20px" },
-                new() { Label = "24px", Value  = "width: 24px" },
-                new() { Label = "32px", Value  = "width: 32px" },
-                new() { Label = "36px", Value  = "width: 36px" },
-                new() { Label = "40px", Value  = "width: 40px" },
-                new() { Label = "50px", Value  = "width: 50px" },
-                new() { Label = "80px", Value  = "width: 80px" },
-                new() { Label = "100px", Value = "width: 100px" },
-                new() { Label = "200px", Value = "width: 200px" }
-            ],
-
-            ["min | height"] =
-            [
-                new() { Label = "50px", Value  = "min-height: 50px" },
-                new() { Label = "100px", Value = "min-height: 100px" },
-                new() { Label = "150px", Value = "min-height: 150px" },
-                new() { Label = "200px", Value = "min-height: 200px" },
-                new() { Label = "300px", Value = "min-height: 300px" },
-                new() { Label = "400px", Value = "min-height: 400px" },
-                new() { Label = "500px", Value = "min-height: 500px" }
-            ]
-        }, 
+        
 
         ["Font"] = new()
         {
-            ["size"] =
-            [
-                new() { Label = "small", Value  = "font-size: small" },
-                new() { Label = "medium", Value = "font-size: medium" },
-                new() { Label = "large", Value  = "font-size: large" },
-            ],
             ["weight"] =
             [
                 new() { Label = "normal", Value  = "font-weight: normal" },
