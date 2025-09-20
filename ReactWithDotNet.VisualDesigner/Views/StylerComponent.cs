@@ -577,6 +577,131 @@ sealed class StylerComponent : Component<StylerComponent.State>
               
                 
             ]
+        },
+        
+        new()
+        {
+            Label = "Effects",
+
+            SubGroups =
+            [
+                new()
+                {
+                    Label = "opacity",
+                    
+                    TargetCssName = "opacity",
+                    
+                    Suggestions =
+                    [
+                        new("0.1"),
+                        new("0.2"),
+                        new("0.3"),
+                        new("0.4"),
+                        new("0.5"),
+                        new("0.6"),
+                        new("0.7"),
+                        new("0.8"),
+                        new("0.9")
+                    ]
+                },
+                
+                new()
+                {
+                    Label = "transition",
+                    
+                    TargetCssName = "transition",
+                    
+                    Suggestions =
+                    [
+                        new("all 0.3s ease"),
+                        new("opacity 0.5s ease-in-out")
+                    ]
+                },
+                
+                new()
+                {
+                    Label = "animation",
+                    
+                    TargetCssName = "animation",
+                    
+                    Suggestions =
+                    [
+                        new("spin 1s linear infinite")
+                    ]
+                },
+                
+                new()
+                {
+                    Label = "filter",
+                    
+                    TargetCssName = "filter",
+                    
+                    Suggestions =
+                    [
+                        new("blur(5px)"),
+                        new("grayscale(100%)")
+                    ]
+                },
+
+                
+                
+              
+                
+            ]
+        },
+        
+        new()
+        {
+            Label = "Other",
+
+            SubGroups =
+            [
+                new()
+                {
+                    Label = "object fit",
+                    
+                    TargetCssName = "object-fit",
+                    
+                    Suggestions =
+                    [
+                        new("cover"),
+                        new("contain"),
+                        new("fill"),
+                        new("scale-down")
+                    ]
+                },
+                
+                new()
+                {
+                    Label = "cursor",
+                    
+                    TargetCssName = "cursor",
+                    
+                    Suggestions =
+                    [
+                        new("default"),
+                        new("pointer"),
+                        new("wait"),
+                        new("text"),
+                        new("move"),
+                        new("not-allowed"),
+                        new("crosshair")
+                    ]
+                },
+
+              
+
+               
+                
+              
+                
+            ]
+        },
+        
+        new ()
+        {
+            Label = "",
+            SubGroups = []
         }
     ];
     
@@ -589,76 +714,12 @@ sealed class StylerComponent : Component<StylerComponent.State>
 
        
 
-        ["Effects"] = new()
-        {
-            ["opacity"] =
-            [
-                new() { Label = "0.1", Value = "opacity: 0.1" },
-                new() { Label = "0.2", Value = "opacity: 0.2" },
-                new() { Label = "0.3", Value = "opacity: 0.3" },
-                new() { Label = "0.4", Value = "opacity: 0.4" },
-                new() { Label = "0.5", Value = "opacity: 0.5" },
-                new() { Label = "0.6", Value = "opacity: 0.6" },
-                new() { Label = "0.7", Value = "opacity: 0.7" },
-                new() { Label = "0.8", Value = "opacity: 0.8" },
-                new() { Label = "0.9", Value = "opacity: 0.9" }
-            ],
-            ["transition"] =
-            [
-                new() { Label = "all 0.3s", Value     = "transition: all 0.3s ease" },
-                new() { Label = "opacity 0.5s", Value = "transition: opacity 0.5s ease-in-out" }
-            ],
-            ["animation"] =
-            [
-                new() { Label = "none", Value = "animation: none" },
-                new() { Label = "spin", Value = "animation: spin 1s linear infinite" }
-            ],
-            ["filter"] =
-            [
-                new() { Label = "none", Value      = "filter: none" },
-                new() { Label = "blur", Value      = "filter: blur(5px)" },
-                new() { Label = "grayscale", Value = "filter: grayscale(100%)" }
-            ]
-        },
 
         ["Other"] = new()
         {
-            ["object fit"] =
-            [
-                new() { Label = "cover", Value      = "object-fit: cover" },
-                new() { Label = "contain", Value    = "object-fit: contain" },
-                new() { Label = "fill", Value       = "object-fit: fill" },
-                new() { Label = "none", Value       = "object-fit: none" },
-                new() { Label = "scale-down", Value = "object-fit: scale-down" }
-            ],
-            ["cursor"] =
-            [
-                new() { Label = "auto", Value        = "cursor: auto" },
-                new() { Label = "default", Value     = "cursor: default" },
-                new() { Label = "pointer", Value     = "cursor: pointer" },
-                new() { Label = "wait", Value        = "cursor: wait" },
-                new() { Label = "text", Value        = "cursor: text" },
-                new() { Label = "move", Value        = "cursor: move" },
-                new() { Label = "not-allowed", Value = "cursor: not-allowed" },
-                new() { Label = "crosshair", Value   = "cursor: crosshair" }
-            ],
-            ["visibility"] =
-            [
-                new() { Label = "visible", Value  = "visibility: visible" },
-                new() { Label = "hidden", Value   = "visibility: hidden" },
-                new() { Label = "collapse", Value = "visibility: collapse" }
-            ],
-            ["pointer events"] =
-            [
-                new() { Label = "auto", Value = "pointer-events: auto" },
-                new() { Label = "none", Value = "pointer-events: none" }
-            ],
-            ["clip path"] =
-            [
-                new() { Label = "circle", Value  = "clip-path: circle(50%)" },
-                new() { Label = "inset", Value   = "clip-path: inset(10px)" },
-                new() { Label = "polygon", Value = "clip-path: polygon(50% 0, 100% 100%, 0 100%)" }
-            ]
+           
+            
+           
         },
         
         ["Other2"] = new()
