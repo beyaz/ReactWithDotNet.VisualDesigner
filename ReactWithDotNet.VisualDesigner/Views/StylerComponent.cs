@@ -310,6 +310,20 @@ sealed class StylerComponent : Component<StylerComponent.State>
                       new("'Times New Roman', serif"),
                       new("'Courier New', monospace")
                   ]
+              },
+              
+              new()
+              {
+                  Label = "decoration",
+                  
+                  TargetCssName = "text-decoration",
+                  
+                  Suggestions =
+                  [
+                      new("underline"),
+                      new("overline"),
+                      new("line-through"),
+                  ]
               }
           ]
       }
@@ -329,12 +343,6 @@ sealed class StylerComponent : Component<StylerComponent.State>
         ["Font"] = new()
         {
            
-            ["decoration"] =
-            [
-                new() { Label = "underline", Value    = "text-decoration: underline" },
-                new() { Label = "overline", Value     = "text-decoration: overline" },
-                new() { Label = "line-through", Value = "text-decoration: line-through" }
-            ],
             ["height"] =
             [
                 new() { Label = "1", Value   = "line-height: 1" },
