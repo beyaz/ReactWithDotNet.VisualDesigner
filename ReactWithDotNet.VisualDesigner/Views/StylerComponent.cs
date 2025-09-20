@@ -861,34 +861,29 @@ sealed class StylerComponent : Component<StylerComponent.State>
                             IsSelected=IsSelectedSubGroup(6)
                         }
                     },
-                    new div(DisplayFlex, Padding(16), HeightFull, WidthFull, AlignItemsCenter, JustifyContentCenter)
+                    new div(DisplayFlex, Padding(16), HeightFull, WidthFull, AlignItemsCenter, JustifyContentCenter, Gap(8))
                     {
-                        !HasAnyActiveSubGroup ? null :
-                            new div(WidthFull, HeightFull, DisplayFlex, Gap(8))
+                        !ActiveSubGroup.Suggestions.Any() ? null :
+                            new div(DisplayFlex, AlignContentCenter, JustifyContentCenter, Gap(4), FlexWrap)
                             {
-                                !ActiveSubGroup.Suggestions.Any() ? null :
-                                    new div(DisplayFlex, AlignContentCenter, JustifyContentCenter, Gap(4), FlexWrap)
-                                    {
-                                        from item in ActiveSubGroup.Suggestions
-                                        select new CssValueItem
-                                        {
-                                            Label=item.Label,
-                                            Value=item.Value,
-                                            Click=OnCssItemClicked,
-                                            TargetCssName=ActiveSubGroup.TargetCssName
-                                        }
-                                    }
-                                ,
-                                !ActiveSubGroup.IsCssUnitEnabled ? null :
-                                    new div(DisplayFlex, AlignItemsCenter, JustifyContentCenter)
-                                    {
-                                        new CssUnitEditor
-                                        {
-                                            Change=OnCssItemClicked,
-                                            CssName=ActiveSubGroup.TargetCssName
-                                        }
-                                    }
-                                
+                                from item in ActiveSubGroup.Suggestions
+                                select new CssValueItem
+                                {
+                                    Label=item.Label,
+                                    Value=item.Value,
+                                    Click=OnCssItemClicked,
+                                    TargetCssName=ActiveSubGroup.TargetCssName
+                                }
+                            }
+                        ,
+                        !ActiveSubGroup.IsCssUnitEnabled ? null :
+                            new div(DisplayFlex, AlignItemsCenter, JustifyContentCenter)
+                            {
+                                new CssUnitEditor
+                                {
+                                    Change=OnCssItemClicked,
+                                    CssName=ActiveSubGroup.TargetCssName
+                                }
                             }
                         
                     }
