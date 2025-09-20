@@ -725,6 +725,22 @@ sealed class StylerComponent : Component<StylerComponent.State>
         return Task.CompletedTask;
     }
 
+    bool HasAnyActiveGroup=>ActiveGroup != null;
+    
+    bool HasAnyActiveSubGroup=>ActiveSubGroup != null;
+    
+    GroupModel ActiveGroup =>
+        FirstOrDefaultOf(from g in AllGroups
+                where g.Label == state.SelectedGroupName
+                select g);
+    
+    SubGroupItemModel ActiveSubGroup =>
+        FirstOrDefaultOf(from g in AllGroups
+                         where g.Label == state.SelectedGroupName
+                         from sg in g.SubGroups
+                         where sg.Label == state.SelectedSubGroupName
+                         select sg);
+    
     IReadOnlyList<Option> GetOptions()
     {
         var groupName = state.SelectedGroupName;
@@ -739,7 +755,13 @@ sealed class StylerComponent : Component<StylerComponent.State>
             return [];
         }
 
-        return AllData[groupName][subGroupName];
+        FirstOf(from g in AllGroups
+                where g.Label == groupName
+                from sg in g.SubGroups
+                where sg.Label == subGroupName
+                select sg);
+        
+        return AllGroups.First(x => x.Label == groupName).SubGroups.First(x => x.Label == subGroupName).Suggestions;
     }
 
     bool IsSelectedGroup(int index)
@@ -763,16 +785,6 @@ sealed class StylerComponent : Component<StylerComponent.State>
         return Task.CompletedTask;
     }
 
-    Task OnOptionItemClicked(MouseEvent e)
-    {
-        var optionLabel = e.target.id;
-
-        var option = GetOptions().First(x => x.Label == optionLabel);
-
-        DispatchEvent(OptionSelected, [option.Value]);
-
-        return Task.CompletedTask;
-    }
     Task OnCssItemClicked(string cssValue)
     {
         DispatchEvent(OptionSelected, [cssValue]);
