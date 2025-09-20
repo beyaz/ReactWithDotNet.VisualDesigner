@@ -708,63 +708,6 @@ sealed class StylerComponent : Component<StylerComponent.State>
     [CustomEvent]
     public required Func<string, Task> OptionSelected { get; init; }
 
-    static Dictionary<string, Dictionary<string, IReadOnlyList<Option>>> AllData => new()
-    {
-        
-
-       
-
-
-        ["Other"] = new()
-        {
-           
-            
-           
-        },
-        
-        ["Other2"] = new()
-        {
-            ["object fit"] =
-            [
-                new() { Label = "cover", Value      = "object-fit: cover" },
-                new() { Label = "contain", Value    = "object-fit: contain" },
-                new() { Label = "fill", Value       = "object-fit: fill" },
-                new() { Label = "none", Value       = "object-fit: none" },
-                new() { Label = "scale-down", Value = "object-fit: scale-down" }
-            ],
-            ["cursor"] =
-            [
-                new() { Label = "auto", Value        = "cursor: auto" },
-                new() { Label = "default", Value     = "cursor: default" },
-                new() { Label = "pointer", Value     = "cursor: pointer" },
-                new() { Label = "wait", Value        = "cursor: wait" },
-                new() { Label = "text", Value        = "cursor: text" },
-                new() { Label = "move", Value        = "cursor: move" },
-                new() { Label = "not-allowed", Value = "cursor: not-allowed" },
-                new() { Label = "crosshair", Value   = "cursor: crosshair" }
-            ],
-            ["visibility"] =
-            [
-                new() { Label = "visible", Value  = "visibility: visible" },
-                new() { Label = "hidden", Value   = "visibility: hidden" },
-                new() { Label = "collapse", Value = "visibility: collapse" }
-            ],
-            ["pointer events"] =
-            [
-                new() { Label = "auto", Value = "pointer-events: auto" },
-                new() { Label = "none", Value = "pointer-events: none" }
-            ],
-            ["clip path"] =
-            [
-                new() { Label = "circle", Value  = "clip-path: circle(50%)" },
-                new() { Label = "inset", Value   = "clip-path: inset(10px)" },
-                new() { Label = "polygon", Value = "clip-path: polygon(50% 0, 100% 100%, 0 100%)" }
-            ]
-        }
-    };
-
-    bool IsFontSizeEditor => TryGetSubGroupLabelAt(0) == "size";
-
     
     protected override Element render()
     {  
