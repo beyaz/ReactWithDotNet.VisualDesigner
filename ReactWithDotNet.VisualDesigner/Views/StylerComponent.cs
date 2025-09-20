@@ -772,7 +772,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                         IsSelected=IsSelectedGroup(4)
                     }
                 },
-                new div(PositionAbsolute, Right(-2), Top(0), DisplayFlex, Bottom(0), JustifyContentSpaceAround, FlexDirectionColumn, Width(7))
+                new div(PositionAbsolute, Right(0), Top(0), DisplayFlex, Bottom(0), JustifyContentSpaceAround, FlexDirectionColumn, Width(7))
                 {
                     new GroupItem
                     {
@@ -789,7 +789,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                 },
                 new div(WidthFull, HeightFull, Border(1, solid, Gray200), BorderRadius(4), PositionRelative, Background(White))
                 {
-                    new div(PositionAbsolute, Left(0), Top(-12), DisplayFlex, Right(0), JustifyContentSpaceAround)
+                    new div(PositionAbsolute, Left(0), Top(-8), DisplayFlex, Right(0), JustifyContentSpaceAround)
                     {
                         new SubGroupItem
                         {
@@ -810,7 +810,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                             IsSelected=IsSelectedSubGroup(2)
                         }
                     },
-                    new div(PositionAbsolute, Left(0), Bottom(-4), DisplayFlex, Right(0), JustifyContentSpaceAround)
+                    new div(PositionAbsolute, Left(0), Bottom(-8), DisplayFlex, Right(0), JustifyContentSpaceAround)
                     {
                         new SubGroupItem
                         {
@@ -831,7 +831,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                             IsSelected=IsSelectedSubGroup(9)
                         }
                     },
-                    new div(PositionAbsolute, Left(-6), Top(0), DisplayFlex, Bottom(0), JustifyContentSpaceAround, FlexDirectionColumn, Width(7))
+                    new div(PositionAbsolute, Left(-8), Top(0), DisplayFlex, Bottom(0), JustifyContentSpaceAround, FlexDirectionColumn, Width(7))
                     {
                         new SubGroupItem
                         {
@@ -846,7 +846,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                             IsSelected=IsSelectedSubGroup(4)
                         }
                     },
-                    new div(PositionAbsolute, Right(-2), Top(0), DisplayFlex, Bottom(0), JustifyContentSpaceAround, FlexDirectionColumn, Width(7))
+                    new div(PositionAbsolute, Right(0), Top(0), DisplayFlex, Bottom(0), JustifyContentSpaceAround, FlexDirectionColumn, Width(7))
                     {
                         new SubGroupItem
                         {
@@ -861,32 +861,34 @@ sealed class StylerComponent : Component<StylerComponent.State>
                             IsSelected=IsSelectedSubGroup(6)
                         }
                     },
-                    new div(DisplayFlex, Padding(16), HeightFull, WidthFull, AlignItemsCenter, JustifyContentCenter, Gap(8))
-                    {
-                        !ActiveSubGroup.Suggestions.Any() ? null :
-                            new div(DisplayFlex, AlignContentCenter, JustifyContentCenter, Gap(4), FlexWrap)
-                            {
-                                from item in ActiveSubGroup.Suggestions
-                                select new CssValueItem
+                    !HasAnyActiveSubGroup ? null :
+                        new div(DisplayFlex, Padding(16), HeightFull, WidthFull, AlignItemsCenter, JustifyContentCenter, Gap(8))
+                        {
+                            !ActiveSubGroup.Suggestions.Any() ? null :
+                                new div(DisplayFlex, AlignContentCenter, JustifyContentCenter, Gap(4), FlexWrap)
                                 {
-                                    Label=item.Label,
-                                    Value=item.Value,
-                                    Click=OnCssItemClicked,
-                                    TargetCssName=ActiveSubGroup.TargetCssName
+                                    from item in ActiveSubGroup.Suggestions
+                                    select new CssValueItem
+                                    {
+                                        Label=item.Label,
+                                        Value=item.Value,
+                                        Click=OnCssItemClicked,
+                                        TargetCssName=ActiveSubGroup.TargetCssName
+                                    }
                                 }
-                            }
-                        ,
-                        !ActiveSubGroup.IsCssUnitEnabled ? null :
-                            new div(DisplayFlex, AlignItemsCenter, JustifyContentCenter)
-                            {
-                                new CssUnitEditor
+                            ,
+                            !ActiveSubGroup.IsCssUnitEnabled ? null :
+                                new div(DisplayFlex, AlignItemsCenter, JustifyContentCenter)
                                 {
-                                    Change=OnCssItemClicked,
-                                    CssName=ActiveSubGroup.TargetCssName
+                                    new CssUnitEditor
+                                    {
+                                        Change=OnCssItemClicked,
+                                        CssName=ActiveSubGroup.TargetCssName
+                                    }
                                 }
-                            }
-                        
-                    }
+                            
+                        }
+                    
                 }
             }
         };
