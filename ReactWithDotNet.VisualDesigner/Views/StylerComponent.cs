@@ -20,326 +20,450 @@ sealed class StylerComponent : Component<StylerComponent.State>
         public required IReadOnlyList<SubGroupItemModel> SubGroups { get; init; }
     }
 
-    static IReadOnlyList<GroupModel> AllGroups => 
+    static IReadOnlyList<GroupModel> AllGroups =>
     [
-      new ()
-      {
-          Label = "Layout",
-          
-          SubGroups =
-          [
-              new()
-              {
-                  Label = "display",
-                  
-                  TargetCssName = "display",
-                  
-                  Suggestions =
-                  [
-                      new("flex"),
-                      new("grid"),
-                      new("block"),
-                      new("inline"),
-                      new("inline-block")
-                  ]
-              },
-              new()
-              {
-                  Label = "position",
-                  
-                  TargetCssName = "position",
-                  
-                  Suggestions =
-                  [
-                      new("static"),
-                      new("relative"),
-                      new("absolute"),
-                      new("fixed"),
-                      new("sticky")
-                  ]
-              },
-              
-              new()
-              {
-                  Label = "overflow",
-                  
-                  TargetCssName = "overflow",
-                  
-                  Suggestions =
-                  [
-                      new("visible"),
-                      new("hidden"),
-                      new("scroll"),
-                      new("auto")
-                  ]
-              },
-              
-              new()
-              {
-                  Label = "transform",
-                  
-                  TargetCssName = "transform",
-                  
-                  Suggestions =
-                  [
-                      new("translateY(-50%)"),
-                      new("translateX(-50%)")
-                  ]
-              },
-              
-              new()
-              {
-                  Label = "z-index",
-                  
-                  TargetCssName = "z-index",
-                  
-                  Suggestions =
-                  [
-                      new("1"),
-                      new("2"),
-                      new("3"),
-                      new("4"),
-                      new("5"),
-                      new("6"),
-                      new("7"),
-                      new("8"),
-                      new("9"),
-                      new("10"),
-                      new("100"),
-                      new("1000"),
-                  ]
-              }
-          ]
-      },
-      
-      new ()
-      {
-          Label = "Flex",
-          
-          SubGroups =
-          [
-              new()
-              {
-                  Label = "direction",
-                  
-                  TargetCssName = "flex-direction",
-                  
-                  Suggestions =
-                  [
-                      new("row"),
-                      new("column"),
-                      new("row-reverse"),
-                      new("column-reverse")
-                  ]
-              },
-              
-              new()
-              {
-                  Label = "justify",
-                  
-                  TargetCssName = "justify-content",
-                  
-                  Suggestions =
-                  [
-                      new("flex-start"),
-                      new("flex-end"),
-                      new("center"),
-                      new("space-between"),
-                      new("space-around"),
-                      new("space-evenly"),
-                  ]
-              },
-              
-              new()
-              {
-                  Label = "align",
-                  
-                  TargetCssName = "align-items",
-                  
-                  Suggestions =
-                  [
-                      new("flex-start"),
-                      new("flex-end"),
-                      new("center"),
-                      new("stretch")
-                  ]
-              },
-              
-              new()
-              {
-                  Label = "wrap",
-                  
-                  TargetCssName = "flex-wrap",
-                  
-                  Suggestions =
-                  [
-                      new("wrap"),
-                      new("wrap-reverse"),
-                      new("nowrap")
-                  ]
-              },
-          ]
-      },
-      
-      new ()
-      {
-          Label = "Size",
-          
-          SubGroups =
-          [
-              new()
-              {
-                  Label = "min-width",
-                  
-                  TargetCssName = "min-width",
-                  
-                  IsCssUnitEnabled = true,
-                  
-                  Suggestions =
-                  [
-                      new("50px"),
-                      new("100px")
-                  ]
-              },
-              new()
-              {
-                  Label = "height",
-                  
-                  TargetCssName = "height",
-                  
-                  IsCssUnitEnabled = true,
-                  
-                  Suggestions =
-                  [
-                      new("100%"),
-                      new("75%"),
-                      new("50%"),
-                      new("25%"),
-                      new("fit-content"),
-                      new("max-content"),
-                      new("min-content")
-                  ]
-              },
-              new()
-              {
-                  Label = "width",
-                  
-                  TargetCssName = "width",
-                  
-                  IsCssUnitEnabled = true,
-                  
-                  Suggestions =
-                  [
-                      new("100%"),
-                      new("75%"),
-                      new("50%"),
-                      new("25%"),
-                      new("fit-content"),
-                      new("max-content"),
-                      new("min-content")
-                  ]
-              },
-              new()
-              {
-                  Label = "min-height",
-                  
-                  TargetCssName = "min-height",
-                  
-                  IsCssUnitEnabled = true,
-                  
-                  Suggestions =
-                  [
-                      new("50px"),
-                      new("100px")
-                  ]
-              }
-          ]
-      },
-      
-      new ()
-      {
-          Label = "Font",
-          
-          SubGroups =
-          [
-              new()
-              {
-                  Label = "size",
-                  
-                  TargetCssName = "font-size",
-                  
-                  IsCssUnitEnabled = true,
-                  
-                  Suggestions =
-                  [
-                      new("small"),
-                      new("medium"),
-                      new("large")
-                  ]
-              },
-              
-              new()
-              {
-                  Label = "weight",
-                  
-                  TargetCssName = "font-weight",
-                  
-                  IsCssUnitEnabled = true,
-                  
-                  Suggestions =
-                  [
-                      new("lighter"),
-                      new("light"),
-                      new("normal"),
-                      new("bold"),
-                      new("bolder")
-                  ]
-              },
-              
-              new()
-              {
-                  Label = "family",
-                  
-                  TargetCssName = "font-family",
-                  
-                  IsCssUnitEnabled = true,
-                  
-                  Suggestions =
-                  [
-                      new("Arial, sans-serif"),
-                      new("'Times New Roman', serif"),
-                      new("'Courier New', monospace")
-                  ]
-              },
-              
-              new()
-              {
-                  Label = "decoration",
-                  
-                  TargetCssName = "text-decoration",
-                  
-                  Suggestions =
-                  [
-                      new("underline"),
-                      new("overline"),
-                      new("line-through"),
-                  ]
-              },
-              
-              new()
-              {
-                  Label = "height",
-                  
-                  TargetCssName = "line-height",
-                  
-                  IsCssUnitEnabled = true,
-                  
-                  Suggestions =
-                  [
-                  ]
-              }
-          ]
-      }
+        new()
+        {
+            Label = "Layout",
+
+            SubGroups =
+            [
+                new()
+                {
+                    Label = "display",
+
+                    TargetCssName = "display",
+
+                    Suggestions =
+                    [
+                        new("flex"),
+                        new("grid"),
+                        new("block"),
+                        new("inline"),
+                        new("inline-block")
+                    ]
+                },
+                new()
+                {
+                    Label = "position",
+
+                    TargetCssName = "position",
+
+                    Suggestions =
+                    [
+                        new("static"),
+                        new("relative"),
+                        new("absolute"),
+                        new("fixed"),
+                        new("sticky")
+                    ]
+                },
+
+                new()
+                {
+                    Label = "overflow",
+
+                    TargetCssName = "overflow",
+
+                    Suggestions =
+                    [
+                        new("visible"),
+                        new("hidden"),
+                        new("scroll"),
+                        new("auto")
+                    ]
+                },
+
+                new()
+                {
+                    Label = "transform",
+
+                    TargetCssName = "transform",
+
+                    Suggestions =
+                    [
+                        new("translateY(-50%)"),
+                        new("translateX(-50%)")
+                    ]
+                },
+
+                new()
+                {
+                    Label = "z-index",
+
+                    TargetCssName = "z-index",
+
+                    Suggestions =
+                    [
+                        new("1"),
+                        new("2"),
+                        new("3"),
+                        new("4"),
+                        new("5"),
+                        new("6"),
+                        new("7"),
+                        new("8"),
+                        new("9"),
+                        new("10"),
+                        new("100"),
+                        new("1000"),
+                    ]
+                }
+            ]
+        },
+
+        new()
+        {
+            Label = "Flex",
+
+            SubGroups =
+            [
+                new()
+                {
+                    Label = "direction",
+
+                    TargetCssName = "flex-direction",
+
+                    Suggestions =
+                    [
+                        new("row"),
+                        new("column"),
+                        new("row-reverse"),
+                        new("column-reverse")
+                    ]
+                },
+
+                new()
+                {
+                    Label = "justify",
+
+                    TargetCssName = "justify-content",
+
+                    Suggestions =
+                    [
+                        new("flex-start"),
+                        new("flex-end"),
+                        new("center"),
+                        new("space-between"),
+                        new("space-around"),
+                        new("space-evenly"),
+                    ]
+                },
+
+                new()
+                {
+                    Label = "align",
+
+                    TargetCssName = "align-items",
+
+                    Suggestions =
+                    [
+                        new("flex-start"),
+                        new("flex-end"),
+                        new("center"),
+                        new("stretch")
+                    ]
+                },
+
+                new()
+                {
+                    Label = "wrap",
+
+                    TargetCssName = "flex-wrap",
+
+                    Suggestions =
+                    [
+                        new("wrap"),
+                        new("wrap-reverse"),
+                        new("nowrap")
+                    ]
+                },
+            ]
+        },
+
+        new()
+        {
+            Label = "Size",
+
+            SubGroups =
+            [
+                new()
+                {
+                    Label = "min-width",
+
+                    TargetCssName = "min-width",
+
+                    IsCssUnitEnabled = true,
+
+                    Suggestions =
+                    [
+                        new("50px"),
+                        new("100px")
+                    ]
+                },
+                new()
+                {
+                    Label = "height",
+
+                    TargetCssName = "height",
+
+                    IsCssUnitEnabled = true,
+
+                    Suggestions =
+                    [
+                        new("100%"),
+                        new("75%"),
+                        new("50%"),
+                        new("25%"),
+                        new("fit-content"),
+                        new("max-content"),
+                        new("min-content")
+                    ]
+                },
+                new()
+                {
+                    Label = "width",
+
+                    TargetCssName = "width",
+
+                    IsCssUnitEnabled = true,
+
+                    Suggestions =
+                    [
+                        new("100%"),
+                        new("75%"),
+                        new("50%"),
+                        new("25%"),
+                        new("fit-content"),
+                        new("max-content"),
+                        new("min-content")
+                    ]
+                },
+                new()
+                {
+                    Label = "min-height",
+
+                    TargetCssName = "min-height",
+
+                    IsCssUnitEnabled = true,
+
+                    Suggestions =
+                    [
+                        new("50px"),
+                        new("100px")
+                    ]
+                }
+            ]
+        },
+
+        new()
+        {
+            Label = "Font",
+
+            SubGroups =
+            [
+                new()
+                {
+                    Label = "size",
+
+                    TargetCssName = "font-size",
+
+                    IsCssUnitEnabled = true,
+
+                    Suggestions =
+                    [
+                        new("small"),
+                        new("medium"),
+                        new("large")
+                    ]
+                },
+
+                new()
+                {
+                    Label = "weight",
+
+                    TargetCssName = "font-weight",
+
+                    IsCssUnitEnabled = true,
+
+                    Suggestions =
+                    [
+                        new("lighter"),
+                        new("light"),
+                        new("normal"),
+                        new("bold"),
+                        new("bolder")
+                    ]
+                },
+
+                new()
+                {
+                    Label = "family",
+
+                    TargetCssName = "font-family",
+
+                    IsCssUnitEnabled = true,
+
+                    Suggestions =
+                    [
+                        new("Arial, sans-serif"),
+                        new("'Times New Roman', serif"),
+                        new("'Courier New', monospace")
+                    ]
+                },
+
+                new()
+                {
+                    Label = "decoration",
+
+                    TargetCssName = "text-decoration",
+
+                    Suggestions =
+                    [
+                        new("underline"),
+                        new("overline"),
+                        new("line-through"),
+                    ]
+                },
+
+                new()
+                {
+                    Label = "height",
+
+                    TargetCssName = "line-height",
+
+                    IsCssUnitEnabled = true,
+
+                    Suggestions =
+                    [
+                    ]
+                },
+
+                new()
+                {
+                    Label = "spacing",
+
+                    TargetCssName = "letter-spacing",
+
+                    IsCssUnitEnabled = true,
+
+                    Suggestions =
+                    [
+                    ]
+                },
+
+                new()
+                {
+                    Label = "align",
+
+                    TargetCssName = "text-align",
+
+                    Suggestions =
+                    [
+                        new("left"),
+                        new("center"),
+                        new("right"),
+                        new("justify")
+                    ]
+                },
+
+                new()
+                {
+                    Label = "wrap",
+
+                    TargetCssName = "white-space",
+
+                    Suggestions =
+                    [
+                        new("normal"),
+                        new("nowrap"),
+                        new("pre"),
+                        new("pre-wrap"),
+                        new("pre-line")
+                    ]
+                },
+
+                new()
+                {
+                    Label = "color",
+
+                    TargetCssName = "color",
+
+                    Suggestions =
+                    [
+                        new("Black"),
+                        new("White"),
+                        new("Gray")
+                    ]
+                }
+            ]
+        },
+
+        new()
+        {
+            Label = "Border",
+
+            SubGroups =
+            [
+                new()
+                {
+                    Label = "style",
+                    TargetCssName = "border-style",
+                    Suggestions =
+                    [
+                        new(solid),
+                        new(dashed),
+                        new(dotted)
+                    ]
+                },
+                
+                new()
+                {
+                    Label         = "width",
+                    
+                    TargetCssName = "border-width",
+                    
+                    IsCssUnitEnabled = true,
+                    
+                    Suggestions =
+                    [
+                        new("1px"),
+                        new("2px"),
+                        new("3px")
+                    ]
+                },
+                
+                new()
+                {
+                    Label = "radius",
+                    
+                    TargetCssName = "border-radius",
+                    
+                    IsCssUnitEnabled = true,
+                    
+                    Suggestions =
+                    [
+                        new("4px"),
+                        new("8px"),
+                        new("16px")
+                    ]
+                },
+                
+                new()
+                {
+                    Label = "shadow",
+                    
+                    TargetCssName = "box-shadow",
+                    
+                    Suggestions =
+                    [
+                        new(){ Label = "small", Value = "0 1px 3px rgba(0,0,0,0.2)"},
+                        new(){Label = "medium", Value = "0 4px 6px rgba(0,0,0,0.2)"},
+                        new(){Label = "large", Value = "0 10px 15px rgba(0,0,0,0.3)"}
+                    ]
+                }
+            ]
+        }
     ];
     
     [CustomEvent]
@@ -347,76 +471,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
 
     static Dictionary<string, Dictionary<string, IReadOnlyList<Option>>> AllData => new()
     {
-       
-
         
-
-        
-
-        ["Font"] = new()
-        {
-           
-            ["spacing"] =
-            [
-                new() { Label = "normal", Value = "letter-spacing: normal" },
-                new() { Label = "1px", Value    = "letter-spacing: 1px" },
-                new() { Label = "2px", Value    = "letter-spacing: 2px" }
-            ], 
-            ["align"] =
-            [
-                new() { Label = "left", Value    = "text-align: left" },
-                new() { Label = "center", Value  = "text-align: center" },
-                new() { Label = "right", Value   = "text-align: right" },
-                new() { Label = "justify", Value = "text-align: justify" }
-            ],
-           
-            ["white space"] =
-            [
-                new() { Label = "normal", Value   = "white-space: normal" },
-                new() { Label = "nowrap", Value   = "white-space: nowrap" },
-                new() { Label = "pre", Value      = "white-space: pre" },
-                new() { Label = "pre-wrap", Value = "white-space: pre-wrap" },
-                new() { Label = "pre-line", Value = "white-space: pre-line" }
-            ],
-            ["color"] =
-            [
-                new() { Label = "Black", Value = "color: #000000" },
-                new() { Label = "White", Value = "color: #ffffff" },
-                new() { Label = "Red", Value   = "color: red" },
-                new() { Label = "Blue", Value  = "color: blue" }
-            ]
-        },
-
-        ["Border"] = new()
-        {
-            ["border style"] =
-            [
-                new() { Label = "none", Value   = "border-style: none" },
-                new() { Label = "solid", Value  = "border-style: solid" },
-                new() { Label = "dashed", Value = "border-style: dashed" },
-                new() { Label = "dotted", Value = "border-style: dotted" }
-            ],
-            ["border width"] =
-            [
-                new() { Label = "1px", Value = "border-width: 1px" },
-                new() { Label = "2px", Value = "border-width: 2px" },
-                new() { Label = "4px", Value = "border-width: 4px" }
-            ],
-            ["border radius"] =
-            [
-                new() { Label = "0", Value   = "border-radius: 0" },
-                new() { Label = "4px", Value = "border-radius: 4px" },
-                new() { Label = "8px", Value = "border-radius: 8px" },
-                new() { Label = "50%", Value = "border-radius: 50%" }
-            ],
-            ["box shadow"] =
-            [
-                new() { Label = "none", Value   = "box-shadow: none" },
-                new() { Label = "small", Value  = "box-shadow: 0 1px 3px rgba(0,0,0,0.2)" },
-                new() { Label = "medium", Value = "box-shadow: 0 4px 6px rgba(0,0,0,0.2)" },
-                new() { Label = "large", Value  = "box-shadow: 0 10px 15px rgba(0,0,0,0.3)" }
-            ]
-        },
 
         ["Space"] = new()
         {
