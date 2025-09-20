@@ -1669,33 +1669,36 @@ sealed class ApplicationView : Component<ApplicationState>
                 new div { Height(1), FlexGrow(1), Background(Gray200) }
             },
             viewStyles(CurrentVisualElement.Styles),
-            new StylerComponent
+            new FlexColumn(Flex(1,1,0), JustifyContentFlexEnd)
             {
-                OptionSelected = newValue =>
+                new StylerComponent
                 {
-                    var existingItemIndex =
-                        (from item in CurrentVisualElement.Styles.Select((text, index) => new { text, index })
-                            let styleItem = ParseStyleAttribute(item.text)
-                            where styleItem.Name == ParseStyleAttribute(newValue).Name
-                            select (int?)item.index).FirstOrDefault();
-
-                    if (existingItemIndex is null)
+                    OptionSelected = newValue =>
                     {
-                        UpdateCurrentVisualElement(x => x with
-                        {
-                            Styles = x.Styles.Add(newValue)
-                        });
-                    }
-                    else
-                    {
-                        UpdateCurrentVisualElement(x => x with
-                        {
-                            Styles = x.Styles.SetItem(existingItemIndex.Value, newValue)
-                        });
-                    }
+                        var existingItemIndex =
+                            (from item in CurrentVisualElement.Styles.Select((text, index) => new { text, index })
+                                let styleItem = ParseStyleAttribute(item.text)
+                                where styleItem.Name == ParseStyleAttribute(newValue).Name
+                                select (int?)item.index).FirstOrDefault();
 
-                    return Task.CompletedTask;
-                }
+                        if (existingItemIndex is null)
+                        {
+                            UpdateCurrentVisualElement(x => x with
+                            {
+                                Styles = x.Styles.Add(newValue)
+                            });
+                        }
+                        else
+                        {
+                            UpdateCurrentVisualElement(x => x with
+                            {
+                                Styles = x.Styles.SetItem(existingItemIndex.Value, newValue)
+                            });
+                        }
+
+                        return Task.CompletedTask;
+                    }
+                },
             },
             SpaceY(16)
         };
