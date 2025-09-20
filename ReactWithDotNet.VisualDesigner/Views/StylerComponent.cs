@@ -415,6 +415,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
     };
 
     bool IsFontSizeEditor => TryGetSubGroupLabelAt(0) == "size";
+
     
     protected override Element render()
     {  
@@ -594,6 +595,28 @@ sealed class StylerComponent : Component<StylerComponent.State>
                                     {
                                         Change=OnCssItemClicked,
                                         CssName="font-size"
+                                    }
+                                }
+                            }
+                        ,
+                        !true ? null :
+                            new div(WidthFull, HeightFull, DisplayFlex)
+                            {
+                                new div(Width("50%"), DisplayFlex, AlignContentCenter, JustifyContentCenter, Gap(4), FlexWrap)
+                                {
+                                    new CssValueItem
+                                    {
+                                        Label="normal",
+                                        Value="letter-spacing: normal",
+                                        Click=OnCssItemClicked
+                                    }
+                                },
+                                new div(Width("50%"), DisplayFlex, AlignItemsCenter, JustifyContentCenter)
+                                {
+                                    new CssUnitEditor
+                                    {
+                                        Change=OnCssItemClicked,
+                                        CssName="letter-spacing"
                                     }
                                 }
                             }
@@ -873,9 +896,10 @@ class CssUnitEditor : Component<CssUnitEditor.State>
         {
             new div(DisplayFlex, BackgroundColor("#ffffff"), Height(36), Gap(4), JustifyContentSpaceEvenly, BorderRadius(4), AlignItemsCenter)
             {
-                new div(),
-                new div(),
-                new div(),
+                new div(LetterSpacing(2))
+                {
+                    state.Value
+                },
                 new div(HeightFull, Width(1), Background(Gray200)),
                 new div
                 {
