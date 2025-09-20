@@ -744,31 +744,44 @@ static class CSharpExporter
 
                     // import style
                     {
-                        foreach (var result in from reactProperty in from p in node.Properties where p.Name == "style" select p
-                                 from styleAttribute in JsonConvert.DeserializeObject<IReadOnlyList<StyleAttribute>>(reactProperty.Value)
-                                 where !Design.IsDesignTimeName(styleAttribute.Name)
-                                 let tagName = elementType.Value?.Name
-                                 let attributeValue = TryClearStringValue(styleAttribute.Value)
-                                 from modifierCode in ToModifierTransformer.TryConvertToModifier(tagName, styleAttribute.Name, attributeValue).AsEnumerable()
-                                 select styleAttribute.Pseudo.HasValue() switch
-                                 {
-                                     false => (Result<string>)modifierCode,
-
-                                     true => ToModifierTransformer.TryGetPseudoForCSharp(styleAttribute.Pseudo) switch
-                                     {
-                                         (true, var validPseudo) => $"{validPseudo}({modifierCode})",
-
-                                         (false, _) => new ArgumentException("NotResolved:" + styleAttribute.Pseudo)
-                                     }
-                                 })
+                        List<string> styleList = [];
                         {
-                            if (result.HasError)
+                            foreach (var styleAttribute in from reactProperty in from p in node.Properties where p.Name == "style" select p
+                                     from styleAttribute in JsonConvert.DeserializeObject<IReadOnlyList<StyleAttribute>>(reactProperty.Value)
+                                     where !Design.IsDesignTimeName(styleAttribute.Name)
+                                     select styleAttribute)
                             {
-                                return result.Error;
-                            }
 
-                            propsAsTextList.Add(result.Value);
+                                var tagName = elementType.Value?.Name;
+                                
+                                var attributeValue = TryClearStringValue(styleAttribute.Value);
+
+                                var modifierCode = ToModifierTransformer.TryConvertToModifier(tagName, styleAttribute.Name, attributeValue);
+                                if (modifierCode.success)
+                                {
+                                    if (styleAttribute.Pseudo.HasNoValue())
+                                    {
+                                        styleList.Add(modifierCode.modifierCode);
+                                        continue;
+                                    }
+
+                                    var pseudo = ToModifierTransformer.TryGetPseudoForCSharp(styleAttribute.Pseudo);
+                                    if (pseudo.success)
+                                    {
+                                        styleList.Add($"{pseudo.pseudo}({modifierCode})");
+                                        continue;
+                                    }
+
+                                    return new ArgumentException("NotResolved:" + styleAttribute.Pseudo);
+
+                                }
+                                
+                                styleList.Add($"CreateStyleModifier(x=>x.{styleAttribute.Name} = ({styleAttribute.Value})");
+                                
+                            }
                         }
+
+                        propsAsTextList.AddRange(styleList);
                     }
                 }
 
