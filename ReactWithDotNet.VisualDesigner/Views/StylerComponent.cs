@@ -42,6 +42,72 @@ sealed class StylerComponent : Component<StylerComponent.State>
                       new("inline"),
                       new("inline-block")
                   ]
+              },
+              new()
+              {
+                  Label = "position",
+                  
+                  TargetCssName = "position",
+                  
+                  Suggestions =
+                  [
+                      new("static"),
+                      new("relative"),
+                      new("absolute"),
+                      new("fixed"),
+                      new("sticky")
+                  ]
+              },
+              
+              new()
+              {
+                  Label = "overflow",
+                  
+                  TargetCssName = "overflow",
+                  
+                  Suggestions =
+                  [
+                      new("visible"),
+                      new("hidden"),
+                      new("scroll"),
+                      new("auto")
+                  ]
+              },
+              
+              new()
+              {
+                  Label = "transform",
+                  
+                  TargetCssName = "transform",
+                  
+                  Suggestions =
+                  [
+                      new("translateY(-50%)"),
+                      new("translateX(-50%)")
+                  ]
+              },
+              
+              new()
+              {
+                  Label = "z-index",
+                  
+                  TargetCssName = "z-index",
+                  
+                  Suggestions =
+                  [
+                      new("1"),
+                      new("2"),
+                      new("3"),
+                      new("4"),
+                      new("5"),
+                      new("6"),
+                      new("7"),
+                      new("8"),
+                      new("9"),
+                      new("10"),
+                      new("100"),
+                      new("1000"),
+                  ]
               }
           ]
       },
@@ -65,9 +131,57 @@ sealed class StylerComponent : Component<StylerComponent.State>
                       new("row-reverse"),
                       new("column-reverse")
                   ]
-              }
+              },
+              
+              new()
+              {
+                  Label = "justify",
+                  
+                  TargetCssName = "justify-content",
+                  
+                  Suggestions =
+                  [
+                      new("flex-start"),
+                      new("flex-end"),
+                      new("center"),
+                      new("space-between"),
+                      new("space-around"),
+                      new("space-evenly"),
+                  ]
+              },
+              
+              new()
+              {
+                  Label = "align",
+                  
+                  TargetCssName = "align-items",
+                  
+                  Suggestions =
+                  [
+                      new("flex-start"),
+                      new("flex-end"),
+                      new("center"),
+                      new("stretch")
+                  ]
+              },
+              
+              new()
+              {
+                  Label = "wrap",
+                  
+                  TargetCssName = "flex-wrap",
+                  
+                  Suggestions =
+                  [
+                      new("wrap"),
+                      new("wrap-reverse"),
+                      new("nowrap")
+                  ]
+              },
           ]
       },
+      
+      
       new ()
       {
           Label = "Font",
@@ -84,18 +198,9 @@ sealed class StylerComponent : Component<StylerComponent.State>
                   
                   Suggestions =
                   [
-                      new()
-                      {
-                          Label = "small", Value = "small"
-                      },
-                      new()
-                      {
-                          Label = "medium", Value = "medium"
-                      },
-                      new()
-                      {
-                          Label = "large", Value = "large"
-                      }
+                      new("small"),
+                      new("medium"),
+                      new("large")
                   ]
               }
           ]
@@ -107,88 +212,9 @@ sealed class StylerComponent : Component<StylerComponent.State>
 
     static Dictionary<string, Dictionary<string, IReadOnlyList<Option>>> AllData => new()
     {
-        ["Layout"] = new()
-        {
-            ["display"] =
-            [
-                new() { Label = "flex", Value         = "display: flex" },
-                new() { Label = "grid", Value         = "display: grid" },
-                new() { Label = "block", Value        = "display: block" },
-                new() { Label = "inline", Value       = "display: inline" },
-                new() { Label = "inline-block", Value = "display: inline-block" },
-                new() { Label = "none", Value         = "display: none" }
-            ],
-            ["position"] =
-            [
-                new() { Label = "static", Value   = "position: static" },
-                new() { Label = "relative", Value = "position: relative" },
-                new() { Label = "absolute", Value = "position: absolute" },
-                new() { Label = "fixed", Value    = "position: fixed" },
-                new() { Label = "sticky", Value   = "position: sticky" }
-            ],
+       
 
-            ["overflow"] =
-            [
-                new() { Label = "visible", Value = "overflow: visible" },
-                new() { Label = "hidden", Value  = "overflow: hidden" },
-                new() { Label = "scroll", Value  = "overflow: scroll" },
-                new() { Label = "auto", Value    = "overflow: auto" }
-            ],
-            ["transform"] =
-            [
-                new() { Label = "translateY(-50%)", Value = "transform: translateY(-50%)" },
-                new() { Label = "translateX(-50%)", Value = "transform: translateX(-50%)" }
-            ],
-            ["z-index"] =
-            [
-                new() { Label = "0", Value    = "z-index: 0" },
-                new() { Label = "1", Value    = "z-index: 1" },
-                new() { Label = "2", Value    = "z-index: 2" },
-                new() { Label = "3", Value    = "z-index: 3" },
-                new() { Label = "4", Value    = "z-index: 4" },
-                new() { Label = "5", Value    = "z-index: 5" },
-                new() { Label = "6", Value    = "z-index: 6" },
-                new() { Label = "7", Value    = "z-index: 7" },
-                new() { Label = "8", Value    = "z-index: 8" },
-                new() { Label = "9", Value    = "z-index: 9" },
-                new() { Label = "10", Value   = "z-index: 10" },
-                new() { Label = "100", Value  = "z-index: 100" },
-                new() { Label = "9999", Value = "z-index: 9999" }
-            ]
-        },
-
-        ["Flex"] = new()
-        {
-            ["direction"] =
-            [
-                new() { Label = "row", Value            = "flex-direction: row" },
-                new() { Label = "column", Value         = "flex-direction: column" },
-                new() { Label = "row-reverse", Value    = "flex-direction: row-reverse" },
-                new() { Label = "column-reverse", Value = "flex-direction: column-reverse" }
-            ],
-            ["justify content"] =
-            [
-                new() { Label = "flex-start", Value    = "justify-content: flex-start" },
-                new() { Label = "flex-end", Value      = "justify-content: flex-end" },
-                new() { Label = "center", Value        = "justify-content: center" },
-                new() { Label = "space-between", Value = "justify-content: space-between" },
-                new() { Label = "space-around", Value  = "justify-content: space-around" },
-                new() { Label = "space-evenly", Value  = "justify-content: space-evenly" }
-            ],
-            ["align items"] =
-            [
-                new() { Label = "flex-start", Value = "align-items: flex-start" },
-                new() { Label = "flex-end", Value   = "align-items: flex-end" },
-                new() { Label = "center", Value     = "align-items: center" },
-                new() { Label = "stretch", Value    = "align-items: stretch" }
-            ],
-            ["wrap"] =
-            [
-                new() { Label = "wrap", Value         = "flex-wrap: wrap" },
-                new() { Label = "wrap-reverse", Value = "flex-wrap: wrap-reverse" },
-                new() { Label = "nowrap", Value       = "flex-wrap: nowrap" }
-            ]
-        },
+        
 
         ["Size"] = new()
         {
