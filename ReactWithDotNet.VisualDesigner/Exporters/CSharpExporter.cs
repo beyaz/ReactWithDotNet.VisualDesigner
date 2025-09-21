@@ -77,14 +77,14 @@ static class CSharpExporter
                 var classDeclarationLineIndex = lines.FindIndex(line => line.Contains($"class {className} "));
                 if (classDeclarationLineIndex >= 0)
                 {
-                    var methodDeclarationLineIndex = lines.FindIndex(classDeclarationLineIndex, line => line.Contains($" Element {methodName}("));
-                    if (methodDeclarationLineIndex >= 0)
+                    var methodDeclerationLineIndex = lines.FindIndex(classDeclarationLineIndex, line => line.Contains($" Element {methodName}("));
+                    if (methodDeclerationLineIndex >= 0)
                     {
-                        var leftSpaceCount = Array.FindIndex(lines[methodDeclarationLineIndex].ToCharArray(), c => c != ' ');
+                        var leftSpaceCount = Array.FindIndex(lines[methodDeclerationLineIndex].ToCharArray(), c => c != ' ');
                         var firstReturnLineIndex = -1;
                         var leftPaddingCount = -1;
                         {
-                            foreach (var item in lines.FindLineIndexStartsWith(methodDeclarationLineIndex,leftSpaceCount+4, "return "))
+                            foreach (var item in lines.FindLineIndexStartsWith(methodDeclerationLineIndex,leftSpaceCount+4, "return "))
                             {
                                 firstReturnLineIndex = item;
                                 leftPaddingCount     = leftSpaceCount + 4;

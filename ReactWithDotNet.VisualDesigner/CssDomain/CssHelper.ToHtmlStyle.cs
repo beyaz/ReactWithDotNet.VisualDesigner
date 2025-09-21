@@ -94,6 +94,7 @@ partial class CssHelper
             case "border-collapse":
             case "table-layout":
             case "vertical-align":
+            case "border-spacing":
             {
                 return CreateFinalCssItem(name, value);
             }
