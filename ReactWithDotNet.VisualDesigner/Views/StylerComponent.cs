@@ -1344,8 +1344,8 @@ class CssUnitEditor : Component<CssUnitEditor.State>
             new div(WidthFull, Height(1), Background(Gray200)),
             new div(DisplayFlex, Width(120), FlexWrap, Padding(4), Gap(8), CursorDefault, JustifyContentSpaceAround)
             {
-                from item in new[] { "1", "2", "3", "4", "5", "6", "7", "8", "9", "-", "0", "." }
-                select new div(OnClick(OnButtonClicked), Id(item), Width(30), Height(30), BorderRadius(50), AlignItemsCenter, JustifyContentCenter, DisplayFlex, Border(1, solid, Gray200), Hover(BorderColor(Gray300)), Hover(Background(Gray50)), BorderWidth(string.IsNullOrWhiteSpace(item) ? "0px" : "1px"))
+                from item in new[]{ "1", "2", "3","4","5","6","7","8","9","-","0","."}
+                select new div(OnClick(OnButtonClicked), Id(item), Width(30), Height(30), BorderRadius(50), AlignItemsCenter, JustifyContentCenter, DisplayFlex, Border(1, solid, Gray200), Hover(BorderColor(Gray300)), Hover(Background(Gray50)), string.IsNullOrWhiteSpace(item ) ? BorderWidth(0) : BorderWidth(1))
                 {
                     item
                 }
