@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Text;
 
 namespace ReactWithDotNet.VisualDesigner;
 
@@ -37,8 +38,8 @@ static class IO
             {
                 fileInfo.IsReadOnly = false;
             }
-            
-            await File.WriteAllTextAsync(filePath, fileContent);
+
+            await File.WriteAllTextAsync(filePath, fileContent, Encoding.UTF8);
         }
         catch (Exception exception)
         {
