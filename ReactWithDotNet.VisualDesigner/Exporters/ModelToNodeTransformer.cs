@@ -191,7 +191,26 @@ static class ModelToNodeTransformer
 
                         foreach (var finalCssItem in designerStyleItem.Value.FinalCssItems)
                         {
-                            var finalCssItemResult = reCreateFinalCssItem(finalCssItem);
+                            var finalCssItemResult = CreateFinalCssItem(new()
+                            {
+                                Name = project.ExportAsCSharpString switch
+                                {
+                                    true  => finalCssItem.Name,
+                                    false => KebabToCamelCase(finalCssItem.Name)
+                                },
+                                Value = finalCssItem.Value switch
+                                {
+                                    null => null,
+
+                                    var y when y.StartsWith("request.") || y.StartsWith("context.") => y,
+
+                                    var y => project.ExportAsCSharpString switch
+                                    {
+                                        true  => TryClearStringValue(y),
+                                        false => '"' + TryClearStringValue(y) + '"'
+                                    }
+                                }
+                            });
                             if (finalCssItemResult.HasError)
                             {
                                 return finalCssItemResult.Error;
@@ -215,30 +234,6 @@ static class ModelToNodeTransformer
             }
 
             return props;
-
-            Result<FinalCssItem> reCreateFinalCssItem(FinalCssItem finalCssItem)
-            {
-                return CreateFinalCssItem(new()
-                {
-                    Name = project.ExportAsCSharpString switch
-                    {
-                        true  => finalCssItem.Name,
-                        false => KebabToCamelCase(finalCssItem.Name)
-                    },
-                    Value = finalCssItem.Value switch
-                    {
-                        null => null,
-
-                        var y when y.StartsWith("request.") || y.StartsWith("context.") => y,
-
-                        var y => project.ExportAsCSharpString switch
-                        {
-                            true  => TryClearStringValue(y),
-                            false => '"' + TryClearStringValue(y) + '"'
-                        }
-                    }
-                });
-            }
         }
 
         static Result<IReadOnlyList<ReactProperty>> calculatePropsForTailwind(ProjectConfig project, IReadOnlyList<string> properties, IReadOnlyList<string> styles)
