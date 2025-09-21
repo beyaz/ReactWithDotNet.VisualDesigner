@@ -792,7 +792,7 @@ sealed class ApplicationView : Component<ApplicationState>
                 new FlexColumn(FlexGrow(1), Padding(7), OverflowXAuto)
                 {
                     Ruler.HorizontalRuler(state.Preview.Width, state.Preview.Scale) + Width(state.Preview.Width) + MarginTop(12) + PaddingLeft(30),
-                    new FlexRow(SizeFull, Width(state.Preview.Width + 30))
+                    new FlexRow(SizeFull, Width(state.Preview.Width + 33))
                     {
                         Ruler.VerticalRuler(state.Preview.Scale),
                         PartPreview
@@ -2513,7 +2513,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
             return new div(HeightFull)
             {
-                new div(HeightFull, Width(30), OverflowHidden, PositionRelative)
+                new div(HeightFull, Width(33), OverflowHidden, PositionRelative)
                 {
                     Enumerable.Range(0, max).Select(number => new div(PositionAbsolute)
                     {

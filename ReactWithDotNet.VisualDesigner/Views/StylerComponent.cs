@@ -350,15 +350,16 @@ sealed class StylerComponent : Component<StylerComponent.State>
 
                     TargetCssName = "font-weight",
 
-                    IsCssUnitEnabled = true,
-
                     Suggestions =
                     [
-                        new("lighter"),
-                        new("light"),
-                        new("normal"),
-                        new("bold"),
-                        new("bolder")
+                        new("200"),
+                        new("300"),
+                        new("400"),
+                        new("500"),
+                        new("600"),
+                        new("700"),
+                        new("800"),
+                        new("900")
                     ]
                 },
 
