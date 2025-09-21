@@ -2953,7 +2953,7 @@ sealed class ApplicationView : Component<ApplicationState>
                     }
                 },
                 !state.IsSuggestionsVisible ? null :
-                    new div(ZIndex(3),DisplayFlex, JustifyContentCenter, AlignItemsCenter, PositionFixed, Background(White), Border(1, solid, Gray300), BorderRadius(4), PaddingTop(4), PaddingBottom(4), Left(state.SuggestionPopupLocationX), Top(state.SuggestionPopupLocationY))
+                    new div(DisplayFlex, JustifyContentCenter, AlignItemsCenter, PositionFixed, Background(White), Border(1, solid, Gray300), BorderRadius(4), PaddingTop(4), PaddingBottom(4), Left(state.SuggestionPopupLocationX), Top(state.SuggestionPopupLocationY), ZIndex(3))
                     {
                         new div
                         {
@@ -2964,6 +2964,7 @@ sealed class ApplicationView : Component<ApplicationState>
                             }
                         }
                     }
+                
             };
         }
 

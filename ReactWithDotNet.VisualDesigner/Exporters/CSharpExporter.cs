@@ -792,7 +792,7 @@ static class CSharpExporter
                                         var pseudo = ToModifierTransformer.TryGetPseudoForCSharp(styleAttribute.Pseudo);
                                         if (pseudo.success)
                                         {
-                                            styleList.Add($"{pseudo.pseudo}({modifierCode})");
+                                            styleList.Add($"{pseudo.pseudo}({modifierCode.modifierCode})");
                                             continue;
                                         }
 
