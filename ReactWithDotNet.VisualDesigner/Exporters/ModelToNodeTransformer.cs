@@ -174,8 +174,6 @@ static class ModelToNodeTransformer
 
             if (project.ExportAsCSharpString)
             {
-               
-
                 List<FinalCssItem> listOFinalCssItems = [];
                 {
                     foreach (var text in styles)
@@ -185,20 +183,21 @@ static class ModelToNodeTransformer
                         {
                             return designerStyleItem.Error;
                         }
+
                         if (designerStyleItem.Value.Pseudo.HasValue())
                         {
                             return new NotSupportedException($"Pseudo styles are not supported in inline styles. {text}");
                         }
-                        
-                        foreach (var x in designerStyleItem.Value.FinalCssItems)
+
+                        foreach (var finalCssItem in designerStyleItem.Value.FinalCssItems)
                         {
-                            var finalCssItem = reCreateFinalCssItem(x);
-                            if (finalCssItem.HasError)
+                            var finalCssItemResult = reCreateFinalCssItem(finalCssItem);
+                            if (finalCssItemResult.HasError)
                             {
-                                return finalCssItem.Error;
+                                return finalCssItemResult.Error;
                             }
-                            
-                            listOFinalCssItems.Add(finalCssItem.Value);
+
+                            listOFinalCssItems.Add(finalCssItemResult.Value);
                         }
                     }
                 }
@@ -207,7 +206,7 @@ static class ModelToNodeTransformer
                 {
                     return props;
                 }
-                
+
                 props.Add(new()
                 {
                     Name  = "style",
@@ -217,16 +216,16 @@ static class ModelToNodeTransformer
 
             return props;
 
-            Result<FinalCssItem> reCreateFinalCssItem(FinalCssItem x)
+            Result<FinalCssItem> reCreateFinalCssItem(FinalCssItem finalCssItem)
             {
                 return CreateFinalCssItem(new()
                 {
                     Name = project.ExportAsCSharpString switch
                     {
-                        true  => x.Name,
-                        false => KebabToCamelCase(x.Name)
+                        true  => finalCssItem.Name,
+                        false => KebabToCamelCase(finalCssItem.Name)
                     },
-                    Value = x.Value switch
+                    Value = finalCssItem.Value switch
                     {
                         null => null,
 
