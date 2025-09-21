@@ -719,9 +719,8 @@ static class CSharpStringExporter
                         var styleLines = ListFrom
                             (
                              from reactProperty in from p in node.Properties where p.Name == "style" select p
-                             from styleAttribute in JsonConvert.DeserializeObject<IReadOnlyList<StyleAttribute>>(reactProperty.Value)
+                             from styleAttribute in JsonConvert.DeserializeObject<IReadOnlyList<FinalCssItem>>(reactProperty.Value)
                              where !Design.IsDesignTimeName(styleAttribute.Name)
-                             where styleAttribute.Pseudo is null
                              let tagName = elementType.Value?.Name
                              let attributeValue = TryClearStringValue(styleAttribute.Value)
                              select $"{styleAttribute.Name}: {styleAttribute.Value}"
