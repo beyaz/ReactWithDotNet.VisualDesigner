@@ -1326,6 +1326,20 @@ class CssUnitEditor : Component<CssUnitEditor.State>
 
     public string CssName { get; init; }
 
+    Task ToggleUnitTypeSuggestions(MouseEvent e)
+    {
+        var rect = e.target.boundingClientRect;
+
+        state = state with
+        {
+            IsUnitSuggestionsVisible = !state.IsUnitSuggestionsVisible,
+            SuggestionPopupLocationX = rect.left + rect.width / 2 - 24,
+            SuggestionPopupLocationY = rect.top + rect.height + 8
+        };
+
+        return Task.CompletedTask;
+    }
+    
     protected override Element render()
     {
         return new div(WidthFitContent, Border(1, solid, Gray200), DisplayFlex, FlexDirectionColumn)
@@ -1337,7 +1351,7 @@ class CssUnitEditor : Component<CssUnitEditor.State>
                     state.Value
                 },
                 new div(HeightFull, Width(1), Background(Gray200)),
-                new div
+                new div(OnClick(ToggleUnitTypeSuggestions))
                 {
                     "px"
                 }
@@ -1350,7 +1364,20 @@ class CssUnitEditor : Component<CssUnitEditor.State>
                 {
                     item
                 }
-            }
+            },
+            !state.IsUnitSuggestionsVisible ? null :
+                new div(OnMouseLeave(ToggleUnitTypeSuggestions), DisplayFlex, JustifyContentCenter, AlignItemsCenter, PositionFixed, Background(White), Border(1, solid, Gray300), BorderRadius(4), PaddingTop(4), PaddingBottom(4), Left(state.SuggestionPopupLocationX), Top(state.SuggestionPopupLocationY), ZIndex(3))
+                {
+                    new div
+                    {
+                        from item in new[] { "px", "%", "rem", "vw", "vh", "cm", "mm" }
+                        select new div(Id(item), OnClick(OnUnitTypeSuggestionItemClicked), DisplayFlex, JustifyContentCenter, AlignItemsCenter, Padding(6, 12), BorderRadius(4), Hover(Background(Gray100)))
+                        {
+                            item
+                        }
+                    }
+                }
+            
         };
     }
 
@@ -1376,5 +1403,12 @@ class CssUnitEditor : Component<CssUnitEditor.State>
     {
         public string Unit { get; init; } = "px";
         public string Value { get; init; }
+        
+        public bool IsUnitSuggestionsVisible { get; init; }
+
+
+        public double SuggestionPopupLocationX { get; init; }
+
+        public double SuggestionPopupLocationY { get; init; }
     }
 }
