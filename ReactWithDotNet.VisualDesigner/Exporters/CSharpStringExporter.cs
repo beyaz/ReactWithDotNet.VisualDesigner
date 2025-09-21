@@ -721,10 +721,6 @@ static class CSharpStringExporter
                                         continue;
                                     }
 
-                                    var tagName = elementType.Value?.Name;
-
-                                    var attributeValue = TryClearStringValue(styleAttribute.Value);
-
                                     listOfCss.Add((styleAttribute.Name, styleAttribute.Value));
                                 }
                             }
