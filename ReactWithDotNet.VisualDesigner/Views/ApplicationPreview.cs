@@ -106,7 +106,7 @@ sealed class ApplicationPreview : Component
         {
             Element element = null;
             {
-                TryGetHtmlElementTypeByTagName(model.Tag).HasValue(elementType => { element = (HtmlElement)Activator.CreateInstance(elementType); });
+                TryGetHtmlElementTypeByTagName(model.Tag).HasValue(elementType => { element = (Element)Activator.CreateInstance(elementType); });
             }
 
             if (element is null)
