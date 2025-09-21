@@ -575,7 +575,145 @@ sealed class StylerComponent : Component<StylerComponent.State>
                         new("16px"),
                         new("auto")
                     ]
-                }
+                },
+                
+               
+                
+                new()
+                {
+                    Label = "p - L",
+
+                    TargetCssName = "padding-left",
+
+                    IsCssUnitEnabled = true,
+
+                    Suggestions =
+                    [
+                        new("4px"),
+                        new("8px"),
+                        new("16px"),
+                        new("24px")
+                    ]
+                },
+                
+                new()
+                {
+                    Label = "p - R",
+
+                    TargetCssName = "padding-right",
+
+                    IsCssUnitEnabled = true,
+
+                    Suggestions =
+                    [
+                        new("4px"),
+                        new("8px"),
+                        new("16px"),
+                        new("24px")
+                    ]
+                },
+                
+                new()
+                {
+                    Label = "p - T",
+
+                    TargetCssName = "padding-top",
+
+                    IsCssUnitEnabled = true,
+
+                    Suggestions =
+                    [
+                        new("4px"),
+                        new("8px"),
+                        new("16px"),
+                        new("24px")
+                    ]
+                },
+                
+                new()
+                {
+                    Label = "p - B",
+
+                    TargetCssName = "padding-bottom",
+
+                    IsCssUnitEnabled = true,
+
+                    Suggestions =
+                    [
+                        new("4px"),
+                        new("8px"),
+                        new("16px"),
+                        new("24px")
+                    ]
+                },
+                
+                new()
+                {
+                    Label = "m - L",
+
+                    TargetCssName = "margin-left",
+
+                    IsCssUnitEnabled = true,
+
+                    Suggestions =
+                    [
+                        new("4px"),
+                        new("8px"),
+                        new("16px"),
+                        new("24px")
+                    ]
+                },
+                
+                new()
+                {
+                    Label = "m - R",
+
+                    TargetCssName = "margin-right",
+
+                    IsCssUnitEnabled = true,
+
+                    Suggestions =
+                    [
+                        new("4px"),
+                        new("8px"),
+                        new("16px"),
+                        new("24px")
+                    ]
+                },
+                
+                new()
+                {
+                    Label = "m - T",
+
+                    TargetCssName = "margin-top",
+
+                    IsCssUnitEnabled = true,
+
+                    Suggestions =
+                    [
+                        new("4px"),
+                        new("8px"),
+                        new("16px"),
+                        new("24px")
+                    ]
+                },
+                
+                new()
+                {
+                    Label = "m - B",
+
+                    TargetCssName = "margin-bottom",
+
+                    IsCssUnitEnabled = true,
+
+                    Suggestions =
+                    [
+                        new("4px"),
+                        new("8px"),
+                        new("16px"),
+                        new("24px")
+                    ]
+                },
             ]
         },
 
