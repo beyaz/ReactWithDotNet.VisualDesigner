@@ -101,14 +101,14 @@ static class CSharpStringExporter
             }
 
             var leftSpaceCount = Array.FindIndex(lines[methodDeclarationLineIndex].ToCharArray(), c => c != ' ');
-            
+
             var firstReturnLineIndex = -1;
             var leftPaddingCount = -1;
             {
-                foreach (var item in lines.FindLineIndexStartsWith(methodDeclarationLineIndex,leftSpaceCount+4, "return ", "return"))
+                foreach (var item in lines.FindLineIndexStartsWith(methodDeclarationLineIndex, leftSpaceCount + 4, "return ", "return"))
                 {
                     firstReturnLineIndex = item;
-                    leftPaddingCount     = item+4;
+                    leftPaddingCount     = item + 4;
                 }
 
                 if (firstReturnLineIndex < 0)
@@ -179,30 +179,27 @@ static class CSharpStringExporter
                             let lineStartsWithDoubleQuote = line.text.TrimStart().StartsWith('"')
                             let lineEndsWithDoubleQuote = line.text.TrimEnd().EndsWith('"')
                             let hasNextLine = !isLastLine
-                            
                             let nextLineIsEndOfMapping = hasNextLine && lines[line.index + 1].TrimStart().StartsWith("},")
-
                             select line switch
                             {
-                                _ when !isLastLine && 
-                                       lineStartsWithDoubleQuote && 
+                                _ when !isLastLine &&
+                                       lineStartsWithDoubleQuote &&
                                        lineEndsWithDoubleQuote &&
                                        !nextLineIsEndOfMapping => line.text + ",",
 
                                 _ => line.text
                             });
         }
-        
+
         static List<string> appendDollarSignAtLineStartIfNeed(IReadOnlyList<string> lines)
         {
             return ListFrom(from line in lines.Select((line, index) => new { text = line, index })
                             let length = lines.Count
                             let lineStartsWithDoubleQuote = line.text.TrimStart().StartsWith('"')
                             let lineContainsLeftBracket = line.text.Contains('{')
-
                             select line switch
                             {
-                                _ when lineStartsWithDoubleQuote && lineContainsLeftBracket => '$'+line.text.TrimStart(),
+                                _ when lineStartsWithDoubleQuote && lineContainsLeftBracket => '$' + line.text.TrimStart(),
 
                                 _ => line.text
                             });
@@ -347,7 +344,7 @@ static class CSharpStringExporter
             {
                 return new List<string>
                 {
-                     $"{indent(indentLevel)}{asFinalText(node.Text)}"
+                    $"{indent(indentLevel)}{asFinalText(node.Text)}"
                 };
             }
 
@@ -365,8 +362,6 @@ static class CSharpStringExporter
 
                 lines.Add($"{indent(indentLevel)}from item in {itemsSource.Value}");
 
-              
-
                 IReadOnlyList<string> innerLines;
                 {
                     var result = await ConvertReactNodeModelToElementTreeSourceLines(project, node, parentNode, indentLevel);
@@ -380,11 +375,10 @@ static class CSharpStringExporter
 
                 lines.Add(indent(indentLevel) + "select new LineCollection");
                 lines.Add(indent(indentLevel) + "{");
-                
+
                 lines.AddRange(innerLines);
 
                 lines.Add(indent(indentLevel) + "},");
-
 
                 return lines;
             }
@@ -706,7 +700,7 @@ static class CSharpStringExporter
                             let value = reactProperty.Value
                             let finalValue = IsStringValue(value) switch
                             {
-                                true  => '\\'.ToString() + '"' + TryClearStringValue(value) + '\\'+ '"',
+                                true  => '\\'.ToString() + '"' + TryClearStringValue(value) + '\\' + '"',
                                 false => value
                             }
                             select $"{reactProperty.Name}={finalValue}";
@@ -716,19 +710,29 @@ static class CSharpStringExporter
 
                     // import style
                     {
-                        var styleLines = ListFrom
-                            (
-                             from reactProperty in from p in node.Properties where p.Name == "style" select p
-                             from styleAttribute in JsonConvert.DeserializeObject<IReadOnlyList<FinalCssItem>>(reactProperty.Value)
-                             where !Design.IsDesignTimeName(styleAttribute.Name)
-                             let tagName = elementType.Value?.Name
-                             let attributeValue = TryClearStringValue(styleAttribute.Value)
-                             select $"{styleAttribute.Name}: {styleAttribute.Value}"
-                            );
-
-                        if (styleLines.Count > 0)
+                        List<(string name, string value)> listOfCss = [];
                         {
-                            propsAsTextList.Add($"style=\\\"{string.Join("; ", styleLines)}\\\"");
+                            foreach (var json in from p in node.Properties where p.Name == "style" select p.Value)
+                            {
+                                foreach (var styleAttribute in JsonConvert.DeserializeObject<IReadOnlyList<FinalCssItem>>(json))
+                                {
+                                    if (Design.IsDesignTimeName(styleAttribute.Name))
+                                    {
+                                        continue;
+                                    }
+
+                                    var tagName = elementType.Value?.Name;
+
+                                    var attributeValue = TryClearStringValue(styleAttribute.Value);
+
+                                    listOfCss.Add((styleAttribute.Name, styleAttribute.Value));
+                                }
+                            }
+                        }
+
+                        if (listOfCss.Count > 0)
+                        {
+                            propsAsTextList.Add($"style=\\\"{string.Join("; ", from x in listOfCss select $"{x.name}: {x.value}")};\\\"");
                         }
                     }
                 }
@@ -859,12 +863,12 @@ static class CSharpStringExporter
 
         // apply padding
         {
-            var temp = linesToInject.Select(line => new string(' ', leftPaddingCount+4) + line).ToList();
+            var temp = linesToInject.Select(line => new string(' ', leftPaddingCount + 4) + line).ToList();
 
-            temp.Insert(0,new string(' ', leftPaddingCount) + "return new LineCollection");
-            
-            temp.Insert(1,new string(' ', leftPaddingCount) + "{");
-            
+            temp.Insert(0, new string(' ', leftPaddingCount) + "return new LineCollection");
+
+            temp.Insert(1, new string(' ', leftPaddingCount) + "{");
+
             temp.Add(new string(' ', leftPaddingCount) + "};");
 
             linesToInject = temp;
