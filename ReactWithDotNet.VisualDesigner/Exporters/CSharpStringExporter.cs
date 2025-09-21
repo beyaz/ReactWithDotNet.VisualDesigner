@@ -695,17 +695,23 @@ static class CSharpStringExporter
                 {
                     // import props except style
                     {
-                        var propsWithoutStyle =
-                            from reactProperty in from p in node.Properties where p.Name.NotIn(Design.ItemsSource, Design.ItemsSourceDesignTimeCount, Design.Text, Design.TextPreview, Design.Src, Design.Name, "style") select p
-                            let value = reactProperty.Value
-                            let finalValue = IsStringValue(value) switch
+                        foreach (var reactProperty in from p in node.Properties where p.Name != "style" select p)
+                        {
+                            if (Design.IsDesignTimeName(reactProperty.Name))
+                            {
+                                continue;
+                            }
+
+                            var value = reactProperty.Value;
+
+                            var finalValue = IsStringValue(value) switch
                             {
                                 true  => '\\'.ToString() + '"' + TryClearStringValue(value) + '\\' + '"',
                                 false => value
-                            }
-                            select $"{reactProperty.Name}={finalValue}";
+                            };
 
-                        propsAsTextList.AddRange(propsWithoutStyle);
+                            propsAsTextList.Add($"{reactProperty.Name}={finalValue}");
+                        }
                     }
 
                     // import style
