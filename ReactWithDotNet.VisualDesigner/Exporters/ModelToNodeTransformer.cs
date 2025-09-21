@@ -108,58 +108,53 @@ static class ModelToNodeTransformer
 
             if (project.ExportAsCSharp)
             {
-                if (styles.Count == 0)
+                List<StyleAttribute> listOfStyleAttributes = [];
                 {
-                    return props;
-                }
-
-                string stlyeValueAsJson;
-                {
-                    List<StyleAttribute> listOfStyleAttributes = [];
+                    foreach (var text in styles)
                     {
-                        foreach (var text in styles)
+                        if (Design.IsDesignTimeName(ParseStyleAttribute(text).Name))
                         {
-                            if (Design.IsDesignTimeName(ParseStyleAttribute(text).Name))
-                            {
-                                continue;
-                            }
+                            continue;
+                        }
 
-                            var item = CreateDesignerStyleItemFromText(project, text);
-                            if (item.HasError)
-                            {
-                                return item.Error;
-                            }
+                        var item = CreateDesignerStyleItemFromText(project, text);
+                        if (item.HasError)
+                        {
+                            return item.Error;
+                        }
 
-                            foreach (var finalCssItem in item.Value.FinalCssItems)
+                        foreach (var finalCssItem in item.Value.FinalCssItems)
+                        {
+                            var styleAttribute = new StyleAttribute
                             {
-                                var styleAttribute = new StyleAttribute
+                                Pseudo = item.Value.Pseudo,
+
+                                Name = KebabToCamelCase(finalCssItem.Name),
+
+                                Value = finalCssItem.Value switch
                                 {
-                                    Pseudo = item.Value.Pseudo,
+                                    null => null,
 
-                                    Name = KebabToCamelCase(finalCssItem.Name),
+                                    var x when x.StartsWith("request.") || x.StartsWith("context.") => x,
 
-                                    Value = finalCssItem.Value switch
-                                    {
-                                        null => null,
+                                    var x => '"' + TryClearStringValue(x) + '"'
+                                }
+                            };
 
-                                        var x when x.StartsWith("request.") || x.StartsWith("context.") => x,
-
-                                        var x => '"' + TryClearStringValue(x) + '"'
-                                    }
-                                };
-
-                                listOfStyleAttributes.Add(styleAttribute);
-                            }
+                            listOfStyleAttributes.Add(styleAttribute);
                         }
                     }
+                }
 
-                    stlyeValueAsJson = JsonConvert.SerializeObject(listOfStyleAttributes);
+                if (listOfStyleAttributes.Count == 0)
+                {
+                    return props;
                 }
 
                 props.Add(new()
                 {
                     Name  = "style",
-                    Value = stlyeValueAsJson
+                    Value = JsonConvert.SerializeObject(listOfStyleAttributes)
                 });
 
                 return props;
