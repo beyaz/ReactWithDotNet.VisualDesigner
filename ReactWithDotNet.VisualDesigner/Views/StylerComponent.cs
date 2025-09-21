@@ -1328,23 +1328,28 @@ class CssUnitEditor : Component<CssUnitEditor.State>
     {
         return new div(WidthFitContent, Border(1, solid, Gray200), DisplayFlex, FlexDirectionColumn)
         {
-            new div(DisplayFlex, BackgroundColor("#ffffff"), Height(36), Gap(4), JustifyContentSpaceEvenly, BorderRadius(4), AlignItemsCenter)
+            new div(DisplayFlex, BackgroundColor("#ffffff"), Height(36), Gap(4), BorderRadius(4), AlignItemsCenter, JustifyContentSpaceEvenly)
             {
-                new div(LetterSpacing(2))
+                new div(TextAlignCenter, Width("50%"))
                 {
-                    state.Value
+                    new div(LetterSpacing(2))
+                    {
+                        state.Value
+                    }
                 },
-                new div(HeightFull, Width(1), Background(Gray200)),
-                new div(OnClick(ToggleUnitTypeSuggestions))
+                new div(OnClick(ToggleUnitTypeSuggestions), Width("50%"), BorderLeft(1, solid, "#e5e7eb"), HeightFull, JustifyContentCenter, AlignItemsCenter, DisplayFlex)
                 {
-                    state.Unit
+                    new div(HeightFull, LineHeight36)
+                    {
+                        state.Unit
+                    }
                 }
             },
             new div(WidthFull, Height(1), Background(Gray200)),
             new div(DisplayFlex, Width(120), FlexWrap, Padding(4), Gap(8), CursorDefault, JustifyContentSpaceAround)
             {
-                from item in new[] { "1", "2", "3", "4", "5", "6", "7", "8", "9", "-", "0", "." }
-                select new div(OnClick(OnButtonClicked), Id(item), Width(30), Height(30), BorderRadius(50), AlignItemsCenter, JustifyContentCenter, DisplayFlex, Border(1, solid, Gray200), Hover(BorderColor(Gray300)), Hover(Background(Gray50)), string.IsNullOrWhiteSpace(item) ? BorderWidth(0) : BorderWidth(1))
+                from item in new[]{ "1", "2", "3","4","5","6","7","8","9","-","0","."}
+                select new div(OnClick(OnButtonClicked), Id(item), Width(30), Height(30), BorderRadius(50), AlignItemsCenter, JustifyContentCenter, DisplayFlex, Border(1, solid, Gray200), Hover(BorderColor(Gray300)), Hover(Background(Gray50)), string.IsNullOrWhiteSpace(item ) ? BorderWidth(0) : BorderWidth(1))
                 {
                     item
                 }
@@ -1361,6 +1366,7 @@ class CssUnitEditor : Component<CssUnitEditor.State>
                         }
                     }
                 }
+            
         };
     }
 
