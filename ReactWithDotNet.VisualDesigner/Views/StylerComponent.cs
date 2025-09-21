@@ -93,7 +93,75 @@ sealed class StylerComponent : Component<StylerComponent.State>
                         new("100"),
                         new("1000")
                     ]
-                }
+                },
+                
+                new()
+                {
+                    Label = "left",
+
+                    TargetCssName = "left",
+
+                    IsCssUnitEnabled = true,
+
+                    Suggestions =
+                    [
+                        new("4px"),
+                        new("8px"),
+                        new("16px"),
+                        new("24px")
+                    ]
+                },
+                
+                new()
+                {
+                    Label = "right",
+
+                    TargetCssName = "right",
+
+                    IsCssUnitEnabled = true,
+
+                    Suggestions =
+                    [
+                        new("4px"),
+                        new("8px"),
+                        new("16px"),
+                        new("24px")
+                    ]
+                },
+                
+                new()
+                {
+                    Label = "top",
+
+                    TargetCssName = "top",
+
+                    IsCssUnitEnabled = true,
+
+                    Suggestions =
+                    [
+                        new("4px"),
+                        new("8px"),
+                        new("16px"),
+                        new("24px")
+                    ]
+                },
+                
+                new()
+                {
+                    Label = "bottom",
+
+                    TargetCssName = "bottom",
+
+                    IsCssUnitEnabled = true,
+
+                    Suggestions =
+                    [
+                        new("4px"),
+                        new("8px"),
+                        new("16px"),
+                        new("24px")
+                    ]
+                },
             ]
         },
 
@@ -225,7 +293,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
 
                 new()
                 {
-                    Label = "min-width",
+                    Label = "min-w",
 
                     TargetCssName = "min-width",
 
@@ -239,7 +307,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                 },
                 new()
                 {
-                    Label = "min-height",
+                    Label = "min-h",
 
                     TargetCssName = "min-height",
 
