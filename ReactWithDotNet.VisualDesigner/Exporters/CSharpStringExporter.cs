@@ -1,5 +1,4 @@
 ﻿using System.IO;
-using Newtonsoft.Json;
 using ReactWithDotNet.Transformers;
 
 namespace ReactWithDotNet.VisualDesigner.Exporters;
@@ -720,7 +719,7 @@ static class CSharpStringExporter
                         {
                             foreach (var json in from p in node.Properties where p.Name == "style" select p.Value)
                             {
-                                foreach (var styleAttribute in JsonConvert.DeserializeObject<IReadOnlyList<FinalCssItem>>(json))
+                                foreach (var styleAttribute in Json.Deserialize<IReadOnlyList<FinalCssItem>>(json))
                                 {
                                     if (Design.IsDesignTimeName(styleAttribute.Name))
                                     {

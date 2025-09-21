@@ -151,7 +151,7 @@ static class ModelToNodeTransformer
                     props.Add(new()
                     {
                         Name  = "style",
-                        Value = JsonConvert.SerializeObject(listOfStyleAttributes)
+                        Value = Json.Serialize(listOfStyleAttributes)
                     });
                 }
             }
@@ -203,7 +203,7 @@ static class ModelToNodeTransformer
                     props.Add(new()
                     {
                         Name  = "style",
-                        Value = JsonConvert.SerializeObject(listOFinalCssItems)
+                        Value = JsonConvert.SerializeObject(listOFinalCssItems, new JsonSerializerSettings{ TypeNameHandling = TypeNameHandling.Auto})
                     });
                 }
             }
