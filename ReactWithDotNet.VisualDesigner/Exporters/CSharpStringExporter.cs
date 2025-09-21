@@ -107,7 +107,7 @@ static class CSharpStringExporter
                 foreach (var item in lines.FindLineIndexStartsWith(methodDeclarationLineIndex, leftSpaceCount + 4, "return ", "return"))
                 {
                     firstReturnLineIndex = item;
-                    leftPaddingCount     = item + 4;
+                    leftPaddingCount     = leftSpaceCount + 4;
                 }
 
                 if (firstReturnLineIndex < 0)
