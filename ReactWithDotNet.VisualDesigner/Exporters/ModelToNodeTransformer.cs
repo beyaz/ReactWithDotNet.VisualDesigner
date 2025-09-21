@@ -146,18 +146,14 @@ static class ModelToNodeTransformer
                     }
                 }
 
-                if (listOfStyleAttributes.Count == 0)
+                if (listOfStyleAttributes.Count > 0)
                 {
-                    return props;
+                    props.Add(new()
+                    {
+                        Name  = "style",
+                        Value = JsonConvert.SerializeObject(listOfStyleAttributes)
+                    });
                 }
-
-                props.Add(new()
-                {
-                    Name  = "style",
-                    Value = JsonConvert.SerializeObject(listOfStyleAttributes)
-                });
-
-                return props;
             }
 
             if (project.ExportAsCSharpString)
@@ -202,16 +198,14 @@ static class ModelToNodeTransformer
                     }
                 }
 
-                if (listOFinalCssItems.Count == 0)
+                if (listOFinalCssItems.Count > 0)
                 {
-                    return props;
+                    props.Add(new()
+                    {
+                        Name  = "style",
+                        Value = JsonConvert.SerializeObject(listOFinalCssItems)
+                    });
                 }
-
-                props.Add(new()
-                {
-                    Name  = "style",
-                    Value = JsonConvert.SerializeObject(listOFinalCssItems)
-                });
             }
 
             return props;
