@@ -1381,6 +1381,22 @@ class CssUnitEditor : Component<CssUnitEditor.State>
         };
     }
 
+    Task OnUnitTypeSuggestionItemClicked(MouseEvent e)
+    {
+        state = state with
+        {
+            Unit = e.target.id,
+            IsUnitSuggestionsVisible = false
+        };
+
+        if ( state.Value.HasValue())
+        {
+            DispatchEvent(Change, [CssName + ":" + state.Value + state.Unit]);
+        }
+
+        return Task.CompletedTask;
+    }
+    
     Task OnButtonClicked(MouseEvent e)
     {
         var charachter = e.target.id;
