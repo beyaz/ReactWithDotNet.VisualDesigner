@@ -117,7 +117,6 @@ static class ModelToNodeTransformer
                 {
                     List<StyleAttribute> listOfStyleAttributes = [];
                     {
-
                         foreach (var text in styles)
                         {
                             if (Design.IsDesignTimeName(ParseStyleAttribute(text).Name))
@@ -131,7 +130,7 @@ static class ModelToNodeTransformer
                                 return item.Error;
                             }
 
-                            foreach (var x in  item.Value.FinalCssItems)
+                            foreach (var x in item.Value.FinalCssItems)
                             {
                                 var styleAttribute = new StyleAttribute
                                 {
@@ -157,12 +156,9 @@ static class ModelToNodeTransformer
                                 };
 
                                 listOfStyleAttributes.Add(styleAttribute);
-
                             }
                         }
                     }
-                    
-             
 
                     stlyeValueAsJson = JsonConvert.SerializeObject(listOfStyleAttributes);
                 }
