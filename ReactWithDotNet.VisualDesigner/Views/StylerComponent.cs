@@ -580,7 +580,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
 
                 new()
                 {
-                    Label = "p – L",
+                    Label = "p Â· L",
 
                     TargetCssName = "padding-left",
 
@@ -597,7 +597,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
 
                 new()
                 {
-                    Label = "p – R",
+                    Label = "p Â· R",
 
                     TargetCssName = "padding-right",
 
@@ -614,7 +614,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
 
                 new()
                 {
-                    Label = "p – T",
+                    Label = "p Â· T",
 
                     TargetCssName = "padding-top",
 
@@ -631,7 +631,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
 
                 new()
                 {
-                    Label = "p – B",
+                    Label = "p Â· B",
 
                     TargetCssName = "padding-bottom",
 
@@ -648,7 +648,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
 
                 new()
                 {
-                    Label = "m – L",
+                    Label = "m Â· L",
 
                     TargetCssName = "margin-left",
 
@@ -665,7 +665,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
 
                 new()
                 {
-                    Label = "m – R",
+                    Label = "m Â· R",
 
                     TargetCssName = "margin-right",
 
@@ -682,7 +682,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
 
                 new()
                 {
-                    Label = "m – T",
+                    Label = "m Â· T",
 
                     TargetCssName = "margin-top",
 
@@ -699,7 +699,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
 
                 new()
                 {
-                    Label = "m – B",
+                    Label = "m Â· B",
 
                     TargetCssName = "margin-bottom",
 
