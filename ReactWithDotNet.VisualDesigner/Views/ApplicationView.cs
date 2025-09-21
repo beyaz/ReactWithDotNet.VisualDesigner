@@ -2875,7 +2875,12 @@ sealed class ApplicationView : Component<ApplicationState>
                 return Task.CompletedTask;
             }
 
-            state = state with { Scale = state.Scale - 10 };
+            state = state with
+            {
+                Scale = state.Scale - 10,
+                
+                IsSuggestionsVisible = false
+            };
 
             DispatchEvent(OnChange, [state.Scale]);
 
@@ -2889,7 +2894,12 @@ sealed class ApplicationView : Component<ApplicationState>
                 return Task.CompletedTask;
             }
 
-            state = state with { Scale = state.Scale + 10 };
+            state = state with
+            {
+                Scale = state.Scale + 10,
+                
+                IsSuggestionsVisible = false
+            };
 
             DispatchEvent(OnChange, [state.Scale]);
 
@@ -2940,7 +2950,7 @@ sealed class ApplicationView : Component<ApplicationState>
                             new path(Fill("currentColor"), path.D("M12 8.667H4A.669.669 0 0 1 3.333 8c0-.367.3-.667.667-.667h8c.367 0 .667.3.667.667 0 .367-.3.667-.667.667Z"))
                         }
                     },
-                    new div(OnClick(ToggleZoomSuggestions))
+                    new div(OnMouseEnter(ToggleZoomSuggestions))
                     {
                         $"%{state.Scale}"
                     },
@@ -2953,7 +2963,7 @@ sealed class ApplicationView : Component<ApplicationState>
                     }
                 },
                 !state.IsSuggestionsVisible ? null :
-                    new div(DisplayFlex, JustifyContentCenter, AlignItemsCenter, PositionFixed, Background(White), Border(1, solid, Gray300), BorderRadius(4), PaddingTop(4), PaddingBottom(4), Left(state.SuggestionPopupLocationX), Top(state.SuggestionPopupLocationY), ZIndex(3))
+                    new div(OnMouseLeave(ToggleZoomSuggestions), DisplayFlex, JustifyContentCenter, AlignItemsCenter, PositionFixed, Background(White), Border(1, solid, Gray300), BorderRadius(4), PaddingTop(4), PaddingBottom(4), Left(state.SuggestionPopupLocationX), Top(state.SuggestionPopupLocationY), ZIndex(3))
                     {
                         new div
                         {
