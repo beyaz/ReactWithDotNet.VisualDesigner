@@ -174,50 +174,44 @@ static class ModelToNodeTransformer
 
             if (project.ExportAsCSharpString)
             {
-                if (styles.Count == 0)
+               
+
+                List<FinalCssItem> listOFinalCssItems = [];
                 {
-                    return props;
-                }
-
-                // check has no pseudo
-                {
-                    var error = FirstOrDefaultOf
-                        (from text in styles
-                         let item = CreateDesignerStyleItemFromText(project, text)
-                         let exception = item switch
-                         {
-                             var x when x.HasError => item.Error,
-
-                             var x when x.Value.Pseudo is not null =>
-                                 new NotSupportedException($"Pseudo styles are not supported in inline styles. {text}"),
-
-                             _ => null
-                         }
-                         where exception is not null
-                         select exception);
-
-                    if (error is not null)
+                    foreach (var text in styles)
                     {
-                        return error;
+                        var designerStyleItem = CreateDesignerStyleItemFromText(project, text);
+                        if (designerStyleItem.HasError)
+                        {
+                            return designerStyleItem.Error;
+                        }
+                        if (designerStyleItem.Value.Pseudo.HasValue())
+                        {
+                            return new NotSupportedException($"Pseudo styles are not supported in inline styles. {text}");
+                        }
+                        
+                        foreach (var x in designerStyleItem.Value.FinalCssItems)
+                        {
+                            var finalCssItem = reCreateFinalCssItem(x);
+                            if (finalCssItem.HasError)
+                            {
+                                return finalCssItem.Error;
+                            }
+                            
+                            listOFinalCssItems.Add(finalCssItem.Value);
+                        }
                     }
                 }
 
-                var finalCssList = ListFrom
-                    (from text in styles
-                     let designerStyleItem = CreateDesignerStyleItemFromText(project, text)
-                     from x in designerStyleItem.Value.FinalCssItems
-                     select reCreateFinalCssItem(x));
-
-                if (finalCssList.HasError)
+                if (listOFinalCssItems.Count == 0)
                 {
-                    return finalCssList.Error;
+                    return props;
                 }
-
-                var inlineStyle = finalCssList.Value;
+                
                 props.Add(new()
                 {
                     Name  = "style",
-                    Value = JsonConvert.SerializeObject(inlineStyle)
+                    Value = JsonConvert.SerializeObject(listOFinalCssItems)
                 });
             }
 
