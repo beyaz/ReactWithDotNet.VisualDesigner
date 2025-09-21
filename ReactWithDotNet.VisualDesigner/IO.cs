@@ -39,7 +39,29 @@ static class IO
                 fileInfo.IsReadOnly = false;
             }
 
-            await File.WriteAllTextAsync(filePath, fileContent, Encoding.UTF8);
+            Encoding encoding;
+
+            if (fileInfo.Exists)
+            {
+                // Dosyayı açıp encoding tespit et
+                using (var reader = new StreamReader(filePath, Encoding.UTF8, detectEncodingFromByteOrderMarks: true))
+                {
+                    // İlk okumayı yapmazsak CurrentEncoding default (UTF8) kalabilir
+                    var buffer = new char[1];
+                    await reader.ReadAsync(buffer, 0, 1);
+                    encoding = reader.CurrentEncoding;
+                }
+            }
+            else
+            {
+                // Dosya yoksa UTF-8 kullan
+                encoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
+            }
+
+            // Dosyaya mevcut encoding ile yaz
+            await using var writer = new StreamWriter(filePath, false, encoding);
+
+            await writer.WriteAsync(fileContent);
         }
         catch (Exception exception)
         {
