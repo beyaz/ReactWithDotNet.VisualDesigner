@@ -115,48 +115,56 @@ static class ModelToNodeTransformer
 
                 string stlyeValueAsJson;
                 {
-                    var styleAttributeList = ListFrom(from text in styles
-                                                      let item = CreateDesignerStyleItemFromText(project, text)
-                                                      let styleAttributes = item switch
-                                                      {
-                                                          var x when x.HasError => [item.Error],
-
-                                                          var x when x.Value.Pseudo is not null && project.ExportAsCSharpString => [new NotSupportedException($"Pseudo styles are not supported in inline styles. Pseudo: {x.Value.Pseudo}")],
-
-                                                          _ => from x in item.Value.FinalCssItems
-                                                              select ResultFrom(new StyleAttribute
-                                                                                {
-                                                                                    Pseudo = item.Value.Pseudo,
-                                                                                    Name = project.ExportAsCSharpString switch
-                                                                                    {
-                                                                                        true  => x.Name,
-                                                                                        false => KebabToCamelCase(x.Name)
-                                                                                    },
-
-                                                                                    Value = x.Value switch
-                                                                                    {
-                                                                                        null => null,
-
-                                                                                        var y when y.StartsWith("request.") || y.StartsWith("context.") => y,
-
-                                                                                        var y => project.ExportAsCSharpString switch
-                                                                                        {
-                                                                                            true  => TryClearStringValue(y),
-                                                                                            false => '"' + TryClearStringValue(y) + '"'
-                                                                                        }
-                                                                                    }
-                                                                                }
-                                                                               )
-                                                      }
-                                                      from x in styleAttributes
-                                                      select x);
-
-                    if (styleAttributeList.HasError)
+                    List<StyleAttribute> listOfStyleAttributes = [];
                     {
-                        return styleAttributeList.Error;
-                    }
 
-                    stlyeValueAsJson = JsonConvert.SerializeObject(styleAttributeList.Value);
+                        foreach (var text in styles)
+                        {
+                            if (Design.IsDesignTimeName(ParseStyleAttribute(text).Name))
+                            {
+                                continue;
+                            }
+
+                            var item = CreateDesignerStyleItemFromText(project, text);
+                            if (item.HasError)
+                            {
+                                return item.Error;
+                            }
+
+                            foreach (var x in  item.Value.FinalCssItems)
+                            {
+                                var styleAttribute = new StyleAttribute
+                                {
+                                    Pseudo = item.Value.Pseudo,
+                                    Name = project.ExportAsCSharpString switch
+                                    {
+                                        true  => x.Name,
+                                        false => KebabToCamelCase(x.Name)
+                                    },
+
+                                    Value = x.Value switch
+                                    {
+                                        null => null,
+
+                                        var y when y.StartsWith("request.") || y.StartsWith("context.") => y,
+
+                                        var y => project.ExportAsCSharpString switch
+                                        {
+                                            true  => TryClearStringValue(y),
+                                            false => '"' + TryClearStringValue(y) + '"'
+                                        }
+                                    }
+                                };
+
+                                listOfStyleAttributes.Add(styleAttribute);
+
+                            }
+                        }
+                    }
+                    
+             
+
+                    stlyeValueAsJson = JsonConvert.SerializeObject(listOfStyleAttributes);
                 }
 
                 props.Add(new()
