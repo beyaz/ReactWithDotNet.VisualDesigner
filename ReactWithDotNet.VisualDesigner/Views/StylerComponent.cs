@@ -581,7 +581,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                 
                 new()
                 {
-                    Label = "p - L",
+                    Label = "p · L",
 
                     TargetCssName = "padding-left",
 
@@ -598,7 +598,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                 
                 new()
                 {
-                    Label = "p - R",
+                    Label = "p · R",
 
                     TargetCssName = "padding-right",
 
@@ -615,7 +615,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                 
                 new()
                 {
-                    Label = "p - T",
+                    Label = "p · T",
 
                     TargetCssName = "padding-top",
 
@@ -632,7 +632,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                 
                 new()
                 {
-                    Label = "p - B",
+                    Label = "p · B",
 
                     TargetCssName = "padding-bottom",
 
@@ -649,7 +649,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                 
                 new()
                 {
-                    Label = "m - L",
+                    Label = "m · L",
 
                     TargetCssName = "margin-left",
 
@@ -666,7 +666,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                 
                 new()
                 {
-                    Label = "m - R",
+                    Label = "m · R",
 
                     TargetCssName = "margin-right",
 
@@ -683,7 +683,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                 
                 new()
                 {
-                    Label = "m - T",
+                    Label = "m · T",
 
                     TargetCssName = "margin-top",
 
@@ -700,7 +700,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                 
                 new()
                 {
-                    Label = "m - B",
+                    Label = "m · B",
 
                     TargetCssName = "margin-bottom",
 
