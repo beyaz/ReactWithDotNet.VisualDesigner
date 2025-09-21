@@ -135,7 +135,7 @@ static class ModelToNodeTransformer
                                 var styleAttribute = new StyleAttribute
                                 {
                                     Pseudo = item.Value.Pseudo,
-                                    
+
                                     Name = KebabToCamelCase(finalCssItem.Name),
 
                                     Value = finalCssItem.Value switch
@@ -187,7 +187,7 @@ static class ModelToNodeTransformer
                             var finalCssItemResult = CreateFinalCssItem(new()
                             {
                                 Name = finalCssItem.Name,
-                                
+
                                 Value = finalCssItem.Value switch
                                 {
                                     null => null,
