@@ -1337,7 +1337,7 @@ class CssUnitEditor : Component<CssUnitEditor.State>
                 new div(HeightFull, Width(1), Background(Gray200)),
                 new div(OnClick(ToggleUnitTypeSuggestions))
                 {
-                    "px"
+                    state.Unit
                 }
             },
             new div(WidthFull, Height(1), Background(Gray200)),
@@ -1406,7 +1406,7 @@ class CssUnitEditor : Component<CssUnitEditor.State>
         {
             IsUnitSuggestionsVisible = !state.IsUnitSuggestionsVisible,
             SuggestionPopupLocationX = rect.left + rect.width / 2 - 24,
-            SuggestionPopupLocationY = rect.top + rect.height + 8
+            SuggestionPopupLocationY = rect.top - 64
         };
 
         return Task.CompletedTask;
