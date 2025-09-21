@@ -120,7 +120,7 @@ static class CSharpExporter
             }
         }
 
-        return new ArgumentException($"ComponentDeclerationNotFoundInFile. {targetComponentName}");
+        return new ArgumentException($"ComponentDeclarationNotFoundInFile. {targetComponentName}");
     }
 
     internal static async Task<Result<(IReadOnlyList<string> elementTreeSourceLines, IReadOnlyList<string> importLines)>> CalculateElementTreeSourceCodes(ProjectConfig project, IReadOnlyDictionary<string, string> componentConfig, VisualElementModel rootVisualElement)

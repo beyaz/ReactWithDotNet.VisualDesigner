@@ -571,7 +571,7 @@ static class TsxExporter
                 componentDeclarationLineIndex = lines.FindIndex(line => line.Contains($"const {targetComponentName}:"));
                 if (componentDeclarationLineIndex < 0)
                 {
-                    return new ArgumentException($"ComponentDeclerationNotFoundInFile. {targetComponentName}");
+                    return new ArgumentException($"ComponentDeclarationNotFoundInFile. {targetComponentName}");
                 }
             }
         }

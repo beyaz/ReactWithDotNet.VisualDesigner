@@ -70,7 +70,7 @@ static class CSharpStringExporter
             var names = targetComponentName.Split(':', StringSplitOptions.RemoveEmptyEntries);
             if (names.Length != 2)
             {
-                return new ArgumentException($"ComponentDeclerationNotFoundInFile. {targetComponentName}");
+                return new ArgumentException($"ComponentDeclarationNotFoundInFile. {targetComponentName}");
             }
 
             var className = names[0];
@@ -88,13 +88,13 @@ static class CSharpStringExporter
                     var classDeclarationLineIndex = lines.FindIndex(line => line.Contains($"class {className} "));
                     if (classDeclarationLineIndex < 0)
                     {
-                        return new ArgumentException($"ComponentDeclerationNotFoundInFile. {targetComponentName}");
+                        return new ArgumentException($"ComponentDeclarationNotFoundInFile. {targetComponentName}");
                     }
 
                     methodDeclarationLineIndex = lines.FindIndex(classDeclarationLineIndex, line => line.Contains($" Element {methodName}("));
                     if (methodDeclarationLineIndex < 0)
                     {
-                        return new ArgumentException($"ComponentDeclerationNotFoundInFile. {targetComponentName}");
+                        return new ArgumentException($"ComponentDeclarationNotFoundInFile. {targetComponentName}");
                     }
                 }
             }
