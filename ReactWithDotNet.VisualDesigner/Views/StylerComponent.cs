@@ -94,7 +94,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                         new("1000")
                     ]
                 },
-                
+
                 new()
                 {
                     Label = "left",
@@ -111,7 +111,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                         new("24px")
                     ]
                 },
-                
+
                 new()
                 {
                     Label = "right",
@@ -128,7 +128,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                         new("24px")
                     ]
                 },
-                
+
                 new()
                 {
                     Label = "top",
@@ -145,7 +145,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                         new("24px")
                     ]
                 },
-                
+
                 new()
                 {
                     Label = "bottom",
@@ -161,7 +161,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                         new("16px"),
                         new("24px")
                     ]
-                },
+                }
             ]
         },
 
@@ -577,9 +577,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                         new("auto")
                     ]
                 },
-                
-               
-                
+
                 new()
                 {
                     Label = "p · L",
@@ -596,7 +594,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                         new("24px")
                     ]
                 },
-                
+
                 new()
                 {
                     Label = "p · R",
@@ -613,7 +611,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                         new("24px")
                     ]
                 },
-                
+
                 new()
                 {
                     Label = "p · T",
@@ -630,7 +628,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                         new("24px")
                     ]
                 },
-                
+
                 new()
                 {
                     Label = "p · B",
@@ -647,7 +645,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                         new("24px")
                     ]
                 },
-                
+
                 new()
                 {
                     Label = "m · L",
@@ -664,7 +662,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                         new("24px")
                     ]
                 },
-                
+
                 new()
                 {
                     Label = "m · R",
@@ -681,7 +679,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                         new("24px")
                     ]
                 },
-                
+
                 new()
                 {
                     Label = "m · T",
@@ -698,7 +696,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                         new("24px")
                     ]
                 },
-                
+
                 new()
                 {
                     Label = "m · B",
@@ -714,7 +712,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                         new("16px"),
                         new("24px")
                     ]
-                },
+                }
             ]
         },
 
@@ -1326,20 +1324,6 @@ class CssUnitEditor : Component<CssUnitEditor.State>
 
     public string CssName { get; init; }
 
-    Task ToggleUnitTypeSuggestions(MouseEvent e)
-    {
-        var rect = e.target.boundingClientRect;
-
-        state = state with
-        {
-            IsUnitSuggestionsVisible = !state.IsUnitSuggestionsVisible,
-            SuggestionPopupLocationX = rect.left + rect.width / 2 - 24,
-            SuggestionPopupLocationY = rect.top + rect.height + 8
-        };
-
-        return Task.CompletedTask;
-    }
-    
     protected override Element render()
     {
         return new div(WidthFitContent, Border(1, solid, Gray200), DisplayFlex, FlexDirectionColumn)
@@ -1359,8 +1343,8 @@ class CssUnitEditor : Component<CssUnitEditor.State>
             new div(WidthFull, Height(1), Background(Gray200)),
             new div(DisplayFlex, Width(120), FlexWrap, Padding(4), Gap(8), CursorDefault, JustifyContentSpaceAround)
             {
-                from item in new[]{ "1", "2", "3","4","5","6","7","8","9","-","0","."}
-                select new div(OnClick(OnButtonClicked), Id(item), Width(30), Height(30), BorderRadius(50), AlignItemsCenter, JustifyContentCenter, DisplayFlex, Border(1, solid, Gray200), Hover(BorderColor(Gray300)), Hover(Background(Gray50)), string.IsNullOrWhiteSpace(item ) ? BorderWidth(0) : BorderWidth(1))
+                from item in new[] { "1", "2", "3", "4", "5", "6", "7", "8", "9", "-", "0", "." }
+                select new div(OnClick(OnButtonClicked), Id(item), Width(30), Height(30), BorderRadius(50), AlignItemsCenter, JustifyContentCenter, DisplayFlex, Border(1, solid, Gray200), Hover(BorderColor(Gray300)), Hover(Background(Gray50)), string.IsNullOrWhiteSpace(item) ? BorderWidth(0) : BorderWidth(1))
                 {
                     item
                 }
@@ -1377,26 +1361,9 @@ class CssUnitEditor : Component<CssUnitEditor.State>
                         }
                     }
                 }
-            
         };
     }
 
-    Task OnUnitTypeSuggestionItemClicked(MouseEvent e)
-    {
-        state = state with
-        {
-            Unit = e.target.id,
-            IsUnitSuggestionsVisible = false
-        };
-
-        if ( state.Value.HasValue())
-        {
-            DispatchEvent(Change, [CssName + ":" + state.Value + state.Unit]);
-        }
-
-        return Task.CompletedTask;
-    }
-    
     Task OnButtonClicked(MouseEvent e)
     {
         var charachter = e.target.id;
@@ -1415,16 +1382,44 @@ class CssUnitEditor : Component<CssUnitEditor.State>
         return Task.CompletedTask;
     }
 
+    Task OnUnitTypeSuggestionItemClicked(MouseEvent e)
+    {
+        state = state with
+        {
+            Unit = e.target.id,
+            IsUnitSuggestionsVisible = false
+        };
+
+        if (state.Value.HasValue())
+        {
+            DispatchEvent(Change, [CssName + ":" + state.Value + state.Unit]);
+        }
+
+        return Task.CompletedTask;
+    }
+
+    Task ToggleUnitTypeSuggestions(MouseEvent e)
+    {
+        var rect = e.target.boundingClientRect;
+
+        state = state with
+        {
+            IsUnitSuggestionsVisible = !state.IsUnitSuggestionsVisible,
+            SuggestionPopupLocationX = rect.left + rect.width / 2 - 24,
+            SuggestionPopupLocationY = rect.top + rect.height + 8
+        };
+
+        return Task.CompletedTask;
+    }
+
     internal record State
     {
-        public string Unit { get; init; } = "px";
-        public string Value { get; init; }
-        
         public bool IsUnitSuggestionsVisible { get; init; }
-
 
         public double SuggestionPopupLocationX { get; init; }
 
         public double SuggestionPopupLocationY { get; init; }
+        public string Unit { get; init; } = "px";
+        public string Value { get; init; }
     }
 }
