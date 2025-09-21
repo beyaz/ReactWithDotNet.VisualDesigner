@@ -9,76 +9,75 @@ namespace ReactWithDotNet.VisualDesigner.Views;
 
 sealed class ApplicationView : Component<ApplicationState>
 {
-    static readonly Dictionary<string,IReadOnlyList<(string Name, IReadOnlyList<string> Suggestions)>> HtmlPropSuggestions =new()
+    static readonly Dictionary<string, IReadOnlyList<(string Name, IReadOnlyList<string> Suggestions)>> HtmlPropSuggestions = new()
     {
-        [nameof(table)] = 
+        [nameof(table)] =
         [
-            (nameof(table.border), [ "0", "1"]),
-            (nameof(table.cellSpacing), [ "0", "1", "2"]),
-            (nameof(table.cellPadding), [ "0", "1","2"]),
-            (nameof(table.align), [ "left", "center", "right"]),
-            (nameof(table.rules), [ "all", "cols", "rows", "groups", "none"]),
-            (nameof(table.frame), [ "void", "above", "below", "hsides", "lhs", "rhs", "vsides", "box", "border" ]),
+            (nameof(table.border), ["0", "1"]),
+            (nameof(table.cellSpacing), ["0", "1", "2"]),
+            (nameof(table.cellPadding), ["0", "1", "2"]),
+            (nameof(table.align), ["left", "center", "right"]),
+            (nameof(table.rules), ["all", "cols", "rows", "groups", "none"]),
+            (nameof(table.frame), ["void", "above", "below", "hsides", "lhs", "rhs", "vsides", "box", "border"])
         ],
-        
-        [nameof(th)] = 
+
+        [nameof(th)] =
         [
-            (nameof(th.align), [ "left", "center", "right", "justify"]),
+            (nameof(th.align), ["left", "center", "right", "justify"]),
             (nameof(th.valign), ["top", "middle", "bottom", "baseline"]),
             (nameof(th.scope), ["row", "col", "rowgroup", "colgroup"]),
-            (nameof(th.colSpan), ["2","3","4","5","6","7","8","9","10"]),
-            (nameof(th.rowSpan), ["2","3","4","5","6","7","8","9","10"]),
+            (nameof(th.colSpan), ["2", "3", "4", "5", "6", "7", "8", "9", "10"]),
+            (nameof(th.rowSpan), ["2", "3", "4", "5", "6", "7", "8", "9", "10"])
         ],
-        
-        [nameof(tr)] = 
+
+        [nameof(tr)] =
         [
-            (nameof(tr.colSpan), ["2","3","4","5","6","7","8","9","10"]),
-            (nameof(tr.rowSpan), ["2","3","4","5","6","7","8","9","10"]),
+            (nameof(tr.colSpan), ["2", "3", "4", "5", "6", "7", "8", "9", "10"]),
+            (nameof(tr.rowSpan), ["2", "3", "4", "5", "6", "7", "8", "9", "10"]),
             (nameof(tr.align), ["left", "center", "right", "justify"]),
             (nameof(tr.valign), ["top", "middle", "bottom", "baseline"])
         ],
-        
-        [nameof(td)] = 
+
+        [nameof(td)] =
         [
-            (nameof(td.colSpan), ["2","3","4","5","6","7","8","9","10"]),
-            (nameof(td.rowSpan), ["2","3","4","5","6","7","8","9","10"]),
-            (nameof(td.align), ["left","right","center","justify","char"]),
+            (nameof(td.colSpan), ["2", "3", "4", "5", "6", "7", "8", "9", "10"]),
+            (nameof(td.rowSpan), ["2", "3", "4", "5", "6", "7", "8", "9", "10"]),
+            (nameof(td.align), ["left", "right", "center", "justify", "char"]),
             (nameof(td.valign), ["top", "middle", "bottom", "baseline"]),
             (nameof(td.nowrap), ["true", "false"]),
             (nameof(td.scope), ["row", "col", "rowgroup", "colgroup"])
         ],
-        
-        [nameof(input)] = 
+
+        [nameof(input)] =
         [
             (nameof(input.type), ["text", "password", "email", "number", "checkbox", "radio", "submit", "button"]),
             (nameof(input.disabled), ["true", "false"]),
-            (nameof(input.readOnly),  ["true", "false"]),
-            (nameof(input.required),  ["true", "false"])
+            (nameof(input.readOnly), ["true", "false"]),
+            (nameof(input.required), ["true", "false"])
         ],
-        
-        [nameof(a)] = 
+
+        [nameof(a)] =
         [
-            (nameof(a.rel), ["nofollow", "noopener", "noreferrer"]),
+            (nameof(a.rel), ["nofollow", "noopener", "noreferrer"])
         ],
-        
-        [nameof(img)] = 
+
+        [nameof(img)] =
         [
             (nameof(img.loading), ["lazy", "eager"]),
-            (nameof(img.decoding), ["sync", "async", "auto"]),
+            (nameof(img.decoding), ["sync", "async", "auto"])
         ],
-        
-        
-        [nameof(button)] = 
+
+        [nameof(button)] =
         [
-            (nameof(button.type), ["button", "submit", "reset" ]),
-            (nameof(button.disabled), ["true", "false"]),
+            (nameof(button.type), ["button", "submit", "reset"]),
+            (nameof(button.disabled), ["true", "false"])
         ],
-        
-        [nameof(form)] = 
+
+        [nameof(form)] =
         [
-            (nameof(form.method), ["get", "post" ]),
+            (nameof(form.method), ["get", "post"]),
             (nameof(form.enctype), ["application/x-www-form-urlencoded", "multipart/form-data", "text/plain"]),
-            (nameof(form.novalidate), [ "true", "false" ]),
+            (nameof(form.novalidate), ["true", "false"])
         ]
     };
 
@@ -375,7 +374,6 @@ sealed class ApplicationView : Component<ApplicationState>
 
         UpdateCurrentVisualElement(parent => parent with
         {
-
             Children = parent.Children.Add(new()
             {
                 Tag = parent.Tag switch
@@ -384,7 +382,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
                     var x when x == nameof(tbody) || x == nameof(thead) || x == nameof(tfoot) => nameof(tr),
 
-                    var x when x == nameof(table) && parent.Children.Any(c => c.Tag == nameof(tr)) => nameof(tr),
+                    var x when x == nameof(table) && parent.Children.Any(c => c.Tag == nameof(tr))    => nameof(tr),
                     var x when x == nameof(table) && parent.Children.All(c => c.Tag != nameof(thead)) => nameof(thead),
                     var x when x == nameof(table) && parent.Children.All(c => c.Tag != nameof(tbody)) => nameof(tbody),
                     var x when x == nameof(table) && parent.Children.All(c => c.Tag != nameof(tfoot)) => nameof(tfoot),
@@ -1602,7 +1600,7 @@ sealed class ApplicationView : Component<ApplicationState>
             {
                 if (HtmlPropSuggestions.TryGetValue(CurrentVisualElement.Tag, out var list))
                 {
-                    return 
+                    return
                         from x in list
                         where !alreadyContainsProp(x.Name)
                         select new ShadowPropertyView
@@ -1614,7 +1612,7 @@ sealed class ApplicationView : Component<ApplicationState>
                         };
                 }
 
-                return 
+                return
                     from type in Plugin.GetAllCustomComponents()
                     where type.Name == CurrentVisualElement.Tag
                     from propertyInfo in type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly)
@@ -1641,8 +1639,6 @@ sealed class ApplicationView : Component<ApplicationState>
             {
                 shadowProps = null;
             }
-
-            
         }
 
         return new FlexColumn(BorderLeft(1, dotted, "#d9d9d9"), PaddingX(2), Gap(8), OverflowYAuto, Background(White))
@@ -1669,7 +1665,7 @@ sealed class ApplicationView : Component<ApplicationState>
                 new div { Height(1), FlexGrow(1), Background(Gray200) }
             },
             viewStyles(CurrentVisualElement.Styles),
-            new FlexColumn(Flex(1,1,0), JustifyContentFlexEnd, AlignItemsCenter)
+            new FlexColumn(Flex(1, 1, 0), JustifyContentFlexEnd, AlignItemsCenter)
             {
                 new StylerComponent
                 {
@@ -1698,7 +1694,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
                         return Task.CompletedTask;
                     }
-                },
+                }
             },
             SpaceY(16)
         };
@@ -2878,7 +2874,7 @@ sealed class ApplicationView : Component<ApplicationState>
             state = state with
             {
                 Scale = state.Scale - 10,
-                
+
                 IsSuggestionsVisible = false
             };
 
@@ -2897,7 +2893,7 @@ sealed class ApplicationView : Component<ApplicationState>
             state = state with
             {
                 Scale = state.Scale + 10,
-                
+
                 IsSuggestionsVisible = false
             };
 
@@ -2974,7 +2970,6 @@ sealed class ApplicationView : Component<ApplicationState>
                             }
                         }
                     }
-                
             };
         }
 
