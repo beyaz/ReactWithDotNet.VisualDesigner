@@ -85,13 +85,13 @@ static class CSharpStringExporter
 
                 if (methodDeclarationLineIndex < 0)
                 {
-                    var classDeclerationLineIndex = lines.FindIndex(line => line.Contains($"class {className} "));
-                    if (classDeclerationLineIndex < 0)
+                    var classDeclarationLineIndex = lines.FindIndex(line => line.Contains($"class {className} "));
+                    if (classDeclarationLineIndex < 0)
                     {
                         return new ArgumentException($"ComponentDeclerationNotFoundInFile. {targetComponentName}");
                     }
 
-                    methodDeclarationLineIndex = lines.FindIndex(classDeclerationLineIndex, line => line.Contains($" Element {methodName}("));
+                    methodDeclarationLineIndex = lines.FindIndex(classDeclarationLineIndex, line => line.Contains($" Element {methodName}("));
                     if (methodDeclarationLineIndex < 0)
                     {
                         return new ArgumentException($"ComponentDeclerationNotFoundInFile. {targetComponentName}");
