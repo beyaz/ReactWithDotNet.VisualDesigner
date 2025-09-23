@@ -27,8 +27,6 @@ public sealed record ApplicationSelectionState
     
     public int? SelectedPropertyIndex { get; init; }
     
-    public int? HoveredStyleIndex { get; init; }
-    
     // @formatter:on
 }
 
