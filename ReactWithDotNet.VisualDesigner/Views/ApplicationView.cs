@@ -242,6 +242,27 @@ sealed class ApplicationView : Component<ApplicationState>
         };
     }
 
+    static Element CreateAttributeItemCloseIcon(params Modifier[] modifiers)
+    {
+        return new FlexRowCentered
+        {
+            Size(20),
+            Padding(4),
+            PositionAbsolute, Top(-8), Right(-8),
+
+            Background(White),
+            Border(0.5, solid, Theme.BorderColor),
+            BorderRadius(24),
+
+            Color(Gray500),
+            Hover(Color(Blue300), BorderColor(Blue300)),
+
+            new IconClose() + Size(16),
+
+            modifiers
+        };
+    }
+
     static Element CreateDropLocationElement(bool onMouseOver, Modifier[] modifiers)
     {
         return new FlexRowCentered(Size(24))
@@ -249,7 +270,7 @@ sealed class ApplicationView : Component<ApplicationState>
             new div(Size(16), BorderRadius(32), Background(Blue200))
             {
                 When(onMouseOver, Size(24) + Border(1, dotted, Blue600)),
-                
+
                 modifiers
             }
         };
@@ -1044,13 +1065,13 @@ sealed class ApplicationView : Component<ApplicationState>
             StyleItemDragDrop = new(),
             Selection = state.Selection with
             {
-                SelectedStyleIndex = null,
+                SelectedStyleIndex = null
             }
         };
 
         return Task.CompletedTask;
     }
-    
+
     Task OnStyleItemDropLocationLeaved(int styleIndex)
     {
         state = state with
@@ -1574,246 +1595,6 @@ sealed class ApplicationView : Component<ApplicationState>
         };
     }
 
-    static Element CreateAttributeItemCloseIcon(params Modifier[] modifiers)
-    {
-        return new FlexRowCentered
-        {
-            Size(20),
-            Padding(4),
-            PositionAbsolute, Top(-8), Right(-8),
-
-            Background(White),
-            Border(0.5, solid, Theme.BorderColor),
-            BorderRadius(24),
-
-            Color(Gray500),
-            Hover(Color(Blue300), BorderColor(Blue300)),
-
-            new IconClose() + Size(16),
-
-            modifiers
-        };
-    }
-    
-    class StyleItemView: Component<StyleItemView.StyleItemViewState>
-    {
-        public required int StyleIndex { get; init; }
-        
-        public required string Value { get; init; }
-        
-        public required bool IsSelected { get; init; }
-        
-        public required bool IsDragDropLocationsVisible { get; init; }
-        
-        public required AttributeDragPosition? DragDropPosition { get; init; }
-        
-        public bool IsMouseEnterLeaveEnabled { get; init; }
-        
-        [CustomEvent]
-        public Func<int,Task> Close { get; init; }
-        
-        [CustomEvent]
-        public Func<int,Task> Select { get; init; }
-        
-        [CustomEvent]
-        public Func<int,Task> DragStart { get; init; }
-        
-        [CustomEvent]
-        public Func<int,Task> DragEnter { get; init; }
-
-        
-        
-        [CustomEvent]
-        public Func<int,Task> DropLocation_Before_DragEnter { get; init; }
-        
-        [CustomEvent]
-        public Func<int,Task> DropLocation_Before_DragLeave { get; init; }
-        
-        [CustomEvent]
-        public Func<int,Task> DropLocation_Before_Drop { get; init; }
-        
-        [CustomEvent]
-        public Func<int,Task> DropLocation_After_DragEnter { get; init; }
-        
-        [CustomEvent]
-        public Func<int,Task> DropLocation_After_DragLeave { get; init; }
-        
-        [CustomEvent]
-        public Func<int,Task> DropLocation_After_Drop { get; init; }
-        
-        protected override Element render()
-            {
-                var closeIcon = CreateAttributeItemCloseIcon(OnClick(OnDeleteClicked));
-
-                Element content = Value;
-                {
-                    ParseProperty(Value).Then(x =>
-                    {
-                        content = new FlexRow(AlignItemsCenter, FlexWrap)
-                        {
-                            new span(FontWeight600) { x.Name }, ": ", new span(PaddingLeft(2)) { x.Value }
-                        };
-                    });
-                }
-
-                
-
-                var styleItem = new FlexRowCentered(CursorDefault, Padding(4, 8), BorderRadius(16), UserSelect(none))
-                {
-                    Background(IsSelected ? Gray200 : Gray50),
-                    Border(1, solid, Gray100),
-
-                    PositionRelative,
-                    IsSelected || state.IsCloseIconVisible ? closeIcon : null,
-
-                    content,
-                    Id(StyleIndex),
-
-                    IsMouseEnterLeaveEnabled ?  OnMouseEnter(OnMouseEntered): null,
-
-                    IsMouseEnterLeaveEnabled ? OnMouseLeave(OnMouseLeaved) : null,
-
-                    OnClick(OnClicked),
-
-                    // Drag Drop Operation
-                    {
-                        DraggableTrue,
-                        OnDragStart(OnDragStarted),
-                        OnDragEnter(OnDragEntered)
-                    }
-                };
-
-                if (IsDragDropLocationsVisible)
-                {
-                    var dropLocationBefore = CreateDropLocationElement(DragDropPosition == AttributeDragPosition.Before,
-                    [
-                        OnDragEnter(OnDropLocation_Before_DragEntered),
-                        OnDragLeave(OnDropLocation_Before_DragLeaved),
-                        OnDrop(OnDropLocation_Before_Dropped)
-                    ]);
-                  
-
-                    var dropLocationAfter = CreateDropLocationElement(DragDropPosition == AttributeDragPosition.After,
-                    [
-                        OnDragEnter(OnDropLocation_After_DragEntered),
-                        OnDragLeave(OnDropLocation_After_DragLeaved),
-                        OnDrop(OnDropLocation_After_Dropped)
-                    ]);
-
-                    return new FlexRowCentered(Gap(8))
-                    {
-                        dropLocationBefore,
-
-                        styleItem,
-
-                        dropLocationAfter
-                    };
-                }
-
-                return styleItem;
-            }
-
-        Task OnDropLocation_After_Dropped(DragEvent _)
-        {
-            DispatchEvent(DropLocation_After_Drop, [StyleIndex]);
-
-            return Task.CompletedTask;
-        }
-
-        Task OnDropLocation_After_DragLeaved(DragEvent _)
-        {
-            DispatchEvent(DropLocation_After_DragLeave, [StyleIndex]);
-
-            return Task.CompletedTask;
-        }
-
-        Task OnDropLocation_After_DragEntered(DragEvent _)
-        {
-            DispatchEvent(DropLocation_After_DragEnter, [StyleIndex]);
-
-            return Task.CompletedTask;
-        }
-
-        Task OnDropLocation_Before_Dropped(DragEvent _)
-        {
-            DispatchEvent(DropLocation_Before_Drop, [StyleIndex]);
-
-            return Task.CompletedTask;
-        }
-
-        Task OnDropLocation_Before_DragLeaved(DragEvent _)
-        {
-            DispatchEvent(DropLocation_Before_DragLeave, [StyleIndex]);
-
-            return Task.CompletedTask;
-        }
-
-        Task OnDropLocation_Before_DragEntered(DragEvent _)
-        {
-            DispatchEvent(DropLocation_Before_DragEnter, [StyleIndex]);
-
-            return Task.CompletedTask;
-        }
-
-        [StopPropagation]
-        Task OnDeleteClicked(MouseEvent _)
-        {
-            DispatchEvent(Close, [StyleIndex]);
-
-            return Task.CompletedTask;
-        }
-
-        [StopPropagation]
-        Task OnMouseLeaved(MouseEvent e)
-        {
-            state.IsCloseIconVisible = false;
-
-            return Task.CompletedTask;
-        }
-
-        [StopPropagation]
-        Task OnMouseEntered(MouseEvent e)
-        {
-            state.IsCloseIconVisible = true;
-
-            return Task.CompletedTask;
-        }
-
-        Task OnDragEntered(DragEvent _)
-        {
-            state.IsCloseIconVisible = false;
-
-            DispatchEvent(DragEnter, [StyleIndex]);
-
-            return Task.CompletedTask;
-        }
-
-        Task OnDragStarted(DragEvent _)
-        {
-            state.IsCloseIconVisible = false;
-
-            DispatchEvent(DragStart, [StyleIndex]);
-
-            return Task.CompletedTask;
-        }
-
-        [StopPropagation]
-        Task OnClicked(MouseEvent e)
-        {
-            state.IsCloseIconVisible = true;
-
-            DispatchEvent(Select, [StyleIndex]);
-
-            return Task.CompletedTask;
-        }
-
-        internal sealed class StyleItemViewState
-        {
-            public bool IsCloseIconVisible { get; set; }
-        }
-        
-        
-    }
     Element PartRightPanel()
     {
         VisualElementModel visualElementModel = null;
@@ -1938,8 +1719,6 @@ sealed class ApplicationView : Component<ApplicationState>
             SpaceY(16)
         };
 
-       
-
         Element viewStyles(IReadOnlyList<string> styles)
         {
             return new FlexColumn(WidthFull, Gap(4))
@@ -1959,7 +1738,7 @@ sealed class ApplicationView : Component<ApplicationState>
                             {
                                 Selection = state.Selection with
                                 {
-                                    SelectedStyleIndex = null,
+                                    SelectedStyleIndex = null
                                 }
                             };
 
@@ -2007,7 +1786,7 @@ sealed class ApplicationView : Component<ApplicationState>
                         {
                             Selection = state.Selection with
                             {
-                                SelectedStyleIndex = null,
+                                SelectedStyleIndex = null
                             }
                         };
 
@@ -2016,7 +1795,7 @@ sealed class ApplicationView : Component<ApplicationState>
                     Value = value
                 };
             }
-            
+
             Element attributeItem(int index, string value)
             {
                 var isSelected = index == state.Selection.SelectedStyleIndex;
@@ -2024,13 +1803,13 @@ sealed class ApplicationView : Component<ApplicationState>
                 {
                     isSelected = false;
                 }
-                
+
                 return new StyleItemView
                 {
-                    Value = value,
-                    StyleIndex = index,
-                    IsSelected = isSelected,
-                    DragDropPosition = state.StyleItemDragDrop.Position,
+                    Value                      = value,
+                    StyleIndex                 = index,
+                    IsSelected                 = isSelected,
+                    DragDropPosition           = state.StyleItemDragDrop.Position,
                     IsDragDropLocationsVisible = state.StyleItemDragDrop.EndItemIndex == index,
                     Close = [StopPropagation](styleIndex) =>
                     {
@@ -2043,7 +1822,7 @@ sealed class ApplicationView : Component<ApplicationState>
                         {
                             Selection = state.Selection with
                             {
-                                SelectedStyleIndex = null,
+                                SelectedStyleIndex = null
                             }
                         };
 
@@ -2092,19 +1871,19 @@ sealed class ApplicationView : Component<ApplicationState>
 
                         return Task.CompletedTask;
                     },
-                    
+
                     DragStart = styleIndex =>
                     {
                         state = state with
                         {
                             StyleItemDragDrop = state.StyleItemDragDrop with
                             {
-                                StartItemIndex =styleIndex
+                                StartItemIndex = styleIndex
                             }
                         };
                         return Task.CompletedTask;
                     },
-                    
+
                     DragEnter = styleIndex =>
                     {
                         state = state with
@@ -2122,25 +1901,17 @@ sealed class ApplicationView : Component<ApplicationState>
                         return Task.CompletedTask;
                     },
                     DropLocation_Before_DragLeave = OnStyleItemDropLocationLeaved,
-                    DropLocation_Before_Drop = OnStyleItemDropLocationDropped
-                    ,
-                    
+                    DropLocation_Before_Drop      = OnStyleItemDropLocationDropped,
+
                     DropLocation_After_DragEnter = _ =>
                     {
                         state = state with { StyleItemDragDrop = state.StyleItemDragDrop with { Position = AttributeDragPosition.After } };
                         return Task.CompletedTask;
                     },
                     DropLocation_After_DragLeave = OnStyleItemDropLocationLeaved,
-                    DropLocation_After_Drop = OnStyleItemDropLocationDropped,
-                    IsMouseEnterLeaveEnabled = state.StyleItemDragDrop.StartItemIndex is null && state.Selection.SelectedStyleIndex is null
+                    DropLocation_After_Drop      = OnStyleItemDropLocationDropped,
+                    IsMouseEnterLeaveEnabled     = state.StyleItemDragDrop.StartItemIndex is null && state.Selection.SelectedStyleIndex is null
                 };
-               
-
-               
-
-                
-
-
             }
         }
 
@@ -2971,6 +2742,219 @@ sealed class ApplicationView : Component<ApplicationState>
             public string InitialValue { get; init; }
 
             public string Value { get; init; }
+        }
+    }
+
+    class StyleItemView : Component<StyleItemView.StyleItemViewState>
+    {
+        [CustomEvent]
+        public Func<int, Task> Close { get; init; }
+
+        public required AttributeDragPosition? DragDropPosition { get; init; }
+
+        [CustomEvent]
+        public Func<int, Task> DragEnter { get; init; }
+
+        [CustomEvent]
+        public Func<int, Task> DragStart { get; init; }
+
+        [CustomEvent]
+        public Func<int, Task> DropLocation_After_DragEnter { get; init; }
+
+        [CustomEvent]
+        public Func<int, Task> DropLocation_After_DragLeave { get; init; }
+
+        [CustomEvent]
+        public Func<int, Task> DropLocation_After_Drop { get; init; }
+
+        [CustomEvent]
+        public Func<int, Task> DropLocation_Before_DragEnter { get; init; }
+
+        [CustomEvent]
+        public Func<int, Task> DropLocation_Before_DragLeave { get; init; }
+
+        [CustomEvent]
+        public Func<int, Task> DropLocation_Before_Drop { get; init; }
+
+        public required bool IsDragDropLocationsVisible { get; init; }
+
+        public bool IsMouseEnterLeaveEnabled { get; init; }
+
+        public required bool IsSelected { get; init; }
+
+        [CustomEvent]
+        public Func<int, Task> Select { get; init; }
+
+        public required int StyleIndex { get; init; }
+
+        public required string Value { get; init; }
+
+        protected override Element render()
+        {
+            var closeIcon = CreateAttributeItemCloseIcon(OnClick(OnDeleteClicked));
+
+            Element content = Value;
+            {
+                ParseProperty(Value).Then(x =>
+                {
+                    content = new FlexRow(AlignItemsCenter, FlexWrap)
+                    {
+                        new span(FontWeight600) { x.Name }, ": ", new span(PaddingLeft(2)) { x.Value }
+                    };
+                });
+            }
+
+            var styleItem = new FlexRowCentered(CursorDefault, Padding(4, 8), BorderRadius(16), UserSelect(none))
+            {
+                Background(IsSelected ? Gray200 : Gray50),
+                Border(1, solid, Gray100),
+
+                PositionRelative,
+                IsSelected || state.IsCloseIconVisible ? closeIcon : null,
+
+                content,
+                Id(StyleIndex),
+
+                IsMouseEnterLeaveEnabled ? OnMouseEnter(OnMouseEntered) : null,
+
+                IsMouseEnterLeaveEnabled ? OnMouseLeave(OnMouseLeaved) : null,
+
+                OnClick(OnClicked),
+
+                // Drag Drop Operation
+                {
+                    DraggableTrue,
+                    OnDragStart(OnDragStarted),
+                    OnDragEnter(OnDragEntered)
+                }
+            };
+
+            if (IsDragDropLocationsVisible)
+            {
+                var dropLocationBefore = CreateDropLocationElement(DragDropPosition == AttributeDragPosition.Before,
+                [
+                    OnDragEnter(OnDropLocation_Before_DragEntered),
+                    OnDragLeave(OnDropLocation_Before_DragLeaved),
+                    OnDrop(OnDropLocation_Before_Dropped)
+                ]);
+
+                var dropLocationAfter = CreateDropLocationElement(DragDropPosition == AttributeDragPosition.After,
+                [
+                    OnDragEnter(OnDropLocation_After_DragEntered),
+                    OnDragLeave(OnDropLocation_After_DragLeaved),
+                    OnDrop(OnDropLocation_After_Dropped)
+                ]);
+
+                return new FlexRowCentered(Gap(8))
+                {
+                    dropLocationBefore,
+
+                    styleItem,
+
+                    dropLocationAfter
+                };
+            }
+
+            return styleItem;
+        }
+
+        [StopPropagation]
+        Task OnClicked(MouseEvent e)
+        {
+            state.IsCloseIconVisible = true;
+
+            DispatchEvent(Select, [StyleIndex]);
+
+            return Task.CompletedTask;
+        }
+
+        [StopPropagation]
+        Task OnDeleteClicked(MouseEvent _)
+        {
+            DispatchEvent(Close, [StyleIndex]);
+
+            return Task.CompletedTask;
+        }
+
+        Task OnDragEntered(DragEvent _)
+        {
+            state.IsCloseIconVisible = false;
+
+            DispatchEvent(DragEnter, [StyleIndex]);
+
+            return Task.CompletedTask;
+        }
+
+        Task OnDragStarted(DragEvent _)
+        {
+            state.IsCloseIconVisible = false;
+
+            DispatchEvent(DragStart, [StyleIndex]);
+
+            return Task.CompletedTask;
+        }
+
+        Task OnDropLocation_After_DragEntered(DragEvent _)
+        {
+            DispatchEvent(DropLocation_After_DragEnter, [StyleIndex]);
+
+            return Task.CompletedTask;
+        }
+
+        Task OnDropLocation_After_DragLeaved(DragEvent _)
+        {
+            DispatchEvent(DropLocation_After_DragLeave, [StyleIndex]);
+
+            return Task.CompletedTask;
+        }
+
+        Task OnDropLocation_After_Dropped(DragEvent _)
+        {
+            DispatchEvent(DropLocation_After_Drop, [StyleIndex]);
+
+            return Task.CompletedTask;
+        }
+
+        Task OnDropLocation_Before_DragEntered(DragEvent _)
+        {
+            DispatchEvent(DropLocation_Before_DragEnter, [StyleIndex]);
+
+            return Task.CompletedTask;
+        }
+
+        Task OnDropLocation_Before_DragLeaved(DragEvent _)
+        {
+            DispatchEvent(DropLocation_Before_DragLeave, [StyleIndex]);
+
+            return Task.CompletedTask;
+        }
+
+        Task OnDropLocation_Before_Dropped(DragEvent _)
+        {
+            DispatchEvent(DropLocation_Before_Drop, [StyleIndex]);
+
+            return Task.CompletedTask;
+        }
+
+        [StopPropagation]
+        Task OnMouseEntered(MouseEvent e)
+        {
+            state.IsCloseIconVisible = true;
+
+            return Task.CompletedTask;
+        }
+
+        [StopPropagation]
+        Task OnMouseLeaved(MouseEvent e)
+        {
+            state.IsCloseIconVisible = false;
+
+            return Task.CompletedTask;
+        }
+
+        internal sealed class StyleItemViewState
+        {
+            public bool IsCloseIconVisible { get; set; }
         }
     }
 
