@@ -1,4 +1,4 @@
-namespace ReactWithDotNet.VisualDesigner.Views;
+﻿namespace ReactWithDotNet.VisualDesigner.Views;
 
 sealed class StylerComponent : Component<StylerComponent.State>
 {
@@ -1356,7 +1356,7 @@ class CssUnitEditor : Component<CssUnitEditor.State>
                 }
             },
             !state.IsUnitSuggestionsVisible ? null :
-                new div(OnMouseLeave(ToggleUnitTypeSuggestions), DisplayFlex, JustifyContentCenter, AlignItemsCenter, PositionFixed, Background(White), Border(1, solid, Gray300), BorderRadius(4), PaddingTop(4), PaddingBottom(4), Left(state.SuggestionPopupLocationX), Top(state.SuggestionPopupLocationY), ZIndex(3))
+                new div(OnMouseLeave(ToggleUnitTypeSuggestions), DisplayFlex, JustifyContentCenter, AlignItemsCenter, PositionFixed, Background(White), Border(1, solid, Gray300), BorderRadius(4), PaddingTop(4), PaddingBottom(4), Left(state.SuggestionPopupLocationX), Top(state.SuggestionPopupLocationY), ZIndex(3), BoxShadow("0 1px 3px rgba(0,0,0,0.2)"))
                 {
                     new div
                     {
