@@ -198,7 +198,8 @@ sealed class StylerComponent : Component<StylerComponent.State>
                     [
                         new("4px"),
                         new("8px"),
-                        new("16px")
+                        new("16px"),
+                        new("24px")
                     ]
                 },
 
