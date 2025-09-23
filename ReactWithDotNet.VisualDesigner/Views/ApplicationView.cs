@@ -1575,6 +1575,223 @@ sealed class ApplicationView : Component<ApplicationState>
         };
     }
 
+    class StyleItemView: Component<StyleItemView.StyleItemViewState>
+    {
+        public required int StyleIndex { get; init; }
+        
+        public required string Value { get; init; }
+        
+        public required bool IsSelected { get; init; }
+        
+        public required bool IsDragDropLocationsVisible { get; init; }
+        
+        public required AttributeDragPosition DragDropPosition { get; init; }
+        
+        public bool IsMouseEnterLeaveEnabled { get; init; }
+        
+        [CustomEvent]
+        public Func<Task> Close { get; init; }
+        
+        [CustomEvent]
+        public Func<int,Task> Select { get; init; }
+        
+        [CustomEvent]
+        public Func<int,Task> DragStart { get; init; }
+        
+        [CustomEvent]
+        public Func<int,Task> DragEnter { get; init; }
+
+        
+        
+        [CustomEvent]
+        public Func<int,Task> DropLocation_Before_DragEnter { get; init; }
+        
+        [CustomEvent]
+        public Func<int,Task> DropLocation_Before_DragLeave { get; init; }
+        
+        [CustomEvent]
+        public Func<int,Task> DropLocation_Before_Drop { get; init; }
+        
+        [CustomEvent]
+        public Func<int,Task> DropLocation_After_DragEnter { get; init; }
+        
+        [CustomEvent]
+        public Func<int,Task> DropLocation_After_DragLeave { get; init; }
+        
+        [CustomEvent]
+        public Func<int,Task> DropLocation_After_Drop { get; init; }
+        
+        
+       
+        
+        // todo make static
+        static Element CreateAttributeItemCloseIcon(params Modifier[] modifiers)
+        {
+            return new FlexRowCentered
+            {
+                Size(20),
+                Padding(4),
+                PositionAbsolute, Top(-8), Right(-8),
+
+                Background(White),
+                Border(0.5, solid, Theme.BorderColor),
+                BorderRadius(24),
+
+                Color(Gray500),
+                Hover(Color(Blue300), BorderColor(Blue300)),
+
+                new IconClose() + Size(16),
+
+                modifiers
+            };
+        }
+        
+        protected override Element render()
+            {
+                var closeIcon = CreateAttributeItemCloseIcon(OnClick([StopPropagation](_) =>
+                {
+                    DispatchEvent(Close,[]);
+                    
+                    
+
+                    return Task.CompletedTask;
+                }));
+
+                Element content = Value;
+                {
+                    ParseProperty(Value).Then(x =>
+                    {
+                        content = new FlexRow(AlignItemsCenter, FlexWrap)
+                        {
+                            new span(FontWeight600) { x.Name }, ": ", new span(PaddingLeft(2)) { x.Value }
+                        };
+                    });
+                }
+
+                
+
+                var styleItem = new FlexRowCentered(CursorDefault, Padding(4, 8), BorderRadius(16), UserSelect(none))
+                {
+                    Background(IsSelected ? Gray200 : Gray50),
+                    Border(1, solid, Gray100),
+
+                    PositionRelative,
+                    IsSelected || state.IsHovered ? closeIcon : null,
+
+                    content,
+                    Id(StyleIndex),
+
+                    IsMouseEnterLeaveEnabled ? null :
+                        OnMouseEnter([StopPropagation](e) =>
+                        {
+                            state.IsCloseIconVisible = true;
+
+                            return Task.CompletedTask;
+                        }),
+
+                    IsMouseEnterLeaveEnabled ? null :
+                        OnMouseLeave([StopPropagation](e) =>
+                        {
+                            state.IsCloseIconVisible = false;
+
+                            return Task.CompletedTask;
+                        }),
+
+                    OnClick([StopPropagation](e) =>
+                    {
+                        DispatchEvent(Select,[StyleIndex]);
+
+                        return Task.CompletedTask;
+                    }),
+
+                    // Drag Drop Operation
+                    {
+                        DraggableTrue,
+                        OnDragStart(_ =>
+                        {
+                            DispatchEvent(DragStart,[StyleIndex]);
+                            
+                            return Task.CompletedTask;
+                        }),
+                        OnDragEnter(_ =>
+                        {
+                            
+                            DispatchEvent(DragEnter,[StyleIndex]);
+                            
+                            return Task.CompletedTask;
+                        })
+                    }
+                };
+
+                if (IsDragDropLocationsVisible)
+                {
+                    var dropLocationBefore = CreateDropLocationElement(DragDropPosition == AttributeDragPosition.Before,
+                    [
+                        OnDragEnter(_ =>
+                        {
+                            DispatchEvent(DropLocation_Before_DragEnter,[StyleIndex]);
+                            
+                            return Task.CompletedTask;
+                        }),
+                        OnDragLeave(_ =>
+                        {
+                            DispatchEvent(DropLocation_Before_DragLeave,[StyleIndex]);
+                            
+                            return Task.CompletedTask;
+                        }),
+                        OnDrop(_ =>
+                        {
+                            DispatchEvent(DropLocation_Before_Drop,[StyleIndex]);
+                            
+                            return Task.CompletedTask;
+                        })
+                    ]);
+                  
+
+                    var dropLocationAfter = CreateDropLocationElement(DragDropPosition == AttributeDragPosition.After,
+                    [
+                        OnDragEnter(_ =>
+                        {
+                            DispatchEvent(DropLocation_After_DragEnter,[StyleIndex]);
+                            
+                            return Task.CompletedTask;
+                        }),
+                        OnDragLeave(_ =>
+                        {
+                            DispatchEvent(DropLocation_After_DragLeave,[StyleIndex]);
+                            
+                            return Task.CompletedTask;
+                        }),
+                        OnDrop(_ =>
+                        {
+                            DispatchEvent(DropLocation_After_Drop,[StyleIndex]);
+                            
+                            return Task.CompletedTask;
+                        })
+                    ]);
+
+                    return new FlexRowCentered(Gap(8))
+                    {
+                        dropLocationBefore,
+
+                        styleItem,
+
+                        dropLocationAfter
+                    };
+                }
+
+                return styleItem;
+            }
+
+        internal sealed class StyleItemViewState
+        {
+            public bool IsCloseIconVisible { get; set; }
+            
+            public bool IsHovered { get; set; }
+        }
+        
+        
+    }
     Element PartRightPanel()
     {
         VisualElementModel visualElementModel = null;
@@ -1798,7 +2015,7 @@ sealed class ApplicationView : Component<ApplicationState>
                     Value = value
                 };
             }
-
+            
             Element attributeItem(int index, string value)
             {
                 var closeIcon = CreateAttributeItemCloseIcon(OnClick([StopPropagation](_) =>
