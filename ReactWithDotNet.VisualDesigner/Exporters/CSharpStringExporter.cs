@@ -703,11 +703,7 @@ static class CSharpStringExporter
 
                             var value = reactProperty.Value;
 
-                            var finalValue = IsStringValue(value) switch
-                            {
-                                true  => '\\'.ToString() + '"' + TryClearStringValue(value) + '\\' + '"',
-                                false => value
-                            };
+                            var finalValue = '\\'.ToString() + '"' + TryClearStringValue(value) + '\\' + '"';
 
                             propsAsTextList.Add($"{reactProperty.Name}={finalValue}");
                         }

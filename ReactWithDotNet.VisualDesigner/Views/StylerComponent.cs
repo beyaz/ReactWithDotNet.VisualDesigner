@@ -1360,7 +1360,7 @@ class CssUnitEditor : Component<CssUnitEditor.State>
                 {
                     new div
                     {
-                        from item in new[] { "px", "%", "rem", "vw", "vh", "cm", "mm" }
+                        from item in new[] { "px", "%", "rem", "vw", "vh", "cm", "mm", "pt" }
                         select new div(Id(item), OnClick(OnUnitTypeSuggestionItemClicked), DisplayFlex, JustifyContentCenter, AlignItemsCenter, Padding(6, 12), BorderRadius(4), Hover(Background(Gray100)))
                         {
                             item
