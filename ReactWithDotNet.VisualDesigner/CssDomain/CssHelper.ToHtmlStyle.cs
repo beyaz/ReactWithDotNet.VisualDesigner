@@ -95,6 +95,7 @@ partial class CssHelper
             case "table-layout":
             case "vertical-align":
             case "border-spacing":
+            case "zoom":
             {
                 return CreateFinalCssItem(name, value);
             }
