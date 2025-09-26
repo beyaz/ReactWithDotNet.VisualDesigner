@@ -1739,7 +1739,9 @@ sealed class ApplicationView : Component<ApplicationState>
                                 Selection = state.Selection with
                                 {
                                     SelectedStyleIndex = null
-                                }
+                                },
+                                PropertyItemDragDrop = new (),
+                                StyleItemDragDrop = new()
                             };
 
                             return Task.CompletedTask;
@@ -1929,7 +1931,16 @@ sealed class ApplicationView : Component<ApplicationState>
                     {
                         OnClick(_ =>
                         {
-                            state = state with { Selection = state.Selection with { SelectedPropertyIndex = null } };
+                            state = state with
+                            {
+                                Selection = state.Selection with
+                                {
+                                    SelectedPropertyIndex = null
+                                },
+                                
+                                PropertyItemDragDrop = new (),
+                                StyleItemDragDrop = new()
+                            };
 
                             return Task.CompletedTask;
                         }),
