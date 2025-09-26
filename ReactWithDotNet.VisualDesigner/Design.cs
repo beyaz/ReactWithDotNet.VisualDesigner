@@ -2,6 +2,9 @@
 
 static class Design
 {
+    public const string PREFIX = "d-";
+    
+    
     public const string Text = "d-text";
     
     public const string TextPreview = "d-text-preview";

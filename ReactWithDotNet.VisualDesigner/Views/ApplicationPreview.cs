@@ -171,11 +171,16 @@ sealed class ApplicationPreview : Component
                 }
             }
 
+
+            var designTimeProps = from p in model.Properties
+                                  from x in ParseProperty(p)
+                                  where Design.IsDesignTimeName(x.Name) && x.Name.NotIn(Design.Text, Design.TextPreview, Design.Name)
+                                  select x;
             model = model with
             {
                 Properties = ListFrom(from p in model.Properties
                                       from x in ParseProperty(p)
-                                      where x.Name.NotIn(Design.Text, Design.TextPreview, Design.Src, Design.Name)
+                                      where !Design.IsDesignTimeName(x.Name)
                                       select p)
             };
 
@@ -205,6 +210,26 @@ sealed class ApplicationPreview : Component
                 {
                     Properties = model.Properties.Where(p => p != propText).ToList()
                 };
+            }
+
+            // process design time props
+            {
+                foreach (var designTimeProp in designTimeProps)
+                {
+                    var propertyProcessScope = new PropertyProcessScope
+                    {
+                        scope     = scope,
+                        element   = element,
+                        model     = model,
+                        propName  = designTimeProp.Name.RemoveFromStart(Design.PREFIX),
+                        propValue = designTimeProp.Value
+                    };
+                    var result = await processProp(propertyProcessScope);
+                    if (result.HasError)
+                    {
+                        return result.Error;
+                    }
+                }
             }
 
             {
