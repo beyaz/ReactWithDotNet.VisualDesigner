@@ -1673,63 +1673,55 @@ static class Plugin
             [JsTypeInfo(JsType.Function)]
             public string onSelectedIndexChange { get; set; }
             
-
-            [JsTypeInfo(JsType.Function)]
-            public string onSelectedAccountIndexChange { get; set; }
-
-            [JsTypeInfo(JsType.Number)]
-            public string selectedAccountIndex { get; set; }
-
-            [JsTypeInfo(JsType.String)]
-            public string title { get; set; }
-
             [NodeAnalyzer]
             public static ReactNode AnalyzeReactNode(ReactNode node, IReadOnlyDictionary<string, string> componentConfig)
             {
                 if (node.Tag == nameof(BDigitalAccountCardView))
                 {
-                    var selectedAccountIndexProp = node.Properties.FirstOrDefault(x => x.Name == nameof(selectedAccountIndex));
-                    var onSelectedAccountIndexChangeProp = node.Properties.FirstOrDefault(x => x.Name == nameof(onSelectedAccountIndexChange));
+                    var selectedIndexProp = node.Properties.FirstOrDefault(x => x.Name == nameof(selectedIndex));
+                    var isCardSelectedProp = node.Properties.FirstOrDefault(x => x.Name == nameof(isCardSelected));
+                    var onSelectedIndexChangeProp = node.Properties.FirstOrDefault(x => x.Name == nameof(onSelectedIndexChange));
 
-                    if (selectedAccountIndexProp is not null)
+                    if (selectedIndexProp is not null && isCardSelectedProp is not null)
                     {
                         var properties = node.Properties;
 
                         List<string> lines =
                         [
-                            "(selectedAccountIndex: number) =>",
+                            "(selectedAccountCardIndex: number, isCardSelected: boolean) =>",
                             "{",
-                            $"  updateRequest(r => {{ r.{selectedAccountIndexProp.Value.RemoveFromStart("request.")} = selectedAccountIndex; }});"
+                            $"  updateRequest(r => {{ r.{selectedIndexProp.Value.RemoveFromStart("request.")} = selectedAccountCardIndex; }});",
+                            $"  updateRequest(r => {{ r.{isCardSelectedProp.Value.RemoveFromStart("request.")} = isCardSelected; }});"
                         ];
 
-                        if (onSelectedAccountIndexChangeProp is not null)
+                        if (onSelectedIndexChangeProp is not null)
                         {
-                            if (IsAlphaNumeric(onSelectedAccountIndexChangeProp.Value))
+                            if (IsAlphaNumeric(onSelectedIndexChangeProp.Value))
                             {
-                                lines.Add(onSelectedAccountIndexChangeProp.Value + "(selectedAccountIndex);");
+                                lines.Add(onSelectedIndexChangeProp.Value + "(selectedAccountCardIndex, isCardSelected);");
                             }
                             else
                             {
-                                lines.Add(onSelectedAccountIndexChangeProp.Value);
+                                lines.Add(onSelectedIndexChangeProp.Value);
                             }
                         }
 
                         lines.Add("}");
 
-                        if (onSelectedAccountIndexChangeProp is not null)
+                        if (onSelectedIndexChangeProp is not null)
                         {
-                            onSelectedAccountIndexChangeProp = onSelectedAccountIndexChangeProp with
+                            onSelectedIndexChangeProp = onSelectedIndexChangeProp with
                             {
                                 Value = string.Join(Environment.NewLine, lines)
                             };
 
-                            properties = properties.SetItem(properties.FindIndex(x => x.Name == onSelectedAccountIndexChangeProp.Name), onSelectedAccountIndexChangeProp);
+                            properties = properties.SetItem(properties.FindIndex(x => x.Name == onSelectedIndexChangeProp.Name), onSelectedIndexChangeProp);
                         }
                         else
                         {
                             properties = properties.Add(new()
                             {
-                                Name  = nameof(onSelectedAccountIndexChange),
+                                Name  = nameof(onSelectedIndexChange),
                                 Value = string.Join(Environment.NewLine, lines)
                             });
                         }
@@ -1744,9 +1736,9 @@ static class Plugin
             protected override Element render()
             {
                 var textContent = string.Empty;
-                if (title.HasValue())
+                if (cards.HasValue())
                 {
-                    textContent = title;
+                    textContent = cards;
                 }
 
                 if (accounts.HasValue())
@@ -1766,7 +1758,7 @@ static class Plugin
                             new FlexColumn
                             {
                                 new div(FontWeight700) { "73.148,00 TL" },
-                                new div(Color("rgb(0 0 0 / 60%)")) { "Cari Hesap" }
+                                new div(Color("rgb(0 0 0 / 60%)")) { "Hesap / Kart Seçimi" }
                             },
 
                             new svg(ViewBox(0, 0, 24, 24), svg.Width(24), svg.Height(24), Color(rgb(117, 117, 117)))
