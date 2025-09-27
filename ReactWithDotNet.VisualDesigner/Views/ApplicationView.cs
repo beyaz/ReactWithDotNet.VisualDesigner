@@ -1637,13 +1637,23 @@ sealed class ApplicationView : Component<ApplicationState>
                     where type.Name == CurrentVisualElement.Tag
                     from propertyInfo in type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly)
                     where !alreadyContainsProp(propertyInfo.Name)
+                    let jsTypeInfo = propertyInfo.GetCustomAttribute<JsTypeInfoAttribute>()
+                    let isStringProp = jsTypeInfo?.JsType == JsType.String
+                    
+                    let suggestionItems = propertyInfo.GetCustomAttribute<SuggestionsAttribute>()?.Suggestions ?? []
+                    
                     select new ShadowPropertyView
                     {
                         PropertyName = propertyInfo.Name,
-                        PropertyType = propertyInfo.GetCustomAttribute<JsTypeInfoAttribute>()?.JsType.ToString().ToLower(),
+                        PropertyType = jsTypeInfo?.JsType.ToString().ToLower(),
 
                         OnChange    = OnShadowPropClicked,
-                        Suggestions = propertyInfo.GetCustomAttribute<SuggestionsAttribute>()?.Suggestions
+                        Suggestions = isStringProp switch
+                        {
+                            true=> suggestionItems.ToList().ConvertAll(x=> '"' + x + '"'),
+                            
+                            false=>suggestionItems
+                        }
                     };
 
                 bool alreadyContainsProp(string propName)

@@ -2726,7 +2726,7 @@ sealed class SuggestionsAttribute : Attribute
 
     public SuggestionsAttribute(string suggestions)
     {
-        Suggestions = suggestions.Split(',', StringSplitOptions.RemoveEmptyEntries);
+        Suggestions = suggestions.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(x=>x.Trim()).ToList();
     }
 
     public IReadOnlyList<string> Suggestions { get; }
