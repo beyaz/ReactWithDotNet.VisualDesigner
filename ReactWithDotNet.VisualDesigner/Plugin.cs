@@ -695,7 +695,7 @@ static class Plugin
 
             protected override Element render()
             {
-                return new FlexColumn(Background(White), BorderRadius(10), Border(1, solid, "#E0E0E0"), Padding(24), Id(id), OnClick(onMouseClick))
+                return new FlexColumn(MarginBottom(24),MarginTop(8), Background(White), BorderRadius(10), Border(1, solid, "#E0E0E0"), Padding(24), Id(id), OnClick(onMouseClick))
                 {
                     children =
                     {
