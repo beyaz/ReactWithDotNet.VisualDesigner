@@ -1233,6 +1233,7 @@ static class Plugin
 
         [CustomComponent]
         [Import(Name = "BComboBox", Package = "b-combo-box")]
+        [Import(Name = "TextValuePair", Package = "b-digital-internet-banking")]
         sealed class BComboBox : PluginComponentBase
         {
             [JsTypeInfo(JsType.Array)]
@@ -2558,6 +2559,7 @@ static class Plugin
     }
 }
 
+[AttributeUsage(AttributeTargets.Property)]
 sealed class SuggestionsAttribute : Attribute
 {
     public SuggestionsAttribute(string[] suggestions)
@@ -2573,10 +2575,12 @@ sealed class SuggestionsAttribute : Attribute
     public IReadOnlyList<string> Suggestions { get; }
 }
 
+[AttributeUsage(AttributeTargets.Class)]
 sealed class CustomComponentAttribute : Attribute
 {
 }
 
+[AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
 sealed class ImportAttribute : Attribute
 {
     public string Name { get; init; }
@@ -2584,6 +2588,7 @@ sealed class ImportAttribute : Attribute
     public string Package { get; init; }
 }
 
+[AttributeUsage(AttributeTargets.Method)]
 sealed class NodeAnalyzerAttribute : Attribute
 {
 }
