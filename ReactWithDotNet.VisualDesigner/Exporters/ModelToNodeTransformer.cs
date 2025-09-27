@@ -106,6 +106,52 @@ static class ModelToNodeTransformer
                 });
             }
 
+            if (project.ExportStylesAsInline)
+            {
+                List<string> listOfStyleAttributes = [];
+                {
+                    foreach (var text in styles)
+                    {
+                        if (Design.IsDesignTimeName(ParseStyleAttribute(text).Name))
+                        {
+                            continue;
+                        }
+
+                        var item = CreateDesignerStyleItemFromText(project, text);
+                        if (item.HasError)
+                        {
+                            return item.Error;
+                        }
+
+                        foreach (var finalCssItem in item.Value.FinalCssItems)
+                        {
+                            if (finalCssItem.Value.HasNoValue())
+                            {
+                                return new ArgumentException($"{finalCssItem.Name} has no value.");
+                            }
+                            
+                            var value = finalCssItem.Value switch
+                            {
+                                var x when x.StartsWith("request.") || x.StartsWith("context.") => x,
+
+                                var x => '"' + TryClearStringValue(x) + '"'
+                            };
+
+                            listOfStyleAttributes.Add($"{finalCssItem.Name}: {value}");
+                        }
+                    }
+                }
+
+                if (listOfStyleAttributes.Count > 0)
+                {
+                    props.Add(new()
+                    {
+                        Name  = "style",
+                        Value = "{" + string.Join(", ", listOfStyleAttributes) + "}"
+                    });
+                }
+            }
+            
             if (project.ExportAsCSharp)
             {
                 List<StyleAttribute> listOfStyleAttributes = [];
