@@ -695,11 +695,12 @@ static class Plugin
 
             protected override Element render()
             {
-                return new FlexColumn(MarginBottom(24),MarginTop(8), Background(White), BorderRadius(10), Border(1, solid, "#E0E0E0"), Padding(24), Id(id), OnClick(onMouseClick))
+                return new FlexColumn(MarginBottom(24),MarginTop(8))
                 {
-                    children =
+                    title is null ? null : new div(FontSize18, FontWeight600, Color(rgba(0, 0, 0, 0.87))) { title },
+                    
+                    new FlexColumn( Background(White), BorderRadius(10), Border(1, solid, "#E0E0E0"), Padding(24), Id(id), OnClick(onMouseClick))
                     {
-                        title is null ? null : new div { title },
                         children
                     }
                 };
@@ -1170,11 +1171,13 @@ static class Plugin
 
             protected override Element render()
             {
-                return new FlexColumn()
+                return new FlexColumn(MarginBottom(24),MarginTop(8))
                 {
+                    Id(id), OnClick(onMouseClick),
+                    
                     new div(FontSize18, FontWeight600, Color(rgba(0, 0, 0, 0.87))) { "Belge Onayı" },
                     SpaceY(8),
-                    new FlexColumn(Background(White), BorderRadius(10), Border(1, solid, "#E0E0E0"), Padding(24), Id(id), OnClick(onMouseClick))
+                    new FlexColumn(Background(White), BorderRadius(10), Border(1, solid, "#E0E0E0"), Padding(24))
                     {
                         new FlexRow(Gap(8), AlignItemsCenter)
                         {
@@ -1690,8 +1693,10 @@ static class Plugin
                         [
                             "(selectedAccountCardIndex: number, isCardSelected: boolean) =>",
                             "{",
-                            $"  updateRequest(r => {{ r.{selectedIndexProp.Value.RemoveFromStart("request.")} = selectedAccountCardIndex; }});",
-                            $"  updateRequest(r => {{ r.{isCardSelectedProp.Value.RemoveFromStart("request.")} = isCardSelected; }});"
+                            "  updateRequest(r => {",
+                            $"       r.{selectedIndexProp.Value.RemoveFromStart("request.")} = selectedAccountCardIndex;",
+                            $"       r.{isCardSelectedProp.Value.RemoveFromStart("request.")} = isCardSelected;",
+                            "  });"
                         ];
 
                         if (onSelectedIndexChangeProp is not null)
@@ -1749,16 +1754,46 @@ static class Plugin
                 return new div
                 {
                     Id(id), OnClick(onMouseClick),
+                    
                     new FlexRow(AlignItemsCenter, Padding(16), Border(1, solid, "#c0c0c0"), BorderRadius(10), Height(83), JustifyContentSpaceBetween)
                     {
-                        new div(Color(rgba(0, 0, 0, 0.54)), FontSize16, FontWeight400) { textContent },
+                        PositionRelative,
+                        new div(Color("rgb(0 0 0 / 60%)"))
+                        {
+                            "Hesap / Kart Seçimi",
+                            
+                            PositionAbsolute,
+                            Top(-16),
+                            Left(8),
+                            Transform("scale(0.942723)"),
+                            
+                            WhiteSpaceNoWrap,
+                            
+                            Background(White),
+                            PaddingX(8)
+                        },
+                        
+                        
+                        new FlexColumn
+                        {
+                            new div(Color(rgba(0, 0, 0, 0.54)), FontSize16, FontWeight400)
+                            {
+                                textContent
+                            },
+                            
+                            new div(Color(rgba(0, 0, 0, 0.87)), FontSize16, FontWeight400)
+                            {
+                                "0000000-1"
+                            }
+                            
+                        },
 
                         new FlexRow(AlignItemsCenter, TextAlignRight, Gap(8))
                         {
                             new FlexColumn
                             {
                                 new div(FontWeight700) { "73.148,00 TL" },
-                                new div(Color("rgb(0 0 0 / 60%)")) { "Hesap / Kart Seçimi" }
+                                new div(FontWeight400,FontSize16, Color(rgba(0, 0, 0, 0.6))) { "Cari Hesap" }
                             },
 
                             new svg(ViewBox(0, 0, 24, 24), svg.Width(24), svg.Height(24), Color(rgb(117, 117, 117)))

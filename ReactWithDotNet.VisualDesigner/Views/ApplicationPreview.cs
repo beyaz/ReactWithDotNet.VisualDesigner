@@ -216,6 +216,11 @@ sealed class ApplicationPreview : Component
             {
                 foreach (var designTimeProp in designTimeProps)
                 {
+                    if (designTimeProp.Name.In(Design.ShowIf, Design.HideIf))
+                    {
+                        continue;
+                    }
+                    
                     var propertyProcessScope = new PropertyProcessScope
                     {
                         scope     = scope,

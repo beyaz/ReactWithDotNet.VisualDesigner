@@ -592,14 +592,16 @@ static class TsxExporter
         
         int firstReturnCloseLineIndex = -1;
         {
-            for (int i = 1; i < 20; i++)
+            foreach (var item in lines.FindLineIndexStartsWith(firstReturnLineIndex, leftPaddingCount,  ");"))
             {
-                firstReturnCloseLineIndex = lines.FindIndex(firstReturnLineIndex, l => l == new string(' ',i)+ ");");
-                if (firstReturnCloseLineIndex > 0)
-                {
-                    break;
-                }
+                firstReturnCloseLineIndex = item;
             }
+            
+            if (firstReturnCloseLineIndex < 0)
+            {
+                return new ArgumentException($"ReturnClosePointNotFound. {targetComponentName}");
+            }
+            
         }
 
         return (leftPaddingCount, firstReturnLineIndex, firstReturnCloseLineIndex);
