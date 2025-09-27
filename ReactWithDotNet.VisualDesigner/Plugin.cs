@@ -38,7 +38,7 @@ static class Plugin
 
             var pagesFolderPath = string.Empty;
             {
-                pagesFolderPath = $@"D:\work\BOA.BusinessModules\Dev\{solutionName}\OBAWeb\OBA.Web.{solutionName.RemoveFromStart("BOA.")}\ClientApp\pages\";
+                pagesFolderPath = $@"D:\work\BOA.BusinessModules\Test\{solutionName}\OBAWeb\OBA.Web.{solutionName.RemoveFromStart("BOA.")}\ClientApp\pages\";
                 if (solutionName == "BOA.MobilePos")
                 {
                     pagesFolderPath = @"D:\work\BOA.BusinessModules\Dev\BOA.MobilePos\OBAWeb\OBA.Web.POSPortal.MobilePos\ClientApp\pages\";
@@ -170,7 +170,7 @@ static class Plugin
         {
             if (fullTypeName.StartsWith("BOA.InternetBanking.Payments.API", StringComparison.OrdinalIgnoreCase))
             {
-                const string projectBinDirectoryPath = @"D:\work\BOA.BusinessModules\Dev\BOA.InternetBanking.Payments\API\BOA.InternetBanking.Payments.API\bin\Debug\net8.0\";
+                const string projectBinDirectoryPath = @"D:\work\BOA.BusinessModules\Test\BOA.InternetBanking.Payments\API\BOA.InternetBanking.Payments.API\bin\Debug\net8.0\";
 
                 return projectBinDirectoryPath + "BOA.InternetBanking.Payments.API.dll";
             }
