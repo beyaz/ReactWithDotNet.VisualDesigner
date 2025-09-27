@@ -629,7 +629,8 @@ static class Plugin
 
         }
 
-        [CustomComponent(Import="import { BDigitalGrid } from \"b-digital-grid\";")]
+        [CustomComponent]
+        [Import(Name = "BDigitalGrid", Package = "b-digital-grid")]
         public sealed class BDigitalGrid : PluginComponentBase
         {
             [Suggestions("flex-start , flex-end , stretch , center , baseline")]
@@ -695,7 +696,8 @@ static class Plugin
             }
         }
 
-        [CustomComponent(Import="import { BDigitalGroupView } from \"b-digital-group-view\";")]
+        [CustomComponent]
+        [Import(Name = "BDigitalGroupView", Package = "b-digital-group-view")]
         public sealed class BDigitalGroupView : PluginComponentBase
         {
             [JsTypeInfo(JsType.String)]
@@ -716,7 +718,8 @@ static class Plugin
             }
         }
         
-        [CustomComponent(Import="import { BDigitalTransactionConfirm } from \"b-digital-transaction-confirm\";")]
+        [CustomComponent]
+        [Import(Name = "BDigitalTransactionConfirm", Package = "b-digital-transaction-confirm")]
         public sealed class BDigitalTransactionConfirm : PluginComponentBase
         {
            
@@ -836,7 +839,8 @@ static class Plugin
         }
         
         
-        [CustomComponent(Import="import { BIconExtended as BIcon } from \"../utils/FormAssistant\"")]
+        [CustomComponent]
+        [Import(Name = "BIconExtended as BIcon", Package = "../utils/FormAssistant")]
         public sealed class BIcon : PluginComponentBase
         {
             [Suggestions("TimerRounded , content_copy" )]
@@ -924,7 +928,8 @@ static class Plugin
             }
         }
 
-        [CustomComponent(Import="import { BAlert } from 'b-core-alert';")]
+        [CustomComponent]
+        [Import(Name = "BAlert", Package = "b-core-alert")]
         sealed class BAlert : PluginComponentBase
         {
             [Suggestions("success , info , warning , error" )]
@@ -1075,7 +1080,8 @@ static class Plugin
             }
         }
 
-        [CustomComponent(Import = "import { BCheckBox } from \"b-check-box\";")]
+        [CustomComponent]
+        [Import(Name = "BCheckBox", Package = "b-check-box")]
         sealed class BCheckBox : PluginComponentBase
         {
             [JsTypeInfo(JsType.String)]
@@ -1200,7 +1206,8 @@ static class Plugin
             };
         }
 
-        [CustomComponent(Import="import { BButton } from \"b-button\";")]
+        [CustomComponent]
+        [Import(Name = "BButton", Package = "b-button")]
         sealed class BButton : PluginComponentBase
         {
             [JsTypeInfo(JsType.String)]
@@ -1269,7 +1276,8 @@ static class Plugin
             }
         }
 
-        [CustomComponent(Import="import { BDigitalDatepicker } from \"b-digital-datepicker\";")]
+        [CustomComponent]
+        [Import(Name = "BDigitalDatepicker", Package = "b-digital-datepicker")]
         sealed class BDigitalDatepicker : PluginComponentBase
         {
             [JsTypeInfo(JsType.Date)]
@@ -1408,7 +1416,8 @@ static class Plugin
             }
         }
 
-        [CustomComponent(Import="import { BDigitalBox } from \"b-digital-box\";")]
+        [CustomComponent]
+        [Import(Name = "BDigitalBox", Package = "b-digital-box")]
         sealed class BDigitalBox : PluginComponentBase
         {
             [Suggestions("noMargin, primary" )]
@@ -1445,7 +1454,8 @@ static class Plugin
             }
         }
 
-        [CustomComponent(Import="import { BDigitalDialog } from \"b-digital-dialog\";")]
+        [CustomComponent]
+        [Import(Name = "BDigitalDialog", Package = "b-digital-dialog")]
         sealed class BDigitalDialog : PluginComponentBase
         {
             [JsTypeInfo(JsType.String)]
@@ -1519,7 +1529,8 @@ static class Plugin
             }
         }
 
-        [CustomComponent(Import="import { BDigitalAccountView } from \"b-digital-account-view\";")]
+        [CustomComponent]
+        [Import(Name = "BDigitalAccountView", Package = "b-digital-account-view")]
         sealed class BDigitalAccountView : PluginComponentBase
         {
             [JsTypeInfo(JsType.Array)]
@@ -1634,7 +1645,8 @@ static class Plugin
             }
         }
         
-        [CustomComponent(Import="import { BInput } from \"b-input\";")]
+        [CustomComponent]
+        [Import(Name = "BInput", Package = "b-input")]
         sealed class BInput : PluginComponentBase
         {
             [JsTypeInfo(JsType.Boolean)]
@@ -1780,7 +1792,8 @@ static class Plugin
             }
         }
 
-        [CustomComponent(Import="import { BComboBox } from \"b-combo-box\";")]
+        [CustomComponent]
+        [Import(Name = "BComboBox", Package = "b-combo-box")]
         sealed class BComboBox : PluginComponentBase
         {
 
@@ -1929,7 +1942,8 @@ static class Plugin
             }
         }
 
-        [CustomComponent(Import="import { BDigitalFilterView } from \"b-digital-filter-view\";")]
+        [CustomComponent]
+        [Import(Name = "BDigitalFilterView", Package = "b-digital-filter-view")]
         sealed class BDigitalFilterView:PluginComponentBase
         {
             [JsTypeInfo(JsType.String)]
@@ -2069,7 +2083,8 @@ static class Plugin
             }
         }
         
-        [CustomComponent(Import="import { BInputMaskExtended } from \"b-input-mask-extended\";")]
+        [CustomComponent]
+        [Import(Name = "BInputMaskExtended", Package = "b-input-mask-extended")]
         sealed class BInputMaskExtended : PluginComponentBase
         {
             
@@ -2221,7 +2236,8 @@ static class Plugin
             }
         }
 
-        [CustomComponent(Import="import { BDigitalMoneyInput } from \"b-digital-money-input\";")]
+        [CustomComponent]
+        [Import(Name = "BDigitalMoneyInput", Package = "b-digital-money-input")]
         sealed class BDigitalMoneyInput : PluginComponentBase
         {
             [JsTypeInfo(JsType.String)]
@@ -2327,7 +2343,8 @@ static class Plugin
             }
         }
         
-        [CustomComponent(Import="import { BChip } from \"b-chip\";")]
+        [CustomComponent]
+        [Import(Name = "BChip", Package = "b-chip")]
         sealed class BChip : PluginComponentBase
         {
             [JsTypeInfo(JsType.String)]
@@ -2434,7 +2451,8 @@ static class Plugin
             }
         }
 
-        [CustomComponent(Import="import { BTypography } from \"b-core-typography\";")]
+        [CustomComponent]
+        [Import(Name = "BTypography", Package = "b-core-typography")]
         sealed class BTypography : PluginComponentBase
         {
             public string dangerouslySetInnerHTML { get; set; }
@@ -2592,7 +2610,13 @@ sealed class SuggestionsAttribute: Attribute
 
 sealed class CustomComponentAttribute: Attribute
 {
-    public string Import { get; init; }
+}
+
+sealed class ImportAttribute : Attribute
+{
+    public string Name { get; init; }
+    
+    public string Package { get; init; }
 }
 
 sealed class NodeAnalyzerAttribute: Attribute
