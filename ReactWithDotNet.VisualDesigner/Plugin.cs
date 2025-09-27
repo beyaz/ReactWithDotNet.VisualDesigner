@@ -109,11 +109,7 @@ static class Plugin
         
         foreach (var type in GetAllCustomComponents())
         {
-            var importLine = tryGetImportLine(type, node);
-            if (importLine.HasValue())
-            {
-                lines.Add(importLine);
-            }
+            lines.AddRange(tryGetImportLines(type, node));
         }
         
         foreach (var child in node.Children)
@@ -123,14 +119,15 @@ static class Plugin
 
         return lines.Distinct();
 
-        static string tryGetImportLine(Type type, ReactNode node)
+        static IEnumerable<string> tryGetImportLines(Type type, ReactNode node)
         {
             if (type.Name == node.Tag)
             {
-                return type.GetCustomAttribute<CustomComponentAttribute>()?.Import;
+                return  from a in type.GetCustomAttributes<ImportAttribute>() 
+                    select  $"import {{ {a.Name} }} from \"{a.Package}\";";
             }
 
-            return null;
+            return [];
         }
     }
 
