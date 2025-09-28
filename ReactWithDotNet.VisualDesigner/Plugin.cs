@@ -832,63 +832,225 @@ static class Plugin
             {
                 if (node.Tag == nameof(BDigitalTransactionConfirm))
                 {
-                    var sender = new
-                    {
-                        title = tryGetValueAt(node, [0, 1, 0, 0]),
 
-                        item1Text = tryGetValueAt(node, [0, 1, 0, 1, 0]),
-
-                        item1Value = tryGetValueAt(node, [0, 1, 0, 1, 1])
-                    };
-
-                    List<string> senderLines = [];
-                    if (sender.title is not null)
-                    {
-                        senderLines.Add($"titleText: {sender.title.Children[0].Properties[0].Value}");
-                    }
-
-                    var item1 = getItem(sender.item1Text, sender.item1Value);
+                    List<ReactProperty> finalProps = [];
                     
-                    if (item1 is not null)
-                    {
-                        senderLines.Add($"item1: " + item1);
-                    }
+                    
 
-                    static string getItem(ReactNode textNode, ReactNode valueNode)
+                   
+                   
+                        
+
+                    // sender
                     {
-                        if (valueNode is null)
+                        List<string> lines = [];
+                        
+                        var sender = new
                         {
-                            if (textNode is null)
-                            {
-                                return null;
-                            }
+                            title = tryGetValueAt(node, [0, 1, 0, 0]),
 
-                            var value = textNode.Children[0].Properties[0].Value;
-
-                            var valueVariant = textNode.Properties[0].Value;
-
-                            return '{' + "value:" + value + ", valueVariant: " + valueVariant + '}';
+                            item1Text  = tryGetValueAt(node, [0, 1, 0, 1, 0]),
+                            item1Value = tryGetValueAt(node, [0, 1, 0, 1, 1]),
+                        
+                            item2Text  = tryGetValueAt(node, [0, 1, 0, 2, 0]),
+                            item2Value = tryGetValueAt(node, [0, 1, 0, 2, 1]),
+                        
+                            item3Text  = tryGetValueAt(node, [0, 1, 0, 3, 0]),
+                            item3Value = tryGetValueAt(node, [0, 1, 0, 3, 1])
+                        };
+                        
+                        if (sender.title is not null)
+                        {
+                            lines.Add($"titleText: {sender.title.Children[0].Properties[0].Value}");
                         }
 
-                        return null;
+                        var item1 = getItem(sender.item1Text, sender.item1Value);
+                        if (item1 is not null)
+                        {
+                            lines.Add("item1: " + item1);
+                        }
+                    
+                        var item2 = getItem(sender.item2Text, sender.item2Value);
+                        if (item2 is not null)
+                        {
+                            lines.Add("item2: " + item2);
+                        }
+                    
+                        var item3 = getItem(sender.item3Text, sender.item3Value);
+                        if (item3 is not null)
+                        {
+                            lines.Add("item3: " + item3);
+                        }
+
+                        if (lines.Count > 0)
+                        {
+                            var prop = new ReactProperty
+                            {
+                                Name  = "senderData",
+                                Value = '{' + string.Join(",", lines) + '}'
+                            };
+
+                            finalProps.Add(prop);
+                        }
                     }
+
+                    // amount
+                    {
+                        var transferAmount = tryGetValueAt(node, [1, 1]);
+                        if (transferAmount is not null)
+                        {
+                            finalProps.Add(new ReactProperty
+                            {
+                                Name  = "transferAmount",
+                                Value =  string.Join(",", transferAmount.Children[0].Children[0].Text)
+                            });
+
+                            finalProps.Add(new ReactProperty
+                            {
+                                Name  = "transferAmountVariant",
+                                Value = string.Join(",", transferAmount.Properties[0].Value)
+                            });
+                        }
+                    }
+                    
+                    
+                    // receiver
+                    {
+                        List<string> lines = [];
+                        
+                        var receiver = new
+                        {
+                            title = tryGetValueAt(node, [2, 1, 0, 0]),
+
+                            item1Text  = tryGetValueAt(node, [2, 1, 0, 1, 0]),
+                            item1Value = tryGetValueAt(node, [2, 1, 0, 1, 1]),
+                        
+                            item2Text  = tryGetValueAt(node, [2, 1, 0, 2, 0]),
+                            item2Value = tryGetValueAt(node, [2, 1, 0, 2, 1]),
+                        
+                            item3Text  = tryGetValueAt(node, [2, 1, 0, 3, 0]),
+                            item3Value = tryGetValueAt(node, [2, 1, 0, 3, 1])
+                        };
+                        
+                        if (receiver.title is not null)
+                        {
+                            lines.Add($"titleText: {receiver.title.Children[0].Properties[0].Value}");
+                        }
+
+                        var item1 = getItem(receiver.item1Text, receiver.item1Value);
+                        if (item1 is not null)
+                        {
+                            lines.Add("item1: " + item1);
+                        }
+                    
+                        var item2 = getItem(receiver.item2Text, receiver.item2Value);
+                        if (item2 is not null)
+                        {
+                            lines.Add("item2: " + item2);
+                        }
+                    
+                        var item3 = getItem(receiver.item3Text, receiver.item3Value);
+                        if (item3 is not null)
+                        {
+                            lines.Add("item3: " + item3);
+                        }
+
+                        if (lines.Count > 0)
+                        {
+                            var prop = new ReactProperty
+                            {
+                                Name  = "receiverData",
+                                Value = '{' + string.Join(",", lines) + '}'
+                            };
+
+                            finalProps.Add(prop);
+                        }
+                    }
+                    
+                    
+                    // transactionDetailLines
+                    {
+                        List<string> lines = [];
+                        
+                        var items = new
+                        {
+                            item1Text  = tryGetValueAt(node, [4, 0, 0]),
+                            item1Value = tryGetValueAt(node, [4, 0, 1]),
+                        
+                            item2Text  = tryGetValueAt(node, [4, 1, 0]),
+                            item2Value = tryGetValueAt(node, [4, 1, 1]),
+                        
+                            item3Text  = tryGetValueAt(node, [4, 2, 0]),
+                            item3Value = tryGetValueAt(node, [4, 2, 1])
+                        };
+                        
+                       
+
+                        var item1 = getItem(items.item1Text, items.item1Value);
+                        if (item1 is not null)
+                        {
+                            lines.Add(item1);
+                        }
+                    
+                        var item2 = getItem(items.item2Text, items.item2Value);
+                        if (item2 is not null)
+                        {
+                            lines.Add(item2);
+                        }
+                    
+                        var item3 = getItem(items.item3Text, items.item3Value);
+                        if (item3 is not null)
+                        {
+                            lines.Add(item3);
+                        }
+
+                        finalProps.Add(new ReactProperty
+                        {
+                            Name  = "transactionDetailList",
+                            Value = '[' + string.Join(",", lines) + ']'
+                        });
+                    }
+
+                 
                     
                     node = node with
                     {
                         Children = [],
-                        Properties =
-                        [
-                            new ReactProperty
-                            {
-                                Name  = "senderData",
-                                Value = '{' + string.Join(",", senderLines) + '}'
-                            }
-                        ]
+                        Properties = finalProps.ToImmutableList()
                     };
                 }
 
                 return node with { Children = node.Children.Select(x => AnalyzeReactNode(x, componentConfig)).ToImmutableList() };
 
+                static string getItem(ReactNode textNode, ReactNode valueNode)
+                {
+                    if (valueNode is null)
+                    {
+                        if (textNode is null)
+                        {
+                            return null;
+                        }
+
+                        var value = textNode.Children[0].Properties[0].Value;
+
+                        var valueVariant = textNode.Properties[0].Value;
+
+                        return '{' + "value:" + value + ", valueVariant: " + valueVariant + '}';
+                    }
+
+                    {
+                        var text = textNode.Children[0].Properties[0].Value;
+
+                        var textVariant = textNode.Properties[0].Value;
+                            
+                        var value = valueNode.Children[0].Properties[0].Value;
+
+                        var valueVariant = valueNode.Properties[0].Value;
+
+                        return '{' + "text: " + text + ", textVariant: "+ textVariant +  ", value:" + value + ", valueVariant: " + valueVariant + '}';
+                    }
+                }
+                
                 static ReactNode tryGetValueAt(ReactNode node, int[] location)
                 {
                     foreach (var childIndex in location)
