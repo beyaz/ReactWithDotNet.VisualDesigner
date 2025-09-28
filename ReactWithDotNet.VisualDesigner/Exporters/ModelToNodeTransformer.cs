@@ -125,19 +125,25 @@ static class ModelToNodeTransformer
 
                         foreach (var finalCssItem in item.Value.FinalCssItems)
                         {
-                            if (finalCssItem.Value.HasNoValue())
-                            {
-                                return new ArgumentException($"{finalCssItem.Name} has no value.");
-                            }
+                            var name = finalCssItem.Name;
+
+                            var value = finalCssItem.Value;
                             
-                            var value = finalCssItem.Value switch
+                            if (value.HasNoValue())
+                            {
+                                return new ArgumentException($"{name} has no value.");
+                            }
+
+                            name = KebabToCamelCase(name);
+                            
+                            value = value switch
                             {
                                 var x when x.StartsWith("request.") || x.StartsWith("context.") => x,
 
                                 var x => '"' + TryClearStringValue(x) + '"'
                             };
 
-                            listOfStyleAttributes.Add($"{finalCssItem.Name}: {value}");
+                            listOfStyleAttributes.Add($"{name}: {value}");
                         }
                     }
                 }
