@@ -697,7 +697,7 @@ static class Plugin
             {
                 return new FlexColumn(MarginBottom(24),MarginTop(8))
                 {
-                    title is null ? null : new div(FontSize18, FontWeight600, Color(rgba(0, 0, 0, 0.87))) { title },
+                    title is null ? null : new div(FontSize18, FontWeight600, LineHeight32, Color(rgba(0, 0, 0, 0.87))) { title },
                     
                     new FlexColumn( Background(White), BorderRadius(10), Border(1, solid, "#E0E0E0"), Padding(24), Id(id), OnClick(onMouseClick))
                     {
@@ -708,7 +708,7 @@ static class Plugin
         }
 
         [CustomComponent]
-        [Import(Name = "BDigitalTransactionConfirm", Package = "b-digital-transaction-confirm")]
+        [Import(Name = nameof(BDigitalTransactionConfirm), Package = "b-digital-transaction-confirm")]
         public sealed class BDigitalTransactionConfirm : PluginComponentBase
         {
             // @formatter:on
@@ -826,6 +826,90 @@ static class Plugin
                                           />
                                       </BDigitalBox>*/
             }
+            
+            [NodeAnalyzer]
+            public static ReactNode AnalyzeReactNode(ReactNode node, IReadOnlyDictionary<string, string> componentConfig)
+            {
+                if (node.Tag == nameof(BDigitalTransactionConfirm))
+                {
+                    var sender = new
+                    {
+                        title = tryGetValueAt(node, [0, 1, 0, 0]),
+
+                        item1Text = tryGetValueAt(node, [0, 1, 0, 1, 0]),
+
+                        item1Value = tryGetValueAt(node, [0, 1, 0, 1, 1])
+                    };
+
+                    List<string> senderLines = [];
+                    if (sender.title is not null)
+                    {
+                        senderLines.Add($"titleText: {sender.title.Children[0].Properties[0].Value}");
+                    }
+
+                    var item1 = getItem(sender.item1Text, sender.item1Value);
+                    
+                    if (item1 is not null)
+                    {
+                        senderLines.Add($"item1: " + item1);
+                    }
+
+                    static string getItem(ReactNode textNode, ReactNode valueNode)
+                    {
+                        if (valueNode is null)
+                        {
+                            if (textNode is null)
+                            {
+                                return null;
+                            }
+
+                            var value = textNode.Children[0].Properties[0].Value;
+
+                            var valueVariant = textNode.Properties[0].Value;
+
+                            return '{' + "value:" + value + ", valueVariant: " + valueVariant + '}';
+                        }
+
+                        return null;
+                    }
+                    
+                    node = node with
+                    {
+                        Children = [],
+                        Properties =
+                        [
+                            new ReactProperty
+                            {
+                                Name  = "senderData",
+                                Value = '{' + string.Join(",", senderLines) + '}'
+                            }
+                        ]
+                    };
+                }
+
+                return node with { Children = node.Children.Select(x => AnalyzeReactNode(x, componentConfig)).ToImmutableList() };
+
+                static ReactNode tryGetValueAt(ReactNode node, int[] location)
+                {
+                    foreach (var childIndex in location)
+                    {
+                        if (node is null)
+                        {
+                            return null;
+                        }
+
+                        if (!(node.Children.Count > childIndex))
+                        {
+                            return null;
+                        }
+                        
+                        node = node.Children[childIndex];
+                    }
+
+                    return node;
+                }
+            }
+
         }
 
         static ReactNode AddContextProp(ReactNode node)
