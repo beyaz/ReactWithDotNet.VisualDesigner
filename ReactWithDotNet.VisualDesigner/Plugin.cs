@@ -1398,7 +1398,7 @@ static class Plugin
         
         
         
-            [CustomComponent]
+        [CustomComponent]
         [Import(Name = nameof(BDigitalSecureConfirmAgreement), Package = "b-digital-secure-confirm-agreement")]
         sealed class BDigitalSecureConfirmAgreement : PluginComponentBase
         {
@@ -3042,6 +3042,73 @@ static class Plugin
                         children
                     }
                 } + Id(id) + OnClick(onMouseClick);
+            }
+        }
+        
+          [CustomComponent]
+        [Import(Name = nameof(BDigitalSecureConfirm), Package = "b-digital-secure-confirm")]
+        sealed class BDigitalSecureConfirm : PluginComponentBase
+        {
+            [JsTypeInfo(JsType.String)]
+            public string smsPassword { get; set; }
+
+            [JsTypeInfo(JsType.String)]
+            public string messageInfo { get; set; }
+            
+            [NodeAnalyzer]
+            public static ReactNode AnalyzeReactNode(ReactNode node, IReadOnlyDictionary<string, string> componentConfig)
+            {
+                if (node.Tag == nameof(BDigitalSecureConfirm))
+                {
+                    var smsPasswordProp = node.Properties.FirstOrDefault(x => x.Name == nameof(smsPassword));
+
+                    if (smsPasswordProp is not null)
+                    {
+                        var properties = node.Properties;
+
+                        List<string> lines =
+                        [
+                            "(value: String) =>",
+
+                            "{",
+
+                            $"  updateRequest(r => {{ r.{smsPasswordProp.Value.RemoveFromStart("request.")} = value; }});",
+                            "}"
+                        ];
+
+                        properties = properties.Add(new()
+                        {
+                            Name  = "handleSmsPasswordSend",
+                            Value = string.Join(Environment.NewLine, lines)
+                        });
+
+                        node = node with { Properties = properties };
+                    }
+                }
+
+                return node with { Children = node.Children.Select(x => AnalyzeReactNode(x, componentConfig)).ToImmutableList() };
+            }
+
+            protected override Element render()
+            {
+                return new FlexColumn(MarginBottom(24),MarginTop(8))
+                {
+                    new div(FontSize18, FontWeight600, LineHeight32, Color(rgba(0, 0, 0, 0.87))) { "Mobil Onay" },
+                    
+                    new FlexColumn( Background(White), BorderRadius(10), Border(1, solid, "#E0E0E0"), Padding(24), Id(id), OnClick(onMouseClick))
+                    {
+                        new div
+                        {
+                            "Mobil Onay Bekleniyor...",
+                            Color(rgba(2, 136, 209, 1))
+                        },
+                        
+                        new div(FontWeight400)
+                        {
+                            "Ödeme işleminizi gerçekleştirmek için cihazınıza gelen Mobil Onay bildirimine belirtilen süre içerisinde onay vermeniz gerekmektedir."
+                        }
+                    }
+                };
             }
         }
     }
