@@ -2769,6 +2769,10 @@ static class Plugin
 
             [JsTypeInfo(JsType.String)]
             public string value { get; set; }
+            
+            [JsTypeInfo(JsType.Boolean)]
+            public string disabled { get; set; }
+            
 
             [NodeAnalyzer]
             public static ReactNode AnalyzeReactNode(ReactNode node, IReadOnlyDictionary<string, string> componentConfig)
