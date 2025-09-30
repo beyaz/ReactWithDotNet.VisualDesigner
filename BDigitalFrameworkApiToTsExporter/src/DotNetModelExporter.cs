@@ -274,11 +274,12 @@ static class DotNetModelExporter
 
     static Result<IEnumerable<FileModel>> CalculateFiles()
     {
-        var config = ReadConfig();
-        if (config is null)
+        var configResult = ReadConfig();
+        if (configResult.HasError)
         {
-            return new Exception("Config is null");
+            return configResult.Error;
         }
+        var config = configResult.Value;
 
         AssemblyDefinition assemblyDefinition;
         {
@@ -332,17 +333,22 @@ static class DotNetModelExporter
             return typeDefinitions;
         }
 
-        static Config? ReadConfig()
+        static Result<Config> ReadConfig()
         {
             var configFilePath = Path.Combine(Path.GetDirectoryName(typeof(Program).Assembly.Location) ?? string.Empty, "Config.json");
             if (File.Exists(configFilePath))
             {
                 var fileContent = File.ReadAllText(configFilePath);
 
-                return JsonConvert.DeserializeObject<Config>(fileContent);
+                var config = JsonConvert.DeserializeObject<Config>(fileContent);
+                if (config is not null)
+                {
+                    return config;
+                }
+                
             }
 
-            return null;
+            return new IOException("ConfigFileNotRead");
         }
     }
 
