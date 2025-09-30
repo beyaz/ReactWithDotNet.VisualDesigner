@@ -44,56 +44,92 @@ public static class ResultExtensions
 {
     public static IEnumerable<T> AsEnumerable<T>(this Result<T> result)
     {
-        return result.HasError ? [] : [result.Value!];
+        return result.HasError ? [] : [result.Value];
     }
 
-    // --- Normal Select (map) ---
     public static Result<B> Select<A, B>(this Result<A> r, Func<A, B> selector)
     {
-        return r.HasError ? r.Error : selector(r.Value!);
+        return r.HasError ? r.Error : selector(r.Value);
     }
 
-    // --- Normal SelectMany (bind) ---
-    public static Result<B> SelectMany<A, B>(this Result<A> r, Func<A, Result<B>> binder)
+    public static Result<B> SelectMany<A, B>(this Result<A> result, Func<A, Result<B>> binder)
     {
-        return r.HasError ? r.Error : binder(r.Value!);
+        if (result.HasError)
+        {
+            return result.Error;
+        }
+        
+        return binder(result.Value);
     }
 
-    // --- SelectMany + projector (LINQ query syntax için) ---
-    public static Result<C> SelectMany<A, B, C>(this Result<A> result, Func<A, Result<B>> binder, Func<A, B, C> projector)
+    public static Result<IEnumerable<B>> SelectMany<A, B>
+    (
+        this Result<A> result,
+        Func<A, Result<IEnumerable<B>>> binder
+    )
     {
         if (result.HasError)
         {
             return result.Error;
         }
 
-        var middle = binder(result.Value!);
-        if (middle.HasError)
+        var inner = binder(result.Value);
+        if (inner.HasError)
         {
-            return middle.Error;
+            return inner.Error;
         }
 
-        return projector(result.Value!, middle.Value!);
+        return new(inner.Value);
     }
-    
-    public static Result<C> SelectMany<A, B, C>(this Result<A> result, Func<A, Result<B>> binder, Func<A, B, Result<C>> projector)
+
+    public static Result<C> SelectMany<A, B, C>
+    (
+        this Result<A> result,
+        Func<A, Result<B>> binder,
+        Func<A, B, C> projector
+    )
     {
         if (result.HasError)
         {
             return result.Error;
         }
 
-        var middle = binder(result.Value!);
+        var middle = binder(result.Value);
         if (middle.HasError)
         {
             return middle.Error;
         }
 
-        return projector(result.Value!, middle.Value!);
+        return projector(result.Value!, middle.Value);
     }
 
-    // --- Result + IEnumerable flatten ---
-    public static Result<IEnumerable<C>> SelectMany<A, B, C>(this Result<A> result, Func<A, IEnumerable<B>> binder, Func<A, B, C> projector)
+    public static Result<C> SelectMany<A, B, C>
+    (
+        this Result<A> result,
+        Func<A, Result<B>> binder,
+        Func<A, B, Result<C>> projector
+    )
+    {
+        if (result.HasError)
+        {
+            return result.Error;
+        }
+
+        var middle = binder(result.Value);
+        if (middle.HasError)
+        {
+            return middle.Error;
+        }
+
+        return projector(result.Value!, middle.Value);
+    }
+
+    public static Result<IEnumerable<C>> SelectMany<A, B, C>
+    (
+        this Result<A> result,
+        Func<A, IEnumerable<B>> binder,
+        Func<A, B, C> projector
+    )
     {
         if (result.HasError)
         {
@@ -102,9 +138,9 @@ public static class ResultExtensions
 
         try
         {
-            var middles = binder(result.Value!);
+            var middles = binder(result.Value);
 
-            var results = middles.Select(middle => projector(result.Value!, middle));
+            var results = middles.Select(middle => projector(result.Value, middle));
 
             return new(results);
         }
@@ -112,22 +148,5 @@ public static class ResultExtensions
         {
             return ex;
         }
-    }
-
-    // --- Nested Result<IEnumerable> flatten ---
-    public static Result<IEnumerable<B>> SelectMany<A, B>(this Result<A> result, Func<A, Result<IEnumerable<B>>> binder)
-    {
-        if (result.HasError)
-        {
-            return result.Error;
-        }
-
-        var inner = binder(result.Value!);
-        if (inner.HasError)
-        {
-            return inner.Error;
-        }
-
-        return new(inner.Value);
     }
 }
