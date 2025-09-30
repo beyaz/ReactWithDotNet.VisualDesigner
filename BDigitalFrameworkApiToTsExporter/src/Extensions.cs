@@ -37,30 +37,24 @@ public class Result<TSuccess, TError>
     protected Result(TSuccess value)
     {
         Success = true;
-        
         Value  = value;
-        
         Error = default!;
     }
 
     protected Result(TError error)
     {
         Success = false;
-        
         Error    = error;
-        
         Value = default!;
     }
 
 
     // --- LINQ desteği ---
     public Result<TResult, TError> Select<TResult>(Func<TSuccess, TResult> selector)
-        => Success ? selector(Value!)
-            : Error!;
+        => Success ? selector(Value!) : Error!;
 
     public Result<TResult, TError> SelectMany<TResult>(Func<TSuccess, Result<TResult, TError>> binder)
-        => Success ? binder(Value!)
-            : Error!;
+        => Success ? binder(Value!) : Error!;
 
     public Result<TResult, TError> SelectMany<TMiddle, TResult>(
         Func<TSuccess, Result<TMiddle, TError>> binder,
@@ -68,9 +62,26 @@ public class Result<TSuccess, TError>
     {
         if (!Success) return Error!;
         var mid = binder(Value!);
-        return mid.Success
-            ? projector(Value!, mid.Value!)
-            : mid.Error!;
+        return mid.Success ? projector(Value!, mid.Value!) : mid.Error!;
+    }
+
+    // --- Yeni LINQ-compatible overload (IEnumerable) ---
+    public Result<IEnumerable<TResult>, TError> SelectMany<TMiddle, TResult>(
+        Func<TSuccess, IEnumerable<TMiddle>> binder,
+        Func<TSuccess, TMiddle, TResult> projector)
+    {
+        if (!Success) return Error!;
+
+        try
+        {
+            var mids = binder(Value!);
+            var results = mids.Select(mid => projector(Value!, mid));
+            return new Result<IEnumerable<TResult>, TError>(results); // Implicit operator veya yeni Result<IEnumerable<TResult>, TError> dönecek
+        }
+        catch (Exception ex) // binder veya projector exception fırlatırsa
+        {
+            return (TError)(object)ex; // cast TError
+        }
     }
 
     // --- Implicit operators ---
@@ -80,6 +91,7 @@ public class Result<TSuccess, TError>
     public static implicit operator Result<TSuccess, TError>(TError error)
         => new(error);
 }
+
 
 public sealed class Result<TSuccess> : Result<TSuccess, Exception>
 {
