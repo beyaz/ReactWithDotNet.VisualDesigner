@@ -1,6 +1,7 @@
 ﻿global using static BDigitalFrameworkApiToTsExporter.Extensions;
 
 using System.Collections;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace BDigitalFrameworkApiToTsExporter;
 
@@ -22,89 +23,105 @@ static class Extensions
 }
 
 
-
-
-public class Result<TSuccess, TError>
+public sealed class Result<TSuccess>
 {
     public readonly TSuccess Value;
     
-    public readonly TError Error;
+    public readonly Exception Error;
 
     bool Success { get; }
     
     public bool HasError => !Success;
 
-    protected Result(TSuccess value)
+    Result(TSuccess value)
     {
         Success = true;
-        Value  = value;
-        Error = default!;
+        Value   = value;
+        Error   = null!;
     }
 
-    protected Result(TError error)
+    Result(Exception error)
     {
         Success = false;
-        Error    = error;
-        Value = default!;
+        Error   = error;
+        Value   = default!;
     }
 
 
-    // --- LINQ desteği ---
-    public Result<TResult, TError> Select<TResult>(Func<TSuccess, TResult> selector)
-        => Success ? selector(Value!) : Error!;
+    public Result<TResult> Select<TResult>(Func<TSuccess, TResult> selector)
+    {
+        if (HasError)
+        {
+            return Error;
+        }
 
-    public Result<TResult, TError> SelectMany<TResult>(Func<TSuccess, Result<TResult, TError>> binder)
-        => Success ? binder(Value!) : Error!;
+        return selector(Value!);
+    }
 
-    public Result<TResult, TError> SelectMany<TMiddle, TResult>(
-        Func<TSuccess, Result<TMiddle, TError>> binder,
+    public Result<TResult> SelectMany<TResult>(Func<TSuccess, Result<TResult>> binder)
+    {
+        if (HasError)
+        {
+            return Error;
+        }
+
+        return binder(Value!);
+    }
+
+    public Result<TResult> SelectMany<TMiddle, TResult>(
+        Func<TSuccess, Result<TMiddle>> binder,
         Func<TSuccess, TMiddle, TResult> projector)
     {
-        if (!Success) return Error!;
-        var mid = binder(Value!);
-        return mid.Success ? projector(Value!, mid.Value!) : mid.Error!;
+        if (HasError)
+        {
+            return Error;
+        }
+        
+        var middle = binder(Value!);
+        if (middle.HasError)
+        {
+            return middle.Error;
+        }
+        
+        return projector(Value!, middle.Value!);
     }
 
-    // --- Yeni LINQ-compatible overload (IEnumerable) ---
-    public Result<IEnumerable<TResult>, TError> SelectMany<TMiddle, TResult>(
+    public Result<IEnumerable<TResult>> SelectMany<TMiddle, TResult>(
         Func<TSuccess, IEnumerable<TMiddle>> binder,
         Func<TSuccess, TMiddle, TResult> projector)
     {
-        if (!Success) return Error!;
+        if (HasError)
+        {
+            return Error;
+        }
 
         try
         {
-            var mids = binder(Value!);
-            var results = mids.Select(mid => projector(Value!, mid));
-            return new Result<IEnumerable<TResult>, TError>(results); // Implicit operator veya yeni Result<IEnumerable<TResult>, TError> dönecek
+            IEnumerable<TMiddle> enumerable = binder(Value!);
+            
+            IEnumerable<TResult> results = enumerable.Select(mid => projector(Value!, mid));
+            
+            return new(results); 
         }
-        catch (Exception ex) // binder veya projector exception fırlatırsa
+        catch (Exception exception) 
         {
-            return (TError)(object)ex; // cast TError
+            return exception;
         }
     }
-
-    // --- Implicit operators ---
-    public static implicit operator Result<TSuccess, TError>(TSuccess value)
-        => new(value);
-
-    public static implicit operator Result<TSuccess, TError>(TError error)
-        => new(error);
-}
-
-
-public sealed class Result<TSuccess> : Result<TSuccess, Exception>
-{
     
-    public Result(TSuccess value) : base(value) { }
     
-    public Result(Exception error) : base(error) { }
+  
 
+    
     public static implicit operator Result<TSuccess>(TSuccess value)
         => new(value);
 
     public static implicit operator Result<TSuccess>(Exception error)
         => new(error);
+    
+    
+    
+    
 }
 
 

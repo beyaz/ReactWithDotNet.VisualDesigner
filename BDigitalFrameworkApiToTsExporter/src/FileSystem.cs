@@ -18,7 +18,7 @@ static class FileSystem
         }
     }
 
-    public static Result<Unit, Exception> Save(FileModel file)
+    public static Result<Unit> Save(FileModel file)
     {
         try
         {
@@ -40,7 +40,7 @@ static class FileSystem
         }
     }
 
-    public static Result<Unit, Exception> SaveAll(IEnumerable<FileModel> files)
+    public static Result<Unit> SaveAll(IEnumerable<FileModel> files)
     {
         foreach (var file in files)
         {
