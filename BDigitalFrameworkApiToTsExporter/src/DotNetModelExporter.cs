@@ -274,20 +274,20 @@ static class DotNetModelExporter
         }
     }
 
-    static Result<List<FileModel>> CalculateFiles()
+    static Result<IEnumerable<FileModel>> CalculateFiles()
     {
-        return 
+        return
             from config in ReadConfig()
             from assemblyDefinition in CecilHelper.ReadAssemblyDefinition(config.AssemblyFilePath)
-            let typeDefinitions = pickTypes(assemblyDefinition, config)
-            select typeDefinitions.ConvertAll(typeDefinition =>
+            from x in pickTypes(assemblyDefinition, config).ConvertAll(typeDefinition =>
             {
                 var tsCode = LinesToString(GetTsCodes(typeDefinition));
 
                 var filePath = Path.Combine(config.OutputDirectoryPath ?? string.Empty, $"{typeDefinition.Name}.ts");
 
                 return new FileModel(filePath, tsCode);
-            });
+            })
+            select x;
 
         static List<TypeDefinition> pickTypes(AssemblyDefinition assemblyDefinition, Config config)
         {
