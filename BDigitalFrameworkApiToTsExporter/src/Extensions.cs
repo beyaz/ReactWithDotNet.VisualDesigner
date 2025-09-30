@@ -1,37 +1,11 @@
-﻿global using static BDigitalFrameworkApiToTsExporter.Extensions;
+﻿namespace BDigitalFrameworkApiToTsExporter;
 
-
-namespace BDigitalFrameworkApiToTsExporter;
-
-static class Extensions
+public sealed class Result<TValue>
 {
-   
-    
-    public static Exception? Then<TIn>(this (TIn? value, Exception? exception) tuple, Func<TIn?, Exception?> nextFunc)
-    {
-        if (tuple.exception is not null)
-        {
-            return tuple.exception;
-        }
-
-        return nextFunc(tuple.value);
-    }
-    
-    public static IReadOnlyList<T> ListFrom<T>(IEnumerable<T> enumerable)=>enumerable.ToList();
-}
-
-
-public sealed class Result<TSuccess>
-{
-    public readonly TSuccess Value;
-    
     public readonly Exception Error;
+    public readonly TValue Value;
 
-    bool Success { get; }
-    
-    public bool HasError => !Success;
-
-    Result(TSuccess value)
+    Result(TValue value)
     {
         Success = true;
         Value   = value;
@@ -45,18 +19,21 @@ public sealed class Result<TSuccess>
         Value   = default!;
     }
 
+    public bool HasError => !Success;
 
-    public Result<TResult> Select<TResult>(Func<TSuccess, TResult> selector)
+    bool Success { get; }
+
+    public static implicit operator Result<TValue>(TValue value)
     {
-        if (HasError)
-        {
-            return Error;
-        }
-
-        return selector(Value!);
+        return new(value);
     }
 
-    public Result<TResult> SelectMany<TResult>(Func<TSuccess, Result<TResult>> binder)
+    public static implicit operator Result<TValue>(Exception error)
+    {
+        return new(error);
+    }
+
+    public Result<T> SelectMany<T>(Func<TValue, Result<T>> binder)
     {
         if (HasError)
         {
@@ -67,26 +44,26 @@ public sealed class Result<TSuccess>
     }
 
     public Result<TResult> SelectMany<TMiddle, TResult>(
-        Func<TSuccess, Result<TMiddle>> binder,
-        Func<TSuccess, TMiddle, TResult> projector)
+        Func<TValue, Result<TMiddle>> binder,
+        Func<TValue, TMiddle, TResult> projector)
     {
         if (HasError)
         {
             return Error;
         }
-        
+
         var middle = binder(Value!);
         if (middle.HasError)
         {
             return middle.Error;
         }
-        
+
         return projector(Value!, middle.Value!);
     }
 
     public Result<IEnumerable<TResult>> SelectMany<TMiddle, TResult>(
-        Func<TSuccess, IEnumerable<TMiddle>> binder,
-        Func<TSuccess, TMiddle, TResult> projector)
+        Func<TValue, IEnumerable<TMiddle>> binder,
+        Func<TValue, TMiddle, TResult> projector)
     {
         if (HasError)
         {
@@ -95,35 +72,33 @@ public sealed class Result<TSuccess>
 
         try
         {
-            IEnumerable<TMiddle> enumerable = binder(Value!);
-            
-            IEnumerable<TResult> results = enumerable.Select(mid => projector(Value!, mid));
-            
-            return new(results); 
+            var enumerable = binder(Value!);
+
+            var results = enumerable.Select(mid => projector(Value!, mid));
+
+            return new(results);
         }
-        catch (Exception exception) 
+        catch (Exception exception)
         {
             return exception;
         }
     }
-    
-    
-  
-
-    
-    public static implicit operator Result<TSuccess>(TSuccess value)
-        => new(value);
-
-    public static implicit operator Result<TSuccess>(Exception error)
-        => new(error);
-    
-    
-    
-    
 }
-
 
 public readonly struct Unit
 {
     public static readonly Unit Value = new();
+}
+
+static class ResultExtensions
+{
+    public static Result<T> Select<TValue, T>(Result<TValue> result, Func<TValue, T> selector)
+    {
+        if (result.HasError)
+        {
+            return result.Error;
+        }
+
+        return selector(result.Value!);
+    }
 }
