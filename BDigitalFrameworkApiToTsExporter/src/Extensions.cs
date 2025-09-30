@@ -35,13 +35,19 @@ public sealed class Result<TValue>
     }
 }
 
-public readonly struct Unit
+public sealed class Unit
 {
     public static readonly Unit Value = new();
 }
 
 public static class ResultExtensions
 {
+    
+    
+   
+    
+    
+    
     public static Result<B> Select<A, B>(this Result<A> result, Func<A, B> selector)
     {
         if (result.HasError)
@@ -142,5 +148,42 @@ public static class ResultExtensions
         {
             return ex;
         }
+    }
+    
+    public static Result<Unit> SelectMany<A, B>
+    (
+        this Result<A> result,
+        Func<A, IEnumerable<Result<B>>> binder,
+        Func<A, B, Result<Unit>> projector
+    )
+    {
+        if (result.HasError)
+        {
+            return result.Error;
+        }
+
+        var a = result.Value;
+        
+        var enumerable = binder(a);
+
+        Result<Unit> resultC =  new Result<Unit>(Unit.Value);
+        
+        foreach (var item in enumerable)
+        {
+            if (item.HasError)
+            {
+                return item.Error;
+            }
+
+            var b = item.Value;
+
+            resultC = projector(a, b);
+            if (resultC.HasError)
+            {
+                return resultC.Error;
+            }
+        }
+
+        return resultC;
     }
 }

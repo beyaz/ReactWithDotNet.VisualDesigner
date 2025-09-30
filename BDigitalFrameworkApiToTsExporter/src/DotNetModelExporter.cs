@@ -13,9 +13,8 @@ static class DotNetModelExporter
     {
         return
             from files in CalculateFiles()
-            from fileModel in files
-            from file in trySyncWithLocalFileSystem(fileModel)
-            select FileSystem.Save(file);
+            from fileModel in files.Select(trySyncWithLocalFileSystem)
+            select FileSystem.Save(fileModel);
 
         static Result<FileModel> trySyncWithLocalFileSystem(FileModel file)
         {
