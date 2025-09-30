@@ -1,4 +1,8 @@
-﻿namespace BDigitalFrameworkApiToTsExporter;
+﻿global using static BDigitalFrameworkApiToTsExporter.Extensions;
+
+using System.Collections;
+
+namespace BDigitalFrameworkApiToTsExporter;
 
 static class Extensions
 {
@@ -10,5 +14,39 @@ static class Extensions
         }
 
         return nextFunc(tuple.value);
+    }
+    
+    public static IReadOnlyList<T> ListFrom<T>(IEnumerable<T> enumerable)=>enumerable.ToList();
+}
+
+public sealed record Result<TValue> : IEnumerable<TValue?>
+{
+    public Exception? Error { get; private init; }
+
+    public bool HasError { get; private init; }
+
+    public TValue? Value { get; private init; }
+
+    public static implicit operator Result<TValue>(TValue value)
+    {
+        return new() { Value = value };
+    }
+
+    public static implicit operator Result<TValue>(Exception failInfo)
+    {
+        return new() { Error = failInfo, HasError = true };
+    }
+
+    public IEnumerator<TValue?> GetEnumerator()
+    {
+        if (!HasError)
+        {
+            yield return Value;
+        }
+    }
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return GetEnumerator();
     }
 }

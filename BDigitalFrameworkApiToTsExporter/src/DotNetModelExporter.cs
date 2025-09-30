@@ -11,76 +11,33 @@ static class DotNetModelExporter
 {
     public static Exception? TryExport()
     {
-        var config = ReadConfig();
-        if (config is null)
+        var result = CalculateFiles();
+        if (result.HasError)
         {
-            return new Exception("Config is null");
+            return result.Error;
         }
 
-        AssemblyDefinition assemblyDefinition;
+        foreach (var files in result)
         {
-            var primarySearchDirectoryPath = Path.GetDirectoryName(config.AssemblyFilePath) ?? Directory.GetCurrentDirectory();
-
-            const string secondarySearchDirectoryPath = @"d:\boa\server\bin";
-
-            var resolver = new CustomAssemblyResolver(primarySearchDirectoryPath, secondarySearchDirectoryPath);
-
-            var readerParameters = new ReaderParameters
+            foreach (var fileModel in files ?? [])
             {
-                AssemblyResolver = resolver
-            };
-
-            assemblyDefinition = AssemblyDefinition.ReadAssembly(config.AssemblyFilePath, readerParameters);
-
-            if (assemblyDefinition is null)
-            {
-                return new Exception("AssemblyNotFound:" + config.AssemblyFilePath);
-            }
-        }
-
-        var typeDefinitions = new List<TypeDefinition>();
-        {
-            foreach (var item in config.ListOfTypes ?? [])
-            {
-                var typeNamePrefix = item;
-
-                if (typeNamePrefix.EndsWith("*", StringComparison.OrdinalIgnoreCase))
+                var exception = WriteTsModelToFileSystem(fileModel);
+                if (exception is not null)
                 {
-                    typeNamePrefix = typeNamePrefix.Remove(typeNamePrefix.Length - 1);
-
-                    foreach (var typeDefinition in assemblyDefinition.MainModule.Types)
-                    {
-                        if (typeDefinition.FullName.StartsWith(typeNamePrefix, StringComparison.OrdinalIgnoreCase))
-                        {
-                            typeDefinitions.Add(typeDefinition);
-                        }
-                    }
-
-                    continue;
+                    return exception;
                 }
-
-                typeDefinitions.Add(assemblyDefinition.MainModule.GetType(typeNamePrefix));
-            }
-        }
-
-        foreach (var typeDefinition in typeDefinitions)
-        {
-            var tsCode = LinesToString(GetTsCodes(typeDefinition));
-
-            var exception = WriteTsModelToFileSystem(Path.Combine(config.OutputDirectoryPath ?? string.Empty, $"{typeDefinition.Name}.ts"), tsCode);
-            if (exception is not null)
-            {
-                return exception;
             }
         }
 
         return null;
 
-        static Exception? WriteTsModelToFileSystem(string filePath, string fileContent)
+        static Exception? WriteTsModelToFileSystem(TsFileModel file)
         {
-            if (File.Exists(filePath))
+            var fileContent = file.Content;
+            
+            if (File.Exists(file.Path))
             {
-                return FileSystem.ReadAllText(filePath).Then(fileContentInDirectory =>
+                return FileSystem.ReadAllText(file.Path).Then(fileContentInDirectory =>
                 {
                     fileContentInDirectory ??= string.Empty;
 
@@ -90,24 +47,11 @@ static class DotNetModelExporter
                         fileContent = fileContentInDirectory[..exportIndex] + fileContent;
                     }
 
-                    return FileSystem.WriteAllText(filePath, fileContent);
+                    return FileSystem.WriteAllText(file.Path, fileContent);
                 });
             }
 
-            return FileSystem.WriteAllText(filePath, fileContent);
-        }
-
-        static Config? ReadConfig()
-        {
-            var configFilePath = Path.Combine(Path.GetDirectoryName(typeof(Program).Assembly.Location) ?? string.Empty, "Config.json");
-            if (File.Exists(configFilePath))
-            {
-                var fileContent = File.ReadAllText(configFilePath);
-
-                return JsonConvert.DeserializeObject<Config>(fileContent);
-            }
-
-            return null;
+            return FileSystem.WriteAllText(file.Path, fileContent);
         }
     }
 
@@ -242,9 +186,9 @@ static class DotNetModelExporter
             {
                 // NullableContextAttribute class / module seviyesinde olabilir
                 var nullableContext = propertyDefinition.DeclaringType.CustomAttributes
-                                                        .FirstOrDefault(a => a.AttributeType.FullName == typeof(NullableContextAttribute).FullName)
+                                          .FirstOrDefault(a => a.AttributeType.FullName == typeof(NullableContextAttribute).FullName)
                                       ?? propertyDefinition.Module.CustomAttributes
-                                                           .FirstOrDefault(a => a.AttributeType.FullName == typeof(NullableContextAttribute).FullName);
+                                          .FirstOrDefault(a => a.AttributeType.FullName == typeof(NullableContextAttribute).FullName);
 
                 if (nullableContext == null)
                 {
@@ -343,6 +287,83 @@ static class DotNetModelExporter
         }
     }
 
+    static Result<IReadOnlyList<TsFileModel>> CalculateFiles()
+    {
+        var config = ReadConfig();
+        if (config is null)
+        {
+            return new Exception("Config is null");
+        }
+
+        AssemblyDefinition assemblyDefinition;
+        {
+            var primarySearchDirectoryPath = Path.GetDirectoryName(config.AssemblyFilePath) ?? Directory.GetCurrentDirectory();
+
+            const string secondarySearchDirectoryPath = @"d:\boa\server\bin";
+
+            var resolver = new CustomAssemblyResolver(primarySearchDirectoryPath, secondarySearchDirectoryPath);
+
+            var readerParameters = new ReaderParameters
+            {
+                AssemblyResolver = resolver
+            };
+
+            assemblyDefinition = AssemblyDefinition.ReadAssembly(config.AssemblyFilePath, readerParameters);
+
+            if (assemblyDefinition is null)
+            {
+                return new Exception("AssemblyNotFound:" + config.AssemblyFilePath);
+            }
+        }
+
+        var typeDefinitions = new List<TypeDefinition>();
+        {
+            foreach (var item in config.ListOfTypes ?? [])
+            {
+                var typeNamePrefix = item;
+
+                if (typeNamePrefix.EndsWith("*", StringComparison.OrdinalIgnoreCase))
+                {
+                    typeNamePrefix = typeNamePrefix.Remove(typeNamePrefix.Length - 1);
+
+                    foreach (var typeDefinition in assemblyDefinition.MainModule.Types)
+                    {
+                        if (typeDefinition.FullName.StartsWith(typeNamePrefix, StringComparison.OrdinalIgnoreCase))
+                        {
+                            typeDefinitions.Add(typeDefinition);
+                        }
+                    }
+
+                    continue;
+                }
+
+                typeDefinitions.Add(assemblyDefinition.MainModule.GetType(typeNamePrefix));
+            }
+        }
+
+        return typeDefinitions.ConvertAll(typeDefinition =>
+        {
+            var tsCode = LinesToString(GetTsCodes(typeDefinition));
+
+            var filePath = Path.Combine(config.OutputDirectoryPath ?? string.Empty, $"{typeDefinition.Name}.ts");
+
+            return new TsFileModel(filePath, tsCode);
+        });
+
+        static Config? ReadConfig()
+        {
+            var configFilePath = Path.Combine(Path.GetDirectoryName(typeof(Program).Assembly.Location) ?? string.Empty, "Config.json");
+            if (File.Exists(configFilePath))
+            {
+                var fileContent = File.ReadAllText(configFilePath);
+
+                return JsonConvert.DeserializeObject<Config>(fileContent);
+            }
+
+            return null;
+        }
+    }
+
     static string LinesToString(IReadOnlyList<string> lines)
     {
         var sb = new StringBuilder();
@@ -375,7 +396,7 @@ static class DotNetModelExporter
 
     static class TypescriptNaming
     {
-        static readonly CamelCasePropertyNamesContractResolver CamelCasePropertyNamesContractResolver = new CamelCasePropertyNamesContractResolver();
+        static readonly CamelCasePropertyNamesContractResolver CamelCasePropertyNamesContractResolver = new();
 
         public static string GetResolvedPropertyName(string propertyNameInCSharp)
         {
@@ -411,4 +432,6 @@ static class DotNetModelExporter
             return base.Resolve(name, parameters);
         }
     }
+
+    record TsFileModel(string Path, string Content);
 }
