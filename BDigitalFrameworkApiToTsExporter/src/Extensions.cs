@@ -32,7 +32,8 @@ public sealed record Result<TValue> : IEnumerable<TValue?>
         return new() { Value = value };
     }
 
-    public static implicit operator Result<TValue>(Exception failInfo)
+    
+    public static implicit operator Result<TValue>(Exception? failInfo)
     {
         return new() { Error = failInfo, HasError = true };
     }

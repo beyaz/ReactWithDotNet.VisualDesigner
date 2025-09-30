@@ -21,7 +21,7 @@ static class DotNetModelExporter
         {
             foreach (var fileModel in files ?? [])
             {
-                var exception = WriteTsModelToFileSystem(fileModel);
+                var exception = writeFile(fileModel);
                 if (exception is not null)
                 {
                     return exception;
@@ -31,7 +31,22 @@ static class DotNetModelExporter
 
         return null;
 
-        static Exception? WriteTsModelToFileSystem(TsFileModel file)
+
+        static Exception? writeFiles(IEnumerable<TsFileModel> files)
+        {
+            foreach (var fileModel in files ?? [])
+            {
+                var exception = writeFile(fileModel);
+                if (exception is not null)
+                {
+                    return exception;
+                }
+            }
+
+            return null;
+        }
+        
+        static Exception? writeFile(TsFileModel file)
         {
             var fileContent = file.Content;
 
@@ -297,23 +312,13 @@ static class DotNetModelExporter
 
         AssemblyDefinition assemblyDefinition;
         {
-            var primarySearchDirectoryPath = Path.GetDirectoryName(config.AssemblyFilePath) ?? Directory.GetCurrentDirectory();
-
-            const string secondarySearchDirectoryPath = @"d:\boa\server\bin";
-
-            var resolver = new CustomAssemblyResolver(primarySearchDirectoryPath, secondarySearchDirectoryPath);
-
-            var readerParameters = new ReaderParameters
+            var result = CecilHelper.ReadAssemblyDefinition(config.AssemblyFilePath);
+            if (result.HasError)
             {
-                AssemblyResolver = resolver
-            };
-
-            assemblyDefinition = AssemblyDefinition.ReadAssembly(config.AssemblyFilePath, readerParameters);
-
-            if (assemblyDefinition is null)
-            {
-                return new Exception("AssemblyNotFound:" + config.AssemblyFilePath);
+                return result.Error;
             }
+            
+            assemblyDefinition = result.Value;
         }
 
         var typeDefinitions = new List<TypeDefinition>();
@@ -404,34 +409,7 @@ static class DotNetModelExporter
         }
     }
 
-    class CustomAssemblyResolver : BaseAssemblyResolver
-    {
-        readonly string[] _searchDirectories;
-
-        public CustomAssemblyResolver(params string[] searchDirectories)
-        {
-            _searchDirectories = searchDirectories;
-            foreach (var directory in _searchDirectories)
-            {
-                AddSearchDirectory(directory);
-            }
-        }
-
-        public override AssemblyDefinition Resolve(AssemblyNameReference name, ReaderParameters parameters)
-        {
-            foreach (var directory in _searchDirectories)
-            {
-                var filePath = Path.Combine(directory, name.Name + ".dll");
-                if (File.Exists(filePath))
-                {
-                    return AssemblyDefinition.ReadAssembly(filePath, parameters);
-                }
-            }
-
-            // Eğer burada bulamazsa, varsayılan çözümleyiciye dön
-            return base.Resolve(name, parameters);
-        }
-    }
+  
 
     record TsFileModel(string Path, string Content);
 }
