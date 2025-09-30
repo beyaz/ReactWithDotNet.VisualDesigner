@@ -276,7 +276,6 @@ static class DotNetModelExporter
 
     static Result<IEnumerable<FileModel>> CalculateFiles()
     {
-        
         //return
         //    from config in ReadConfig()
         //    from assemblyDefinition in CecilHelper.ReadAssemblyDefinition(config.AssemblyFilePath)
@@ -284,8 +283,7 @@ static class DotNetModelExporter
         //    let tsCode = LinesToString(GetTsCodes(typeDefinition))
         //    let filePath = Path.Combine(config.OutputDirectoryPath ?? string.Empty, $"{typeDefinition.Name}.ts")
         //    select new FileModel(filePath, tsCode);
-        
-        
+
         return
             from config in ReadConfig()
             from assemblyDefinition in CecilHelper.ReadAssemblyDefinition(config.AssemblyFilePath)
@@ -302,28 +300,27 @@ static class DotNetModelExporter
         static List<TypeDefinition> pickTypes(AssemblyDefinition assemblyDefinition, Config config)
         {
             var typeDefinitions = new List<TypeDefinition>();
+
+            foreach (var item in config.ListOfTypes ?? [])
             {
-                foreach (var item in config.ListOfTypes ?? [])
+                var typeNamePrefix = item;
+
+                if (typeNamePrefix.EndsWith("*", StringComparison.OrdinalIgnoreCase))
                 {
-                    var typeNamePrefix = item;
+                    typeNamePrefix = typeNamePrefix.Remove(typeNamePrefix.Length - 1);
 
-                    if (typeNamePrefix.EndsWith("*", StringComparison.OrdinalIgnoreCase))
+                    foreach (var typeDefinition in assemblyDefinition.MainModule.Types)
                     {
-                        typeNamePrefix = typeNamePrefix.Remove(typeNamePrefix.Length - 1);
-
-                        foreach (var typeDefinition in assemblyDefinition.MainModule.Types)
+                        if (typeDefinition.FullName.StartsWith(typeNamePrefix, StringComparison.OrdinalIgnoreCase))
                         {
-                            if (typeDefinition.FullName.StartsWith(typeNamePrefix, StringComparison.OrdinalIgnoreCase))
-                            {
-                                typeDefinitions.Add(typeDefinition);
-                            }
+                            typeDefinitions.Add(typeDefinition);
                         }
-
-                        continue;
                     }
 
-                    typeDefinitions.Add(assemblyDefinition.MainModule.GetType(typeNamePrefix));
+                    continue;
                 }
+
+                typeDefinitions.Add(assemblyDefinition.MainModule.GetType(typeNamePrefix));
             }
 
             return typeDefinitions;
