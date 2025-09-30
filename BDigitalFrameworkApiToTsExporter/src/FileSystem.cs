@@ -2,6 +2,8 @@
 
 namespace BDigitalFrameworkApiToTsExporter;
 
+record FileModel(string Path, string Content);
+
 static class FileSystem
 {
     public static (string? fileContent, Exception? exception) ReadAllText(string filePath)
@@ -38,4 +40,43 @@ static class FileSystem
 
         return null;
     }
+    
+    public static Result<Unit, Exception> Save(FileModel file)
+    {
+        try
+        {
+            var fileInfo = new FileInfo(file.Path);
+
+            if (fileInfo.Exists)
+            {
+                fileInfo.IsReadOnly = false;
+                TfsHelper.CheckoutFileFromTfs(file.Path);
+            }
+
+            File.WriteAllText(file.Path, file.Content, Encoding.UTF8);
+
+            return Unit.Value; 
+        }
+        catch (Exception exception)
+        {
+            return exception; 
+        }
+    }
+    
+    public static Result<Unit, Exception> Save(IEnumerable<FileModel> files)
+    {
+        foreach (var file in files)
+        {
+            var result = Save(file);
+            if (result.HasError)
+            {
+                return result;
+            }
+        }
+        
+        return Unit.Value; 
+    }
+
+   
+
 }

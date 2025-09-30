@@ -94,3 +94,9 @@ public sealed class Result<TSuccess> : Result<TSuccess, Exception>
     public static implicit operator Result<TSuccess>(Exception error)
         => new(error);
 }
+
+
+public readonly struct Unit
+{
+    public static readonly Unit Value = new();
+}
