@@ -75,6 +75,22 @@ public static class ResultExtensions
 
         return projector(result.Value!, middle.Value!);
     }
+    
+    public static Result<C> SelectMany<A, B, C>(this Result<A> result, Func<A, Result<B>> binder, Func<A, B, Result<C>> projector)
+    {
+        if (result.HasError)
+        {
+            return result.Error;
+        }
+
+        var middle = binder(result.Value!);
+        if (middle.HasError)
+        {
+            return middle.Error;
+        }
+
+        return projector(result.Value!, middle.Value!);
+    }
 
     // --- Result + IEnumerable flatten ---
     public static Result<IEnumerable<C>> SelectMany<A, B, C>(this Result<A> result, Func<A, IEnumerable<B>> binder, Func<A, B, C> projector)
