@@ -25,6 +25,7 @@ static class DotNetModelExporter
                 {
                     return result.Error;
                 }
+
                 var fileContentInDirectory = result.Value;
 
                 var exportIndex = fileContentInDirectory.IndexOf("export ", StringComparison.OrdinalIgnoreCase);
@@ -36,6 +37,7 @@ static class DotNetModelExporter
                     };
                 }
             }
+
             return file;
         }
     }
@@ -272,36 +274,20 @@ static class DotNetModelExporter
         }
     }
 
-    static Result<IEnumerable<FileModel>> CalculateFiles()
+    static Result<List<FileModel>> CalculateFiles()
     {
-        var configResult = ReadConfig();
-        if (configResult.HasError)
-        {
-            return configResult.Error;
-        }
-        var config = configResult.Value;
-
-        AssemblyDefinition assemblyDefinition;
-        {
-            var result = CecilHelper.ReadAssemblyDefinition(config.AssemblyFilePath);
-            if (result.HasError)
+        return 
+            from config in ReadConfig()
+            from assemblyDefinition in CecilHelper.ReadAssemblyDefinition(config.AssemblyFilePath)
+            let typeDefinitions = pickTypes(assemblyDefinition, config)
+            select typeDefinitions.ConvertAll(typeDefinition =>
             {
-                return result.Error;
-            }
+                var tsCode = LinesToString(GetTsCodes(typeDefinition));
 
-            assemblyDefinition = result.Value;
-        }
+                var filePath = Path.Combine(config.OutputDirectoryPath ?? string.Empty, $"{typeDefinition.Name}.ts");
 
-        var typeDefinitions = pickTypes(assemblyDefinition, config);
-
-        return typeDefinitions.ConvertAll(typeDefinition =>
-        {
-            var tsCode = LinesToString(GetTsCodes(typeDefinition));
-
-            var filePath = Path.Combine(config.OutputDirectoryPath ?? string.Empty, $"{typeDefinition.Name}.ts");
-
-            return new FileModel(filePath, tsCode);
-        });
+                return new FileModel(filePath, tsCode);
+            });
 
         static List<TypeDefinition> pickTypes(AssemblyDefinition assemblyDefinition, Config config)
         {
@@ -345,7 +331,6 @@ static class DotNetModelExporter
                 {
                     return config;
                 }
-                
             }
 
             return new IOException("ConfigFileNotRead");
@@ -391,5 +376,4 @@ static class DotNetModelExporter
             return CamelCasePropertyNamesContractResolver.GetResolvedPropertyName(propertyNameInCSharp);
         }
     }
-
 }
