@@ -42,14 +42,14 @@ public readonly struct Unit
 
 public static class ResultExtensions
 {
-    public static IEnumerable<T> AsEnumerable<T>(this Result<T> result)
+    public static Result<B> Select<A, B>(this Result<A> result, Func<A, B> selector)
     {
-        return result.HasError ? [] : [result.Value];
-    }
+        if (result.HasError)
+        {
+            return result.Error;
+        }
 
-    public static Result<B> Select<A, B>(this Result<A> r, Func<A, B> selector)
-    {
-        return r.HasError ? r.Error : selector(r.Value);
+        return selector(result.Value);
     }
 
     public static Result<B> SelectMany<A, B>(this Result<A> result, Func<A, Result<B>> binder)
