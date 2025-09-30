@@ -58,7 +58,7 @@ public static class ResultExtensions
         {
             return result.Error;
         }
-        
+
         return binder(result.Value);
     }
 
