@@ -11,7 +11,8 @@ static class DotNetModelExporter
 {
     public static Result<int, Exception> TryExport()
     {
-        return from files in CalculateFiles()
+        return 
+            from files in CalculateFiles()
             from count in writeFiles(files)
             select count;
 

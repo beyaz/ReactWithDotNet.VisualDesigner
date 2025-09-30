@@ -30,13 +30,14 @@ public class Result<TSuccess, TError>
     
     public readonly TError Error;
 
-    public bool Success { get; }
+    bool Success { get; }
     
     public bool HasError => !Success;
 
     protected Result(TSuccess value)
     {
         Success = true;
+        
         Value  = value;
         
         Error = default!;
@@ -45,6 +46,7 @@ public class Result<TSuccess, TError>
     protected Result(TError error)
     {
         Success = false;
+        
         Error    = error;
         
         Value = default!;
