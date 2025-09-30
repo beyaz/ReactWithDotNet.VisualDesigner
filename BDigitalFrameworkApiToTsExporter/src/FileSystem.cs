@@ -2,7 +2,12 @@
 
 namespace BDigitalFrameworkApiToTsExporter;
 
-record FileModel(string Path, string Content);
+public sealed record FileModel
+{
+    public required string Content { get; init; }
+    
+    public required string Path { get; init; }
+}
 
 static class FileSystem
 {
