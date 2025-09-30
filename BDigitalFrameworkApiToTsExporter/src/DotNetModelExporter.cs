@@ -16,7 +16,7 @@ static class DotNetModelExporter
             from count in writeFiles(files)
             select count;
 
-        static Result<int> writeFiles(IEnumerable<TsFileModel> files)
+        static Result<int> writeFiles(IEnumerable<FileModel> files)
         {
             var count = 0;
             foreach (var fileModel in files)
@@ -33,7 +33,7 @@ static class DotNetModelExporter
             return count;
         }
 
-        static Exception? writeFile(TsFileModel file)
+        static Exception? writeFile(FileModel file)
         {
             var fileContent = file.Content;
 
@@ -289,7 +289,7 @@ static class DotNetModelExporter
         }
     }
 
-    static Result<IReadOnlyList<TsFileModel>> CalculateFiles()
+    static Result<IReadOnlyList<FileModel>> CalculateFiles()
     {
         var config = ReadConfig();
         if (config is null)
@@ -316,7 +316,7 @@ static class DotNetModelExporter
 
             var filePath = Path.Combine(config.OutputDirectoryPath ?? string.Empty, $"{typeDefinition.Name}.ts");
 
-            return new TsFileModel(filePath, tsCode);
+            return new FileModel(filePath, tsCode);
         });
 
         static List<TypeDefinition> pickTypes(AssemblyDefinition assemblyDefinition, Config config)
@@ -403,5 +403,4 @@ static class DotNetModelExporter
         }
     }
 
-    record TsFileModel(string Path, string Content);
 }
