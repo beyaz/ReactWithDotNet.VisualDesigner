@@ -17,8 +17,6 @@ static class DotNetModelExporter
             from file in trySyncWithLocalFileSystem(fileModel)
             select FileSystem.Save(file);
 
-        
-
         static Result<FileModel> trySyncWithLocalFileSystem(FileModel file)
         {
             if (File.Exists(file.Path))
