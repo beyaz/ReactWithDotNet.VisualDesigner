@@ -279,7 +279,7 @@ static class DotNetModelExporter
         return
             from config in ReadConfig()
             from assemblyDefinition in CecilHelper.ReadAssemblyDefinition(config.AssemblyFilePath)
-            from x in pickTypes(assemblyDefinition, config).ConvertAll(typeDefinition =>
+            from file in pickTypes(assemblyDefinition, config).ConvertAll(typeDefinition =>
             {
                 var tsCode = LinesToString(GetTsCodes(typeDefinition));
 
@@ -287,7 +287,7 @@ static class DotNetModelExporter
 
                 return new FileModel(filePath, tsCode);
             })
-            select x;
+            select file;
 
         static List<TypeDefinition> pickTypes(AssemblyDefinition assemblyDefinition, Config config)
         {
