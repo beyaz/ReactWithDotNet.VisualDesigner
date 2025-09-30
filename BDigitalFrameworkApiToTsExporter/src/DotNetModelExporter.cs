@@ -9,12 +9,15 @@ namespace BDigitalFrameworkApiToTsExporter;
 
 static class DotNetModelExporter
 {
-    public static Exception? TryExport()
+    public static Result<int, Exception> TryExport()
     {
-        return Run(CalculateFiles, writeFiles);
+        return from files in CalculateFiles()
+            from count in writeFiles(files)
+            select count;
 
-        static Exception? writeFiles(IEnumerable<TsFileModel> files)
+        static Result<int> writeFiles(IEnumerable<TsFileModel> files)
         {
+            var count = 0;
             foreach (var fileModel in files)
             {
                 var exception = writeFile(fileModel);
@@ -22,9 +25,11 @@ static class DotNetModelExporter
                 {
                     return exception;
                 }
+
+                count++;
             }
 
-            return null;
+            return count;
         }
 
         static Exception? writeFile(TsFileModel file)
@@ -299,7 +304,7 @@ static class DotNetModelExporter
                 return result.Error;
             }
 
-            assemblyDefinition = result.Value!;
+            assemblyDefinition = result.Value;
         }
 
         var typeDefinitions = pickTypes(assemblyDefinition, config);

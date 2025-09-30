@@ -26,45 +26,49 @@ static class Extensions
 
 public class Result<TSuccess, TError>
 {
-    readonly TSuccess? _success;
+    public readonly TSuccess Value;
     
-    readonly TError? _error;
+    public readonly TError Error;
 
     public bool Success { get; }
     
     public bool HasError => !Success;
 
-    protected Result(TSuccess success)
+    protected Result(TSuccess value)
     {
         Success = true;
-        _success  = success;
+        Value  = value;
+        
+        Error = default!;
     }
 
     protected Result(TError error)
     {
         Success = false;
-        _error    = error;
+        Error    = error;
+        
+        Value = default!;
     }
 
 
     // --- LINQ desteği ---
     public Result<TResult, TError> Select<TResult>(Func<TSuccess, TResult> selector)
-        => Success ? selector(_success!)
-            : _error!;
+        => Success ? selector(Value!)
+            : Error!;
 
     public Result<TResult, TError> SelectMany<TResult>(Func<TSuccess, Result<TResult, TError>> binder)
-        => Success ? binder(_success!)
-            : _error!;
+        => Success ? binder(Value!)
+            : Error!;
 
     public Result<TResult, TError> SelectMany<TMiddle, TResult>(
         Func<TSuccess, Result<TMiddle, TError>> binder,
         Func<TSuccess, TMiddle, TResult> projector)
     {
-        if (!Success) return _error!;
-        var mid = binder(_success!);
+        if (!Success) return Error!;
+        var mid = binder(Value!);
         return mid.Success
-            ? projector(_success!, mid._success!)
-            : mid._error!;
+            ? projector(Value!, mid.Value!)
+            : mid.Error!;
     }
 
     // --- Implicit operators ---
@@ -77,7 +81,8 @@ public class Result<TSuccess, TError>
 
 public sealed class Result<TSuccess> : Result<TSuccess, Exception>
 {
-    public Result(TSuccess success) : base(success) { }
+    
+    public Result(TSuccess value) : base(value) { }
     
     public Result(Exception error) : base(error) { }
 

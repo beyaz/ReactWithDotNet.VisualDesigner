@@ -4,10 +4,10 @@ static class Program
 {
     static void Main()
     {
-        var exception = DotNetModelExporter.TryExport();
-        if (exception is not null)
+        var result = DotNetModelExporter.TryExport();
+        if (result.HasError)
         {
-            throw exception;
+            throw result.Error;
         }
     }
 }
