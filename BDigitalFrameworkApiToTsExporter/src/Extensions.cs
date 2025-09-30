@@ -6,6 +6,17 @@ namespace BDigitalFrameworkApiToTsExporter;
 
 static class Extensions
 {
+    public static Exception? Run<A>(Func<Result<IReadOnlyList<A>>> first, Func<IReadOnlyList<A>, Exception?> second)
+    {
+        var result = first();
+        if (result.HasError)
+        {
+            return result.Error;
+        }
+
+        return second(result.Value!);
+    }
+    
     public static Exception? Then<TIn>(this (TIn? value, Exception? exception) tuple, Func<TIn?, Exception?> nextFunc)
     {
         if (tuple.exception is not null)

@@ -11,30 +11,11 @@ static class DotNetModelExporter
 {
     public static Exception? TryExport()
     {
-        var result = CalculateFiles();
-        if (result.HasError)
-        {
-            return result.Error;
-        }
-
-        foreach (var files in result)
-        {
-            foreach (var fileModel in files ?? [])
-            {
-                var exception = writeFile(fileModel);
-                if (exception is not null)
-                {
-                    return exception;
-                }
-            }
-        }
-
-        return null;
-
+        return Run(CalculateFiles, writeFiles);
 
         static Exception? writeFiles(IEnumerable<TsFileModel> files)
         {
-            foreach (var fileModel in files ?? [])
+            foreach (var fileModel in files)
             {
                 var exception = writeFile(fileModel);
                 if (exception is not null)
@@ -45,7 +26,7 @@ static class DotNetModelExporter
 
             return null;
         }
-        
+
         static Exception? writeFile(TsFileModel file)
         {
             var fileContent = file.Content;
@@ -317,7 +298,7 @@ static class DotNetModelExporter
             {
                 return result.Error;
             }
-            
+
             assemblyDefinition = result.Value;
         }
 
@@ -408,8 +389,6 @@ static class DotNetModelExporter
             return CamelCasePropertyNamesContractResolver.GetResolvedPropertyName(propertyNameInCSharp);
         }
     }
-
-  
 
     record TsFileModel(string Path, string Content);
 }
