@@ -48,22 +48,22 @@ public static class ResultExtensions
     }
 
     // --- Normal Select (map) ---
-    public static Result<TResult> Select<T, TResult>(this Result<T> r, Func<T, TResult> selector)
+    public static Result<B> Select<A, B>(this Result<A> r, Func<A, B> selector)
     {
         return r.HasError ? r.Error : selector(r.Value!);
     }
 
     // --- Normal SelectMany (bind) ---
-    public static Result<TResult> SelectMany<T, TResult>(this Result<T> r, Func<T, Result<TResult>> binder)
+    public static Result<B> SelectMany<A, B>(this Result<A> r, Func<A, Result<B>> binder)
     {
         return r.HasError ? r.Error : binder(r.Value!);
     }
 
     // --- SelectMany + projector (LINQ query syntax için) ---
-    public static Result<TResult> SelectMany<T, TMiddle, TResult>(
-        this Result<T> result,
-        Func<T, Result<TMiddle>> binder,
-        Func<T, TMiddle, TResult> projector)
+    public static Result<C> SelectMany<A, B, C>(
+        this Result<A> result,
+        Func<A, Result<B>> binder,
+        Func<A, B, C> projector)
     {
         if (result.HasError)
         {
@@ -80,10 +80,10 @@ public static class ResultExtensions
     }
 
     // --- Result + IEnumerable flatten ---
-    public static Result<IEnumerable<TResult>> SelectMany<T, TMiddle, TResult>(
-        this Result<T> result,
-        Func<T, IEnumerable<TMiddle>> binder,
-        Func<T, TMiddle, TResult> projector)
+    public static Result<IEnumerable<C>> SelectMany<A, B, C>(
+        this Result<A> result,
+        Func<A, IEnumerable<B>> binder,
+        Func<A, B, C> projector)
     {
         if (result.HasError)
         {
@@ -105,9 +105,9 @@ public static class ResultExtensions
     }
 
     // --- Nested Result<IEnumerable> flatten ---
-    public static Result<IEnumerable<TResult>> SelectMany<T, TResult>(
-        this Result<T> result,
-        Func<T, Result<IEnumerable<TResult>>> binder)
+    public static Result<IEnumerable<B>> SelectMany<A, B>(
+        this Result<A> result,
+        Func<A, Result<IEnumerable<B>>> binder)
     {
         if (result.HasError)
         {
