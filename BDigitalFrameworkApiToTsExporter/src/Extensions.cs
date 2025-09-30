@@ -42,12 +42,6 @@ public sealed class Unit
 
 public static class ResultExtensions
 {
-    
-    
-   
-    
-    
-    
     public static Result<B> Select<A, B>(this Result<A> result, Func<A, B> selector)
     {
         if (result.HasError)
@@ -149,7 +143,7 @@ public static class ResultExtensions
             return ex;
         }
     }
-    
+
     public static Result<Unit> SelectMany<A, B>
     (
         this Result<A> result,
@@ -163,11 +157,11 @@ public static class ResultExtensions
         }
 
         var a = result.Value;
-        
+
         var enumerable = binder(a);
 
-        Result<Unit> resultC =  new Result<Unit>(Unit.Value);
-        
+        Result<Unit> resultC = new(Unit.Value);
+
         foreach (var item in enumerable)
         {
             if (item.HasError)
