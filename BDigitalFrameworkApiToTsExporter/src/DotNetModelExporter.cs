@@ -285,7 +285,7 @@ static class DotNetModelExporter
 
     static Result<IReadOnlyList<TsFileModel>> CalculateFiles()
     {
-        var config = ReadConfig();
+        Config? config = ReadConfig();
         if (config is null)
         {
             return new Exception("Config is null");
@@ -302,7 +302,7 @@ static class DotNetModelExporter
             assemblyDefinition = result.Value;
         }
 
-        var typeDefinitions = new List<TypeDefinition>();
+        List<TypeDefinition> typeDefinitions = new List<TypeDefinition>();
         {
             foreach (var item in config.ListOfTypes ?? [])
             {
