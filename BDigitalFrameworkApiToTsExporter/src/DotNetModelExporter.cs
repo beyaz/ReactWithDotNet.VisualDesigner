@@ -34,7 +34,7 @@ static class DotNetModelExporter
         static Exception? WriteTsModelToFileSystem(TsFileModel file)
         {
             var fileContent = file.Content;
-            
+
             if (File.Exists(file.Path))
             {
                 return FileSystem.ReadAllText(file.Path).Then(fileContentInDirectory =>
