@@ -60,10 +60,7 @@ public static class ResultExtensions
     }
 
     // --- SelectMany + projector (LINQ query syntax için) ---
-    public static Result<C> SelectMany<A, B, C>(
-        this Result<A> result,
-        Func<A, Result<B>> binder,
-        Func<A, B, C> projector)
+    public static Result<C> SelectMany<A, B, C>(this Result<A> result, Func<A, Result<B>> binder, Func<A, B, C> projector)
     {
         if (result.HasError)
         {
@@ -80,10 +77,7 @@ public static class ResultExtensions
     }
 
     // --- Result + IEnumerable flatten ---
-    public static Result<IEnumerable<C>> SelectMany<A, B, C>(
-        this Result<A> result,
-        Func<A, IEnumerable<B>> binder,
-        Func<A, B, C> projector)
+    public static Result<IEnumerable<C>> SelectMany<A, B, C>(this Result<A> result, Func<A, IEnumerable<B>> binder, Func<A, B, C> projector)
     {
         if (result.HasError)
         {
@@ -105,9 +99,7 @@ public static class ResultExtensions
     }
 
     // --- Nested Result<IEnumerable> flatten ---
-    public static Result<IEnumerable<B>> SelectMany<A, B>(
-        this Result<A> result,
-        Func<A, Result<IEnumerable<B>>> binder)
+    public static Result<IEnumerable<B>> SelectMany<A, B>(this Result<A> result, Func<A, Result<IEnumerable<B>>> binder)
     {
         if (result.HasError)
         {
