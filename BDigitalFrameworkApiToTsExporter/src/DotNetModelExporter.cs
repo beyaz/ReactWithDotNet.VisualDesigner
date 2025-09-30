@@ -302,30 +302,7 @@ static class DotNetModelExporter
             assemblyDefinition = result.Value;
         }
 
-        List<TypeDefinition> typeDefinitions = new List<TypeDefinition>();
-        {
-            foreach (var item in config.ListOfTypes ?? [])
-            {
-                var typeNamePrefix = item;
-
-                if (typeNamePrefix.EndsWith("*", StringComparison.OrdinalIgnoreCase))
-                {
-                    typeNamePrefix = typeNamePrefix.Remove(typeNamePrefix.Length - 1);
-
-                    foreach (var typeDefinition in assemblyDefinition.MainModule.Types)
-                    {
-                        if (typeDefinition.FullName.StartsWith(typeNamePrefix, StringComparison.OrdinalIgnoreCase))
-                        {
-                            typeDefinitions.Add(typeDefinition);
-                        }
-                    }
-
-                    continue;
-                }
-
-                typeDefinitions.Add(assemblyDefinition.MainModule.GetType(typeNamePrefix));
-            }
-        }
+        var typeDefinitions = pickTypes(assemblyDefinition, config);
 
         return typeDefinitions.ConvertAll(typeDefinition =>
         {
@@ -335,6 +312,36 @@ static class DotNetModelExporter
 
             return new TsFileModel(filePath, tsCode);
         });
+
+        static List<TypeDefinition> pickTypes(AssemblyDefinition assemblyDefinition, Config config)
+        {
+            List<TypeDefinition> typeDefinitions = new List<TypeDefinition>();
+            {
+                foreach (var item in config.ListOfTypes ?? [])
+                {
+                    var typeNamePrefix = item;
+
+                    if (typeNamePrefix.EndsWith("*", StringComparison.OrdinalIgnoreCase))
+                    {
+                        typeNamePrefix = typeNamePrefix.Remove(typeNamePrefix.Length - 1);
+
+                        foreach (var typeDefinition in assemblyDefinition.MainModule.Types)
+                        {
+                            if (typeDefinition.FullName.StartsWith(typeNamePrefix, StringComparison.OrdinalIgnoreCase))
+                            {
+                                typeDefinitions.Add(typeDefinition);
+                            }
+                        }
+
+                        continue;
+                    }
+
+                    typeDefinitions.Add(assemblyDefinition.MainModule.GetType(typeNamePrefix));
+                }
+            }
+
+            return typeDefinitions;
+        }
 
         static Config? ReadConfig()
         {
