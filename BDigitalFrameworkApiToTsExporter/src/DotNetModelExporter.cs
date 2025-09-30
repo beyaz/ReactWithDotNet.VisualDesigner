@@ -9,7 +9,7 @@ namespace BDigitalFrameworkApiToTsExporter;
 
 static class DotNetModelExporter
 {
-    public static Result<int, Exception> TryExport()
+    public static Result<Unit, Exception> TryExport()
     {
         return 
             from files in CalculateFiles()
