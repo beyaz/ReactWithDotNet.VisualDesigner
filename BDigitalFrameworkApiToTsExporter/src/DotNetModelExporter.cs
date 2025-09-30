@@ -293,7 +293,11 @@ static class DotNetModelExporter
 
                 var filePath = Path.Combine(config.OutputDirectoryPath ?? string.Empty, $"{typeDefinition.Name}.ts");
 
-                return new FileModel(filePath, tsCode);
+                return new FileModel
+                {
+                    Path = filePath,
+                    Content = tsCode
+                };
             })
             select file;
 
