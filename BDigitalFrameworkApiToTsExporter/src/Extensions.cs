@@ -73,13 +73,7 @@ public static class ResultExtensions
             return result.Error;
         }
 
-        var inner = binder(result.Value);
-        if (inner.HasError)
-        {
-            return inner.Error;
-        }
-
-        return new(inner.Value);
+        return binder(result.Value);
     }
 
     public static Result<C> SelectMany<A, B, C>
@@ -100,7 +94,7 @@ public static class ResultExtensions
             return middle.Error;
         }
 
-        return projector(result.Value!, middle.Value);
+        return projector(result.Value, middle.Value);
     }
 
     public static Result<C> SelectMany<A, B, C>
@@ -121,7 +115,7 @@ public static class ResultExtensions
             return middle.Error;
         }
 
-        return projector(result.Value!, middle.Value);
+        return projector(result.Value, middle.Value);
     }
 
     public static Result<IEnumerable<C>> SelectMany<A, B, C>
