@@ -13,47 +13,33 @@ static class DotNetModelExporter
     {
         return 
             from files in CalculateFiles()
-            from count in writeFiles(files)
-            select count;
+            from fileModel in files
+            from file in trySyncWithLocalFileSystem(fileModel)
+            select FileSystem.Save(file);
 
-        static Result<int> writeFiles(IEnumerable<FileModel> files)
+        
+
+        static Result<FileModel> trySyncWithLocalFileSystem(FileModel file)
         {
-            var count = 0;
-            foreach (var fileModel in files)
-            {
-                var exception = writeFile(fileModel);
-                if (exception is not null)
-                {
-                    return exception;
-                }
-
-                count++;
-            }
-
-            return count;
-        }
-
-        static Exception? writeFile(FileModel file)
-        {
-            var fileContent = file.Content;
-
             if (File.Exists(file.Path))
             {
-                return FileSystem.ReadAllText(file.Path).Then(fileContentInDirectory =>
+                var result = FileSystem.ReadAllText(file.Path);
+                if (result.HasError)
                 {
-                    fileContentInDirectory ??= string.Empty;
+                    return result.Error;
+                }
+                var fileContentInDirectory = result.Value;
 
-                    var exportIndex = fileContentInDirectory.IndexOf("export ", StringComparison.OrdinalIgnoreCase);
-                    if (exportIndex > 0)
+                var exportIndex = fileContentInDirectory.IndexOf("export ", StringComparison.OrdinalIgnoreCase);
+                if (exportIndex > 0)
+                {
+                    return file with
                     {
-                        fileContent = fileContentInDirectory[..exportIndex] + fileContent;
-                    }
-
-                    return FileSystem.WriteAllText(file.Path, fileContent);
-                });
+                        Content = fileContentInDirectory[..exportIndex] + file.Content
+                    };
+                }
             }
-
-            return FileSystem.WriteAllText(file.Path, fileContent);
+            return file;
         }
     }
 

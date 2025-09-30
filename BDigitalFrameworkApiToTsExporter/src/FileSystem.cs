@@ -6,15 +6,15 @@ record FileModel(string Path, string Content);
 
 static class FileSystem
 {
-    public static (string? fileContent, Exception? exception) ReadAllText(string filePath)
+    public static Result<string> ReadAllText(string filePath)
     {
         try
         {
-            return (File.ReadAllText(filePath), null);
+            return File.ReadAllText(filePath);
         }
         catch (Exception exception)
         {
-            return (null, exception);
+            return exception;
         }
     }
 
