@@ -1,7 +1,5 @@
 ﻿global using static BDigitalFrameworkApiToTsExporter.Extensions;
 
-using System.Collections;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace BDigitalFrameworkApiToTsExporter;
 
