@@ -3,9 +3,10 @@
 public sealed class Result<TValue>
 {
     public readonly Exception Error;
+    
     public readonly TValue Value;
 
-    Result(TValue value)
+    internal Result(TValue value)
     {
         Success = true;
         Value   = value;
@@ -32,57 +33,6 @@ public sealed class Result<TValue>
     {
         return new(error);
     }
-
-    public Result<T> SelectMany<T>(Func<TValue, Result<T>> binder)
-    {
-        if (HasError)
-        {
-            return Error;
-        }
-
-        return binder(Value!);
-    }
-
-    public Result<TResult> SelectMany<TMiddle, TResult>(
-        Func<TValue, Result<TMiddle>> binder,
-        Func<TValue, TMiddle, TResult> projector)
-    {
-        if (HasError)
-        {
-            return Error;
-        }
-
-        var middle = binder(Value!);
-        if (middle.HasError)
-        {
-            return middle.Error;
-        }
-
-        return projector(Value!, middle.Value!);
-    }
-
-    public Result<IEnumerable<TResult>> SelectMany<TMiddle, TResult>(
-        Func<TValue, IEnumerable<TMiddle>> binder,
-        Func<TValue, TMiddle, TResult> projector)
-    {
-        if (HasError)
-        {
-            return Error;
-        }
-
-        try
-        {
-            var enumerable = binder(Value!);
-
-            var results = enumerable.Select(mid => projector(Value!, mid));
-
-            return new(results);
-        }
-        catch (Exception exception)
-        {
-            return exception;
-        }
-    }
 }
 
 public readonly struct Unit
@@ -90,15 +40,84 @@ public readonly struct Unit
     public static readonly Unit Value = new();
 }
 
-static class ResultExtensions
+public static class ResultExtensions
 {
-    public static Result<T> Select<TValue, T>(Result<TValue> result, Func<TValue, T> selector)
+    // --- Normal Select (map) ---
+    public static Result<TResult> Select<T, TResult>(this Result<T> r, Func<T, TResult> selector)
+    {
+        return r.HasError ? r.Error! : selector(r.Value!);
+    }
+
+    // --- Normal SelectMany (bind) ---
+    public static Result<TResult> SelectMany<T, TResult>(this Result<T> r, Func<T, Result<TResult>> binder)
+    {
+        return r.HasError ? r.Error! : binder(r.Value!);
+    }
+
+    // --- SelectMany + projector (LINQ query syntax için) ---
+    public static Result<TResult> SelectMany<T, TMiddle, TResult>(
+        this Result<T> result,
+        Func<T, Result<TMiddle>> binder,
+        Func<T, TMiddle, TResult> projector)
     {
         if (result.HasError)
         {
-            return result.Error;
+            return result.Error!;
         }
-
-        return selector(result.Value!);
+        
+        var middle = binder(result.Value!);
+        if (middle.HasError)
+        {
+            return middle.Error;
+        }
+        
+        return projector(result.Value!, middle.Value!);
     }
+
+    // --- Result + IEnumerable flatten ---
+    public static Result<IEnumerable<TResult>> SelectMany<T, TMiddle, TResult>(
+        this Result<T> result,
+        Func<T, IEnumerable<TMiddle>> binder,
+        Func<T, TMiddle, TResult> projector)
+    {
+        if (result.HasError)
+        {
+            return result.Error!;
+        }
+        
+        try
+        {
+            var middles = binder(result.Value!);
+            
+            var results = middles.Select(middle => projector(result.Value!, middle));
+
+            return new(results);
+        }
+        catch (Exception ex)
+        {
+            return ex;
+        }
+    }
+
+    // --- Nested Result<IEnumerable> flatten ---
+    public static Result<IEnumerable<TResult>> SelectMany<T, TResult>(
+        this Result<T> result,
+        Func<T, Result<IEnumerable<TResult>>> binder)
+    {
+        if (result.HasError)
+        {
+            return result.Error!;
+        }
+        
+        var inner = binder(result.Value!);
+        if (inner.HasError)
+        {
+            return inner.Error;
+        }
+        
+        return new(inner.Value);
+    }
+
+    public static IEnumerable<T> AsEnumerable<T>(this Result<T> result)
+        => result.HasError ? [] : [result.Value!];
 }
