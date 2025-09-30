@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 
-namespace b_digital_framework_type_exporter;
+namespace BDigitalFrameworkApiToTsExporter;
 
 sealed class CheckoutFileFromTfsResponse
 {

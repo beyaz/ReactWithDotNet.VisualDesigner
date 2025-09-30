@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace b_digital_framework_type_exporter;
+namespace BDigitalFrameworkApiToTsExporter;
 
 static class FileSystem
 {

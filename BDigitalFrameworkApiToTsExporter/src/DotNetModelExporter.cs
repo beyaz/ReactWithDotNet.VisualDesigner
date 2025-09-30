@@ -5,7 +5,7 @@ using Mono.Cecil;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
-namespace b_digital_framework_type_exporter;
+namespace BDigitalFrameworkApiToTsExporter;
 
 static class DotNetModelExporter
 {
