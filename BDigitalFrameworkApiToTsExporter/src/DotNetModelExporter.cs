@@ -273,7 +273,7 @@ static class DotNetModelExporter
         }
     }
 
-    static Result<IReadOnlyList<FileModel>> CalculateFiles()
+    static Result<IEnumerable<FileModel>> CalculateFiles()
     {
         var config = ReadConfig();
         if (config is null)
