@@ -3,7 +3,7 @@
 public sealed class Result<TValue>
 {
     public readonly Exception Error;
-    
+
     public readonly TValue Value;
 
     internal Result(TValue value)
@@ -42,16 +42,21 @@ public readonly struct Unit
 
 public static class ResultExtensions
 {
+    public static IEnumerable<T> AsEnumerable<T>(this Result<T> result)
+    {
+        return result.HasError ? [] : [result.Value!];
+    }
+
     // --- Normal Select (map) ---
     public static Result<TResult> Select<T, TResult>(this Result<T> r, Func<T, TResult> selector)
     {
-        return r.HasError ? r.Error! : selector(r.Value!);
+        return r.HasError ? r.Error : selector(r.Value!);
     }
 
     // --- Normal SelectMany (bind) ---
     public static Result<TResult> SelectMany<T, TResult>(this Result<T> r, Func<T, Result<TResult>> binder)
     {
-        return r.HasError ? r.Error! : binder(r.Value!);
+        return r.HasError ? r.Error : binder(r.Value!);
     }
 
     // --- SelectMany + projector (LINQ query syntax için) ---
@@ -62,15 +67,15 @@ public static class ResultExtensions
     {
         if (result.HasError)
         {
-            return result.Error!;
+            return result.Error;
         }
-        
+
         var middle = binder(result.Value!);
         if (middle.HasError)
         {
             return middle.Error;
         }
-        
+
         return projector(result.Value!, middle.Value!);
     }
 
@@ -82,13 +87,13 @@ public static class ResultExtensions
     {
         if (result.HasError)
         {
-            return result.Error!;
+            return result.Error;
         }
-        
+
         try
         {
             var middles = binder(result.Value!);
-            
+
             var results = middles.Select(middle => projector(result.Value!, middle));
 
             return new(results);
@@ -106,18 +111,15 @@ public static class ResultExtensions
     {
         if (result.HasError)
         {
-            return result.Error!;
+            return result.Error;
         }
-        
+
         var inner = binder(result.Value!);
         if (inner.HasError)
         {
             return inner.Error;
         }
-        
+
         return new(inner.Value);
     }
-
-    public static IEnumerable<T> AsEnumerable<T>(this Result<T> result)
-        => result.HasError ? [] : [result.Value!];
 }
