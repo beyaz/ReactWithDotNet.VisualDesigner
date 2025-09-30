@@ -13,3 +13,9 @@
 /VsOpenFileAtLine/obj
 /ReactWithDotNet.VisualDesigner.sln.DotSettings.user
 /TsxFormatter/node_modules
+
+
+/BDigitalFrameworkApiToTsExporter/.vs/
+/BDigitalFrameworkApiToTsExporter/src/bin
+/BDigitalFrameworkApiToTsExporter/src/obj
+/BDigitalFrameworkApiToTsExporter/bin
