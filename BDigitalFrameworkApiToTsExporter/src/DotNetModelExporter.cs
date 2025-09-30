@@ -11,12 +11,11 @@ static class DotNetModelExporter
 {
     public static Result<Unit> TryExport()
     {
-        return null;
-        //return 
-        //    from files in CalculateFiles()
-        //    from fileModel in files
-        //    from file in trySyncWithLocalFileSystem(fileModel)
-        //    select FileSystem.Save(file);
+        return
+            from files in CalculateFiles()
+            from fileModel in files
+            from file in trySyncWithLocalFileSystem(fileModel)
+            select FileSystem.Save(file);
 
         static Result<FileModel> trySyncWithLocalFileSystem(FileModel file)
         {
