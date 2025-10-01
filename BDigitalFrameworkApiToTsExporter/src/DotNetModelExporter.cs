@@ -67,6 +67,15 @@ static class DotNetModelExporter
 
         if (typeDefinition.IsEnum)
         {
+            var enumFields = from fieldDefinition in typeDefinition.Fields.Where(f => f.Name != "value__")
+                select new TsFieldDefinition
+                {
+                    Name          = fieldDefinition.Name,
+                    ConstantValue = fieldDefinition.Constant + string.Empty,
+                    IsNullable    = false,
+                    TypeName      = string.Empty
+                };
+            
             var fieldDeclarations = new List<string>();
             foreach (var field in typeDefinition.Fields.Where(f => f.Name != "value__"))
             {
@@ -89,6 +98,16 @@ static class DotNetModelExporter
         }
         else
         {
+            var properties =
+                from propertyDefinition in typeDefinition.Properties.Where(p => !IsImplicitDefinition(p))
+                    select new TsFieldDefinition
+                    {
+                        Name       = TypescriptNaming.GetResolvedPropertyName(propertyDefinition.Name),
+                        IsNullable = CecilHelper.isNullableProperty(propertyDefinition),
+                        TypeName   = GetTSTypeName(propertyDefinition.PropertyType),
+                        ConstantValue = string.Empty
+                    };
+
             foreach (var propertyDefinition in typeDefinition.Properties.Where(p => !IsImplicitDefinition(p)))
             {
                 var typeName = GetTSTypeName(propertyDefinition.PropertyType);
