@@ -11,11 +11,6 @@ sealed record TsFieldDefinition
     public required string TypeName { get; init; }
     
     public required string ConstantValue { get; init; }
-
-    public override string ToString()
-    {
-        return TsOutput.GetTsCode(this);
-    }
     
     // @formatter:on
 }

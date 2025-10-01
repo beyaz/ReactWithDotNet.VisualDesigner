@@ -15,7 +15,7 @@ static class ConfigReader
 {
     public static Result<Config> ReadConfig()
     {
-        var configFilePath = Path.Combine(Path.GetDirectoryName(typeof(Program).Assembly.Location) ?? string.Empty, "Config.json");
+        var configFilePath = Path.Combine(Path.GetDirectoryName(typeof(ConfigReader).Assembly.Location) ?? string.Empty, "Config.json");
         if (File.Exists(configFilePath))
         {
             var fileContent = File.ReadAllText(configFilePath);
