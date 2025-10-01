@@ -7,6 +7,11 @@ namespace BDigitalFrameworkApiToTsExporter;
 
 static class CecilHelper
 {
+    public static bool IsNullableType(TypeReference typeReference)
+    {
+        return typeReference.Name == "Nullable`1" && typeReference.IsGenericInstance;
+    }
+    
     public static bool isNullableProperty(PropertyDefinition propertyDefinition)
         {
             // is value type

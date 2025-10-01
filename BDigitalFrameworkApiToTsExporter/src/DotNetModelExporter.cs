@@ -127,7 +127,7 @@ static class DotNetModelExporter
 
         static string GetTSTypeName(TypeReference typeReference)
         {
-            if (IsNullableType(typeReference))
+            if (CecilHelper.IsNullableType(typeReference))
             {
                 return GetTSTypeName(((GenericInstanceType)typeReference).GenericArguments[0]);
             }
@@ -190,10 +190,7 @@ static class DotNetModelExporter
             return typeReference.Name;
         }
 
-        static bool IsNullableType(TypeReference typeReference)
-        {
-            return typeReference.Name == "Nullable`1" && typeReference.IsGenericInstance;
-        }
+        
     }
 
     static Result<IEnumerable<FileModel>> CalculateFiles()
