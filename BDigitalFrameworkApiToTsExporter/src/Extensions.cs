@@ -42,6 +42,20 @@ public sealed class Unit
 
 public static class ResultExtensions
 {
+    public static Result<TResult> Select<TSource, TResult>
+    (
+        this Result<TSource> result,
+        Func<TSource, TResult> selector
+    )
+    {
+        if (result.HasError)
+        {
+            return result.Error;
+        }
+
+        return selector(result.Value);
+    }
+
     public static Result<C> SelectMany<A, B, C>
     (
         this Result<A> result,
