@@ -42,6 +42,42 @@ static class DotNetModelExporter
 
     static IReadOnlyList<string> GetTsCodes(TypeDefinition typeDefinition)
     {
+        IEnumerable<TsFieldDefinition> fields;
+        if (typeDefinition.IsEnum)
+        {
+            fields = from fieldDefinition in typeDefinition.Fields.Where(f => f.Name != "value__")
+                select new TsFieldDefinition
+                {
+                    Name          = fieldDefinition.Name,
+                    ConstantValue = fieldDefinition.Constant + string.Empty,
+                    IsNullable    = false,
+                    TypeName      = string.Empty
+                };
+        }
+        else
+        {
+            fields =
+                from propertyDefinition in typeDefinition.Properties.Where(p => !IsImplicitDefinition(p))
+                select new TsFieldDefinition
+                {
+                    Name          = TypescriptNaming.GetResolvedPropertyName(propertyDefinition.Name),
+                    IsNullable    = CecilHelper.isNullableProperty(propertyDefinition),
+                    TypeName      = GetTSTypeName(propertyDefinition.PropertyType),
+                    ConstantValue = string.Empty
+                };
+        }
+
+        var a = new TsTypeDefinition
+        {
+            Name = typeDefinition.Name,
+            
+            IsEnum = typeDefinition.IsEnum,
+            
+            BaseTypeName = typeDefinition.BaseType.FullName == typeof(object).FullName ? string.Empty : typeDefinition.BaseType.Name,
+            
+            Fields = fields.ToList()
+        };
+        
         List<string> lines = [];
 
         if (typeDefinition.IsEnum)
