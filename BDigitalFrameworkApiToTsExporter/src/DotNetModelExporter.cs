@@ -67,7 +67,7 @@ static class DotNetModelExporter
                 };
         }
 
-        var a = new TsTypeDefinition
+        var tsTypeDefinition = new TsTypeDefinition
         {
             Name = typeDefinition.Name,
             
@@ -77,91 +77,9 @@ static class DotNetModelExporter
             
             Fields = fields.ToList()
         };
+
+        return TsOutput.GetTsCode(tsTypeDefinition);
         
-        List<string> lines = [];
-
-        if (typeDefinition.IsEnum)
-        {
-            lines.Add($"export enum {typeDefinition.Name}");
-        }
-        else
-        {
-            var extends = " extends ";
-            if (typeDefinition.BaseType.FullName == typeof(object).FullName)
-            {
-                extends = "";
-            }
-            else
-            {
-                extends += typeDefinition.BaseType.Name;
-            }
-
-            lines.Add($"export interface {typeDefinition.Name}" + extends);
-        }
-
-        lines.Add("{");
-
-        if (typeDefinition.IsEnum)
-        {
-            var enumFields = from fieldDefinition in typeDefinition.Fields.Where(f => f.Name != "value__")
-                select new TsFieldDefinition
-                {
-                    Name          = fieldDefinition.Name,
-                    ConstantValue = fieldDefinition.Constant + string.Empty,
-                    IsNullable    = false,
-                    TypeName      = string.Empty
-                };
-            
-            var fieldDeclarations = new List<string>();
-            foreach (var field in typeDefinition.Fields.Where(f => f.Name != "value__"))
-            {
-                fieldDeclarations.Add($"{field.Name} = {field.Constant}");
-            }
-
-            for (var i = 0; i < fieldDeclarations.Count; i++)
-            {
-                var declaration = fieldDeclarations[i];
-
-                if (i < fieldDeclarations.Count - 1)
-                {
-                    lines.Add(declaration + ",");
-                }
-                else
-                {
-                    lines.Add(declaration);
-                }
-            }
-        }
-        else
-        {
-            var properties =
-                from propertyDefinition in typeDefinition.Properties.Where(p => !IsImplicitDefinition(p))
-                    select new TsFieldDefinition
-                    {
-                        Name       = TypescriptNaming.GetResolvedPropertyName(propertyDefinition.Name),
-                        IsNullable = CecilHelper.isNullableProperty(propertyDefinition),
-                        TypeName   = GetTSTypeName(propertyDefinition.PropertyType),
-                        ConstantValue = string.Empty
-                    };
-
-            foreach (var propertyDefinition in typeDefinition.Properties.Where(p => !IsImplicitDefinition(p)))
-            {
-                var typeName = GetTSTypeName(propertyDefinition.PropertyType);
-
-                var name = TypescriptNaming.GetResolvedPropertyName(propertyDefinition.Name);
-
-                if (CecilHelper.isNullableProperty(propertyDefinition))
-                {
-                    name += "?";
-                }
-
-                lines.Add($"{name} : {typeName};");
-            }
-        }
-
-        lines.Add("}");
-
-        return lines;
 
         
 
