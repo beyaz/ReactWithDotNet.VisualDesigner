@@ -2,7 +2,7 @@
 
 namespace BDigitalFrameworkApiToTsExporter;
 
-sealed class Config
+public sealed class Config
 {
     public string? AssemblyFilePath { get; set; }
     

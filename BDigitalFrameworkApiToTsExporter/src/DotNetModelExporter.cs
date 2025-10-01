@@ -1,7 +1,25 @@
-﻿namespace BDigitalFrameworkApiToTsExporter;
+﻿using Mono.Cecil;
+
+namespace BDigitalFrameworkApiToTsExporter;
 
 static class DotNetModelExporter
 {
+    static Result<IEnumerable<FileModel>> Test(Func<Result<Config>> readConfig, 
+        Func<string?,Result<Mono.Cecil.AssemblyDefinition>> readAssembly,
+        Func<AssemblyDefinition, string[]?, List<TypeDefinition>> readTypes)
+    {
+        return
+            from config in readConfig()
+            from assemblyDefinition in readAssembly(config.AssemblyFilePath)
+            from typeDefinition in readTypes(assemblyDefinition, config.ListOfTypes)
+            select new FileModel
+            {
+                Path    = Path.Combine(config.OutputDirectoryPath ?? string.Empty, $"{typeDefinition.Name}.ts"),
+                Content = TsOutput.LinesToString(TsOutput.GetTsCode(TsModelCreator.CreatFrom(typeDefinition)))
+            };
+    }
+    
+    
     public static Result<Unit> TryExport()
     {
         var calculatedFiles =
