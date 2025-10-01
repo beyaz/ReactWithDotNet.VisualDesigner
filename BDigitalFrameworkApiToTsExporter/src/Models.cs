@@ -12,7 +12,7 @@ sealed record TsFieldDefinition
 
     public override string ToString()
     {
-        return $"{Name}{(IsNullable ? '?' : string.Empty)} : {TypeName};";
+        return TsOutput.GetTsCode(this);
     }
 }
 
@@ -25,6 +25,4 @@ sealed record TsTypeDefinition
     public required string BaseTypeName { get; init; }
     
     public required IReadOnlyList<TsFieldDefinition> Fields { get; init; }
-
- 
 }
