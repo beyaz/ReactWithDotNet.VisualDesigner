@@ -1,6 +1,4 @@
-﻿using System.Text;
-using Mono.Cecil;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 
 namespace BDigitalFrameworkApiToTsExporter;
 
@@ -48,7 +46,7 @@ static class DotNetModelExporter
             select new FileModel
             {
                 Path    = Path.Combine(config.OutputDirectoryPath ?? string.Empty, $"{typeDefinition.Name}.ts"),
-                Content = LinesToString(GetTsCodes(typeDefinition))
+                Content = TsOutput.LinesToString(TsOutput.GetTsCode(TsModelCreator.CreatFrom(typeDefinition)))
             };
 
         static Result<Config> ReadConfig()
@@ -67,40 +65,5 @@ static class DotNetModelExporter
 
             return new IOException("ConfigFileNotRead");
         }
-    }
-
-    static IReadOnlyList<string> GetTsCodes(TypeDefinition typeDefinition)
-    {
-        return TsOutput.GetTsCode(TsModelCreator.CreatFrom(typeDefinition));
-    }
-
-    static string LinesToString(IReadOnlyList<string> lines)
-    {
-        var sb = new StringBuilder();
-
-        var indentCount = 0;
-
-        foreach (var line in lines)
-        {
-            var padding = string.Empty.PadRight(indentCount * 4, ' ');
-
-            if (line == "{")
-            {
-                sb.AppendLine(padding + line);
-                indentCount++;
-                continue;
-            }
-
-            if (line == "}")
-            {
-                indentCount--;
-
-                padding = string.Empty.PadRight(indentCount * 4, ' ');
-            }
-
-            sb.AppendLine(padding + line);
-        }
-
-        return sb.ToString();
     }
 }

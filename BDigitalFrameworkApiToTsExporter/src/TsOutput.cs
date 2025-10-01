@@ -1,4 +1,6 @@
-﻿namespace BDigitalFrameworkApiToTsExporter;
+﻿using System.Text;
+
+namespace BDigitalFrameworkApiToTsExporter;
 
 static class TsOutput
 {
@@ -65,5 +67,35 @@ static class TsOutput
         lines.Add("}");
         
         return lines;
+    }
+    
+    public static string LinesToString(IReadOnlyList<string> lines)
+    {
+        var sb = new StringBuilder();
+
+        var indentCount = 0;
+
+        foreach (var line in lines)
+        {
+            var padding = string.Empty.PadRight(indentCount * 4, ' ');
+
+            if (line == "{")
+            {
+                sb.AppendLine(padding + line);
+                indentCount++;
+                continue;
+            }
+
+            if (line == "}")
+            {
+                indentCount--;
+
+                padding = string.Empty.PadRight(indentCount * 4, ' ');
+            }
+
+            sb.AppendLine(padding + line);
+        }
+
+        return sb.ToString();
     }
 }
