@@ -4,18 +4,16 @@ static class DotNetModelExporter
 {
     public static Result<Unit> TryExport()
     {
-        var calculatedFiles =
-            from config in ConfigReader.ReadConfig()
-            from assemblyDefinition in CecilHelper.ReadAssemblyDefinition(config.AssemblyFilePath)
-            from typeDefinition in CecilHelper.GetTypes(assemblyDefinition, config.ListOfTypes ?? [])
-            select new FileModel
-            {
-                Path    = Path.Combine(config.OutputDirectoryPath ?? string.Empty, $"{typeDefinition.Name}.ts"),
-                Content = TsOutput.LinesToString(TsOutput.GetTsCode(TsModelCreator.CreatFrom(typeDefinition)))
-            };
-
         return
-            from files in calculatedFiles
+            from files in
+                from config in ConfigReader.ReadConfig()
+                from assemblyDefinition in CecilHelper.ReadAssemblyDefinition(config.AssemblyFilePath)
+                from typeDefinition in CecilHelper.GetTypes(assemblyDefinition, config.ListOfTypes ?? [])
+                select new FileModel
+                {
+                    Path    = Path.Combine(config.OutputDirectoryPath ?? string.Empty, $"{typeDefinition.Name}.ts"),
+                    Content = TsOutput.LinesToString(TsOutput.GetTsCode(TsModelCreator.CreatFrom(typeDefinition)))
+                }
             from fileModel in files.Select(TrySyncWithLocalFileSystem)
             select FileSystem.Save(fileModel);
     }
