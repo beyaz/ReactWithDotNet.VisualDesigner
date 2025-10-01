@@ -2,6 +2,7 @@
 
 sealed record TsFieldDefinition
 {
+    // @format: off
     public required string Name { get; init; }
     
     public required bool IsNullable { get; init; }
@@ -9,6 +10,8 @@ sealed record TsFieldDefinition
     public required string TypeName { get; init; }
     
     public required string ConstantValue { get; init; }
+
+    // @format: on
 
     public override string ToString()
     {
@@ -18,11 +21,15 @@ sealed record TsFieldDefinition
 
 sealed record TsTypeDefinition
 {
+    // @format: off
+    
     public required string Name { get; init; }
     
     public required bool IsEnum { get; init; }
     
     public required string BaseTypeName { get; init; }
-    
+
+    // @format: on
+
     public required IReadOnlyList<TsFieldDefinition> Fields { get; init; }
 }
