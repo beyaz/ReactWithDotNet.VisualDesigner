@@ -42,7 +42,7 @@ static class DotNetModelExporter
         }
     }
 
-    internal static IReadOnlyList<string> GetTsCodes(TypeDefinition typeDefinition)
+    static IReadOnlyList<string> GetTsCodes(TypeDefinition typeDefinition)
     {
         List<string> lines = [];
 
