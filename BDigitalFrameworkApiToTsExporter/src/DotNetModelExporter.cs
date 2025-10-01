@@ -4,7 +4,8 @@ static class DotNetModelExporter
 {
     public static Result<Unit> TryExport()
     {
-        var calculatedFiles = from config in ConfigReader.ReadConfig()
+        var calculatedFiles =
+            from config in ConfigReader.ReadConfig()
             from assemblyDefinition in CecilHelper.ReadAssemblyDefinition(config.AssemblyFilePath)
             from typeDefinition in CecilHelper.GetTypes(assemblyDefinition, config.ListOfTypes ?? [])
             select new FileModel
