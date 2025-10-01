@@ -42,66 +42,11 @@ public sealed class Unit
 
 public static class ResultExtensions
 {
-    public static Result<B> Select<A, B>(this Result<A> result, Func<A, B> selector)
-    {
-        if (result.HasError)
-        {
-            return result.Error;
-        }
-
-        return selector(result.Value);
-    }
-
-    public static Result<B> SelectMany<A, B>(this Result<A> result, Func<A, Result<B>> binder)
-    {
-        if (result.HasError)
-        {
-            return result.Error;
-        }
-
-        return binder(result.Value);
-    }
-
-    public static Result<IEnumerable<B>> SelectMany<A, B>
-    (
-        this Result<A> result,
-        Func<A, Result<IEnumerable<B>>> binder
-    )
-    {
-        if (result.HasError)
-        {
-            return result.Error;
-        }
-
-        return binder(result.Value);
-    }
-
     public static Result<C> SelectMany<A, B, C>
     (
         this Result<A> result,
         Func<A, Result<B>> binder,
         Func<A, B, C> projector
-    )
-    {
-        if (result.HasError)
-        {
-            return result.Error;
-        }
-
-        var middle = binder(result.Value);
-        if (middle.HasError)
-        {
-            return middle.Error;
-        }
-
-        return projector(result.Value, middle.Value);
-    }
-
-    public static Result<C> SelectMany<A, B, C>
-    (
-        this Result<A> result,
-        Func<A, Result<B>> binder,
-        Func<A, B, Result<C>> projector
     )
     {
         if (result.HasError)
