@@ -2,7 +2,7 @@
 
 sealed record TsFieldDefinition
 {
-    // @format: off
+    // @formatter:off
     public required string Name { get; init; }
     
     public required bool IsNullable { get; init; }
@@ -18,12 +18,12 @@ sealed record TsFieldDefinition
         return TsOutput.GetTsCode(this);
     }
     
-    // @format: on
+    // @formatter:on
 }
 
 sealed record TsTypeDefinition
 {
-    // @format: off
+     // @formatter:off
     
     public required string Name { get; init; }
     
@@ -35,5 +35,5 @@ sealed record TsTypeDefinition
 
     public required IReadOnlyList<TsFieldDefinition> Fields { get; init; }
     
-    // @format: on
+    // @formatter:on
 }
