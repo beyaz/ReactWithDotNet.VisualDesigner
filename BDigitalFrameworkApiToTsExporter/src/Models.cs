@@ -11,12 +11,14 @@ sealed record TsFieldDefinition
     
     public required string ConstantValue { get; init; }
 
-    // @format: on
+   
 
     public override string ToString()
     {
         return TsOutput.GetTsCode(this);
     }
+    
+    // @format: on
 }
 
 sealed record TsTypeDefinition
@@ -29,7 +31,9 @@ sealed record TsTypeDefinition
     
     public required string BaseTypeName { get; init; }
 
-    // @format: on
+  
 
     public required IReadOnlyList<TsFieldDefinition> Fields { get; init; }
+    
+    // @format: on
 }
