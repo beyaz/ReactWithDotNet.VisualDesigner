@@ -56,6 +56,29 @@ public static class ResultExtensions
         return selector(result.Value);
     }
 
+    public static Result<Unit> Select<TSource>
+    (
+        this Result<IEnumerable<TSource>> result,
+        Func<TSource, Result<Unit>> selector
+    )
+    {
+        if (result.HasError)
+        {
+            return result.Error;
+        }
+
+        foreach (var source in result.Value)
+        {
+            var selectorResult = selector(source);
+            if (selectorResult.HasError)
+            {
+                return selectorResult.Error;
+            }
+        }
+
+        return Unit.Value;
+    }
+
     public static Result<C> SelectMany<A, B, C>
     (
         this Result<A> result,
@@ -139,8 +162,7 @@ public static class ResultExtensions
 
         return resultC;
     }
-    
-    
+
     public static Result<IEnumerable<C>> SelectMany<A, B, C>
     (
         this Result<A> result,
@@ -158,7 +180,7 @@ public static class ResultExtensions
         var enumerable = binder(a);
 
         List<C> returnList = [];
-        
+
         foreach (var item in enumerable)
         {
             if (item.HasError)
@@ -169,11 +191,10 @@ public static class ResultExtensions
             var b = item.Value;
 
             var c = projector(a, b);
-            
+
             returnList.Add(c);
         }
 
         return returnList;
     }
-
 }
