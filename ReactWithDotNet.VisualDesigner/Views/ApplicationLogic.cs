@@ -83,11 +83,13 @@ static class ApplicationLogic
         return GetAllComponentsInProjectFromCache(projectId).FirstOrDefault(x => x.Id == componentId)?.GetName();
     }
 
-    public static Task<Result<VisualElementModel>> GetComponentUserOrMainVersionAsync(int componentId, string userName)
+    public static async Task<Result<VisualElementModel>> GetComponentUserOrMainVersionAsync(int componentId, string userName)
     {
         var input = new GetComponentDataInput { ComponentId = componentId, UserName = userName };
 
-        return Pipe(input, GetComponentData, GetRootElementAsYaml, DeserializeFromYaml<VisualElementModel>);
+        return 
+            from x in await GetComponentData(input)
+            select DeserializeFromYaml<VisualElementModel>(GetRootElementAsYaml(x));
     }
 
     public static ProjectConfig GetProjectConfig(int projectId)

@@ -4,31 +4,8 @@ using System.Collections;
 
 namespace ReactWithDotNet.VisualDesigner.FunctionalUtilities;
 
-
 static class FP
 {
-    
-
-    
-  
-
-    public static async Task<Result<T3>> Pipe<T0, T1, T2, T3>(T0 i0, Func<T0, Task<Result<T1>>> m0, Func<T1, T2> m1, Func<T2, T3> m2)
-    {
-        var response0 = await m0(i0);
-        if (response0.HasError)
-        {
-            return response0.Error;
-        }
-
-        var response1 = m1(response0.Value);
-
-        var response2 = m2(response1);
-
-        return response2;
-    }
-
-   
-
     public static async Task<Result<TValue>> RunWhile<TValue>(TValue value, Func<TValue, bool> canContinueToExecute, Pipe<TValue, TValue> pipe)
     {
         foreach (Func<TValue, Task<Result<TValue>>> item in pipe)
@@ -49,10 +26,6 @@ static class FP
 
         return value;
     }
-
-    
-
-   
 }
 
 public sealed record Pipe<Tin, Tout> : IEnumerable<Func<Tin, Task<Result<Tout>>>>
@@ -61,11 +34,10 @@ public sealed record Pipe<Tin, Tout> : IEnumerable<Func<Tin, Task<Result<Tout>>>
 
     public void Add(Func<Tin, Tout> value)
     {
-        
         var fn = (Tin x) =>
         {
             Result<Tout> result = value(x);
-            
+
             return Task.FromResult(result);
         };
 
