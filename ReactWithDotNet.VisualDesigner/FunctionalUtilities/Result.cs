@@ -22,10 +22,7 @@ public sealed record Result<TValue>
         return new() { Error = failInfo };
     }
 
-    public static implicit operator Result<TValue>(NoneObject _)
-    {
-        return new() { Success = true };
-    }
+   
 
     public static implicit operator Result<TValue>(Result<Unit> value)
     {

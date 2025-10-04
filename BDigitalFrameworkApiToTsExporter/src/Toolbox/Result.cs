@@ -4,20 +4,20 @@ public sealed class Result<TValue>
 {
     // @formatter:off
     
-    public required TValue Value { get; init; }
-    
-    public required Exception Error { get; init; }
+    public TValue Value { get; init; } = default!;
+
+    public Exception Error { get; init; } = null!;
 
     public bool HasError => !ReferenceEquals(Error, null);
 
     public static implicit operator Result<TValue>(TValue value)
     {
-        return new() { Value = value, Error = null! };
+        return new() { Value = value};
     }
 
     public static implicit operator Result<TValue>(Exception error)
     {
-        return new() { Error = error, Value = default! };
+        return new() { Error = error };
     }
     
     // @formatter:on
@@ -78,7 +78,7 @@ public static class ResultExtensions
 
             var results = middles.Select(middle => projector(result.Value, middle));
 
-            return new() { Value = results, Error = null! };
+            return new() { Value = results };
         }
         catch (Exception ex)
         {

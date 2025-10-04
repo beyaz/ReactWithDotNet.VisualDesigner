@@ -832,7 +832,7 @@ static class TailwindCss
 
                 if (styleName is null)
                 {
-                    return None;
+                    return new(){ Value = null};
                 }
 
                 return CreateDesignerStyleItem(new()
