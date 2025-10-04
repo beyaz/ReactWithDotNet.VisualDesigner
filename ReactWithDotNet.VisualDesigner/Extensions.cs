@@ -671,7 +671,7 @@ static class Extensions
     {
         foreach (var property in properties)
         {
-            foreach (var parsedProperty in ParseProperty(property))
+            foreach (var parsedProperty in TryParseProperty(property))
             {
                 foreach (var propertyName in propertyNameWithAlias)
                 {

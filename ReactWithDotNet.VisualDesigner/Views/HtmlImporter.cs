@@ -75,7 +75,7 @@ static class HtmlImporter
 
         static bool hasMatch(ProjectConfig project, string designerStyleText, string htmlAttributeName, string htmlAttributeValue)
         {
-            foreach (var designerStyleItem in CreateDesignerStyleItemFromText(project, designerStyleText))
+            foreach (var designerStyleItem in TryCreateDesignerStyleItemFromText(project, designerStyleText))
             {
                 if (designerStyleItem.FinalCssItems.Count == 1)
                 {

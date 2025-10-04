@@ -442,7 +442,7 @@ static class Plugin
         {
             foreach (var p in node.Properties)
             {
-                foreach (var property in ParseProperty(p))
+                foreach (var property in TryParseProperty(p))
                 {
                     if (property.Name == "direction")
                     {

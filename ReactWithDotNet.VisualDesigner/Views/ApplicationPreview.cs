@@ -570,7 +570,7 @@ sealed class ApplicationPreview : Component
 
                                 Properties = ListFrom(data.model.Properties.Where(p =>
                                 {
-                                    foreach (var prop in ParseProperty(p))
+                                    foreach (var prop in TryParseProperty(p))
                                     {
                                         if (prop.Name == Design.ItemsSourceDesignTimeCount)
                                         {
@@ -591,7 +591,7 @@ sealed class ApplicationPreview : Component
                             {
                                 Properties = ListFrom(m.Properties.Select(p =>
                                 {
-                                    foreach (var prop in ParseProperty(p))
+                                    foreach (var prop in TryParseProperty(p))
                                     {
                                         if (prop.Value.StartsWith("_item.", StringComparison.OrdinalIgnoreCase))
                                         {
