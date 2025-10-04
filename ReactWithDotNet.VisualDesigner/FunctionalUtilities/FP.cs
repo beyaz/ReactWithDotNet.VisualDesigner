@@ -6,7 +6,10 @@ using System.Collections;
 
 namespace ReactWithDotNet.VisualDesigner.FunctionalUtilities;
 
-
+public sealed class Unit
+{
+    public static readonly Unit Value = new();
+}
 
 public sealed record Result
 {
