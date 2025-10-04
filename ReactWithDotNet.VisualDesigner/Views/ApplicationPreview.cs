@@ -1108,7 +1108,7 @@ static class ApplicationPreviewExtensions
                     yield return CreateFinalCssItem(finalCssItem.Name, parseResult.left);
                 }
 
-                yield return ResultFrom(finalCssItem);
+                yield return new(){Value = finalCssItem};
             }
 
         }

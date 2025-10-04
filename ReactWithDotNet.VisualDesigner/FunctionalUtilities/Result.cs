@@ -30,8 +30,5 @@ public sealed record Result<TValue>
 
 static class ResultExtensions
 {
-    public static Result<T> ResultFrom<T>(T value)
-    {
-        return new() { Success = true, Value = value };
-    }
+    
 }
