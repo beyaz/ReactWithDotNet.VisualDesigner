@@ -9,7 +9,7 @@ static class TsxExporter
     {
         var project = GetProjectConfig(projectId);
 
-        return 
+        return
             from x in await CalculateElementTreeSourceCodes(project, componentConfig, visualElement)
             select string.Join(Environment.NewLine, x.elementTreeSourceLines);
     }
@@ -45,15 +45,57 @@ static class TsxExporter
         }
 
         // write to file system
+        return
+            from _ in await IO.TryWriteToFile(filePath, fileContent)
+            select new ExportOutput { HasChange = true };
+    }
+
+    public static Result<(int leftPaddingCount, int firstReturnLineIndex, int firstReturnCloseLineIndex)> GetComponentLineIndexPointsInTsxFile(IReadOnlyList<string> fileContent, string targetComponentName)
+    {
+        var lines = fileContent.ToList();
+
+        var componentDeclarationLineIndex = lines.FindIndex(line => line.Contains($"function {targetComponentName}(", StringComparison.OrdinalIgnoreCase));
+        if (componentDeclarationLineIndex < 0)
         {
-            var result = await IO.TryWriteToFile(filePath, fileContent);
-            if (result.HasError)
+            componentDeclarationLineIndex = lines.FindIndex(line => line.Contains($"const {targetComponentName} "));
+            if (componentDeclarationLineIndex < 0)
             {
-                return result.Error;
+                componentDeclarationLineIndex = lines.FindIndex(line => line.Contains($"const {targetComponentName}:"));
+                if (componentDeclarationLineIndex < 0)
+                {
+                    return new ArgumentException($"ComponentDeclarationNotFoundInFile. {targetComponentName}");
+                }
             }
         }
 
-        return new ExportOutput { HasChange = true };
+        var leftPaddingCount = 0;
+        var firstReturnLineIndex = -1;
+        {
+            for (var i = 1; i < 20; i++)
+            {
+                firstReturnLineIndex = lines.FindIndex(componentDeclarationLineIndex, l => l == new string(' ', i) + "return (");
+                if (firstReturnLineIndex > 0)
+                {
+                    leftPaddingCount = i;
+                    break;
+                }
+            }
+        }
+
+        var firstReturnCloseLineIndex = -1;
+        {
+            foreach (var item in lines.FindLineIndexStartsWith(firstReturnLineIndex, leftPaddingCount, ");"))
+            {
+                firstReturnCloseLineIndex = item;
+            }
+
+            if (firstReturnCloseLineIndex < 0)
+            {
+                return new ArgumentException($"ReturnClosePointNotFound. {targetComponentName}");
+            }
+        }
+
+        return (leftPaddingCount, firstReturnLineIndex, firstReturnCloseLineIndex);
     }
 
     internal static async Task<Result<(IReadOnlyList<string> elementTreeSourceLines, IReadOnlyList<string> importLines)>> CalculateElementTreeSourceCodes(ProjectConfig project, IReadOnlyDictionary<string, string> componentConfig, VisualElementModel rootVisualElement)
@@ -491,7 +533,7 @@ static class TsxExporter
                     };
                 }
             }
-            
+
             LineCollection lines =
             [
                 $"{indent(indentLevel)}<{tag}{partProps}>"
@@ -554,61 +596,12 @@ static class TsxExporter
         }
     }
 
-    public static Result<(int leftPaddingCount, int firstReturnLineIndex, int firstReturnCloseLineIndex)> GetComponentLineIndexPointsInTsxFile(IReadOnlyList<string> fileContent, string targetComponentName)
-    {
-        var lines = fileContent.ToList();
-
-        var componentDeclarationLineIndex = lines.FindIndex(line => line.Contains($"function {targetComponentName}(", StringComparison.OrdinalIgnoreCase));
-        if (componentDeclarationLineIndex < 0)
-        {
-            componentDeclarationLineIndex = lines.FindIndex(line => line.Contains($"const {targetComponentName} "));
-            if (componentDeclarationLineIndex < 0)
-            {
-                componentDeclarationLineIndex = lines.FindIndex(line => line.Contains($"const {targetComponentName}:"));
-                if (componentDeclarationLineIndex < 0)
-                {
-                    return new ArgumentException($"ComponentDeclarationNotFoundInFile. {targetComponentName}");
-                }
-            }
-        }
-
-        var leftPaddingCount = 0;
-        int firstReturnLineIndex = -1;
-        {
-            for (int i = 1; i < 20; i++)
-            {
-                firstReturnLineIndex = lines.FindIndex(componentDeclarationLineIndex, l => l == new string(' ',i)+ "return (");
-                if (firstReturnLineIndex > 0)
-                {
-                    leftPaddingCount = i;
-                    break;
-                }
-            }
-        }
-        
-        int firstReturnCloseLineIndex = -1;
-        {
-            foreach (var item in lines.FindLineIndexStartsWith(firstReturnLineIndex, leftPaddingCount,  ");"))
-            {
-                firstReturnCloseLineIndex = item;
-            }
-            
-            if (firstReturnCloseLineIndex < 0)
-            {
-                return new ArgumentException($"ReturnClosePointNotFound. {targetComponentName}");
-            }
-            
-        }
-
-        return (leftPaddingCount, firstReturnLineIndex, firstReturnCloseLineIndex);
-    }
-    
     static Result<string> InjectRender(IReadOnlyList<string> fileContent, string targetComponentName, IReadOnlyList<string> linesToInject)
     {
         var lines = fileContent.ToList();
 
         // focus to component code
-        int firstReturnLineIndex,firstReturnCloseLineIndex,leftPaddingCount;
+        int firstReturnLineIndex, firstReturnCloseLineIndex, leftPaddingCount;
         {
             var result = GetComponentLineIndexPointsInTsxFile(fileContent, targetComponentName);
             if (result.HasError)
@@ -616,24 +609,24 @@ static class TsxExporter
                 return result.Error;
             }
 
-            leftPaddingCount = result.Value.leftPaddingCount;
-            firstReturnLineIndex          = result.Value.firstReturnLineIndex;
-            firstReturnCloseLineIndex     = result.Value.firstReturnCloseLineIndex;
+            leftPaddingCount          = result.Value.leftPaddingCount;
+            firstReturnLineIndex      = result.Value.firstReturnLineIndex;
+            firstReturnCloseLineIndex = result.Value.firstReturnCloseLineIndex;
         }
-        
-        lines.RemoveRange(firstReturnLineIndex, firstReturnCloseLineIndex - firstReturnLineIndex+1);
-        
+
+        lines.RemoveRange(firstReturnLineIndex, firstReturnCloseLineIndex - firstReturnLineIndex + 1);
+
         // apply padding
         {
-            var temp = linesToInject.Select(line => new string(' ', leftPaddingCount+2) + line).ToList();
+            var temp = linesToInject.Select(line => new string(' ', leftPaddingCount + 2) + line).ToList();
 
             temp.Insert(0, new string(' ', leftPaddingCount) + "return (");
-            
+
             temp.Add(new string(' ', leftPaddingCount) + ");");
 
             linesToInject = temp;
         }
-        
+
         lines.InsertRange(firstReturnLineIndex, linesToInject);
 
         var injectedFileContent = string.Join(Environment.NewLine, lines);
