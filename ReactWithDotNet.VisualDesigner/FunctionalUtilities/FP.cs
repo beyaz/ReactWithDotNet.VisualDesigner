@@ -61,16 +61,6 @@ static class FP
     }
 
    
-
-    public static Result<A> Then<A>(this Result<Unit> result, Func<A> onSuccessFunc)
-    {
-        if (result.HasError)
-        {
-            return result.Error;
-        }
-
-        return onSuccessFunc();
-    }
 }
 
 public sealed record Pipe<Tin, Tout> : IEnumerable<Func<Tin, Task<Result<Tout>>>>

@@ -759,11 +759,11 @@ sealed class ApplicationPreview : Component
                         }
 
                         
-                        return ReflectionHelper.SetPropertyValue(element, "src", DummySrc(500))
-                            .Then(() => data with
+                        return from _ in ReflectionHelper.SetPropertyValue(element, "src", DummySrc(500))
+                            select data with
                             {
                                 IsProcessed = true
-                            });
+                            };
 
                         static async Task<Maybe<string>> calculateSrcFromValue(RenderPreviewScope scope, VisualElementModel model, string value)
                         {
