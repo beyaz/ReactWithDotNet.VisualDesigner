@@ -1,4 +1,6 @@
-﻿namespace ReactWithDotNet.VisualDesigner.FunctionalUtilities;
+﻿global using ReactWithDotNet.VisualDesigner.FunctionalUtilities;
+
+namespace ReactWithDotNet.VisualDesigner.FunctionalUtilities;
 
 public sealed class Result<TValue>
 {
