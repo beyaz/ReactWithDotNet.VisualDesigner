@@ -19,7 +19,7 @@ static class ModelToNodeTransformer
                 _ when project.ExportStylesAsTailwind
                     => calculatePropsForTailwind(project, elementModel.Properties, elementModel.Styles),
 
-                _ => Fail<IReadOnlyList<ReactProperty>>(new ArgumentException("Style export not specified"))
+                _ => new ArgumentException("Style export not specified")
             };
 
             if (props.HasError)

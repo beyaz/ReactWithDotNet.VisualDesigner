@@ -6,9 +6,9 @@ public sealed record Result<TValue>
 
     public bool HasError => !Success;
 
-    public bool Success { get; init; }
+    public bool Success { get; private init; }
 
-    public TValue Value { get; init; }
+    public TValue Value { get; private init; }
 
     public static implicit operator Result<TValue>(TValue value)
     {
@@ -29,4 +29,6 @@ public sealed record Result<TValue>
     {
         return new() { Success = value.Success, Error = value.Error };
     }
+
+    
 }

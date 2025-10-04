@@ -74,16 +74,6 @@ static class FP
 {
     public static NoneObject None => NoneObject.Instance;
 
-    public static Result<Unit> Fail(string message)
-    {
-        return new() { Success = false, Error = new(message) };
-    }
-
-    public static Result<T> Fail<T>(Exception exception)
-    {
-        return new() { Success = false, Error = exception };
-    }
-
     public static Exception GetError<T>(this IEnumerable<Result<T>> results)
     {
         foreach (var result in results)

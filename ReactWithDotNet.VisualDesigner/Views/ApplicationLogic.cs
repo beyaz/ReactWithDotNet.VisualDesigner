@@ -22,7 +22,7 @@ static class ApplicationLogic
 
         if (userVersion is null)
         {
-            return Fail($"User ({state.UserName}) has no change to commit.");
+            return new Exception($"User ({state.UserName}) has no change to commit.");
         }
 
         // Check if the user version is the same as the main version
@@ -30,7 +30,7 @@ static class ApplicationLogic
         {
             await Store.Delete(userVersion);
 
-            return Fail($"User ({state.UserName}) has no change to commit.");
+            return new Exception($"User ({state.UserName}) has no change to commit.");
         }
 
         userVersion = userVersion with
