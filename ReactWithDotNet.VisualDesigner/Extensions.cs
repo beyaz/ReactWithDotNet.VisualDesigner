@@ -73,19 +73,7 @@ static class Extensions
         return input.All(char.IsLetterOrDigit);
     }
     
-    public static Result Try(Action action)
-    {
-        try
-        {
-            action();
-        }
-        catch (Exception exception)
-        {
-            return exception;
-        }
-
-        return Success;
-    }
+    
     
     public static Result<T> Try<T>(Func<T> func)
     {

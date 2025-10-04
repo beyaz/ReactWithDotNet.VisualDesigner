@@ -5,7 +5,7 @@ namespace ReactWithDotNet.VisualDesigner.Views;
 
 static class ApplicationLogic
 {
-    public static async Task<Result> CommitComponent(ApplicationState state)
+    public static async Task<Result<Unit>> CommitComponent(ApplicationState state)
     {
         ComponentEntity component;
         ComponentWorkspace userVersion;
@@ -56,7 +56,7 @@ static class ApplicationLogic
 
         await Store.Delete(userVersion);
 
-        return Success;
+        return Unit.Value;
     }
 
     public static IReadOnlyList<ComponentEntity> GetAllComponentsInProjectFromCache(int projectId)
@@ -470,7 +470,7 @@ static class ApplicationLogic
         });
     }
 
-    public static async Task<Result> TrySaveComponentForUser(ApplicationState state)
+    public static async Task<Result<Unit>> TrySaveComponentForUser(ApplicationState state)
     {
         var componentId = state.ComponentId;
 
@@ -478,7 +478,7 @@ static class ApplicationLogic
 
         if (componentId <= 0 || userName.HasNoValue())
         {
-            return Success;
+            return Unit.Value;
         }
 
         var userVersion = await Store.TryGetComponentWorkspace(componentId, userName);
@@ -492,7 +492,7 @@ static class ApplicationLogic
 
             if (SerializeToYaml(state.ComponentRootElement) == component.RootElementAsYaml)
             {
-                return Success;
+                return Unit.Value;
             }
 
             userVersion = new()
@@ -505,7 +505,7 @@ static class ApplicationLogic
 
             await Store.Insert(userVersion);
 
-            return Success;
+            return Unit.Value;
         }
 
         await Store.Update(userVersion with
@@ -514,7 +514,7 @@ static class ApplicationLogic
             LastAccessTime = DateTime.Now
         });
 
-        return Success;
+        return Unit.Value;
     }
 
     public static async Task UpdateLastUsageInfo(ApplicationState state)

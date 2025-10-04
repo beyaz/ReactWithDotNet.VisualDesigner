@@ -1015,7 +1015,7 @@ sealed class ApplicationPreview : Component
 
     static class ReflectionHelper
     {
-        public static Result SetPropertyValue(object obj, string propertyName, object value)
+        public static Result<Unit> SetPropertyValue(object obj, string propertyName, object value)
         {
             var type = obj.GetType();
 
@@ -1036,14 +1036,14 @@ sealed class ApplicationPreview : Component
             {
                 propertyInfo.SetValue(obj, value?.ToString());
 
-                return Success;
+                return Unit.Value;
             }
 
             if (propertyType == typeof(double) || (propertyType == typeof(double?) && value is double))
             {
                 propertyInfo.SetValue(obj, value);
 
-                return Success;
+                return Unit.Value;
             }
 
             if (propertyType == typeof(UnionProp<string, double?>))
@@ -1051,12 +1051,12 @@ sealed class ApplicationPreview : Component
                 if (value is double d)
                 {
                     propertyInfo.SetValue(obj, (UnionProp<string, double?>)d);
-                    return Success;
+                    return Unit.Value;
                 }
 
                 propertyInfo.SetValue(obj, (UnionProp<string, double?>)value.ToString());
 
-                return Success;
+                return Unit.Value;
             }
 
             return new Exception("PropertyTypeNotImplementedForReflection:" + propertyType.FullName);

@@ -2226,7 +2226,7 @@ sealed class ApplicationView : Component<ApplicationState>
         };
     }
 
-    Result UpdateElementNode(string path, string yaml)
+    Result<Unit> UpdateElementNode(string path, string yaml)
     {
         VisualElementModel newModel;
 
@@ -2250,14 +2250,14 @@ sealed class ApplicationView : Component<ApplicationState>
                 }
             };
 
-            return Success;
+            return Unit.Value;
         }
 
         if (path.HasNoValue() || path == "0")
         {
             state = state with { ComponentRootElement = newModel };
 
-            return Success;
+            return Unit.Value;
         }
 
         UpdateCurrentVisualElement(x => x with
@@ -2269,7 +2269,7 @@ sealed class ApplicationView : Component<ApplicationState>
             HideInDesigner = newModel.HideInDesigner
         });
 
-        return Success;
+        return Unit.Value;
     }
 
     void UpdateZoomInClient()

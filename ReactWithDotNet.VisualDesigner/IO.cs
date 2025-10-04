@@ -29,7 +29,7 @@ static class IO
         }
     }
 
-    public static async Task<Result> TryWriteToFile(string filePath, string fileContent)
+    public static async Task<Result<Unit>> TryWriteToFile(string filePath, string fileContent)
     {
         try
         {
@@ -68,6 +68,6 @@ static class IO
             return exception;
         }
 
-        return Success;
+        return Unit.Value;
     }
 }

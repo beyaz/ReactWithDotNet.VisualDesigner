@@ -58,6 +58,11 @@ public sealed record Result<TValue>: IEnumerable<TValue>
         return new() { Success = true };
     }
     
+    public static implicit operator Result<TValue>(Result<Unit> value)
+    {
+        return new() { Success = value.Success, Error = value.Error};
+    }
+    
     public IEnumerator<TValue> GetEnumerator()
     {
         if (Success)
@@ -173,9 +178,9 @@ static class FP
         return values;
     }
 
-    public static Result Fail(string message)
+    public static Result<Unit> Fail(string message)
     {
-        return new() { Success = false, HasError = true, Error = new(message) };
+        return new() { Success = false,  Error = new(message) };
     }
     
     public static Result<T> Fail<T>(Exception exception)
@@ -409,6 +414,17 @@ static class FP
         return onSuccessFunc();
     }
 
+    
+    public static Result<A> Then<A>(this Result<Unit> result, Func<A> onSuccessFunc)
+    {
+        if (result.HasError)
+        {
+            return result.Error;
+        }
+
+        return onSuccessFunc();
+    }
+    
     public static Result Then<A>(this Result<A> result, Action<A> action)
     {
         if (result.HasError)
