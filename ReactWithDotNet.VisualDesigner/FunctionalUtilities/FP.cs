@@ -50,15 +50,7 @@ static class FP
         return value;
     }
 
-    public static Result<B> Then<A, B>(this (A value, Exception exception) result, Func<A, Result<B>> convertFunc)
-    {
-        if (result.exception is not null)
-        {
-            return result.exception;
-        }
-
-        return convertFunc(result.value);
-    }
+    
 
    
 }

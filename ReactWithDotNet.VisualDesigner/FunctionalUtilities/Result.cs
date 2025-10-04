@@ -211,4 +211,10 @@ public static class ResultExtensions
 
         return returnItems;
     }
+
+
+    public static Result<T> AsResult<T>(this (T value, Exception exception) tuple)
+    {
+        return new() { Value = tuple.value, Error = tuple.exception };
+    }
 }

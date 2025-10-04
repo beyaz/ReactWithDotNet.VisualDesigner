@@ -76,14 +76,16 @@ public static partial class CssHelper
 
             if (project.Styles.TryGetValue(designerStyleItem, out var cssText))
             {
-                return Style.ParseCssAsDictionary(cssText).Then(styleMap => CreateDesignerStyleItem(new()
-                {
-                    OriginalText = designerStyleItem,
+                return from styleMap in Style.ParseCssAsDictionary(cssText).AsResult()
+                       from x in CreateDesignerStyleItem(new()
+                       {
+                           OriginalText = designerStyleItem,
 
-                    Pseudo = pseudo,
+                           Pseudo = pseudo,
 
-                    FinalCssItems = from pair in styleMap select CreateFinalCssItem(pair)
-                }));
+                           FinalCssItems = from pair in styleMap select CreateFinalCssItem(pair)
+                       })
+                       select x;
             }
 
             if (name == "color" && value is not null && project.Colors.TryGetValue(value, out var realColor))
