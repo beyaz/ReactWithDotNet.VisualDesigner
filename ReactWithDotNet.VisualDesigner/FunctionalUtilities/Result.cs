@@ -38,6 +38,20 @@ public static class ResultExtensions
 
         return selector(result.Value);
     }
+    
+    public static Result<B> Select<A, B>
+    (
+        this Result<A> result,
+        Func<A, Result<B>> selector
+    )
+    {
+        if (result.HasError)
+        {
+            return result.Error;
+        }
+
+        return selector(result.Value);
+    }
 
     public static Result<C> SelectMany<A, B, C>
     (
