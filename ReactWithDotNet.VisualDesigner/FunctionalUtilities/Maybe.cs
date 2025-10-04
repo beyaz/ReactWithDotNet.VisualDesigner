@@ -76,4 +76,39 @@ static class MaybeExtensions
         action(maybe.Value);
     }
     
+    extension<T>(IEnumerable<Result<T>> enumerable)
+    {
+        public bool HasError
+        {
+            get
+            {
+                foreach (var result in enumerable)
+                {
+                    if (result.HasError)
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+        }
+        
+        public Exception Error
+        {
+            get
+            {
+                foreach (var result in enumerable)
+                {
+                    if (result.HasError)
+                    {
+                        return result.Error;
+                    }
+                }
+
+                return new ArgumentException("results has no error.");
+            }
+        }
+    }
+    
 }

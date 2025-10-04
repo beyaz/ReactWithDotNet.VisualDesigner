@@ -9,32 +9,7 @@ static class FP
 {
     
 
-    public static Exception GetError<T>(this IEnumerable<Result<T>> results)
-    {
-        foreach (var result in results)
-        {
-            if (result.HasError)
-            {
-                return result.Error;
-            }
-        }
-
-        return new ArgumentException("results has no error.");
-    }
-
-    public static bool HasError<T>(this IEnumerable<Result<T>> results)
-    {
-        foreach (var result in results)
-        {
-            if (result.HasError)
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
+    
   
 
     public static async Task<Result<T3>> Pipe<T0, T1, T2, T3>(T0 i0, Func<T0, Task<Result<T1>>> m0, Func<T1, T2> m1, Func<T2, T3> m2)

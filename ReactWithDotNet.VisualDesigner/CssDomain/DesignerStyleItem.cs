@@ -27,16 +27,16 @@ static class DesignerStyleItemFactory
             return new ArgumentException(nameof(input.OriginalText));
         }
 
-        return finalCssItems switch
+        if (finalCssItems.HasError)
         {
-            _ when finalCssItems.HasError() => finalCssItems.GetError(),
+            return finalCssItems.Error;
+        }
 
-            _ => new DesignerStyleItemImp
-            {
-                Pseudo = input.Pseudo,
+        return new DesignerStyleItemImp
+        {
+            Pseudo = input.Pseudo,
 
-                FinalCssItems = ListFrom(from x in finalCssItems select x.Value)
-            }
+            FinalCssItems = ListFrom(from x in finalCssItems select x.Value)
         };
     }
 
