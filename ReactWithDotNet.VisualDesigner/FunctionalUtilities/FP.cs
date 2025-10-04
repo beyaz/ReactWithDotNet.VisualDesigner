@@ -63,13 +63,7 @@ public sealed record Result<TValue>
         return new() { Success = value.Success, Error = value.Error};
     }
     
-    public IEnumerator<TValue> GetEnumerator()
-    {
-        if (Success)
-        {
-            yield return Value;
-        }
-    }
+   
     
 }
 

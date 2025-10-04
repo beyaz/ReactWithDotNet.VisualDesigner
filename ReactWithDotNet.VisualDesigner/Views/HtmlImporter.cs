@@ -166,12 +166,13 @@ static class HtmlImporter
 
                 static (Maybe<string> className, IReadOnlyList<string> styles) processClassName(ProjectConfig project, string className)
                 {
-                    foreach (var designerStyleItem in TryConvertTailwindUtilityClassToHtmlStyle(project, className))
+                    var designerStyleItem = TryConvertTailwindUtilityClassToHtmlStyle(project, className);
+                    if (designerStyleItem.Success)
                     {
                         var returnStyles = new List<string>();
 
-                        var pseudo = designerStyleItem.Pseudo;
-                        var styles = designerStyleItem.FinalCssItems;
+                        var pseudo = designerStyleItem.Value.Pseudo;
+                        var styles = designerStyleItem.Value.FinalCssItems;
 
                         foreach (var finalCssItem in styles)
                         {
