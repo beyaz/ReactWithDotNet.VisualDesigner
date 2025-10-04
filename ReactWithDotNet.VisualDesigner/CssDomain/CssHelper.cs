@@ -31,7 +31,7 @@ public static partial class CssHelper
 
                 Pseudo = styleAttribute.Pseudo,
 
-                FinalCssItems = [ResultFrom(htmlStyle.Value)]
+                FinalCssItems = [htmlStyle]
             });
         }
 

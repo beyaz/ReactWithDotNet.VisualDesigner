@@ -1,6 +1,7 @@
 ﻿global using ReactWithDotNet.VisualDesigner.FunctionalUtilities;
 global using static ReactWithDotNet.VisualDesigner.FunctionalUtilities.FP;
 using System.Collections;
+using Microsoft.CodeAnalysis.CSharp;
 
 namespace ReactWithDotNet.VisualDesigner.FunctionalUtilities;
 
@@ -125,10 +126,7 @@ static class FP
         return response2;
     }
 
-    public static Result<T> ResultFrom<T>(T value)
-    {
-        return new() { Success = true, Value = value };
-    }
+   
 
     public static async Task<Result<TValue>> RunWhile<TValue>(TValue value, Func<TValue, bool> canContinueToExecute, Pipe<TValue, TValue> pipe)
     {
@@ -188,7 +186,13 @@ public sealed record Pipe<Tin, Tout> : IEnumerable<Func<Tin, Task<Result<Tout>>>
 
     public void Add(Func<Tin, Tout> value)
     {
-        var fn = (Tin x) => Task.FromResult(ResultFrom(value(x)));
+        
+        var fn = (Tin x) =>
+        {
+            Result<Tout> result = value(x);
+            
+            return Task.FromResult(result);
+        };
 
         _items.Add(fn);
     }

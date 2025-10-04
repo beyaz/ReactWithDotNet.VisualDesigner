@@ -1,4 +1,6 @@
-﻿namespace ReactWithDotNet.VisualDesigner.FunctionalUtilities;
+﻿global using static ReactWithDotNet.VisualDesigner.FunctionalUtilities.ResultExtensions;
+
+namespace ReactWithDotNet.VisualDesigner.FunctionalUtilities;
 
 public sealed record Result<TValue>
 {
@@ -6,9 +8,9 @@ public sealed record Result<TValue>
 
     public bool HasError => !Success;
 
-    public bool Success { get; private init; }
+    public bool Success { get;  init; }
 
-    public TValue Value { get; private init; }
+    public TValue Value { get;  init; }
 
     public static implicit operator Result<TValue>(TValue value)
     {
@@ -31,4 +33,12 @@ public sealed record Result<TValue>
     }
 
     
+}
+
+static class ResultExtensions
+{
+    public static Result<T> ResultFrom<T>(T value)
+    {
+        return new() { Success = true, Value = value };
+    }
 }
