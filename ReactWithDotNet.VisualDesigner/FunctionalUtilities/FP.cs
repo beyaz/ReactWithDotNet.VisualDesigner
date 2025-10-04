@@ -11,25 +11,6 @@ public sealed class Unit
     public static readonly Unit Value = new();
 }
 
-public sealed record Result
-{
-    public Exception Error { get; init; }
-
-    public bool HasError { get; init; }
-
-    public bool Success { get; init; }
-
-
-    public static implicit operator Result(Exception failInfo)
-    {
-        return new() { HasError = true, Error = failInfo };
-    }
-
-    public static implicit operator Result(NoneObject _)
-    {
-        return new() { Success = true };
-    }
-}
 
 
 
@@ -141,7 +122,6 @@ static class FP
     }
     
     
-    public static readonly Result Success = new() { Success = true };
 
     public static NoneObject None => NoneObject.Instance;
 
@@ -206,26 +186,7 @@ static class FP
         return new ArgumentException("results has no error.");
     }
 
-    public static Result FoldThen<A>(this IEnumerable<Result<IReadOnlyList<A>>> response, Action<IReadOnlyList<A>> nextAction)
-    {
-        List<A> values = [];
-
-        foreach (var result in response)
-        {
-            if (result.HasError)
-            {
-                return result.Error;
-            }
-
-            values.AddRange(result.Value);
-        }
-
-        nextAction(values);
-
-        return Success;
-    }
-
-    public static void HasValue<TValue>(this Maybe<TValue> maybe, Action<TValue> action)
+     public static void HasValue<TValue>(this Maybe<TValue> maybe, Action<TValue> action)
     {
         if (maybe.HasNoValue)
         {
@@ -394,16 +355,7 @@ static class FP
         return convertFunc(result.Value);
     }
     
-    public static Result<A> Then<A>(this Result result, Func<A> onSuccessFunc)
-    {
-        if (result.HasError)
-        {
-            return result.Error;
-        }
-
-        return onSuccessFunc();
-    }
-
+    
     
     public static Result<A> Then<A>(this Result<Unit> result, Func<A> onSuccessFunc)
     {
@@ -415,17 +367,7 @@ static class FP
         return onSuccessFunc();
     }
     
-    public static Result Then<A>(this Result<A> result, Action<A> action)
-    {
-        if (result.HasError)
-        {
-            return result.Error;
-        }
-
-        action(result.Value);
-
-        return None;
-    }
+   
 
     public static async Task<Result<TValue>> Then<TValue>(this Task<Result<TValue>> response, Action<TValue> nextAction)
     {

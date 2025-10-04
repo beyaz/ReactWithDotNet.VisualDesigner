@@ -430,13 +430,14 @@ sealed class ApplicationView : Component<ApplicationState>
             {
                 var nameValue = CurrentVisualElement.Properties[propertyIndex];
 
-                ParseProperty(nameValue).Then(parseResult =>
+                foreach (var parsedProperty in TryParseProperty(nameValue))
                 {
-                    var startIndex = nameValue.LastIndexOf(parseResult.Value ?? string.Empty, StringComparison.OrdinalIgnoreCase);
+               
+                    var startIndex = nameValue.LastIndexOf(parsedProperty.Value ?? string.Empty, StringComparison.OrdinalIgnoreCase);
                     var endIndex = nameValue.Length;
 
                     jsCode.AppendLine($"document.getElementById('{id}').setSelectionRange({startIndex}, {endIndex});");
-                });
+                }
             }
 
             Client.RunJavascript(jsCode.ToString());
@@ -1869,13 +1870,14 @@ sealed class ApplicationView : Component<ApplicationState>
                             // calculate text selection in edit input
                             {
                                 var nameValue = CurrentVisualElement.Styles[styleIndex];
-                                ParseProperty(nameValue).Then(parseResult =>
+
+                                foreach (var parsedProperty in TryParseProperty(nameValue))
                                 {
-                                    var startIndex = nameValue.LastIndexOf(parseResult.Value, StringComparison.OrdinalIgnoreCase);
+                                    var startIndex = nameValue.LastIndexOf(parsedProperty.Value, StringComparison.OrdinalIgnoreCase);
                                     var endIndex = nameValue.Length;
 
                                     jsCode.AppendLine($"document.getElementById('{id}').setSelectionRange({startIndex}, {endIndex});");
-                                });
+                                }
                             }
 
                             Client.RunJavascript(jsCode.ToString());
@@ -2023,7 +2025,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
                 Element content = value;
                 {
-                    ParseProperty(value).Then(x =>
+                    foreach (var x in TryParseProperty(value))
                     {
                         if (x.Name == Design.SpreadOperator)
                         {
@@ -2039,7 +2041,7 @@ sealed class ApplicationView : Component<ApplicationState>
                                 new span(FontWeight600) { x.Name }, ": ", new span(PaddingLeft(2)) { x.Value }
                             };
                         }
-                    });
+                    }
                 }
 
                 var isSelected = index == state.Selection.SelectedPropertyIndex;
@@ -2816,13 +2818,13 @@ sealed class ApplicationView : Component<ApplicationState>
 
             Element content = Value;
             {
-                ParseProperty(Value).Then(x =>
+                foreach (var x in TryParseProperty(Value))
                 {
                     content = new FlexRow(AlignItemsCenter, FlexWrap)
                     {
                         new span(FontWeight600) { x.Name }, ": ", new span(PaddingLeft(2)) { x.Value }
                     };
-                });
+                };
             }
 
             var styleItem = new FlexRowCentered(CursorDefault, Padding(4, 8), BorderRadius(16), UserSelect(none))
