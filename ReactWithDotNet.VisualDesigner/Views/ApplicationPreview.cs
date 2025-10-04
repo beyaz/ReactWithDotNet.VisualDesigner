@@ -679,11 +679,11 @@ sealed class ApplicationPreview : Component
                     {
                         if (isValueDouble)
                         {
-                            return ReflectionHelper.SetPropertyValue(element, "width", propValue)
-                                .Then(() => data with
+                            return from _ in ReflectionHelper.SetPropertyValue(element, "width", propValue)
+                                select data with
                                 {
                                     IsProcessed = true
-                                });
+                                };
                         }
                     }
 
@@ -694,11 +694,11 @@ sealed class ApplicationPreview : Component
                             foreach (var srcValue in await calculateSrcFromValue(scope, model, propValue))
                             {
                                 
-                                return ReflectionHelper.SetPropertyValue(element, "src", srcValue)
-                                    .Then(() => data with
+                                return from _ in ReflectionHelper.SetPropertyValue(element, "src", srcValue)
+                                    select data with
                                     {
                                         IsProcessed = true
-                                    });
+                                    };
                             }
                         }
 
@@ -717,11 +717,11 @@ sealed class ApplicationPreview : Component
                                 foreach (var srcValue in await calculateSrcFromValue(scope, model, designTimeSrc))
                                 {
 
-                                    return ReflectionHelper.SetPropertyValue(element, "src", srcValue)
-                                        .Then(() => data with
+                                    return from _ in ReflectionHelper.SetPropertyValue(element, "src", srcValue)
+                                        select data with
                                         {
                                             IsProcessed = true
-                                        });
+                                        };
                                     
                                     
                                 }
@@ -749,11 +749,11 @@ sealed class ApplicationPreview : Component
 
                             if (dummySrc.HasValue())
                             {
-                                return ReflectionHelper.SetPropertyValue(element, "src", dummySrc)
-                                    .Then(() => data with
+                                return from _ in ReflectionHelper.SetPropertyValue(element, "src", dummySrc)
+                                    select data with
                                     {
                                         IsProcessed = true
-                                    });
+                                    };
                                 
                             }
                         }
