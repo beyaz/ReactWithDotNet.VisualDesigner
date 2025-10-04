@@ -339,7 +339,7 @@ static class Extensions
     {
         var query =
             from p in model.Properties
-            from v in ParseProperty(p)
+            from v in TryParseProperty(p)
             where v.Name == Design.TextPreview
             select v.Value;
 
@@ -350,7 +350,7 @@ static class Extensions
     {
         var query =
             from p in model.Properties
-            from v in ParseProperty(p)
+            from v in TryParseProperty(p)
             where v.Name == Design.Text
             select v.Value;
 

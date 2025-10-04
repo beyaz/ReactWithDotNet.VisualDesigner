@@ -173,13 +173,13 @@ sealed class ApplicationPreview : Component
 
 
             var designTimeProps = from p in model.Properties
-                                  from x in ParseProperty(p)
+                                  from x in TryParseProperty(p)
                                   where Design.IsDesignTimeName(x.Name) && x.Name.NotIn(Design.Text, Design.TextPreview, Design.Name)
                                   select x;
             model = model with
             {
                 Properties = ListFrom(from p in model.Properties
-                                      from x in ParseProperty(p)
+                                      from x in TryParseProperty(p)
                                       where !Design.IsDesignTimeName(x.Name)
                                       select p)
             };
@@ -241,7 +241,7 @@ sealed class ApplicationPreview : Component
                 foreach (var styleModifierResult in
                          from designerStyleText in model.Styles
                          where !designerStyleText.StartsWith("d-")
-                         from designerStyleItem in CreateDesignerStyleItemFromText(scope.Project, designerStyleText)
+                         from designerStyleItem in TryCreateDesignerStyleItemFromText(scope.Project, designerStyleText)
                          from x in designerStyleItem.FinalCssItems
                          where x.Value?.StartsWith("state.", StringComparison.OrdinalIgnoreCase) is not true
                          where x.Value?.StartsWith("props.", StringComparison.OrdinalIgnoreCase) is not true
@@ -259,7 +259,7 @@ sealed class ApplicationPreview : Component
                 foreach (var styleModifierResult in
                          from designerStyleText in model.Styles
                          where Design.IsDesignTimeName(designerStyleText)
-                         from designerStyleItem in CreateDesignerStyleItemFromText(scope.Project, designerStyleText.RemoveFromStart("d-", StringComparison.OrdinalIgnoreCase))
+                         from designerStyleItem in TryCreateDesignerStyleItemFromText(scope.Project, designerStyleText.RemoveFromStart("d-", StringComparison.OrdinalIgnoreCase))
                          from x in designerStyleItem.FinalCssItems
                          select designerStyleItem.ToStyleModifier())
                 {
@@ -939,7 +939,7 @@ sealed class ApplicationPreview : Component
                     propertyValue = maybe.Value.Value;
                 }
 
-                foreach (var callerProperty in from p in scope.ParentModel.Properties from v in ParseProperty(p) select v)
+                foreach (var callerProperty in from p in scope.ParentModel.Properties from v in TryParseProperty(p) select v)
                 {
                     if (callerProperty.Value?.In("true","false") is true)
                     {
@@ -979,7 +979,7 @@ sealed class ApplicationPreview : Component
 
                 static Maybe<ParsedProperty> tryGetProperty(VisualElementModel model, string propertyName)
                 {
-                    foreach (ParsedProperty parsedProperty in from p in model.Properties from v in ParseProperty(p) where v.Name == propertyName select v)
+                    foreach (ParsedProperty parsedProperty in from p in model.Properties from v in TryParseProperty(p) where v.Name == propertyName select v)
                     {
                         return Maybe<ParsedProperty>.Some(parsedProperty);
                     }

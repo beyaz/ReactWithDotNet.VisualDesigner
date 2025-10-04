@@ -1659,7 +1659,7 @@ sealed class ApplicationView : Component<ApplicationState>
                 bool alreadyContainsProp(string propName)
                 {
                     return HasAny(from p in CurrentVisualElement.Properties
-                                  from prop in ParseProperty(p)
+                                  from prop in TryParseProperty(p)
                                   where propName.Equals(prop.Name, StringComparison.OrdinalIgnoreCase)
                                   select prop);
                 }

@@ -33,7 +33,7 @@ public sealed record Result
 
 
 
-public sealed record Result<TValue>: IEnumerable<TValue>
+public sealed record Result<TValue>
 {
     public Exception Error { get; init; }
 
@@ -71,10 +71,6 @@ public sealed record Result<TValue>: IEnumerable<TValue>
         }
     }
     
-    IEnumerator IEnumerable.GetEnumerator()
-    {
-        return GetEnumerator();
-    }
 }
 
 

@@ -317,7 +317,7 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
 
         string nameText = null;
         {
-            foreach (var name in from p in node.Properties from pair in ParseProperty(p) where pair.Name == Design.Name select pair.Value)
+            foreach (var name in from p in node.Properties from pair in TryParseProperty(p) where pair.Name == Design.Name select pair.Value)
             {
                 nameText = TryClearStringValue(name);
             }
@@ -388,7 +388,7 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
 
         static bool hasNamedProperty(VisualElementModel node, string propertyName)
         {
-            foreach (var _ in from p in node.Properties from pair in ParseProperty(p) where pair.Name == propertyName select pair)
+            foreach (var _ in from p in node.Properties from pair in TryParseProperty(p) where pair.Name == propertyName select pair)
             {
                 return true;
             }

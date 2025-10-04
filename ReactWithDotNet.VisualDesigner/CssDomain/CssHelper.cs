@@ -2,6 +2,16 @@
 
 public static partial class CssHelper
 {
+    public static Maybe<DesignerStyleItem> TryCreateDesignerStyleItemFromText(ProjectConfig project, string designerStyleItem)
+    {
+        var result = CreateDesignerStyleItemFromText(project, designerStyleItem);
+        if (result.Success)
+        {
+            return Maybe<DesignerStyleItem>.Some(result.Value);
+        }
+
+        return None;
+    }
     public static Result<DesignerStyleItem> CreateDesignerStyleItemFromText(ProjectConfig project, string designerStyleItem)
     {
         var styleAttribute = ParseStyleAttribute(designerStyleItem);
