@@ -665,12 +665,13 @@ sealed class ApplicationPreview : Component
                     {
                         if (isValueDouble)
                         {
-                            return ReflectionHelper.SetPropertyValue(element, "height", propValue)
-                                .Then(() => data with
+                            return 
+                                from _ in ReflectionHelper.SetPropertyValue(element, "height", propValue)
+                                select data with
                                 {
                                     IsProcessed = true
-                                });
-                            
+                                };
+
                         }
                     }
 
