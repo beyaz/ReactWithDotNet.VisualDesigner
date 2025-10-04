@@ -171,6 +171,12 @@ sealed class ApplicationPreview : Component
                 }
             }
 
+            Result<IEnumerable<ParsedProperty>> designTimeProps_ = 
+                from p in model.Properties
+                from x in ParseProperty(p)
+                where Design.IsDesignTimeName(x.Name) && x.Name.NotIn(Design.Text, Design.TextPreview, Design.Name)
+                select x;
+            
 
             var designTimeProps = from p in model.Properties
                                   from x in TryParseProperty(p)
