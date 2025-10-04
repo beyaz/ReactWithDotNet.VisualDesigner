@@ -1116,7 +1116,9 @@ static class ApplicationPreviewExtensions
 
         static Result<StyleModifier> ApplyPseudo(string pseudo, IReadOnlyList<StyleModifier> styleModifiers)
         {
-            return GetPseudoFunction(pseudo).Then(pseudoFunction => pseudoFunction([.. styleModifiers]));
+            return 
+                from fn in GetPseudoFunction(pseudo)
+                select fn([.. styleModifiers]);
         }
     }
 }

@@ -60,15 +60,7 @@ static class FP
         return convertFunc(result.value);
     }
 
-    public static Result<B> Then<A, B>(this Result<A> result, Func<A, B> convertFunc)
-    {
-        if (result.HasError)
-        {
-            return result.Error;
-        }
-
-        return convertFunc(result.Value);
-    }
+   
 
     public static Result<A> Then<A>(this Result<Unit> result, Func<A> onSuccessFunc)
     {
