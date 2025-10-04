@@ -7,29 +7,6 @@ public sealed class Unit
 
 public static class UnitExtensions
 {
-    public static Result<Unit> Select<TSource>
-    (
-        this Result<IEnumerable<TSource>> result,
-        Func<TSource, Result<Unit>> selector
-    )
-    {
-        if (result.HasError)
-        {
-            return result.Error;
-        }
-
-        foreach (var source in result.Value)
-        {
-            var selectorResult = selector(source);
-            if (selectorResult.HasError)
-            {
-                return selectorResult.Error;
-            }
-        }
-
-        return Unit.Value;
-    }
-
     public static Result<Unit> SelectMany<A, B>
     (
         this Result<A> result,

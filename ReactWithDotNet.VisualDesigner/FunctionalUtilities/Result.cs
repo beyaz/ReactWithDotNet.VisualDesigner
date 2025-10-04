@@ -120,4 +120,95 @@ public static class ResultExtensions
 
         return returnList;
     }
+    
+    public static Result<IEnumerable<C>> SelectMany<A, B, C>
+    (
+        this IEnumerable<A> result,
+        Func<A, Result<B>> binder,
+        Func<A, B, C> projector
+    )
+    {
+        if (result is null)
+        {
+            throw new ArgumentNullException(nameof(result));
+        }
+
+        if (binder == null)
+        {
+            throw new ArgumentNullException(nameof(binder));
+        }
+
+        if (projector == null)
+        {
+            throw new ArgumentNullException(nameof(projector));
+        }
+
+        List<C> returnItems = [];
+        
+        foreach (var a in result)
+        {
+            var b = binder(a);
+            if (b.HasError)
+            {
+                return b.Error;
+            }
+
+            var c = projector(a, b.Value);
+
+            returnItems.Add(c);
+        }
+
+        return returnItems;
+    }
+    
+    public static Result<IEnumerable<A>> Where<A>
+    (
+        this Result<IEnumerable<A>> result,
+        Func<A, bool> filter
+    )
+    {
+        if (result == null)
+        {
+            throw new ArgumentNullException(nameof(result));
+        }
+
+        if (filter == null)
+        {
+            throw new ArgumentNullException(nameof(filter));
+        }
+
+        if (result.HasError)
+        {
+            return result.Error;
+        }
+
+        return new()
+        {
+            Value = result.Value.Where(filter)
+        };
+
+    }
+
+    public static Result<IEnumerable<B>> Select<TSource,B>
+    (
+        this Result<IEnumerable<TSource>> result,
+        Func<TSource, B> selector
+    )
+    {
+        if (result.HasError)
+        {
+            return result.Error;
+        }
+
+        List<B> returnItems = [];
+        
+        foreach (var source in result.Value)
+        {
+            var selectorResult = selector(source);
+
+            returnItems.Add(selectorResult);
+        }
+
+        return returnItems;
+    }
 }
