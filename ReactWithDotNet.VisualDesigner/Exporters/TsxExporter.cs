@@ -28,6 +28,14 @@ static class TsxExporter
             (filePath, fileContent) = result.Value;
         }
 
+        //return 
+        //    from fileContentAtDisk in await IO.TryReadFile(filePath)
+        //    select IsEqualsIgnoreWhitespace(fileContentAtDisk, fileContent) switch
+        //    {
+        //        true=>new ExportOutput(),
+        //        false=> from _ in await IO.TryWriteToFile(filePath, fileContent)
+        //            select new ExportOutput { HasChange = true }
+        //    }
         string fileContentAtDisk;
         {
             var result = await IO.TryReadFile(filePath);
