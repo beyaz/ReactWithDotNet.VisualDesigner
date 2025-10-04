@@ -35,6 +35,16 @@ static class ParsedPropertyExtensions
 
 static class ParsedPropertyFactory
 {
+    public static Maybe<ParsedProperty> TryParseProperty(string nameValueCombined)
+    {
+        var result = ParseProperty(nameValueCombined);
+        if (result.Success)
+        {
+            return Maybe<ParsedProperty>.Some(result.Value);
+        }
+
+        return None;
+    }
     public static Result<ParsedProperty> ParseProperty(string nameValueCombined)
     {
         if (string.IsNullOrWhiteSpace(nameValueCombined))
