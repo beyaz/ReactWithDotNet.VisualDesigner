@@ -1,5 +1,4 @@
 ﻿global using static ReactWithDotNet.VisualDesigner.FunctionalUtilities.MaybeExtensions;
-
 using System.Collections;
 
 namespace ReactWithDotNet.VisualDesigner.FunctionalUtilities;
@@ -51,7 +50,6 @@ public sealed record Maybe<TValue> : IEnumerable<TValue>
     }
 }
 
-
 public sealed class NoneObject
 {
     public static readonly NoneObject Instance = new();
@@ -61,11 +59,10 @@ public sealed class NoneObject
     }
 }
 
-
 static class MaybeExtensions
 {
     public static NoneObject None => NoneObject.Instance;
-    
+
     public static void HasValue<TValue>(this Maybe<TValue> maybe, Action<TValue> action)
     {
         if (maybe.HasNoValue)
@@ -75,7 +72,7 @@ static class MaybeExtensions
 
         action(maybe.Value);
     }
-    
+
     extension<T>(IEnumerable<Result<T>> enumerable)
     {
         public bool HasError
@@ -93,7 +90,7 @@ static class MaybeExtensions
                 return false;
             }
         }
-        
+
         public Exception Error
         {
             get
@@ -110,5 +107,4 @@ static class MaybeExtensions
             }
         }
     }
-    
 }
