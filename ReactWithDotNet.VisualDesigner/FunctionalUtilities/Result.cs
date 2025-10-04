@@ -24,10 +24,6 @@ public sealed record Result<TValue>
 
    
 
-    public static implicit operator Result<TValue>(Result<Unit> value)
-    {
-        return new() { Success = value.Success, Error = value.Error };
-    }
 
     
 }
