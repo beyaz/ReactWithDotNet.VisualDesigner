@@ -1,7 +1,6 @@
 ﻿global using ReactWithDotNet.VisualDesigner.FunctionalUtilities;
 global using static ReactWithDotNet.VisualDesigner.FunctionalUtilities.FP;
 using System.Collections;
-using Microsoft.CodeAnalysis.CSharp;
 
 namespace ReactWithDotNet.VisualDesigner.FunctionalUtilities;
 
@@ -16,11 +15,6 @@ public sealed record Maybe<TValue> : IEnumerable<TValue>
     public static implicit operator Maybe<TValue>(TValue value)
     {
         return new() { Value = value, HasValue = value is not null };
-    }
-
-    public static implicit operator Maybe<TValue>((bool success, TValue value) tuple)
-    {
-        return new() { Value = tuple.value, HasValue = tuple.success };
     }
 
     public static implicit operator Maybe<TValue>(NoneObject _)
