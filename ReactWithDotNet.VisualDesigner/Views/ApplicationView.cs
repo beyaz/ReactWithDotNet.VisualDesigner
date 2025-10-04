@@ -2824,7 +2824,7 @@ sealed class ApplicationView : Component<ApplicationState>
                     {
                         new span(FontWeight600) { x.Name }, ": ", new span(PaddingLeft(2)) { x.Value }
                     };
-                };
+                }
             }
 
             var styleItem = new FlexRowCentered(CursorDefault, Padding(4, 8), BorderRadius(16), UserSelect(none))
