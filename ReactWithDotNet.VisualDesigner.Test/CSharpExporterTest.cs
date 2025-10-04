@@ -16,7 +16,7 @@ public sealed class CSharpExporterTest
         });
         
         
-        result.Success.ShouldBeTrue();
+        result.HasError.ShouldBeFalse();
     }
     [TestMethod]
     public async Task Export_as_csharp()
@@ -49,7 +49,7 @@ public sealed class CSharpExporterTest
 
             var result = await CSharpExporter.CalculateElementTreeSourceCodes(project,new Dictionary<string, string>(), visualElementModel);
 
-            result.Success.ShouldBeTrue();
+            result.HasError.ShouldBeFalse();
 
             result.Value.elementTreeSourceLines.Select(x=>x.Trim()).ShouldBe(expected.Select(x=>x.Trim()));
         }

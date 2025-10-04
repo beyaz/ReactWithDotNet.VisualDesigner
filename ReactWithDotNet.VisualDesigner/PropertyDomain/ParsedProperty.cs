@@ -39,7 +39,7 @@ static class ParsedPropertyFactory
     public static Maybe<ParsedProperty> TryParseProperty(string nameValueCombined)
     {
         var result = ParseProperty(nameValueCombined);
-        if (result.Success)
+        if (!result.HasError)
         {
             return Maybe<ParsedProperty>.Some(result.Value);
         }

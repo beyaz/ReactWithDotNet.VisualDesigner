@@ -167,7 +167,7 @@ static class HtmlImporter
                 static (Maybe<string> className, IReadOnlyList<string> styles) processClassName(ProjectConfig project, string className)
                 {
                     var designerStyleItem = TryConvertTailwindUtilityClassToHtmlStyle(project, className);
-                    if (designerStyleItem.Success)
+                    if (!designerStyleItem.HasError)
                     {
                         var returnStyles = new List<string>();
 

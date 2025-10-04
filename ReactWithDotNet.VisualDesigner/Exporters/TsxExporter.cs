@@ -173,7 +173,7 @@ static class TsxExporter
                 importLines = result.Value.importLines;
 
                 var formatResult = await Prettier.FormatCode(string.Join(Environment.NewLine, linesToInject));
-                if (formatResult.Success)
+                if (!formatResult.HasError)
                 {
                     linesToInject = formatResult.Value.Split(Environment.NewLine.ToCharArray());
                 }

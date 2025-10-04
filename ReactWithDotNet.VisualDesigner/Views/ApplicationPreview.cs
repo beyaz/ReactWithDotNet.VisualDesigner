@@ -127,7 +127,7 @@ sealed class ApplicationPreview : Component
                     if (componentRootElementModel is not null)
                     {
                         var component = await renderElement(scope with { Parent = scope, ParentModel = model, ParentPath = path }, componentRootElementModel, path);
-                        if (component.Success)
+                        if (!component.HasError)
                         {
                             Plugin.BeforeComponentPreview(scope, model, component.Value);
                         }

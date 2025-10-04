@@ -26,7 +26,7 @@ public sealed class NextJsExportTest
                 UserName    = EnvironmentUserName
             });
 
-            result.Success.ShouldBeTrue();
+            result.HasError.ShouldBeFalse();
         }
     }
 

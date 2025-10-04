@@ -5,12 +5,13 @@ public static partial class CssHelper
     public static Maybe<DesignerStyleItem> TryCreateDesignerStyleItemFromText(ProjectConfig project, string designerStyleItem)
     {
         var result = CreateDesignerStyleItemFromText(project, designerStyleItem);
-        if (result.Success)
+        if (result.HasError)
         {
-            return Maybe<DesignerStyleItem>.Some(result.Value);
+            return None;
+            
         }
 
-        return None;
+        return Maybe<DesignerStyleItem>.Some(result.Value);
     }
     public static Result<DesignerStyleItem> CreateDesignerStyleItemFromText(ProjectConfig project, string designerStyleItem)
     {
@@ -38,7 +39,7 @@ public static partial class CssHelper
         // P r o j e c t
         {
             var result = tryProcessByProjectConfig(project, designerStyleItem);
-            if (result.Success)
+            if (!result.HasError)
             {
                 return result;
             }
@@ -47,7 +48,7 @@ public static partial class CssHelper
         // T a i l w i n d
         {
             var result = TryConvertTailwindUtilityClassToHtmlStyle(project, designerStyleItem);
-            if (result.Success)
+            if (!result.HasError)
             {
                 return result;
             }

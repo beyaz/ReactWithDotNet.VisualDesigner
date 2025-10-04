@@ -1,5 +1,4 @@
 ﻿using ReactWithDotNet.VisualDesigner.Exporters;
-using ReactWithDotNet.VisualDesigner.FunctionalUtilities;
 
 namespace ReactWithDotNet.VisualDesigner.Test;
 
@@ -36,7 +35,7 @@ public sealed class ExporterTest
 
             var result = await TsxExporter.CalculateElementTreeSourceCodes(project,new Dictionary<string, string>(), visualElementModel);
 
-            result.Success.ShouldBeTrue();
+            result.HasError.ShouldBeFalse();
 
             result.Value.elementTreeSourceLines.ShouldBe(expected);
         }
