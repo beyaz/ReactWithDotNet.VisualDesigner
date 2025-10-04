@@ -46,7 +46,7 @@ public static class UnitExtensions
 
         var enumerable = binder(a);
 
-        Result<Unit> resultC = new(Unit.Value);
+        Result<Unit> resultC = Unit.Value;
 
         foreach (var item in enumerable)
         {

@@ -2,36 +2,21 @@
 
 public sealed class Result<TValue>
 {
-    public readonly Exception Error;
+    public required Exception Error { get; init; }
 
-    public readonly TValue Value;
+    public required TValue Value { get; init; }
 
-    internal Result(TValue value)
-    {
-        Success = true;
-        Value   = value;
-        Error   = null!;
-    }
+    public bool HasError => !ReferenceEquals(Error, null);
 
-    Result(Exception error)
-    {
-        Success = false;
-        Error   = error;
-        Value   = default!;
-    }
-
-    public bool HasError => !Success;
-
-    bool Success { get; }
 
     public static implicit operator Result<TValue>(TValue value)
     {
-        return new(value);
+        return new() { Value = value, Error = null! };
     }
 
     public static implicit operator Result<TValue>(Exception error)
     {
-        return new(error);
+        return new() { Error = error, Value = default!};
     }
 }
 
@@ -90,7 +75,7 @@ public static class ResultExtensions
 
             var results = middles.Select(middle => projector(result.Value, middle));
 
-            return new(results);
+            return new() { Value = results, Error = null!};
         }
         catch (Exception ex)
         {
