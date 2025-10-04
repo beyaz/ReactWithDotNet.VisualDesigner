@@ -5,11 +5,6 @@ using Microsoft.CodeAnalysis.CSharp;
 
 namespace ReactWithDotNet.VisualDesigner.FunctionalUtilities;
 
-public sealed class Unit
-{
-    public static readonly Unit Value = new();
-}
-
 public sealed record Maybe<TValue> : IEnumerable<TValue>
 {
     public bool HasNoValue => !HasValue;
