@@ -114,39 +114,34 @@ static class CSharpStringExporter
         }
     }
 
-    internal static async 
+    internal static  
         Task<Result<(IReadOnlyList<string> elementTreeSourceLines, IReadOnlyList<string> importLines)>> 
         CalculateElementTreeSourceCodes(ProjectConfig project, IReadOnlyDictionary<string, string> componentConfig, VisualElementModel rootVisualElement)
     {
-        ReactNode rootNode;
-        {
-            var result = await ModelToNodeTransformer.ConvertVisualElementModelToReactNodeModel(project, rootVisualElement);
-            if (result.HasError)
-            {
-                return result.Error;
-            }
+        
+        return
+            // Convert model to node
+            from rootNode in ModelToNodeTransformer.ConvertVisualElementModelToReactNodeModel(project, rootVisualElement)
 
-            rootNode = result.Value;
-        }
+            // Analyze node
+            let analyzedRootNode = Plugin.AnalyzeNode(rootNode, componentConfig)
 
-        rootNode = Plugin.AnalyzeNode(rootNode, componentConfig);
+            // Convert node to tree
+            from elementTree in ConvertReactNodeModelToElementTreeSourceLines(project, analyzedRootNode, null, 0)
 
-        IReadOnlyList<string> elementJsxTree;
-        {
-            var result = await ConvertReactNodeModelToElementTreeSourceLines(project, rootNode, null, 0);
-            if (result.HasError)
-            {
-                return result.Error;
-            }
+            // Calculate imports
+            let importLines = Plugin.CalculateImportLines(analyzedRootNode)
+            
+            // apply $, append , ent of file
+            let elementTreeFinalVersion = appendDollarSignAtLineStartIfNeed(appendCommaEndOfLine(elementTree))
+            
+            // return
+            select (elementTreeFinalVersion.AsReadOnlyList(), importLines.AsReadOnlyList());
+        
+        
+        
 
-            elementJsxTree = result.Value;
 
-            elementJsxTree = appendDollarSignAtLineStartIfNeed(appendCommaEndOfLine(elementJsxTree));
-        }
-
-        var importLines = Plugin.CalculateImportLines(rootNode);
-
-        return (elementJsxTree, importLines.ToList());
 
         static List<string> appendCommaEndOfLine(IReadOnlyList<string> lines)
         {
