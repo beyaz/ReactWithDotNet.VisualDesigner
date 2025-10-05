@@ -1,5 +1,4 @@
-﻿using System.IO;
-using System.Reflection;
+﻿using System.Reflection;
 
 namespace ReactWithDotNet.VisualDesigner.Exporters;
 
@@ -135,24 +134,6 @@ static class TsxExporter
 
             filePath            = result.Value.filePath;
             targetComponentName = result.Value.targetComponentName;
-        }
-
-        // create File if not exists
-        {
-            if (filePath is null)
-            {
-                return new IOException("FilePathNotCalculated");
-            }
-
-            if (!File.Exists(filePath))
-            {
-                var fileContent =
-                    $"export default function {targetComponentName}()" + "{" + Environment.NewLine +
-                    "    return (" + Environment.NewLine +
-                    "    );" + Environment.NewLine +
-                    "}";
-                await File.WriteAllTextAsync(filePath, fileContent);
-            }
         }
 
         IReadOnlyList<string> fileContentInDirectory;
