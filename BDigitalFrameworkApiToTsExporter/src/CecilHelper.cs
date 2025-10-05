@@ -6,7 +6,7 @@ namespace BDigitalFrameworkApiToTsExporter;
 
 static class CecilHelper
 {
-    public static List<TypeDefinition> GetTypes(AssemblyDefinition assemblyDefinition, IReadOnlyList<string> listOfTypes)
+    public static IReadOnlyList<TypeDefinition> GetTypes(AssemblyDefinition assemblyDefinition, IReadOnlyList<string> listOfTypes)
     {
         var typeDefinitions = new List<TypeDefinition>();
 
