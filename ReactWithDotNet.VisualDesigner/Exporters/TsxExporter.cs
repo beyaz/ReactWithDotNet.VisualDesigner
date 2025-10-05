@@ -79,8 +79,8 @@ static class TsxExporter
         return (leftPaddingCount, firstReturnLineIndex, firstReturnCloseLineIndex);
     }
 
-    internal static 
-        Task<Result<(IReadOnlyList<string> elementTreeSourceLines, IReadOnlyList<string> importLines)>> 
+    internal static
+        Task<Result<(IReadOnlyList<string> elementTreeSourceLines, IReadOnlyList<string> importLines)>>
         CalculateElementTreeSourceCodes(ProjectConfig project, IReadOnlyDictionary<string, string> componentConfig, VisualElementModel rootVisualElement)
     {
         return
@@ -95,7 +95,7 @@ static class TsxExporter
 
             // Calculate imports
             let importLines = Plugin.CalculateImportLines(analyzedRootNode)
-            
+
             // return
             select (elementJsxTree, importLines.AsReadOnlyList());
     }
@@ -155,7 +155,6 @@ static class TsxExporter
             }
         }
 
-        
         IReadOnlyList<string> fileContentInDirectory;
         {
             var result = await FileSystem.ReadAllLines(filePath);
@@ -187,7 +186,17 @@ static class TsxExporter
             }
         }
 
-        // try import lines
+        fileContentInDirectory = mergeImportLines(fileContentInDirectory, importLines);
+
+        return
+            from fileContent in InjectRender(fileContentInDirectory, targetComponentName, linesToInject)
+            select new FileModel
+            {
+                Path    = filePath,
+                Content = fileContent
+            };
+
+        static IReadOnlyList<string> mergeImportLines(IReadOnlyList<string> fileContentInDirectory, IReadOnlyList<string> importLines)
         {
             var fileContentInDirectoryAsList = fileContentInDirectory.ToList();
 
@@ -205,19 +214,8 @@ static class TsxExporter
                 }
             }
 
-            fileContentInDirectory = fileContentInDirectoryAsList;
+            return fileContentInDirectoryAsList;
         }
-
-
-
-        return
-            from fileContent in InjectRender(fileContentInDirectory, targetComponentName, linesToInject)
-            select new FileModel
-            {
-                Path    = filePath,
-                Content = fileContent
-            };
-        
     }
 
     static async Task<Result<IReadOnlyList<string>>> ConvertReactNodeModelToElementTreeSourceLines(ProjectConfig project, ReactNode node, ReactNode parentNode, int indentLevel)
