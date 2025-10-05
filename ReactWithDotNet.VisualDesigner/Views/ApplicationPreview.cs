@@ -247,6 +247,8 @@ sealed class ApplicationPreview : Component
                     {
                         return result.Error;
                     }
+                    
+                    model = result.Value.model;
                 }
             }
 
