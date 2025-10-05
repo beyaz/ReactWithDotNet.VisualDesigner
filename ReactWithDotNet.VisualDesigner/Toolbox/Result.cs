@@ -21,8 +21,10 @@ public sealed class Result<TValue>
     }
     
     public static implicit operator Task<Result<TValue>>(Result<TValue> result)
-        => Task.FromResult(result);
-    
+    {
+        return Task.FromResult(result);
+    }
+
     // @formatter:on
 }
 
@@ -33,54 +35,13 @@ static class Result
         return new() { Value = value };
     }
 }
+
 public static class ResultExtensions
 {
-    public static async Task<Result<C>> SelectMany<A, B, C>
-    (
-        this Task<Result<A>> result,
-        Func<A, Task<Result<B>>> binder,
-        Func<A, B, C> projector
-    )
+    public static Result<T> AsResult<T>(this (T value, Exception exception) tuple)
     {
-        var a = await result;
-
-        if (a.HasError)
-        {
-            return a.Error;
-        }
-
-        var middle = await binder(a.Value);
-        if (middle.HasError)
-        {
-            return middle.Error;
-        }
-
-        return projector(a.Value, middle.Value);
+        return new() { Value = tuple.value, Error = tuple.exception };
     }
-    
-    public static async Task<Result<C>> SelectMany<A, B, C>
-    (
-        this Task<Result<A>> result,
-        Func<A, Task<Result<B>>> binder,
-        Func<A, B, Task<Result<C>>> projector
-    )
-    {
-        var a = await result;
-
-        if (a.HasError)
-        {
-            return a.Error;
-        }
-
-        var middle = await binder(a.Value);
-        if (middle.HasError)
-        {
-            return middle.Error;
-        }
-
-        return await projector(a.Value, middle.Value);
-    }
-
 
     public static Result<B> Select<A, B>
     (
@@ -95,7 +56,7 @@ public static class ResultExtensions
 
         return selector(result.Value);
     }
-    
+
     public static Result<B> Select<A, B>
     (
         this Result<A> result,
@@ -109,7 +70,7 @@ public static class ResultExtensions
 
         return selector(result.Value);
     }
-    
+
     public static async Task<Result<B>> Select<A, B>
     (
         this Task<Result<A>> result,
@@ -117,7 +78,7 @@ public static class ResultExtensions
     )
     {
         var a = await result;
-        
+
         if (a.HasError)
         {
             return a.Error;
@@ -141,7 +102,76 @@ public static class ResultExtensions
 
         return selector(a.Value);
     }
-    
+
+    public static Result<IEnumerable<B>> Select<TSource, B>
+    (
+        this Result<IEnumerable<TSource>> result,
+        Func<TSource, B> selector
+    )
+    {
+        if (result.HasError)
+        {
+            return result.Error;
+        }
+
+        List<B> returnItems = [];
+
+        foreach (var source in result.Value)
+        {
+            var selectorResult = selector(source);
+
+            returnItems.Add(selectorResult);
+        }
+
+        return returnItems;
+    }
+
+    public static async Task<Result<C>> SelectMany<A, B, C>
+    (
+        this Task<Result<A>> result,
+        Func<A, Task<Result<B>>> binder,
+        Func<A, B, C> projector
+    )
+    {
+        var a = await result;
+
+        if (a.HasError)
+        {
+            return a.Error;
+        }
+
+        var middle = await binder(a.Value);
+        if (middle.HasError)
+        {
+            return middle.Error;
+        }
+
+        return projector(a.Value, middle.Value);
+    }
+
+    public static async Task<Result<C>> SelectMany<A, B, C>
+    (
+        this Task<Result<A>> result,
+        Func<A, Task<Result<B>>> binder,
+        Func<A, B, Task<Result<C>>> projector
+    )
+    {
+        var a = await result;
+
+        if (a.HasError)
+        {
+            return a.Error;
+        }
+
+        var middle = await binder(a.Value);
+        if (middle.HasError)
+        {
+            return middle.Error;
+        }
+
+        return await projector(a.Value, middle.Value);
+    }
+
     public static Result<C> SelectMany<A, B, C>
     (
         this Result<A> result,
@@ -223,7 +253,7 @@ public static class ResultExtensions
 
         return returnList;
     }
-    
+
     public static Result<IEnumerable<C>> SelectMany<A, B, C>
     (
         this IEnumerable<A> result,
@@ -247,7 +277,7 @@ public static class ResultExtensions
         }
 
         List<C> returnItems = [];
-        
+
         foreach (var a in result)
         {
             var b = binder(a);
@@ -263,7 +293,7 @@ public static class ResultExtensions
 
         return returnItems;
     }
-    
+
     public static Result<IEnumerable<A>> Where<A>
     (
         this Result<IEnumerable<A>> result,
@@ -289,35 +319,5 @@ public static class ResultExtensions
         {
             Value = result.Value.Where(filter)
         };
-
-    }
-
-    public static Result<IEnumerable<B>> Select<TSource,B>
-    (
-        this Result<IEnumerable<TSource>> result,
-        Func<TSource, B> selector
-    )
-    {
-        if (result.HasError)
-        {
-            return result.Error;
-        }
-
-        List<B> returnItems = [];
-        
-        foreach (var source in result.Value)
-        {
-            var selectorResult = selector(source);
-
-            returnItems.Add(selectorResult);
-        }
-
-        return returnItems;
-    }
-
-
-    public static Result<T> AsResult<T>(this (T value, Exception exception) tuple)
-    {
-        return new() { Value = tuple.value, Error = tuple.exception };
     }
 }
