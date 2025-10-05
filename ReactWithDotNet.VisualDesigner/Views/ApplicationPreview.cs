@@ -629,12 +629,12 @@ sealed class ApplicationPreview : Component
                         var firstChild = model.Children.FirstOrDefault();
                         if (firstChild is not null)
                         {
-                            var designTimeChildrenCount = double.Parse(propValue);
+                            var designTimeChildrenCount = int.Parse(propValue);
 
-                            for (var i = 0; i < designTimeChildrenCount - 1; i++)
+                            model = model with
                             {
-                                model = model with { Children = model.Children.Add(CloneByUsingYaml(firstChild)) };
-                            }
+                                Children = model.Children.AddRange(from _ in Enumerable.Range(0,designTimeChildrenCount) select CloneByUsingYaml(firstChild))
+                            };
                         }
 
                         return data with { IsProcessed = true, model = model };
