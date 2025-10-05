@@ -1,4 +1,4 @@
-﻿using System.IO;
+﻿using System.Collections.Immutable;
 using ReactWithDotNet.Transformers;
 
 namespace ReactWithDotNet.VisualDesigner.Exporters;
@@ -33,7 +33,6 @@ static class CSharpStringExporter
                         HasChange = true
                     }
             };
-
     }
 
     public static Result<SourceLinePoints> GetComponentLineIndexPointsInCSharpFile(IReadOnlyList<string> fileContent, string targetComponentName)
@@ -113,11 +112,10 @@ static class CSharpStringExporter
         }
     }
 
-    internal static  
-        Task<Result<(IReadOnlyList<string> elementTreeSourceLines, IReadOnlyList<string> importLines)>> 
+    internal static
+        Task<Result<(IReadOnlyList<string> elementTreeSourceLines, IReadOnlyList<string> importLines)>>
         CalculateElementTreeSourceCodes(ProjectConfig project, IReadOnlyDictionary<string, string> componentConfig, VisualElementModel rootVisualElement)
     {
-        
         return
             // Convert model to node
             from rootNode in ModelToNodeTransformer.ConvertVisualElementModelToReactNodeModel(project, rootVisualElement)
@@ -130,21 +128,17 @@ static class CSharpStringExporter
 
             // Calculate imports
             let importLines = Plugin.CalculateImportLines(analyzedRootNode)
-            
+
             // apply $, append , ent of file
             let elementTreeFinalVersion = appendDollarSignAtLineStartIfNeed(appendCommaEndOfLine(elementTree))
-            
+
             // return
             select (elementTreeFinalVersion.AsReadOnlyList(), importLines.AsReadOnlyList());
-        
-        
-        
-
-
 
         static List<string> appendCommaEndOfLine(IReadOnlyList<string> lines)
         {
-            return ListFrom(from line in lines.Select((line, index) => new { text = line, index })
+            return ListFrom(
+                            from line in lines.Select((line, index) => new { text = line, index })
                             let length = lines.Count - 1
                             let isLastLine = line.index == lines.Count - 1
                             let lineStartsWithDoubleQuote = line.text.TrimStart().StartsWith('"')
@@ -164,7 +158,8 @@ static class CSharpStringExporter
 
         static List<string> appendDollarSignAtLineStartIfNeed(IReadOnlyList<string> lines)
         {
-            return ListFrom(from line in lines.Select((line, index) => new { text = line, index })
+            return ListFrom(
+                            from line in lines.Select((line, index) => new { text = line, index })
                             let length = lines.Count
                             let lineStartsWithDoubleQuote = line.text.TrimStart().StartsWith('"')
                             let lineContainsLeftBracket = line.text.Contains('{')
@@ -185,32 +180,18 @@ static class CSharpStringExporter
 
         var project = GetProjectConfig(projectId);
 
-        
-        
         return await
             from data in GetComponentData(new() { ComponentId = componentId, UserName = userName })
-            
             from rootVisualElement in GetComponentUserOrMainVersionAsync(componentId, userName)
-            
             from file in GetComponentFileLocation(componentId, user.LocalWorkspacePath)
-            
             from fileContentInDirectory in FileSystem.ReadAllLines(file.filePath)
-            
             from source in CalculateElementTreeSourceCodes(project, data.Component.GetConfig(), rootVisualElement)
-            
             from fileContent in InjectRender(fileContentInDirectory, file.targetComponentName, source.elementTreeSourceLines)
-            
             select new FileModel
             {
                 Path    = file.filePath,
                 Content = fileContent
             };
-        
-        
-        
-
-
-
     }
 
     static async Task<Result<IReadOnlyList<string>>> ConvertReactNodeModelToElementTreeSourceLines(ProjectConfig project, ReactNode node, ReactNode parentNode, int indentLevel)
@@ -728,30 +709,12 @@ static class CSharpStringExporter
 
     static Result<string> InjectRender(IReadOnlyList<string> fileContent, string targetComponentName, IReadOnlyList<string> linesToInject)
     {
-        var lines = fileContent.ToList();
+        return
+            from points in GetComponentLineIndexPointsInCSharpFile(fileContent, targetComponentName)
+            let clearedFileContent = fileContent.ToImmutableList().RemoveRange(points.FirstReturnLineIndex, points.FirstReturnCloseLineIndex - points.FirstReturnLineIndex + 1)
+            let linesToInjectPaddingAppliedVersion = applyPadding(clearedFileContent, points.LeftPaddingCount)
+            select string.Join(Environment.NewLine, clearedFileContent.InsertRange(points.FirstReturnLineIndex, linesToInjectPaddingAppliedVersion));
 
-        // focus to component code
-        int firstReturnLineIndex, firstReturnCloseLineIndex, leftPaddingCount;
-        {
-            var result = GetComponentLineIndexPointsInCSharpFile(fileContent, targetComponentName);
-            if (result.HasError)
-            {
-                return result.Error;
-            }
-
-            leftPaddingCount          = result.Value.LeftPaddingCount;
-            firstReturnLineIndex      = result.Value.FirstReturnLineIndex;
-            firstReturnCloseLineIndex = result.Value.FirstReturnCloseLineIndex;
-        }
-
-        lines.RemoveRange(firstReturnLineIndex, firstReturnCloseLineIndex - firstReturnLineIndex + 1);
-
-       
-
-        lines.InsertRange(firstReturnLineIndex, applyPadding(linesToInject,leftPaddingCount));
-
-        return string.Join(Environment.NewLine, lines);
-        
         static IReadOnlyList<string> applyPadding(IReadOnlyList<string> lines, int leftPaddingCount)
         {
             var temp = lines.Select(line => new string(' ', leftPaddingCount + 4) + line).ToList();
