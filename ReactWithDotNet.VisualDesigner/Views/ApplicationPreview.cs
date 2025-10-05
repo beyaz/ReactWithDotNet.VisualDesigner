@@ -178,10 +178,7 @@ sealed class ApplicationPreview : Component
                 where Design.IsDesignTimeName(x.Name) && x.Name.NotIn(Design.Text, Design.TextPreview, Design.Name, Design.ShowIf, Design.HideIf)
                 select x;
 
-            if (designTimeProps.HasError)
-            {
-                return designTimeProps.Error;
-            }
+            
          
             model = model with
             {
@@ -221,8 +218,15 @@ sealed class ApplicationPreview : Component
 
             // process design time props
             {
-                foreach (var designTimeProp in designTimeProps.Value)
+                foreach (var item in designTimeProps)
                 {
+                    if (item.HasError)
+                    {
+                        return item.Error;
+                    }
+
+                    var designTimeProp = item.Value;
+                    
                     var propertyProcessScope = new PropertyProcessScope
                     {
                         scope     = scope,

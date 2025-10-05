@@ -107,5 +107,14 @@ static class MaybeExtensions
                 return new ArgumentException("results has no error.");
             }
         }
+        
+        public IReadOnlyList<T> Value
+        {
+            get
+            {
+
+                return enumerable.Select(x => x.Value).AsReadOnlyList();
+            }
+        }
     }
 }

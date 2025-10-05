@@ -36,7 +36,7 @@ static class DesignerStyleItemFactory
         {
             Pseudo = input.Pseudo,
 
-            FinalCssItems = ListFrom(from x in finalCssItems select x.Value)
+            FinalCssItems = finalCssItems.Value
         };
     }
 
