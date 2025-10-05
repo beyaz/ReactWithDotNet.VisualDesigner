@@ -6,9 +6,9 @@ public interface DesignerStyleItem
 {
     public IReadOnlyList<FinalCssItem> FinalCssItems { get; }
 
-    public string Pseudo { get; }
-    
     public string OriginalText { get; }
+
+    public string Pseudo { get; }
 }
 
 static class DesignerStyleItemFactory
@@ -27,34 +27,31 @@ static class DesignerStyleItemFactory
             return new ArgumentException(nameof(input.OriginalText));
         }
 
-        if (finalCssItems.HasError)
-        {
-            return finalCssItems.Error;
-        }
+        return
+            from list in finalCssItems.AsResult()
+            select new DesignerStyleItemImp
+            {
+                Pseudo = input.Pseudo,
 
-        return new DesignerStyleItemImp
-        {
-            Pseudo = input.Pseudo,
-
-            FinalCssItems = finalCssItems.Value
-        };
+                FinalCssItems = list.ToList()
+            } as DesignerStyleItem;
     }
 
     class DesignerStyleItemImp : DesignerStyleItem
     {
         public IReadOnlyList<FinalCssItem> FinalCssItems { get; init; }
 
-        public string Pseudo { get; init; }
-        
         public string OriginalText { get; init; }
+
+        public string Pseudo { get; init; }
     }
 
     public sealed record CreateDesignerStyleItemInput
     {
         public IEnumerable<Result<FinalCssItem>> FinalCssItems { get; init; }
 
-        public string Pseudo { get; init; }
-        
         public string OriginalText { get; init; }
+
+        public string Pseudo { get; init; }
     }
 }

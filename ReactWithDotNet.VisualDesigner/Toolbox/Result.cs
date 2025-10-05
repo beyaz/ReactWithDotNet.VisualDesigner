@@ -43,6 +43,27 @@ public static class ResultExtensions
         return new() { Value = tuple.value, Error = tuple.exception };
     }
     
+    
+    public static Result<IEnumerable<T>> AsResult<T>(this IEnumerable<Result<T>> enumerable)
+    {
+        List<T> items = [];
+        
+        foreach (var result in enumerable)
+        {
+            items.Add(result.Value);
+            
+            if (result.HasError)
+            {
+                return new()
+                {
+                    Error = result.Error
+                };
+            }
+        }
+        
+        return items;
+    }
+    
     public static IEnumerable<Result<B>> Select<A, B>
     (
         this IEnumerable<Result<A>> source,
