@@ -22,8 +22,7 @@ static class CSharpExporter
 
     public static Task<Result<ExportOutput>> ExportToFileSystem(ExportInput input)
     {
-        
-        return 
+        return
             from file in CalculateExportInfo(input)
             from fileContentAtDisk in FileSystem.ReadAllText(file.Path)
             select IsEqualsIgnoreWhitespace(fileContentAtDisk, file.Content) switch
@@ -36,14 +35,11 @@ static class CSharpExporter
                         HasChange = true
                     }
             };
-        
-        
-        
     }
 
     public static Result<(int leftPaddingCount, int firstReturnLineIndex, int firstReturnCloseLineIndex)> GetComponentLineIndexPointsInCSharpFile(IReadOnlyList<string> fileContent, string targetComponentName)
     {
-         var lines = fileContent.ToList();
+        var lines = fileContent.ToList();
 
         // maybe  ZoomComponent:View
         {
@@ -63,12 +59,12 @@ static class CSharpExporter
                         var firstReturnLineIndex = -1;
                         var leftPaddingCount = -1;
                         {
-                            foreach (var item in lines.FindLineIndexStartsWith(methodDeclerationLineIndex,leftSpaceCount+4, "return "))
+                            foreach (var item in lines.FindLineIndexStartsWith(methodDeclerationLineIndex, leftSpaceCount + 4, "return "))
                             {
                                 firstReturnLineIndex = item;
                                 leftPaddingCount     = leftSpaceCount + 4;
                             }
-                            
+
                             if (firstReturnLineIndex < 0)
                             {
                                 return new InvalidOperationException("No return found");
@@ -77,16 +73,16 @@ static class CSharpExporter
 
                         if (lines[firstReturnLineIndex].EndsWith(";"))
                         {
-                            return ( leftPaddingCount, firstReturnLineIndex, firstReturnLineIndex);
+                            return (leftPaddingCount, firstReturnLineIndex, firstReturnLineIndex);
                         }
 
                         var firstReturnCloseLineIndex = -1;
                         {
-                            foreach (var item in lines.FindLineIndexStartsWith(firstReturnLineIndex, leftSpaceCount+4, "};"))
+                            foreach (var item in lines.FindLineIndexStartsWith(firstReturnLineIndex, leftSpaceCount + 4, "};"))
                             {
                                 firstReturnCloseLineIndex = item;
                             }
-                            
+
                             if (firstReturnCloseLineIndex < 0)
                             {
                                 return new InvalidOperationException("No return found");
@@ -102,35 +98,23 @@ static class CSharpExporter
         return new ArgumentException($"ComponentDeclarationNotFoundInFile. {targetComponentName}");
     }
 
-    internal static async Task<Result<(IReadOnlyList<string> elementTreeSourceLines, IReadOnlyList<string> importLines)>> CalculateElementTreeSourceCodes(ProjectConfig project, IReadOnlyDictionary<string, string> componentConfig, VisualElementModel rootVisualElement)
+    internal static Task<Result<(IReadOnlyList<string> elementTreeSourceLines, IReadOnlyList<string> importLines)>> CalculateElementTreeSourceCodes(ProjectConfig project, IReadOnlyDictionary<string, string> componentConfig, VisualElementModel rootVisualElement)
     {
-        ReactNode rootNode;
-        {
-            var result = await ModelToNodeTransformer.ConvertVisualElementModelToReactNodeModel(project, rootVisualElement);
-            if (result.HasError)
-            {
-                return result.Error;
-            }
+        return
+            // Convert model to node
+            from rootNode in ModelToNodeTransformer.ConvertVisualElementModelToReactNodeModel(project, rootVisualElement)
 
-            rootNode = result.Value;
-        }
+            // Analyze node
+            let analyzedRootNode = Plugin.AnalyzeNode(rootNode, componentConfig)
 
-        rootNode = Plugin.AnalyzeNode(rootNode, componentConfig);
+            // Convert node to JSX tree
+            from elementJsxTree in ConvertReactNodeModelToElementTreeSourceLines(project, analyzedRootNode, null, 2)
 
-        IReadOnlyList<string> elementJsxTree;
-        {
-            var result = await ConvertReactNodeModelToElementTreeSourceLines(project, rootNode, null, 0);
-            if (result.HasError)
-            {
-                return result.Error;
-            }
+            // Calculate imports
+            let importLines = Plugin.CalculateImportLines(analyzedRootNode)
 
-            elementJsxTree = result.Value;
-        }
-
-        var importLines = Plugin.CalculateImportLines(rootNode);
-
-        return (elementJsxTree, importLines.ToList());
+            // return
+            select (elementJsxTree, importLines.AsReadOnlyList());
     }
 
     static async Task<Result<FileModel>> CalculateExportInfo(ExportInput input)
@@ -249,7 +233,7 @@ static class CSharpExporter
 
             fileNewContent = injectedVersion;
         }
-        
+
         return new FileModel
         {
             Path    = filePath,
@@ -729,16 +713,16 @@ static class CSharpExporter
                     {
                         List<string> styleList = [];
                         {
-                            foreach (var styleAttribute in from reactProperty in from p in node.Properties where p.Name == "style" select p
+                            foreach (var styleAttribute in
+                                     from reactProperty in from p in node.Properties where p.Name == "style" select p
                                      from styleAttribute in JsonConvert.DeserializeObject<IReadOnlyList<StyleAttribute>>(reactProperty.Value)
                                      where !Design.IsDesignTimeName(styleAttribute.Name)
                                      select styleAttribute)
                             {
-
                                 var tagName = elementType.Value?.Name;
-                                
+
                                 var attributeValue = TryClearStringValue(styleAttribute.Value);
-                                
+
                                 // try parse condition
                                 {
                                     var (success, condition, left, right) = TryParseConditionalValue(TryClearStringValue(styleAttribute.Value));
@@ -746,8 +730,8 @@ static class CSharpExporter
                                     {
                                         if (left.HasValue() && right.HasValue())
                                         {
-                                            var modifierCodeForLeft = ToModifierTransformer.TryConvertToModifier(tagName, styleAttribute.Name, TryClearStringValue(left));    
-                                            
+                                            var modifierCodeForLeft = ToModifierTransformer.TryConvertToModifier(tagName, styleAttribute.Name, TryClearStringValue(left));
+
                                             var modifierCodeForRight = ToModifierTransformer.TryConvertToModifier(tagName, styleAttribute.Name, TryClearStringValue(right));
 
                                             if (modifierCodeForLeft.success && modifierCodeForRight.success)
@@ -756,13 +740,11 @@ static class CSharpExporter
                                                 continue;
                                             }
                                         }
-                                        
                                     }
                                 }
 
                                 // try import from modifier
                                 {
-                                    
                                     var modifierCode = ToModifierTransformer.TryConvertToModifier(tagName, styleAttribute.Name, attributeValue);
                                     if (modifierCode.success)
                                     {
@@ -780,12 +762,10 @@ static class CSharpExporter
                                         }
 
                                         return new ArgumentException("NotResolved:" + styleAttribute.Pseudo);
-
                                     }
                                 }
-                                
+
                                 styleList.Add($"CreateStyleModifier(x=>x.{styleAttribute.Name} = ({styleAttribute.Value})");
-                                
                             }
                         }
 
