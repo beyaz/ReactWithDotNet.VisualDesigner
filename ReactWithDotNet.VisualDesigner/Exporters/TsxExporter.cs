@@ -14,9 +14,9 @@ static class TsxExporter
             select string.Join(Environment.NewLine, x.elementTreeSourceLines);
     }
 
-    public static  Task<Result<ExportOutput>> ExportToFileSystem(ExportInput input)
+    public static Task<Result<ExportOutput>> ExportToFileSystem(ExportInput input)
     {
-        return 
+        return
             from file in CalculateExportInfo(input)
             from fileContentAtDisk in FileSystem.ReadAllText(file.Path)
             select IsEqualsIgnoreWhitespace(fileContentAtDisk, file.Content) switch
@@ -81,7 +81,6 @@ static class TsxExporter
 
     internal static Task<Result<(IReadOnlyList<string> elementTreeSourceLines, IReadOnlyList<string> importLines)>> CalculateElementTreeSourceCodes(ProjectConfig project, IReadOnlyDictionary<string, string> componentConfig, VisualElementModel rootVisualElement)
     {
-
         return
             // Convert model to node
             from rootNode in ModelToNodeTransformer.ConvertVisualElementModelToReactNodeModel(project, rootVisualElement)
@@ -94,9 +93,9 @@ static class TsxExporter
 
             // Calculate imports
             let importLines = Plugin.CalculateImportLines(analyzedRootNode)
-
+            
+            // return
             select (elementJsxTree, importLines.AsReadOnlyList());
-
     }
 
     static async Task<Result<FileModel>> CalculateExportInfo(ExportInput input)
