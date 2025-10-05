@@ -324,6 +324,98 @@ public static class ResultExtensions
         }
     }
 
+    public static async Task<Result<C>> SelectMany<A, B, C>
+    (
+        this Task<Result<A>> source,
+        Func<A, Result<B>> bind,
+        Func<A, B, C> resultSelector
+    )
+    {
+        var a = await source;
+
+        if (a.HasError)
+        {
+            return a.Error;
+        }
+
+        var middle = bind(a.Value);
+        if (middle.HasError)
+        {
+            return middle.Error;
+        }
+
+        return resultSelector(a.Value, middle.Value);
+    }
+
+    public static async IAsyncEnumerable<Result<C>> SelectMany<A, B, C>
+    (
+        this Task<Result<A>> source,
+        Func<A, IEnumerable<B>> bind,
+        Func<A, B, C> resultSelector
+    )
+    {
+        var a = await source;
+
+        if (a.HasError)
+        {
+            yield return a.Error;
+        }
+
+        var enumerable = bind(a.Value);
+        foreach (var b in enumerable)
+        {
+            yield return resultSelector(a.Value, b);
+        }
+    }
+
+    public static async IAsyncEnumerable<Result<C>> SelectMany<A, B, C>
+    (
+        this IAsyncEnumerable<Result<A>> source,
+        Func<A, Task<Result<B>>> bind,
+        Func<A, B, Result<C>> resultSelector
+    )
+    {
+        await foreach (var a in source)
+        {
+            if (a.HasError)
+            {
+                yield return a.Error;
+            }
+
+            var b = await bind(a.Value);
+            if (b.HasError)
+            {
+                yield return b.Error;
+            }
+
+            yield return resultSelector(a.Value, b.Value);
+        }
+    }
+
+    public static async IAsyncEnumerable<Result<C>> SelectMany<A, B, C>
+    (
+        this IAsyncEnumerable<Result<A>> source,
+        Func<A, Task<Result<B>>> bind,
+        Func<A, B, Task<Result<C>>> resultSelector
+    )
+    {
+        await foreach (var a in source)
+        {
+            if (a.HasError)
+            {
+                yield return a.Error;
+            }
+
+            var b = await bind(a.Value);
+            if (b.HasError)
+            {
+                yield return b.Error;
+            }
+
+            yield return await resultSelector(a.Value, b.Value);
+        }
+    }
+
     public static Result<IEnumerable<A>> Where<A>
     (
         this Result<IEnumerable<A>> source,
@@ -349,98 +441,5 @@ public static class ResultExtensions
         {
             Value = source.Value.Where(predicate)
         };
-    }
-    
-    
-    public static async Task<Result<C>> SelectMany<A, B, C>
-    (
-        this Task<Result<A>> source,
-        Func<A, Result<B>> bind,
-        Func<A, B, C> resultSelector
-    )
-    {
-        var a = await source;
-
-        if (a.HasError)
-        {
-            return a.Error;
-        }
-
-        var middle = bind(a.Value);
-        if (middle.HasError)
-        {
-            return middle.Error;
-        }
-
-        return resultSelector(a.Value, middle.Value);
-    }
-    
-    public static async IAsyncEnumerable<Result<C>> SelectMany<A, B, C>
-    (
-        this Task<Result<A>> source,
-        Func<A, IEnumerable<B>> bind,
-        Func<A, B, C> resultSelector
-    )
-    {
-        var a = await source;
-
-        if (a.HasError)
-        {
-            yield return a.Error;
-        }
-
-        var enumerable = bind(a.Value);
-        foreach (var b in enumerable)
-        {
-            yield return  resultSelector(a.Value, b);
-        }
-    }
-    
-    public static async IAsyncEnumerable<Result<C>> SelectMany<A, B, C>
-    (
-        this IAsyncEnumerable<Result<A>> source,
-        Func<A, Task<Result<B>>> bind,
-        Func<A, B, Result<C>> resultSelector
-    )
-    {
-        await foreach (var a in source)
-        {
-            if (a.HasError)
-            {
-                yield return a.Error;
-            }
-            
-            var b = await bind(a.Value);
-            if (b.HasError)
-            {
-                yield return b.Error;
-            }
-
-            yield return resultSelector(a.Value, b.Value);
-        }
-    }
-    
-    public static async IAsyncEnumerable<Result<C>> SelectMany<A, B, C>
-    (
-        this IAsyncEnumerable<Result<A>> source,
-        Func<A, Task<Result<B>>> bind,
-        Func<A, B, Task<Result<C>>> resultSelector
-    )
-    {
-        await foreach (var a in source)
-        {
-            if (a.HasError)
-            {
-                yield return a.Error;
-            }
-            
-            var b = await bind(a.Value);
-            if (b.HasError)
-            {
-                yield return b.Error;
-            }
-
-            yield return await resultSelector(a.Value, b.Value);
-        }
     }
 }
