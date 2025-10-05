@@ -226,15 +226,21 @@ sealed class ApplicationPreview : Component
                         return item.Error;
                     }
 
-                    var designTimeProp = item.Value;
+                    var name = item.Value.Name;
+                    var value = item.Value.Value;
+
+                    if (Extensions.NotIn(name, Design.ItemsSource, Design.ItemsSourceDesignTimeCount))
+                    {
+                        name = Extensions.RemoveFromStart(name, Design.PREFIX);
+                    }
 
                     var propertyProcessScope = new PropertyProcessScope
                     {
                         scope     = scope,
                         element   = element,
                         model     = model,
-                        propName  = designTimeProp.Name.RemoveFromStart(Design.PREFIX),
-                        propValue = designTimeProp.Value
+                        propName  = Extensions.RemoveFromStart(name, Design.PREFIX),
+                        propValue = value
                     };
                     var result = await processProp(propertyProcessScope);
                     if (result.HasError)
