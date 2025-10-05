@@ -23,7 +23,7 @@ static class TsxExporter
             {
                 true => Result.From(new ExportOutput()),
                 false =>
-                    from _ in FileSystem.TryWriteToFile(file.filePath, file.fileContent)
+                    from _ in FileSystem.Save(file.filePath, file.fileContent)
                     select new ExportOutput
                     {
                         HasChange = true

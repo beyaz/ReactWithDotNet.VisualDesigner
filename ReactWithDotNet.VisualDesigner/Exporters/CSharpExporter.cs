@@ -52,7 +52,7 @@ static class CSharpExporter
 
         // write to file system
         {
-            var result = await FileSystem.TryWriteToFile(filePath, fileContent);
+            var result = await FileSystem.Save(filePath, fileContent);
             if (result.HasError)
             {
                 return result.Error;
