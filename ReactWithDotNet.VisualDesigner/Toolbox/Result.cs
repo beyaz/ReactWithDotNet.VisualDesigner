@@ -296,25 +296,25 @@ public static class ResultExtensions
 
     public static async IAsyncEnumerable<Result<C>> SelectMany<A, B, C>
     (
-        this Result<IEnumerable<A>> result,
-        Func<A, Task<Result<B>>> binder,
-        Func<A, B, Result<C>> projector
+        this Result<IEnumerable<A>> source,
+        Func<A, Task<Result<B>>> bindAsync,
+        Func<A, B, Result<C>> selector
     )
     {
-        if (result.HasError)
+        if (source.HasError)
         {
-            yield return result.Error;
+            yield return source.Error;
         }
 
-        foreach (var a in result.Value)
+        foreach (var a in source.Value)
         {
-            var b = await binder(a);
+            var b = await bindAsync(a);
             if (b.HasError)
             {
                 yield return b.Error;
             }
 
-            var c = projector(a, b.Value);
+            var c = selector(a, b.Value);
             if (c.HasError)
             {
                 yield return c.Error;
