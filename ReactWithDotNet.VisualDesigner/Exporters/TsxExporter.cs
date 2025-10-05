@@ -31,7 +31,7 @@ static class TsxExporter
             };
     }
 
-    public static Result<(int leftPaddingCount, int firstReturnLineIndex, int firstReturnCloseLineIndex)> GetComponentLineIndexPointsInTsxFile(IReadOnlyList<string> fileContent, string targetComponentName)
+    public static Result<(int LeftPaddingCount, int FirstReturnLineIndex, int FirstReturnCloseLineIndex)> GetComponentLineIndexPointsInTsxFile(IReadOnlyList<string> fileContent, string targetComponentName)
     {
         var lines = fileContent.ToList();
 
@@ -506,9 +506,9 @@ static class TsxExporter
                 return result.Error;
             }
 
-            leftPaddingCount          = result.Value.leftPaddingCount;
-            firstReturnLineIndex      = result.Value.firstReturnLineIndex;
-            firstReturnCloseLineIndex = result.Value.firstReturnCloseLineIndex;
+            leftPaddingCount          = result.Value.LeftPaddingCount;
+            firstReturnLineIndex      = result.Value.FirstReturnLineIndex;
+            firstReturnCloseLineIndex = result.Value.FirstReturnCloseLineIndex;
         }
 
         lines = lines.RemoveRange(firstReturnLineIndex, firstReturnCloseLineIndex - firstReturnLineIndex + 1);

@@ -23,7 +23,7 @@ static class ExporterFactory
         return await TsxExporter.ExportToFileSystem(input);
     }
 
-    public static Result<(int leftPaddingCount, int firstReturnLineIndex, int firstReturnCloseLineIndex)> GetComponentLineIndexPointsInSourceFile(int projectId, IReadOnlyList<string> fileContent, string targetComponentName)
+    public static Result<(int LeftPaddingCount, int FirstReturnLineIndex, int FirstReturnCloseLineIndex)> GetComponentLineIndexPointsInSourceFile(int projectId, IReadOnlyList<string> fileContent, string targetComponentName)
     {
         var project = GetProjectConfig(projectId);
         if (project is null)
