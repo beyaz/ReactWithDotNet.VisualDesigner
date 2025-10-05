@@ -14,48 +14,21 @@ static class TsxExporter
             select string.Join(Environment.NewLine, x.elementTreeSourceLines);
     }
 
-    public static async Task<Result<ExportOutput>> ExportToFileSystem(ExportInput input)
+    public static  Task<Result<ExportOutput>> ExportToFileSystem(ExportInput input)
     {
-        string filePath;
-        string fileContent;
-        {
-            var result = await CalculateExportInfo(input);
-            if (result.HasError)
+        return 
+            from file in CalculateExportInfo(input)
+            from fileContentAtDisk in IO.TryReadFile(file.filePath)
+            select IsEqualsIgnoreWhitespace(fileContentAtDisk, file.fileContent) switch
             {
-                return result.Error;
-            }
-
-            (filePath, fileContent) = result.Value;
-        }
-
-        //return 
-        //    from fileContentAtDisk in await IO.TryReadFile(filePath)
-        //    select IsEqualsIgnoreWhitespace(fileContentAtDisk, fileContent) switch
-        //    {
-        //        true=>new ExportOutput(),
-        //        false=> from _ in await IO.TryWriteToFile(filePath, fileContent)
-        //            select new ExportOutput { HasChange = true }
-        //    }
-        string fileContentAtDisk;
-        {
-            var result = await IO.TryReadFile(filePath);
-            if (result.HasError)
-            {
-                return result.Error;
-            }
-
-            fileContentAtDisk = result.Value;
-        }
-
-        if (IsEqualsIgnoreWhitespace(fileContentAtDisk, fileContent))
-        {
-            return new ExportOutput();
-        }
-
-        // write to file system
-        return
-            from _ in await IO.TryWriteToFile(filePath, fileContent)
-            select new ExportOutput { HasChange = true };
+                true => Result.From(new ExportOutput()),
+                false =>
+                    from _ in IO.TryWriteToFile(file.filePath, file.fileContent)
+                    select new ExportOutput
+                    {
+                        HasChange = true
+                    }
+            };
     }
 
     public static Result<(int leftPaddingCount, int firstReturnLineIndex, int firstReturnCloseLineIndex)> GetComponentLineIndexPointsInTsxFile(IReadOnlyList<string> fileContent, string targetComponentName)
