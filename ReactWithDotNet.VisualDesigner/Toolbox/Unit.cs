@@ -1,4 +1,4 @@
-﻿namespace ReactWithDotNet.VisualDesigner.FunctionalUtilities;
+﻿namespace Toolbox;
 
 public sealed class Unit
 {

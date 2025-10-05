@@ -1,6 +1,4 @@
-﻿global using ReactWithDotNet.VisualDesigner.FunctionalUtilities;
-
-namespace ReactWithDotNet.VisualDesigner.FunctionalUtilities;
+﻿namespace Toolbox;
 
 public sealed class Result<TValue>
 {

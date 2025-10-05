@@ -1,7 +1,8 @@
-﻿global using static ReactWithDotNet.VisualDesigner.FunctionalUtilities.MaybeExtensions;
+﻿global using static Toolbox.MaybeExtensions;
+
 using System.Collections;
 
-namespace ReactWithDotNet.VisualDesigner.FunctionalUtilities;
+namespace Toolbox;
 
 public sealed record Maybe<TValue> : IEnumerable<TValue>
 {
