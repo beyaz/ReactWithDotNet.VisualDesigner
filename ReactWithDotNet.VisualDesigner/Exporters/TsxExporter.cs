@@ -18,12 +18,12 @@ static class TsxExporter
     {
         return 
             from file in CalculateExportInfo(input)
-            from fileContentAtDisk in FileSystem.ReadAllText(file.filePath)
-            select IsEqualsIgnoreWhitespace(fileContentAtDisk, file.fileContent) switch
+            from fileContentAtDisk in FileSystem.ReadAllText(file.Path)
+            select IsEqualsIgnoreWhitespace(fileContentAtDisk, file.Content) switch
             {
                 true => Result.From(new ExportOutput()),
                 false =>
-                    from _ in FileSystem.Save(file.filePath, file.fileContent)
+                    from _ in FileSystem.Save(file)
                     select new ExportOutput
                     {
                         HasChange = true
@@ -110,7 +110,7 @@ static class TsxExporter
         return (elementJsxTree, importLines.ToList());
     }
 
-    static async Task<Result<(string filePath, string fileContent)>> CalculateExportInfo(ExportInput input)
+    static async Task<Result<FileModel>> CalculateExportInfo(ExportInput input)
     {
         var (projectId, componentId, userName) = input;
 
@@ -140,7 +140,7 @@ static class TsxExporter
             var result = await GetComponentFileLocation(componentId, user.LocalWorkspacePath);
             if (result.HasError)
             {
-                return result;
+                return result.Error;
             }
 
             filePath            = result.Value.filePath;
@@ -233,7 +233,11 @@ static class TsxExporter
             fileNewContent = injectedVersion;
         }
 
-        return (filePath, fileNewContent);
+        return new FileModel
+        {
+            Path    = filePath,
+            Content = fileNewContent
+        };
     }
 
     static async Task<Result<IReadOnlyList<string>>> ConvertReactNodeModelToElementTreeSourceLines(ProjectConfig project, ReactNode node, ReactNode parentNode, int indentLevel)
