@@ -155,79 +155,69 @@ static class TsxExporter
             }
         }
 
-        string fileNewContent;
+        
+        IReadOnlyList<string> fileContentInDirectory;
         {
-            IReadOnlyList<string> fileContentInDirectory;
+            var result = await FileSystem.ReadAllLines(filePath);
+            if (result.HasError)
             {
-                var result = await FileSystem.ReadAllLines(filePath);
-                if (result.HasError)
-                {
-                    return result.Error;
-                }
-
-                fileContentInDirectory = result.Value;
+                return result.Error;
             }
 
-            IReadOnlyList<string> linesToInject;
-            IReadOnlyList<string> importLines;
-            {
-                var result = await CalculateElementTreeSourceCodes(project, data.Value.Component.GetConfig(), rootVisualElement);
-                if (result.HasError)
-                {
-                    return result.Error;
-                }
-
-                linesToInject = result.Value.elementTreeSourceLines;
-
-                importLines = result.Value.importLines;
-
-                var formatResult = await Prettier.FormatCode(string.Join(Environment.NewLine, linesToInject));
-                if (!formatResult.HasError)
-                {
-                    linesToInject = formatResult.Value.Split(Environment.NewLine.ToCharArray());
-                }
-            }
-
-            // try import lines
-            {
-                var fileContentInDirectoryAsList = fileContentInDirectory.ToList();
-
-                foreach (var importLine in importLines)
-                {
-                    if (fileContentInDirectory.Any(x => IsEqualsIgnoreWhitespace(x, importLine)))
-                    {
-                        continue;
-                    }
-
-                    var lastImportLineIndex = fileContentInDirectoryAsList.FindLastIndex(line => line.TrimStart().StartsWith("import "));
-                    if (lastImportLineIndex >= 0)
-                    {
-                        fileContentInDirectoryAsList.Insert(lastImportLineIndex + 1, importLine);
-                    }
-                }
-
-                fileContentInDirectory = fileContentInDirectoryAsList;
-            }
-
-            string injectedVersion;
-            {
-                var newVersion = InjectRender(fileContentInDirectory, targetComponentName, linesToInject);
-                if (newVersion.HasError)
-                {
-                    return newVersion.Error;
-                }
-
-                injectedVersion = newVersion.Value;
-            }
-
-            fileNewContent = injectedVersion;
+            fileContentInDirectory = result.Value;
         }
 
-        return new FileModel
+        IReadOnlyList<string> linesToInject;
+        IReadOnlyList<string> importLines;
         {
-            Path    = filePath,
-            Content = fileNewContent
-        };
+            var result = await CalculateElementTreeSourceCodes(project, data.Value.Component.GetConfig(), rootVisualElement);
+            if (result.HasError)
+            {
+                return result.Error;
+            }
+
+            linesToInject = result.Value.elementTreeSourceLines;
+
+            importLines = result.Value.importLines;
+
+            var formatResult = await Prettier.FormatCode(string.Join(Environment.NewLine, linesToInject));
+            if (!formatResult.HasError)
+            {
+                linesToInject = formatResult.Value.Split(Environment.NewLine.ToCharArray());
+            }
+        }
+
+        // try import lines
+        {
+            var fileContentInDirectoryAsList = fileContentInDirectory.ToList();
+
+            foreach (var importLine in importLines)
+            {
+                if (fileContentInDirectory.Any(x => IsEqualsIgnoreWhitespace(x, importLine)))
+                {
+                    continue;
+                }
+
+                var lastImportLineIndex = fileContentInDirectoryAsList.FindLastIndex(line => line.TrimStart().StartsWith("import "));
+                if (lastImportLineIndex >= 0)
+                {
+                    fileContentInDirectoryAsList.Insert(lastImportLineIndex + 1, importLine);
+                }
+            }
+
+            fileContentInDirectory = fileContentInDirectoryAsList;
+        }
+
+
+
+        return
+            from fileContent in InjectRender(fileContentInDirectory, targetComponentName, linesToInject)
+            select new FileModel
+            {
+                Path    = filePath,
+                Content = fileContent
+            };
+        
     }
 
     static async Task<Result<IReadOnlyList<string>>> ConvertReactNodeModelToElementTreeSourceLines(ProjectConfig project, ReactNode node, ReactNode parentNode, int indentLevel)
