@@ -83,12 +83,16 @@ static class TsxExporter
     {
 
         return
+            // Convert model to node
             from rootNode in ModelToNodeTransformer.ConvertVisualElementModelToReactNodeModel(project, rootVisualElement)
 
+            // Analyze node
             let analyzedRootNode = Plugin.AnalyzeNode(rootNode, componentConfig)
 
+            // Convert node to JSX tree
             from elementJsxTree in ConvertReactNodeModelToElementTreeSourceLines(project, analyzedRootNode, null, 2)
 
+            // Calculate imports
             let importLines = Plugin.CalculateImportLines(analyzedRootNode)
 
             select (elementJsxTree, importLines.AsReadOnlyList());
