@@ -774,6 +774,11 @@ sealed class ApplicationPreview : Component
                             {
                                 return src;
                             }
+                            
+                            if (src=="true" || src == "false")
+                            {
+                                return None;
+                            }
 
                             if (src.StartsWith("/"))
                             {
