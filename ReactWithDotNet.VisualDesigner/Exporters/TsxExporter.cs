@@ -489,8 +489,9 @@ static class TsxExporter
     static Result<string> InjectRender(IReadOnlyList<string> fileContent, string targetComponentName, IReadOnlyList<string> linesToInject)
     {
         
-        // from points in GetComponentLineIndexPointsInTsxFile(fileContent, targetComponentName)
-            
+        //from points in GetComponentLineIndexPointsInTsxFile(fileContent, targetComponentName)
+        //    let lines2 = fileContent.ToImmutableList()
+        //    let lines3= lines2.RemoveRange(points.firstReturnLineIndex, points.firstReturnCloseLineIndex - points.firstReturnLineIndex + 1)
         
         
         
