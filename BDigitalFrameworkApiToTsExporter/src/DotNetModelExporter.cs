@@ -2,7 +2,7 @@
 
 static class DotNetModelExporter
 {
-    public static Task<Result<Unit>> TryExport()
+    public static Task<Result<IEnumerable<Unit>>> TryExport()
     {
         var fileModels =
             from config in ConfigReader.ReadConfig()

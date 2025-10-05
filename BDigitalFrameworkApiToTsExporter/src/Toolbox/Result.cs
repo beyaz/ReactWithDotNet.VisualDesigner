@@ -320,4 +320,38 @@ public static class ResultExtensions
     {
         return new() { Value = tuple.value, Error = tuple.exception };
     }
+    
+    
+    public static async Task<Result<IEnumerable<C>>> SelectMany<A, B, C>
+    (
+        this Result<IEnumerable<A>> result,
+        Func<A, Task<Result<B>>> binder,
+        Func<A, B, Result<C>> projector
+    )
+    {
+        if (result.HasError)
+        {
+            return result.Error;
+        }
+
+        List<C> listOfC = [];
+        
+        foreach (var a in result.Value)
+        {
+            var b = await binder(a);
+            if (b.HasError)
+            {
+                return b.Error;
+            }
+            var c = projector(a, b.Value);
+            if (c.HasError)
+            {
+                return c.Error;
+            }
+            
+            listOfC.Add(c.Value);
+        }
+
+        return listOfC;
+    }
 }
