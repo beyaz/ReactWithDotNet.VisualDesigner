@@ -29,12 +29,12 @@ static class DesignerStyleItemFactory
 
         return
             from list in finalCssItems.AsResult()
-            select new DesignerStyleItemImp
+            select (DesignerStyleItem)new DesignerStyleItemImp
             {
                 Pseudo = input.Pseudo,
 
-                FinalCssItems = list.ToList()
-            } as DesignerStyleItem;
+                FinalCssItems = list.AsReadOnlyList()
+            };
     }
 
     class DesignerStyleItemImp : DesignerStyleItem
