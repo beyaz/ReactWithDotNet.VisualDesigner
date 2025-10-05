@@ -186,120 +186,32 @@ static class CSharpStringExporter
 
         var project = GetProjectConfig(projectId);
 
-        var data = await GetComponentData(new() { ComponentId = componentId, UserName = userName });
-        if (data.HasError)
-        {
-            return data.Error;
-        }
-
-        VisualElementModel rootVisualElement;
-        {
-            var result = await GetComponentUserOrMainVersionAsync(componentId, userName);
-            if (result.HasError)
-            {
-                return result.Error;
-            }
-
-            rootVisualElement = result.Value;
-        }
-
-        string filePath, targetComponentName;
-        {
-            var result = await GetComponentFileLocation(componentId, user.LocalWorkspacePath);
-            if (result.HasError)
-            {
-                return result.Error;
-            }
-
-            filePath            = result.Value.filePath;
-            targetComponentName = result.Value.targetComponentName;
-        }
-
-        // create File if not exists
-        {
-            if (filePath is null)
-            {
-                return new IOException("FilePathNotCalculated");
-            }
-
-            if (!File.Exists(filePath))
-            {
-                var fileContent =
-                    $"export default function {targetComponentName}()" + "{" + Environment.NewLine +
-                    "    return (" + Environment.NewLine +
-                    "    );" + Environment.NewLine +
-                    "}";
-                await File.WriteAllTextAsync(filePath, fileContent);
-            }
-        }
-
-        string fileNewContent;
-        {
-            IReadOnlyList<string> fileContentInDirectory;
-            {
-                var result = await FileSystem.ReadAllLines(filePath);
-                if (result.HasError)
-                {
-                    return result.Error;
-                }
-
-                fileContentInDirectory = result.Value;
-            }
-
-            IReadOnlyList<string> linesToInject;
-            IReadOnlyList<string> importLines;
-            {
-                var result = await CalculateElementTreeSourceCodes(project, data.Value.Component.GetConfig(), rootVisualElement);
-                if (result.HasError)
-                {
-                    return result.Error;
-                }
-
-                linesToInject = result.Value.elementTreeSourceLines;
-
-                importLines = result.Value.importLines;
-            }
-
-            // try import lines
-            {
-                var fileContentInDirectoryAsList = fileContentInDirectory.ToList();
-
-                foreach (var importLine in importLines)
-                {
-                    if (fileContentInDirectory.Any(x => IsEqualsIgnoreWhitespace(x, importLine)))
-                    {
-                        continue;
-                    }
-
-                    var lastImportLineIndex = fileContentInDirectoryAsList.FindLastIndex(line => line.TrimStart().StartsWith("import "));
-                    if (lastImportLineIndex >= 0)
-                    {
-                        fileContentInDirectoryAsList.Insert(lastImportLineIndex + 1, importLine);
-                    }
-                }
-
-                fileContentInDirectory = fileContentInDirectoryAsList;
-            }
-
-            string injectedVersion;
-            {
-                var newVersion = InjectRender(fileContentInDirectory, targetComponentName, linesToInject);
-                if (newVersion.HasError)
-                {
-                    return newVersion.Error;
-                }
-
-                injectedVersion = newVersion.Value;
-            }
-
-            fileNewContent = injectedVersion;
-        }
         
-        return new FileModel
-        {
-            Path    = filePath,
-            Content = fileNewContent
-        };
+        
+        return await
+            from data in GetComponentData(new() { ComponentId = componentId, UserName = userName })
+            
+            from rootVisualElement in GetComponentUserOrMainVersionAsync(componentId, userName)
+            
+            from file in GetComponentFileLocation(componentId, user.LocalWorkspacePath)
+            
+            from fileContentInDirectory in FileSystem.ReadAllLines(file.filePath)
+            
+            from source in CalculateElementTreeSourceCodes(project, data.Component.GetConfig(), rootVisualElement)
+            
+            from fileContent in InjectRender(fileContentInDirectory, file.targetComponentName, source.elementTreeSourceLines)
+            
+            select new FileModel
+            {
+                Path    = file.filePath,
+                Content = fileContent
+            };
+        
+        
+        
+
+
+
     }
 
     static async Task<Result<IReadOnlyList<string>>> ConvertReactNodeModelToElementTreeSourceLines(ProjectConfig project, ReactNode node, ReactNode parentNode, int indentLevel)
