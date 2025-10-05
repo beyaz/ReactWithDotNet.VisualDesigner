@@ -42,16 +42,15 @@ public static class ResultExtensions
     {
         return new() { Value = tuple.value, Error = tuple.exception };
     }
-    
-    
+
     public static Result<IEnumerable<T>> AsResult<T>(this IEnumerable<Result<T>> enumerable)
     {
         List<T> items = [];
-        
+
         foreach (var result in enumerable)
         {
             items.Add(result.Value);
-            
+
             if (result.HasError)
             {
                 return new()
@@ -60,10 +59,10 @@ public static class ResultExtensions
                 };
             }
         }
-        
+
         return items;
     }
-    
+
     public static IEnumerable<Result<B>> Select<A, B>
     (
         this IEnumerable<Result<A>> source,
@@ -80,7 +79,6 @@ public static class ResultExtensions
 
             yield return selector(result.Value);
         }
-        
     }
 
     public static Result<B> Select<A, B>
@@ -327,7 +325,7 @@ public static class ResultExtensions
                 {
                     Error = b.Error
                 });
-                
+
                 return returnItems;
             }
 
@@ -511,24 +509,21 @@ public static class ResultExtensions
             throw new ArgumentNullException(nameof(predicate));
         }
 
-
         List<Result<A>> returnList = [];
-        
+
         foreach (var result in source)
         {
             if (result.HasError)
             {
-                returnList.Add(new(){ Error = result.Error});
+                returnList.Add(new() { Error = result.Error });
 
                 return returnList;
             }
 
             if (predicate(result.Value))
             {
-                returnList.Add(result);    
+                returnList.Add(result);
             }
-            
-            
         }
 
         return returnList;
