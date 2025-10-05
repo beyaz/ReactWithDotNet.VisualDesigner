@@ -264,7 +264,7 @@ static class CSharpStringExporter
         {
             IReadOnlyList<string> fileContentInDirectory;
             {
-                var result = await FileSystem.TryReadFileAllLines(filePath);
+                var result = await FileSystem.ReadAllLines(filePath);
                 if (result.HasError)
                 {
                     return result.Error;

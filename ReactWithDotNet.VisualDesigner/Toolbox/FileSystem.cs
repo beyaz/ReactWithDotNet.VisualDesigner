@@ -17,7 +17,7 @@ static class FileSystem
         }
     }
 
-    public static async Task<Result<string[]>> TryReadFileAllLines(string filePath)
+    public static async Task<Result<string[]>> ReadAllLines(string filePath)
     {
         try
         {
