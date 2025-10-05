@@ -13,12 +13,12 @@ public sealed class Config
 
 static class ConfigReader
 {
-    public static Result<Config> ReadConfig()
+    public static async Task<Result<Config>> ReadConfig()
     {
         var configFilePath = Path.Combine(Path.GetDirectoryName(typeof(ConfigReader).Assembly.Location) ?? string.Empty, "Config.json");
         if (File.Exists(configFilePath))
         {
-            var fileContent = File.ReadAllText(configFilePath);
+            var fileContent = await File.ReadAllTextAsync(configFilePath);
 
             var config = JsonConvert.DeserializeObject<Config>(fileContent);
             if (config is not null)
