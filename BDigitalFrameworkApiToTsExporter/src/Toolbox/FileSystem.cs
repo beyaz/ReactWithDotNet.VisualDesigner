@@ -23,7 +23,7 @@ static class FileSystem
         }
     }
 
-    public static Result<Unit> Save(FileModel file)
+    public static async Task<Result<Unit>> Save(FileModel file)
     {
         try
         {
@@ -35,7 +35,7 @@ static class FileSystem
                 TfsHelper.CheckoutFileFromTfs(file.Path);
             }
 
-            File.WriteAllText(file.Path, file.Content, Encoding.UTF8);
+            await File.WriteAllTextAsync(file.Path, file.Content, Encoding.UTF8);
 
             return Unit.Value;
         }
@@ -45,11 +45,11 @@ static class FileSystem
         }
     }
 
-    public static Result<Unit> SaveAll(IEnumerable<FileModel> files)
+    public static async Task<Result<Unit>> SaveAll(IEnumerable<FileModel> files)
     {
         foreach (var file in files)
         {
-            var result = Save(file);
+            var result = await Save(file);
             if (result.HasError)
             {
                 return result;
