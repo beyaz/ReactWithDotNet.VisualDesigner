@@ -1,7 +1,7 @@
 ﻿using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace ReactWithDotNet.VisualDesigner.Toolbox;
+namespace Toolbox;
 
 static class RoslynHelper
 {

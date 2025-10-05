@@ -5,7 +5,7 @@ using System.Text;
 using System.Text.Json;
 using Microsoft.AspNetCore.Builder;
 
-namespace ReactWithDotNet.VisualDesigner.Toolbox;
+namespace Toolbox;
 
 static class Prettier
 {

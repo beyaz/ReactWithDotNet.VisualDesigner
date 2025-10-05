@@ -1,6 +1,6 @@
 using System.Runtime.InteropServices;
 
-namespace ReactWithDotNet.VisualDesigner.Toolbox;
+namespace Toolbox;
 
 static class ConsoleWindowUtility
 {

@@ -1,6 +1,6 @@
 using System.Collections.Concurrent;
 
-namespace ReactWithDotNet.VisualDesigner.Toolbox;
+namespace Toolbox;
 
 public sealed class CachedObjectMap
 {

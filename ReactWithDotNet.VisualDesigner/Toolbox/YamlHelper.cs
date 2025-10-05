@@ -2,7 +2,7 @@
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
-namespace ReactWithDotNet.VisualDesigner.Toolbox;
+namespace Toolbox;
 
 static class YamlHelper
 {

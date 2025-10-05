@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using System.IO;
 
-namespace ReactWithDotNet.VisualDesigner.Toolbox;
+namespace Toolbox;
 
 static class IdeBridge
 {

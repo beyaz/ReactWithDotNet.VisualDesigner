@@ -1,4 +1,4 @@
-﻿namespace ReactWithDotNet.VisualDesigner.Toolbox;
+﻿namespace Toolbox;
 
 static class TextNavigationHelper
 {

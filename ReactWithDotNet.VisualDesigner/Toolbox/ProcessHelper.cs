@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-namespace ReactWithDotNet.VisualDesigner.Toolbox;
+namespace Toolbox;
 
 static class ProcessHelper
 {
