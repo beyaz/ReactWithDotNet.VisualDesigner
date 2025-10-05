@@ -229,9 +229,9 @@ sealed class ApplicationPreview : Component
                     var name = item.Value.Name;
                     var value = item.Value.Value;
 
-                    if (Extensions.NotIn(name, Design.ItemsSource, Design.ItemsSourceDesignTimeCount))
+                    if (name.NotIn(Design.ItemsSource, Design.ItemsSourceDesignTimeCount))
                     {
-                        name = Extensions.RemoveFromStart(name, Design.PREFIX);
+                        name = name.RemoveFromStart(Design.PREFIX);
                     }
 
                     var propertyProcessScope = new PropertyProcessScope
@@ -239,7 +239,7 @@ sealed class ApplicationPreview : Component
                         scope     = scope,
                         element   = element,
                         model     = model,
-                        propName  = Extensions.RemoveFromStart(name, Design.PREFIX),
+                        propName  = name.RemoveFromStart(Design.PREFIX),
                         propValue = value
                     };
                     var result = await processProp(propertyProcessScope);
