@@ -416,6 +416,40 @@ public static class ResultExtensions
         }
     }
 
+    public static async IAsyncEnumerable<Result<C>> SelectMany<A, B, C>
+    (
+        this IEnumerable<A> source,
+        Func<A, Task<Result<B>>> bind,
+        Func<A, B, C> resultSelector
+    )
+    {
+        if (source == null)
+        {
+            throw new ArgumentNullException(nameof(source));
+        }
+
+        if (bind == null)
+        {
+            throw new ArgumentNullException(nameof(bind));
+        }
+
+        if (resultSelector == null)
+        {
+            throw new ArgumentNullException(nameof(resultSelector));
+        }
+
+        foreach (var a in source)
+        {
+            var b = await bind(a);
+            if (b.HasError)
+            {
+                yield return b.Error;
+            }
+
+            yield return resultSelector(a, b.Value);
+        }
+    }
+
     public static Result<IEnumerable<A>> Where<A>
     (
         this Result<IEnumerable<A>> source,
