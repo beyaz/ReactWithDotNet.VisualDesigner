@@ -667,7 +667,7 @@ static class Extensions
 
     public static Maybe<Type> TryGetHtmlElementTypeByTagName(string tag)
     {
-        return typeof(svg).Assembly.GetType(nameof(ReactWithDotNet) + "." + tag, false, true);
+        return typeof(svg).Assembly.GetType(nameof(ReactWithDotNet) + "." + tag, false, false);
     }
 
     public static Maybe<string> TryGetPropertyValue(this IReadOnlyList<string> properties, params string[] propertyNameWithAlias)
