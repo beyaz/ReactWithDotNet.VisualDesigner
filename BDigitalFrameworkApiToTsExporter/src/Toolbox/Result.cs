@@ -1,4 +1,4 @@
-﻿namespace BDigitalFrameworkApiToTsExporter;
+﻿namespace Toolbox;
 
 public sealed class Result<TValue>
 {

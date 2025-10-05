@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 
-namespace BDigitalFrameworkApiToTsExporter;
+namespace Toolbox;
 
 sealed class CheckoutFileFromTfsResponse
 {
