@@ -44,12 +44,4 @@ static class FileSystem
             return exception;
         }
     }
-
-    public static  Task<Result<Unit>> SaveAll(IEnumerable<FileModel> files)
-    {
-        return 
-            from file in files
-            from unit in Save(file)
-            select unit;
-    }
 }
