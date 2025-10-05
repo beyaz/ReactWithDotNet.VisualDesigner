@@ -81,6 +81,15 @@ static class TsxExporter
 
     internal static async Task<Result<(IReadOnlyList<string> elementTreeSourceLines, IReadOnlyList<string> importLines)>> CalculateElementTreeSourceCodes(ProjectConfig project, IReadOnlyDictionary<string, string> componentConfig, VisualElementModel rootVisualElement)
     {
+        
+        //Task<Result<Result<(IReadOnlyList<string> elementJsxTree, List<string>)>>> a =
+        //    from rootNode in ModelToNodeTransformer.ConvertVisualElementModelToReactNodeModel(project, rootVisualElement)
+        //    let analyzedRootNode = Plugin.AnalyzeNode(rootNode, componentConfig)
+        //    from elementJsxTree in ConvertReactNodeModelToElementTreeSourceLines(project, analyzedRootNode, null, 2)
+        //    let importLines = Plugin.CalculateImportLines(analyzedRootNode)
+        //    select Result.From((elementJsxTree, importLines.ToList()));
+        
+        
         ReactNode rootNode;
         {
             var result = await ModelToNodeTransformer.ConvertVisualElementModelToReactNodeModel(project, rootVisualElement);
