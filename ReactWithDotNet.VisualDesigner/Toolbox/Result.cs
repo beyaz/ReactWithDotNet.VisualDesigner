@@ -294,6 +294,36 @@ public static class ResultExtensions
         return returnItems;
     }
 
+    public static async IAsyncEnumerable<Result<C>> SelectMany<A, B, C>
+    (
+        this Result<IEnumerable<A>> result,
+        Func<A, Task<Result<B>>> binder,
+        Func<A, B, Result<C>> projector
+    )
+    {
+        if (result.HasError)
+        {
+            yield return result.Error;
+        }
+
+        foreach (var a in result.Value)
+        {
+            var b = await binder(a);
+            if (b.HasError)
+            {
+                yield return b.Error;
+            }
+
+            var c = projector(a, b.Value);
+            if (c.HasError)
+            {
+                yield return c.Error;
+            }
+
+            yield return c.Value;
+        }
+    }
+
     public static Result<IEnumerable<A>> Where<A>
     (
         this Result<IEnumerable<A>> result,
