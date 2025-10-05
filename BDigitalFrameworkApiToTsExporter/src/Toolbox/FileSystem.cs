@@ -45,17 +45,11 @@ static class FileSystem
         }
     }
 
-    public static async Task<Result<Unit>> SaveAll(IEnumerable<FileModel> files)
+    public static  Task<Result<Unit>> SaveAll(IEnumerable<FileModel> files)
     {
-        foreach (var file in files)
-        {
-            var result = await Save(file);
-            if (result.HasError)
-            {
-                return result;
-            }
-        }
-
-        return Unit.Value;
+        return 
+            from file in files
+            from unit in Save(file)
+            select unit;
     }
 }
