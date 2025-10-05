@@ -10,7 +10,9 @@ static class TsModelCreator
         IEnumerable<TsFieldDefinition> fields;
         if (typeDefinition.IsEnum)
         {
-            fields = from fieldDefinition in typeDefinition.Fields.Where(f => f.Name != "value__")
+            fields =
+                from fieldDefinition in typeDefinition.Fields
+                where fieldDefinition.Name != "value__"
                 select new TsFieldDefinition
                 {
                     Name          = fieldDefinition.Name,
@@ -22,7 +24,9 @@ static class TsModelCreator
         else
         {
             fields =
-                from propertyDefinition in typeDefinition.Properties.Where(p => !IsImplicitDefinition(p))
+                from propertyDefinition in typeDefinition.Properties
+                where propertyDefinition.SetMethod is not null
+                where !IsImplicitDefinition(propertyDefinition)
                 select new TsFieldDefinition
                 {
                     Name          = TypescriptNaming.GetResolvedPropertyName(propertyDefinition.Name),
