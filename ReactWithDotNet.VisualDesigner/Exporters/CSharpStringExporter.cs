@@ -746,9 +746,15 @@ static class CSharpStringExporter
 
         lines.RemoveRange(firstReturnLineIndex, firstReturnCloseLineIndex - firstReturnLineIndex + 1);
 
-        // apply padding
+       
+
+        lines.InsertRange(firstReturnLineIndex, applyPadding(linesToInject,leftPaddingCount));
+
+        return string.Join(Environment.NewLine, lines);
+        
+        static IReadOnlyList<string> applyPadding(IReadOnlyList<string> lines, int leftPaddingCount)
         {
-            var temp = linesToInject.Select(line => new string(' ', leftPaddingCount + 4) + line).ToList();
+            var temp = lines.Select(line => new string(' ', leftPaddingCount + 4) + line).ToList();
 
             temp.Insert(0, new string(' ', leftPaddingCount) + "return new LineCollection");
 
@@ -756,14 +762,8 @@ static class CSharpStringExporter
 
             temp.Add(new string(' ', leftPaddingCount) + "};");
 
-            linesToInject = temp;
+            return temp;
         }
-
-        lines.InsertRange(firstReturnLineIndex, linesToInject);
-
-        var injectedFileContent = string.Join(Environment.NewLine, lines);
-
-        return injectedFileContent;
     }
 
     class LineCollection : List<string>
