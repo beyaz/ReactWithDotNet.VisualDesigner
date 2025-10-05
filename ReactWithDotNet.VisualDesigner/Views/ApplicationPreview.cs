@@ -239,7 +239,7 @@ sealed class ApplicationPreview : Component
                         scope     = scope,
                         element   = element,
                         model     = model,
-                        propName  = name.RemoveFromStart(Design.PREFIX),
+                        propName  = name,
                         propValue = value
                     };
                     var result = await processProp(propertyProcessScope);
