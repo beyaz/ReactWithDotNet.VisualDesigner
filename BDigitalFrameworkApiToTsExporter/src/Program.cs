@@ -2,9 +2,9 @@
 
 static class Program
 {
-    static void Main()
+    static async Task Main()
     {
-        var result = DotNetModelExporter.TryExport();
+        var result = await DotNetModelExporter.TryExport();
         if (result.HasError)
         {
             throw result.Error;

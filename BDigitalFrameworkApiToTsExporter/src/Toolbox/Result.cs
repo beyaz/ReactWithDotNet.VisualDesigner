@@ -20,15 +20,72 @@ public sealed class Result<TValue>
         return new() { Error = error };
     }
     
+    public static implicit operator Task<Result<TValue>>(Result<TValue> result)
+        => Task.FromResult(result);
+    
     // @formatter:on
 }
 
+static class Result
+{
+    public static Result<T> From<T>(T value)
+    {
+        return new() { Value = value };
+    }
+}
 public static class ResultExtensions
 {
-    public static Result<TResult> Select<TSource, TResult>
+    public static async Task<Result<C>> SelectMany<A, B, C>
     (
-        this Result<TSource> result,
-        Func<TSource, TResult> selector
+        this Task<Result<A>> result,
+        Func<A, Task<Result<B>>> binder,
+        Func<A, B, C> projector
+    )
+    {
+        var a = await result;
+
+        if (a.HasError)
+        {
+            return a.Error;
+        }
+
+        var middle = await binder(a.Value);
+        if (middle.HasError)
+        {
+            return middle.Error;
+        }
+
+        return projector(a.Value, middle.Value);
+    }
+    
+    public static async Task<Result<C>> SelectMany<A, B, C>
+    (
+        this Task<Result<A>> result,
+        Func<A, Task<Result<B>>> binder,
+        Func<A, B, Task<Result<C>>> projector
+    )
+    {
+        var a = await result;
+
+        if (a.HasError)
+        {
+            return a.Error;
+        }
+
+        var middle = await binder(a.Value);
+        if (middle.HasError)
+        {
+            return middle.Error;
+        }
+
+        return await projector(a.Value, middle.Value);
+    }
+
+
+    public static Result<B> Select<A, B>
+    (
+        this Result<A> result,
+        Func<A, B> selector
     )
     {
         if (result.HasError)
@@ -38,7 +95,53 @@ public static class ResultExtensions
 
         return selector(result.Value);
     }
+    
+    public static Result<B> Select<A, B>
+    (
+        this Result<A> result,
+        Func<A, Result<B>> selector
+    )
+    {
+        if (result.HasError)
+        {
+            return result.Error;
+        }
 
+        return selector(result.Value);
+    }
+    
+    public static async Task<Result<B>> Select<A, B>
+    (
+        this Task<Result<A>> result,
+        Func<A, B> selector
+    )
+    {
+        var a = await result;
+        
+        if (a.HasError)
+        {
+            return a.Error;
+        }
+
+        return selector(a.Value);
+    }
+
+    public static Task<Result<B>> Select<A, B>
+    (
+        this Result<A> a,
+        Func<A, Task<Result<B>>> selector
+    )
+    {
+        if (a.HasError)
+        {
+            var b = new Result<B> { Error = a.Error };
+
+            return Task.FromResult(b);
+        }
+
+        return selector(a.Value);
+    }
+    
     public static Result<C> SelectMany<A, B, C>
     (
         this Result<A> result,
@@ -119,5 +222,102 @@ public static class ResultExtensions
         }
 
         return returnList;
+    }
+    
+    public static Result<IEnumerable<C>> SelectMany<A, B, C>
+    (
+        this IEnumerable<A> result,
+        Func<A, Result<B>> binder,
+        Func<A, B, C> projector
+    )
+    {
+        if (result is null)
+        {
+            throw new ArgumentNullException(nameof(result));
+        }
+
+        if (binder == null)
+        {
+            throw new ArgumentNullException(nameof(binder));
+        }
+
+        if (projector == null)
+        {
+            throw new ArgumentNullException(nameof(projector));
+        }
+
+        List<C> returnItems = [];
+        
+        foreach (var a in result)
+        {
+            var b = binder(a);
+            if (b.HasError)
+            {
+                return b.Error;
+            }
+
+            var c = projector(a, b.Value);
+
+            returnItems.Add(c);
+        }
+
+        return returnItems;
+    }
+    
+    public static Result<IEnumerable<A>> Where<A>
+    (
+        this Result<IEnumerable<A>> result,
+        Func<A, bool> filter
+    )
+    {
+        if (result == null)
+        {
+            throw new ArgumentNullException(nameof(result));
+        }
+
+        if (filter == null)
+        {
+            throw new ArgumentNullException(nameof(filter));
+        }
+
+        if (result.HasError)
+        {
+            return result.Error;
+        }
+
+        return new()
+        {
+            Value = result.Value.Where(filter)
+        };
+
+    }
+
+    public static Result<IEnumerable<B>> Select<TSource,B>
+    (
+        this Result<IEnumerable<TSource>> result,
+        Func<TSource, B> selector
+    )
+    {
+        if (result.HasError)
+        {
+            return result.Error;
+        }
+
+        List<B> returnItems = [];
+        
+        foreach (var source in result.Value)
+        {
+            var selectorResult = selector(source);
+
+            returnItems.Add(selectorResult);
+        }
+
+        return returnItems;
+    }
+
+
+    public static Result<T> AsResult<T>(this (T value, Exception exception) tuple)
+    {
+        return new() { Value = tuple.value, Error = tuple.exception };
     }
 }

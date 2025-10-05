@@ -2,7 +2,7 @@
 
 static class DotNetModelExporter
 {
-    public static Result<Unit> TryExport()
+    public static Task<Result<Unit>> TryExport()
     {
         var fileModels =
             from config in ConfigReader.ReadConfig()
@@ -20,11 +20,11 @@ static class DotNetModelExporter
             select FileSystem.Save(syncedFile);
     }
 
-    static Result<FileModel> TrySyncWithLocalFileSystem(FileModel file)
+    static async Task<Result<FileModel>> TrySyncWithLocalFileSystem(FileModel file)
     {
         if (File.Exists(file.Path))
         {
-            return
+            return await 
                 from fileContentInDirectory in FileSystem.ReadAllText(file.Path)
                 let exportIndex = fileContentInDirectory.IndexOf("export ", StringComparison.OrdinalIgnoreCase)
                 select (exportIndex > 0) switch

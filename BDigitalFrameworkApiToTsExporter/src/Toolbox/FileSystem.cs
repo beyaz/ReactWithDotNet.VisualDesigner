@@ -11,11 +11,11 @@ public sealed record FileModel
 
 static class FileSystem
 {
-    public static Result<string> ReadAllText(string filePath)
+    public static async Task<Result<string>> ReadAllText(string filePath)
     {
         try
         {
-            return File.ReadAllText(filePath);
+            return await File.ReadAllTextAsync(filePath);
         }
         catch (Exception exception)
         {
