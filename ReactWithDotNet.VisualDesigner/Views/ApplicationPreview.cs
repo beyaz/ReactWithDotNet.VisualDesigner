@@ -233,7 +233,7 @@ sealed class ApplicationPreview : Component
                         scope     = scope,
                         element   = element,
                         model     = model,
-                        propName  = Extensions.RemoveFromStart(designTimeProp.Name, Design.PREFIX),
+                        propName  = designTimeProp.Name.RemoveFromStart(Design.PREFIX),
                         propValue = designTimeProp.Value
                     };
                     var result = await processProp(propertyProcessScope);
