@@ -488,37 +488,11 @@ static class TsxExporter
 
     static Result<string> InjectRender(IReadOnlyList<string> fileContent, string targetComponentName, IReadOnlyList<string> linesToInject)
     {
-        
-        //from points in GetComponentLineIndexPointsInTsxFile(fileContent, targetComponentName)
-        //    let lines2 = fileContent.ToImmutableList()
-        //    let lines3= lines2.RemoveRange(points.firstReturnLineIndex, points.firstReturnCloseLineIndex - points.firstReturnLineIndex + 1)
-        
-        
-        
-        var lines = fileContent.ToImmutableList();
-
-        // focus to component code
-        int firstReturnLineIndex, firstReturnCloseLineIndex, leftPaddingCount;
-        {
-            var result = GetComponentLineIndexPointsInTsxFile(fileContent, targetComponentName);
-            if (result.HasError)
-            {
-                return result.Error;
-            }
-
-            leftPaddingCount          = result.Value.LeftPaddingCount;
-            firstReturnLineIndex      = result.Value.FirstReturnLineIndex;
-            firstReturnCloseLineIndex = result.Value.FirstReturnCloseLineIndex;
-        }
-
-        lines = lines.RemoveRange(firstReturnLineIndex, firstReturnCloseLineIndex - firstReturnLineIndex + 1);
-
-        linesToInject = applyPadding(lines, leftPaddingCount);
-
-        
-
-        return string.Join(Environment.NewLine, lines.InsertRange(firstReturnLineIndex, linesToInject));
-
+        return
+            from points in GetComponentLineIndexPointsInTsxFile(fileContent, targetComponentName)
+            let clearedFileContent = fileContent.ToImmutableList().RemoveRange(points.FirstReturnLineIndex, points.FirstReturnCloseLineIndex - points.FirstReturnLineIndex + 1)
+            let linesToInjectPaddingAppliedVersion = applyPadding(clearedFileContent, points.LeftPaddingCount)
+            select string.Join(Environment.NewLine, clearedFileContent.InsertRange(points.FirstReturnLineIndex, linesToInjectPaddingAppliedVersion));
 
         static IReadOnlyList<string> applyPadding(IReadOnlyList<string> lines, int leftPaddingCount)
         {
