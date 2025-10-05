@@ -107,73 +107,26 @@ static class TsxExporter
 
         var project = GetProjectConfig(projectId);
 
-        var data = await GetComponentData(new() { ComponentId = componentId, UserName = userName });
-        if (data.HasError)
-        {
-            return data.Error;
-        }
-
-        VisualElementModel rootVisualElement;
-        {
-            var result = await GetComponentUserOrMainVersionAsync(componentId, userName);
-            if (result.HasError)
-            {
-                return result.Error;
-            }
-
-            rootVisualElement = result.Value;
-        }
-
-        string filePath, targetComponentName;
-        {
-            var result = await GetComponentFileLocation(componentId, user.LocalWorkspacePath);
-            if (result.HasError)
-            {
-                return result.Error;
-            }
-
-            filePath            = result.Value.filePath;
-            targetComponentName = result.Value.targetComponentName;
-        }
-
-        IReadOnlyList<string> fileContentInDirectory;
-        {
-            var result = await FileSystem.ReadAllLines(filePath);
-            if (result.HasError)
-            {
-                return result.Error;
-            }
-
-            fileContentInDirectory = result.Value;
-        }
-
-        IReadOnlyList<string> linesToInject;
-        IReadOnlyList<string> importLines;
-        {
-            var result = await CalculateElementTreeSourceCodes(project, data.Value.Component.GetConfig(), rootVisualElement);
-            if (result.HasError)
-            {
-                return result.Error;
-            }
-
-            linesToInject = result.Value.elementTreeSourceLines;
-
-            importLines = result.Value.importLines;
-
-            var formatResult = await Prettier.FormatCode(string.Join(Environment.NewLine, linesToInject));
-            if (!formatResult.HasError)
-            {
-                linesToInject = formatResult.Value.Split(Environment.NewLine.ToCharArray());
-            }
-        }
-
-        fileContentInDirectory = mergeImportLines(fileContentInDirectory, importLines);
-
-        return
-            from fileContent in InjectRender(fileContentInDirectory, targetComponentName, linesToInject)
+        return await
+            from data in GetComponentData(new() { ComponentId = componentId, UserName = userName })
+            
+            from rootVisualElement in GetComponentUserOrMainVersionAsync(componentId, userName)
+            
+            from file in GetComponentFileLocation(componentId, user.LocalWorkspacePath)
+            
+            from fileContentInDirectory in FileSystem.ReadAllLines(file.filePath)
+            
+            from source in CalculateElementTreeSourceCodes(project, data.Component.GetConfig(), rootVisualElement)
+            
+            from formattedSourceLines in Prettier.FormatCode(string.Join(Environment.NewLine, source.elementTreeSourceLines))
+            
+            let content = mergeImportLines(fileContentInDirectory, source.importLines)
+            
+            from fileContent in InjectRender(content, file.targetComponentName, formattedSourceLines.Split(Environment.NewLine.ToCharArray()))
+            
             select new FileModel
             {
-                Path    = filePath,
+                Path    = file.filePath,
                 Content = fileContent
             };
 
