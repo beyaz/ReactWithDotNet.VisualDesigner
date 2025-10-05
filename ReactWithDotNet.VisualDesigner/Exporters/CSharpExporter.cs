@@ -108,7 +108,7 @@ static class CSharpExporter
             let analyzedRootNode = Plugin.AnalyzeNode(rootNode, componentConfig)
 
             // Convert node to JSX tree
-            from elementJsxTree in ConvertReactNodeModelToElementTreeSourceLines(project, analyzedRootNode, null, 2)
+            from elementJsxTree in ConvertReactNodeModelToElementTreeSourceLines(project, analyzedRootNode, null, 0)
 
             // Calculate imports
             let importLines = Plugin.CalculateImportLines(analyzedRootNode)
