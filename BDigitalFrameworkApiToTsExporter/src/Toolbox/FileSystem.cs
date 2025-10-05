@@ -5,7 +5,7 @@ namespace BDigitalFrameworkApiToTsExporter;
 public sealed record FileModel
 {
     public required string Content { get; init; }
-    
+
     public required string Path { get; init; }
 }
 
@@ -57,28 +57,5 @@ static class FileSystem
         }
 
         return Unit.Value;
-    }
-
-    public static Exception? WriteAllText(string filePath, string fileContent)
-    {
-        try
-        {
-            var fileInfo = new FileInfo(filePath);
-
-            if (fileInfo.Exists)
-            {
-                fileInfo.IsReadOnly = false;
-
-                TfsHelper.CheckoutFileFromTfs(filePath);
-            }
-
-            File.WriteAllText(filePath, fileContent, Encoding.UTF8);
-        }
-        catch (Exception exception)
-        {
-            return exception;
-        }
-
-        return null;
     }
 }
