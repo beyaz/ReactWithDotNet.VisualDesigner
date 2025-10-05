@@ -513,22 +513,23 @@ static class TsxExporter
 
         lines = lines.RemoveRange(firstReturnLineIndex, firstReturnCloseLineIndex - firstReturnLineIndex + 1);
 
-        // apply padding
+        linesToInject = applyPadding(lines, leftPaddingCount);
+
+        
+
+        return string.Join(Environment.NewLine, lines.InsertRange(firstReturnLineIndex, linesToInject));
+
+
+        static IReadOnlyList<string> applyPadding(IReadOnlyList<string> lines, int leftPaddingCount)
         {
-            var temp = linesToInject.Select(line => new string(' ', leftPaddingCount + 2) + line).ToList();
+            var temp = lines.Select(line => new string(' ', leftPaddingCount + 2) + line).ToList();
 
             temp.Insert(0, new string(' ', leftPaddingCount) + "return (");
 
             temp.Add(new string(' ', leftPaddingCount) + ");");
 
-            linesToInject = temp;
+            return temp;
         }
-
-        lines = lines.InsertRange(firstReturnLineIndex, linesToInject);
-
-        var injectedFileContent = string.Join(Environment.NewLine, lines);
-
-        return injectedFileContent;
     }
 
     class LineCollection : List<string>
