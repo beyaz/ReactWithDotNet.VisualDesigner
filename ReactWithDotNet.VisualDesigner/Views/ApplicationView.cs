@@ -722,7 +722,7 @@ sealed class ApplicationView : Component<ApplicationState>
             return;
         }
 
-        var fileContent = await IO.TryReadFileAllLines(location.Value.filePath);
+        var fileContent = await FileSystem.TryReadFileAllLines(location.Value.filePath);
         if (fileContent.HasError)
         {
             this.FailNotification(fileContent.Error.Message);

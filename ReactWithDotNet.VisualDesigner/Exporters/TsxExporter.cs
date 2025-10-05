@@ -18,12 +18,12 @@ static class TsxExporter
     {
         return 
             from file in CalculateExportInfo(input)
-            from fileContentAtDisk in IO.TryReadFile(file.filePath)
+            from fileContentAtDisk in FileSystem.ReadAllText(file.filePath)
             select IsEqualsIgnoreWhitespace(fileContentAtDisk, file.fileContent) switch
             {
                 true => Result.From(new ExportOutput()),
                 false =>
-                    from _ in IO.TryWriteToFile(file.filePath, file.fileContent)
+                    from _ in FileSystem.TryWriteToFile(file.filePath, file.fileContent)
                     select new ExportOutput
                     {
                         HasChange = true
@@ -169,7 +169,7 @@ static class TsxExporter
         {
             IReadOnlyList<string> fileContentInDirectory;
             {
-                var result = await IO.TryReadFileAllLines(filePath);
+                var result = await FileSystem.TryReadFileAllLines(filePath);
                 if (result.HasError)
                 {
                     return result.Error;

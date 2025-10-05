@@ -36,7 +36,7 @@ static class CSharpExporter
 
         string fileContentAtDisk;
         {
-            var result = await IO.TryReadFile(filePath);
+            var result = await FileSystem.ReadAllText(filePath);
             if (result.HasError)
             {
                 return result.Error;
@@ -52,7 +52,7 @@ static class CSharpExporter
 
         // write to file system
         {
-            var result = await IO.TryWriteToFile(filePath, fileContent);
+            var result = await FileSystem.TryWriteToFile(filePath, fileContent);
             if (result.HasError)
             {
                 return result.Error;
@@ -213,7 +213,7 @@ static class CSharpExporter
         {
             IReadOnlyList<string> fileContentInDirectory;
             {
-                var result = await IO.TryReadFileAllLines(filePath);
+                var result = await FileSystem.TryReadFileAllLines(filePath);
                 if (result.HasError)
                 {
                     return result.Error;

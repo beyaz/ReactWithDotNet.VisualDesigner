@@ -1,11 +1,11 @@
 ﻿using System.IO;
 using System.Text;
 
-namespace ReactWithDotNet.VisualDesigner;
+namespace Toolbox;
 
-static class IO
+static class FileSystem
 {
-    public static async Task<Result<string>> TryReadFile(string filePath)
+    public static async Task<Result<string>> ReadAllText(string filePath)
     {
         try
         {
