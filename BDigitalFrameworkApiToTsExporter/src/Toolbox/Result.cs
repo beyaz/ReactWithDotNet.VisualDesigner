@@ -45,39 +45,39 @@ public static class ResultExtensions
 
     public static Result<B> Select<A, B>
     (
-        this Result<A> result,
+        this Result<A> source,
         Func<A, B> selector
     )
     {
-        if (result.HasError)
+        if (source.HasError)
         {
-            return result.Error;
+            return source.Error;
         }
 
-        return selector(result.Value);
+        return selector(source.Value);
     }
 
     public static Result<B> Select<A, B>
     (
-        this Result<A> result,
+        this Result<A> source,
         Func<A, Result<B>> selector
     )
     {
-        if (result.HasError)
+        if (source.HasError)
         {
-            return result.Error;
+            return source.Error;
         }
 
-        return selector(result.Value);
+        return selector(source.Value);
     }
 
     public static async Task<Result<B>> Select<A, B>
     (
-        this Task<Result<A>> result,
+        this Task<Result<A>> source,
         Func<A, B> selector
     )
     {
-        var a = await result;
+        var a = await source;
 
         if (a.HasError)
         {
@@ -103,22 +103,22 @@ public static class ResultExtensions
         return selector(a.Value);
     }
 
-    public static Result<IEnumerable<B>> Select<TSource, B>
+    public static Result<IEnumerable<B>> Select<A, B>
     (
-        this Result<IEnumerable<TSource>> result,
-        Func<TSource, B> selector
+        this Result<IEnumerable<A>> source,
+        Func<A, B> selector
     )
     {
-        if (result.HasError)
+        if (source.HasError)
         {
-            return result.Error;
+            return source.Error;
         }
 
         List<B> returnItems = [];
 
-        foreach (var source in result.Value)
+        foreach (var a in source.Value)
         {
-            var selectorResult = selector(source);
+            var selectorResult = selector(a);
 
             returnItems.Add(selectorResult);
         }
@@ -128,88 +128,88 @@ public static class ResultExtensions
 
     public static async Task<Result<C>> SelectMany<A, B, C>
     (
-        this Task<Result<A>> result,
-        Func<A, Task<Result<B>>> binder,
-        Func<A, B, C> projector
+        this Task<Result<A>> source,
+        Func<A, Task<Result<B>>> bind,
+        Func<A, B, C> resultSelector
     )
     {
-        var a = await result;
+        var a = await source;
 
         if (a.HasError)
         {
             return a.Error;
         }
 
-        var middle = await binder(a.Value);
+        var middle = await bind(a.Value);
         if (middle.HasError)
         {
             return middle.Error;
         }
 
-        return projector(a.Value, middle.Value);
+        return resultSelector(a.Value, middle.Value);
     }
 
     public static async Task<Result<C>> SelectMany<A, B, C>
     (
-        this Task<Result<A>> result,
-        Func<A, Task<Result<B>>> binder,
-        Func<A, B, Task<Result<C>>> projector
+        this Task<Result<A>> source,
+        Func<A, Task<Result<B>>> bind,
+        Func<A, B, Task<Result<C>>> resultSelector
     )
     {
-        var a = await result;
+        var a = await source;
 
         if (a.HasError)
         {
             return a.Error;
         }
 
-        var middle = await binder(a.Value);
+        var middle = await bind(a.Value);
         if (middle.HasError)
         {
             return middle.Error;
         }
 
-        return await projector(a.Value, middle.Value);
+        return await resultSelector(a.Value, middle.Value);
     }
 
     public static Result<C> SelectMany<A, B, C>
     (
-        this Result<A> result,
-        Func<A, Result<B>> binder,
-        Func<A, B, C> projector
+        this Result<A> source,
+        Func<A, Result<B>> bind,
+        Func<A, B, C> resultSelector
     )
     {
-        if (result.HasError)
+        if (source.HasError)
         {
-            return result.Error;
+            return source.Error;
         }
 
-        var middle = binder(result.Value);
+        var middle = bind(source.Value);
         if (middle.HasError)
         {
             return middle.Error;
         }
 
-        return projector(result.Value, middle.Value);
+        return resultSelector(source.Value, middle.Value);
     }
 
     public static Result<IEnumerable<C>> SelectMany<A, B, C>
     (
-        this Result<A> result,
-        Func<A, IEnumerable<B>> binder,
-        Func<A, B, C> projector
+        this Result<A> source,
+        Func<A, IEnumerable<B>> bind,
+        Func<A, B, C> resultSelector
     )
     {
-        if (result.HasError)
+        if (source.HasError)
         {
-            return result.Error;
+            return source.Error;
         }
 
         try
         {
-            var middles = binder(result.Value);
+            var middles = bind(source.Value);
 
-            var results = middles.Select(middle => projector(result.Value, middle));
+            var results = middles.Select(middle => resultSelector(source.Value, middle));
 
             return new() { Value = results };
         }
@@ -221,19 +221,19 @@ public static class ResultExtensions
 
     public static Result<IEnumerable<C>> SelectMany<A, B, C>
     (
-        this Result<A> result,
-        Func<A, IEnumerable<Result<B>>> binder,
-        Func<A, B, C> projector
+        this Result<A> source,
+        Func<A, IEnumerable<Result<B>>> bind,
+        Func<A, B, C> resultSelector
     )
     {
-        if (result.HasError)
+        if (source.HasError)
         {
-            return result.Error;
+            return source.Error;
         }
 
-        var a = result.Value;
+        var a = source.Value;
 
-        var enumerable = binder(a);
+        var enumerable = bind(a);
 
         List<C> returnList = [];
 
@@ -246,7 +246,7 @@ public static class ResultExtensions
 
             var b = item.Value;
 
-            var c = projector(a, b);
+            var c = resultSelector(a, b);
 
             returnList.Add(c);
         }
@@ -256,37 +256,37 @@ public static class ResultExtensions
 
     public static Result<IEnumerable<C>> SelectMany<A, B, C>
     (
-        this IEnumerable<A> result,
-        Func<A, Result<B>> binder,
-        Func<A, B, C> projector
+        this IEnumerable<A> source,
+        Func<A, Result<B>> bind,
+        Func<A, B, C> resultSelector
     )
     {
-        if (result is null)
+        if (source is null)
         {
-            throw new ArgumentNullException(nameof(result));
+            throw new ArgumentNullException(nameof(source));
         }
 
-        if (binder == null)
+        if (bind == null)
         {
-            throw new ArgumentNullException(nameof(binder));
+            throw new ArgumentNullException(nameof(bind));
         }
 
-        if (projector == null)
+        if (resultSelector == null)
         {
-            throw new ArgumentNullException(nameof(projector));
+            throw new ArgumentNullException(nameof(resultSelector));
         }
 
         List<C> returnItems = [];
 
-        foreach (var a in result)
+        foreach (var a in source)
         {
-            var b = binder(a);
+            var b = bind(a);
             if (b.HasError)
             {
                 return b.Error;
             }
 
-            var c = projector(a, b.Value);
+            var c = resultSelector(a, b.Value);
 
             returnItems.Add(c);
         }
@@ -326,28 +326,28 @@ public static class ResultExtensions
 
     public static Result<IEnumerable<A>> Where<A>
     (
-        this Result<IEnumerable<A>> result,
-        Func<A, bool> filter
+        this Result<IEnumerable<A>> source,
+        Func<A, bool> predicate
     )
     {
-        if (result == null)
+        if (source == null)
         {
-            throw new ArgumentNullException(nameof(result));
+            throw new ArgumentNullException(nameof(source));
         }
 
-        if (filter == null)
+        if (predicate == null)
         {
-            throw new ArgumentNullException(nameof(filter));
+            throw new ArgumentNullException(nameof(predicate));
         }
 
-        if (result.HasError)
+        if (source.HasError)
         {
-            return result.Error;
+            return source.Error;
         }
 
         return new()
         {
-            Value = result.Value.Where(filter)
+            Value = source.Value.Where(predicate)
         };
     }
 }
