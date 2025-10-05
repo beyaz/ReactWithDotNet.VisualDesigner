@@ -79,44 +79,20 @@ static class TsxExporter
         return (leftPaddingCount, firstReturnLineIndex, firstReturnCloseLineIndex);
     }
 
-    internal static async Task<Result<(IReadOnlyList<string> elementTreeSourceLines, IReadOnlyList<string> importLines)>> CalculateElementTreeSourceCodes(ProjectConfig project, IReadOnlyDictionary<string, string> componentConfig, VisualElementModel rootVisualElement)
+    internal static Task<Result<(IReadOnlyList<string> elementTreeSourceLines, IReadOnlyList<string> importLines)>> CalculateElementTreeSourceCodes(ProjectConfig project, IReadOnlyDictionary<string, string> componentConfig, VisualElementModel rootVisualElement)
     {
-        
-        //Task<Result<Result<(IReadOnlyList<string> elementJsxTree, List<string>)>>> a =
-        //    from rootNode in ModelToNodeTransformer.ConvertVisualElementModelToReactNodeModel(project, rootVisualElement)
-        //    let analyzedRootNode = Plugin.AnalyzeNode(rootNode, componentConfig)
-        //    from elementJsxTree in ConvertReactNodeModelToElementTreeSourceLines(project, analyzedRootNode, null, 2)
-        //    let importLines = Plugin.CalculateImportLines(analyzedRootNode)
-        //    select Result.From((elementJsxTree, importLines.ToList()));
-        
-        
-        ReactNode rootNode;
-        {
-            var result = await ModelToNodeTransformer.ConvertVisualElementModelToReactNodeModel(project, rootVisualElement);
-            if (result.HasError)
-            {
-                return result.Error;
-            }
 
-            rootNode = result.Value;
-        }
+        return
+            from rootNode in ModelToNodeTransformer.ConvertVisualElementModelToReactNodeModel(project, rootVisualElement)
 
-        rootNode = Plugin.AnalyzeNode(rootNode, componentConfig);
+            let analyzedRootNode = Plugin.AnalyzeNode(rootNode, componentConfig)
 
-        IReadOnlyList<string> elementJsxTree;
-        {
-            var result = await ConvertReactNodeModelToElementTreeSourceLines(project, rootNode, null, 2);
-            if (result.HasError)
-            {
-                return result.Error;
-            }
+            from elementJsxTree in ConvertReactNodeModelToElementTreeSourceLines(project, analyzedRootNode, null, 2)
 
-            elementJsxTree = result.Value;
-        }
+            let importLines = Plugin.CalculateImportLines(analyzedRootNode)
 
-        var importLines = Plugin.CalculateImportLines(rootNode);
+            select (elementJsxTree, importLines.AsReadOnlyList());
 
-        return (elementJsxTree, importLines.ToList());
     }
 
     static async Task<Result<FileModel>> CalculateExportInfo(ExportInput input)

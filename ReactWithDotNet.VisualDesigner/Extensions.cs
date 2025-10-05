@@ -7,6 +7,9 @@ namespace ReactWithDotNet.VisualDesigner;
 
 static class Extensions
 {
+    public static IReadOnlyList<T> AsReadOnlyList<T>(this IEnumerable<T> source)
+        => source as IReadOnlyList<T> ?? source.ToList();
+    
     public static T FirstOrDefaultOf<T>(IEnumerable<T> items) => items.FirstOrDefault();
     
     public static T FirstOf<T>(IEnumerable<T> items) => items.First();
