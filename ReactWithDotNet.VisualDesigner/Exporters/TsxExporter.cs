@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Collections.Immutable;
+using System.Reflection;
 
 namespace ReactWithDotNet.VisualDesigner.Exporters;
 
@@ -487,7 +488,13 @@ static class TsxExporter
 
     static Result<string> InjectRender(IReadOnlyList<string> fileContent, string targetComponentName, IReadOnlyList<string> linesToInject)
     {
-        var lines = fileContent.ToList();
+        
+        // from points in GetComponentLineIndexPointsInTsxFile(fileContent, targetComponentName)
+            
+        
+        
+        
+        var lines = fileContent.ToImmutableList();
 
         // focus to component code
         int firstReturnLineIndex, firstReturnCloseLineIndex, leftPaddingCount;
@@ -503,7 +510,7 @@ static class TsxExporter
             firstReturnCloseLineIndex = result.Value.firstReturnCloseLineIndex;
         }
 
-        lines.RemoveRange(firstReturnLineIndex, firstReturnCloseLineIndex - firstReturnLineIndex + 1);
+        lines = lines.RemoveRange(firstReturnLineIndex, firstReturnCloseLineIndex - firstReturnLineIndex + 1);
 
         // apply padding
         {
@@ -516,7 +523,7 @@ static class TsxExporter
             linesToInject = temp;
         }
 
-        lines.InsertRange(firstReturnLineIndex, linesToInject);
+        lines = lines.InsertRange(firstReturnLineIndex, linesToInject);
 
         var injectedFileContent = string.Join(Environment.NewLine, lines);
 
