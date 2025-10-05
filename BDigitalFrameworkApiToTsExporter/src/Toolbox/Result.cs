@@ -42,6 +42,46 @@ public static class ResultExtensions
     {
         return new() { Value = tuple.value, Error = tuple.exception };
     }
+    
+    
+    public static Result<IEnumerable<T>> AsResult<T>(this IEnumerable<Result<T>> enumerable)
+    {
+        List<T> items = [];
+        
+        foreach (var result in enumerable)
+        {
+            items.Add(result.Value);
+            
+            if (result.HasError)
+            {
+                return new()
+                {
+                    Error = result.Error
+                };
+            }
+        }
+        
+        return items;
+    }
+    
+    public static IEnumerable<Result<B>> Select<A, B>
+    (
+        this IEnumerable<Result<A>> source,
+        Func<A, B> selector
+    )
+    {
+        foreach (var result in source)
+        {
+            if (result.HasError)
+            {
+                yield return result.Error;
+                yield break;
+            }
+
+            yield return selector(result.Value);
+        }
+        
+    }
 
     public static Result<B> Select<A, B>
     (
@@ -254,7 +294,7 @@ public static class ResultExtensions
         return returnList;
     }
 
-    public static Result<IEnumerable<C>> SelectMany<A, B, C>
+    public static IEnumerable<Result<C>> SelectMany<A, B, C>
     (
         this IEnumerable<A> source,
         Func<A, Result<B>> bind,
@@ -276,14 +316,19 @@ public static class ResultExtensions
             throw new ArgumentNullException(nameof(resultSelector));
         }
 
-        List<C> returnItems = [];
+        List<Result<C>> returnItems = [];
 
         foreach (var a in source)
         {
             var b = bind(a);
             if (b.HasError)
             {
-                return b.Error;
+                returnItems.Add(new()
+                {
+                    Error = b.Error
+                });
+                
+                return returnItems;
             }
 
             var c = resultSelector(a, b.Value);
@@ -450,9 +495,9 @@ public static class ResultExtensions
         }
     }
 
-    public static Result<IEnumerable<A>> Where<A>
+    public static IEnumerable<Result<A>> Where<A>
     (
-        this Result<IEnumerable<A>> source,
+        this IEnumerable<Result<A>> source,
         Func<A, bool> predicate
     )
     {
@@ -466,14 +511,26 @@ public static class ResultExtensions
             throw new ArgumentNullException(nameof(predicate));
         }
 
-        if (source.HasError)
+
+        List<Result<A>> returnList = [];
+        
+        foreach (var result in source)
         {
-            return source.Error;
+            if (result.HasError)
+            {
+                returnList.Add(new(){ Error = result.Error});
+
+                return returnList;
+            }
+
+            if (predicate(result.Value))
+            {
+                returnList.Add(result);    
+            }
+            
+            
         }
 
-        return new()
-        {
-            Value = source.Value.Where(predicate)
-        };
+        return returnList;
     }
 }

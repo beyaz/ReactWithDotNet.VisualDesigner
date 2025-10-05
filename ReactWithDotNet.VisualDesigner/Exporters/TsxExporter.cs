@@ -491,7 +491,7 @@ static class TsxExporter
         return
             from points in GetComponentLineIndexPointsInTsxFile(fileContent, targetComponentName)
             let clearedFileContent = fileContent.ToImmutableList().RemoveRange(points.FirstReturnLineIndex, points.FirstReturnCloseLineIndex - points.FirstReturnLineIndex + 1)
-            let linesToInjectPaddingAppliedVersion = applyPadding(clearedFileContent, points.LeftPaddingCount)
+            let linesToInjectPaddingAppliedVersion = applyPadding(linesToInject, points.LeftPaddingCount)
             select string.Join(Environment.NewLine, clearedFileContent.InsertRange(points.FirstReturnLineIndex, linesToInjectPaddingAppliedVersion));
 
         static IReadOnlyList<string> applyPadding(IReadOnlyList<string> lines, int leftPaddingCount)
