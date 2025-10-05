@@ -24,22 +24,17 @@ static class DotNetModelExporter
     {
         if (File.Exists(file.Path))
         {
-            var result = FileSystem.ReadAllText(file.Path);
-            if (result.HasError)
-            {
-                return result.Error;
-            }
-
-            var fileContentInDirectory = result.Value;
-
-            var exportIndex = fileContentInDirectory.IndexOf("export ", StringComparison.OrdinalIgnoreCase);
-            if (exportIndex > 0)
-            {
-                return file with
+            return
+                from fileContentInDirectory in FileSystem.ReadAllText(file.Path)
+                let exportIndex = fileContentInDirectory.IndexOf("export ", StringComparison.OrdinalIgnoreCase)
+                select (exportIndex > 0) switch
                 {
-                    Content = fileContentInDirectory[..exportIndex] + file.Content
+                    true => file with
+                    {
+                        Content = fileContentInDirectory[..exportIndex] + file.Content
+                    },
+                    false => file
                 };
-            }
         }
 
         return file;
