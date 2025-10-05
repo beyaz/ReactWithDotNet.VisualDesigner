@@ -35,7 +35,7 @@ static class CecilHelper
         return typeDefinitions;
     }
 
-    public static bool isNullableProperty(PropertyDefinition propertyDefinition)
+    public static bool IsNullableProperty(PropertyDefinition propertyDefinition)
     {
         // is value type
         if (isSystemNullable(propertyDefinition.PropertyType))

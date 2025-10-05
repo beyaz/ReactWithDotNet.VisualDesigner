@@ -30,7 +30,7 @@ static class TsModelCreator
                 select new TsFieldDefinition
                 {
                     Name          = TypescriptNaming.GetResolvedPropertyName(propertyDefinition.Name),
-                    IsNullable    = CecilHelper.isNullableProperty(propertyDefinition),
+                    IsNullable    = CecilHelper.IsNullableProperty(propertyDefinition),
                     TypeName      = GetTSTypeName(propertyDefinition.PropertyType),
                     ConstantValue = string.Empty
                 };
@@ -42,7 +42,11 @@ static class TsModelCreator
 
             IsEnum = typeDefinition.IsEnum,
 
-            BaseTypeName = typeDefinition.BaseType.FullName == typeof(object).FullName ? string.Empty : typeDefinition.BaseType.Name,
+            BaseTypeName = (typeDefinition.BaseType.FullName == typeof(object).FullName) switch
+            {
+                true  => string.Empty,
+                false => typeDefinition.BaseType.Name
+            },
 
             Fields = fields.ToList()
         };
