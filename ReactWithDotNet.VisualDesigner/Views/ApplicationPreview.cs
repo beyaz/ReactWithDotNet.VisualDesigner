@@ -1,10 +1,10 @@
 ﻿using System.Collections;
-using ReactWithDotNet.VisualDesigner.PropertyDomain;
 using System.IO;
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using ReactWithDotNet.VisualDesigner.PropertyDomain;
 
 namespace ReactWithDotNet.VisualDesigner.Views;
 
@@ -172,20 +172,21 @@ sealed class ApplicationPreview : Component
                 }
             }
 
-            var designTimeProps = 
+            var designTimeProps =
                 from p in model.Properties
                 from x in ParseProperty(p)
                 where Design.IsDesignTimeName(x.Name) && x.Name.NotIn(Design.Text, Design.TextPreview, Design.Name, Design.ShowIf, Design.HideIf)
                 select x;
 
-            
-         
             model = model with
             {
-                Properties = ListFrom(from p in model.Properties
-                                      from x in TryParseProperty(p)
-                                      where !Design.IsDesignTimeName(x.Name)
-                                      select p)
+                Properties =
+                (
+                    from p in model.Properties
+                    from x in TryParseProperty(p)
+                    where !Design.IsDesignTimeName(x.Name)
+                    select p
+                ).AsReadOnlyList()
             };
 
             while (model.Properties.Count > 0)
@@ -226,13 +227,13 @@ sealed class ApplicationPreview : Component
                     }
 
                     var designTimeProp = item.Value;
-                    
+
                     var propertyProcessScope = new PropertyProcessScope
                     {
                         scope     = scope,
                         element   = element,
                         model     = model,
-                        propName  = designTimeProp.Name.RemoveFromStart(Design.PREFIX),
+                        propName  = Extensions.RemoveFromStart(designTimeProp.Name, Design.PREFIX),
                         propValue = designTimeProp.Value
                     };
                     var result = await processProp(propertyProcessScope);
@@ -467,9 +468,8 @@ sealed class ApplicationPreview : Component
                     foreach (var propRealValue in tryGetPropValueFromCaller(data.scope, data.model, data.propName))
                     {
                         data = data with { propValue = propRealValue };
-                    }    
+                    }
                 }
-                
 
                 var result = await FP.RunWhile(data, x => !x.IsProcessed,
                 [
@@ -670,13 +670,12 @@ sealed class ApplicationPreview : Component
                     {
                         if (isValueDouble)
                         {
-                            return 
+                            return
                                 from _ in ReflectionHelper.SetPropertyValue(element, "height", propValue)
                                 select data with
                                 {
                                     IsProcessed = true
                                 };
-
                         }
                     }
 
@@ -684,7 +683,8 @@ sealed class ApplicationPreview : Component
                     {
                         if (isValueDouble)
                         {
-                            return from _ in ReflectionHelper.SetPropertyValue(element, "width", propValue)
+                            return
+                                from _ in ReflectionHelper.SetPropertyValue(element, "width", propValue)
                                 select data with
                                 {
                                     IsProcessed = true
@@ -698,8 +698,8 @@ sealed class ApplicationPreview : Component
                         {
                             foreach (var srcValue in await calculateSrcFromValue(scope, model, propValue))
                             {
-                                
-                                return from _ in ReflectionHelper.SetPropertyValue(element, "src", srcValue)
+                                return
+                                    from _ in ReflectionHelper.SetPropertyValue(element, "src", srcValue)
                                     select data with
                                     {
                                         IsProcessed = true
@@ -721,14 +721,12 @@ sealed class ApplicationPreview : Component
                             {
                                 foreach (var srcValue in await calculateSrcFromValue(scope, model, designTimeSrc))
                                 {
-
-                                    return from _ in ReflectionHelper.SetPropertyValue(element, "src", srcValue)
+                                    return
+                                        from _ in ReflectionHelper.SetPropertyValue(element, "src", srcValue)
                                         select data with
                                         {
                                             IsProcessed = true
                                         };
-                                    
-                                    
                                 }
                             }
                         }
@@ -754,17 +752,17 @@ sealed class ApplicationPreview : Component
 
                             if (dummySrc.HasValue())
                             {
-                                return from _ in ReflectionHelper.SetPropertyValue(element, "src", dummySrc)
+                                return
+                                    from _ in ReflectionHelper.SetPropertyValue(element, "src", dummySrc)
                                     select data with
                                     {
                                         IsProcessed = true
                                     };
-                                
                             }
                         }
 
-                        
-                        return from _ in ReflectionHelper.SetPropertyValue(element, "src", DummySrc(500))
+                        return
+                            from _ in ReflectionHelper.SetPropertyValue(element, "src", DummySrc(500))
                             select data with
                             {
                                 IsProcessed = true
@@ -778,8 +776,8 @@ sealed class ApplicationPreview : Component
                             {
                                 return src;
                             }
-                            
-                            if (src=="true" || src == "false")
+
+                            if (src == "true" || src == "false")
                             {
                                 return None;
                             }
@@ -953,11 +951,11 @@ sealed class ApplicationPreview : Component
 
                 foreach (var callerProperty in from p in scope.ParentModel.Properties from v in TryParseProperty(p) select v)
                 {
-                    if (callerProperty.Value?.In("true","false") is true)
+                    if (callerProperty.Value?.In("true", "false") is true)
                     {
                         return callerProperty.Value;
                     }
-                    
+
                     if (ClearConnectedValue(propertyValue) == $"props.{callerProperty.Name}")
                     {
                         if (IsStringValue(ClearConnectedValue(callerProperty.Value)))
@@ -991,7 +989,7 @@ sealed class ApplicationPreview : Component
 
                 static Maybe<ParsedProperty> tryGetProperty(VisualElementModel model, string propertyName)
                 {
-                    foreach (ParsedProperty parsedProperty in from p in model.Properties from v in TryParseProperty(p) where v.Name == propertyName select v)
+                    foreach (var parsedProperty in from p in model.Properties from v in TryParseProperty(p) where v.Name == propertyName select v)
                     {
                         return Maybe<ParsedProperty>.Some(parsedProperty);
                     }
@@ -1120,14 +1118,13 @@ static class ApplicationPreviewExtensions
                     yield return CreateFinalCssItem(finalCssItem.Name, parseResult.left);
                 }
 
-                yield return new(){Value = finalCssItem};
+                yield return new() { Value = finalCssItem };
             }
-
         }
 
         static Result<StyleModifier> ApplyPseudo(string pseudo, IReadOnlyList<StyleModifier> styleModifiers)
         {
-            return 
+            return
                 from fn in GetPseudoFunction(pseudo)
                 select fn([.. styleModifiers]);
         }
@@ -1201,7 +1198,6 @@ public class PluginComponentBase : Component
     public string id;
     public MouseEventHandler onMouseClick;
 }
-
 
 static class FP
 {
