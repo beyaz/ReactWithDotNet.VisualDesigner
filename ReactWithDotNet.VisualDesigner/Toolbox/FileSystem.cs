@@ -5,18 +5,6 @@ namespace Toolbox;
 
 static class FileSystem
 {
-    public static async Task<Result<string>> ReadAllText(string filePath)
-    {
-        try
-        {
-            return await File.ReadAllTextAsync(filePath);
-        }
-        catch (Exception exception)
-        {
-            return exception;
-        }
-    }
-
     public static async Task<Result<string[]>> ReadAllLines(string filePath)
     {
         try
@@ -29,48 +17,18 @@ static class FileSystem
         }
     }
 
-    public static async Task<Result<Unit>> Save(string filePath, string fileContent)
+    public static async Task<Result<string>> ReadAllText(string filePath)
     {
         try
         {
-            var fileInfo = new FileInfo(filePath);
-            if (fileInfo.IsReadOnly)
-            {
-                fileInfo.IsReadOnly = false;
-            }
-
-            Encoding encoding;
-
-            if (fileInfo.Exists)
-            {
-                // Dosyayı açıp encoding tespit et
-                using (var reader = new StreamReader(filePath, Encoding.UTF8, detectEncodingFromByteOrderMarks: true))
-                {
-                    // İlk okumayı yapmazsak CurrentEncoding default (UTF8) kalabilir
-                    var buffer = new char[1];
-                    await reader.ReadAsync(buffer, 0, 1);
-                    encoding = reader.CurrentEncoding;
-                }
-            }
-            else
-            {
-                // Dosya yoksa UTF-8 kullan
-                encoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
-            }
-
-            // Dosyaya mevcut encoding ile yaz
-            await using var writer = new StreamWriter(filePath, false, encoding);
-
-            await writer.WriteAsync(fileContent);
+            return await File.ReadAllTextAsync(filePath);
         }
         catch (Exception exception)
         {
             return exception;
         }
-
-        return Unit.Value;
     }
-    
+
     public static async Task<Result<Unit>> Save(FileModel file)
     {
         try
