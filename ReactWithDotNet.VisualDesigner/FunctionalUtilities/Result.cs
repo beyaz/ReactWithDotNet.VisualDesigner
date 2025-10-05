@@ -27,10 +27,10 @@ public sealed class Result<TValue>
 
 public static class ResultExtensions
 {
-    public static Result<TResult> Select<TSource, TResult>
+    public static Result<B> Select<A, B>
     (
-        this Result<TSource> result,
-        Func<TSource, TResult> selector
+        this Result<A> result,
+        Func<A, B> selector
     )
     {
         if (result.HasError)
