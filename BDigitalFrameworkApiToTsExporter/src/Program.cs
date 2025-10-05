@@ -4,10 +4,12 @@ static class Program
 {
     static async Task Main()
     {
-        var result = await DotNetModelExporter.TryExport();
-        if (result.HasError)
+        await foreach (var result in DotNetModelExporter.TryExport())
         {
-            throw result.Error;
+            if (result.HasError)
+            {
+                throw result.Error;
+            }
         }
     }
 }

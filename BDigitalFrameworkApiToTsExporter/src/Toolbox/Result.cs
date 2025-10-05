@@ -322,7 +322,7 @@ public static class ResultExtensions
     }
     
     
-    public static async Task<Result<IEnumerable<C>>> SelectMany<A, B, C>
+    public static async IAsyncEnumerable<Result<C>> SelectMany<A, B, C>
     (
         this Result<IEnumerable<A>> result,
         Func<A, Task<Result<B>>> binder,
@@ -331,27 +331,23 @@ public static class ResultExtensions
     {
         if (result.HasError)
         {
-            return result.Error;
+            yield return result.Error;
         }
-
-        List<C> listOfC = [];
         
         foreach (var a in result.Value)
         {
             var b = await binder(a);
             if (b.HasError)
             {
-                return b.Error;
+                yield return b.Error;
             }
             var c = projector(a, b.Value);
             if (c.HasError)
             {
-                return c.Error;
+                yield return c.Error;
             }
-            
-            listOfC.Add(c.Value);
-        }
 
-        return listOfC;
+            yield return c.Value;
+        }
     }
 }
