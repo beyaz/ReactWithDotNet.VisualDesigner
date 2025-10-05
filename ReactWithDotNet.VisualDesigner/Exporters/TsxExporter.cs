@@ -31,7 +31,7 @@ static class TsxExporter
             };
     }
 
-    public static Result<(int LeftPaddingCount, int FirstReturnLineIndex, int FirstReturnCloseLineIndex)> GetComponentLineIndexPointsInTsxFile(IReadOnlyList<string> fileContent, string targetComponentName)
+    public static Result<SourceLinePoints> GetComponentLineIndexPointsInTsxFile(IReadOnlyList<string> fileContent, string targetComponentName)
     {
         var lines = fileContent.ToList();
 
@@ -76,7 +76,7 @@ static class TsxExporter
             }
         }
 
-        return (leftPaddingCount, firstReturnLineIndex, firstReturnCloseLineIndex);
+        return new SourceLinePoints(leftPaddingCount, firstReturnLineIndex, firstReturnCloseLineIndex);
     }
 
     internal static

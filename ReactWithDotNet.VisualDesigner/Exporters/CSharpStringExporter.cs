@@ -36,7 +36,7 @@ static class CSharpStringExporter
 
     }
 
-    public static Result<(int LeftPaddingCount, int FirstReturnLineIndex, int FirstReturnCloseLineIndex)> GetComponentLineIndexPointsInCSharpFile(IReadOnlyList<string> fileContent, string targetComponentName)
+    public static Result<SourceLinePoints> GetComponentLineIndexPointsInCSharpFile(IReadOnlyList<string> fileContent, string targetComponentName)
     {
         var lines = fileContent.ToList();
 
@@ -93,7 +93,7 @@ static class CSharpStringExporter
 
             if (lines[firstReturnLineIndex].EndsWith(";"))
             {
-                return (leftPaddingCount, firstReturnLineIndex, firstReturnLineIndex);
+                return new SourceLinePoints(leftPaddingCount, firstReturnLineIndex, firstReturnLineIndex);
             }
 
             var firstReturnCloseLineIndex = -1;
@@ -109,7 +109,7 @@ static class CSharpStringExporter
                 }
             }
 
-            return (leftPaddingCount, firstReturnLineIndex, firstReturnCloseLineIndex);
+            return new SourceLinePoints(leftPaddingCount, firstReturnLineIndex, firstReturnCloseLineIndex);
         }
     }
 
