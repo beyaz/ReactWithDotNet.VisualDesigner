@@ -18,46 +18,22 @@ static class CSharpStringExporter
         return string.Join(Environment.NewLine, result.Value.elementTreeSourceLines);
     }
 
-    public static async Task<Result<ExportOutput>> ExportToFileSystem(ExportInput input)
+    public static Task<Result<ExportOutput>> ExportToFileSystem(ExportInput input)
     {
-        string filePath;
-        string fileContent;
-        {
-            var result = await CalculateExportInfo(input);
-            if (result.HasError)
+        return
+            from file in CalculateExportInfo(input)
+            from fileContentAtDisk in FileSystem.ReadAllText(file.Path)
+            select IsEqualsIgnoreWhitespace(fileContentAtDisk, file.Content) switch
             {
-                return result.Error;
-            }
+                true => Result.From(new ExportOutput()),
+                false =>
+                    from _ in FileSystem.Save(file)
+                    select new ExportOutput
+                    {
+                        HasChange = true
+                    }
+            };
 
-            (filePath, fileContent) = result.Value;
-        }
-
-        string fileContentAtDisk;
-        {
-            var result = await FileSystem.ReadAllText(filePath);
-            if (result.HasError)
-            {
-                return result.Error;
-            }
-
-            fileContentAtDisk = result.Value;
-        }
-
-        if (IsEqualsIgnoreWhitespace(fileContentAtDisk, fileContent))
-        {
-            return new ExportOutput();
-        }
-
-        // write to file system
-        {
-            var result = await FileSystem.Save(filePath, fileContent);
-            if (result.HasError)
-            {
-                return result.Error;
-            }
-        }
-
-        return new ExportOutput { HasChange = true };
     }
 
     public static Result<(int leftPaddingCount, int firstReturnLineIndex, int firstReturnCloseLineIndex)>
@@ -205,7 +181,7 @@ static class CSharpStringExporter
         }
     }
 
-    static async Task<Result<(string filePath, string fileContent)>> CalculateExportInfo(ExportInput input)
+    static async Task<Result<FileModel>> CalculateExportInfo(ExportInput input)
     {
         var (projectId, componentId, userName) = input;
 
@@ -235,7 +211,7 @@ static class CSharpStringExporter
             var result = await GetComponentFileLocation(componentId, user.LocalWorkspacePath);
             if (result.HasError)
             {
-                return result;
+                return result.Error;
             }
 
             filePath            = result.Value.filePath;
@@ -321,8 +297,12 @@ static class CSharpStringExporter
 
             fileNewContent = injectedVersion;
         }
-
-        return (filePath, fileNewContent);
+        
+        return new FileModel
+        {
+            Path    = filePath,
+            Content = fileNewContent
+        };
     }
 
     static async Task<Result<IReadOnlyList<string>>> ConvertReactNodeModelToElementTreeSourceLines(ProjectConfig project, ReactNode node, ReactNode parentNode, int indentLevel)
