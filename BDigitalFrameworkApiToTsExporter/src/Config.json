@@ -2,6 +2,7 @@
   "assemblyFilePath": "D:\\\\work\\\\BOA.BusinessModules\\Dev\\\\BOA.InternetBanking.Payments\\\\API\\\\BOA.InternetBanking.Payments.API\\\\bin\\\\Debug\\\\net8.0\\\\BOA.InternetBanking.Payments.API.dll",
   "outputDirectoryPath": "D:\\work\\BOA.BusinessModules\\Dev\\BOA.InternetBanking.Payments\\OBAWeb\\OBA.Web.InternetBanking.Payments\\ClientApp\\types\\religious\\",
   "listOfTypes": [
-    "BOA.InternetBanking.Payments.API.Types.Religious.*"
+    "BOA.InternetBanking.Payments.API.Types.Religious.*",
+    "BOA.InternetBanking.Payments.API.Models.HgsTopUpModel"
   ]
 }
