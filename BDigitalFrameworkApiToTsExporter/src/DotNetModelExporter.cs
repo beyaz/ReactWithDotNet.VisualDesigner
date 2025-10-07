@@ -7,6 +7,17 @@ static class DotNetModelExporter
     
     static IAsyncEnumerable<Result<FileModel>> ExportController(TypeDefinition controllerTypeDefinition)
     {
+
+        var temp =
+            from modelTypeDefinition in getModelTypeDefinition()
+            from method in getExportablePublicMethods()
+            let requestType = getMethodRequest(method)
+            //let responseType = getMethodResponseType(method)
+            select new
+            {
+                model = modelTypeDefinition
+            };
+        
         // modelType = GetModel(controllerDefinition)
         // publicMethod = GetPublicMethods(controllerDefinition)
         // requestType = GetRequest(publicMethod)
@@ -27,7 +38,7 @@ static class DotNetModelExporter
             return null;
         }
         
-        TypeReference getMethodResponse(MethodDefinition methodDefinition)
+        TypeReference getMethodResponseType(MethodDefinition methodDefinition)
         {
             return methodDefinition.ReturnType;
         }
