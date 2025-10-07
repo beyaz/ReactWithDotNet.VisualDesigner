@@ -5,16 +5,22 @@ namespace BDigitalFrameworkApiToTsExporter;
 static class DotNetModelExporter
 {
     
-    static IAsyncEnumerable<Result<FileModel>> ExportController(TypeDefinition controllerTypeDefinition)
+    static IAsyncEnumerable<Result<FileModel>> ExportController(Config config, TypeDefinition controllerTypeDefinition)
     {
 
         var temp =
             from modelTypeDefinition in getModelTypeDefinition()
             from method in getExportablePublicMethods()
+            from modelFilePath in getOutputFilePath(config, modelTypeDefinition)
             let requestType = getMethodRequest(method)
             let responseType = getMethodResponseType(method)
             let serviceWrapper = getServiceWrapper(method)
             let serviceWrapperByModel = getServiceWrapperByModel(method,modelTypeDefinition)
+            let modelFile = new FileModel
+            {
+                Path    = modelFilePath,
+                Content = TsOutput.LinesToString(TsOutput.GetTsCode(TsModelCreator.CreateFrom(modelTypeDefinition)))
+            }
             select new
             {
                 modelTypeDefinition,
@@ -89,6 +95,31 @@ static class DotNetModelExporter
             }
 
             return typeDefinition;
+        }
+        
+        static Result<string> getOutputFilePath(Config config, TypeDefinition typeDefinition)
+        {
+            return Path.Combine(config.OutputDirectoryPath ?? string.Empty, $"{typeDefinition.Name}.ts");
+        }
+        
+        static async Task<Result<FileModel>> trySyncWithLocalFileSystem(FileModel file)
+        {
+            if (!File.Exists(file.Path))
+            {
+                return file;
+            }
+
+            return await(
+                from fileContentInDirectory in FileSystem.ReadAllText(file.Path)
+                let exportIndex = fileContentInDirectory.IndexOf("export ", StringComparison.OrdinalIgnoreCase)
+                select (exportIndex > 0) switch
+                {
+                    true => file with
+                    {
+                        Content = fileContentInDirectory[..exportIndex] + file.Content
+                    },
+                    false => file
+                });
         }
     }
     
