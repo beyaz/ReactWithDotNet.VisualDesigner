@@ -36,6 +36,32 @@ static class DotNetModelExporter
             from fileModel in fileModels
             from syncedFile in TrySyncWithLocalFileSystem(fileModel)
             select FileSystem.Save(syncedFile);
+        
+        
+        static Result<string> GetOutputFilePath(Config config, TypeDefinition typeDefinition)
+        {
+            return Path.Combine(config.OutputDirectoryPath ?? string.Empty, $"{typeDefinition.Name}.ts");
+        }
+        
+        static async Task<Result<FileModel>> TrySyncWithLocalFileSystem(FileModel file)
+        {
+            if (!File.Exists(file.Path))
+            {
+                return file;
+            }
+
+            return await(
+                from fileContentInDirectory in FileSystem.ReadAllText(file.Path)
+                let exportIndex = fileContentInDirectory.IndexOf("export ", StringComparison.OrdinalIgnoreCase)
+                select (exportIndex > 0) switch
+                {
+                    true => file with
+                    {
+                        Content = fileContentInDirectory[..exportIndex] + file.Content
+                    },
+                    false => file
+                });
+        }
     }
     
     static IEnumerable<PropertyDefinition> GetMappingPropertyList(TypeDefinition model, TypeDefinition apiParameter)
@@ -58,28 +84,7 @@ static class DotNetModelExporter
         }
     }
 
-    static Result<string> GetOutputFilePath(Config config, TypeDefinition typeDefinition)
-    {
-        return Path.Combine(config.OutputDirectoryPath ?? string.Empty, $"{typeDefinition.Name}.ts");
-    }
+    
 
-    static async Task<Result<FileModel>> TrySyncWithLocalFileSystem(FileModel file)
-    {
-        if (!File.Exists(file.Path))
-        {
-            return file;
-        }
-
-        return await(
-            from fileContentInDirectory in FileSystem.ReadAllText(file.Path)
-            let exportIndex = fileContentInDirectory.IndexOf("export ", StringComparison.OrdinalIgnoreCase)
-            select (exportIndex > 0) switch
-            {
-                true => file with
-                {
-                    Content = fileContentInDirectory[..exportIndex] + file.Content
-                },
-                false => file
-            });
-    }
+    
 }
