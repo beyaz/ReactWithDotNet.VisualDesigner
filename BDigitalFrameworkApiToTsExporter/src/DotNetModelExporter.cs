@@ -22,21 +22,21 @@ static class DotNetModelExporter
 
     static async Task<Result<FileModel>> TrySyncWithLocalFileSystem(FileModel file)
     {
-        if (File.Exists(file.Path))
+        if (!File.Exists(file.Path))
         {
-            return await 
-                from fileContentInDirectory in FileSystem.ReadAllText(file.Path)
-                let exportIndex = fileContentInDirectory.IndexOf("export ", StringComparison.OrdinalIgnoreCase)
-                select (exportIndex > 0) switch
-                {
-                    true => file with
-                    {
-                        Content = fileContentInDirectory[..exportIndex] + file.Content
-                    },
-                    false => file
-                };
+            return file;
         }
 
-        return file;
+        return await
+            from fileContentInDirectory in FileSystem.ReadAllText(file.Path)
+            let exportIndex = fileContentInDirectory.IndexOf("export ", StringComparison.OrdinalIgnoreCase)
+            select (exportIndex > 0) switch
+            {
+                true => file with
+                {
+                    Content = fileContentInDirectory[..exportIndex] + file.Content
+                },
+                false => file
+            };
     }
 }
