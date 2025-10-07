@@ -4,6 +4,16 @@ namespace BDigitalFrameworkApiToTsExporter;
 
 static class DotNetModelExporter
 {
+    
+    static IAsyncEnumerable<Result<FileModel>> ExportController(TypeDefinition controllerDefinition)
+    {
+        // publicMethod = GetPublicMethods
+        // types = GetTypes (publicMethod)
+        // typeFiles = calculateFiles()
+
+        return null;
+    }
+    
     public static IAsyncEnumerable<Result<Unit>> TryExport()
     {
         var fileModels =
