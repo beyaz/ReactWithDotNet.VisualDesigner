@@ -6,7 +6,7 @@ static class TsOutput
 {
     public static string GetTsCode(TsFieldDefinition field)
     {
-        return $"{field.Name}{(field.IsNullable ? '?' : string.Empty)} : {field.TypeName};";
+        return $"{field.Name}{(field.IsNullable ? '?' : string.Empty)} : {field.Type.Name};";
     }
 
     public static IReadOnlyList<string> GetTsCode(TsTypeDefinition type)

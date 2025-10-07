@@ -18,7 +18,11 @@ static class TsModelCreator
                     Name          = fieldDefinition.Name,
                     ConstantValue = fieldDefinition.Constant + string.Empty,
                     IsNullable    = false,
-                    TypeName      = string.Empty
+                    Type      = new TsTypeReference
+                    {
+                        Name = string.Empty,
+                        Imports = []
+                    }
                 };
         }
         else
@@ -31,7 +35,7 @@ static class TsModelCreator
                 {
                     Name          = TypescriptNaming.GetResolvedPropertyName(propertyDefinition.Name),
                     IsNullable    = CecilHelper.IsNullableProperty(propertyDefinition),
-                    TypeName      = GetTSTypeName(propertyDefinition.PropertyType),
+                    Type      = GetTSType(propertyDefinition.PropertyType),
                     ConstantValue = string.Empty
                 };
         }
@@ -52,70 +56,7 @@ static class TsModelCreator
         };
     }
 
-    static string GetTSTypeName(TypeReference typeReference)
-    {
-        if (CecilHelper.IsNullableType(typeReference))
-        {
-            return GetTSTypeName(((GenericInstanceType)typeReference).GenericArguments[0]);
-        }
 
-        if (typeReference.FullName == "System.String")
-        {
-            return "string";
-        }
-
-        if (typeReference.FullName == typeof(short).FullName ||
-            typeReference.FullName == typeof(int).FullName ||
-            typeReference.FullName == typeof(byte).FullName ||
-            typeReference.FullName == typeof(sbyte).FullName ||
-            typeReference.FullName == typeof(short).FullName ||
-            typeReference.FullName == typeof(ushort).FullName ||
-            typeReference.FullName == typeof(double).FullName ||
-            typeReference.FullName == typeof(float).FullName ||
-            typeReference.FullName == typeof(decimal).FullName ||
-            typeReference.FullName == typeof(long).FullName)
-
-        {
-            return "number";
-        }
-
-        if (typeReference.FullName == "System.DateTime")
-        {
-            return "Date";
-        }
-
-        if (typeReference.FullName == "System.Boolean")
-        {
-            return "boolean";
-        }
-
-        if (typeReference.FullName == "System.Object")
-        {
-            return "any";
-        }
-
-        if (typeReference.IsGenericInstance)
-        {
-            var genericInstanceType = (GenericInstanceType)typeReference;
-
-            var isArrayType =
-                genericInstanceType.GenericArguments.Count == 1 &&
-                (
-                    typeReference.Name == "Collection`1" ||
-                    typeReference.Name == "List`1" ||
-                    typeReference.Name == "IReadOnlyCollection`1" ||
-                    typeReference.Name == "IReadOnlyList`1"
-                );
-
-            if (isArrayType)
-            {
-                var arrayType = genericInstanceType.GenericArguments[0];
-                return GetTSTypeName(arrayType) + "[]";
-            }
-        }
-
-        return typeReference.Name;
-    }
     
     
     static TsTypeReference GetTSType(TypeReference typeReference)

@@ -66,7 +66,7 @@ static class DotNetModelExporter
             return file;
         }
 
-        return await
+        return await(
             from fileContentInDirectory in FileSystem.ReadAllText(file.Path)
             let exportIndex = fileContentInDirectory.IndexOf("export ", StringComparison.OrdinalIgnoreCase)
             select (exportIndex > 0) switch
@@ -76,6 +76,6 @@ static class DotNetModelExporter
                     Content = fileContentInDirectory[..exportIndex] + file.Content
                 },
                 false => file
-            };
+            });
     }
 }
