@@ -11,7 +11,7 @@ sealed record TsImportInfo
     // @formatter:on
 }
 
-sealed record TsTypeInfo
+sealed record TsTypeReference
 {
     // @formatter:off
     

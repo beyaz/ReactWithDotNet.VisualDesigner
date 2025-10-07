@@ -116,6 +116,107 @@ static class TsModelCreator
 
         return typeReference.Name;
     }
+    
+    
+    static TsTypeReference GetTSType(TypeReference typeReference)
+    {
+        if (CecilHelper.IsNullableType(typeReference))
+        {
+            return GetTSType(((GenericInstanceType)typeReference).GenericArguments[0]);
+        }
+
+        if (typeReference.FullName == "System.String")
+        {
+            return new()
+            {
+                Name    = "string",
+                Imports = []
+            };
+        }
+
+        if (typeReference.FullName == typeof(short).FullName ||
+            typeReference.FullName == typeof(int).FullName ||
+            typeReference.FullName == typeof(byte).FullName ||
+            typeReference.FullName == typeof(sbyte).FullName ||
+            typeReference.FullName == typeof(short).FullName ||
+            typeReference.FullName == typeof(ushort).FullName ||
+            typeReference.FullName == typeof(double).FullName ||
+            typeReference.FullName == typeof(float).FullName ||
+            typeReference.FullName == typeof(decimal).FullName ||
+            typeReference.FullName == typeof(long).FullName)
+
+        {
+            return new()
+            {
+                Name    = "number",
+                Imports = []
+            };
+            
+        }
+
+        if (typeReference.FullName == "System.DateTime")
+        {
+            return new()
+            {
+                Name    = "Date",
+                Imports = []
+            };
+            
+        }
+
+        if (typeReference.FullName == "System.Boolean")
+        {
+            return new()
+            {
+                Name    = "boolean",
+                Imports = []
+            };
+            
+        }
+
+        if (typeReference.FullName == "System.Object")
+        {
+            return new()
+            {
+                Name    = "any",
+                Imports = []
+            };
+            
+        }
+
+        if (typeReference.IsGenericInstance)
+        {
+            var genericInstanceType = (GenericInstanceType)typeReference;
+
+            var isArrayType =
+                genericInstanceType.GenericArguments.Count == 1 &&
+                (
+                    typeReference.Name == "Collection`1" ||
+                    typeReference.Name == "List`1" ||
+                    typeReference.Name == "IReadOnlyCollection`1" ||
+                    typeReference.Name == "IReadOnlyList`1"
+                );
+
+            if (isArrayType)
+            {
+                var arrayType = genericInstanceType.GenericArguments[0];
+
+                var tsTypeReference = GetTSType(arrayType);
+
+                return tsTypeReference with
+                {
+                    Name = tsTypeReference.Name + "[]"
+                };
+            }
+        }
+        
+        return new()
+        {
+            Name    = typeReference.Name,
+            Imports = [] // todo: autofind file
+        };
+
+    }
 
     static bool IsImplicitDefinition(PropertyDefinition propertyDefinition)
     {
