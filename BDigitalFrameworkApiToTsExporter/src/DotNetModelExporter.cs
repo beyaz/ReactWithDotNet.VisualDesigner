@@ -17,10 +17,26 @@ static class DotNetModelExporter
 
         return null;
 
+        ParameterDefinition? getMethodRequest(MethodDefinition methodDefinition)
+        {
+            if (methodDefinition.Parameters.Count == 1)
+            {
+                return methodDefinition.Parameters[0];
+            }
+
+            return null;
+        }
+        
+        TypeReference getMethodResponse(MethodDefinition methodDefinition)
+        {
+            return methodDefinition.ReturnType;
+        }
+        
         IEnumerable<MethodDefinition> getExportablePublicMethods()
         {
             return from method in controllerTypeDefinition.Methods where method.IsPublic select method;
         }
+        
         Result<TypeDefinition> getModelTypeDefinition()
         {
             // todo: find 
