@@ -16,17 +16,20 @@ static class ConfigReader
     public static async Task<Result<Config>> ReadConfig()
     {
         var configFilePath = Path.Combine(Path.GetDirectoryName(typeof(ConfigReader).Assembly.Location) ?? string.Empty, "Config.json");
-        if (File.Exists(configFilePath))
+
+        if (!File.Exists(configFilePath))
         {
-            var fileContent = await File.ReadAllTextAsync(configFilePath);
-
-            var config = JsonConvert.DeserializeObject<Config>(fileContent);
-            if (config is not null)
-            {
-                return config;
-            }
+            return new FileNotFoundException(configFilePath);
         }
+        
+        var fileContent = await File.ReadAllTextAsync(configFilePath);
 
-        return new IOException("ConfigFileNotRead");
+        var config = JsonConvert.DeserializeObject<Config>(fileContent);
+        if (config is null)
+        {
+            return new InvalidDataException("InvalidConfigData: "+ configFilePath);
+        }
+        
+        return config;
     }
 }
