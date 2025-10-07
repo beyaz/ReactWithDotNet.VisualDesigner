@@ -12,12 +12,13 @@ static class DotNetModelExporter
             from modelTypeDefinition in getModelTypeDefinition()
             from method in getExportablePublicMethods()
             let requestType = getMethodRequest(method)
-            //let responseType = getMethodResponseType(method)
+            let responseType = getMethodResponseType(method)
             select new
             {
                 model = modelTypeDefinition,
                 request = requestType,
             };
+        
         
         // modelType = GetModel(controllerDefinition)
         // publicMethod = GetPublicMethods(controllerDefinition)
