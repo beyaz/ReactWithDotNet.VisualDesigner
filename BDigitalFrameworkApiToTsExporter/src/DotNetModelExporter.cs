@@ -7,9 +7,13 @@ static class DotNetModelExporter
     
     static IAsyncEnumerable<Result<FileModel>> ExportController(TypeDefinition controllerDefinition)
     {
-        // publicMethod = GetPublicMethods
-        // types = GetTypes (publicMethod)
-        // typeFiles = calculateFiles()
+        // modelType = GetModel(controllerDefinition)
+        // publicMethod = GetPublicMethods(controllerDefinition)
+        // requestType = GetRequest(publicMethod)
+        // responseType = GetResponse(publicMethod)
+        // serviceWrapper = GetServiceWrapper(publicMethod)
+        // serviceWrapperByModel = getWrapperByModel(serviceWrapper)
+        // return model
 
         return null;
     }
