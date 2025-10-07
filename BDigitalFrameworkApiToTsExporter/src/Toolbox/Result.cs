@@ -570,4 +570,34 @@ public static class ResultExtensions
 
         return returnList;
     }
+    
+    public static Result<IEnumerable<C>> SelectMany<A, B, C>
+    (
+        this Result<IEnumerable<A>> result,
+        Func<A, Result<B>> binder,
+        Func<A, B, C> projector
+    )
+    {
+        if (result.HasError)
+        {
+            return result.Error;
+        }
+
+        List<C> returnList = [];
+        
+        foreach (var a in result.Value)
+        {
+            var b = binder(a);
+            if (b.HasError)
+            {
+                return b.Error;
+            }
+
+            var c = projector(a, b.Value);
+            
+            returnList.Add(c);
+        }
+
+        return returnList;
+    }
 }
