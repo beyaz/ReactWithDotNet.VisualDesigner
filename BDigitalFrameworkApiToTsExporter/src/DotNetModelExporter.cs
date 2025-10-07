@@ -15,7 +15,8 @@ static class DotNetModelExporter
             //let responseType = getMethodResponseType(method)
             select new
             {
-                model = modelTypeDefinition
+                model = modelTypeDefinition,
+                request = requestType,
             };
         
         // modelType = GetModel(controllerDefinition)
