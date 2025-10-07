@@ -1,4 +1,6 @@
-﻿namespace BDigitalFrameworkApiToTsExporter;
+﻿using Mono.Cecil;
+
+namespace BDigitalFrameworkApiToTsExporter;
 
 static class DotNetModelExporter
 {
@@ -18,6 +20,11 @@ static class DotNetModelExporter
             from fileModel in fileModels
             from syncedFile in TrySyncWithLocalFileSystem(fileModel)
             select FileSystem.Save(syncedFile);
+    }
+
+    static Result<string> GetOutputFilePath(Config config,TypeDefinition typeDefinition)
+    {
+            return Path.Combine(config.OutputDirectoryPath ?? string.Empty, $"{typeDefinition.Name}.ts");
     }
 
     static async Task<Result<FileModel>> TrySyncWithLocalFileSystem(FileModel file)
