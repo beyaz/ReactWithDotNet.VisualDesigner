@@ -16,6 +16,33 @@ static class DotNetModelExporter
         // return model
 
         return null;
+
+        IEnumerable<MethodDefinition> getExportablePublicMethods()
+        {
+            return from method in controllerTypeDefinition.Methods where method.IsPublic select method;
+        }
+        Result<TypeDefinition> getModelTypeDefinition()
+        {
+            // todo: find 
+            var modelTypeFullName = controllerTypeDefinition.FullName;
+            
+            var assemblyDefinition = controllerTypeDefinition.Module.Assembly;
+
+            var typeDefinition =
+            (
+                from module in assemblyDefinition.Modules
+                from type in module.Types
+                where type.FullName == modelTypeFullName
+                select type
+            ).FirstOrDefault();
+
+            if (typeDefinition is null)
+            {
+                return new MissingMemberException(modelTypeFullName);
+            }
+
+            return typeDefinition;
+        }
     }
     
     public static IAsyncEnumerable<Result<Unit>> TryExport()
