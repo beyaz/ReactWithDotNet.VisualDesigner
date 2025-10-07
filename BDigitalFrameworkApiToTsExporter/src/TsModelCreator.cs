@@ -46,7 +46,7 @@ static class TsModelCreator
 
             IsEnum = typeDefinition.IsEnum,
 
-            BaseTypeName = (typeDefinition.BaseType.FullName == typeof(object).FullName) switch
+            BaseType = (typeDefinition.BaseType.FullName == typeof(object).FullName) switch
             {
                 true  => new()
                 {
