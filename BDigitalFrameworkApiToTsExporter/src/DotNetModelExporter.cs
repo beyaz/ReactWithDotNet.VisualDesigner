@@ -23,6 +23,26 @@ static class DotNetModelExporter
             from syncedFile in TrySyncWithLocalFileSystem(fileModel)
             select FileSystem.Save(syncedFile);
     }
+    
+    static IEnumerable<PropertyDefinition> GetMappingPropertyList(TypeDefinition model, TypeDefinition apiParameter)
+    {
+        return
+            from parameterProperty in apiParameter.Properties
+            where modelHasNamedProperty(model, parameterProperty)
+            select parameterProperty;
+        
+        static bool modelHasNamedProperty(TypeDefinition model, PropertyDefinition property)
+        {
+            foreach (var modelProperty in model.Properties)
+            {
+                if (string.Equals(modelProperty.Name, property.Name, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
 
     static Result<string> GetOutputFilePath(Config config, TypeDefinition typeDefinition)
     {
