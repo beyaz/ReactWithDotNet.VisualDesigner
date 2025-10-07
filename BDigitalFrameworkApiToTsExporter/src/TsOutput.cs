@@ -45,7 +45,7 @@ static class TsOutput
                     true  => line,
                     false => line + ","
                 };
-            
+
             lines.AddRange(definitionLines);
         }
         else

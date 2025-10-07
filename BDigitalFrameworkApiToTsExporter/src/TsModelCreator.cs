@@ -18,9 +18,9 @@ static class TsModelCreator
                     Name          = fieldDefinition.Name,
                     ConstantValue = fieldDefinition.Constant + string.Empty,
                     IsNullable    = false,
-                    Type      = new TsTypeReference
+                    Type = new()
                     {
-                        Name = string.Empty,
+                        Name    = string.Empty,
                         Imports = []
                     }
                 };
@@ -35,11 +35,11 @@ static class TsModelCreator
                 {
                     Name          = TypescriptNaming.GetResolvedPropertyName(propertyDefinition.Name),
                     IsNullable    = CecilHelper.IsNullableProperty(propertyDefinition),
-                    Type      = GetTSType(propertyDefinition.PropertyType),
+                    Type          = GetTSType(propertyDefinition.PropertyType),
                     ConstantValue = string.Empty
                 };
         }
-        
+
         return new()
         {
             Name = typeDefinition.Name,
@@ -48,7 +48,7 @@ static class TsModelCreator
 
             BaseType = (typeDefinition.BaseType.FullName == typeof(object).FullName) switch
             {
-                true  => new()
+                true => new()
                 {
                     Name    = string.Empty,
                     Imports = []
@@ -60,9 +60,6 @@ static class TsModelCreator
         };
     }
 
-
-    
-    
     static TsTypeReference GetTSType(TypeReference typeReference)
     {
         if (CecilHelper.IsNullableType(typeReference))
@@ -96,7 +93,6 @@ static class TsModelCreator
                 Name    = "number",
                 Imports = []
             };
-            
         }
 
         if (typeReference.FullName == "System.DateTime")
@@ -106,7 +102,6 @@ static class TsModelCreator
                 Name    = "Date",
                 Imports = []
             };
-            
         }
 
         if (typeReference.FullName == "System.Boolean")
@@ -116,7 +111,6 @@ static class TsModelCreator
                 Name    = "boolean",
                 Imports = []
             };
-            
         }
 
         if (typeReference.FullName == "System.Object")
@@ -126,7 +120,6 @@ static class TsModelCreator
                 Name    = "any",
                 Imports = []
             };
-            
         }
 
         if (typeReference.IsGenericInstance)
@@ -154,13 +147,12 @@ static class TsModelCreator
                 };
             }
         }
-        
+
         return new()
         {
             Name    = typeReference.Name,
             Imports = [] // todo: autofind file
         };
-
     }
 
     static bool IsImplicitDefinition(PropertyDefinition propertyDefinition)
