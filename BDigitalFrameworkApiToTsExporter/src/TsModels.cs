@@ -17,7 +17,7 @@ sealed record TsTypeInfo
     
     public required string Name { get; init; }
     
-    public required TsImportInfo ImportInfo { get; init; }
+    public required IReadOnlyList<TsImportInfo> Imports { get; init; }
     
     // @formatter:on
 }
