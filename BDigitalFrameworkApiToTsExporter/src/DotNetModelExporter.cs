@@ -11,10 +11,11 @@ static class DotNetModelExporter
             from assemblyDefinition in CecilHelper.ReadAssemblyDefinition(config.AssemblyFilePath)
             from typeDefinition in CecilHelper.GetTypes(assemblyDefinition, config.ListOfTypes ?? [])
             from outputFilePath in GetOutputFilePath(config, typeDefinition)
+            let fileContent = TsOutput.LinesToString(TsOutput.GetTsCode(TsModelCreator.CreateFrom(typeDefinition)))
             select new FileModel
             {
                 Path    = outputFilePath,
-                Content = TsOutput.LinesToString(TsOutput.GetTsCode(TsModelCreator.CreateFrom(typeDefinition)))
+                Content = fileContent
             };
 
         return
