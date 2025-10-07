@@ -46,7 +46,7 @@ sealed record TsTypeDefinition
     
     public required bool IsEnum { get; init; }
     
-    public required string BaseTypeName { get; init; }
+    public required TsTypeReference BaseTypeName { get; init; }
 
     public required IReadOnlyList<TsFieldDefinition> Fields { get; init; }
     

@@ -39,7 +39,7 @@ static class TsModelCreator
                     ConstantValue = string.Empty
                 };
         }
-
+        
         return new()
         {
             Name = typeDefinition.Name,
@@ -48,8 +48,12 @@ static class TsModelCreator
 
             BaseTypeName = (typeDefinition.BaseType.FullName == typeof(object).FullName) switch
             {
-                true  => string.Empty,
-                false => typeDefinition.BaseType.Name
+                true  => new()
+                {
+                    Name    = string.Empty,
+                    Imports = []
+                },
+                false => GetTSType(typeDefinition.BaseType)
             },
 
             Fields = fields.ToList()

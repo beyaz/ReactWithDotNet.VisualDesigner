@@ -20,13 +20,13 @@ static class TsOutput
         else
         {
             var extends = " extends ";
-            if (string.IsNullOrWhiteSpace(type.BaseTypeName))
+            if (string.IsNullOrWhiteSpace(type.BaseTypeName.Name))
             {
                 extends = "";
             }
             else
             {
-                extends += type.BaseTypeName;
+                extends += type.BaseTypeName.Name;
             }
 
             lines.Add($"export interface {type.Name}" + extends);
