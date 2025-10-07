@@ -21,6 +21,7 @@ static class DotNetModelExporter
                 Path    = modelFilePath,
                 Content = TsOutput.LinesToString(TsOutput.GetTsCode(TsModelCreator.CreateFrom(modelTypeDefinition)))
             }
+            from syncedFile in trySyncWithLocalFileSystem(modelFile)
             select new
             {
                 modelTypeDefinition,
