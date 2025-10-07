@@ -33,6 +33,8 @@ sealed record TsFieldDefinition
     
     public required string TypeName { get; init; }
     
+    public required string Type { get; init; }
+    
     public required string ConstantValue { get; init; }
     
     // @formatter:on
