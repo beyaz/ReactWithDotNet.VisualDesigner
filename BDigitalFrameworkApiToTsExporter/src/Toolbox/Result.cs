@@ -81,6 +81,24 @@ public static class ResultExtensions
         }
     }
 
+    public static async IAsyncEnumerable<Result<B>> Select<A, B>
+    (
+        this IAsyncEnumerable<Result<A>> source,
+        Func<A, B> selector
+    )
+    {
+        await foreach (var result in source)
+        {
+            if (result.HasError)
+            {
+                yield return result.Error;
+                yield break;
+            }
+
+            yield return selector(result.Value);
+        }
+    }
+
     public static Result<B> Select<A, B>
     (
         this Result<A> source,
@@ -426,6 +444,30 @@ public static class ResultExtensions
             }
 
             var b = await bind(a.Value);
+            if (b.HasError)
+            {
+                yield return b.Error;
+            }
+
+            yield return resultSelector(a.Value, b.Value);
+        }
+    }
+
+    public static async IAsyncEnumerable<Result<C>> SelectMany<A, B, C>
+    (
+        this IAsyncEnumerable<Result<A>> source,
+        Func<A, Result<B>> bind,
+        Func<A, B, C> resultSelector
+    )
+    {
+        await foreach (var a in source)
+        {
+            if (a.HasError)
+            {
+                yield return a.Error;
+            }
+
+            var b = bind(a.Value);
             if (b.HasError)
             {
                 yield return b.Error;

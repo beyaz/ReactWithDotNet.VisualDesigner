@@ -10,10 +10,10 @@ static class DotNetModelExporter
             from config in ConfigReader.ReadConfig()
             from assemblyDefinition in CecilHelper.ReadAssemblyDefinition(config.AssemblyFilePath)
             from typeDefinition in CecilHelper.GetTypes(assemblyDefinition, config.ListOfTypes ?? [])
-            let outputFilePath = GetOutputFilePath(config, typeDefinition)
+            from outputFilePath in GetOutputFilePath(config, typeDefinition)
             select new FileModel
             {
-                Path    = "",
+                Path    = outputFilePath,
                 Content = TsOutput.LinesToString(TsOutput.GetTsCode(TsModelCreator.CreateFrom(typeDefinition)))
             };
 
@@ -23,9 +23,9 @@ static class DotNetModelExporter
             select FileSystem.Save(syncedFile);
     }
 
-    static Result<string> GetOutputFilePath(Config config,TypeDefinition typeDefinition)
+    static Result<string> GetOutputFilePath(Config config, TypeDefinition typeDefinition)
     {
-            return Path.Combine(config.OutputDirectoryPath ?? string.Empty, $"{typeDefinition.Name}.ts");
+        return Path.Combine(config.OutputDirectoryPath ?? string.Empty, $"{typeDefinition.Name}.ts");
     }
 
     static async Task<Result<FileModel>> TrySyncWithLocalFileSystem(FileModel file)
