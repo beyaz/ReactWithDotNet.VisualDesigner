@@ -11,8 +11,12 @@ static class DotNetModelExporter
         var temp =
             from modelTypeDefinition in getModelTypeDefinition()
             from method in getExportablePublicMethods()
+            
+            // calculations
             let requestType = getMethodRequest(method)
             let responseType = getMethodResponseType(method)
+            let serviceWrapper = getServiceWrapper(method)
+            let serviceWrapperByModel = getServiceWrapperByModel(method,modelTypeDefinition)
             select new
             {
                 model    = modelTypeDefinition,
@@ -31,6 +35,19 @@ static class DotNetModelExporter
 
         return null;
 
+        IReadOnlyList<string> getServiceWrapper(MethodDefinition methodDefinition)
+        {
+            // todo:  implement
+            return [];
+        }
+        
+        IReadOnlyList<string> getServiceWrapperByModel(MethodDefinition methodDefinition, TypeDefinition modelTypeDefinition)
+        {
+            // todo:  implement
+            return [];
+        }
+        
+        
         ParameterDefinition? getMethodRequest(MethodDefinition methodDefinition)
         {
             if (methodDefinition.Parameters.Count == 1)
