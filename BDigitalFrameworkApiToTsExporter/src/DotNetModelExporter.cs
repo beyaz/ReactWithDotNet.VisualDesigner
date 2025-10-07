@@ -11,17 +11,17 @@ static class DotNetModelExporter
         var temp =
             from modelTypeDefinition in getModelTypeDefinition()
             from method in getExportablePublicMethods()
-            
-            // calculations
             let requestType = getMethodRequest(method)
             let responseType = getMethodResponseType(method)
             let serviceWrapper = getServiceWrapper(method)
             let serviceWrapperByModel = getServiceWrapperByModel(method,modelTypeDefinition)
             select new
             {
-                model    = modelTypeDefinition,
-                request  = requestType,
-                response = responseType
+                modelTypeDefinition,
+                requestType,
+                responseType,
+                serviceWrapper,
+                serviceWrapperByModel
             };
         
         
