@@ -5,7 +5,7 @@ namespace BDigitalFrameworkApiToTsExporter;
 static class DotNetModelExporter
 {
     
-    static IAsyncEnumerable<Result<FileModel>> ExportController(TypeDefinition controllerDefinition)
+    static IAsyncEnumerable<Result<FileModel>> ExportController(TypeDefinition controllerTypeDefinition)
     {
         // modelType = GetModel(controllerDefinition)
         // publicMethod = GetPublicMethods(controllerDefinition)
