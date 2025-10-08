@@ -624,4 +624,75 @@ public static class ResultExtensions
 
         return returnList;
     }
+    
+    
+    
+    public static async IAsyncEnumerable<Result<C>> SelectMany<A, B, C>
+    (
+        this IAsyncEnumerable<Result<A>> source,
+        Func<A, IEnumerable<B>> bind,
+        Func<A, B, Result<C>> resultSelector
+    )
+    {
+        await foreach (var a in source)
+        {
+            if (a.HasError)
+            {
+                yield return a.Error;
+            }
+
+            var enumerableB = bind(a.Value);
+            foreach (var b in enumerableB)
+            {
+                yield return resultSelector(a.Value, b);
+            }
+        }
+    }
+    
+    
+    public static async IAsyncEnumerable<Result<C>> SelectMany<A, B, C>
+    (
+        this IAsyncEnumerable<Result<A>> source,
+        Func<A, IEnumerable<B>> bind,
+        Func<A, B, C> resultSelector
+    )
+    {
+        await foreach (var a in source)
+        {
+            if (a.HasError)
+            {
+                yield return a.Error;
+            }
+
+            var enumerableB = bind(a.Value);
+            foreach (var b in enumerableB)
+            {
+                yield return resultSelector(a.Value, b);
+            }
+        }
+    }
+    
+    public static async IAsyncEnumerable<Result<C>> SelectMany<A, B, C>
+    (
+        this IAsyncEnumerable<Result<A>> source,
+        Func<A, Task<Result<B>>> bind,
+        Func<A, B, C> resultSelector
+    )
+    {
+        await foreach (var a in source)
+        {
+            if (a.HasError)
+            {
+                yield return a.Error;
+            }
+
+            var resultB = await bind(a.Value);
+            if (resultB.HasError)
+            {
+                yield return resultB.Error;
+            }
+            
+            yield return resultSelector(a.Value, resultB.Value);
+        }
+    }
 }
