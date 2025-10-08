@@ -5,12 +5,9 @@ namespace BDigitalFrameworkApiToTsExporter;
 static class DotNetModelExporter
 {
     
-    static IAsyncEnumerable<Result<FileModel>> ExportController()
+    static IAsyncEnumerable<Result<Unit>> ExportController()
     {
-
-                 
-        
-        var temp =
+        var query = 
             from config in ConfigReader.ReadConfig()
             from assemblyDefinition in CecilHelper.ReadAssemblyDefinition(config.AssemblyFilePath)
             from api in config.ApiList
@@ -34,17 +31,16 @@ static class DotNetModelExporter
                 requestType,
                 responseType,
                 serviceWrapper,
-                serviceWrapperByModel
+                serviceWrapperByModel,
+                modelFile
             };
+
         
+        IAsyncEnumerable<Result<Task<Result<Unit>>>> a = 
+            from item in query
+            select FileSystem.Save(item.modelFile);
         
-        // modelType = GetModel(controllerDefinition)
-        // publicMethod = GetPublicMethods(controllerDefinition)
-        // requestType = GetRequest(publicMethod)
-        // responseType = GetResponse(publicMethod)
-        // serviceWrapper = GetServiceWrapper(publicMethod)
-        // serviceWrapperByModel = getWrapperByModel(serviceWrapper)
-        // return model
+       
 
         return null;
 
