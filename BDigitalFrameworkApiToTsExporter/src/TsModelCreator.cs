@@ -60,6 +60,18 @@ static class TsModelCreator
         };
     }
 
+    static IEnumerable<TsImportInfo> GetImports(IReadOnlyList<ExternalTypeInfo> externalTypes, TypeReference typeReference)
+    {
+        return
+            from externalType in externalTypes
+            where externalType.DotNetFullTypeName == typeReference.FullName
+            select new TsImportInfo
+            {
+                LocalName = externalType.LocalName,
+                Source    = externalType.Source
+            };
+    }
+
     static TsTypeReference GetTSType(TypeReference typeReference)
     {
         if (CecilHelper.IsNullableType(typeReference))
@@ -153,21 +165,6 @@ static class TsModelCreator
             Name    = typeReference.Name,
             Imports = [] // todo: autofind file
         };
-    }
-
-    static IEnumerable<TsImportInfo> GetImports(TypeReference typeReference)
-    {
-        if (typeReference.FullName == "BOA.InternetBanking.Common.Account")
-        {
-            return
-            [
-                new TsImportInfo
-                {
-                    LocalName = "Account",
-                    Source    = "b-digital-internet-banking"
-                }
-            ];
-        }
     }
 
     static bool IsImplicitDefinition(PropertyDefinition propertyDefinition)
