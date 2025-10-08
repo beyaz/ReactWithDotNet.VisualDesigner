@@ -163,7 +163,7 @@ static class TsModelCreator
         return new()
         {
             Name    = typeReference.Name,
-            Imports = [] // todo: autofind file
+            Imports = []
         };
     }
 
