@@ -21,9 +21,11 @@ static class TsOutput
                              )
                          select importInfo;
 
-        foreach (var importInfo in allImports.DistinctBy(x => x.LocalName))
+        foreach (IGrouping<string, TsImportInfo> group in allImports.DistinctBy(x => x.LocalName).GroupBy(x=>x.Source))
         {
-            lines.Add($"import {{{{ {importInfo.LocalName} }} from \"{importInfo.Source}\";");
+            IEnumerable<TsImportInfo> groupedImports = group;
+            
+            lines.Add($"import {{ {string.Join(", ", from x in groupedImports select x.LocalName )} }} from \"{group.Key}\";");
         }
 
         if (tsTypeDefinition.IsEnum)
