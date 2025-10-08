@@ -17,7 +17,7 @@
   ],
   "externalTypes": [
     {
-      "fullTypeName": "BOA.InternetBanking.Common.Account",
+      "dotNetFullTypeName": "BOA.InternetBanking.Common.Account",
       "localName": "Account",
       "source": "b-digital-internet-banking"
     }    

@@ -2,10 +2,20 @@
 
 namespace BDigitalFrameworkApiToTsExporter;
 
-public sealed class ApiInfo
+public sealed record ApiInfo
 {
     public required string Name { get; init; }
 }
+
+public sealed record ExternalTypeInfo
+{
+    public required string DotNetFullTypeName { get; init; }
+    
+    public required string LocalName { get; init; }
+    
+    public required string Source { get; init; }
+}
+
 
 public sealed record Config
 {
@@ -18,6 +28,8 @@ public sealed record Config
     public required IReadOnlyList<ApiInfo> ApiList { get; init; }
 
     public required string ProjectDirectory { get; init; }
+    
+    public required IReadOnlyList<ExternalTypeInfo> ExternalTypes { get; init; }
 }
 
 static class ConfigReader
