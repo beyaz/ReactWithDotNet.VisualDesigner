@@ -10,6 +10,9 @@
   "apiList": [
     {
       "name": "GsmPrePaid"
+    },
+    {
+      "name": "Osym"
     }
   ]
 }
