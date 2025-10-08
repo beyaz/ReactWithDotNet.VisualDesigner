@@ -14,5 +14,12 @@
     {
       "name": "Osym"
     }
+  ],
+  "externalTypes": [
+    {
+      "fullTypeName": "BOA.InternetBanking.Common.Account",
+      "localName": "Account",
+      "source": "b-digital-internet-banking"
+    }    
   ]
 }

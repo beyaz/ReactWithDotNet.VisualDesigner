@@ -155,6 +155,21 @@ static class TsModelCreator
         };
     }
 
+    static IEnumerable<TsImportInfo> GetImports(TypeReference typeReference)
+    {
+        if (typeReference.FullName == "BOA.InternetBanking.Common.Account")
+        {
+            return
+            [
+                new TsImportInfo
+                {
+                    LocalName = "Account",
+                    Source    = "b-digital-internet-banking"
+                }
+            ];
+        }
+    }
+
     static bool IsImplicitDefinition(PropertyDefinition propertyDefinition)
     {
         if (propertyDefinition.PropertyType.FullName == "System.Runtime.Serialization.ExtensionDataObject")

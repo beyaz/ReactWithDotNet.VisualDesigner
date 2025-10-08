@@ -6,7 +6,7 @@ sealed record TsImportInfo
     
     public required string LocalName { get; init; }
     
-    public required bool Source { get; init; }
+    public required string Source { get; init; }
     
     // @formatter:on
 }
