@@ -14,7 +14,7 @@ static class DotNetModelExporter
             from modelTypeDefinition in getModelTypeDefinition(assemblyDefinition, api)
             from controllerTypeDefinition in getControllerTypeDefinition(assemblyDefinition,api)
             from method in getExportablePublicMethods(controllerTypeDefinition)
-            from modelFilePath in getOutputFilePath(config, modelTypeDefinition)
+            from modelFilePath in getModelOutputTsFilePath(config, modelTypeDefinition)
             let requestType = getMethodRequest(method)
             let responseType = getMethodResponseType(method)
             let serviceWrapper = getServiceWrapper(method)
@@ -90,9 +90,13 @@ static class DotNetModelExporter
             return CecilHelper.GetType(assemblyDefinition, fullTypeName);
         }
         
-        static Result<string> getOutputFilePath(Config config, TypeDefinition typeDefinition)
+        static Result<string> getModelOutputTsFilePath(Config config, TypeDefinition typeDefinition)
         {
-            return Path.Combine(config.OutputDirectoryPath ?? string.Empty, $"{typeDefinition.Name}.ts");
+            var solutionName = Path.GetFileName(config.ProjectDirectory);
+
+            var webProjectName = "OBA.Web." + solutionName.RemoveFromStart("BOA.");
+            
+            return Path.Combine(config.ProjectDirectory, "OBAWeb", webProjectName,  "ClientApp","models",  $"{typeDefinition.Name}.ts");
         }
         
         static async Task<Result<FileModel>> trySyncWithLocalFileSystem(FileModel file)
