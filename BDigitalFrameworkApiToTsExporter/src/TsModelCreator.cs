@@ -35,7 +35,7 @@ static class TsModelCreator
                 {
                     Name          = TypescriptNaming.GetResolvedPropertyName(propertyDefinition.Name),
                     IsNullable    = CecilHelper.IsNullableProperty(propertyDefinition),
-                    Type          = GetTSType(propertyDefinition.PropertyType),
+                    Type          = GetTSType(externalTypes, propertyDefinition.PropertyType),
                     ConstantValue = string.Empty
                 };
         }
@@ -53,30 +53,18 @@ static class TsModelCreator
                     Name    = string.Empty,
                     Imports = []
                 },
-                false => GetTSType(typeDefinition.BaseType)
+                false => GetTSType(externalTypes, typeDefinition.BaseType)
             },
 
             Fields = fields.ToList()
         };
     }
 
-    static IEnumerable<TsImportInfo> GetImports(IReadOnlyList<ExternalTypeInfo> externalTypes, TypeReference typeReference)
-    {
-        return
-            from externalType in externalTypes
-            where externalType.DotNetFullTypeName == typeReference.FullName
-            select new TsImportInfo
-            {
-                LocalName = externalType.LocalName,
-                Source    = externalType.Source
-            };
-    }
-
-    static TsTypeReference GetTSType(TypeReference typeReference)
+    static TsTypeReference GetTSType(IReadOnlyList<ExternalTypeInfo> externalTypes, TypeReference typeReference)
     {
         if (CecilHelper.IsNullableType(typeReference))
         {
-            return GetTSType(((GenericInstanceType)typeReference).GenericArguments[0]);
+            return GetTSType(externalTypes, ((GenericInstanceType)typeReference).GenericArguments[0]);
         }
 
         if (typeReference.FullName == "System.String")
@@ -151,7 +139,7 @@ static class TsModelCreator
             {
                 var arrayType = genericInstanceType.GenericArguments[0];
 
-                var tsTypeReference = GetTSType(arrayType);
+                var tsTypeReference = GetTSType(externalTypes, arrayType);
 
                 return tsTypeReference with
                 {
@@ -163,8 +151,20 @@ static class TsModelCreator
         return new()
         {
             Name    = typeReference.Name,
-            Imports = []
+            Imports = GetImports(externalTypes, typeReference).ToList()
         };
+
+        static IEnumerable<TsImportInfo> GetImports(IReadOnlyList<ExternalTypeInfo> externalTypes, TypeReference typeReference)
+        {
+            return
+                from externalType in externalTypes
+                where externalType.DotNetFullTypeName == typeReference.FullName
+                select new TsImportInfo
+                {
+                    LocalName = externalType.LocalName,
+                    Source    = externalType.Source
+                };
+        }
     }
 
     static bool IsImplicitDefinition(PropertyDefinition propertyDefinition)
