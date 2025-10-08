@@ -81,6 +81,24 @@ public static class ResultExtensions
         }
     }
 
+    public static async IAsyncEnumerable<Result<B>> Select<A, B>
+    (
+        this IAsyncEnumerable<Result<A>> source,
+        Func<A, B> selector
+    )
+    {
+        await foreach (var result in source)
+        {
+            if (result.HasError)
+            {
+                yield return result.Error;
+                yield break;
+            }
+
+            yield return selector(result.Value);
+        }
+    }
+
     public static Result<B> Select<A, B>
     (
         this Result<A> source,
@@ -367,6 +385,30 @@ public static class ResultExtensions
         }
     }
 
+    public static async IAsyncEnumerable<Result<C>> SelectMany<A, B, C>
+    (
+        this Result<IEnumerable<A>> source,
+        Func<A, Task<Result<B>>> bindAsync,
+        Func<A, B, C> selector
+    )
+    {
+        if (source.HasError)
+        {
+            yield return source.Error;
+        }
+
+        foreach (var a in source.Value)
+        {
+            var b = await bindAsync(a);
+            if (b.HasError)
+            {
+                yield return b.Error;
+            }
+
+            yield return selector(a, b.Value);
+        }
+    }
+
     public static async Task<Result<C>> SelectMany<A, B, C>
     (
         this Task<Result<A>> source,
@@ -438,6 +480,30 @@ public static class ResultExtensions
     public static async IAsyncEnumerable<Result<C>> SelectMany<A, B, C>
     (
         this IAsyncEnumerable<Result<A>> source,
+        Func<A, Result<B>> bind,
+        Func<A, B, C> resultSelector
+    )
+    {
+        await foreach (var a in source)
+        {
+            if (a.HasError)
+            {
+                yield return a.Error;
+            }
+
+            var b = bind(a.Value);
+            if (b.HasError)
+            {
+                yield return b.Error;
+            }
+
+            yield return resultSelector(a.Value, b.Value);
+        }
+    }
+
+    public static async IAsyncEnumerable<Result<C>> SelectMany<A, B, C>
+    (
+        this IAsyncEnumerable<Result<A>> source,
         Func<A, Task<Result<B>>> bind,
         Func<A, B, Task<Result<C>>> resultSelector
     )
@@ -491,6 +557,36 @@ public static class ResultExtensions
 
             yield return resultSelector(a, b.Value);
         }
+    }
+
+    public static Result<IEnumerable<C>> SelectMany<A, B, C>
+    (
+        this Result<IEnumerable<A>> result,
+        Func<A, Result<B>> binder,
+        Func<A, B, C> projector
+    )
+    {
+        if (result.HasError)
+        {
+            return result.Error;
+        }
+
+        List<C> returnList = [];
+
+        foreach (var a in result.Value)
+        {
+            var b = binder(a);
+            if (b.HasError)
+            {
+                return b.Error;
+            }
+
+            var c = projector(a, b.Value);
+
+            returnList.Add(c);
+        }
+
+        return returnList;
     }
 
     public static IEnumerable<Result<A>> Where<A>
