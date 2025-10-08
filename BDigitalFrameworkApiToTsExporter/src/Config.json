@@ -5,6 +5,8 @@
     "BOA.InternetBanking.Payments.API.Types.Religious.*",
     "BOA.InternetBanking.Payments.API.Models.HgsTopUpModel"
   ],
+
+  "projectDirectory": "D:\\work\\BOA.BusinessModules\\Dev\\BOA.InternetBanking.Payments",
   "apiList": [
     {
       "name": "GsmPrePaid"

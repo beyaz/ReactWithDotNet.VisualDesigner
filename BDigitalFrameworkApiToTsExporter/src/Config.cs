@@ -16,6 +16,8 @@ public sealed record Config
     public string[]? ListOfTypes { get; init; }
 
     public required IReadOnlyList<ApiInfo> ApiList { get; init; }
+
+    public required string ProjectDirectory { get; init; }
 }
 
 static class ConfigReader

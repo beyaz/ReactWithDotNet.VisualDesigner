@@ -76,7 +76,7 @@ static class DotNetModelExporter
         {
             // sample: BOA.InternetBanking.Payments.API -> BOA.InternetBanking.Payments.API.Models.GsmPrePaidModel
             
-            var fullTypeName = $"{assemblyDefinition.FullName}.Models.{apiInfo.Name}Model";
+            var fullTypeName = $"{assemblyDefinition.Name.Name}.Models.{apiInfo.Name}Model";
 
             return CecilHelper.GetType(assemblyDefinition, fullTypeName);
         }
@@ -85,7 +85,7 @@ static class DotNetModelExporter
         {
             // sample: BOA.InternetBanking.Payments.API -> BOA.InternetBanking.Payments.API.Controllers.GsmPrePaidController
             
-            var fullTypeName = $"{assemblyDefinition.FullName}.Controllers.{apiInfo.Name}Controller";
+            var fullTypeName = $"{assemblyDefinition.Name.Name}.Controllers.{apiInfo.Name}Controller";
 
             return CecilHelper.GetType(assemblyDefinition, fullTypeName);
         }
