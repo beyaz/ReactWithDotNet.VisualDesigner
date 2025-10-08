@@ -22,7 +22,7 @@ static class DotNetModelExporter
             let modelFile = new FileModel
             {
                 Path    = modelFilePath,
-                Content = TsOutput.LinesToString(TsOutput.GetTsCode(TsModelCreator.CreateFrom(modelTypeDefinition)))
+                Content = TsOutput.LinesToString(TsOutput.GetTsCode(TsModelCreator.CreateFrom(config.ExternalTypes, modelTypeDefinition)))
             }
             from syncedFile in trySyncWithLocalFileSystem(modelFile)
             select new
@@ -100,52 +100,6 @@ static class DotNetModelExporter
         }
         
         static async Task<Result<FileModel>> trySyncWithLocalFileSystem(FileModel file)
-        {
-            if (!File.Exists(file.Path))
-            {
-                return file;
-            }
-
-            return await(
-                from fileContentInDirectory in FileSystem.ReadAllText(file.Path)
-                let exportIndex = fileContentInDirectory.IndexOf("export ", StringComparison.OrdinalIgnoreCase)
-                select (exportIndex > 0) switch
-                {
-                    true => file with
-                    {
-                        Content = fileContentInDirectory[..exportIndex] + file.Content
-                    },
-                    false => file
-                });
-        }
-    }
-    
-    public static IAsyncEnumerable<Result<Unit>> TryExport_old()
-    {
-        var fileModels =
-            from config in ConfigReader.ReadConfig()
-            from assemblyDefinition in CecilHelper.ReadAssemblyDefinition(config.AssemblyFilePath)
-            from typeDefinition in CecilHelper.GetTypes(assemblyDefinition, config.ListOfTypes ?? [])
-            from outputFilePath in GetOutputFilePath(config, typeDefinition)
-            let fileContent = TsOutput.LinesToString(TsOutput.GetTsCode(TsModelCreator.CreateFrom(typeDefinition)))
-            select new FileModel
-            {
-                Path    = outputFilePath,
-                Content = fileContent
-            };
-
-        return
-            from fileModel in fileModels
-            from syncedFile in TrySyncWithLocalFileSystem(fileModel)
-            select FileSystem.Save(syncedFile);
-        
-        
-        static Result<string> GetOutputFilePath(Config config, TypeDefinition typeDefinition)
-        {
-            return Path.Combine(config.OutputDirectoryPath ?? string.Empty, $"{typeDefinition.Name}.ts");
-        }
-        
-        static async Task<Result<FileModel>> TrySyncWithLocalFileSystem(FileModel file)
         {
             if (!File.Exists(file.Path))
             {

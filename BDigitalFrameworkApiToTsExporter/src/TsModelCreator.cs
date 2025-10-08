@@ -5,7 +5,7 @@ namespace BDigitalFrameworkApiToTsExporter;
 
 static class TsModelCreator
 {
-    public static TsTypeDefinition CreateFrom(TypeDefinition typeDefinition)
+    public static TsTypeDefinition CreateFrom(IReadOnlyList<ExternalTypeInfo> externalTypes, TypeDefinition typeDefinition)
     {
         IEnumerable<TsFieldDefinition> fields;
         if (typeDefinition.IsEnum)
