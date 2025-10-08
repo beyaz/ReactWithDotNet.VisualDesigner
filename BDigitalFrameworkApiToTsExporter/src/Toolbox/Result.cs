@@ -98,6 +98,24 @@ public static class ResultExtensions
             yield return selector(result.Value);
         }
     }
+    
+    public static async IAsyncEnumerable<Result<B>> Select<A, B>
+    (
+        this IAsyncEnumerable<Result<A>> source,
+        Func<A, Task<Result<B>>> selector
+    )
+    {
+        await foreach (var result in source)
+        {
+            if (result.HasError)
+            {
+                yield return result.Error;
+                yield break;
+            }
+
+            yield return await selector(result.Value);
+        }
+    }
 
     public static Result<B> Select<A, B>
     (

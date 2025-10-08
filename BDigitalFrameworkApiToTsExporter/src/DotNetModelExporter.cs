@@ -5,7 +5,7 @@ namespace BDigitalFrameworkApiToTsExporter;
 static class DotNetModelExporter
 {
     
-    static IAsyncEnumerable<Result<Unit>> ExportController()
+    public static IAsyncEnumerable<Result<Unit>> TryExport()
     {
         var query = 
             from config in ConfigReader.ReadConfig()
@@ -36,13 +36,8 @@ static class DotNetModelExporter
             };
 
         
-        IAsyncEnumerable<Result<Task<Result<Unit>>>> a = 
-            from item in query
-            select FileSystem.Save(item.modelFile);
-        
-       
-
-        return null;
+        return from item in query
+               select FileSystem.Save(item.modelFile);
 
         IReadOnlyList<string> getServiceWrapper(MethodDefinition methodDefinition)
         {
@@ -121,12 +116,8 @@ static class DotNetModelExporter
         }
     }
     
-    public static IAsyncEnumerable<Result<Unit>> TryExport()
+    public static IAsyncEnumerable<Result<Unit>> TryExport_old()
     {
-        
-     
-        
-        
         var fileModels =
             from config in ConfigReader.ReadConfig()
             from assemblyDefinition in CecilHelper.ReadAssemblyDefinition(config.AssemblyFilePath)
