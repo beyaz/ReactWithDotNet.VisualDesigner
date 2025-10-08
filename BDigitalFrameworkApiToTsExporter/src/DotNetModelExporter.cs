@@ -19,10 +19,11 @@ static class DotNetModelExporter
             let responseType = getMethodResponseType(method)
             let serviceWrapper = getServiceWrapper(method)
             let serviceWrapperByModel = getServiceWrapperByModel(method,modelTypeDefinition)
+            let modelTsType = TsModelCreator.CreateFrom(config.ExternalTypes, modelTypeDefinition)
             let modelFile = new FileModel
             {
                 Path    = modelFilePath,
-                Content = TsOutput.LinesToString(TsOutput.GetTsCode(TsModelCreator.CreateFrom(config.ExternalTypes, modelTypeDefinition)))
+                Content = TsOutput.LinesToString(TsOutput.GetTsCode(modelTsType))
             }
             from syncedFile in trySyncWithLocalFileSystem(modelFile)
             select new
