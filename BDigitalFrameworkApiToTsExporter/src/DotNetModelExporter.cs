@@ -5,12 +5,18 @@ namespace BDigitalFrameworkApiToTsExporter;
 static class DotNetModelExporter
 {
     
-    static IAsyncEnumerable<Result<FileModel>> ExportController(Config config, TypeDefinition controllerTypeDefinition)
+    static IAsyncEnumerable<Result<FileModel>> ExportController()
     {
 
+                 
+        
         var temp =
-            from modelTypeDefinition in getModelTypeDefinition()
-            from method in getExportablePublicMethods()
+            from config in ConfigReader.ReadConfig()
+            from assemblyDefinition in CecilHelper.ReadAssemblyDefinition(config.AssemblyFilePath)
+            from api in config.ApiList
+            from modelTypeDefinition in getModelTypeDefinition(assemblyDefinition, api)
+            from controllerTypeDefinition in getControllerTypeDefinition(assemblyDefinition,api)
+            from method in getExportablePublicMethods(controllerTypeDefinition)
             from modelFilePath in getOutputFilePath(config, modelTypeDefinition)
             let requestType = getMethodRequest(method)
             let responseType = getMethodResponseType(method)
@@ -70,32 +76,27 @@ static class DotNetModelExporter
             return methodDefinition.ReturnType;
         }
         
-        IEnumerable<MethodDefinition> getExportablePublicMethods()
+        static IEnumerable<MethodDefinition> getExportablePublicMethods(TypeDefinition controllerTypeDefinition)
         {
             return from method in controllerTypeDefinition.Methods where method.IsPublic select method;
         }
         
-        Result<TypeDefinition> getModelTypeDefinition()
+        static Result<TypeDefinition> getModelTypeDefinition(AssemblyDefinition assemblyDefinition, ApiInfo apiInfo)
         {
-            // todo: find 
-            var modelTypeFullName = controllerTypeDefinition.FullName;
+            // sample: BOA.InternetBanking.Payments.API -> BOA.InternetBanking.Payments.API.Models.GsmPrePaidModel
             
-            var assemblyDefinition = controllerTypeDefinition.Module.Assembly;
+            var fullTypeName = $"{assemblyDefinition.FullName}.Models.{apiInfo.Name}Model";
 
-            var typeDefinition =
-            (
-                from module in assemblyDefinition.Modules
-                from type in module.Types
-                where type.FullName == modelTypeFullName
-                select type
-            ).FirstOrDefault();
+            return CecilHelper.GetType(assemblyDefinition, fullTypeName);
+        }
+        
+        static Result<TypeDefinition> getControllerTypeDefinition(AssemblyDefinition assemblyDefinition, ApiInfo apiInfo)
+        {
+            // sample: BOA.InternetBanking.Payments.API -> BOA.InternetBanking.Payments.API.Controllers.GsmPrePaidController
+            
+            var fullTypeName = $"{assemblyDefinition.FullName}.Controllers.{apiInfo.Name}Controller";
 
-            if (typeDefinition is null)
-            {
-                return new MissingMemberException(modelTypeFullName);
-            }
-
-            return typeDefinition;
+            return CecilHelper.GetType(assemblyDefinition, fullTypeName);
         }
         
         static Result<string> getOutputFilePath(Config config, TypeDefinition typeDefinition)
@@ -126,6 +127,10 @@ static class DotNetModelExporter
     
     public static IAsyncEnumerable<Result<Unit>> TryExport()
     {
+        
+     
+        
+        
         var fileModels =
             from config in ConfigReader.ReadConfig()
             from assemblyDefinition in CecilHelper.ReadAssemblyDefinition(config.AssemblyFilePath)

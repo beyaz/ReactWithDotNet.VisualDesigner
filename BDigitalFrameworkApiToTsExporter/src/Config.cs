@@ -2,13 +2,20 @@
 
 namespace BDigitalFrameworkApiToTsExporter;
 
-public sealed class Config
+public sealed class ApiInfo
 {
-    public string? AssemblyFilePath { get; set; }
+    public required string Name { get; init; }
+}
+
+public sealed record Config
+{
+    public string? AssemblyFilePath { get; init; }
     
-    public string? OutputDirectoryPath { get; set; }
+    public string? OutputDirectoryPath { get; init; }
     
-    public string[]? ListOfTypes { get; set; }
+    public string[]? ListOfTypes { get; init; }
+
+    public required IReadOnlyList<ApiInfo> ApiList { get; init; }
 }
 
 static class ConfigReader
