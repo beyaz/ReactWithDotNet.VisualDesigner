@@ -20,6 +20,16 @@
       "dotNetFullTypeName": "BOA.InternetBanking.Common.Account",
       "localName": "Account",
       "source": "b-digital-internet-banking"
-    }    
+    },
+    {
+      "dotNetFullTypeName": "BOA.InternetBanking.Common.Models.BaseFinancialModel",
+      "localName": "BaseFinancialModel",
+      "source": "b-digital-internet-banking"
+    },
+    {
+      "dotNetFullTypeName": "BOA.InternetBanking.Common.Card",
+      "localName": "Card",
+      "source": "b-digital-internet-banking"
+    }
   ]
 }
