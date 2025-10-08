@@ -9,37 +9,50 @@ static class TsOutput
         return $"{field.Name}{(field.IsNullable ? '?' : string.Empty)} : {field.Type.Name};";
     }
 
-    public static IReadOnlyList<string> GetTsCode(TsTypeDefinition type)
+    public static IReadOnlyList<string> GetTsCode(TsTypeDefinition tsTypeDefinition)
     {
         List<string> lines = [];
 
-        if (type.IsEnum)
+        var allImports = from importInfo in tsTypeDefinition.BaseType.Imports.Concat
+                             (
+                              from tsFieldDefinition in tsTypeDefinition.Fields
+                              from importForField in tsFieldDefinition.Type.Imports
+                              select importForField
+                             )
+                         select importInfo;
+
+        foreach (var importInfo in allImports.DistinctBy(x => x.LocalName))
         {
-            lines.Add($"export enum {type.Name}");
+            lines.Add($"import {{{{ {importInfo.LocalName} }} from \"{importInfo.Source}\";");
+        }
+
+        if (tsTypeDefinition.IsEnum)
+        {
+            lines.Add($"export enum {tsTypeDefinition.Name}");
         }
         else
         {
             var extends = " extends ";
-            if (string.IsNullOrWhiteSpace(type.BaseType.Name))
+            if (string.IsNullOrWhiteSpace(tsTypeDefinition.BaseType.Name))
             {
                 extends = "";
             }
             else
             {
-                extends += type.BaseType.Name;
+                extends += tsTypeDefinition.BaseType.Name;
             }
 
-            lines.Add($"export interface {type.Name}" + extends);
+            lines.Add($"export interface {tsTypeDefinition.Name}" + extends);
         }
 
         lines.Add("{");
 
-        if (type.IsEnum)
+        if (tsTypeDefinition.IsEnum)
         {
             var definitionLines =
-                from field in type.Fields
+                from field in tsTypeDefinition.Fields
                 let line = $"{field.Name} = {field.ConstantValue}"
-                let isLast = field == type.Fields[^1]
+                let isLast = field == tsTypeDefinition.Fields[^1]
                 select isLast switch
                 {
                     true  => line,
@@ -50,7 +63,7 @@ static class TsOutput
         }
         else
         {
-            foreach (var field in type.Fields)
+            foreach (var field in tsTypeDefinition.Fields)
             {
                 lines.Add(GetTsCode(field));
             }

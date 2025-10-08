@@ -25,7 +25,7 @@ static class DotNetModelExporter
                 Path    = modelFilePath,
                 Content = TsOutput.LinesToString(TsOutput.GetTsCode(modelTsType))
             }
-            from syncedFile in trySyncWithLocalFileSystem(modelFile)
+            from syncedFile in trySyncTsTypeWithLocalFileSystem(modelFile)
             select new
             {
                 modelTypeDefinition,
@@ -100,7 +100,7 @@ static class DotNetModelExporter
             return Path.Combine(config.ProjectDirectory, "OBAWeb", webProjectName,  "ClientApp","models",  $"{typeDefinition.Name}.ts");
         }
         
-        static async Task<Result<FileModel>> trySyncWithLocalFileSystem(FileModel file)
+        static async Task<Result<FileModel>> trySyncTsTypeWithLocalFileSystem(FileModel file)
         {
             if (!File.Exists(file.Path))
             {
