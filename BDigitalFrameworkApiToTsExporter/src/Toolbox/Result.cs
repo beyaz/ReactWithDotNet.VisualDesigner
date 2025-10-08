@@ -385,6 +385,30 @@ public static class ResultExtensions
         }
     }
 
+    public static async IAsyncEnumerable<Result<C>> SelectMany<A, B, C>
+    (
+        this Result<IEnumerable<A>> source,
+        Func<A, Task<Result<B>>> bindAsync,
+        Func<A, B, C> selector
+    )
+    {
+        if (source.HasError)
+        {
+            yield return source.Error;
+        }
+
+        foreach (var a in source.Value)
+        {
+            var b = await bindAsync(a);
+            if (b.HasError)
+            {
+                yield return b.Error;
+            }
+
+            yield return selector(a, b.Value);
+        }
+    }
+
     public static async Task<Result<C>> SelectMany<A, B, C>
     (
         this Task<Result<A>> source,
@@ -535,6 +559,36 @@ public static class ResultExtensions
         }
     }
 
+    public static Result<IEnumerable<C>> SelectMany<A, B, C>
+    (
+        this Result<IEnumerable<A>> result,
+        Func<A, Result<B>> binder,
+        Func<A, B, C> projector
+    )
+    {
+        if (result.HasError)
+        {
+            return result.Error;
+        }
+
+        List<C> returnList = [];
+
+        foreach (var a in result.Value)
+        {
+            var b = binder(a);
+            if (b.HasError)
+            {
+                return b.Error;
+            }
+
+            var c = projector(a, b.Value);
+
+            returnList.Add(c);
+        }
+
+        return returnList;
+    }
+
     public static IEnumerable<Result<A>> Where<A>
     (
         this IEnumerable<Result<A>> source,
@@ -566,36 +620,6 @@ public static class ResultExtensions
             {
                 returnList.Add(result);
             }
-        }
-
-        return returnList;
-    }
-    
-    public static Result<IEnumerable<C>> SelectMany<A, B, C>
-    (
-        this Result<IEnumerable<A>> result,
-        Func<A, Result<B>> binder,
-        Func<A, B, C> projector
-    )
-    {
-        if (result.HasError)
-        {
-            return result.Error;
-        }
-
-        List<C> returnList = [];
-        
-        foreach (var a in result.Value)
-        {
-            var b = binder(a);
-            if (b.HasError)
-            {
-                return b.Error;
-            }
-
-            var c = projector(a, b.Value);
-            
-            returnList.Add(c);
         }
 
         return returnList;
