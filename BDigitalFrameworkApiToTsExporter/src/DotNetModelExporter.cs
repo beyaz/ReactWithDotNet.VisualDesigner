@@ -42,6 +42,17 @@ static class DotNetModelExporter
                 from syncedFile in trySyncTsTypeWithLocalFileSystem(modelFile)
                 select syncedFile;
         }
+
+        static TypeReference getReturnType(MethodDefinition methodDefinition)
+        {
+            if (methodDefinition.ReturnType is GenericInstanceType genericInstanceType)
+            {
+                return genericInstanceType.GenericArguments[0];
+            }
+
+            return methodDefinition.ReturnType;
+        }
+        
         static Result<FileModel> getServiceFile(Config config, ApiInfo apiInfo, TypeDefinition controllerTypeDefinition)
         {
 
@@ -64,8 +75,11 @@ static class DotNetModelExporter
                     
                 ];
 
+              
                 lines.AddRange(from methodDefinition in getExportablePublicMethods(controllerTypeDefinition)
-                               from typeName in new[] { methodDefinition.Parameters[0].ParameterType.Name, methodDefinition.ReturnType.Name }
+                               from typeName in new[] { 
+                                   methodDefinition.Parameters[0].ParameterType.Name, 
+                                   getReturnType(methodDefinition).Name }
                                select typeName);
                 lines.Add("} from \"../types\";");
                 
