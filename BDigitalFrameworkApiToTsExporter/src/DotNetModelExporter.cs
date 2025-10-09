@@ -77,10 +77,13 @@ static class DotNetModelExporter
 
               
                 lines.AddRange(from methodDefinition in getExportablePublicMethods(controllerTypeDefinition)
-                               from typeName in new[] { 
+                               from typeName in new[] 
+                               { 
                                    methodDefinition.Parameters[0].ParameterType.Name, 
-                                   getReturnType(methodDefinition).Name }
-                               select typeName);
+                                   getReturnType(methodDefinition).Name 
+                               }
+                               where typeName != "BaseClientRequest"
+                               select typeName + ",");
                 
                 lines.Add("} from \"../types\";");
                 
