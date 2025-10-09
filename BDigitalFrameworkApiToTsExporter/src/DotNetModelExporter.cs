@@ -93,16 +93,20 @@ static class DotNetModelExporter
                 var basePath = getSolutionName(config.ProjectDirectory).RemoveFromStart("BOA.InternetBanking.").ToLower();
                 
                         lines.Add("export const useOsymService = () => {");
+                        
+                        lines.Add(string.Empty);
                         lines.Add($"const basePath = \"/{basePath}/{apiInfo.Name}\";");
+                        lines.Add(string.Empty);
                     
                 foreach (var methodDefinition in getExportablePublicMethods(controllerTypeDefinition))
                 {
-                   lines.Add($"    const {methodDefinition.Name} = useExecuter<{methodDefinition.Parameters[0].ParameterType.Name}, {getReturnType(methodDefinition).Name}>(basePath + \"/{methodDefinition.Name}\", \"POST\");");
+                   lines.Add($"    const {GetTsVariableName(methodDefinition.Name)} = useExecuter<{methodDefinition.Parameters[0].ParameterType.Name}, {getReturnType(methodDefinition).Name}>(basePath + \"/{methodDefinition.Name}\", \"POST\");");
                 }
                 
+                lines.Add(string.Empty);
                 lines.Add("return {");
                 
-                lines.Add(string.Join(", ", from m in getExportablePublicMethods(controllerTypeDefinition) select TypescriptNaming.GetResolvedPropertyName(m.Name)));
+                lines.Add(string.Join(", ", from m in getExportablePublicMethods(controllerTypeDefinition) select GetTsVariableName(m.Name)));
                 
                 lines.Add("};");
                 lines.Add("}");

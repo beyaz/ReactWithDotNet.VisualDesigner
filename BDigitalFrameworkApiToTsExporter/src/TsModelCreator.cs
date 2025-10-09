@@ -33,7 +33,7 @@ static class TsModelCreator
                 where !IsImplicitDefinition(propertyDefinition)
                 select new TsFieldDefinition
                 {
-                    Name          = TypescriptNaming.GetResolvedPropertyName(propertyDefinition.Name),
+                    Name          = GetTsVariableName(propertyDefinition.Name),
                     IsNullable    = CecilHelper.IsNullableProperty(propertyDefinition),
                     Type          = GetTSType(externalTypes, propertyDefinition.PropertyType),
                     ConstantValue = string.Empty
@@ -185,12 +185,3 @@ static class TsModelCreator
     
 }
 
-static class TypescriptNaming
-{
-    static readonly CamelCasePropertyNamesContractResolver CamelCasePropertyNamesContractResolver = new();
-
-    public static string GetResolvedPropertyName(string propertyNameInCSharp)
-    {
-        return CamelCasePropertyNamesContractResolver.GetResolvedPropertyName(propertyNameInCSharp);
-    }
-}
