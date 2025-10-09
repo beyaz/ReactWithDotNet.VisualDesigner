@@ -5,7 +5,6 @@ namespace BDigitalFrameworkApiToTsExporter;
 
 static class DotNetModelExporter
 {
-    
     public static IAsyncEnumerable<Result<Unit>> TryExport()
     {
         var files =
@@ -15,24 +14,17 @@ static class DotNetModelExporter
             from modelTypeDefinition in getModelTypeDefinition(assemblyDefinition, api)
             from controllerTypeDefinition in getControllerTypeDefinition(assemblyDefinition, api)
             from serviceFile in getServiceFile(config, api, controllerTypeDefinition)
-
-
             from modelFile in getModelFile(config, assemblyDefinition, api, controllerTypeDefinition)
-
-            from file in new[] { modelFile, serviceFile}
+            from file in new[] { modelFile, serviceFile }
             select file;
 
-        
-        return from file in files  select FileSystem.Save(file);
-
+        return from file in files select FileSystem.Save(file);
 
         static Task<Result<FileModel>> getModelFile(Config config, AssemblyDefinition assemblyDefinition, ApiInfo apiInfo, TypeDefinition controllerTypeDefinition)
         {
-            return 
-            from modelTypeDefinition in getModelTypeDefinition(assemblyDefinition, apiInfo)
+            return
+                from modelTypeDefinition in getModelTypeDefinition(assemblyDefinition, apiInfo)
                 from modelFilePath in getModelOutputTsFilePath(config, modelTypeDefinition)
-
-
                 let modelTsType = TsModelCreator.CreateFrom(config.ExternalTypes, modelTypeDefinition)
                 let modelFile = new FileModel
                 {
@@ -52,20 +44,17 @@ static class DotNetModelExporter
 
             return methodDefinition.ReturnType;
         }
-        
+
         static Result<FileModel> getServiceFile(Config config, ApiInfo apiInfo, TypeDefinition controllerTypeDefinition)
         {
-
-            return 
-            from filePath in getOutputTsFilePath(config, apiInfo)
+            return
+                from filePath in getOutputTsFilePath(config, apiInfo)
                 select new FileModel
                 {
                     Path    = filePath,
                     Content = string.Join(Environment.NewLine, getFileContent())
                 };
-            
-            
-            
+
             IReadOnlyList<string> getFileContent()
             {
                 LineCollection lines =
@@ -73,79 +62,71 @@ static class DotNetModelExporter
                     "import { BaseClientRequest, BaseClientResponse, useExecuter } from \"b-digital-framework\";",
                     "import {",
                     string.Empty
-                    
                 ];
 
-              
                 lines.AddRange(from methodDefinition in getExportablePublicMethods(controllerTypeDefinition)
-                               from typeName in new[] 
-                               { 
-                                   methodDefinition.Parameters[0].ParameterType.Name, 
-                                   getReturnType(methodDefinition).Name 
+                               from typeName in new[]
+                               {
+                                   methodDefinition.Parameters[0].ParameterType.Name,
+                                   getReturnType(methodDefinition).Name
                                }
                                where typeName != "BaseClientRequest"
                                select typeName + ",");
-                
+
                 lines.Add("} from \"../types\";");
-                
+
                 lines.Add(string.Empty);
 
                 var basePath = getSolutionName(config.ProjectDirectory).RemoveFromStart("BOA.InternetBanking.").ToLower();
-                
-                        lines.Add("export const useOsymService = () => {");
-                        
-                        lines.Add(string.Empty);
-                        lines.Add($"const basePath = \"/{basePath}/{apiInfo.Name}\";");
-                        lines.Add(string.Empty);
-                    
+
+                lines.Add("export const useOsymService = () => {");
+
+                lines.Add(string.Empty);
+                lines.Add($"const basePath = \"/{basePath}/{apiInfo.Name}\";");
+                lines.Add(string.Empty);
+
                 foreach (var methodDefinition in getExportablePublicMethods(controllerTypeDefinition))
                 {
-                   lines.Add($"    const {GetTsVariableName(methodDefinition.Name)} = useExecuter<{methodDefinition.Parameters[0].ParameterType.Name}, {getReturnType(methodDefinition).Name}>(basePath + \"/{methodDefinition.Name}\", \"POST\");");
+                    lines.Add($"    const {GetTsVariableName(methodDefinition.Name)} = useExecuter<{methodDefinition.Parameters[0].ParameterType.Name}, {getReturnType(methodDefinition).Name}>(basePath + \"/{methodDefinition.Name}\", \"POST\");");
                 }
-                
+
                 lines.Add(string.Empty);
                 lines.Add("return {");
-                
+
                 lines.Add(string.Join(", ", from m in getExportablePublicMethods(controllerTypeDefinition) select GetTsVariableName(m.Name)));
-                
+
                 lines.Add("};");
                 lines.Add("}");
-                
+
                 return lines;
             }
-            
+
             static Result<string> getOutputTsFilePath(Config config, ApiInfo apiInfo)
             {
-                return 
+                return
                     from webProjectPath in getWebProjectFolderPath(config.ProjectDirectory)
-                    select Path.Combine(webProjectPath,  "ClientApp","services",  $"use{apiInfo.Name}Service.ts");
+                    select Path.Combine(webProjectPath, "ClientApp", "services", $"use{apiInfo.Name}Service.ts");
             }
         }
 
-      
-        
-        
-     
-        
-        
         static IEnumerable<MethodDefinition> getExportablePublicMethods(TypeDefinition controllerTypeDefinition)
         {
-            return from method in controllerTypeDefinition.Methods where method.IsPublic && method.Parameters.Count==1 && method.ReturnType.Name != "Void" select method;
+            return from method in controllerTypeDefinition.Methods where method.IsPublic && method.Parameters.Count == 1 && method.ReturnType.Name != "Void" select method;
         }
-        
+
         static Result<TypeDefinition> getModelTypeDefinition(AssemblyDefinition assemblyDefinition, ApiInfo apiInfo)
         {
             // sample: BOA.InternetBanking.Payments.API -> BOA.InternetBanking.Payments.API.Models.GsmPrePaidModel
-            
+
             var fullTypeName = $"{assemblyDefinition.Name.Name}.Models.{apiInfo.Name}Model";
 
             return CecilHelper.GetType(assemblyDefinition, fullTypeName);
         }
-        
+
         static Result<TypeDefinition> getControllerTypeDefinition(AssemblyDefinition assemblyDefinition, ApiInfo apiInfo)
         {
             // sample: BOA.InternetBanking.Payments.API -> BOA.InternetBanking.Payments.API.Controllers.GsmPrePaidController
-            
+
             var fullTypeName = $"{assemblyDefinition.Name.Name}.Controllers.{apiInfo.Name}Controller";
 
             return CecilHelper.GetType(assemblyDefinition, fullTypeName);
@@ -153,12 +134,13 @@ static class DotNetModelExporter
 
         static string getSolutionName(string projectDirectory)
         {
-            return  Path.GetFileName(projectDirectory);
+            return Path.GetFileName(projectDirectory);
         }
+
         static Result<string> getWebProjectFolderPath(string projectDirectory)
         {
             var webProjectName = "OBA.Web." + getSolutionName(projectDirectory).RemoveFromStart("BOA.");
-            
+
             var directory = Path.Combine(projectDirectory, "OBAWeb", webProjectName);
             if (!Directory.Exists(directory))
             {
@@ -167,14 +149,14 @@ static class DotNetModelExporter
 
             return directory;
         }
-        
+
         static Result<string> getModelOutputTsFilePath(Config config, TypeDefinition typeDefinition)
         {
-            return 
-            from webProjectPath in getWebProjectFolderPath(config.ProjectDirectory)
-            select Path.Combine(webProjectPath,  "ClientApp","models",  $"{typeDefinition.Name}.ts");
+            return
+                from webProjectPath in getWebProjectFolderPath(config.ProjectDirectory)
+                select Path.Combine(webProjectPath, "ClientApp", "models", $"{typeDefinition.Name}.ts");
         }
-        
+
         static async Task<Result<FileModel>> trySyncTsTypeWithLocalFileSystem(FileModel file)
         {
             if (!File.Exists(file.Path))
@@ -182,7 +164,7 @@ static class DotNetModelExporter
                 return file;
             }
 
-            return await(
+            return await (
                 from fileContentInDirectory in FileSystem.ReadAllText(file.Path)
                 let exportIndex = fileContentInDirectory.IndexOf("export ", StringComparison.OrdinalIgnoreCase)
                 select (exportIndex > 0) switch
@@ -195,14 +177,14 @@ static class DotNetModelExporter
                 });
         }
     }
-    
+
     static IEnumerable<PropertyDefinition> GetMappingPropertyList(TypeDefinition model, TypeDefinition apiParameter)
     {
         return
             from parameterProperty in apiParameter.Properties
             where modelHasNamedProperty(model, parameterProperty)
             select parameterProperty;
-        
+
         static bool modelHasNamedProperty(TypeDefinition model, PropertyDefinition property)
         {
             foreach (var modelProperty in model.Properties)
@@ -212,11 +194,8 @@ static class DotNetModelExporter
                     return true;
                 }
             }
+
             return false;
         }
     }
-
-    
-
-    
 }
