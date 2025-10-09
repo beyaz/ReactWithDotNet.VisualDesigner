@@ -29,13 +29,11 @@ static class DotNetModelExporter
                 from modelTypeDefinition in getModelTypeDefinition(assemblyDefinition, apiInfo)
                 from modelFilePath in getModelOutputTsFilePath(config, modelTypeDefinition)
                 let modelTsType = TsModelCreator.CreateFrom(config.ExternalTypes, modelTypeDefinition)
-                let modelFile = new FileModel
+                select new FileModel
                 {
-                    Path    = modelFilePath,
+                    Path = modelFilePath,
                     Content = TsOutput.LinesToString(TsOutput.GetTsCode(modelTsType))
-                }
-                from syncedFile in trySyncTsTypeWithLocalFileSystem(modelFile)
-                select syncedFile;
+                };
         }
 
         static TypeReference getReturnType(MethodDefinition methodDefinition)
@@ -168,25 +166,7 @@ static class DotNetModelExporter
                 select Path.Combine(webProjectPath, "ClientApp", "models", $"{typeDefinition.Name}.ts");
         }
 
-        static async Task<Result<FileModel>> trySyncTsTypeWithLocalFileSystem(FileModel file)
-        {
-            if (!File.Exists(file.Path))
-            {
-                return file;
-            }
-
-            return await (
-                from fileContentInDirectory in FileSystem.ReadAllText(file.Path)
-                let exportIndex = fileContentInDirectory.IndexOf("export ", StringComparison.OrdinalIgnoreCase)
-                select (exportIndex > 0) switch
-                {
-                    true => file with
-                    {
-                        Content = fileContentInDirectory[..exportIndex] + file.Content
-                    },
-                    false => file
-                });
-        }
+        
     }
 
     static IEnumerable<PropertyDefinition> GetMappingPropertyList(TypeDefinition model, TypeDefinition apiParameter)
