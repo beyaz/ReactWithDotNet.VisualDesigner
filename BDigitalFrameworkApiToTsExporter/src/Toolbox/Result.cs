@@ -713,4 +713,25 @@ public static class ResultExtensions
             yield return resultSelector(a.Value, resultB.Value);
         }
     }
+    
+    public static async Task<Result<C>> SelectMany<A, B, C>
+    (
+        this Result<A> source,
+        Func<A, Task<Result<B>>> bind,
+        Func<A, B, C> resultSelector
+    )
+    {
+        if (source.HasError)
+        {
+            return source.Error;
+        }
+
+        var middle = await bind(source.Value);
+        if (middle.HasError)
+        {
+            return middle.Error;
+        }
+
+        return resultSelector(source.Value, middle.Value);
+    }
 }
