@@ -88,10 +88,11 @@ static class DotNetModelExporter
 
                 lines.Add(string.Empty);
                 lines.Add($"const basePath = \"/{basePath}/{apiInfo.Name}\";");
-                lines.Add(string.Empty);
+                
 
                 foreach (var methodDefinition in getExportablePublicMethods(controllerTypeDefinition))
                 {
+                    lines.Add(string.Empty);
                     lines.Add(Tab+$"const {GetTsVariableName(methodDefinition.Name)} = useExecuter<{methodDefinition.Parameters[0].ParameterType.Name}, {getReturnType(methodDefinition).Name}>(basePath + \"/{methodDefinition.Name}\", \"POST\");");
                 }
 
@@ -102,7 +103,7 @@ static class DotNetModelExporter
                                    select GetTsVariableName(m.Name);
                 lines.AddRange
                     (
-                     (from serviceName in serviceNames select Tab + Tab +serviceName).AppendBetween(",")
+                     (from serviceName in serviceNames select Tab + Tab +serviceName).AppendBetween(","+Environment.NewLine)
                     );
 
                 lines.Add(Tab + "};");
