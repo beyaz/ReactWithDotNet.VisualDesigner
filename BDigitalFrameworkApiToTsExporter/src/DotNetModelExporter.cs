@@ -102,7 +102,7 @@ static class DotNetModelExporter
         
         static IEnumerable<MethodDefinition> getExportablePublicMethods(TypeDefinition controllerTypeDefinition)
         {
-            return from method in controllerTypeDefinition.Methods where method.IsPublic select method;
+            return from method in controllerTypeDefinition.Methods where method.IsPublic && method.Parameters.Count==0 && method.ReturnType.Name != "Void" select method;
         }
         
         static Result<TypeDefinition> getModelTypeDefinition(AssemblyDefinition assemblyDefinition, ApiInfo apiInfo)
