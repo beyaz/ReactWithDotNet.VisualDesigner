@@ -41,9 +41,56 @@ static class DotNetModelExporter
                select FileSystem.Save(item.modelFile);
 
 
-        static Result<FileModel> getServiceFile(ApiInfo apiInfo, TypeDefinition controllerTypeDefinition)
+        static Result<FileModel> getServiceFile(Config config, ApiInfo apiInfo, TypeDefinition controllerTypeDefinition)
         {
+
+            return 
+            from filePath in getOutputTsFilePath(config, apiInfo)
+                select new FileModel
+                {
+                    Path    = filePath,
+                    Content = string.Join(Environment.NewLine, getFileContent())
+                };
             
+            
+            
+            IReadOnlyList<string> getFileContent()
+            {
+                LineCollection lines =
+                [
+                    "import { BaseClientRequest, BaseClientResponse, useExecuter } from \"b-digital-framework\";",
+                    "import {",
+                    
+                ];
+
+                lines.AddRange(from methodDefinition in getExportablePublicMethods(controllerTypeDefinition)
+                               from typeName in new[] { methodDefinition.Parameters[0].ParameterType.Name, methodDefinition.ReturnType.Name }
+                               select typeName);
+                lines.Add("} from \"../types\";");
+                
+                
+                        lines.Add("export const useOsymService = () => {");
+                        lines.Add("const basePath = \"/payments/osym\";");
+                    
+                foreach (var methodDefinition in getExportablePublicMethods(controllerTypeDefinition))
+                {
+                   lines.Add("    const startPreData = useExecuter<BaseClientRequest, OsymStartPreDataClientResponse>(basePath + \"/OsymStartPreData\", \"POST\");");
+                }
+                
+                lines.Add("return {");
+                lines.Add("startPreData, startPostData, getSessionList, execute, confirmPreData");
+                lines.Add("};");
+                lines.Add("}");
+                
+                return lines;
+            }
+            
+            static Result<string> getOutputTsFilePath(Config config, ApiInfo apiInfo)
+            {
+                return 
+                    from webProjectPath in getWebProjectFolderPath(config.ProjectDirectory)
+                    select Path.Combine(webProjectPath,  "ClientApp","services",  $"use{apiInfo.Name}Service.ts");
+            }
         }
 
         IReadOnlyList<string> getServiceWrapper(MethodDefinition methodDefinition)

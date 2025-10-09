@@ -52,3 +52,14 @@ sealed record TsTypeDefinition
     
     // @formatter:on
 }
+
+class LineCollection : List<string>
+{
+    public void Add(IEnumerable<LineCollection> lineCollections)
+    {
+        foreach (var collection in lineCollections)
+        {
+            AddRange(collection);
+        }
+    }
+}
