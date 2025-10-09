@@ -1,10 +1,13 @@
 ﻿using Mono.Cecil;
+using System.Linq;
 using AssemblyDefinition = Mono.Cecil.AssemblyDefinition;
 
 namespace BDigitalFrameworkApiToTsExporter;
 
 static class DotNetModelExporter
 {
+    const string Tab = "    ";
+    
     public static IAsyncEnumerable<Result<Unit>> TryExport()
     {
         var files =
@@ -61,17 +64,19 @@ static class DotNetModelExporter
                 [
                     "import { BaseClientRequest, BaseClientResponse, useExecuter } from \"b-digital-framework\";",
                     "import {",
-                    string.Empty
                 ];
 
-                lines.AddRange(from methodDefinition in getExportablePublicMethods(controllerTypeDefinition)
-                               from typeName in new[]
-                               {
-                                   methodDefinition.Parameters[0].ParameterType.Name,
-                                   getReturnType(methodDefinition).Name
-                               }
-                               where typeName != "BaseClientRequest"
-                               select "  "+typeName + ",");
+                var inputOutputTypes
+                    = from methodDefinition in getExportablePublicMethods(controllerTypeDefinition)
+                      from typeName in new[]
+                      {
+                          methodDefinition.Parameters[0].ParameterType.Name,
+                          getReturnType(methodDefinition).Name
+                      }
+                      where typeName != "BaseClientRequest"
+                      select Tab + typeName;
+                
+                lines.AddRange(inputOutputTypes.AppendBetween(","));
 
                 lines.Add("} from \"../types\";");
 
@@ -87,25 +92,20 @@ static class DotNetModelExporter
 
                 foreach (var methodDefinition in getExportablePublicMethods(controllerTypeDefinition))
                 {
-                    lines.Add($"    const {GetTsVariableName(methodDefinition.Name)} = useExecuter<{methodDefinition.Parameters[0].ParameterType.Name}, {getReturnType(methodDefinition).Name}>(basePath + \"/{methodDefinition.Name}\", \"POST\");");
+                    lines.Add(Tab+$"const {GetTsVariableName(methodDefinition.Name)} = useExecuter<{methodDefinition.Parameters[0].ParameterType.Name}, {getReturnType(methodDefinition).Name}>(basePath + \"/{methodDefinition.Name}\", \"POST\");");
                 }
 
                 lines.Add(string.Empty);
-                lines.Add("    return {");
+                lines.Add(Tab + "return {");
 
+                var serviceNames = from m in getExportablePublicMethods(controllerTypeDefinition)
+                                   select GetTsVariableName(m.Name);
                 lines.AddRange
                     (
-                     from line in
-                     ((from m in getExportablePublicMethods(controllerTypeDefinition)
-                      select GetTsVariableName(m.Name))
-                    .AppendBetween(","))
-                     
-                     select "        "+line
-                     
-                     
-                     );
+                     (from serviceName in serviceNames select Tab + Tab +serviceName).AppendBetween(",")
+                    );
 
-                lines.Add("    };");
+                lines.Add(Tab + "};");
                 lines.Add("}");
 
                 return lines;
