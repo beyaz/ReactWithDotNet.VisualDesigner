@@ -72,6 +72,7 @@ static class DotNetModelExporter
                 [
                     "import { BaseClientRequest, BaseClientResponse, useExecuter } from \"b-digital-framework\";",
                     "import {",
+                    string.Empty
                     
                 ];
 
@@ -87,17 +88,22 @@ static class DotNetModelExporter
                 
                 lines.Add("} from \"../types\";");
                 
+                lines.Add(string.Empty);
+
+                var basePath = getSolutionName(config.ProjectDirectory).RemoveFromStart("BOA.InternetBanking.").ToLower();
                 
                         lines.Add("export const useOsymService = () => {");
-                        lines.Add("const basePath = \"/payments/osym\";");
+                        lines.Add($"const basePath = \"/{basePath}/{apiInfo.Name}\";");
                     
                 foreach (var methodDefinition in getExportablePublicMethods(controllerTypeDefinition))
                 {
-                   lines.Add("    const startPreData = useExecuter<BaseClientRequest, OsymStartPreDataClientResponse>(basePath + \"/OsymStartPreData\", \"POST\");");
+                   lines.Add($"    const {methodDefinition.Name} = useExecuter<{methodDefinition.Parameters[0].ParameterType.Name}, {getReturnType(methodDefinition).Name}>(basePath + \"/{methodDefinition.Name}\", \"POST\");");
                 }
                 
                 lines.Add("return {");
-                lines.Add("startPreData, startPostData, getSessionList, execute, confirmPreData");
+                
+                lines.Add(string.Join(", ", from m in getExportablePublicMethods(controllerTypeDefinition) select TypescriptNaming.GetResolvedPropertyName(m.Name)));
+                
                 lines.Add("};");
                 lines.Add("}");
                 

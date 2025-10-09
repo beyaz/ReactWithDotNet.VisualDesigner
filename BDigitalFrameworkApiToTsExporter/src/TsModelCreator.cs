@@ -182,13 +182,15 @@ static class TsModelCreator
         return propertyDefinition.Name.Contains(".");
     }
 
-    static class TypescriptNaming
-    {
-        static readonly CamelCasePropertyNamesContractResolver CamelCasePropertyNamesContractResolver = new();
+    
+}
 
-        public static string GetResolvedPropertyName(string propertyNameInCSharp)
-        {
-            return CamelCasePropertyNamesContractResolver.GetResolvedPropertyName(propertyNameInCSharp);
-        }
+static class TypescriptNaming
+{
+    static readonly CamelCasePropertyNamesContractResolver CamelCasePropertyNamesContractResolver = new();
+
+    public static string GetResolvedPropertyName(string propertyNameInCSharp)
+    {
+        return CamelCasePropertyNamesContractResolver.GetResolvedPropertyName(propertyNameInCSharp);
     }
 }
