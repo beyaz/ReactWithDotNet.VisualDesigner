@@ -13,6 +13,8 @@ static class DotNetModelExporter
             from api in config.ApiList
             from modelTypeDefinition in getModelTypeDefinition(assemblyDefinition, api)
             from controllerTypeDefinition in getControllerTypeDefinition(assemblyDefinition,api)
+            from serviceFile in getServiceFile(config,api,controllerTypeDefinition)
+            
             from method in getExportablePublicMethods(controllerTypeDefinition)
             from modelFilePath in getModelOutputTsFilePath(config, modelTypeDefinition)
             let requestType = getMethodRequest(method)
