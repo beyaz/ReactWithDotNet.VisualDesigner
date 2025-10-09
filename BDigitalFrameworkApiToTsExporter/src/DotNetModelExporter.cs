@@ -71,7 +71,7 @@ static class DotNetModelExporter
                                    getReturnType(methodDefinition).Name
                                }
                                where typeName != "BaseClientRequest"
-                               select typeName + ",");
+                               select "  "+typeName + ",");
 
                 lines.Add("} from \"../types\";");
 
@@ -91,11 +91,21 @@ static class DotNetModelExporter
                 }
 
                 lines.Add(string.Empty);
-                lines.Add("return {");
+                lines.Add("    return {");
 
-                lines.Add(string.Join(", ", from m in getExportablePublicMethods(controllerTypeDefinition) select GetTsVariableName(m.Name)));
+                lines.AddRange
+                    (
+                     from line in
+                     ((from m in getExportablePublicMethods(controllerTypeDefinition)
+                      select GetTsVariableName(m.Name))
+                    .AppendBetween(","))
+                     
+                     select "        "+line
+                     
+                     
+                     );
 
-                lines.Add("};");
+                lines.Add("    };");
                 lines.Add("}");
 
                 return lines;
