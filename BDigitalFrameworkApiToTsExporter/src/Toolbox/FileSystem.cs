@@ -31,6 +31,15 @@ static class FileSystem
 
             if (fileInfo.Exists)
             {
+                // check already same
+                var fileContentInDirectory = await File.ReadAllTextAsync(file.Path);
+                
+                if (IsEqualsIgnoreWhitespace(fileContentInDirectory, file.Content))
+                {
+                    return Unit.Value;
+                }
+                    
+                
                 fileInfo.IsReadOnly = false;
                 TfsHelper.CheckoutFileFromTfs(file.Path);
             }

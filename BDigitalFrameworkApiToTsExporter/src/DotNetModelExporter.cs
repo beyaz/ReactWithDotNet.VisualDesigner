@@ -79,7 +79,7 @@ static class DotNetModelExporter
 
                 var basePath = getSolutionName(config.ProjectDirectory).RemoveFromStart("BOA.InternetBanking.").ToLower();
 
-                lines.Add("export const useOsymService = () => {");
+                lines.Add($"export const use{apiInfo.Name}Service = () => {{");
 
                 lines.Add(string.Empty);
                 lines.Add($"const basePath = \"/{basePath}/{apiInfo.Name}\";");
