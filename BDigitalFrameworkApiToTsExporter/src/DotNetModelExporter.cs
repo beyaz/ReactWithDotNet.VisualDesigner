@@ -1,4 +1,5 @@
 ﻿using Mono.Cecil;
+using AssemblyDefinition = Mono.Cecil.AssemblyDefinition;
 
 namespace BDigitalFrameworkApiToTsExporter;
 
@@ -15,12 +16,10 @@ static class DotNetModelExporter
             from controllerTypeDefinition in getControllerTypeDefinition(assemblyDefinition,api)
             from serviceFile in getServiceFile(config,api,controllerTypeDefinition)
             
-            from method in getExportablePublicMethods(controllerTypeDefinition)
+        
             from modelFilePath in getModelOutputTsFilePath(config, modelTypeDefinition)
-            let requestType = getMethodRequest(method)
-            let responseType = getMethodResponseType(method)
-            let serviceWrapper = getServiceWrapper(method)
-            let serviceWrapperByModel = getServiceWrapperByModel(method,modelTypeDefinition)
+           
+           
             let modelTsType = TsModelCreator.CreateFrom(config.ExternalTypes, modelTypeDefinition)
             let modelFile = new FileModel
             {
@@ -30,11 +29,6 @@ static class DotNetModelExporter
             from syncedFile in trySyncTsTypeWithLocalFileSystem(modelFile)
             select new
             {
-                modelTypeDefinition,
-                requestType,
-                responseType,
-                serviceWrapper,
-                serviceWrapperByModel,
                 modelFile
             };
 
@@ -43,6 +37,22 @@ static class DotNetModelExporter
                select FileSystem.Save(item.modelFile);
 
 
+        static Task<Result<FileModel>> getModelFile(Config config, AssemblyDefinition assemblyDefinition, ApiInfo apiInfo, TypeDefinition controllerTypeDefinition)
+        {
+            return 
+            from modelTypeDefinition in getModelTypeDefinition(assemblyDefinition, apiInfo)
+                from modelFilePath in getModelOutputTsFilePath(config, modelTypeDefinition)
+
+
+                let modelTsType = TsModelCreator.CreateFrom(config.ExternalTypes, modelTypeDefinition)
+                let modelFile = new FileModel
+                {
+                    Path    = modelFilePath,
+                    Content = TsOutput.LinesToString(TsOutput.GetTsCode(modelTsType))
+                }
+                from syncedFile in trySyncTsTypeWithLocalFileSystem(modelFile)
+                select syncedFile;
+        }
         static Result<FileModel> getServiceFile(Config config, ApiInfo apiInfo, TypeDefinition controllerTypeDefinition)
         {
 
