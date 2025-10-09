@@ -19,7 +19,7 @@ static class DotNetModelExporter
 
             from modelFile in getModelFile(config, assemblyDefinition, api, controllerTypeDefinition)
 
-            from file in new[] { modelFile }
+            from file in new[] { modelFile, serviceFile}
             select file;
 
         
