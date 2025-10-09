@@ -81,6 +81,7 @@ static class DotNetModelExporter
                                    methodDefinition.Parameters[0].ParameterType.Name, 
                                    getReturnType(methodDefinition).Name }
                                select typeName);
+                
                 lines.Add("} from \"../types\";");
                 
                 
