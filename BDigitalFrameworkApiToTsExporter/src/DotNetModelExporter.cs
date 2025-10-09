@@ -40,6 +40,12 @@ static class DotNetModelExporter
         return from item in query
                select FileSystem.Save(item.modelFile);
 
+
+        static Result<FileModel> getServiceFile(ApiInfo apiInfo, TypeDefinition controllerTypeDefinition)
+        {
+            
+        }
+
         IReadOnlyList<string> getServiceWrapper(MethodDefinition methodDefinition)
         {
             // todo:  implement
@@ -90,14 +96,29 @@ static class DotNetModelExporter
 
             return CecilHelper.GetType(assemblyDefinition, fullTypeName);
         }
+
+        static string getSolutionName(string projectDirectory)
+        {
+            return  Path.GetFileName(projectDirectory);
+        }
+        static Result<string> getWebProjectFolderPath(string projectDirectory)
+        {
+            var webProjectName = "OBA.Web." + getSolutionName(projectDirectory).RemoveFromStart("BOA.");
+            
+            var directory = Path.Combine(projectDirectory, "OBAWeb", webProjectName);
+            if (!Directory.Exists(directory))
+            {
+                return new IOException($"DirectoryNotFound: {directory}");
+            }
+
+            return directory;
+        }
         
         static Result<string> getModelOutputTsFilePath(Config config, TypeDefinition typeDefinition)
         {
-            var solutionName = Path.GetFileName(config.ProjectDirectory);
-
-            var webProjectName = "OBA.Web." + solutionName.RemoveFromStart("BOA.");
-            
-            return Path.Combine(config.ProjectDirectory, "OBAWeb", webProjectName,  "ClientApp","models",  $"{typeDefinition.Name}.ts");
+            return 
+            from webProjectPath in getWebProjectFolderPath(config.ProjectDirectory)
+            select Path.Combine(webProjectPath,  "ClientApp","models",  $"{typeDefinition.Name}.ts");
         }
         
         static async Task<Result<FileModel>> trySyncTsTypeWithLocalFileSystem(FileModel file)
