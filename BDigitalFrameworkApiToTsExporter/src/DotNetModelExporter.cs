@@ -8,33 +8,22 @@ static class DotNetModelExporter
     
     public static IAsyncEnumerable<Result<Unit>> TryExport()
     {
-        var query = 
+        var files =
             from config in ConfigReader.ReadConfig()
             from assemblyDefinition in CecilHelper.ReadAssemblyDefinition(config.AssemblyFilePath)
             from api in config.ApiList
             from modelTypeDefinition in getModelTypeDefinition(assemblyDefinition, api)
-            from controllerTypeDefinition in getControllerTypeDefinition(assemblyDefinition,api)
-            from serviceFile in getServiceFile(config,api,controllerTypeDefinition)
-            
-        
-            from modelFilePath in getModelOutputTsFilePath(config, modelTypeDefinition)
-           
-           
-            let modelTsType = TsModelCreator.CreateFrom(config.ExternalTypes, modelTypeDefinition)
-            let modelFile = new FileModel
-            {
-                Path    = modelFilePath,
-                Content = TsOutput.LinesToString(TsOutput.GetTsCode(modelTsType))
-            }
-            from syncedFile in trySyncTsTypeWithLocalFileSystem(modelFile)
-            select new
-            {
-                modelFile
-            };
+            from controllerTypeDefinition in getControllerTypeDefinition(assemblyDefinition, api)
+            from serviceFile in getServiceFile(config, api, controllerTypeDefinition)
+
+
+            from modelFile in getModelFile(config, assemblyDefinition, api, controllerTypeDefinition)
+
+            from file in new[] { modelFile }
+            select file;
 
         
-        return from item in query
-               select FileSystem.Save(item.modelFile);
+        return from file in files  select FileSystem.Save(file);
 
 
         static Task<Result<FileModel>> getModelFile(Config config, AssemblyDefinition assemblyDefinition, ApiInfo apiInfo, TypeDefinition controllerTypeDefinition)
@@ -105,33 +94,11 @@ static class DotNetModelExporter
             }
         }
 
-        IReadOnlyList<string> getServiceWrapper(MethodDefinition methodDefinition)
-        {
-            // todo:  implement
-            return [];
-        }
-        
-        IReadOnlyList<string> getServiceWrapperByModel(MethodDefinition methodDefinition, TypeDefinition modelTypeDefinition)
-        {
-            // todo:  implement
-            return [];
-        }
+      
         
         
-        ParameterDefinition? getMethodRequest(MethodDefinition methodDefinition)
-        {
-            if (methodDefinition.Parameters.Count == 1)
-            {
-                return methodDefinition.Parameters[0];
-            }
-
-            return null;
-        }
+     
         
-        TypeReference getMethodResponseType(MethodDefinition methodDefinition)
-        {
-            return methodDefinition.ReturnType;
-        }
         
         static IEnumerable<MethodDefinition> getExportablePublicMethods(TypeDefinition controllerTypeDefinition)
         {
