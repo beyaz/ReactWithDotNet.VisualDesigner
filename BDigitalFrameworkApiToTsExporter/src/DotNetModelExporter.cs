@@ -16,9 +16,10 @@ static class DotNetModelExporter
             from api in config.ApiList
             from modelTypeDefinition in getModelTypeDefinition(assemblyDefinition, api)
             from controllerTypeDefinition in getControllerTypeDefinition(assemblyDefinition, api)
-            from serviceFile in getServiceFile(config, api, controllerTypeDefinition)
             from modelFile in getModelFile(config, assemblyDefinition, api, controllerTypeDefinition)
-            from file in new[] { modelFile, serviceFile }
+            from serviceFile in getServiceFile(config, api, controllerTypeDefinition)
+            from serviceModelIntegrationFile in getServiceAndModelIntegrationFile(config, api, controllerTypeDefinition)
+            from file in new[] { modelFile, serviceFile, serviceModelIntegrationFile }
             select file;
 
         return from file in files select FileSystem.Save(file);
@@ -165,6 +166,81 @@ static class DotNetModelExporter
                 from webProjectPath in getWebProjectFolderPath(config.ProjectDirectory)
                 select Path.Combine(webProjectPath, "ClientApp", "models", $"{typeDefinition.Name}.ts");
         }
+        
+        
+        
+         static Result<FileModel> getServiceAndModelIntegrationFile(Config config, ApiInfo apiInfo, TypeDefinition controllerTypeDefinition)
+        {
+            return
+                from filePath in getOutputTsFilePath(config, apiInfo)
+                select new FileModel
+                {
+                    Path    = filePath,
+                    Content = string.Join(Environment.NewLine, getFileContent())
+                };
+
+            IReadOnlyList<string> getFileContent()
+            {
+                LineCollection lines =
+                [
+                    "import { BaseClientRequest, BaseClientResponse, useExecuter } from \"b-digital-framework\";",
+                    "import {",
+                ];
+
+                var inputOutputTypes
+                    = from methodDefinition in getExportablePublicMethods(controllerTypeDefinition)
+                      from typeName in new[]
+                      {
+                          methodDefinition.Parameters[0].ParameterType.Name,
+                          getReturnType(methodDefinition).Name
+                      }
+                      where typeName != "BaseClientRequest"
+                      select Tab + typeName;
+                
+                lines.AddRange(inputOutputTypes.AppendBetween(","));
+
+                lines.Add("} from \"../types\";");
+
+                lines.Add(string.Empty);
+
+                var basePath = getSolutionName(config.ProjectDirectory).RemoveFromStart("BOA.InternetBanking.").ToLower();
+
+                lines.Add($"export const use{apiInfo.Name}Service = () => {{");
+
+                lines.Add(string.Empty);
+                lines.Add($"const basePath = \"/{basePath}/{apiInfo.Name}\";");
+                
+
+                foreach (var methodDefinition in getExportablePublicMethods(controllerTypeDefinition))
+                {
+                    lines.Add(string.Empty);
+                    lines.Add(Tab+$"const {GetTsVariableName(methodDefinition.Name)} = useExecuter<{methodDefinition.Parameters[0].ParameterType.Name}, {getReturnType(methodDefinition).Name}>(basePath + \"/{methodDefinition.Name}\", \"POST\");");
+                }
+
+                lines.Add(string.Empty);
+                lines.Add(Tab + "return {");
+
+                var serviceNames = from m in getExportablePublicMethods(controllerTypeDefinition)
+                                   select GetTsVariableName(m.Name);
+                lines.AddRange
+                    (
+                     (from serviceName in serviceNames select Tab + Tab +serviceName).AppendBetween(","+Environment.NewLine)
+                    );
+
+                lines.Add(Tab + "};");
+                lines.Add("}");
+
+                return lines;
+            }
+
+            static Result<string> getOutputTsFilePath(Config config, ApiInfo apiInfo)
+            {
+                return
+                    from webProjectPath in getWebProjectFolderPath(config.ProjectDirectory)
+                    select Path.Combine(webProjectPath, "ClientApp", "services", $"use{apiInfo.Name}.ts");
+            }
+        }
+
 
         
     }
