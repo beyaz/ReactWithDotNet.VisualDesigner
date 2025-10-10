@@ -18,7 +18,7 @@ static class DotNetModelExporter
             from controllerTypeDefinition in getControllerTypeDefinition(assemblyDefinition, api)
             from modelFile in getModelFile(config, assemblyDefinition, api, controllerTypeDefinition)
             from serviceFile in getServiceFile(config, api, controllerTypeDefinition)
-            from serviceModelIntegrationFile in getServiceAndModelIntegrationFile(config, api, controllerTypeDefinition)
+            from serviceModelIntegrationFile in getServiceAndModelIntegrationFile(config, api, controllerTypeDefinition, modelTypeDefinition)
             from file in new[] { modelFile, serviceFile, serviceModelIntegrationFile }
             select file;
 
@@ -169,7 +169,7 @@ static class DotNetModelExporter
         
         
         
-         static Result<FileModel> getServiceAndModelIntegrationFile(Config config, ApiInfo apiInfo, TypeDefinition controllerTypeDefinition)
+        static Result<FileModel> getServiceAndModelIntegrationFile(Config config, ApiInfo apiInfo, TypeDefinition controllerTypeDefinition, TypeDefinition modelTypeDefinition)
         {
             return
                 from filePath in getOutputTsFilePath(config, apiInfo)
@@ -183,7 +183,7 @@ static class DotNetModelExporter
             {
                 LineCollection lines =
                 [
-                    "import { BaseClientRequest, BaseClientResponse, useExecuter } from \"b-digital-framework\";",
+                    "import { BaseClientRequest, BaseClientResponse, useStore } from \"b-digital-framework\";",
                     "import {",
                 ];
 
@@ -205,16 +205,54 @@ static class DotNetModelExporter
 
                 var basePath = getSolutionName(config.ProjectDirectory).RemoveFromStart("BOA.InternetBanking.").ToLower();
 
-                lines.Add($"export const use{apiInfo.Name}Service = () => {{");
+                lines.Add($"export const use{apiInfo.Name} = (): bool => {{");
 
                 lines.Add(string.Empty);
-                lines.Add($"const basePath = \"/{basePath}/{apiInfo.Name}\";");
+                lines.Add("const store = useStore();");
+                lines.Add(string.Empty);
+                lines.Add($"const service = use{apiInfo.Name}Service();");
                 
-
                 foreach (var methodDefinition in getExportablePublicMethods(controllerTypeDefinition))
                 {
                     lines.Add(string.Empty);
-                    lines.Add(Tab+$"const {GetTsVariableName(methodDefinition.Name)} = useExecuter<{methodDefinition.Parameters[0].ParameterType.Name}, {getReturnType(methodDefinition).Name}>(basePath + \"/{methodDefinition.Name}\", \"POST\");");
+                    lines.Add("const abortController = new AbortController();");
+                    lines.Add(string.Empty);
+                    
+                    lines.Add(Tab+$"const {GetTsVariableName(methodDefinition.Name)} = async (model: {modelTypeDefinition.Name}) => {{");
+                    lines.Add(string.Empty);
+                    lines.Add(Tab + $"let request: {methodDefinition.Parameters[0].ParameterType.Name} = {{");
+
+                    var mappingLines = from property in getMappingPropertyList(modelTypeDefinition, methodDefinition.Parameters[0].ParameterType.Resolve())
+                                       let name = GetTsVariableName(property.Name)
+                                       select Tab + $"request.{name} = model.{name}";
+                    
+                    lines.AddRange(mappingLines.AppendBetween(","+Environment.NewLine));
+                    
+                    lines.Add(Tab + "};");
+                    lines.Add(string.Empty);
+                    
+                    lines.Add($"const response = await service.{GetTsVariableName(methodDefinition.Name)}.send(request, abortController.signal);");
+                    lines.Add("if(!response.success) {");
+                    lines.Add(Tab+"store.setMessage({ content: response.result.errorMessage });");
+                    lines.Add(Tab+"return false;");
+                    lines.Add("}");
+                    
+                    lines.Add(string.Empty);
+                    
+                    var responseMapping = from property in getMappingPropertyList(modelTypeDefinition, methodDefinition.ReturnType.Resolve())
+                                       let name = GetTsVariableName(property.Name)
+                                       select Tab + $"model.{name} = response.{name}";
+                    
+                    
+                    lines.AddRange(responseMapping.AppendBetween(","+Environment.NewLine));
+                    
+                    lines.Add(string.Empty);
+                    
+                    lines.Add("return true");
+                    
+                    lines.Add(Tab + "};");
+                    
+                    
                 }
 
                 lines.Add(string.Empty);
@@ -239,30 +277,32 @@ static class DotNetModelExporter
                     from webProjectPath in getWebProjectFolderPath(config.ProjectDirectory)
                     select Path.Combine(webProjectPath, "ClientApp", "services", $"use{apiInfo.Name}.ts");
             }
+            
+            static IEnumerable<PropertyDefinition> getMappingPropertyList(TypeDefinition model, TypeDefinition apiParameter)
+            {
+                return
+                    from parameterProperty in apiParameter.Properties
+                    where modelHasNamedProperty(model, parameterProperty)
+                    select parameterProperty;
+
+                static bool modelHasNamedProperty(TypeDefinition model, PropertyDefinition property)
+                {
+                    foreach (var modelProperty in model.Properties)
+                    {
+                        if (string.Equals(modelProperty.Name, property.Name, StringComparison.OrdinalIgnoreCase))
+                        {
+                            return true;
+                        }
+                    }
+
+                    return false;
+                }
+            }
         }
 
 
         
     }
 
-    static IEnumerable<PropertyDefinition> GetMappingPropertyList(TypeDefinition model, TypeDefinition apiParameter)
-    {
-        return
-            from parameterProperty in apiParameter.Properties
-            where modelHasNamedProperty(model, parameterProperty)
-            select parameterProperty;
-
-        static bool modelHasNamedProperty(TypeDefinition model, PropertyDefinition property)
-        {
-            foreach (var modelProperty in model.Properties)
-            {
-                if (string.Equals(modelProperty.Name, property.Name, StringComparison.OrdinalIgnoreCase))
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-    }
+   
 }
