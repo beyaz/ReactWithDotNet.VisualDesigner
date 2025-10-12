@@ -19,8 +19,7 @@ static class DotNetModelExporter
             from modelFile in getModelFile(config, assemblyDefinition, api, controllerTypeDefinition)
             from serviceFile in getServiceFile(config, api, controllerTypeDefinition)
             from serviceModelIntegrationFile in getServiceAndModelIntegrationFile(config, api, controllerTypeDefinition, modelTypeDefinition)
-            from inputOutputFiles in getTypeFiles(config,api,controllerTypeDefinition)
-            from file in new[] { modelFile, serviceFile, serviceModelIntegrationFile }.Concat(inputOutputFiles)
+            from file in new[] { modelFile, serviceFile, serviceModelIntegrationFile }
             select file;
 
         return from file in files select FileSystem.Save(file);
