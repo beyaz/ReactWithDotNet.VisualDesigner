@@ -326,18 +326,12 @@ static class DotNetModelExporter
         {
             if (methodDefinition.Parameters[0].ParameterType.Name != "BaseClientRequest")
             {
-                
                 return
                     from webProjectPath in getWebProjectFolderPath(scope.config.ProjectDirectory)
-                    
-                    let returnTypeDefinition =  getReturnType(methodDefinition).Resolve()
-                    
+                    let returnTypeDefinition = getReturnType(methodDefinition).Resolve()
                     let requestTypeDefinition = methodDefinition.Parameters[0].ParameterType.Resolve()
-                    
                     let tsRequest = TsModelCreator.CreateFrom(scope.config.ExternalTypes, requestTypeDefinition)
-                    
                     let tsResponse = TsModelCreator.CreateFrom(scope.config.ExternalTypes, returnTypeDefinition)
-                    
                     select new FileModel
                     {
                         Path    = getOutputFilePath(webProjectPath),
@@ -347,11 +341,8 @@ static class DotNetModelExporter
 
             return
                 from webProjectPath in getWebProjectFolderPath(scope.config.ProjectDirectory)
-                    
-                let returnTypeDefinition =  getReturnType(methodDefinition).Resolve()
-                    
+                let returnTypeDefinition = getReturnType(methodDefinition).Resolve()
                 let tsResponse = TsModelCreator.CreateFrom(scope.config.ExternalTypes, returnTypeDefinition)
-                    
                 select new FileModel
                 {
                     Path    = getOutputFilePath(webProjectPath),
@@ -362,7 +353,6 @@ static class DotNetModelExporter
             {
                 return Path.Combine(webProjectPath, "ClientApp", "types", scope.ApiInfo.Name, $"{methodDefinition.Name}.ts");
             }
-
         }
     }
 
