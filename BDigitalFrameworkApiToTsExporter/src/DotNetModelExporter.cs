@@ -18,6 +18,7 @@ static class DotNetModelExporter
             from modelFile in getModelFile(config, assemblyDefinition, api, controllerTypeDefinition)
             from serviceFile in getServiceFile(config, api, controllerTypeDefinition)
             from serviceModelIntegrationFile in getServiceAndModelIntegrationFile(config, api, controllerTypeDefinition, modelTypeDefinition)
+            from inputOutputFiles in getTypeFilesRelatedMethod(config,api)
             from file in new[] { modelFile, serviceFile, serviceModelIntegrationFile }
             select file;
 
@@ -304,7 +305,15 @@ static class DotNetModelExporter
             
         }
         
-        
+        static Result<IEnumerable<FileModel>> getTypeFiles(Config config, ApiInfo apiInfo, TypeDefinition controllerTypeDefinition)
+        {
+            return 
+            from methodDefinition in getExportablePublicMethods(controllerTypeDefinition)
+                from files in getTypeFilesRelatedMethod(config, apiInfo, methodDefinition)
+                from file in files
+                select file;
+        }
+
         
         static Result<FileModel[]> getTypeFilesRelatedMethod(Config config, ApiInfo apiInfo, MethodDefinition methodDefinition)
             {
