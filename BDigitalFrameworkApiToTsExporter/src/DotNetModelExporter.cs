@@ -324,8 +324,6 @@ static class DotNetModelExporter
 
         static Result<FileModel> getMethodRequestResponseTypesInFile(ApiScope scope, MethodDefinition methodDefinition)
         {
-            var returnTypeFile = getTypeFileRelatedMethod(scope, getReturnType(methodDefinition));
-
             if (methodDefinition.Parameters[0].ParameterType.Name != "BaseClientRequest")
             {
                 
@@ -364,20 +362,6 @@ static class DotNetModelExporter
                     Content = TsOutput.LinesToString(TsOutput.GetTsCode(tsResponse))
                 };
 
-            static Result<FileModel> getTypeFileRelatedMethod(ApiScope scope, TypeReference typeReference)
-            {
-                return
-                    from webProjectPath in getWebProjectFolderPath(scope.config.ProjectDirectory)
-                    let outputFilePath =  Path.Combine(webProjectPath, "ClientApp", "types", scope.ApiInfo.Name, $"{typeReference.Name}.ts")
-                    let tsType = TsModelCreator.CreateFrom(scope.config.ExternalTypes, typeReference.Resolve())
-                    select new FileModel
-                    {
-                        Path    = outputFilePath,
-                        Content = TsOutput.LinesToString(TsOutput.GetTsCode(tsType))
-                    };
-
-                
-            }
         }
     }
 
