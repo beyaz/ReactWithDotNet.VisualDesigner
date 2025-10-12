@@ -6,6 +6,16 @@ namespace BDigitalFrameworkApiToTsExporter;
 
 static class DotNetModelExporter
 {
+    sealed record ApiScope
+    {
+        public  required Config config { get; init; }
+    
+        public required AssemblyDefinition AssemblyDefinition { get; init; }
+    
+        public required ApiInfo ApiInfo { get; init; }
+    }
+    
+    
     const string Tab = "    ";
 
     public static IAsyncEnumerable<Result<Unit>> TryExport()
