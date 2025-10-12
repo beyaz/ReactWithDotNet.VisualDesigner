@@ -4,7 +4,7 @@ static class Program
 {
     static async Task Main()
     {
-        await foreach (var result in DotNetModelExporter.TryExport())
+        await foreach (var result in Exporter.TryExport())
         {
             if (result.HasError)
             {

@@ -3,7 +3,7 @@ using AssemblyDefinition = Mono.Cecil.AssemblyDefinition;
 
 namespace BDigitalFrameworkApiToTsExporter;
 
-static class DotNetModelExporter
+static class Exporter
 {
     const string Tab = "    ";
 
