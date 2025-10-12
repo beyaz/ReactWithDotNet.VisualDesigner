@@ -298,6 +298,35 @@ static class DotNetModelExporter
                     return false;
                 }
             }
+
+
+
+            
         }
+        
+        
+        
+        static Result<FileModel> GetApiInputOutputFilesOfMethod(Config config, ApiInfo apiInfo, TypeReference typeReference)
+            {
+                return
+                    from filePath in getOutputTsFilePath(config, apiInfo,typeReference)
+                    
+                    let tsType = TsModelCreator.CreateFrom(config.ExternalTypes, typeReference.Resolve())
+                    select new FileModel
+                    {
+                        Path    = filePath,
+                        Content = TsOutput.LinesToString(TsOutput.GetTsCode(tsType))
+                    };
+
+
+                static Result<string> getOutputTsFilePath(Config config, ApiInfo apiInfo, TypeReference typeReference)
+                {
+                    return
+                        from webProjectPath in getWebProjectFolderPath(config.ProjectDirectory)
+                        select Path.Combine(webProjectPath, "ClientApp", "types", apiInfo.Name, $"{typeReference.Name}.ts");
+                }
+            }
     }
+
+
 }
