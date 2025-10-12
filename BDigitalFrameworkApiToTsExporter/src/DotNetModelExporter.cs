@@ -330,8 +330,6 @@ static class DotNetModelExporter
                 return
                     from webProjectPath in getWebProjectFolderPath(scope.config.ProjectDirectory)
                     
-                    let outputFilePath =  Path.Combine(webProjectPath, "ClientApp", "types", scope.ApiInfo.Name, $"{methodDefinition.Name}.ts")
-                    
                     let returnTypeDefinition =  getReturnType(methodDefinition).Resolve()
                     
                     let requestTypeDefinition = methodDefinition.Parameters[0].ParameterType.Resolve()
@@ -342,7 +340,7 @@ static class DotNetModelExporter
                     
                     select new FileModel
                     {
-                        Path    = outputFilePath,
+                        Path    = getOutputFilePath(webProjectPath),
                         Content = TsOutput.LinesToString(TsOutput.GetTsCode(tsRequest, tsResponse))
                     };
             }
@@ -350,17 +348,20 @@ static class DotNetModelExporter
             return
                 from webProjectPath in getWebProjectFolderPath(scope.config.ProjectDirectory)
                     
-                let outputFilePath =  Path.Combine(webProjectPath, "ClientApp", "types", scope.ApiInfo.Name, $"{methodDefinition.Name}.ts")
-                    
                 let returnTypeDefinition =  getReturnType(methodDefinition).Resolve()
                     
                 let tsResponse = TsModelCreator.CreateFrom(scope.config.ExternalTypes, returnTypeDefinition)
                     
                 select new FileModel
                 {
-                    Path    = outputFilePath,
+                    Path    = getOutputFilePath(webProjectPath),
                     Content = TsOutput.LinesToString(TsOutput.GetTsCode(tsResponse))
                 };
+
+            string getOutputFilePath(string webProjectPath)
+            {
+                return Path.Combine(webProjectPath, "ClientApp", "types", scope.ApiInfo.Name, $"{methodDefinition.Name}.ts");
+            }
 
         }
     }
