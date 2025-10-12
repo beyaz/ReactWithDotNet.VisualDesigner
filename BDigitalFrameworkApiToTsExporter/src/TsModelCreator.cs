@@ -1,5 +1,4 @@
 ﻿using Mono.Cecil;
-using Newtonsoft.Json.Serialization;
 
 namespace BDigitalFrameworkApiToTsExporter;
 

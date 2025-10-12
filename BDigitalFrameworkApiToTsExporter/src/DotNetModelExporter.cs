@@ -318,26 +318,51 @@ static class DotNetModelExporter
         {
             return
                 from methodDefinition in getExportablePublicMethods(controllerTypeDefinition)
-                from files in getMethodRequestResponseTypesInFile(scope, methodDefinition)
-                from file in files
+                from file in getMethodRequestResponseTypesInFile(scope, methodDefinition)
                 select file;
         }
 
-        static Result<FileModel[]> getMethodRequestResponseTypesInFile(ApiScope scope, MethodDefinition methodDefinition)
+        static Result<FileModel> getMethodRequestResponseTypesInFile(ApiScope scope, MethodDefinition methodDefinition)
         {
             var returnTypeFile = getTypeFileRelatedMethod(scope, getReturnType(methodDefinition));
 
             if (methodDefinition.Parameters[0].ParameterType.Name != "BaseClientRequest")
             {
-                var inputResponse = getTypeFileRelatedMethod(scope, methodDefinition.Parameters[0].ParameterType);
-
-                return from input in inputResponse
-                       from output in returnTypeFile
-                       select new[] { input, output };
+                
+                return
+                    from webProjectPath in getWebProjectFolderPath(scope.config.ProjectDirectory)
+                    
+                    let outputFilePath =  Path.Combine(webProjectPath, "ClientApp", "types", scope.ApiInfo.Name, $"{methodDefinition.Name}.ts")
+                    
+                    let returnTypeDefinition =  getReturnType(methodDefinition).Resolve()
+                    
+                    let requestTypeDefinition = methodDefinition.Parameters[0].ParameterType.Resolve()
+                    
+                    let tsRequest = TsModelCreator.CreateFrom(scope.config.ExternalTypes, requestTypeDefinition)
+                    
+                    let tsResponse = TsModelCreator.CreateFrom(scope.config.ExternalTypes, returnTypeDefinition)
+                    
+                    select new FileModel
+                    {
+                        Path    = outputFilePath,
+                        Content = TsOutput.LinesToString(TsOutput.GetTsCode(tsRequest, tsResponse))
+                    };
             }
 
-            return from output in returnTypeFile
-                   select new[] { output };
+            return
+                from webProjectPath in getWebProjectFolderPath(scope.config.ProjectDirectory)
+                    
+                let outputFilePath =  Path.Combine(webProjectPath, "ClientApp", "types", scope.ApiInfo.Name, $"{methodDefinition.Name}.ts")
+                    
+                let returnTypeDefinition =  getReturnType(methodDefinition).Resolve()
+                    
+                let tsResponse = TsModelCreator.CreateFrom(scope.config.ExternalTypes, returnTypeDefinition)
+                    
+                select new FileModel
+                {
+                    Path    = outputFilePath,
+                    Content = TsOutput.LinesToString(TsOutput.GetTsCode(tsResponse))
+                };
 
             static Result<FileModel> getTypeFileRelatedMethod(ApiScope scope, TypeReference typeReference)
             {
