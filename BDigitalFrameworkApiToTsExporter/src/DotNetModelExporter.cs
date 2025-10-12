@@ -23,8 +23,8 @@ static class DotNetModelExporter
             from modelTypeDefinition in getModelTypeDefinition(scopeApi)
             from controllerTypeDefinition in getControllerTypeDefinition(scopeApi)
             from modelFile in getModelFile(scopeApi)
-            from serviceFile in getServiceFile(config, api, controllerTypeDefinition)
-            from serviceModelIntegrationFile in getServiceAndModelIntegrationFile(config, api, controllerTypeDefinition, modelTypeDefinition)
+            from serviceFile in getServiceFile(scopeApi,controllerTypeDefinition)
+            from serviceModelIntegrationFile in getServiceAndModelIntegrationFile(scopeApi, controllerTypeDefinition, modelTypeDefinition)
             from file in new[] { modelFile, serviceFile, serviceModelIntegrationFile }
             select file;
 
@@ -62,8 +62,11 @@ static class DotNetModelExporter
             return methodDefinition.ReturnType;
         }
 
-        static Result<FileModel> getServiceFile(Config config, ApiInfo apiInfo, TypeDefinition controllerTypeDefinition)
+        static Result<FileModel> getServiceFile(ScopeApi scope, TypeDefinition controllerTypeDefinition)
         {
+            var config = scope.config;
+            var apiInfo = scope.ApiInfo;
+            
             return
                 from filePath in getOutputTsFilePath(config, apiInfo)
                 select new FileModel
@@ -174,8 +177,11 @@ static class DotNetModelExporter
             return directory;
         }
 
-        static Result<FileModel> getServiceAndModelIntegrationFile(Config config, ApiInfo apiInfo, TypeDefinition controllerTypeDefinition, TypeDefinition modelTypeDefinition)
+        static Result<FileModel> getServiceAndModelIntegrationFile(ScopeApi scope, TypeDefinition controllerTypeDefinition, TypeDefinition modelTypeDefinition)
         {
+            Config config = scope.config;
+            ApiInfo apiInfo = scope.ApiInfo;
+            
             return
                 from filePath in getOutputTsFilePath(config, apiInfo)
                 select new FileModel
