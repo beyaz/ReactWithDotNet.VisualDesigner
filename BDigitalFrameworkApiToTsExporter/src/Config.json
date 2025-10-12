@@ -43,7 +43,7 @@
     },
     {
       "dotNetFullTypeName": "BOA.InternetBanking.Common.TextValue",
-      "localName": "TextValuePair",
+      "localName": "TextValuePair as TextValue",
       "source": "b-digital-internet-banking"
     }
   ]
