@@ -305,7 +305,7 @@ static class DotNetModelExporter
             
         }
         
-        static Result<IEnumerable<FileModel>> getTypeFiles(Config config, ApiInfo apiInfo, TypeDefinition controllerTypeDefinition)
+        static IEnumerable<Result<FileModel>> getTypeFiles(Config config, ApiInfo apiInfo, TypeDefinition controllerTypeDefinition)
         {
             return 
             from methodDefinition in getExportablePublicMethods(controllerTypeDefinition)

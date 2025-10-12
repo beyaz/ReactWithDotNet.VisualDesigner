@@ -734,4 +734,53 @@ public static class ResultExtensions
 
         return resultSelector(source.Value, middle.Value);
     }
+    
+    public static IEnumerable<Result<C>> SelectMany<A, B, C>
+    (
+        this IEnumerable<Result<A>> source,
+        Func<A, IEnumerable<B>> bind,
+        Func<A, B, C> resultSelector
+    )
+    {
+        if (source is null)
+        {
+            throw new ArgumentNullException(nameof(source));
+        }
+
+        if (bind == null)
+        {
+            throw new ArgumentNullException(nameof(bind));
+        }
+
+        if (resultSelector == null)
+        {
+            throw new ArgumentNullException(nameof(resultSelector));
+        }
+
+        List<Result<C>> returnItems = [];
+
+        foreach (var a in source)
+        {
+            if (a.HasError)
+            {
+                returnItems.Add(new()
+                {
+                    Error = a.Error
+                });
+
+                return returnItems;
+            }
+
+            foreach (var b in bind(a.Value))
+            {
+                var c = resultSelector(a.Value, b);
+
+                returnItems.Add(c);
+            }
+
+            
+        }
+
+        return returnItems;
+    }
 }
