@@ -21,7 +21,7 @@ static class DotNetModelExporter
             }
             from modelTypeDefinition in getModelTypeDefinition(scopeApi)
             from controllerTypeDefinition in getControllerTypeDefinition(scopeApi)
-            from modelFile in getModelFile(config, assemblyDefinition, api, controllerTypeDefinition)
+            from modelFile in getModelFile(scopeApi, config, assemblyDefinition, api, controllerTypeDefinition)
             from serviceFile in getServiceFile(config, api, controllerTypeDefinition)
             from serviceModelIntegrationFile in getServiceAndModelIntegrationFile(config, api, controllerTypeDefinition, modelTypeDefinition)
             from file in new[] { modelFile, serviceFile, serviceModelIntegrationFile }
@@ -29,10 +29,10 @@ static class DotNetModelExporter
 
         return from file in files select FileSystem.Save(file);
 
-        static Task<Result<FileModel>> getModelFile(Config config, AssemblyDefinition assemblyDefinition, ApiInfo apiInfo, TypeDefinition controllerTypeDefinition)
+        static Task<Result<FileModel>> getModelFile(ScopeApi scopeApi, Config config, AssemblyDefinition assemblyDefinition, ApiInfo apiInfo, TypeDefinition controllerTypeDefinition)
         {
             return
-                from modelTypeDefinition in getModelTypeDefinition(assemblyDefinition, apiInfo)
+                from modelTypeDefinition in getModelTypeDefinition(scopeApi)
                 from modelFilePath in getOutputTsFilePath(config, modelTypeDefinition)
                 let modelTsType = TsModelCreator.CreateFrom(config.ExternalTypes, modelTypeDefinition)
                 select new FileModel
