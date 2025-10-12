@@ -14,8 +14,13 @@ static class DotNetModelExporter
             from config in ConfigReader.ReadConfig()
             from assemblyDefinition in CecilHelper.ReadAssemblyDefinition(config.AssemblyFilePath)
             from api in config.ApiList
-            from modelTypeDefinition in getModelTypeDefinition(assemblyDefinition, api)
-            from controllerTypeDefinition in getControllerTypeDefinition(assemblyDefinition, api)
+            let scopeApi = new ScopeApi
+            {
+                AssemblyDefinition = assemblyDefinition, 
+                ApiInfo = api
+            }
+            from modelTypeDefinition in getModelTypeDefinition(scopeApi)
+            from controllerTypeDefinition in getControllerTypeDefinition(scopeApi)
             from modelFile in getModelFile(config, assemblyDefinition, api, controllerTypeDefinition)
             from serviceFile in getServiceFile(config, api, controllerTypeDefinition)
             from serviceModelIntegrationFile in getServiceAndModelIntegrationFile(config, api, controllerTypeDefinition, modelTypeDefinition)
@@ -130,22 +135,22 @@ static class DotNetModelExporter
             return from method in controllerTypeDefinition.Methods where method.IsPublic && method.Parameters.Count == 1 && method.ReturnType.Name != "Void" select method;
         }
 
-        static Result<TypeDefinition> getModelTypeDefinition(AssemblyDefinition assemblyDefinition, ApiInfo apiInfo)
+        static Result<TypeDefinition> getModelTypeDefinition(ScopeApi scope)
         {
             // sample: BOA.InternetBanking.Payments.API -> BOA.InternetBanking.Payments.API.Models.GsmPrePaidModel
 
-            var fullTypeName = $"{assemblyDefinition.Name.Name}.Models.{apiInfo.Name}Model";
+            var fullTypeName = $"{scope.AssemblyDefinition.Name.Name}.Models.{scope.ApiInfo.Name}Model";
 
-            return CecilHelper.GetType(assemblyDefinition, fullTypeName);
+            return CecilHelper.GetType(scope.AssemblyDefinition, fullTypeName);
         }
 
-        static Result<TypeDefinition> getControllerTypeDefinition(AssemblyDefinition assemblyDefinition, ApiInfo apiInfo)
+        static Result<TypeDefinition> getControllerTypeDefinition(ScopeApi scope)
         {
             // sample: BOA.InternetBanking.Payments.API -> BOA.InternetBanking.Payments.API.Controllers.GsmPrePaidController
 
-            var fullTypeName = $"{assemblyDefinition.Name.Name}.Controllers.{apiInfo.Name}Controller";
+            var fullTypeName = $"{scope.AssemblyDefinition.Name.Name}.Controllers.{scope.ApiInfo.Name}Controller";
 
-            return CecilHelper.GetType(assemblyDefinition, fullTypeName);
+            return CecilHelper.GetType(scope.AssemblyDefinition, fullTypeName);
         }
 
         static string getSolutionName(string projectDirectory)
