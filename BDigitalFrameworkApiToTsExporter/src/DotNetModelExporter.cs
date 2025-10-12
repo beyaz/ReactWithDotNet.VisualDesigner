@@ -1,5 +1,4 @@
 ﻿using Mono.Cecil;
-using System.Linq;
 using AssemblyDefinition = Mono.Cecil.AssemblyDefinition;
 
 namespace BDigitalFrameworkApiToTsExporter;
@@ -28,7 +27,7 @@ static class DotNetModelExporter
         {
             return
                 from modelTypeDefinition in getModelTypeDefinition(assemblyDefinition, apiInfo)
-                from modelFilePath in getModelOutputTsFilePath(config, modelTypeDefinition)
+                from modelFilePath in GetModelOutputTsFilePath(config, modelTypeDefinition)
                 let modelTsType = TsModelCreator.CreateFrom(config.ExternalTypes, modelTypeDefinition)
                 select new FileModel
                 {
@@ -160,12 +159,7 @@ static class DotNetModelExporter
             return directory;
         }
 
-        static Result<string> getModelOutputTsFilePath(Config config, TypeDefinition typeDefinition)
-        {
-            return
-                from webProjectPath in getWebProjectFolderPath(config.ProjectDirectory)
-                select Path.Combine(webProjectPath, "ClientApp", "models", $"{typeDefinition.Name}.ts");
-        }
+      
         
         
         
@@ -202,53 +196,60 @@ static class DotNetModelExporter
                 lines.Add("} from \"../types\";");
 
                 lines.Add(string.Empty);
-
+                lines.Add($"import {{ use{apiInfo.Name}Service }} from \"../services/use{apiInfo.Name}Service\"");
+                
+                lines.Add(string.Empty);
+                lines.Add($"import {{ {apiInfo.Name}Model }} from \"../models/{apiInfo.Name}Model\"");
+                
+                lines.Add(string.Empty);
                 var basePath = getSolutionName(config.ProjectDirectory).RemoveFromStart("BOA.InternetBanking.").ToLower();
 
-                lines.Add($"export const use{apiInfo.Name} = (): bool => {{");
+                lines.Add($"export const use{apiInfo.Name} = () => {{");
 
                 lines.Add(string.Empty);
-                lines.Add("const store = useStore();");
+                lines.Add(Tab + "const store = useStore();");
                 lines.Add(string.Empty);
-                lines.Add($"const service = use{apiInfo.Name}Service();");
+                lines.Add(Tab + $"const service = use{apiInfo.Name}Service();");
                 
                 foreach (var methodDefinition in getExportablePublicMethods(controllerTypeDefinition))
                 {
                     lines.Add(string.Empty);
-                    lines.Add("const abortController = new AbortController();");
-                    lines.Add(string.Empty);
                     
-                    lines.Add(Tab+$"const {GetTsVariableName(methodDefinition.Name)} = async (model: {modelTypeDefinition.Name}) => {{");
+                    lines.Add(Tab+$"const {GetTsVariableName(methodDefinition.Name)} = async (model: {modelTypeDefinition.Name}) : Promise<boolean> => {{");
+                    
                     lines.Add(string.Empty);
-                    lines.Add(Tab + $"let request: {methodDefinition.Parameters[0].ParameterType.Name} = {{");
+                    lines.Add(Tab + Tab + "const abortController = new AbortController();");
+                    
+                    lines.Add(string.Empty);
+                    lines.Add(Tab + Tab + $"let request: {methodDefinition.Parameters[0].ParameterType.Name} = {{");
 
                     var mappingLines = from property in getMappingPropertyList(modelTypeDefinition, methodDefinition.Parameters[0].ParameterType.Resolve())
                                        let name = GetTsVariableName(property.Name)
-                                       select Tab + $"request.{name} = model.{name}";
+                                       select Tab + Tab +Tab + $"{name}: model.{name}";
                     
                     lines.AddRange(mappingLines.AppendBetween(","+Environment.NewLine));
                     
-                    lines.Add(Tab + "};");
+                    lines.Add(Tab + Tab +"};");
                     lines.Add(string.Empty);
                     
-                    lines.Add($"const response = await service.{GetTsVariableName(methodDefinition.Name)}.send(request, abortController.signal);");
-                    lines.Add("if(!response.success) {");
-                    lines.Add(Tab+"store.setMessage({ content: response.result.errorMessage });");
-                    lines.Add(Tab+"return false;");
-                    lines.Add("}");
+                    lines.Add(Tab +Tab + $"const response = await service.{GetTsVariableName(methodDefinition.Name)}.send(request, abortController.signal);");
+                    lines.Add(Tab +Tab +"if(!response.success) {");
+                    lines.Add(Tab+Tab +Tab +"store.setMessage({ content: response.result.errorMessage });");
+                    lines.Add(Tab+Tab +Tab +"return false;");
+                    lines.Add(Tab +Tab +"}");
                     
                     lines.Add(string.Empty);
                     
                     var responseMapping = from property in getMappingPropertyList(modelTypeDefinition, methodDefinition.ReturnType.Resolve())
                                        let name = GetTsVariableName(property.Name)
-                                       select Tab + $"model.{name} = response.{name}";
+                                       select Tab + Tab + $"model.{name}: response.{name}";
                     
                     
                     lines.AddRange(responseMapping.AppendBetween(","+Environment.NewLine));
                     
                     lines.Add(string.Empty);
                     
-                    lines.Add("return true");
+                    lines.Add(Tab +Tab +"return true");
                     
                     lines.Add(Tab + "};");
                     
@@ -301,6 +302,12 @@ static class DotNetModelExporter
         }
 
 
+        static Result<string> GetModelOutputTsFilePath(Config config, TypeDefinition modelTypeDefinition)
+        {
+            return
+                from webProjectPath in getWebProjectFolderPath(config.ProjectDirectory)
+                select Path.Combine(webProjectPath, "ClientApp", "models", $"{modelTypeDefinition.Name}.ts");
+        }
         
     }
 
