@@ -16,6 +16,7 @@ static class DotNetModelExporter
             from api in config.ApiList
             let scopeApi = new ScopeApi
             {
+                config = config,
                 AssemblyDefinition = assemblyDefinition, 
                 ApiInfo = api
             }
