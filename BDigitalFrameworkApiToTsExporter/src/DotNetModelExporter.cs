@@ -1,5 +1,4 @@
 ﻿using Mono.Cecil;
-using System.Linq;
 using AssemblyDefinition = Mono.Cecil.AssemblyDefinition;
 
 namespace BDigitalFrameworkApiToTsExporter;
@@ -328,25 +327,25 @@ static class DotNetModelExporter
             
         }
         
-        static IEnumerable<Result<FileModel>> getTypeFiles(Config config, ApiInfo apiInfo, TypeDefinition controllerTypeDefinition)
+        static IEnumerable<Result<FileModel>> getTypeFiles(ApiScope scope, TypeDefinition controllerTypeDefinition)
         {
             return 
             from methodDefinition in getExportablePublicMethods(controllerTypeDefinition)
-                from files in getTypeFilesRelatedMethod(config, apiInfo, methodDefinition)
+                from files in getTypeFilesRelatedMethod(scope, methodDefinition)
                 from file in files
                 select file;
         }
 
         
-        static Result<FileModel[]> getTypeFilesRelatedMethod(Config config, ApiInfo apiInfo, MethodDefinition methodDefinition)
+        static Result<FileModel[]> getTypeFilesRelatedMethod(ApiScope scope, MethodDefinition methodDefinition)
             {
                 
-                var returnTypeFile = getTypeFileRelatedMethod(config,apiInfo , getReturnType(methodDefinition));
+                var returnTypeFile = getTypeFileRelatedMethod(scope, getReturnType(methodDefinition));
                 
                 
                 if (methodDefinition.Parameters[0].ParameterType.Name !="BaseClientRequest")
                 {
-                    var inputResponse = getTypeFileRelatedMethod(config,apiInfo , methodDefinition.Parameters[0].ParameterType);
+                    var inputResponse = getTypeFileRelatedMethod(scope, methodDefinition.Parameters[0].ParameterType);
 
                     return from input in inputResponse
                                              from output in returnTypeFile
@@ -356,12 +355,12 @@ static class DotNetModelExporter
                 return from output in returnTypeFile
                        select new[] {  output };
                 
-                static Result<FileModel> getTypeFileRelatedMethod(Config config, ApiInfo apiInfo, TypeReference typeReference)
+                static Result<FileModel> getTypeFileRelatedMethod(ApiScope scope, TypeReference typeReference)
                 {
                     return
-                        from filePath in getOutputTsFilePath(config, apiInfo,typeReference)
+                        from filePath in getOutputTsFilePath(scope,typeReference)
                     
-                        let tsType = TsModelCreator.CreateFrom(config.ExternalTypes, typeReference.Resolve())
+                        let tsType = TsModelCreator.CreateFrom(scope.config.ExternalTypes, typeReference.Resolve())
                         select new FileModel
                         {
                             Path    = filePath,
@@ -369,11 +368,11 @@ static class DotNetModelExporter
                         };
 
 
-                    static Result<string> getOutputTsFilePath(Config config, ApiInfo apiInfo, TypeReference typeReference)
+                    static Result<string> getOutputTsFilePath(ApiScope scope, TypeReference typeReference)
                     {
                         return
-                            from webProjectPath in getWebProjectFolderPath(config.ProjectDirectory)
-                            select Path.Combine(webProjectPath, "ClientApp", "types", apiInfo.Name, $"{typeReference.Name}.ts");
+                            from webProjectPath in getWebProjectFolderPath(scope.config.ProjectDirectory)
+                            select Path.Combine(webProjectPath, "ClientApp", "types", scope.ApiInfo.Name, $"{typeReference.Name}.ts");
                     }
                 }
             }
