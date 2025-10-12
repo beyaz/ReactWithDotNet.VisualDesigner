@@ -342,20 +342,16 @@ static class DotNetModelExporter
             static Result<FileModel> getTypeFileRelatedMethod(ApiScope scope, TypeReference typeReference)
             {
                 return
-                    from filePath in getOutputTsFilePath(scope, typeReference)
+                    from webProjectPath in getWebProjectFolderPath(scope.config.ProjectDirectory)
+                    let outputFilePath =  Path.Combine(webProjectPath, "ClientApp", "types", scope.ApiInfo.Name, $"{typeReference.Name}.ts")
                     let tsType = TsModelCreator.CreateFrom(scope.config.ExternalTypes, typeReference.Resolve())
                     select new FileModel
                     {
-                        Path    = filePath,
+                        Path    = outputFilePath,
                         Content = TsOutput.LinesToString(TsOutput.GetTsCode(tsType))
                     };
 
-                static Result<string> getOutputTsFilePath(ApiScope scope, TypeReference typeReference)
-                {
-                    return
-                        from webProjectPath in getWebProjectFolderPath(scope.config.ProjectDirectory)
-                        select Path.Combine(webProjectPath, "ClientApp", "types", scope.ApiInfo.Name, $"{typeReference.Name}.ts");
-                }
+                
             }
         }
     }
