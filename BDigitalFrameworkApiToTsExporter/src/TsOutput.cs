@@ -9,69 +9,77 @@ static class TsOutput
         return $"{field.Name}{(field.IsNullable ? '?' : string.Empty)} : {field.Type.Name};";
     }
 
-    public static IReadOnlyList<string> GetTsCode(TsTypeDefinition tsTypeDefinition)
+    public static IReadOnlyList<string> GetTsCode(params TsTypeDefinition[] tsTypeDefinitions)
     {
         List<string> lines = [];
 
-        var allImports = from importInfo in tsTypeDefinition.BaseType.Imports.Concat
-                             (
-                              from tsFieldDefinition in tsTypeDefinition.Fields
-                              from importForField in tsFieldDefinition.Type.Imports
-                              select importForField
-                             )
-                         select importInfo;
+        List<TsImportInfo> imports = [];
 
-        foreach (IGrouping<string, TsImportInfo> group in allImports.DistinctBy(x => x.LocalName).GroupBy(x=>x.Source))
+        foreach (var tsTypeDefinition in tsTypeDefinitions)
+        {
+            imports.AddRange(tsTypeDefinition.BaseType.Imports);
+
+            imports.AddRange(from tsFieldDefinition in tsTypeDefinition.Fields
+                             from importForField in tsFieldDefinition.Type.Imports
+                             select importForField);
+        }
+
+        foreach (var group in imports.DistinctBy(x => x.LocalName).GroupBy(x => x.Source))
         {
             IEnumerable<TsImportInfo> groupedImports = group;
-            
-            lines.Add($"import {{ {string.Join(", ", from x in groupedImports select x.LocalName )} }} from \"{group.Key}\";");
+
+            lines.Add($"import {{ {string.Join(", ", from x in groupedImports select x.LocalName)} }} from \"{group.Key}\";");
         }
 
-        if (tsTypeDefinition.IsEnum)
+        foreach (var tsTypeDefinition in tsTypeDefinitions)
         {
-            lines.Add($"export enum {tsTypeDefinition.Name}");
-        }
-        else
-        {
-            var extends = " extends ";
-            if (string.IsNullOrWhiteSpace(tsTypeDefinition.BaseType.Name))
+            lines.Add(string.Empty);
+
+            if (tsTypeDefinition.IsEnum)
             {
-                extends = "";
+                lines.Add($"export enum {tsTypeDefinition.Name}");
             }
             else
             {
-                extends += tsTypeDefinition.BaseType.Name;
-            }
-
-            lines.Add($"export interface {tsTypeDefinition.Name}" + extends);
-        }
-
-        lines.Add("{");
-
-        if (tsTypeDefinition.IsEnum)
-        {
-            var definitionLines =
-                from field in tsTypeDefinition.Fields
-                let line = $"{field.Name} = {field.ConstantValue}"
-                let isLast = field == tsTypeDefinition.Fields[^1]
-                select isLast switch
+                var extends = " extends ";
+                if (string.IsNullOrWhiteSpace(tsTypeDefinition.BaseType.Name))
                 {
-                    true  => line,
-                    false => line + ","
-                };
+                    extends = "";
+                }
+                else
+                {
+                    extends += tsTypeDefinition.BaseType.Name;
+                }
 
-            lines.AddRange(definitionLines);
-        }
-        else
-        {
-            foreach (var field in tsTypeDefinition.Fields)
-            {
-                lines.Add(GetTsCode(field));
+                lines.Add($"export interface {tsTypeDefinition.Name}" + extends);
             }
-        }
 
-        lines.Add("}");
+            lines.Add("{");
+
+            if (tsTypeDefinition.IsEnum)
+            {
+                var definitionLines =
+                    from field in tsTypeDefinition.Fields
+                    let line = $"{field.Name} = {field.ConstantValue}"
+                    let isLast = field == tsTypeDefinition.Fields[^1]
+                    select isLast switch
+                    {
+                        true  => line,
+                        false => line + ","
+                    };
+
+                lines.AddRange(definitionLines);
+            }
+            else
+            {
+                foreach (var field in tsTypeDefinition.Fields)
+                {
+                    lines.Add(GetTsCode(field));
+                }
+            }
+
+            lines.Add("}");
+        }
 
         return lines;
     }
