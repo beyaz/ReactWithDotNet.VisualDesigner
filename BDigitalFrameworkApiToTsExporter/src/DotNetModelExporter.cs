@@ -14,7 +14,7 @@ static class DotNetModelExporter
             from config in ConfigReader.ReadConfig()
             from assemblyDefinition in CecilHelper.ReadAssemblyDefinition(config.AssemblyFilePath)
             from api in config.ApiList
-            let scopeApi = new ScopeApi
+            let scopeApi = new ApiScope
             {
                 config = config,
                 AssemblyDefinition = assemblyDefinition, 
@@ -30,7 +30,7 @@ static class DotNetModelExporter
 
         return from file in files select FileSystem.Save(file);
 
-        static Task<Result<FileModel>> getModelFile(ScopeApi scope)
+        static Task<Result<FileModel>> getModelFile(ApiScope scope)
         {
             var config = scope.config;
             
@@ -62,7 +62,7 @@ static class DotNetModelExporter
             return methodDefinition.ReturnType;
         }
 
-        static Result<FileModel> getServiceFile(ScopeApi scope, TypeDefinition controllerTypeDefinition)
+        static Result<FileModel> getServiceFile(ApiScope scope, TypeDefinition controllerTypeDefinition)
         {
             var config = scope.config;
             var apiInfo = scope.ApiInfo;
@@ -141,7 +141,7 @@ static class DotNetModelExporter
             return from method in controllerTypeDefinition.Methods where method.IsPublic && method.Parameters.Count == 1 && method.ReturnType.Name != "Void" select method;
         }
 
-        static Result<TypeDefinition> getModelTypeDefinition(ScopeApi scope)
+        static Result<TypeDefinition> getModelTypeDefinition(ApiScope scope)
         {
             // sample: BOA.InternetBanking.Payments.API -> BOA.InternetBanking.Payments.API.Models.GsmPrePaidModel
 
@@ -150,7 +150,7 @@ static class DotNetModelExporter
             return CecilHelper.GetType(scope.AssemblyDefinition, fullTypeName);
         }
 
-        static Result<TypeDefinition> getControllerTypeDefinition(ScopeApi scope)
+        static Result<TypeDefinition> getControllerTypeDefinition(ApiScope scope)
         {
             // sample: BOA.InternetBanking.Payments.API -> BOA.InternetBanking.Payments.API.Controllers.GsmPrePaidController
 
@@ -177,7 +177,7 @@ static class DotNetModelExporter
             return directory;
         }
 
-        static Result<FileModel> getServiceAndModelIntegrationFile(ScopeApi scope, TypeDefinition controllerTypeDefinition, TypeDefinition modelTypeDefinition)
+        static Result<FileModel> getServiceAndModelIntegrationFile(ApiScope scope, TypeDefinition controllerTypeDefinition, TypeDefinition modelTypeDefinition)
         {
             Config config = scope.config;
             ApiInfo apiInfo = scope.ApiInfo;
