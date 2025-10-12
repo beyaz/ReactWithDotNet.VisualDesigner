@@ -383,6 +383,7 @@ public static class ResultExtensions
         if (source.HasError)
         {
             yield return source.Error;
+            yield break;
         }
 
         foreach (var a in source.Value)
@@ -391,12 +392,14 @@ public static class ResultExtensions
             if (b.HasError)
             {
                 yield return b.Error;
+                yield break;
             }
 
             var c = selector(a, b.Value);
             if (c.HasError)
             {
                 yield return c.Error;
+                yield break;
             }
 
             yield return c.Value;
@@ -413,6 +416,7 @@ public static class ResultExtensions
         if (source.HasError)
         {
             yield return source.Error;
+            yield break;
         }
 
         foreach (var a in source.Value)
@@ -421,6 +425,7 @@ public static class ResultExtensions
             if (b.HasError)
             {
                 yield return b.Error;
+                yield break;
             }
 
             yield return selector(a, b.Value);
@@ -462,6 +467,7 @@ public static class ResultExtensions
         if (a.HasError)
         {
             yield return a.Error;
+            yield break;
         }
 
         var enumerable = bind(a.Value);
@@ -483,12 +489,14 @@ public static class ResultExtensions
             if (a.HasError)
             {
                 yield return a.Error;
+                yield break;
             }
 
             var b = await bind(a.Value);
             if (b.HasError)
             {
                 yield return b.Error;
+                yield break;
             }
 
             yield return resultSelector(a.Value, b.Value);
@@ -507,12 +515,14 @@ public static class ResultExtensions
             if (a.HasError)
             {
                 yield return a.Error;
+                yield break;
             }
 
             var b = bind(a.Value);
             if (b.HasError)
             {
                 yield return b.Error;
+                yield break;
             }
 
             yield return resultSelector(a.Value, b.Value);
@@ -531,12 +541,14 @@ public static class ResultExtensions
             if (a.HasError)
             {
                 yield return a.Error;
+                yield break;
             }
 
             var b = await bind(a.Value);
             if (b.HasError)
             {
                 yield return b.Error;
+                yield break;
             }
 
             yield return await resultSelector(a.Value, b.Value);
@@ -571,6 +583,7 @@ public static class ResultExtensions
             if (b.HasError)
             {
                 yield return b.Error;
+                yield break;
             }
 
             yield return resultSelector(a, b.Value);
@@ -657,6 +670,7 @@ public static class ResultExtensions
             if (a.HasError)
             {
                 yield return a.Error;
+                yield break;
             }
 
             var enumerableB = bind(a.Value);
@@ -680,6 +694,7 @@ public static class ResultExtensions
             if (a.HasError)
             {
                 yield return a.Error;
+                yield break;
             }
 
             var enumerableB = bind(a.Value);
@@ -702,12 +717,14 @@ public static class ResultExtensions
             if (a.HasError)
             {
                 yield return a.Error;
+                yield break;
             }
 
             var resultB = await bind(a.Value);
             if (resultB.HasError)
             {
                 yield return resultB.Error;
+                yield break;
             }
             
             yield return resultSelector(a.Value, resultB.Value);
