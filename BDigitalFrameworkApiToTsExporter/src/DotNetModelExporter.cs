@@ -5,16 +5,6 @@ namespace BDigitalFrameworkApiToTsExporter;
 
 static class DotNetModelExporter
 {
-    sealed record ApiScope
-    {
-        public  required Config config { get; init; }
-    
-        public required AssemblyDefinition AssemblyDefinition { get; init; }
-    
-        public required ApiInfo ApiInfo { get; init; }
-    }
-    
-    
     const string Tab = "    ";
 
     public static IAsyncEnumerable<Result<Unit>> TryExport()
@@ -25,16 +15,16 @@ static class DotNetModelExporter
             from api in config.ApiList
             let scope = new ApiScope
             {
-                config = config,
-                AssemblyDefinition = assemblyDefinition, 
-                ApiInfo = api
+                config             = config,
+                AssemblyDefinition = assemblyDefinition,
+                ApiInfo            = api
             }
             from modelTypeDefinition in getModelTypeDefinition(scope)
             from controllerTypeDefinition in getControllerTypeDefinition(scope)
             from modelFile in getModelFile(scope)
-            from serviceFile in getServiceFile(scope,controllerTypeDefinition)
+            from serviceFile in getServiceFile(scope, controllerTypeDefinition)
             from serviceModelIntegrationFile in getServiceAndModelIntegrationFile(scope, controllerTypeDefinition, modelTypeDefinition)
-            from typeFiles in  getTypeFiles(scope, controllerTypeDefinition).AsResult()
+            from typeFiles in getTypeFiles(scope, controllerTypeDefinition).AsResult()
             from file in new[] { modelFile, serviceFile, serviceModelIntegrationFile }.Concat(typeFiles)
             select file;
 
@@ -43,7 +33,7 @@ static class DotNetModelExporter
         static Task<Result<FileModel>> getModelFile(ApiScope scope)
         {
             var config = scope.config;
-            
+
             return
                 from modelTypeDefinition in getModelTypeDefinition(scope)
                 from modelFilePath in getOutputTsFilePath(config, modelTypeDefinition)
@@ -76,7 +66,7 @@ static class DotNetModelExporter
         {
             var config = scope.config;
             var apiInfo = scope.ApiInfo;
-            
+
             return
                 from filePath in getOutputTsFilePath(config, apiInfo)
                 select new FileModel
@@ -189,9 +179,9 @@ static class DotNetModelExporter
 
         static Result<FileModel> getServiceAndModelIntegrationFile(ApiScope scope, TypeDefinition controllerTypeDefinition, TypeDefinition modelTypeDefinition)
         {
-            Config config = scope.config;
-            ApiInfo apiInfo = scope.ApiInfo;
-            
+            var config = scope.config;
+            var apiInfo = scope.ApiInfo;
+
             return
                 from filePath in getOutputTsFilePath(config, apiInfo)
                 select new FileModel
@@ -322,64 +312,60 @@ static class DotNetModelExporter
                     return false;
                 }
             }
-
-
-
-            
         }
-        
+
         static IEnumerable<Result<FileModel>> getTypeFiles(ApiScope scope, TypeDefinition controllerTypeDefinition)
         {
-            return 
-            from methodDefinition in getExportablePublicMethods(controllerTypeDefinition)
-                from files in getTypeFilesRelatedMethod(scope, methodDefinition)
+            return
+                from methodDefinition in getExportablePublicMethods(controllerTypeDefinition)
+                from files in getMethodRequestResponseTypesInFile(scope, methodDefinition)
                 from file in files
                 select file;
         }
 
-        
-        static Result<FileModel[]> getTypeFilesRelatedMethod(ApiScope scope, MethodDefinition methodDefinition)
-            {
-                
-                var returnTypeFile = getTypeFileRelatedMethod(scope, getReturnType(methodDefinition));
-                
-                
-                if (methodDefinition.Parameters[0].ParameterType.Name !="BaseClientRequest")
-                {
-                    var inputResponse = getTypeFileRelatedMethod(scope, methodDefinition.Parameters[0].ParameterType);
+        static Result<FileModel[]> getMethodRequestResponseTypesInFile(ApiScope scope, MethodDefinition methodDefinition)
+        {
+            var returnTypeFile = getTypeFileRelatedMethod(scope, getReturnType(methodDefinition));
 
-                    return from input in inputResponse
-                                             from output in returnTypeFile
-                                             select new[] { input, output };
-                }
-                
-                return from output in returnTypeFile
-                       select new[] {  output };
-                
-                static Result<FileModel> getTypeFileRelatedMethod(ApiScope scope, TypeReference typeReference)
+            if (methodDefinition.Parameters[0].ParameterType.Name != "BaseClientRequest")
+            {
+                var inputResponse = getTypeFileRelatedMethod(scope, methodDefinition.Parameters[0].ParameterType);
+
+                return from input in inputResponse
+                       from output in returnTypeFile
+                       select new[] { input, output };
+            }
+
+            return from output in returnTypeFile
+                   select new[] { output };
+
+            static Result<FileModel> getTypeFileRelatedMethod(ApiScope scope, TypeReference typeReference)
+            {
+                return
+                    from filePath in getOutputTsFilePath(scope, typeReference)
+                    let tsType = TsModelCreator.CreateFrom(scope.config.ExternalTypes, typeReference.Resolve())
+                    select new FileModel
+                    {
+                        Path    = filePath,
+                        Content = TsOutput.LinesToString(TsOutput.GetTsCode(tsType))
+                    };
+
+                static Result<string> getOutputTsFilePath(ApiScope scope, TypeReference typeReference)
                 {
                     return
-                        from filePath in getOutputTsFilePath(scope,typeReference)
-                    
-                        let tsType = TsModelCreator.CreateFrom(scope.config.ExternalTypes, typeReference.Resolve())
-                        select new FileModel
-                        {
-                            Path    = filePath,
-                            Content = TsOutput.LinesToString(TsOutput.GetTsCode(tsType))
-                        };
-
-
-                    static Result<string> getOutputTsFilePath(ApiScope scope, TypeReference typeReference)
-                    {
-                        return
-                            from webProjectPath in getWebProjectFolderPath(scope.config.ProjectDirectory)
-                            select Path.Combine(webProjectPath, "ClientApp", "types", scope.ApiInfo.Name, $"{typeReference.Name}.ts");
-                    }
+                        from webProjectPath in getWebProjectFolderPath(scope.config.ProjectDirectory)
+                        select Path.Combine(webProjectPath, "ClientApp", "types", scope.ApiInfo.Name, $"{typeReference.Name}.ts");
                 }
             }
-        
-       
+        }
     }
 
+    sealed record ApiScope
+    {
+        public required Config config { get; init; }
 
+        public required AssemblyDefinition AssemblyDefinition { get; init; }
+
+        public required ApiInfo ApiInfo { get; init; }
+    }
 }
