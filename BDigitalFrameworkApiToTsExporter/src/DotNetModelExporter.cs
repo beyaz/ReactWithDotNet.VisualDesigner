@@ -14,17 +14,17 @@ static class DotNetModelExporter
             from config in ConfigReader.ReadConfig()
             from assemblyDefinition in CecilHelper.ReadAssemblyDefinition(config.AssemblyFilePath)
             from api in config.ApiList
-            let scopeApi = new ApiScope
+            let scope = new ApiScope
             {
                 config = config,
                 AssemblyDefinition = assemblyDefinition, 
                 ApiInfo = api
             }
-            from modelTypeDefinition in getModelTypeDefinition(scopeApi)
-            from controllerTypeDefinition in getControllerTypeDefinition(scopeApi)
-            from modelFile in getModelFile(scopeApi)
-            from serviceFile in getServiceFile(scopeApi,controllerTypeDefinition)
-            from serviceModelIntegrationFile in getServiceAndModelIntegrationFile(scopeApi, controllerTypeDefinition, modelTypeDefinition)
+            from modelTypeDefinition in getModelTypeDefinition(scope)
+            from controllerTypeDefinition in getControllerTypeDefinition(scope)
+            from modelFile in getModelFile(scope)
+            from serviceFile in getServiceFile(scope,controllerTypeDefinition)
+            from serviceModelIntegrationFile in getServiceAndModelIntegrationFile(scope, controllerTypeDefinition, modelTypeDefinition)
             from file in new[] { modelFile, serviceFile, serviceModelIntegrationFile }
             select file;
 

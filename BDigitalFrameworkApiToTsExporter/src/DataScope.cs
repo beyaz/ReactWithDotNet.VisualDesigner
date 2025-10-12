@@ -2,7 +2,7 @@
 
 namespace BDigitalFrameworkApiToTsExporter;
 
-sealed record ScopeApi
+sealed record ApiScope
 {
     public  required Config config { get; init; }
     
