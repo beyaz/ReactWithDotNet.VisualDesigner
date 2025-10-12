@@ -219,7 +219,6 @@ static class DotNetModelExporter
                 lines.Add($"import {{ {apiInfo.Name}Model }} from \"../models/{apiInfo.Name}Model\"");
 
                 lines.Add(string.Empty);
-                var basePath = getSolutionName(config.ProjectDirectory).RemoveFromStart("BOA.InternetBanking.").ToLower();
 
                 lines.Add($"export const use{apiInfo.Name} = () => {{");
 
