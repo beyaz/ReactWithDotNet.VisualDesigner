@@ -1,4 +1,5 @@
 ﻿using Mono.Cecil;
+using System.Linq;
 using AssemblyDefinition = Mono.Cecil.AssemblyDefinition;
 
 namespace BDigitalFrameworkApiToTsExporter;
@@ -19,7 +20,7 @@ static class DotNetModelExporter
             from serviceFile in getServiceFile(config, api, controllerTypeDefinition)
             from serviceModelIntegrationFile in getServiceAndModelIntegrationFile(config, api, controllerTypeDefinition, modelTypeDefinition)
             from inputOutputFiles in getTypeFiles(config,api,controllerTypeDefinition)
-            from file in new[] { modelFile, serviceFile, serviceModelIntegrationFile }
+            from file in new[] { modelFile, serviceFile, serviceModelIntegrationFile }.Concat(inputOutputFiles)
             select file;
 
         return from file in files select FileSystem.Save(file);
