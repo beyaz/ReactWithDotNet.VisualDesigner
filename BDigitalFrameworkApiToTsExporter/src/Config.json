@@ -30,6 +30,16 @@
       "dotNetFullTypeName": "BOA.InternetBanking.Common.Card",
       "localName": "Card",
       "source": "b-digital-internet-banking"
-    }
+    },
+    {
+      "dotNetFullTypeName": "BOA.InternetBanking.Common.BaseClientRequest",
+      "localName": "BaseClientRequest",
+      "source": "b-digital-framework"
+    },
+    {
+      "dotNetFullTypeName": "BOA.InternetBanking.Common.BaseClientResponse",
+      "localName": "BaseClientResponse",
+      "source": "b-digital-framework"
+    }    
   ]
 }
