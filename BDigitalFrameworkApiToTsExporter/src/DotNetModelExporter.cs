@@ -306,26 +306,47 @@ static class DotNetModelExporter
         
         
         
-        static Result<FileModel> GetApiInputOutputFilesOfMethod(Config config, ApiInfo apiInfo, TypeReference typeReference)
+        static Result<FileModel[]> getTypeFilesRelatedMethod(Config config, ApiInfo apiInfo, MethodDefinition methodDefinition)
             {
-                return
-                    from filePath in getOutputTsFilePath(config, apiInfo,typeReference)
-                    
-                    let tsType = TsModelCreator.CreateFrom(config.ExternalTypes, typeReference.Resolve())
-                    select new FileModel
-                    {
-                        Path    = filePath,
-                        Content = TsOutput.LinesToString(TsOutput.GetTsCode(tsType))
-                    };
+                
+                var returnTypeFile = getTypeFileRelatedMethod(config,apiInfo , getReturnType(methodDefinition));
+                
+                
+                if (methodDefinition.Parameters[0].ParameterType.Name !="BaseClientRequest")
+                {
+                    var inputResponse = getTypeFileRelatedMethod(config,apiInfo , methodDefinition.Parameters[0].ParameterType);
 
-
-                static Result<string> getOutputTsFilePath(Config config, ApiInfo apiInfo, TypeReference typeReference)
+                    return from input in inputResponse
+                                             from output in returnTypeFile
+                                             select new[] { input, output };
+                }
+                
+                return from output in returnTypeFile
+                       select new[] {  output };
+                
+                static Result<FileModel> getTypeFileRelatedMethod(Config config, ApiInfo apiInfo, TypeReference typeReference)
                 {
                     return
-                        from webProjectPath in getWebProjectFolderPath(config.ProjectDirectory)
-                        select Path.Combine(webProjectPath, "ClientApp", "types", apiInfo.Name, $"{typeReference.Name}.ts");
+                        from filePath in getOutputTsFilePath(config, apiInfo,typeReference)
+                    
+                        let tsType = TsModelCreator.CreateFrom(config.ExternalTypes, typeReference.Resolve())
+                        select new FileModel
+                        {
+                            Path    = filePath,
+                            Content = TsOutput.LinesToString(TsOutput.GetTsCode(tsType))
+                        };
+
+
+                    static Result<string> getOutputTsFilePath(Config config, ApiInfo apiInfo, TypeReference typeReference)
+                    {
+                        return
+                            from webProjectPath in getWebProjectFolderPath(config.ProjectDirectory)
+                            select Path.Combine(webProjectPath, "ClientApp", "types", apiInfo.Name, $"{typeReference.Name}.ts");
+                    }
                 }
             }
+        
+       
     }
 
 
