@@ -9,10 +9,7 @@
   "projectDirectory": "D:\\work\\BOA.BusinessModules\\Dev\\BOA.InternetBanking.Payments",
   "apiList": [
     {
-      "name": "GsmPrePaid"
-    },
-    {
-      "name": "Osym"
+      "name": "Religious"
     }
   ],
   "externalTypes": [
