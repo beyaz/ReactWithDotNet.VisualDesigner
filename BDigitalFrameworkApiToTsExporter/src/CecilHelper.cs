@@ -135,6 +135,11 @@ static class CecilHelper
 
     public static Result<AssemblyDefinition> ReadAssemblyDefinition(string? assemblyFilePath)
     {
+        if (!File.Exists(assemblyFilePath))
+        {
+            return new FileNotFoundException(assemblyFilePath);
+        }
+
         var primarySearchDirectoryPath = Path.GetDirectoryName(assemblyFilePath) ?? Directory.GetCurrentDirectory();
 
         const string secondarySearchDirectoryPath = @"d:\boa\server\bin";
