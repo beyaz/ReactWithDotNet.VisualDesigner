@@ -21,9 +21,7 @@ public sealed record ConfigModel
 {
     public string? AssemblyFilePath { get; init; }
     
-    public string? OutputDirectoryPath { get; init; }
     
-    public string[]? ListOfTypes { get; init; }
 
     public required IReadOnlyList<ApiInfo> ApiList { get; init; }
 
