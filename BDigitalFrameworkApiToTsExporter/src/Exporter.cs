@@ -13,18 +13,18 @@ static class Exporter
             from config in ConfigReader.ReadConfig()
             from assemblyDefinition in CecilHelper.ReadAssemblyDefinition(config.AssemblyFilePath)
             from api in config.ApiList
-            let scope = new ApiScope
+            let scope_old = new ApiScope
             {
                 Config             = config,
                 AssemblyDefinition = assemblyDefinition,
                 ApiInfo            = api
             }
-            from modelTypeDefinition in getModelTypeDefinition(scope)
-            from controllerTypeDefinition in getControllerTypeDefinition(scope)
-            from modelFile in getModelFile(scope)
-            from serviceFile in getServiceFile(scope, controllerTypeDefinition)
-            from serviceModelIntegrationFile in getServiceAndModelIntegrationFile(scope, controllerTypeDefinition, modelTypeDefinition)
-            from typeFiles in getTypeFiles(scope, controllerTypeDefinition).AsResult()
+            from modelTypeDefinition in getModelTypeDefinition(scope_old)
+            from controllerTypeDefinition in getControllerTypeDefinition(scope_old)
+            from modelFile in getModelFile(scope_old)
+            from serviceFile in getServiceFile(scope_old, controllerTypeDefinition)
+            from serviceModelIntegrationFile in getServiceAndModelIntegrationFile(scope_old, controllerTypeDefinition, modelTypeDefinition)
+            from typeFiles in getTypeFiles(scope_old, controllerTypeDefinition).AsResult()
             from file in new[] { modelFile, serviceFile, serviceModelIntegrationFile }.Concat(typeFiles)
             select file;
 
