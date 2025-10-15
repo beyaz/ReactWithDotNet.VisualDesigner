@@ -6,11 +6,21 @@ static class Exporter
 {
     const string Tab = "    ";
 
+
+    static Result<AssemblyDefinition> ReadAPIAssembly(string projectDirectory)
+    {
+        var solutionName = getSolutionName(projectDirectory);
+
+        var filePath = Path.Combine(projectDirectory, "API", $"{solutionName}.API", "bin", "debug", "net8.0", $"{solutionName}.API.dll");
+
+        return CecilHelper.ReadAssemblyDefinition(filePath);
+    }
+
     public static IAsyncEnumerable<Result<Unit>> TryExport()
     {
         var files =
             from config in ConfigReader.ReadConfig()
-            from assemblyDefinition in CecilHelper.ReadAssemblyDefinition(config.AssemblyFilePath)
+            from assemblyDefinition in ReadAPIAssembly(config.ProjectDirectory)
             from api in config.ApiList
             let scope = Scope.Create(new()
             {
