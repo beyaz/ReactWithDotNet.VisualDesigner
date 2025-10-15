@@ -71,10 +71,10 @@ static class Exporter
         static Result<FileModel> getServiceFile(ApiScope scope, TypeDefinition controllerTypeDefinition)
         {
             var config = scope.Config;
-            var apiInfo = scope.ApiInfo;
+            var api = scope.ApiInfo;
 
             return
-                from filePath in getOutputTsFilePath(config, apiInfo)
+                from filePath in getOutputTsFilePath(config, api)
                 select new FileModel
                 {
                     Path    = filePath,
@@ -107,10 +107,10 @@ static class Exporter
 
                 var basePath = getSolutionName(config.ProjectDirectory).RemoveFromStart("BOA.InternetBanking.").ToLower();
 
-                lines.Add($"export const use{apiInfo.Name}Service = () => {{");
+                lines.Add($"export const use{api.Name}Service = () => {{");
 
                 lines.Add(string.Empty);
-                lines.Add($"const basePath = \"/{basePath}/{apiInfo.Name}\";");
+                lines.Add($"const basePath = \"/{basePath}/{api.Name}\";");
 
                 foreach (var methodDefinition in getExportablePublicMethods(controllerTypeDefinition))
                 {
@@ -186,10 +186,10 @@ static class Exporter
         static Result<FileModel> getServiceAndModelIntegrationFile(ApiScope scope, TypeDefinition controllerTypeDefinition, TypeDefinition modelTypeDefinition)
         {
             var config = scope.Config;
-            var apiInfo = scope.ApiInfo;
+            var api = scope.ApiInfo;
 
             return
-                from filePath in getOutputTsFilePath(config, apiInfo)
+                from filePath in getOutputTsFilePath(config, api)
                 select new FileModel
                 {
                     Path    = filePath,
@@ -219,19 +219,19 @@ static class Exporter
                 lines.Add("} from \"../types\";");
 
                 lines.Add(string.Empty);
-                lines.Add($"import {{ use{apiInfo.Name}Service }} from \"../services/use{apiInfo.Name}Service\"");
+                lines.Add($"import {{ use{api.Name}Service }} from \"../services/use{api.Name}Service\"");
 
                 lines.Add(string.Empty);
-                lines.Add($"import {{ {apiInfo.Name}Model }} from \"../models/{apiInfo.Name}Model\"");
+                lines.Add($"import {{ {api.Name}Model }} from \"../models/{api.Name}Model\"");
 
                 lines.Add(string.Empty);
 
-                lines.Add($"export const use{apiInfo.Name} = () => {{");
+                lines.Add($"export const use{api.Name} = () => {{");
 
                 lines.Add(string.Empty);
                 lines.Add(Tab + "const store = useStore();");
                 lines.Add(string.Empty);
-                lines.Add(Tab + $"const service = use{apiInfo.Name}Service();");
+                lines.Add(Tab + $"const service = use{api.Name}Service();");
 
                 foreach (var methodDefinition in getExportablePublicMethods(controllerTypeDefinition))
                 {
