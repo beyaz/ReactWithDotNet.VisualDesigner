@@ -15,7 +15,9 @@ static class Exporter
             from api in config.ApiList
             let scope = Scope.Create(new()
             {
-                { Keys.Config, config }
+                { Config, config },
+                {Assembly, assemblyDefinition},
+                {Api,api}
             })
             let scope_old = new ApiScope
             {
