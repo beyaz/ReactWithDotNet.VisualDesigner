@@ -17,8 +17,7 @@ static class Exporter
                 {ProjectDirectory,projectDirectory},
                 {ExternalTypes, ExternalTypeList.Value},
                 { Assembly, assemblyDefinition },
-                {ApiName,"Religious"},
-                { Api, new() { Name = "Religious" } }
+                {ApiName,"Religious"}
             })
             from modelTypeDefinition in getModelTypeDefinition(scope)
             from controllerTypeDefinition in getControllerTypeDefinition(scope)
@@ -75,12 +74,11 @@ static class Exporter
 
     static Result<TypeDefinition> getModelTypeDefinition(Scope scope)
     {
-        var api = Api[scope];
         var assemblyDefinition = Assembly[scope];
 
         // sample: BOA.InternetBanking.Payments.API -> BOA.InternetBanking.Payments.API.Models.GsmPrePaidModel
 
-        var fullTypeName = $"{assemblyDefinition.Name.Name}.Models.{api.Name}Model";
+        var fullTypeName = $"{assemblyDefinition.Name.Name}.Models.{ApiName[scope]}Model";
 
         return CecilHelper.GetType(assemblyDefinition, fullTypeName);
     }
@@ -99,10 +97,9 @@ static class Exporter
     {
         var projectDirectory = ProjectDirectory[scope];
 
-        var api = Api[scope];
 
         return
-            from filePath in getOutputTsFilePath(api)
+            from filePath in getOutputTsFilePath()
             select new FileModel
             {
                 Path    = filePath,
@@ -132,19 +129,19 @@ static class Exporter
             lines.Add("} from \"../types\";");
 
             lines.Add(string.Empty);
-            lines.Add($"import {{ use{api.Name}Service }} from \"../services/use{api.Name}Service\"");
+            lines.Add($"import {{ use{ApiName[scope]}Service }} from \"../services/use{ApiName[scope]}Service\"");
 
             lines.Add(string.Empty);
-            lines.Add($"import {{ {api.Name}Model }} from \"../models/{api.Name}Model\"");
+            lines.Add($"import {{ {ApiName[scope]}Model }} from \"../models/{ApiName[scope]}Model\"");
 
             lines.Add(string.Empty);
 
-            lines.Add($"export const use{api.Name} = () => {{");
+            lines.Add($"export const use{ApiName[scope]} = () => {{");
 
             lines.Add(string.Empty);
             lines.Add(Tab + "const store = useStore();");
             lines.Add(string.Empty);
-            lines.Add(Tab + $"const service = use{api.Name}Service();");
+            lines.Add(Tab + $"const service = use{ApiName[scope]}Service();");
 
             foreach (var methodDefinition in getExportablePublicMethods(controllerTypeDefinition))
             {
@@ -204,11 +201,11 @@ static class Exporter
             return lines;
         }
 
-        Result<string> getOutputTsFilePath(ApiInfo apiInfo)
+        Result<string> getOutputTsFilePath()
         {
             return
                 from webProjectPath in getWebProjectFolderPath(projectDirectory)
-                select Path.Combine(webProjectPath, "ClientApp", "services", $"use{apiInfo.Name}.ts");
+                select Path.Combine(webProjectPath, "ClientApp", "services", $"use{ApiName[scope]}.ts");
         }
 
         static IEnumerable<PropertyDefinition> getMappingPropertyList(TypeDefinition model, TypeDefinition apiParameter)
@@ -237,10 +234,9 @@ static class Exporter
     {
         var projectDirectory= ProjectDirectory[scope];
      
-        var api = Api[scope];
 
         return
-            from filePath in getOutputTsFilePath( api)
+            from filePath in getOutputTsFilePath()
             select new FileModel
             {
                 Path    = filePath,
@@ -273,10 +269,10 @@ static class Exporter
 
             var basePath = getSolutionName(projectDirectory).RemoveFromStart("BOA.InternetBanking.").ToLower();
 
-            lines.Add($"export const use{api.Name}Service = () => {{");
+            lines.Add($"export const use{ApiName[scope]}Service = () => {{");
 
             lines.Add(string.Empty);
-            lines.Add($"const basePath = \"/{basePath}/{api.Name}\";");
+            lines.Add($"const basePath = \"/{basePath}/{ApiName[scope]}\";");
 
             foreach (var methodDefinition in getExportablePublicMethods(controllerTypeDefinition))
             {
@@ -300,11 +296,11 @@ static class Exporter
             return lines;
         }
 
-         Result<string> getOutputTsFilePath( ApiInfo apiInfo)
+         Result<string> getOutputTsFilePath()
         {
             return
                 from webProjectPath in getWebProjectFolderPath(projectDirectory)
-                select Path.Combine(webProjectPath, "ClientApp", "services", $"use{apiInfo.Name}Service.ts");
+                select Path.Combine(webProjectPath, "ClientApp", "services", $"use{ApiName[scope]}Service.ts");
         }
     }
 
@@ -325,7 +321,6 @@ static class Exporter
             var projectDirectory= ProjectDirectory[scope];
             var externalTypes = ExternalTypes[scope];
           
-            var api = Api[scope];
 
             if (methodDefinition.Parameters[0].ParameterType.Name != "BaseClientRequest")
             {
@@ -354,7 +349,7 @@ static class Exporter
 
             string getOutputFilePath(string webProjectPath)
             {
-                return Path.Combine(webProjectPath, "ClientApp", "types", api.Name, $"{methodDefinition.Name}.ts");
+                return Path.Combine(webProjectPath, "ClientApp", "types", ApiName[scope], $"{methodDefinition.Name}.ts");
             }
         }
     }
