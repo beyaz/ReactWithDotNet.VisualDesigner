@@ -15,10 +15,9 @@ static class Exporter
             let scope = Scope.Create(new()
             {
                 { Config, config },
-                {Assembly, assemblyDefinition},
-                {Api,api}
+                { Assembly, assemblyDefinition },
+                { Api, api }
             })
-            
             from modelTypeDefinition in getModelTypeDefinition(scope)
             from controllerTypeDefinition in getControllerTypeDefinition(scope)
             from modelFile in getModelFile(scope)
@@ -33,7 +32,6 @@ static class Exporter
         static Task<Result<FileModel>> getModelFile(Scope scope)
         {
             var config = Config[scope];
-            var api = Api[scope];
 
             return
                 from modelTypeDefinition in getModelTypeDefinition(scope)
@@ -144,10 +142,9 @@ static class Exporter
 
         static Result<TypeDefinition> getModelTypeDefinition(Scope scope)
         {
-            var config = Config[scope];
             var api = Api[scope];
             var assemblyDefinition = Assembly[scope];
-            
+
             // sample: BOA.InternetBanking.Payments.API -> BOA.InternetBanking.Payments.API.Models.GsmPrePaidModel
 
             var fullTypeName = $"{assemblyDefinition.Name.Name}.Models.{api.Name}Model";
@@ -157,10 +154,9 @@ static class Exporter
 
         static Result<TypeDefinition> getControllerTypeDefinition(Scope scope)
         {
-            var config = Config[scope];
             var api = Api[scope];
             var assemblyDefinition = Assembly[scope];
-            
+
             // sample: BOA.InternetBanking.Payments.API -> BOA.InternetBanking.Payments.API.Controllers.GsmPrePaidController
 
             var fullTypeName = $"{assemblyDefinition.Name.Name}.Controllers.{api.Name}Controller";
@@ -335,7 +331,7 @@ static class Exporter
         {
             var config = Config[scope];
             var api = Api[scope];
-            
+
             if (methodDefinition.Parameters[0].ParameterType.Name != "BaseClientRequest")
             {
                 return
@@ -367,6 +363,4 @@ static class Exporter
             }
         }
     }
-
-    
 }
