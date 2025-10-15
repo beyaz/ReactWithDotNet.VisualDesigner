@@ -14,7 +14,6 @@ static class Exporter
         {
             { ProjectDirectory, projectDirectory },
             { ExternalTypes, ExternalTypeList.Value },
-           
             { ApiName, "Religious" }
         });
 
