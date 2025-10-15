@@ -3,7 +3,96 @@
 namespace BDigitalFrameworkApiToTsExporter;
 
 static class Exporter
-{static Result<string> getWebProjectFolderPath(string projectDirectory)
+{
+    static TypeReference getReturnType(MethodDefinition methodDefinition)
+    {
+        if (methodDefinition.ReturnType is GenericInstanceType genericInstanceType)
+        {
+            return genericInstanceType.GenericArguments[0];
+        }
+
+        return methodDefinition.ReturnType;
+    }
+      static Result<FileModel> getServiceFile(Scope scope, TypeDefinition controllerTypeDefinition)
+        {
+            var config = Config[scope];
+            var api = Api[scope];
+
+            return
+                from filePath in getOutputTsFilePath(config, api)
+                select new FileModel
+                {
+                    Path    = filePath,
+                    Content = string.Join(Environment.NewLine, getFileContent())
+                };
+
+            IReadOnlyList<string> getFileContent()
+            {
+                LineCollection lines =
+                [
+                    "import { BaseClientRequest, BaseClientResponse, useExecuter } from \"b-digital-framework\";",
+                    "import {",
+                ];
+
+                var inputOutputTypes
+                    = from methodDefinition in getExportablePublicMethods(controllerTypeDefinition)
+                      from typeName in new[]
+                      {
+                          methodDefinition.Parameters[0].ParameterType.Name,
+                          getReturnType(methodDefinition).Name
+                      }
+                      where typeName != "BaseClientRequest"
+                      select Tab + typeName;
+
+                lines.AddRange(inputOutputTypes.AppendBetween(","));
+
+                lines.Add("} from \"../types\";");
+
+                lines.Add(string.Empty);
+
+                var basePath = getSolutionName(config.ProjectDirectory).RemoveFromStart("BOA.InternetBanking.").ToLower();
+
+                lines.Add($"export const use{api.Name}Service = () => {{");
+
+                lines.Add(string.Empty);
+                lines.Add($"const basePath = \"/{basePath}/{api.Name}\";");
+
+                foreach (var methodDefinition in getExportablePublicMethods(controllerTypeDefinition))
+                {
+                    lines.Add(string.Empty);
+                    lines.Add(Tab + $"const {GetTsVariableName(methodDefinition.Name)} = useExecuter<{methodDefinition.Parameters[0].ParameterType.Name}, {getReturnType(methodDefinition).Name}>(basePath + \"/{methodDefinition.Name}\", \"POST\");");
+                }
+
+                lines.Add(string.Empty);
+                lines.Add(Tab + "return {");
+
+                var serviceNames = from m in getExportablePublicMethods(controllerTypeDefinition)
+                                   select GetTsVariableName(m.Name);
+                lines.AddRange
+                    (
+                     (from serviceName in serviceNames select Tab + Tab + serviceName).AppendBetween("," + Environment.NewLine)
+                    );
+
+                lines.Add(Tab + "};");
+                lines.Add("}");
+
+                return lines;
+            }
+
+            static Result<string> getOutputTsFilePath(ConfigModel config, ApiInfo apiInfo)
+            {
+                return
+                    from webProjectPath in getWebProjectFolderPath(config.ProjectDirectory)
+                    select Path.Combine(webProjectPath, "ClientApp", "services", $"use{apiInfo.Name}Service.ts");
+            }
+        }
+
+        static IEnumerable<MethodDefinition> getExportablePublicMethods(TypeDefinition controllerTypeDefinition)
+        {
+            return from method in controllerTypeDefinition.Methods where method.IsPublic && method.Parameters.Count == 1 && method.ReturnType.Name != "Void" select method;
+        }
+    
+    static Result<string> getWebProjectFolderPath(string projectDirectory)
     {
         var webProjectName = "OBA.Web." + getSolutionName(projectDirectory).RemoveFromStart("BOA.");
 
@@ -92,94 +181,9 @@ static class Exporter
 
        
 
-        static TypeReference getReturnType(MethodDefinition methodDefinition)
-        {
-            if (methodDefinition.ReturnType is GenericInstanceType genericInstanceType)
-            {
-                return genericInstanceType.GenericArguments[0];
-            }
+       
 
-            return methodDefinition.ReturnType;
-        }
-
-        static Result<FileModel> getServiceFile(Scope scope, TypeDefinition controllerTypeDefinition)
-        {
-            var config = Config[scope];
-            var api = Api[scope];
-
-            return
-                from filePath in getOutputTsFilePath(config, api)
-                select new FileModel
-                {
-                    Path    = filePath,
-                    Content = string.Join(Environment.NewLine, getFileContent())
-                };
-
-            IReadOnlyList<string> getFileContent()
-            {
-                LineCollection lines =
-                [
-                    "import { BaseClientRequest, BaseClientResponse, useExecuter } from \"b-digital-framework\";",
-                    "import {",
-                ];
-
-                var inputOutputTypes
-                    = from methodDefinition in getExportablePublicMethods(controllerTypeDefinition)
-                      from typeName in new[]
-                      {
-                          methodDefinition.Parameters[0].ParameterType.Name,
-                          getReturnType(methodDefinition).Name
-                      }
-                      where typeName != "BaseClientRequest"
-                      select Tab + typeName;
-
-                lines.AddRange(inputOutputTypes.AppendBetween(","));
-
-                lines.Add("} from \"../types\";");
-
-                lines.Add(string.Empty);
-
-                var basePath = getSolutionName(config.ProjectDirectory).RemoveFromStart("BOA.InternetBanking.").ToLower();
-
-                lines.Add($"export const use{api.Name}Service = () => {{");
-
-                lines.Add(string.Empty);
-                lines.Add($"const basePath = \"/{basePath}/{api.Name}\";");
-
-                foreach (var methodDefinition in getExportablePublicMethods(controllerTypeDefinition))
-                {
-                    lines.Add(string.Empty);
-                    lines.Add(Tab + $"const {GetTsVariableName(methodDefinition.Name)} = useExecuter<{methodDefinition.Parameters[0].ParameterType.Name}, {getReturnType(methodDefinition).Name}>(basePath + \"/{methodDefinition.Name}\", \"POST\");");
-                }
-
-                lines.Add(string.Empty);
-                lines.Add(Tab + "return {");
-
-                var serviceNames = from m in getExportablePublicMethods(controllerTypeDefinition)
-                                   select GetTsVariableName(m.Name);
-                lines.AddRange
-                    (
-                     (from serviceName in serviceNames select Tab + Tab + serviceName).AppendBetween("," + Environment.NewLine)
-                    );
-
-                lines.Add(Tab + "};");
-                lines.Add("}");
-
-                return lines;
-            }
-
-            static Result<string> getOutputTsFilePath(ConfigModel config, ApiInfo apiInfo)
-            {
-                return
-                    from webProjectPath in getWebProjectFolderPath(config.ProjectDirectory)
-                    select Path.Combine(webProjectPath, "ClientApp", "services", $"use{apiInfo.Name}Service.ts");
-            }
-        }
-
-        static IEnumerable<MethodDefinition> getExportablePublicMethods(TypeDefinition controllerTypeDefinition)
-        {
-            return from method in controllerTypeDefinition.Methods where method.IsPublic && method.Parameters.Count == 1 && method.ReturnType.Name != "Void" select method;
-        }
+      
 
         
 
