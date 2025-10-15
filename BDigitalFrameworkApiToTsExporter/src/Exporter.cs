@@ -13,6 +13,7 @@ static class Exporter
             from assemblyDefinition in ReadAPIAssembly(config.ProjectDirectory)
             let scope = Scope.Create(new()
             {
+                {ExternalTypes, ExternalTypeList.Value},
                 { Config, config },
                 { Assembly, assemblyDefinition },
                 { Api, new() { Name = "Religious" } }
@@ -49,11 +50,12 @@ static class Exporter
     static Task<Result<FileModel>> getModelFile(Scope scope)
     {
         var config = Config[scope];
+        var externalTypes = ExternalTypes[scope];
 
         return
             from modelTypeDefinition in getModelTypeDefinition(scope)
             from modelFilePath in getOutputTsFilePath(config, modelTypeDefinition)
-            let modelTsType = TsModelCreator.CreateFrom(config.ExternalTypes, modelTypeDefinition)
+            let modelTsType = TsModelCreator.CreateFrom(externalTypes, modelTypeDefinition)
             select new FileModel
             {
                 Path    = modelFilePath,
@@ -315,6 +317,7 @@ static class Exporter
 
         static Result<FileModel> getMethodRequestResponseTypesInFile(Scope scope, MethodDefinition methodDefinition)
         {
+            var externalTypes = ExternalTypes[scope];
             var config = Config[scope];
             var api = Api[scope];
 
@@ -324,8 +327,8 @@ static class Exporter
                     from webProjectPath in getWebProjectFolderPath(config.ProjectDirectory)
                     let returnTypeDefinition = getReturnType(methodDefinition).Resolve()
                     let requestTypeDefinition = methodDefinition.Parameters[0].ParameterType.Resolve()
-                    let tsRequest = TsModelCreator.CreateFrom(config.ExternalTypes, requestTypeDefinition)
-                    let tsResponse = TsModelCreator.CreateFrom(config.ExternalTypes, returnTypeDefinition)
+                    let tsRequest = TsModelCreator.CreateFrom(externalTypes, requestTypeDefinition)
+                    let tsResponse = TsModelCreator.CreateFrom(externalTypes, returnTypeDefinition)
                     select new FileModel
                     {
                         Path    = getOutputFilePath(webProjectPath),
@@ -336,7 +339,7 @@ static class Exporter
             return
                 from webProjectPath in getWebProjectFolderPath(config.ProjectDirectory)
                 let returnTypeDefinition = getReturnType(methodDefinition).Resolve()
-                let tsResponse = TsModelCreator.CreateFrom(config.ExternalTypes, returnTypeDefinition)
+                let tsResponse = TsModelCreator.CreateFrom(externalTypes, returnTypeDefinition)
                 select new FileModel
                 {
                     Path    = getOutputFilePath(webProjectPath),
