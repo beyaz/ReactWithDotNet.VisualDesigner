@@ -192,7 +192,11 @@ static class Exporter
 
         
 
-        static Result<FileModel> getServiceAndModelIntegrationFile(Scope scope, TypeDefinition controllerTypeDefinition, TypeDefinition modelTypeDefinition)
+       
+       
+    }
+    
+     static Result<FileModel> getServiceAndModelIntegrationFile(Scope scope, TypeDefinition controllerTypeDefinition, TypeDefinition modelTypeDefinition)
         {
             var config = Config[scope];
             var api = Api[scope];
@@ -335,42 +339,42 @@ static class Exporter
                 from methodDefinition in getExportablePublicMethods(controllerTypeDefinition)
                 from file in getMethodRequestResponseTypesInFile(scope, methodDefinition)
                 select file;
-        }
-
-        static Result<FileModel> getMethodRequestResponseTypesInFile(Scope scope, MethodDefinition methodDefinition)
-        {
-            var config = Config[scope];
-            var api = Api[scope];
-
-            if (methodDefinition.Parameters[0].ParameterType.Name != "BaseClientRequest")
+            
+            static Result<FileModel> getMethodRequestResponseTypesInFile(Scope scope, MethodDefinition methodDefinition)
             {
+                var config = Config[scope];
+                var api = Api[scope];
+
+                if (methodDefinition.Parameters[0].ParameterType.Name != "BaseClientRequest")
+                {
+                    return
+                        from webProjectPath in getWebProjectFolderPath(config.ProjectDirectory)
+                        let returnTypeDefinition = getReturnType(methodDefinition).Resolve()
+                        let requestTypeDefinition = methodDefinition.Parameters[0].ParameterType.Resolve()
+                        let tsRequest = TsModelCreator.CreateFrom(config.ExternalTypes, requestTypeDefinition)
+                        let tsResponse = TsModelCreator.CreateFrom(config.ExternalTypes, returnTypeDefinition)
+                        select new FileModel
+                        {
+                            Path    = getOutputFilePath(webProjectPath),
+                            Content = TsOutput.LinesToString(TsOutput.GetTsCode(tsRequest, tsResponse))
+                        };
+                }
+
                 return
                     from webProjectPath in getWebProjectFolderPath(config.ProjectDirectory)
                     let returnTypeDefinition = getReturnType(methodDefinition).Resolve()
-                    let requestTypeDefinition = methodDefinition.Parameters[0].ParameterType.Resolve()
-                    let tsRequest = TsModelCreator.CreateFrom(config.ExternalTypes, requestTypeDefinition)
                     let tsResponse = TsModelCreator.CreateFrom(config.ExternalTypes, returnTypeDefinition)
                     select new FileModel
                     {
                         Path    = getOutputFilePath(webProjectPath),
-                        Content = TsOutput.LinesToString(TsOutput.GetTsCode(tsRequest, tsResponse))
+                        Content = TsOutput.LinesToString(TsOutput.GetTsCode(tsResponse))
                     };
-            }
 
-            return
-                from webProjectPath in getWebProjectFolderPath(config.ProjectDirectory)
-                let returnTypeDefinition = getReturnType(methodDefinition).Resolve()
-                let tsResponse = TsModelCreator.CreateFrom(config.ExternalTypes, returnTypeDefinition)
-                select new FileModel
+                string getOutputFilePath(string webProjectPath)
                 {
-                    Path    = getOutputFilePath(webProjectPath),
-                    Content = TsOutput.LinesToString(TsOutput.GetTsCode(tsResponse))
-                };
-
-            string getOutputFilePath(string webProjectPath)
-            {
-                return Path.Combine(webProjectPath, "ClientApp", "types", api.Name, $"{methodDefinition.Name}.ts");
+                    return Path.Combine(webProjectPath, "ClientApp", "types", api.Name, $"{methodDefinition.Name}.ts");
+                }
             }
         }
-    }
+
 }
