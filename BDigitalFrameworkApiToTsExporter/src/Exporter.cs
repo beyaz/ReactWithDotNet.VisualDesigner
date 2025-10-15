@@ -8,15 +8,16 @@ static class Exporter
 
     public static IAsyncEnumerable<Result<Unit>> TryExport()
     {
+        var projectDirectory = "D:\\work\\BOA.BusinessModules\\Dev\\BOA.InternetBanking.Payments";
+        
         var files =
-            from config in ConfigReader.ReadConfig()
-            from assemblyDefinition in ReadAPIAssembly(config.ProjectDirectory)
+            from assemblyDefinition in ReadAPIAssembly(projectDirectory)
             let scope = Scope.Create(new()
             {
-                {ProjectDirectory,"D:\\work\\BOA.BusinessModules\\Dev\\BOA.InternetBanking.Payments"},
+                {ProjectDirectory,projectDirectory},
                 {ExternalTypes, ExternalTypeList.Value},
-                { Config, config },
                 { Assembly, assemblyDefinition },
+                {ApiName,"Religious"},
                 { Api, new() { Name = "Religious" } }
             })
             from modelTypeDefinition in getModelTypeDefinition(scope)

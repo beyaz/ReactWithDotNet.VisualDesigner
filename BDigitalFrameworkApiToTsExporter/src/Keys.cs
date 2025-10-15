@@ -13,6 +13,8 @@ static class Keys
     
     public static readonly ScopeKey<AssemblyDefinition> Assembly = new() { Key = nameof(AssemblyDefinition) };
     
+    public static readonly ScopeKey<string> ApiName = new() { Key = nameof(ApiName) };
+    
     public static readonly ScopeKey<ApiInfo> Api = new() { Key = nameof(ApiInfo) };
     
     public static readonly ScopeKey<TypeDefinition> ModelTypeDefinition = new() { Key = nameof(ModelTypeDefinition) };
