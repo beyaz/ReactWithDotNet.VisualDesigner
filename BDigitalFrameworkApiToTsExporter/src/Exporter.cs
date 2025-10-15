@@ -21,12 +21,11 @@ static class Exporter
         var files =
             from config in ConfigReader.ReadConfig()
             from assemblyDefinition in ReadAPIAssembly(config.ProjectDirectory)
-            from api in config.ApiList
             let scope = Scope.Create(new()
             {
                 { Config, config },
                 { Assembly, assemblyDefinition },
-                { Api, api }
+                { Api, new (){Name = "Religious"} }
             })
             from modelTypeDefinition in getModelTypeDefinition(scope)
             from controllerTypeDefinition in getControllerTypeDefinition(scope)

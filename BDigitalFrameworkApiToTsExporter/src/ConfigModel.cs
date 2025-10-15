@@ -19,8 +19,6 @@ public sealed record ExternalTypeInfo
 
 public sealed record ConfigModel
 {
-    public required IReadOnlyList<ApiInfo> ApiList { get; init; }
-
     public required string ProjectDirectory { get; init; }
     
     public required IReadOnlyList<ExternalTypeInfo> ExternalTypes { get; init; }

@@ -1,10 +1,5 @@
 {
   "projectDirectory": "D:\\work\\BOA.BusinessModules\\Dev\\BOA.InternetBanking.Payments",
-  "apiList": [
-    {
-      "name": "Religious"
-    }
-  ],
   "externalTypes": [
     {
       "dotNetFullTypeName": "BOA.InternetBanking.Common.Account",
