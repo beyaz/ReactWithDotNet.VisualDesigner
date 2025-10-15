@@ -8,7 +8,9 @@ static class Keys
     // @formatter:off
     
     public static readonly ScopeKey<IReadOnlyList<ExternalTypeInfo>> ExternalTypes = new() { Key = nameof(ExternalTypes) };
-        
+    
+    public static readonly ScopeKey<string> ProjectDirectory = new() { Key = nameof(ProjectDirectory) };
+    
     public static readonly ScopeKey<ConfigModel> Config = new() { Key = nameof(Config) };
         
     public static readonly ScopeKey<AssemblyDefinition> Assembly = new() { Key = nameof(AssemblyDefinition) };
