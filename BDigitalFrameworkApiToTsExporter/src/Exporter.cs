@@ -13,6 +13,10 @@ static class Exporter
             from config in ConfigReader.ReadConfig()
             from assemblyDefinition in CecilHelper.ReadAssemblyDefinition(config.AssemblyFilePath)
             from api in config.ApiList
+            let scope = Scope.Create(new()
+            {
+                { Keys.Config, config }
+            })
             let scope_old = new ApiScope
             {
                 Config             = config,
@@ -44,7 +48,7 @@ static class Exporter
                     Content = TsOutput.LinesToString(TsOutput.GetTsCode(modelTsType))
                 };
 
-            static Result<string> getOutputTsFilePath(Config config, TypeDefinition modelTypeDefinition)
+            static Result<string> getOutputTsFilePath(ConfigModel config, TypeDefinition modelTypeDefinition)
             {
                 return
                     from webProjectPath in getWebProjectFolderPath(config.ProjectDirectory)
@@ -128,7 +132,7 @@ static class Exporter
                 return lines;
             }
 
-            static Result<string> getOutputTsFilePath(Config config, ApiInfo apiInfo)
+            static Result<string> getOutputTsFilePath(ConfigModel config, ApiInfo apiInfo)
             {
                 return
                     from webProjectPath in getWebProjectFolderPath(config.ProjectDirectory)
@@ -285,7 +289,7 @@ static class Exporter
                 return lines;
             }
 
-            static Result<string> getOutputTsFilePath(Config config, ApiInfo apiInfo)
+            static Result<string> getOutputTsFilePath(ConfigModel config, ApiInfo apiInfo)
             {
                 return
                     from webProjectPath in getWebProjectFolderPath(config.ProjectDirectory)
@@ -358,7 +362,7 @@ static class Exporter
 
     sealed record ApiScope
     {
-        public required Config Config { get; init; }
+        public required ConfigModel Config { get; init; }
 
         public required AssemblyDefinition AssemblyDefinition { get; init; }
 

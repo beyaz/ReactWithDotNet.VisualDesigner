@@ -17,7 +17,7 @@ public sealed record ExternalTypeInfo
 }
 
 
-public sealed record Config
+public sealed record ConfigModel
 {
     public string? AssemblyFilePath { get; init; }
     
@@ -34,7 +34,7 @@ public sealed record Config
 
 static class ConfigReader
 {
-    public static async Task<Result<Config>> ReadConfig()
+    public static async Task<Result<ConfigModel>> ReadConfig()
     {
         var configFilePath = Path.Combine(Path.GetDirectoryName(typeof(ConfigReader).Assembly.Location) ?? string.Empty, "Config.json");
 
@@ -45,7 +45,7 @@ static class ConfigReader
         
         var fileContent = await File.ReadAllTextAsync(configFilePath);
 
-        var config = JsonConvert.DeserializeObject<Config>(fileContent);
+        var config = JsonConvert.DeserializeObject<ConfigModel>(fileContent);
         if (config is null)
         {
             return new InvalidDataException("InvalidConfigData: "+ configFilePath);
