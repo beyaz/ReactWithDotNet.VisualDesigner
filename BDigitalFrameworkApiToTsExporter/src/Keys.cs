@@ -15,7 +15,9 @@ static class Keys
     
     public static readonly ScopeKey<TypeDefinition> ModelTypeDefinition = new() { Key = nameof(ModelTypeDefinition) };
     
-    public static readonly ScopeKey<MethodDefinition> MethodDefinition = new() { Key = nameof(MethodDefinition) };
+    public static readonly ScopeKey<TypeDefinition> ControllerTypeDefinition = new() { Key = nameof(ControllerTypeDefinition) };
+    
+    public static readonly ScopeKey<MethodDefinition> ControllerMethodDefinition = new() { Key = nameof(ControllerMethodDefinition) };
     
     // @formatter:on
 }
