@@ -91,6 +91,14 @@ public sealed class Scope
 
         return scope;
     }
+    
+    
+    public static Scope operator +(Scope scope, ScopeCreationInput input)
+    {
+        return scope.With(input);
+    }
+
+    
 
     class ScopeDebugView
     {
