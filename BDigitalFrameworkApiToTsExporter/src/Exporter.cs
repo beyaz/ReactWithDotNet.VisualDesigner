@@ -25,20 +25,21 @@ static class Exporter
                 AssemblyDefinition = assemblyDefinition,
                 ApiInfo            = api
             }
-            from modelTypeDefinition in getModelTypeDefinition(scope_old)
-            from controllerTypeDefinition in getControllerTypeDefinition(scope_old)
-            from modelFile in getModelFile(scope_old)
-            from serviceFile in getServiceFile(scope_old, controllerTypeDefinition)
-            from serviceModelIntegrationFile in getServiceAndModelIntegrationFile(scope_old, controllerTypeDefinition, modelTypeDefinition)
+            from modelTypeDefinition in getModelTypeDefinition(scope)
+            from controllerTypeDefinition in getControllerTypeDefinition(scope)
+            from modelFile in getModelFile(scope)
+            from serviceFile in getServiceFile(scope, controllerTypeDefinition)
+            from serviceModelIntegrationFile in getServiceAndModelIntegrationFile(scope, controllerTypeDefinition, modelTypeDefinition)
             from typeFiles in getTypeFiles(scope, controllerTypeDefinition).AsResult()
             from file in new[] { modelFile, serviceFile, serviceModelIntegrationFile }.Concat(typeFiles)
             select file;
 
         return from file in files select FileSystem.Save(file);
 
-        static Task<Result<FileModel>> getModelFile(ApiScope scope)
+        static Task<Result<FileModel>> getModelFile(Scope scope)
         {
-            var config = scope.Config;
+            var config = Config[scope];
+            var api = Api[scope];
 
             return
                 from modelTypeDefinition in getModelTypeDefinition(scope)
@@ -68,10 +69,10 @@ static class Exporter
             return methodDefinition.ReturnType;
         }
 
-        static Result<FileModel> getServiceFile(ApiScope scope, TypeDefinition controllerTypeDefinition)
+        static Result<FileModel> getServiceFile(Scope scope, TypeDefinition controllerTypeDefinition)
         {
-            var config = scope.Config;
-            var api = scope.ApiInfo;
+            var config = Config[scope];
+            var api = Api[scope];
 
             return
                 from filePath in getOutputTsFilePath(config, api)
@@ -147,22 +148,30 @@ static class Exporter
             return from method in controllerTypeDefinition.Methods where method.IsPublic && method.Parameters.Count == 1 && method.ReturnType.Name != "Void" select method;
         }
 
-        static Result<TypeDefinition> getModelTypeDefinition(ApiScope scope)
+        static Result<TypeDefinition> getModelTypeDefinition(Scope scope)
         {
+            var config = Config[scope];
+            var api = Api[scope];
+            var assemblyDefinition = Assembly[scope];
+            
             // sample: BOA.InternetBanking.Payments.API -> BOA.InternetBanking.Payments.API.Models.GsmPrePaidModel
 
-            var fullTypeName = $"{scope.AssemblyDefinition.Name.Name}.Models.{scope.ApiInfo.Name}Model";
+            var fullTypeName = $"{assemblyDefinition.Name.Name}.Models.{api.Name}Model";
 
-            return CecilHelper.GetType(scope.AssemblyDefinition, fullTypeName);
+            return CecilHelper.GetType(assemblyDefinition, fullTypeName);
         }
 
-        static Result<TypeDefinition> getControllerTypeDefinition(ApiScope scope)
+        static Result<TypeDefinition> getControllerTypeDefinition(Scope scope)
         {
+            var config = Config[scope];
+            var api = Api[scope];
+            var assemblyDefinition = Assembly[scope];
+            
             // sample: BOA.InternetBanking.Payments.API -> BOA.InternetBanking.Payments.API.Controllers.GsmPrePaidController
 
-            var fullTypeName = $"{scope.AssemblyDefinition.Name.Name}.Controllers.{scope.ApiInfo.Name}Controller";
+            var fullTypeName = $"{assemblyDefinition.Name.Name}.Controllers.{api.Name}Controller";
 
-            return CecilHelper.GetType(scope.AssemblyDefinition, fullTypeName);
+            return CecilHelper.GetType(assemblyDefinition, fullTypeName);
         }
 
         static string getSolutionName(string projectDirectory)
@@ -183,10 +192,10 @@ static class Exporter
             return directory;
         }
 
-        static Result<FileModel> getServiceAndModelIntegrationFile(ApiScope scope, TypeDefinition controllerTypeDefinition, TypeDefinition modelTypeDefinition)
+        static Result<FileModel> getServiceAndModelIntegrationFile(Scope scope, TypeDefinition controllerTypeDefinition, TypeDefinition modelTypeDefinition)
         {
-            var config = scope.Config;
-            var api = scope.ApiInfo;
+            var config = Config[scope];
+            var api = Api[scope];
 
             return
                 from filePath in getOutputTsFilePath(config, api)
