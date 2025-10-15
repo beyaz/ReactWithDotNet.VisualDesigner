@@ -3,9 +3,48 @@
 namespace BDigitalFrameworkApiToTsExporter;
 
 static class Exporter
-{
-    const string Tab = "    ";
+{static Result<string> getWebProjectFolderPath(string projectDirectory)
+    {
+        var webProjectName = "OBA.Web." + getSolutionName(projectDirectory).RemoveFromStart("BOA.");
+
+        var directory = Path.Combine(projectDirectory, "OBAWeb", webProjectName);
+        if (!Directory.Exists(directory))
+        {
+            return new IOException($"DirectoryNotFound: {directory}");
+        }
+
+        return directory;
+    }
     
+    
+    static string getSolutionName(string projectDirectory)
+    {
+        return Path.GetFileName(projectDirectory);
+    }
+    
+    
+    const string Tab = "    ";
+    static Task<Result<FileModel>> getModelFile(Scope scope)
+    {
+        var config = Config[scope];
+
+        return
+            from modelTypeDefinition in getModelTypeDefinition(scope)
+            from modelFilePath in getOutputTsFilePath(config, modelTypeDefinition)
+            let modelTsType = TsModelCreator.CreateFrom(config.ExternalTypes, modelTypeDefinition)
+            select new FileModel
+            {
+                Path    = modelFilePath,
+                Content = TsOutput.LinesToString(TsOutput.GetTsCode(modelTsType))
+            };
+
+        static Result<string> getOutputTsFilePath(ConfigModel config, TypeDefinition modelTypeDefinition)
+        {
+            return
+                from webProjectPath in getWebProjectFolderPath(config.ProjectDirectory)
+                select Path.Combine(webProjectPath, "ClientApp", "models", $"{modelTypeDefinition.Name}.ts");
+        }
+    }
     static Result<TypeDefinition> getModelTypeDefinition(Scope scope)
     {
         var api = Api[scope];
@@ -51,27 +90,7 @@ static class Exporter
 
         return from file in files select FileSystem.Save(file);
 
-        static Task<Result<FileModel>> getModelFile(Scope scope)
-        {
-            var config = Config[scope];
-
-            return
-                from modelTypeDefinition in getModelTypeDefinition(scope)
-                from modelFilePath in getOutputTsFilePath(config, modelTypeDefinition)
-                let modelTsType = TsModelCreator.CreateFrom(config.ExternalTypes, modelTypeDefinition)
-                select new FileModel
-                {
-                    Path    = modelFilePath,
-                    Content = TsOutput.LinesToString(TsOutput.GetTsCode(modelTsType))
-                };
-
-            static Result<string> getOutputTsFilePath(ConfigModel config, TypeDefinition modelTypeDefinition)
-            {
-                return
-                    from webProjectPath in getWebProjectFolderPath(config.ProjectDirectory)
-                    select Path.Combine(webProjectPath, "ClientApp", "models", $"{modelTypeDefinition.Name}.ts");
-            }
-        }
+       
 
         static TypeReference getReturnType(MethodDefinition methodDefinition)
         {
@@ -166,23 +185,8 @@ static class Exporter
 
       
 
-        static string getSolutionName(string projectDirectory)
-        {
-            return Path.GetFileName(projectDirectory);
-        }
 
-        static Result<string> getWebProjectFolderPath(string projectDirectory)
-        {
-            var webProjectName = "OBA.Web." + getSolutionName(projectDirectory).RemoveFromStart("BOA.");
-
-            var directory = Path.Combine(projectDirectory, "OBAWeb", webProjectName);
-            if (!Directory.Exists(directory))
-            {
-                return new IOException($"DirectoryNotFound: {directory}");
-            }
-
-            return directory;
-        }
+        
 
         static Result<FileModel> getServiceAndModelIntegrationFile(Scope scope, TypeDefinition controllerTypeDefinition, TypeDefinition modelTypeDefinition)
         {
