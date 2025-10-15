@@ -1,32 +1,92 @@
-﻿namespace Toolbox;
+﻿using System.Collections;
 
-public sealed class DataKey<T>
+namespace Toolbox;
+
+public class ScopeKey
 {
     public required string Key { get; init; }
 
-    public T? this[DataScope scope]
+    public override int GetHashCode()
     {
-        get => scope.GetData(this);
-        set => scope.SetData(this, value);
+        return Key.GetHashCode();
     }
 }
 
-public sealed class DataScope
+public sealed class ScopeKey<T> : ScopeKey
 {
-    readonly Dictionary<string, object?> store = new();
-
-    public T? GetData<T>(DataKey<T> key)
+    public T this[Scope scope]
     {
-        if (store.TryGetValue(key.Key, out var value))
+        get
         {
-            return (T?)value;
-        }
+            var map = scope.AsDictionary();
+            if (map.TryGetValue(this, out var value))
+            {
+                return (T)value;
+            }
 
-        return default;
+            throw new KeyNotFoundException(Key);
+        }
+    }
+}
+
+public sealed class ScopeCreationInput : IEnumerable
+{
+    readonly Dictionary<ScopeKey, object> items = new();
+
+    public void Add<T>(ScopeKey<T> key, T value)
+    {
+        items.Add(key, value!);
     }
 
-    public void SetData<T>(DataKey<T> key, T? value)
+    public IReadOnlyDictionary<ScopeKey, object> AsDictionary() => items;
+
+    public IEnumerator GetEnumerator()
     {
-        store[key.Key] = value;
+        return items.GetEnumerator();
+    }
+}
+
+public sealed class Scope
+{
+    readonly Dictionary<ScopeKey, object> items = new();
+
+    Scope()
+    {
+    }
+
+    public static Scope Create(ScopeCreationInput input)
+    {
+        var scope = new Scope();
+
+        foreach (var (key, value) in input.AsDictionary())
+        {
+            scope.items.Add(key, value);
+        }
+
+        return scope;
+    }
+
+    public IReadOnlyDictionary<ScopeKey, object> AsDictionary() => items;
+
+    public bool Has(ScopeKey key)
+    {
+        return items.ContainsKey(key);
+    }
+
+    public Scope With(ScopeCreationInput input)
+    {
+        var scope = new Scope();
+
+        foreach (var (key, value) in items)
+        {
+            scope.items.Add(key, value);
+        }
+
+        foreach (var (key, value) in input.AsDictionary())
+        {
+            scope.items.Add(key, value);
+        }
+
+        return scope;
     }
 }
