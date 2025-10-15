@@ -34,12 +34,12 @@ static class Exporter
 
     static Result<TypeDefinition> getControllerTypeDefinition(Scope scope)
     {
-        var api = Api[scope];
+        
         var assemblyDefinition = Assembly[scope];
 
         // sample: BOA.InternetBanking.Payments.API -> BOA.InternetBanking.Payments.API.Controllers.GsmPrePaidController
 
-        var fullTypeName = $"{assemblyDefinition.Name.Name}.Controllers.{api.Name}Controller";
+        var fullTypeName = $"{assemblyDefinition.Name.Name}.Controllers.{ApiName[scope]}Controller";
 
         return CecilHelper.GetType(assemblyDefinition, fullTypeName);
     }
