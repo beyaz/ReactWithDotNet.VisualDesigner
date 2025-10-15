@@ -86,7 +86,7 @@ public sealed class Scope
 
         foreach (var (key, value) in input.AsDictionary())
         {
-            scope.items.Add(key, value);
+            scope.items[key] = value;
         }
 
         return scope;
