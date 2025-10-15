@@ -19,16 +19,26 @@ static class Exporter
 
         var files =
             from assemblyDefinition in ReadAPIAssembly(projectDirectory)
-            from _ in run(() =>
+           
+            let scope_ = scope = scope.With(new()
             {
-                scope = scope.With(new()
-                {
-                    { Assembly, assemblyDefinition }
-                });
+                { Assembly, assemblyDefinition }
             })
            
             from modelTypeDefinition in getModelTypeDefinition(scope)
+            
+            let scope__ = scope = scope.With(new()
+            {
+                { ModelTypeDefinition, modelTypeDefinition }
+            })
+            
             from controllerTypeDefinition in getControllerTypeDefinition(scope)
+            
+            let scope___ = scope = scope.With(new()
+            {
+                { ControllerTypeDefinition, controllerTypeDefinition }
+            })
+            
             from modelFile in getModelFile(scope)
             from serviceFile in getServiceFile(scope, controllerTypeDefinition)
             from serviceModelIntegrationFile in getServiceAndModelIntegrationFile(scope, controllerTypeDefinition, modelTypeDefinition)
@@ -38,12 +48,7 @@ static class Exporter
 
         return from file in files select FileSystem.Save(file);
 
-        static Result<Unit> run(Action action)
-        {
-            action();
-            
-            return Unit.Value;
-        }
+        
     }
 
     static Result<TypeDefinition> getControllerTypeDefinition(Scope scope)
