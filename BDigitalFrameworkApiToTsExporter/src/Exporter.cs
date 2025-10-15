@@ -5,7 +5,29 @@ namespace BDigitalFrameworkApiToTsExporter;
 static class Exporter
 {
     const string Tab = "    ";
+    
+    static Result<TypeDefinition> getModelTypeDefinition(Scope scope)
+    {
+        var api = Api[scope];
+        var assemblyDefinition = Assembly[scope];
 
+        // sample: BOA.InternetBanking.Payments.API -> BOA.InternetBanking.Payments.API.Models.GsmPrePaidModel
+
+        var fullTypeName = $"{assemblyDefinition.Name.Name}.Models.{api.Name}Model";
+
+        return CecilHelper.GetType(assemblyDefinition, fullTypeName);
+    }
+    static Result<TypeDefinition> getControllerTypeDefinition(Scope scope)
+    {
+        var api = Api[scope];
+        var assemblyDefinition = Assembly[scope];
+
+        // sample: BOA.InternetBanking.Payments.API -> BOA.InternetBanking.Payments.API.Controllers.GsmPrePaidController
+
+        var fullTypeName = $"{assemblyDefinition.Name.Name}.Controllers.{api.Name}Controller";
+
+        return CecilHelper.GetType(assemblyDefinition, fullTypeName);
+    }
     public static IAsyncEnumerable<Result<Unit>> TryExport()
     {
         var files =
@@ -140,29 +162,9 @@ static class Exporter
             return from method in controllerTypeDefinition.Methods where method.IsPublic && method.Parameters.Count == 1 && method.ReturnType.Name != "Void" select method;
         }
 
-        static Result<TypeDefinition> getModelTypeDefinition(Scope scope)
-        {
-            var api = Api[scope];
-            var assemblyDefinition = Assembly[scope];
+        
 
-            // sample: BOA.InternetBanking.Payments.API -> BOA.InternetBanking.Payments.API.Models.GsmPrePaidModel
-
-            var fullTypeName = $"{assemblyDefinition.Name.Name}.Models.{api.Name}Model";
-
-            return CecilHelper.GetType(assemblyDefinition, fullTypeName);
-        }
-
-        static Result<TypeDefinition> getControllerTypeDefinition(Scope scope)
-        {
-            var api = Api[scope];
-            var assemblyDefinition = Assembly[scope];
-
-            // sample: BOA.InternetBanking.Payments.API -> BOA.InternetBanking.Payments.API.Controllers.GsmPrePaidController
-
-            var fullTypeName = $"{assemblyDefinition.Name.Name}.Controllers.{api.Name}Controller";
-
-            return CecilHelper.GetType(assemblyDefinition, fullTypeName);
-        }
+      
 
         static string getSolutionName(string projectDirectory)
         {
