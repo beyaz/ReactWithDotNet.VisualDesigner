@@ -1,5 +1,4 @@
 ﻿using Mono.Cecil;
-using AssemblyDefinition = Mono.Cecil.AssemblyDefinition;
 
 namespace BDigitalFrameworkApiToTsExporter;
 
@@ -19,12 +18,7 @@ static class Exporter
                 {Assembly, assemblyDefinition},
                 {Api,api}
             })
-            let scope_old = new ApiScope
-            {
-                Config             = config,
-                AssemblyDefinition = assemblyDefinition,
-                ApiInfo            = api
-            }
+            
             from modelTypeDefinition in getModelTypeDefinition(scope)
             from controllerTypeDefinition in getControllerTypeDefinition(scope)
             from modelFile in getModelFile(scope)
@@ -374,12 +368,5 @@ static class Exporter
         }
     }
 
-    sealed record ApiScope
-    {
-        public required ConfigModel Config { get; init; }
-
-        public required AssemblyDefinition AssemblyDefinition { get; init; }
-
-        public required ApiInfo ApiInfo { get; init; }
-    }
+    
 }
