@@ -26,23 +26,18 @@ static class Exporter
             })
            
             from modelTypeDefinition in getModelTypeDefinition(scope)
+            from controllerTypeDefinition in getControllerTypeDefinition(scope)
             
             let scope__ = scope = scope.With(new()
             {
-                { ModelTypeDefinition, modelTypeDefinition }
-            })
-            
-            from controllerTypeDefinition in getControllerTypeDefinition(scope)
-            
-            let scope___ = scope = scope.With(new()
-            {
+                { ModelTypeDefinition, modelTypeDefinition },
                 { ControllerTypeDefinition, controllerTypeDefinition }
             })
             
-            from modelFile in getModelFile(scope)
-            from serviceFile in getServiceFile(scope, controllerTypeDefinition)
-            from serviceModelIntegrationFile in getServiceAndModelIntegrationFile(scope, controllerTypeDefinition, modelTypeDefinition)
-            from typeFiles in getTypeFiles(scope, controllerTypeDefinition).AsResult()
+            from modelFile in getModelFile(scope__)
+            from serviceFile in getServiceFile(scope__)
+            from serviceModelIntegrationFile in getServiceAndModelIntegrationFile(scope__)
+            from typeFiles in getTypeFiles(scope__).AsResult()
             from file in new[] { modelFile, serviceFile, serviceModelIntegrationFile }.Concat(typeFiles)
             select file;
 
@@ -112,9 +107,11 @@ static class Exporter
         return methodDefinition.ReturnType;
     }
 
-    static Result<FileModel> getServiceAndModelIntegrationFile(Scope scope, TypeDefinition controllerTypeDefinition, TypeDefinition modelTypeDefinition)
+    static Result<FileModel> getServiceAndModelIntegrationFile(Scope scope)
     {
         var projectDirectory = ProjectDirectory[scope];
+        var controllerTypeDefinition = ControllerTypeDefinition[scope];
+        var modelTypeDefinition = ModelTypeDefinition[scope];
 
         return
             from filePath in getOutputTsFilePath()
@@ -248,9 +245,11 @@ static class Exporter
         }
     }
 
-    static Result<FileModel> getServiceFile(Scope scope, TypeDefinition controllerTypeDefinition)
+    static Result<FileModel> getServiceFile(Scope scope)
     {
         var projectDirectory = ProjectDirectory[scope];
+        
+        var controllerTypeDefinition = ControllerTypeDefinition[scope];
 
         return
             from filePath in getOutputTsFilePath()
@@ -326,8 +325,11 @@ static class Exporter
         return Path.GetFileName(projectDirectory);
     }
 
-    static IEnumerable<Result<FileModel>> getTypeFiles(Scope scope, TypeDefinition controllerTypeDefinition)
+    static IEnumerable<Result<FileModel>> getTypeFiles(Scope scope)
     {
+        
+        var controllerTypeDefinition = ControllerTypeDefinition[scope];
+        
         return
             from methodDefinition in getExportablePublicMethods(controllerTypeDefinition)
             from file in getMethodRequestResponseTypesInFile(scope, methodDefinition)
