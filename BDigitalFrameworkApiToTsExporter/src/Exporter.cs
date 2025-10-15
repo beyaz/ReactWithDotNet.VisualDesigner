@@ -6,44 +6,42 @@ static class Exporter
 {
     const string Tab = "    ";
 
-    public static IAsyncEnumerable<Result<Unit>> TryExport()
+    public static IAsyncEnumerable<Result<FileModel>> CalculateFiles(string projectDirectory, string apiName)
     {
-        var projectDirectory = "D:\\work\\BOA.BusinessModules\\Dev\\BOA.InternetBanking.Payments";
-
         var scope = Scope.Create(new()
         {
             { ProjectDirectory, projectDirectory },
             { ExternalTypes, ExternalTypeList.Value },
-            { ApiName, "Religious" }
+            { ApiName, apiName }
         });
 
-        var files =
+        return
             from assemblyDefinition in ReadAPIAssembly(projectDirectory)
-           
             let scope_ = scope = scope.With(new()
             {
                 { Assembly, assemblyDefinition }
             })
-           
             from modelTypeDefinition in getModelTypeDefinition(scope)
             from controllerTypeDefinition in getControllerTypeDefinition(scope)
-            
             let scope__ = scope = scope.With(new()
             {
                 { ModelTypeDefinition, modelTypeDefinition },
                 { ControllerTypeDefinition, controllerTypeDefinition }
             })
-            
             from modelFile in getModelFile(scope__)
             from serviceFile in getServiceFile(scope__)
             from serviceModelIntegrationFile in getServiceAndModelIntegrationFile(scope__)
             from typeFiles in getTypeFiles(scope__).AsResult()
             from file in new[] { modelFile, serviceFile, serviceModelIntegrationFile }.Concat(typeFiles)
             select file;
+    }
 
-        return from file in files select FileSystem.Save(file);
+    public static IAsyncEnumerable<Result<Unit>> TryExport()
+    {
+        const string projectDirectory = "D:\\work\\BOA.BusinessModules\\Dev\\BOA.InternetBanking.Payments";
+        const string apiName = "Religious";
 
-        
+        return from file in CalculateFiles(projectDirectory, apiName) select FileSystem.Save(file);
     }
 
     static Result<TypeDefinition> getControllerTypeDefinition(Scope scope)
@@ -248,7 +246,7 @@ static class Exporter
     static Result<FileModel> getServiceFile(Scope scope)
     {
         var projectDirectory = ProjectDirectory[scope];
-        
+
         var controllerTypeDefinition = ControllerTypeDefinition[scope];
 
         return
@@ -327,9 +325,8 @@ static class Exporter
 
     static IEnumerable<Result<FileModel>> getTypeFiles(Scope scope)
     {
-        
         var controllerTypeDefinition = ControllerTypeDefinition[scope];
-        
+
         return
             from methodDefinition in getExportablePublicMethods(controllerTypeDefinition)
             from file in getMethodRequestResponseTypesInFile(scope, methodDefinition)
