@@ -15,7 +15,7 @@ static class Exporter
             from api in config.ApiList
             let scope = new ApiScope
             {
-                config             = config,
+                Config             = config,
                 AssemblyDefinition = assemblyDefinition,
                 ApiInfo            = api
             }
@@ -32,7 +32,7 @@ static class Exporter
 
         static Task<Result<FileModel>> getModelFile(ApiScope scope)
         {
-            var config = scope.config;
+            var config = scope.Config;
 
             return
                 from modelTypeDefinition in getModelTypeDefinition(scope)
@@ -64,7 +64,7 @@ static class Exporter
 
         static Result<FileModel> getServiceFile(ApiScope scope, TypeDefinition controllerTypeDefinition)
         {
-            var config = scope.config;
+            var config = scope.Config;
             var apiInfo = scope.ApiInfo;
 
             return
@@ -179,7 +179,7 @@ static class Exporter
 
         static Result<FileModel> getServiceAndModelIntegrationFile(ApiScope scope, TypeDefinition controllerTypeDefinition, TypeDefinition modelTypeDefinition)
         {
-            var config = scope.config;
+            var config = scope.Config;
             var apiInfo = scope.ApiInfo;
 
             return
@@ -327,11 +327,11 @@ static class Exporter
             if (methodDefinition.Parameters[0].ParameterType.Name != "BaseClientRequest")
             {
                 return
-                    from webProjectPath in getWebProjectFolderPath(scope.config.ProjectDirectory)
+                    from webProjectPath in getWebProjectFolderPath(scope.Config.ProjectDirectory)
                     let returnTypeDefinition = getReturnType(methodDefinition).Resolve()
                     let requestTypeDefinition = methodDefinition.Parameters[0].ParameterType.Resolve()
-                    let tsRequest = TsModelCreator.CreateFrom(scope.config.ExternalTypes, requestTypeDefinition)
-                    let tsResponse = TsModelCreator.CreateFrom(scope.config.ExternalTypes, returnTypeDefinition)
+                    let tsRequest = TsModelCreator.CreateFrom(scope.Config.ExternalTypes, requestTypeDefinition)
+                    let tsResponse = TsModelCreator.CreateFrom(scope.Config.ExternalTypes, returnTypeDefinition)
                     select new FileModel
                     {
                         Path    = getOutputFilePath(webProjectPath),
@@ -340,9 +340,9 @@ static class Exporter
             }
 
             return
-                from webProjectPath in getWebProjectFolderPath(scope.config.ProjectDirectory)
+                from webProjectPath in getWebProjectFolderPath(scope.Config.ProjectDirectory)
                 let returnTypeDefinition = getReturnType(methodDefinition).Resolve()
-                let tsResponse = TsModelCreator.CreateFrom(scope.config.ExternalTypes, returnTypeDefinition)
+                let tsResponse = TsModelCreator.CreateFrom(scope.Config.ExternalTypes, returnTypeDefinition)
                 select new FileModel
                 {
                     Path    = getOutputFilePath(webProjectPath),
@@ -358,7 +358,7 @@ static class Exporter
 
     sealed record ApiScope
     {
-        public required Config config { get; init; }
+        public required Config Config { get; init; }
 
         public required AssemblyDefinition AssemblyDefinition { get; init; }
 
