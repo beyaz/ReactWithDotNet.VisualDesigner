@@ -10,15 +10,24 @@ static class Exporter
     {
         var projectDirectory = "D:\\work\\BOA.BusinessModules\\Dev\\BOA.InternetBanking.Payments";
 
+        var scope = Scope.Create(new()
+        {
+            { ProjectDirectory, projectDirectory },
+            { ExternalTypes, ExternalTypeList.Value },
+           
+            { ApiName, "Religious" }
+        });
+
         var files =
             from assemblyDefinition in ReadAPIAssembly(projectDirectory)
-            let scope = Scope.Create(new()
+            from _ in run(() =>
             {
-                { ProjectDirectory, projectDirectory },
-                { ExternalTypes, ExternalTypeList.Value },
-                { Assembly, assemblyDefinition },
-                { ApiName, "Religious" }
+                scope = scope.With(new()
+                {
+                    { Assembly, assemblyDefinition }
+                });
             })
+           
             from modelTypeDefinition in getModelTypeDefinition(scope)
             from controllerTypeDefinition in getControllerTypeDefinition(scope)
             from modelFile in getModelFile(scope)
@@ -29,6 +38,13 @@ static class Exporter
             select file;
 
         return from file in files select FileSystem.Save(file);
+
+        static Result<Unit> run(Action action)
+        {
+            action();
+            
+            return Unit.Value;
+        }
     }
 
     static Result<TypeDefinition> getControllerTypeDefinition(Scope scope)
