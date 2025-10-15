@@ -13,6 +13,7 @@ static class Exporter
             from assemblyDefinition in ReadAPIAssembly(config.ProjectDirectory)
             let scope = Scope.Create(new()
             {
+                {ProjectDirectory,"D:\\work\\BOA.BusinessModules\\Dev\\BOA.InternetBanking.Payments"},
                 {ExternalTypes, ExternalTypeList.Value},
                 { Config, config },
                 { Assembly, assemblyDefinition },
@@ -49,12 +50,13 @@ static class Exporter
 
     static Task<Result<FileModel>> getModelFile(Scope scope)
     {
-        var config = Config[scope];
+        var projectDirectory = ProjectDirectory[scope];
+       
         var externalTypes = ExternalTypes[scope];
 
         return
             from modelTypeDefinition in getModelTypeDefinition(scope)
-            from modelFilePath in getOutputTsFilePath(config, modelTypeDefinition)
+            from modelFilePath in getOutputTsFilePath( modelTypeDefinition)
             let modelTsType = TsModelCreator.CreateFrom(externalTypes, modelTypeDefinition)
             select new FileModel
             {
@@ -62,10 +64,10 @@ static class Exporter
                 Content = TsOutput.LinesToString(TsOutput.GetTsCode(modelTsType))
             };
 
-        static Result<string> getOutputTsFilePath(ConfigModel config, TypeDefinition modelTypeDefinition)
+        Result<string> getOutputTsFilePath( TypeDefinition modelTypeDefinition)
         {
             return
-                from webProjectPath in getWebProjectFolderPath(config.ProjectDirectory)
+                from webProjectPath in getWebProjectFolderPath(projectDirectory)
                 select Path.Combine(webProjectPath, "ClientApp", "models", $"{modelTypeDefinition.Name}.ts");
         }
     }
@@ -94,11 +96,12 @@ static class Exporter
 
     static Result<FileModel> getServiceAndModelIntegrationFile(Scope scope, TypeDefinition controllerTypeDefinition, TypeDefinition modelTypeDefinition)
     {
-        var config = Config[scope];
+        var projectDirectory = ProjectDirectory[scope];
+
         var api = Api[scope];
 
         return
-            from filePath in getOutputTsFilePath(config, api)
+            from filePath in getOutputTsFilePath(api)
             select new FileModel
             {
                 Path    = filePath,
@@ -200,10 +203,10 @@ static class Exporter
             return lines;
         }
 
-        static Result<string> getOutputTsFilePath(ConfigModel config, ApiInfo apiInfo)
+        Result<string> getOutputTsFilePath(ApiInfo apiInfo)
         {
             return
-                from webProjectPath in getWebProjectFolderPath(config.ProjectDirectory)
+                from webProjectPath in getWebProjectFolderPath(projectDirectory)
                 select Path.Combine(webProjectPath, "ClientApp", "services", $"use{apiInfo.Name}.ts");
         }
 
@@ -231,11 +234,12 @@ static class Exporter
 
     static Result<FileModel> getServiceFile(Scope scope, TypeDefinition controllerTypeDefinition)
     {
-        var config = Config[scope];
+        var projectDirectory= ProjectDirectory[scope];
+     
         var api = Api[scope];
 
         return
-            from filePath in getOutputTsFilePath(config, api)
+            from filePath in getOutputTsFilePath( api)
             select new FileModel
             {
                 Path    = filePath,
@@ -266,7 +270,7 @@ static class Exporter
 
             lines.Add(string.Empty);
 
-            var basePath = getSolutionName(config.ProjectDirectory).RemoveFromStart("BOA.InternetBanking.").ToLower();
+            var basePath = getSolutionName(projectDirectory).RemoveFromStart("BOA.InternetBanking.").ToLower();
 
             lines.Add($"export const use{api.Name}Service = () => {{");
 
@@ -295,10 +299,10 @@ static class Exporter
             return lines;
         }
 
-        static Result<string> getOutputTsFilePath(ConfigModel config, ApiInfo apiInfo)
+         Result<string> getOutputTsFilePath( ApiInfo apiInfo)
         {
             return
-                from webProjectPath in getWebProjectFolderPath(config.ProjectDirectory)
+                from webProjectPath in getWebProjectFolderPath(projectDirectory)
                 select Path.Combine(webProjectPath, "ClientApp", "services", $"use{apiInfo.Name}Service.ts");
         }
     }
@@ -317,14 +321,15 @@ static class Exporter
 
         static Result<FileModel> getMethodRequestResponseTypesInFile(Scope scope, MethodDefinition methodDefinition)
         {
+            var projectDirectory= ProjectDirectory[scope];
             var externalTypes = ExternalTypes[scope];
-            var config = Config[scope];
+          
             var api = Api[scope];
 
             if (methodDefinition.Parameters[0].ParameterType.Name != "BaseClientRequest")
             {
                 return
-                    from webProjectPath in getWebProjectFolderPath(config.ProjectDirectory)
+                    from webProjectPath in getWebProjectFolderPath(projectDirectory)
                     let returnTypeDefinition = getReturnType(methodDefinition).Resolve()
                     let requestTypeDefinition = methodDefinition.Parameters[0].ParameterType.Resolve()
                     let tsRequest = TsModelCreator.CreateFrom(externalTypes, requestTypeDefinition)
@@ -337,7 +342,7 @@ static class Exporter
             }
 
             return
-                from webProjectPath in getWebProjectFolderPath(config.ProjectDirectory)
+                from webProjectPath in getWebProjectFolderPath(projectDirectory)
                 let returnTypeDefinition = getReturnType(methodDefinition).Resolve()
                 let tsResponse = TsModelCreator.CreateFrom(externalTypes, returnTypeDefinition)
                 select new FileModel
