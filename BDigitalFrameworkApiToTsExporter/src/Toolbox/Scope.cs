@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Diagnostics;
 
 namespace Toolbox;
 
@@ -46,6 +47,7 @@ public sealed class ScopeCreationInput : IEnumerable
     }
 }
 
+[DebuggerTypeProxy(typeof(ScopeDebugView))]
 public sealed class Scope
 {
     readonly Dictionary<ScopeKey, object> items = new();
@@ -88,5 +90,25 @@ public sealed class Scope
         }
 
         return scope;
+    }
+
+    class ScopeDebugView
+    {
+        readonly Scope scope;
+
+        public ScopeDebugView(Scope scope)
+        {
+            this.scope = scope;
+        }
+
+        [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
+        public ItemDebugView[] Items => scope.items.Select(p => new ItemDebugView { Key = p.Key.Key, Value = p.Value }).ToArray();
+    }
+
+    [DebuggerDisplay("{Key} : {Value}")]
+    class ItemDebugView
+    {
+        public required string Key { get; init; }
+        public required object Value { get; init; }
     }
 }
