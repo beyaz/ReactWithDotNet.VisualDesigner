@@ -92,11 +92,21 @@ public sealed class Scope
         return scope;
     }
     
-    
-    public static Scope operator +(Scope scope, ScopeCreationInput input)
+    public Scope With<T>(ScopeKey<T> scopeKey, T value )
     {
-        return scope.With(input);
+        var scope = new Scope();
+
+        foreach (var item in items)
+        {
+            scope.items.Add(item.Key, item.Value);
+        }
+
+        scope.items[scopeKey] = value!;
+
+        return scope;
     }
+    
+    
 
     
 

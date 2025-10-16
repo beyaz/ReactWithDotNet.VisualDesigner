@@ -17,10 +17,7 @@ static class Exporter
 
         return
             from assemblyDefinition in ReadAPIAssembly(projectDirectory)
-            let scope_ = scope += new ScopeCreationInput()
-            {
-                { Assembly, assemblyDefinition }
-            }
+            let scope_ = scope.With(Assembly, assemblyDefinition)
             from modelTypeDefinition in getModelTypeDefinition(scope)
             from controllerTypeDefinition in getControllerTypeDefinition(scope)
             let scope__ = scope = scope.With(new()
