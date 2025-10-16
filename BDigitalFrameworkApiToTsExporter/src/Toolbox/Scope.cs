@@ -140,7 +140,22 @@ public static class ScopeExtensions
             return result.Error;
         }
 
-
         return existingScope.With(scopeKey, result.Value);
+    }
+    public static Result<Scope> With<T>(this Result<Scope> existingScope, ScopeKey<T> scopeKey, Func<Scope, Result<T>> next)
+    {
+        if (existingScope.HasError)
+        {
+            return existingScope.Error;
+        }
+
+        var result = next(existingScope.Value);
+        
+        if (result.HasError)
+        {
+            return result.Error;
+        }
+
+        return existingScope.Value.With(scopeKey, result.Value);
     }
 }

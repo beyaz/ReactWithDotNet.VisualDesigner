@@ -8,27 +8,24 @@ static class Exporter
 
     public static IAsyncEnumerable<Result<FileModel>> CalculateFiles(string projectDirectory, string apiName)
     {
-        var scope = Scope.Create(new()
-        {
-            { ProjectDirectory, projectDirectory },
-            { ExternalTypes, ExternalTypeList.Value },
-            { ApiName, apiName }
-        });
 
         return
-            from assemblyDefinition in ReadAPIAssembly(projectDirectory)
-            let scope_ = scope.With(Assembly, assemblyDefinition)
+            from scope in Scope.Create(new()
+                                {
+                                    { ProjectDirectory, projectDirectory },
+                                    { ExternalTypes, ExternalTypeList.Value },
+                                    { ApiName, apiName }
+                                })
+                               .With(Assembly, ReadAPIAssembly(projectDirectory))
+                               .With(ModelTypeDefinition, getModelTypeDefinition)
+                               .With(ControllerTypeDefinition,getControllerTypeDefinition)
+                                
             from modelTypeDefinition in getModelTypeDefinition(scope)
             from controllerTypeDefinition in getControllerTypeDefinition(scope)
-            let scope__ = scope = scope.With(new()
-            {
-                { ModelTypeDefinition, modelTypeDefinition },
-                { ControllerTypeDefinition, controllerTypeDefinition }
-            })
-            from modelFile in getModelFile(scope__)
-            from serviceFile in getServiceFile(scope__)
-            from serviceModelIntegrationFile in getServiceAndModelIntegrationFile(scope__)
-            from typeFiles in getTypeFiles(scope__).AsResult()
+            from modelFile in getModelFile(scope)
+            from serviceFile in getServiceFile(scope)
+            from serviceModelIntegrationFile in getServiceAndModelIntegrationFile(scope)
+            from typeFiles in getTypeFiles(scope).AsResult()
             from file in new[] { modelFile, serviceFile, serviceModelIntegrationFile }.Concat(typeFiles)
             select file;
     }
