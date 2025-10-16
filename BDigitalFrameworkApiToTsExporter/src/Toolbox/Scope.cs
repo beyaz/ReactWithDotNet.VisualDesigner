@@ -130,3 +130,17 @@ public sealed class Scope
         public required object Value { get; init; }
     }
 }
+
+public static class ScopeExtensions
+{
+    public static Result<Scope> With<T>(this Scope existingScope, ScopeKey<T> scopeKey, Result<T> result)
+    {
+        if (result.HasError)
+        {
+            return result.Error;
+        }
+
+
+        return existingScope.With(scopeKey, result.Value);
+    }
+}
