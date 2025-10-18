@@ -169,10 +169,16 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
 
         static NodeModel CreateNode(ComponentEntity x)
         {
+            var directoryName = Path.GetDirectoryName(x.GetExportFilePath());
+
+            var name = x.GetName();
+
+            var names = (directoryName + "/" + name).Split(['/', '\\'], StringSplitOptions.RemoveEmptyEntries);
+            
             return new NodeModel
             {
                 ComponentId    = x.Id,
-                Names          = (Path.GetDirectoryName(x.GetExportFilePath()) + "/" + x.GetName()).Split(['/', '\\'], StringSplitOptions.RemoveEmptyEntries),
+                Names          = names,
                 ExportFilePath = x.GetExportFilePath()
             };
         }
