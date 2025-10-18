@@ -73,21 +73,19 @@ static class CecilHelper
         throw new InvalidOperationException("Invalid property path.");
     }
 
-    public static IReadOnlyList<string> GetPropertyPathList(string assemblyPath, string typeFullName, string prefix, Func<PropertyDefinition, bool> matchFunc)
+    public static Result<IReadOnlyList<string>> GetPropertyPathList(string assemblyPath, string typeFullName, string prefix, Func<PropertyDefinition, bool> matchFunc)
     {
-        var assembly = AssemblyDefinition.ReadAssembly(assemblyPath);
-        if (assembly is null)
-        {
-            return [];
-        }
-
-        var type = assembly.MainModule.GetType(typeFullName);
-        if (type is null)
-        {
-            return [];
-        }
-
-        return findProperties(isInSameAssembly, type, prefix, matchFunc);
+        return from assembly in Try(() => AssemblyDefinition.ReadAssembly(assemblyPath))
+               let type = assembly.MainModule.GetType(typeFullName)
+               select (type is null) switch
+               {
+                   true => new Exception($"TypeNotFound.{typeFullName}"),
+                   false => new Result<IReadOnlyList<string>>
+                   {
+                       Value = findProperties(isInSameAssembly, type, prefix, matchFunc)
+                   }
+               };
+        
 
         bool isInSameAssembly(TypeReference typeReference)
         {

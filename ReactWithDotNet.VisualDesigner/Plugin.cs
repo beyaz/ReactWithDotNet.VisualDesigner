@@ -1,16 +1,18 @@
-﻿using System.Collections;
+﻿using Dapper;
+using Microsoft.Data.SqlClient;
+using Mono.Cecil;
+using Newtonsoft.Json;
+using ReactWithDotNet.ThirdPartyLibraries.MUI.Material;
+using ReactWithDotNet.VisualDesigner.Configuration;
+using ReactWithDotNet.VisualDesigner.Exporters;
+using System.Collections;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Data;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Text;
-using Dapper;
-using Microsoft.Data.SqlClient;
-using Newtonsoft.Json;
-using ReactWithDotNet.ThirdPartyLibraries.MUI.Material;
-using ReactWithDotNet.VisualDesigner.Configuration;
-using ReactWithDotNet.VisualDesigner.Exporters;
 
 namespace ReactWithDotNet.VisualDesigner;
 
@@ -232,17 +234,29 @@ static class Plugin
                 "false"
             ];
 
-            List<string> remoteApiMethodNames = [];
-
             foreach (var (variableName, dotNetAssemblyFilePath, dotnetTypeFullName) in GetDotNetVariables(scope.Component))
             {
-                stringSuggestions.AddRange(CecilHelper.GetPropertyPathList(dotNetAssemblyFilePath, dotnetTypeFullName, $"{variableName}.", CecilHelper.IsString));
-                numberSuggestions.AddRange(CecilHelper.GetPropertyPathList(dotNetAssemblyFilePath, dotnetTypeFullName, $"{variableName}.", CecilHelper.IsNumber));
-                dateSuggestions.AddRange(CecilHelper.GetPropertyPathList(dotNetAssemblyFilePath, dotnetTypeFullName, $"{variableName}.", CecilHelper.IsDateTime));
-                booleanSuggestions.AddRange(CecilHelper.GetPropertyPathList(dotNetAssemblyFilePath, dotnetTypeFullName, $"{variableName}.", CecilHelper.IsBoolean));
-                collectionSuggestions.AddRange(CecilHelper.GetPropertyPathList(dotNetAssemblyFilePath, dotnetTypeFullName, $"{variableName}.", CecilHelper.IsCollection));
+                List<(List<string> list, Func<PropertyDefinition, bool> matchFunc)> map =
+                [
+                    (stringSuggestions, CecilHelper.IsString),
+                    (numberSuggestions, CecilHelper.IsNumber),
+                    (dateSuggestions, CecilHelper.IsDateTime),
+                    (booleanSuggestions, CecilHelper.IsBoolean),
+                    (collectionSuggestions, CecilHelper.IsCollection)
+                ];
+                
+                foreach (var (list, fn) in map)
+                {
+                    var result = CecilHelper.GetPropertyPathList(dotNetAssemblyFilePath, dotnetTypeFullName, $"{variableName}.", fn);
+                    if (result.HasError)
+                    {
+                     continue;   
+                    }
 
-                remoteApiMethodNames.AddRange(CecilHelper.GetRemoteApiMethodNames(dotNetAssemblyFilePath, dotnetTypeFullName));
+                    list.AddRange(result.Value);
+                }
+                
+               
             }
 
             List<string> returnList = [];
@@ -336,10 +350,7 @@ static class Plugin
 
                     case JsType.Function:
                     {
-                        foreach (var remoteApiMethodName in remoteApiMethodNames)
-                        {
-                            addSuggestion(prop.Name, $"callRemoteApi('{remoteApiMethodName}')");
-                        }
+                       
 
                         break;
                     }
