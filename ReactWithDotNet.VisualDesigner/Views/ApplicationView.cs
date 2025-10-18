@@ -1970,11 +1970,18 @@ sealed class ApplicationView : Component<ApplicationState>
                     value = props[state.Selection.SelectedPropertyIndex.Value];
                 }
 
+                var suggestions = await GetPropSuggestions(state);
+                if (suggestions.HasError)
+                {
+                    return new div { suggestions.Error.ToString() };
+
+                }
+
                 return new MagicInput
                 {
                     Placeholder = "Add property",
 
-                    Suggestions = await GetPropSuggestions(state),
+                    Suggestions = suggestions.Value,
 
                     Name = (state.Selection.SelectedPropertyIndex ?? (props.Count + 1) * -1).ToString(),
 

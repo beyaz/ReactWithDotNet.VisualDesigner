@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Reflection;
 
 namespace ReactWithDotNet.VisualDesigner.Views;
@@ -111,7 +112,7 @@ static class ApplicationLogic
         return GetAllProjectsCached().Select(x => x.Name).ToList();
     }
 
-    public static async Task<IReadOnlyList<string>> GetPropSuggestions(ApplicationState state)
+    public static async Task<Result<IReadOnlyList<string>>> GetPropSuggestions(ApplicationState state)
     {
         var scope = new PropSuggestionScope();
         {
@@ -132,7 +133,16 @@ static class ApplicationLogic
 
         var items = new List<string>();
 
-        items.AddRange(await Plugin.GetPropSuggestions(scope));
+        {
+            var result = await Plugin.GetPropSuggestions(scope);
+            if (result.HasError)
+            {
+                return result.Error;
+            }
+            
+            items.AddRange(result.Value);
+        }
+        
 
         if (scope.TagName != null)
         {

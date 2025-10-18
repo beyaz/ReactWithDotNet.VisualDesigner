@@ -188,16 +188,16 @@ static class Plugin
         }
     }
 
-    public static async Task<IReadOnlyList<string>> GetPropSuggestions(PropSuggestionScope scope)
+    public static async Task<Result<IReadOnlyList<string>>> GetPropSuggestions(PropSuggestionScope scope)
     {
         if (scope.TagName.HasNoValue())
         {
-            return [];
+            return Result.From((IReadOnlyList<string>)[]);
         }
 
         return await Cache.AccessValue($"{nameof(Plugin)}-{scope.TagName}", () => calculate(scope));
 
-        static async Task<IReadOnlyList<string>> calculate(PropSuggestionScope scope)
+        static async Task<Result<IReadOnlyList<string>>> calculate(PropSuggestionScope scope)
         {
             var collectionSuggestions = new List<string>();
 

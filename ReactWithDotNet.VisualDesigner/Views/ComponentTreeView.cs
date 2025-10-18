@@ -165,12 +165,17 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
         return Cache.AccessValue($"{nameof(ComponentTreeView)}-{nameof(GetAllNodes)}-{ProjectId}",
                                  () => ListFrom(from x in GetAllComponentsInProjectFromCache(ProjectId)
                                                 orderby x.GetName() descending
-                                                select new NodeModel
-                                                {
-                                                    ComponentId    = x.Id,
-                                                    Names          = (Path.GetDirectoryName(x.GetExportFilePath()) + "/" + x.GetName()).Split(['/', '\\'], StringSplitOptions.RemoveEmptyEntries),
-                                                    ExportFilePath = x.GetExportFilePath()
-                                                }));
+                                                select CreateNode(x)));
+
+        static NodeModel CreateNode(ComponentEntity x)
+        {
+            return new NodeModel
+            {
+                ComponentId    = x.Id,
+                Names          = (Path.GetDirectoryName(x.GetExportFilePath()) + "/" + x.GetName()).Split(['/', '\\'], StringSplitOptions.RemoveEmptyEntries),
+                ExportFilePath = x.GetExportFilePath()
+            };
+        }
     }
 
     Task InitializeState()
