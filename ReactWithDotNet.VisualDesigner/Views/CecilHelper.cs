@@ -114,7 +114,7 @@ static class CecilHelper
                                      from nestedProperty in findProperties(isInSameAssembly, p.PropertyType.Resolve(), prefix + p.Name + ".", matchFunc)
                                      select nestedProperty;
 
-            return properties.Concat(nestedProperties).Concat(contractProperties).ToList();
+            return (from path in properties.Concat(nestedProperties).Concat(contractProperties) select TypescriptNaming.NormalizeBindingPath(path)).ToList();
         }
     }
 

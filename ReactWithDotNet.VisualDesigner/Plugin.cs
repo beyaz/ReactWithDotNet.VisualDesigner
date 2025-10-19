@@ -50,7 +50,7 @@ class Plugin: IPlugin
     public  string AnalyzeExportFilePath(string exportFilePathForComponent)
     {
         var names = exportFilePathForComponent.Split('/', StringSplitOptions.RemoveEmptyEntries);
-        if (names.Length == 2 && names[0].StartsWith("BOA."))
+        if (names[0].StartsWith("BOA."))
         {
             // project folder is d:\work\
             // we need to calculate rest of path
@@ -59,20 +59,20 @@ class Plugin: IPlugin
 
             var solutionName = names[0];
 
-            var pagesFolderPath = string.Empty;
+            var clientAppFolderPath = string.Empty;
             {
-                pagesFolderPath = $@"D:\work\BOA.BusinessModules\Test\{solutionName}\OBAWeb\OBA.Web.{solutionName.RemoveFromStart("BOA.")}\ClientApp\pages\";
+                clientAppFolderPath = $@"D:\work\BOA.BusinessModules\Dev\{solutionName}\OBAWeb\OBA.Web.{solutionName.RemoveFromStart("BOA.")}\ClientApp\";
                 if (solutionName == "BOA.MobilePos")
                 {
-                    pagesFolderPath = @"D:\work\BOA.BusinessModules\Dev\BOA.MobilePos\OBAWeb\OBA.Web.POSPortal.MobilePos\ClientApp\pages\";
+                    clientAppFolderPath = @"D:\work\BOA.BusinessModules\Dev\BOA.MobilePos\OBAWeb\OBA.Web.POSPortal.MobilePos\ClientApp\";
                 }
             }
 
             var fileName = names[1];
 
-            if (Directory.Exists(pagesFolderPath))
+            if (Directory.Exists(clientAppFolderPath))
             {
-                return Path.Combine(pagesFolderPath, fileName);
+                return Path.Combine(clientAppFolderPath, Path.Combine(names.Skip(1).ToArray()));
             }
         }
 
@@ -297,7 +297,7 @@ class Plugin: IPlugin
                     {
                         foreach (var item in stringSuggestions)
                         {
-                            if (item.StartsWith("request."))
+                            if (item.StartsWith("model."))
                             {
                                 addSuggestion(prop.Name, ConvertDotNetPathToJsPath(item));
                                 continue;
@@ -1355,11 +1355,13 @@ class Plugin: IPlugin
                     {
                         var properties = node.Properties;
 
-                        List<string> lines =
+                        
+                        TsLineCollection lines =
                         [
                             "(value: string, formattedValue: string, areaCode: string) =>",
                             "{",
-                            $"  updateRequest(r => {{ r.{phoneNumberProp.Value.RemoveFromStart("request.")} = value; }});"
+                            $"  {phoneNumberProp.Value} = value;",
+                            GetUpdateStateLine(phoneNumberProp.Value)
                         ];
 
                         if (handlePhoneChangeProp is not null)
@@ -1380,7 +1382,7 @@ class Plugin: IPlugin
                         {
                             handlePhoneChangeProp = handlePhoneChangeProp with
                             {
-                                Value = string.Join(Environment.NewLine, lines)
+                                Value = lines.ToTsCode()
                             };
 
                             properties = properties.SetItem(properties.FindIndex(x => x.Name == handlePhoneChangeProp.Name), handlePhoneChangeProp);
@@ -1390,7 +1392,7 @@ class Plugin: IPlugin
                             properties = properties.Add(new()
                             {
                                 Name  = "handlePhoneChange",
-                                Value = string.Join(Environment.NewLine, lines)
+                                Value = lines.ToTsCode()
                             });
                         }
 

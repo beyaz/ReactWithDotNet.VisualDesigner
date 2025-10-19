@@ -52,14 +52,12 @@ static class TsxExporter
         var leftPaddingCount = 0;
         var firstReturnLineIndex = -1;
         {
-            for (var i = 1; i < 20; i++)
+            var leftSpaceCount = Array.FindIndex(lines[componentDeclarationLineIndex].ToCharArray(), c => c != ' ');
+            
+            foreach (var item in lines.FindLineIndexStartsWith(componentDeclarationLineIndex, leftSpaceCount + 4, "return ("))
             {
-                firstReturnLineIndex = lines.FindIndex(componentDeclarationLineIndex, l => l == new string(' ', i) + "return (");
-                if (firstReturnLineIndex > 0)
-                {
-                    leftPaddingCount = i;
-                    break;
-                }
+                firstReturnLineIndex = item;
+                leftPaddingCount     = leftSpaceCount + 4;
             }
         }
 

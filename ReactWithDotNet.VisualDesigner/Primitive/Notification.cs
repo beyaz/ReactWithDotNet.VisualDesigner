@@ -50,7 +50,7 @@ static class NotificationHelper
         return CreateNotificationContent(new() { Text = message });
     }
 
-    public static void FailNotification(this IReactComponent component, string message, int timeoutInMilliseconds = 3000)
+    public static void FailNotification(this IReactComponent component, string message, int timeoutInMilliseconds = 4000)
     {
         component.Client.DispatchEvent<PublishNotification>([new NotificationMessage { Text = message, TimeoutInMilliseconds = timeoutInMilliseconds }]);
     }
