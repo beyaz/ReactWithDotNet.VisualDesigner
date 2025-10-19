@@ -172,7 +172,7 @@ static class Plugin
         {
             if (fullTypeName.StartsWith("BOA.InternetBanking.Payments.API", StringComparison.OrdinalIgnoreCase))
             {
-                const string projectBinDirectoryPath = @"D:\work\BOA.BusinessModules\Test\BOA.InternetBanking.Payments\API\BOA.InternetBanking.Payments.API\bin\Debug\net8.0\";
+                const string projectBinDirectoryPath = @"D:\work\BOA.BusinessModules\Dev\BOA.InternetBanking.Payments\API\BOA.InternetBanking.Payments.API\bin\Debug\net8.0\";
 
                 return projectBinDirectoryPath + "BOA.InternetBanking.Payments.API.dll";
             }
