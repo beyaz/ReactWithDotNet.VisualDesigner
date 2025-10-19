@@ -16,15 +16,23 @@ using System.Text;
 
 namespace ReactWithDotNet.VisualDesigner;
 
+
 sealed record PropSuggestionScope
 {
     public ComponentEntity Component { get; init; }
 
     public Maybe<ComponentEntity> SelectedComponent { get; init; }
+    
     public string TagName { get; init; }
 }
 
-static class Plugin
+interface IPlugin
+{
+    string AnalyzeExportFilePath(string exportFilePathForComponent);
+}
+
+
+class Plugin: IPlugin
 {
     static string GetUpdateStateLine(string jsVariableName)
     {
@@ -38,8 +46,8 @@ static class Plugin
 
         return null;
     }
-    
-    public static string AnalyzeExportFilePath(string exportFilePathForComponent)
+
+    public  string AnalyzeExportFilePath(string exportFilePathForComponent)
     {
         var names = exportFilePathForComponent.Split('/', StringSplitOptions.RemoveEmptyEntries);
         if (names.Length == 2 && names[0].StartsWith("BOA."))

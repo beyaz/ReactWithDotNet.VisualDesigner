@@ -331,7 +331,7 @@ static class Extensions
 
         var exportFilePath = component.GetExportFilePath();
 
-        exportFilePath = Plugin.AnalyzeExportFilePath(exportFilePath);
+        exportFilePath = PluginWrapper.AnalyzeExportFilePath(exportFilePath);
 
         var filePath = Path.Combine(userLocalWorkspacePath, Path.Combine(exportFilePath.Split('/', Path.DirectorySeparatorChar)));
         
