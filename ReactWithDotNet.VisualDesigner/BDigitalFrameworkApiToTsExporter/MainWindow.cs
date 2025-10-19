@@ -136,12 +136,41 @@ class MainWindow : Component<MainWindow.Model>
         return Task.CompletedTask;
     }
      
-    Task OnApiSelected(MouseEvent e)
+    async Task OnApiSelected(MouseEvent e)
     {
 
         state.SelectedApiName = e.currentTarget.id;
+
+        await UpdateFiles(null);
+    }
+
+    async Task UpdateFiles(MouseEvent e)
+    {
+        if (!state.SelectedApiName.HasValue())
+        {
+            return;
+        }
         
-        return Task.CompletedTask;
+        string projectDirectory = new DirectoryInfo(state.AssemblyFilePath).Parent?.Parent?.Parent?.Parent?.Parent?.Parent?.FullName;
+
+
+        var files = Exporter.CalculateFiles(projectDirectory, state.SelectedApiName);
+
+        List<FileModel> fileModels = [];
+
+        await foreach (var file in files)
+        {
+            if (file.HasError)
+            {
+                state.StatusMessage = file.Error.Message;
+                return;
+            }
+
+            fileModels.Add(file.Value);
+        }
+
+        state.Files = fileModels;
+        
     }
     
     
@@ -155,5 +184,7 @@ class MainWindow : Component<MainWindow.Model>
         public IEnumerable<string> ApiNames { get; set; }
 
         public string SelectedApiName { get; set; }
+
+        public IReadOnlyList<FileModel> Files { get; set; }         
     }
 }
