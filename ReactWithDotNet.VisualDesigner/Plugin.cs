@@ -1706,11 +1706,12 @@ class Plugin: IPlugin
 
                         var isCollection = IsPropertyPathProvidedByCollection(componentConfig, valueProp.Value);
 
-                        List<string> lines =
+                        TsLineCollection lines =
                         [
                             "(selectedIndexes: [number], selectedItems: [TextValuePair], selectedValues: [string]) =>",
                             "{",
-                            $"  updateRequest(r => {{ r.{valueProp.Value.RemoveFromStart("request.")} = selectedValues{(isCollection ? string.Empty : "[0]")}; }});"
+                            $"  {valueProp.Value} = selectedValues{(isCollection ? string.Empty : "[0]")};",
+                            GetUpdateStateLine(valueProp.Value)
                         ];
 
                         if (onSelectProp is not null)
@@ -1731,7 +1732,7 @@ class Plugin: IPlugin
                         {
                             onSelectProp = onSelectProp with
                             {
-                                Value = string.Join(Environment.NewLine, lines)
+                                Value = lines.ToTsCode()
                             };
 
                             properties = properties.SetItem(properties.FindIndex(x => x.Name == onSelectProp.Name), onSelectProp);
@@ -1741,7 +1742,7 @@ class Plugin: IPlugin
                             properties = properties.Add(new()
                             {
                                 Name  = nameof(onSelect),
-                                Value = string.Join(Environment.NewLine, lines)
+                                Value = lines.ToTsCode()
                             });
                         }
 
