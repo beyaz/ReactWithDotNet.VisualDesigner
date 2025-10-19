@@ -31,6 +31,6 @@ public class CecilHelperTest
 
         var propertyPathList = CecilHelper.GetPropertyPathList(assemblyFilePath, dotnetTypeFullName, $"{variableName}.", CecilHelper.IsString);
         
-        propertyPathList.Count.ShouldBeGreaterThan(1);
+        propertyPathList.Value.Count.ShouldBeGreaterThan(1);
     }
 }
