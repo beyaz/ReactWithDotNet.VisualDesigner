@@ -2647,12 +2647,25 @@ static class Plugin
                     {
                         var properties = node.Properties;
 
+                        var updateStateLine = string.Empty;
+                        var propertyPath = valueProp.Value.Split('.', StringSplitOptions.RemoveEmptyEntries);
+                        if (propertyPath.Length == 2)
+                        {
+                            var stateName = propertyPath[0];
+
+                            updateStateLine = $"  set{Char.ToUpper(stateName[0]) + stateName[1..]}({{ ...{stateName} }});";
+                        }
+                        
                         List<string> lines =
                         [
                             "(e: any, value: any) =>",
                             "{",
-                            $"  updateRequest(r => {{ r.{valueProp.Value.RemoveFromStart("request.")} = value; }});"
+                            $"  {valueProp.Value} = value;",
                         ];
+                        if (updateStateLine.HasValue())
+                        {
+                            lines.Add(updateStateLine);
+                        }
 
                         if (onChangeProp is not null)
                         {
