@@ -44,61 +44,58 @@ class MainWindow : Component<MainWindow.Model>
                             }
                         }
                     },
-                    new div(WidthFull, DisplayFlex)
+                    new div(Width(200), BorderRight(1, solid, "#d1d5db"), DisplayFlex, FlexDirectionColumn)
                     {
-                        new div(Width(200), BorderRight(1, solid, "#d1d5db"), DisplayFlex, FlexDirectionColumn)
+                        new div(Height(40), FontWeight600, DisplayFlex, JustifyContentCenter, AlignItemsCenter, BorderBottom(1, solid, "#d1d5db"))
                         {
-                            new div(Height(40), FontWeight600, DisplayFlex, JustifyContentCenter, AlignItemsCenter, BorderBottom(1, solid, "#d1d5db"))
+                            new div
                             {
-                                new div
+                                "Files"
+                            }
+                        },
+                        new div(Flex(1, 1, 0), Padding(8), DisplayFlex, FlexDirectionColumn, Gap(16), OverflowAuto)
+                        {
+                            from item in state.Files
+                            select new div(Id(item.Path), OnClick(OnFileSelected), Border(1, solid, Gray300), BorderRadius(4), DisplayFlex, JustifyContentCenter, AlignItemsCenter, state.SelectedFilePath== item.Path ? BackgroundColor(Gray100) : BackgroundColor(White), Hover(BorderColor(Gray500)))
+                            {
+                                new div(Padding(4))
                                 {
-                                    "Files"
+                                    Path.GetFileName(item.Path)
+                                }
+                            }
+                        }
+                    },
+                    new div(WidthFull, DisplayFlex, FlexDirectionColumn)
+                    {
+                        new div(Height(40), DisplayFlex, BorderBottom(1, solid, "#d1d5db"))
+                        {
+                            new div(Height(40), FontWeight600, DisplayFlex, JustifyContentCenter, AlignItemsCenter, Width("50%"))
+                            {
+                                new div(Padding(4, 8), Border(1, solid, Gray300), BorderRadius(4), Hover(BackgroundColor(Gray100)))
+                                {
+                                    "Export All"
                                 }
                             },
-                            new div(Flex(1, 1, 0), Padding(8), DisplayFlex, FlexDirectionColumn, Gap(16), OverflowAuto)
+                            new div(Height(40), FontWeight600, DisplayFlex, JustifyContentCenter, AlignItemsCenter, Width("50%"))
                             {
-                                from item in state.Files
-                                select new div(Id(item.Path), OnClick(OnFileSelected), Border(1, solid, Gray300), BorderRadius(4), DisplayFlex, JustifyContentCenter, AlignItemsCenter, state.SelectedFilePath== item.Path ? BackgroundColor(Gray100) : BackgroundColor(White), Hover(BorderColor(Gray500)))
+                                new div(Padding(4, 8), Border(1, solid, Gray300), BorderRadius(4), Hover(BackgroundColor(Gray100)))
                                 {
-                                    new div(Padding(4))
-                                    {
-                                        Path.GetFileName(item.Path)
-                                    }
+                                    "Export"
                                 }
                             }
                         },
-                        new div(WidthFull, DisplayFlex, FlexDirectionColumn)
+                        new div(DisplayFlex, FlexDirectionColumn, FlexGrow(1))
                         {
-                            new div(Height(40), DisplayFlex, BorderBottom(1, solid, "#d1d5db"))
+                            new div(Height(40), DisplayFlex, AlignItemsCenter, PaddingLeft(8))
                             {
-                                new div(Height(40), FontWeight600, DisplayFlex, JustifyContentCenter, AlignItemsCenter, Width("50%"))
+                                new div
                                 {
-                                    new div(Padding(4, 8), Border(1, solid, Gray300), BorderRadius(4), Hover(BackgroundColor(Gray100)))
-                                    {
-                                        "Export All"
-                                    }
-                                },
-                                new div(Height(40), FontWeight600, DisplayFlex, JustifyContentCenter, AlignItemsCenter, Width("50%"))
-                                {
-                                    new div(Padding(4, 8), Border(1, solid, Gray300), BorderRadius(4), Hover(BackgroundColor(Gray100)))
-                                    {
-                                        "Export"
-                                    }
+                                    CalculateSelectedFilePathRelativeToProject()
                                 }
                             },
-                            new div(HeightFull, DisplayFlex, FlexDirectionColumn)
+                            new div(Padding(4), WidthFull, Border(1, solid, Gray300), BorderRadius(4), FlexGrow(1), OverflowHidden)
                             {
-                                new div(Height(40), DisplayFlex, AlignItemsCenter, PaddingLeft(8))
-                                {
-                                    new div
-                                    {
-                                        CalculateSelectedFilePathRelativeToProject()
-                                    }
-                                },
-                                new div(HeightFull, Padding(4))
-                                {
-                                    new textarea(textarea.Value(GetSelectedFileContent()), HeightFull, WidthFull, Border(1, solid, Gray300), BorderRadius(4), Padding(4), Focus(OutlineNone), FontSizeSmall)
-                                }
+                                new TsFileViewer{Value=GetSelectedFileContent()}
                             }
                         }
                     }
@@ -217,8 +214,8 @@ class MainWindow : Component<MainWindow.Model>
 
     Element GetTsEditor()
     {
-        return new Editor
-        {
+        return new Editor 
+        { 
             value           = GetSelectedFileContent(),
             defaultLanguage = "typescript",
             options =
@@ -261,6 +258,7 @@ class TsFileViewer : PluginComponentBase
     {
         return new Editor
         {
+            width = "100%",
             value           = Value,
             defaultLanguage = "typescript",
             options =
