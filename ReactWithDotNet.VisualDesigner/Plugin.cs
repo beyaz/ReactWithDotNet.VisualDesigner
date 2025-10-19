@@ -26,6 +26,19 @@ sealed record PropSuggestionScope
 
 static class Plugin
 {
+    static string GetUpdateStateLine(string jsVariableName)
+    {
+        var propertyPath = jsVariableName.Split('.', StringSplitOptions.RemoveEmptyEntries);
+        if (propertyPath.Length == 2)
+        {
+            var stateName = propertyPath[0];
+
+            return $"  set{Char.ToUpper(stateName[0]) + stateName[1..]}({{ ...{stateName} }});";
+        }
+
+        return null;
+    }
+    
     public static string AnalyzeExportFilePath(string exportFilePathForComponent)
     {
         var names = exportFilePathForComponent.Split('/', StringSplitOptions.RemoveEmptyEntries);
@@ -2647,26 +2660,16 @@ static class Plugin
                     {
                         var properties = node.Properties;
 
-                        var updateStateLine = string.Empty;
-                        var propertyPath = valueProp.Value.Split('.', StringSplitOptions.RemoveEmptyEntries);
-                        if (propertyPath.Length == 2)
-                        {
-                            var stateName = propertyPath[0];
-
-                            updateStateLine = $"  set{Char.ToUpper(stateName[0]) + stateName[1..]}({{ ...{stateName} }});";
-                        }
                         
-                        List<string> lines =
+                        
+                        TsLineCollection lines =
                         [
                             "(e: any, value: any) =>",
                             "{",
                             $"  {valueProp.Value} = value;",
+                            GetUpdateStateLine(valueProp.Value)
                         ];
-                        if (updateStateLine.HasValue())
-                        {
-                            lines.Add(updateStateLine);
-                        }
-
+                        
                         if (onChangeProp is not null)
                         {
                             if (IsAlphaNumeric(onChangeProp.Value))
@@ -2685,7 +2688,7 @@ static class Plugin
                         {
                             onChangeProp = onChangeProp with
                             {
-                                Value = string.Join(Environment.NewLine, lines)
+                                Value = lines.ToTsCode()
                             };
 
                             properties = properties.SetItem(properties.FindIndex(x => x.Name == onChangeProp.Name), onChangeProp);
@@ -2695,7 +2698,7 @@ static class Plugin
                             properties = properties.Add(new()
                             {
                                 Name  = "onChange",
-                                Value = string.Join(Environment.NewLine, lines)
+                                Value = lines.ToTsCode()
                             });
                         }
 
@@ -3263,4 +3266,12 @@ sealed class ImportAttribute : Attribute
 [AttributeUsage(AttributeTargets.Method)]
 sealed class NodeAnalyzerAttribute : Attribute
 {
+}
+
+public sealed class TsLineCollection: List<string>
+{
+    public string ToTsCode()
+    {
+        return string.Join(Environment.NewLine, from line in this where line is not null select line);
+    }
 }
