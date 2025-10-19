@@ -16,7 +16,7 @@ class MainWindow : Component<MainWindow.Model>
                     {
                         "AssemblyFilePath"
                     },
-                    new input(input.Type("text"), WidthFull, Border(1, solid, Gray300), BorderRadius(4))
+                    new input(input.Type("text"), input.Value(state.AssemblyFilePath), WidthFull, Border(1, solid, Gray300), BorderRadius(4), PaddingLeft(4))
                 },
                 new div(WidthFull, DisplayFlex, Flex(1, 1, 0))
                 {
@@ -89,6 +89,16 @@ class MainWindow : Component<MainWindow.Model>
         };
     }
 
+    protected override Task constructor()
+    {
+        state = new()
+        {
+            AssemblyFilePath = @"D:\work\BOA.BusinessModules\Dev\BOA.InternetBanking.Payments\API\BOA.InternetBanking.Payments.API\bin\Debug\net8.0\BOA.InternetBanking.Payments.API.dll"
+        };
+        
+        return base.constructor();
+    }
+       
     static async Task Main2()
     {
         await foreach (var result in Exporter.TryExport())
