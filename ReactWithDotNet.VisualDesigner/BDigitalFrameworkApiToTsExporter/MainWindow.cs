@@ -17,7 +17,7 @@ class MainWindow : Component<MainWindow.Model>
                     {
                         "AssemblyFilePath"
                     },
-                    new input(input.Type("text"), input.Value(state.AssemblyFilePath), WidthFull, Border(1, solid, Gray300), BorderRadius(4), PaddingLeft(4))
+                    new input(input.Type("text"), input.Value(state.AssemblyFilePath), WidthFull, Border(1, solid, Gray300), BorderRadius(4), PaddingLeft(4), OutlineNone)
                 },
                 new div(WidthFull, DisplayFlex, Flex(1, 1, 0))
                 {
@@ -44,22 +44,23 @@ class MainWindow : Component<MainWindow.Model>
                     },
                     new div(WidthFull, DisplayFlex)
                     {
-                        new div(Width(150), BorderRight(1, solid, "#d1d5db"), DisplayFlex, FlexDirectionColumn)
+                        new div(Width(200), BorderRight(1, solid, "#d1d5db"), DisplayFlex, FlexDirectionColumn)
                         {
-                            new div(Height(40), FontWeight600, DisplayFlex, JustifyContentCenter, AlignItemsCenter, BorderBottom(1, solid, "#d1d5db")) 
+                            new div(Height(40), FontWeight600, DisplayFlex, JustifyContentCenter, AlignItemsCenter, BorderBottom(1, solid, "#d1d5db"))
                             {
                                 new div
                                 {
                                     "Files"
                                 }
                             },
-                            new div(Flex(1, 1, 0), Padding(8), DisplayFlex, FlexDirectionColumn, Gap(16))
+                            new div(Flex(1, 1, 0), Padding(8), DisplayFlex, FlexDirectionColumn, Gap(16), OverflowAuto)
                             {
-                                new div(Border(1, solid, Gray300), BorderRadius(4), DisplayFlex, JustifyContentCenter, AlignItemsCenter)
+                                from item in state.Files
+                                select new div(Id(item.Path), OnClick(OnFileSelected), Border(1, solid, Gray300), BorderRadius(4), DisplayFlex, JustifyContentCenter, AlignItemsCenter, state.SelectedFilePath== item.Path ? BackgroundColor(Gray100) : BackgroundColor(White), Hover(BorderColor(Gray500)))
                                 {
                                     new div(Padding(4))
                                     {
-                                        "Api 1"
+                                        Path.GetFileName(item.Path)
                                     }
                                 }
                             }
@@ -83,7 +84,20 @@ class MainWindow : Component<MainWindow.Model>
                                     }
                                 }
                             },
-                            new div(HeightFull)
+                            new div(HeightFull, DisplayFlex, FlexDirectionColumn)
+                            {
+                                new div(Height(40), DisplayFlex, AlignItemsCenter, PaddingLeft(8))
+                                {
+                                    new div
+                                    {
+                                        CalculateSelectedFilePathRelativeToProject()
+                                    }
+                                },
+                                new div(HeightFull, Padding(4))
+                                {
+                                    new textarea(textarea.Value(GetSelectedFileContent()), HeightFull, WidthFull, Border(1, solid, Gray300), BorderRadius(4), Padding(4), Focus(OutlineNone), FontSizeSmall)
+                                }
+                            }
                         }
                     }
                 }
@@ -91,28 +105,23 @@ class MainWindow : Component<MainWindow.Model>
         };
     }
 
-    protected override Task constructor()
+    protected override async Task constructor()
     {
         state = new()
         {
             StatusMessage = "Ready",
             
+            SelectedApiName = "Religious",
+            
             AssemblyFilePath = @"D:\work\BOA.BusinessModules\Dev\BOA.InternetBanking.Payments\API\BOA.InternetBanking.Payments.API\bin\Debug\net8.0\BOA.InternetBanking.Payments.API.dll"
         };
 
-        return TryUpdateApiList();
+        await TryUpdateApiList();
+        
+        await UpdateFiles(null);
     }
        
-    static async Task Main2()
-    {
-        await foreach (var result in Exporter.TryExport())
-        {
-            if (result.HasError)
-            {
-                throw result.Error;
-            }
-        }
-    }
+   
 
     Task TryUpdateApiList()
     {
@@ -143,6 +152,39 @@ class MainWindow : Component<MainWindow.Model>
 
         await UpdateFiles(null);
     }
+    
+    async Task OnFileSelected(MouseEvent e)
+    {
+
+        state.SelectedFilePath = e.currentTarget.id;
+
+        await UpdateFiles(null);
+    }
+
+    string CalculateSelectedFilePathRelativeToProject()
+    {
+        if (state.SelectedFilePath.HasNoValue())
+        {
+            return string.Empty;
+        }
+
+        var names = state.SelectedFilePath.Split(Path.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries);
+        
+        return "/"+string.Join("/", names.SkipWhile(x=>x != "ClientApp").Skip(1));
+    }
+    
+    string GetSelectedFileContent()
+    {
+        return state.Files.FirstOrDefault(x => x.Path == state.SelectedFilePath)?.Content ?? string.Empty;
+    }
+
+    string ProjectDirectory
+    {
+        get
+        {
+            return new DirectoryInfo(state.AssemblyFilePath).Parent?.Parent?.Parent?.Parent?.Parent?.Parent?.FullName;
+        }
+    }
 
     async Task UpdateFiles(MouseEvent e)
     {
@@ -151,10 +193,8 @@ class MainWindow : Component<MainWindow.Model>
             return;
         }
         
-        string projectDirectory = new DirectoryInfo(state.AssemblyFilePath).Parent?.Parent?.Parent?.Parent?.Parent?.Parent?.FullName;
 
-
-        var files = Exporter.CalculateFiles(projectDirectory, state.SelectedApiName);
+        var files = Exporter.CalculateFiles(ProjectDirectory, state.SelectedApiName);
 
         List<FileModel> fileModels = [];
 
@@ -172,7 +212,7 @@ class MainWindow : Component<MainWindow.Model>
         state.Files = fileModels;
         
     }
-    
+     
     
 
     internal record Model
@@ -185,6 +225,8 @@ class MainWindow : Component<MainWindow.Model>
 
         public string SelectedApiName { get; set; }
 
-        public IReadOnlyList<FileModel> Files { get; set; }         
+        public IReadOnlyList<FileModel> Files { get; set; }  
+        
+        public string SelectedFilePath { get; set; }
     }
 }
