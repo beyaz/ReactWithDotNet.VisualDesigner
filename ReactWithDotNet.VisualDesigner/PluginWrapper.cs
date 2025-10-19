@@ -10,7 +10,7 @@ static class PluginWrapper
     (
         from assembly in PluginAssemblies
         from type in assembly.GetTypes()
-        where type.GetInterfaces().Any(i => i == typeof(IPlugin))
+        where type.GetInterfaces().Any(i => i == typeof(IPlugin)) && !type.IsAbstract
         select (IPlugin)Activator.CreateInstance(type)
     ).ToList();
     
@@ -23,5 +23,19 @@ static class PluginWrapper
         }
         
         return exportFilePathForComponent;
+    }
+
+    public static Element TryCreateElementForPreview(string tag, string id, MouseEventHandler onMouseClick)
+    {
+        foreach (var plugin in Plugins)
+        {
+            var element = plugin.TryCreateElementForPreview(tag, id, onMouseClick);
+            if (element is not null)
+            {
+                return element;
+            }
+        }
+        
+        return null;
     }
 }

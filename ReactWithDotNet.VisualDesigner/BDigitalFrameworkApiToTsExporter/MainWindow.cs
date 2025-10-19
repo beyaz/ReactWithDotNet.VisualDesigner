@@ -1,6 +1,7 @@
-﻿using System.IO;
-using ReactWithDotNet;
+﻿using ReactWithDotNet;
 using ReactWithDotNet.ThirdPartyLibraries.MonacoEditorReact;
+using ReactWithDotNet.VisualDesigner;
+using System.IO;
 
 namespace BDigitalFrameworkApiToTsExporter;
 
@@ -231,8 +232,10 @@ class MainWindow : Component<MainWindow.Model>
             }
         };
     }
-     
+
+
     
+   
 
     internal record Model
     {
@@ -247,5 +250,46 @@ class MainWindow : Component<MainWindow.Model>
         public IReadOnlyList<FileModel> Files { get; set; }  
         
         public string SelectedFilePath { get; set; }
+    }
+}
+
+class TsFileViewer : PluginComponentBase
+{
+    public string Value { get; set; }
+
+    protected override Element render()
+    {
+        return new Editor
+        {
+            value           = Value,
+            defaultLanguage = "typescript",
+            options =
+            {
+                renderLineHighlight = "none",
+                fontFamily          = "consolas, 'IBM Plex Mono Medium', 'Courier New', monospace",
+                fontSize            = 11,
+                minimap             = new { enabled = false },
+                lineNumbers         = "off",
+                unicodeHighlight    = new { showExcludeOptions = false }
+            }
+        };
+    }
+}
+
+class ExporterPlugin:  PluginBase
+{
+    public override Element TryCreateElementForPreview(string tag, string id, MouseEventHandler onMouseClick)
+    {
+        if (tag == nameof(TsFileViewer))
+        {
+            return new TsFileViewer
+            {
+                id = id,
+                
+                onMouseClick = onMouseClick
+            };
+        }
+
+        return null;
     }
 }

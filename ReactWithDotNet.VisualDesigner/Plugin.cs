@@ -29,10 +29,24 @@ sealed record PropSuggestionScope
 interface IPlugin
 {
     string AnalyzeExportFilePath(string exportFilePathForComponent);
+    Element TryCreateElementForPreview(string tag, string id, MouseEventHandler onMouseClick);
+}
+
+abstract class PluginBase:IPlugin
+{
+    public virtual string AnalyzeExportFilePath(string exportFilePathForComponent)
+    {
+        return exportFilePathForComponent;
+    }
+
+    public virtual Element TryCreateElementForPreview(string tag, string id, MouseEventHandler onMouseClick)
+    {
+        return null;
+    }
 }
 
 
-class Plugin: IPlugin
+class Plugin: PluginBase
 {
     static string GetUpdateStateLine(string jsVariableName)
     {
@@ -47,7 +61,7 @@ class Plugin: IPlugin
         return null;
     }
 
-    public  string AnalyzeExportFilePath(string exportFilePathForComponent)
+    public override  string AnalyzeExportFilePath(string exportFilePathForComponent)
     {
         var names = exportFilePathForComponent.Split('/', StringSplitOptions.RemoveEmptyEntries);
         if (names[0].StartsWith("BOA."))
@@ -437,7 +451,7 @@ class Plugin: IPlugin
         return component is Components.Image;
     }
 
-    public static Element TryCreateElementForPreview(string tag, string id, MouseEventHandler onMouseClick)
+    public override Element TryCreateElementForPreview(string tag, string id, MouseEventHandler onMouseClick)
     {
         var type = GetAllCustomComponents().FirstOrDefault(t => t.Name.Equals(tag, StringComparison.OrdinalIgnoreCase));
         if (type is null)
