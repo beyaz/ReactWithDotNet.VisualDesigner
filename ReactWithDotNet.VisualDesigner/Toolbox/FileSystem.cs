@@ -3,6 +3,13 @@ using System.Text;
 
 namespace Toolbox;
 
+public sealed record FileModel
+{
+    public required string Content { get; init; }
+
+    public required string Path { get; init; }
+}
+
 static class FileSystem
 {
     public static async Task<Result<string[]>> ReadAllLines(string filePath)
@@ -16,7 +23,7 @@ static class FileSystem
             return exception;
         }
     }
-
+    
     public static async Task<Result<string>> ReadAllText(string filePath)
     {
         try
@@ -34,47 +41,29 @@ static class FileSystem
         try
         {
             var fileInfo = new FileInfo(file.Path);
-            if (fileInfo.IsReadOnly)
-            {
-                fileInfo.IsReadOnly = false;
-            }
-
-            Encoding encoding;
 
             if (fileInfo.Exists)
             {
-                // Dosyayı açıp encoding tespit et
-                using (var reader = new StreamReader(file.Path, Encoding.UTF8, detectEncodingFromByteOrderMarks: true))
+                // check already same
+                var fileContentInDirectory = await File.ReadAllTextAsync(file.Path);
+                
+                if (IsEqualsIgnoreWhitespace(fileContentInDirectory, file.Content))
                 {
-                    // İlk okumayı yapmazsak CurrentEncoding default (UTF8) kalabilir
-                    var buffer = new char[1];
-                    await reader.ReadAsync(buffer, 0, 1);
-                    encoding = reader.CurrentEncoding;
+                    return Unit.Value;
                 }
-            }
-            else
-            {
-                // Dosya yoksa UTF-8 kullan
-                encoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
+                    
+                
+                fileInfo.IsReadOnly = false;
+                TfsHelper.CheckoutFileFromTfs(file.Path);
             }
 
-            // Dosyaya mevcut encoding ile yaz
-            await using var writer = new StreamWriter(file.Path, false, encoding);
+            await File.WriteAllTextAsync(file.Path, file.Content, Encoding.UTF8);
 
-            await writer.WriteAsync(file.Content);
+            return Unit.Value;
         }
         catch (Exception exception)
         {
             return exception;
         }
-
-        return Unit.Value;
     }
-}
-
-public sealed record FileModel
-{
-    public required string Content { get; init; }
-
-    public required string Path { get; init; }
 }
