@@ -218,7 +218,7 @@ class MainWindow : Component<MainWindow.Model>
     {
         return new Editor
         {
-            value       = GetSelectedFileContent(),
+            value           = GetSelectedFileContent(),
             defaultLanguage = "typescript",
             options =
             {
@@ -229,7 +229,7 @@ class MainWindow : Component<MainWindow.Model>
                 lineNumbers         = "off",
                 unicodeHighlight    = new { showExcludeOptions = false }
             }
-        }
+        };
     }
      
     
