@@ -23,7 +23,7 @@ class MainWindow : Component<MainWindow.Model>
         await TryUpdateApiList();
 
         await UpdateFiles(null);
-    }
+    } 
 
     protected override Element render()
     {
@@ -37,7 +37,7 @@ class MainWindow : Component<MainWindow.Model>
                     {
                         "AssemblyFilePath"
                     },
-                    new input(input.Type("text"), input.Value("state.AssemblyFilePath"), WidthFull, Border(1, solid, Gray300), BorderRadius(4), PaddingLeft(4), OutlineNone)
+                    new input(input.Type("text"), input.Value(state.AssemblyFilePath), WidthFull, Border(1, solid, Gray300), BorderRadius(4), PaddingLeft(4), OutlineNone)
                 },
                 new div(WidthFull, DisplayFlex, Flex(1, 1, 0))
                 {
@@ -53,7 +53,7 @@ class MainWindow : Component<MainWindow.Model>
                         new div(Flex(1, 1, 0), Padding(8), DisplayFlex, FlexDirectionColumn, Gap(16), OverflowAuto)
                         {
                             from item in state.ApiNames
-                            select new div(OnClick(OnApiSelected), Id("item"), Border(1, solid, Gray300), BorderRadius(4), DisplayFlex, JustifyContentCenter, AlignItemsCenter, state.SelectedApiName == item ? BackgroundColor(Gray100) : BackgroundColor(White), Hover(BorderColor(Gray500)))
+                            select new div(OnClick(OnApiSelected), Id(item), Border(1, solid, Gray300), BorderRadius(4), DisplayFlex, JustifyContentCenter, AlignItemsCenter, state.SelectedApiName == item ? BackgroundColor(Gray100) : BackgroundColor(White), Hover(BorderColor(Gray500)))
                             {
                                 new div(Padding(4))
                                 {
@@ -74,7 +74,7 @@ class MainWindow : Component<MainWindow.Model>
                         new div(Flex(1, 1, 0), Padding(8), DisplayFlex, FlexDirectionColumn, Gap(16), OverflowAuto)
                         {
                             from item in state.Files
-                            select new div(Id(item.Path), OnClick(OnFileSelected), Border(1, solid, Gray300), BorderRadius(4), DisplayFlex, JustifyContentCenter, AlignItemsCenter, state.SelectedFilePath == item.Path ? BackgroundColor(Gray100) : BackgroundColor(White), Hover(BorderColor(Gray500)))
+                            select new div(Id(item.Path), OnClick(OnFileSelected), Border(1, solid, Gray300), BorderRadius(4), DisplayFlex, JustifyContentCenter, AlignItemsCenter, state.SelectedFilePath== item.Path ? BackgroundColor(Gray100) : BackgroundColor(White), Hover(BorderColor(Gray500)))
                             {
                                 new div(Padding(4))
                                 {
@@ -113,7 +113,7 @@ class MainWindow : Component<MainWindow.Model>
                             },
                             new div(Padding(4), WidthFull, Border(1, solid, Gray300), BorderRadius(4), FlexGrow(1), OverflowHidden)
                             {
-                                new TsFileViewer
+                                new TsFileViewer()
                                 {
                                     Value = GetSelectedFileContent()
                                 }

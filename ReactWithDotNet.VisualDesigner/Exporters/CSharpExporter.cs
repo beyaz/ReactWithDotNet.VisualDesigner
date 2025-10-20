@@ -566,6 +566,15 @@ static class CSharpExporter
                                 var (success, modifierCode) = ToModifierTransformer.TryConvertToModifier(elementType.Value.Name, propertyName, TryClearStringValue(propertyValue));
                                 if (success)
                                 {
+                                    if (!IsStringValue(propertyValue))
+                                    {
+                                        return new ()
+                                        {
+                                            IsModifier = true,
+                                            Text       = modifierCode.Replace('"' + propertyValue + '"', propertyValue)
+                                        };
+                                    }
+                                    
                                     return new ()
                                     {
                                         IsModifier = true,
@@ -714,7 +723,7 @@ static class CSharpExporter
                 {
                     return new LineCollection
                     {
-                        $"{indent(indentLevel)}new {tag}{partProps}",
+                        $"{indent(indentLevel)}new {tag}{partProps.RemoveFromEnd("()")}",
                         indent(indentLevel) + "{",
                         
                         from x in tsPropTexts.Select((x,i)=>new
