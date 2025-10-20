@@ -1,12 +1,30 @@
-﻿using ReactWithDotNet;
+﻿using System.IO;
+using ReactWithDotNet;
 using ReactWithDotNet.ThirdPartyLibraries.MonacoEditorReact;
 using ReactWithDotNet.VisualDesigner;
-using System.IO;
 
 namespace BDigitalFrameworkApiToTsExporter;
 
 class MainWindow : Component<MainWindow.Model>
 {
+    string ProjectDirectory => new DirectoryInfo(state.AssemblyFilePath).Parent?.Parent?.Parent?.Parent?.Parent?.Parent?.FullName;
+
+    protected override async Task constructor()
+    {
+        state = new()
+        {
+            StatusMessage = "Ready",
+
+            SelectedApiName = "Religious",
+
+            AssemblyFilePath = @"D:\work\BOA.BusinessModules\Dev\BOA.InternetBanking.Payments\API\BOA.InternetBanking.Payments.API\bin\Debug\net8.0\BOA.InternetBanking.Payments.API.dll"
+        };
+
+        await TryUpdateApiList();
+
+        await UpdateFiles(null);
+    }
+
     protected override Element render()
     {
         return new div(WidthFull, HeightFull, BackgroundColor(WhiteSmoke), Padding(16), FontSize13, FontFamily("-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'"), DisplayFlex, FlexDirectionColumn, Gap(4))
@@ -56,7 +74,7 @@ class MainWindow : Component<MainWindow.Model>
                         new div(Flex(1, 1, 0), Padding(8), DisplayFlex, FlexDirectionColumn, Gap(16), OverflowAuto)
                         {
                             from item in state.Files
-                            select new div(Id(item.Path), OnClick(OnFileSelected), Border(1, solid, Gray300), BorderRadius(4), DisplayFlex, JustifyContentCenter, AlignItemsCenter, state.SelectedFilePath== item.Path ? BackgroundColor(Gray100) : BackgroundColor(White), Hover(BorderColor(Gray500)))
+                            select new div(Id(item.Path), OnClick(OnFileSelected), Border(1, solid, Gray300), BorderRadius(4), DisplayFlex, JustifyContentCenter, AlignItemsCenter, state.SelectedFilePath == item.Path ? BackgroundColor(Gray100) : BackgroundColor(White), Hover(BorderColor(Gray500)))
                             {
                                 new div(Padding(4))
                                 {
@@ -95,7 +113,7 @@ class MainWindow : Component<MainWindow.Model>
                             },
                             new div(Padding(4), WidthFull, Border(1, solid, Gray300), BorderRadius(4), FlexGrow(1), OverflowHidden)
                             {
-                                new TsFileViewer()
+                                new TsFileViewer
                                 {
                                     Value = GetSelectedFileContent()
                                 }
@@ -114,23 +132,74 @@ class MainWindow : Component<MainWindow.Model>
         };
     }
 
-    protected override async Task constructor()
+    string CalculateSelectedFilePathRelativeToProject()
     {
-        state = new()
+        if (state.SelectedFilePath.HasNoValue())
         {
-            StatusMessage = "Ready",
-            
-            SelectedApiName = "Religious",
-            
-            AssemblyFilePath = @"D:\work\BOA.BusinessModules\Dev\BOA.InternetBanking.Payments\API\BOA.InternetBanking.Payments.API\bin\Debug\net8.0\BOA.InternetBanking.Payments.API.dll"
-        };
+            return string.Empty;
+        }
 
-        await TryUpdateApiList();
-        
+        var names = state.SelectedFilePath.Split(Path.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries);
+
+        return "/" + string.Join("/", names.SkipWhile(x => x != "ClientApp").Skip(1));
+    }
+
+    string GetSelectedFileContent()
+    {
+        return state.Files.FirstOrDefault(x => x.Path == state.SelectedFilePath)?.Content ?? string.Empty;
+    }
+
+    async Task OnApiSelected(MouseEvent e)
+    {
+        state.SelectedApiName = e.currentTarget.id;
+
         await UpdateFiles(null);
     }
-       
-   
+
+    async Task OnExportAllClicked(MouseEvent e)
+    {
+        var count = 0;
+
+        foreach (var fileModel in state.Files)
+        {
+            var result = await FileSystem.Save(fileModel);
+            if (result.HasError)
+            {
+                state.StatusMessage = result.Error.Message;
+                return;
+            }
+
+            count++;
+        }
+
+        state.StatusMessage = $"Success / ( {count} file exported. )";
+    }
+
+    async Task OnExportClicked(MouseEvent e)
+    {
+        var count = 0;
+
+        foreach (var fileModel in state.Files.Where(f => f.Path == state.SelectedFilePath))
+        {
+            var result = await FileSystem.Save(fileModel);
+            if (result.HasError)
+            {
+                state.StatusMessage = result.Error.Message;
+                return;
+            }
+
+            count++;
+        }
+
+        state.StatusMessage = $"Success / ( {count} file exported. )";
+    }
+
+    async Task OnFileSelected(MouseEvent e)
+    {
+        state.SelectedFilePath = e.currentTarget.id;
+
+        await UpdateFiles(null);
+    }
 
     Task TryUpdateApiList()
     {
@@ -147,100 +216,18 @@ class MainWindow : Component<MainWindow.Model>
         }
 
         var apiTypes = from type in assembly.Value.MainModule.Types where type.BaseType?.Name == "CommonControllerBase" select type;
-        
+
         state.ApiNames = from type in apiTypes select type.Name.RemoveFromEnd("Controller");
-        
-        
+
         return Task.CompletedTask;
     }
-     
-    async Task OnApiSelected(MouseEvent e)
-    {
 
-        state.SelectedApiName = e.currentTarget.id;
-
-        await UpdateFiles(null);
-    }
-    
-    async Task OnFileSelected(MouseEvent e)
-    {
-
-        state.SelectedFilePath = e.currentTarget.id;
-
-        await UpdateFiles(null);
-    }
-    
-    async Task OnExportClicked(MouseEvent e)
-    {
-        var count = 0;
-        
-        foreach (var fileModel in state.Files.Where(f=>f.Path == state.SelectedFilePath))
-        {
-            var result = await FileSystem.Save(fileModel);
-            if (result.HasError)
-            {
-                state.StatusMessage = result.Error.Message;
-                return;
-            }
-
-            count++;
-        }
-
-        state.StatusMessage = $"Success / ( {count} file exported. )";
-    }
-    
-    async Task OnExportAllClicked(MouseEvent e)
-    {
-        var count = 0;
-        
-        foreach (var fileModel in state.Files)
-        {
-            var result = await FileSystem.Save(fileModel);
-            if (result.HasError)
-            {
-                state.StatusMessage = result.Error.Message;
-                return;
-            } 
-            
-            count++;
-        }
-
-        state.StatusMessage = $"Success / ( {count} file exported. )";
-    }
-    
-
-    string CalculateSelectedFilePathRelativeToProject()
-    {
-        if (state.SelectedFilePath.HasNoValue())
-        {
-            return string.Empty;
-        }
-
-        var names = state.SelectedFilePath.Split(Path.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries);
-        
-        return "/"+string.Join("/", names.SkipWhile(x=>x != "ClientApp").Skip(1));
-    }
-    
-    string GetSelectedFileContent()
-    {
-        return state.Files.FirstOrDefault(x => x.Path == state.SelectedFilePath)?.Content ?? string.Empty;
-    }
-
-    string ProjectDirectory
-    {
-        get
-        {
-            return new DirectoryInfo(state.AssemblyFilePath).Parent?.Parent?.Parent?.Parent?.Parent?.Parent?.FullName;
-        }
-    }
-
-    async Task UpdateFiles(MouseEvent e)
+    async Task UpdateFiles(MouseEvent _)
     {
         if (!state.SelectedApiName.HasValue())
         {
             return;
         }
-        
 
         var files = Exporter.CalculateFiles(ProjectDirectory, state.SelectedApiName);
 
@@ -258,22 +245,20 @@ class MainWindow : Component<MainWindow.Model>
         }
 
         state.Files = fileModels;
-        
     }
-
 
     internal record Model
     {
         public string AssemblyFilePath { get; init; }
-        
+
         public string StatusMessage { get; set; }
-        
+
         public IEnumerable<string> ApiNames { get; set; }
 
         public string SelectedApiName { get; set; }
 
-        public IReadOnlyList<FileModel> Files { get; set; }  
-        
+        public IReadOnlyList<FileModel> Files { get; set; }
+
         public string SelectedFilePath { get; set; }
     }
 }
@@ -286,7 +271,7 @@ class TsFileViewer : PluginComponentBase
     {
         return new Editor
         {
-            width = "100%",
+            width           = "100%",
             value           = Value,
             defaultLanguage = "typescript",
             options =
@@ -302,7 +287,7 @@ class TsFileViewer : PluginComponentBase
     }
 }
 
-class ExporterPlugin:  PluginBase
+class ExporterPlugin : PluginBase
 {
     public override Element TryCreateElementForPreview(string tag, string id, MouseEventHandler onMouseClick)
     {
@@ -311,7 +296,7 @@ class ExporterPlugin:  PluginBase
             return new TsFileViewer
             {
                 id = id,
-                
+
                 onMouseClick = onMouseClick
             };
         }
