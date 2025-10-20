@@ -212,27 +212,6 @@ class MainWindow : Component<MainWindow.Model>
         
     }
 
-    Element GetTsEditor()
-    {
-        return new Editor 
-        { 
-            value           = GetSelectedFileContent(),
-            defaultLanguage = "typescript",
-            options =
-            {
-                renderLineHighlight = "none",
-                fontFamily          = "consolas, 'IBM Plex Mono Medium', 'Courier New', monospace",
-                fontSize            = 11,
-                minimap             = new { enabled = false },
-                lineNumbers         = "off",
-                unicodeHighlight    = new { showExcludeOptions = false }
-            }
-        };
-    }
-
-
-    
-   
 
     internal record Model
     {
