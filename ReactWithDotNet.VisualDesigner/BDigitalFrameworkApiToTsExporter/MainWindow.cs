@@ -20,9 +20,8 @@ class MainWindow : Component<MainWindow.Model>
             AssemblyFilePath = @"D:\work\BOA.BusinessModules\Dev\BOA.InternetBanking.Payments\API\BOA.InternetBanking.Payments.API\bin\Debug\net8.0\BOA.InternetBanking.Payments.API.dll"
         };
 
-        await TryUpdateApiList();
+        await OnAssemblyFilePathChanged();
 
-        await UpdateFiles(null);
     } 
 
     protected override Element render()
@@ -37,7 +36,7 @@ class MainWindow : Component<MainWindow.Model>
                     {
                         "AssemblyFilePath"
                     },
-                    new input(input.Type("text"), input.Value(state.AssemblyFilePath), WidthFull, Border(1, solid, Gray300), BorderRadius(4), PaddingLeft(4), OutlineNone)
+                    new input(input.Type("text"), input.ValueBind(()=> state.AssemblyFilePath), input.ValueBindDebounceTimeout(1000), input.ValueBindDebounceHandler(OnAssemblyFilePathChanged), WidthFull, Border(1, solid, Gray300), BorderRadius(4), PaddingLeft(4), OutlineNone)
                 },
                 new div(WidthFull, DisplayFlex, Flex(1, 1, 0))
                 {
@@ -113,7 +112,7 @@ class MainWindow : Component<MainWindow.Model>
                             },
                             new div(Padding(4), WidthFull, Border(1, solid, Gray300), BorderRadius(4), FlexGrow(1), OverflowHidden)
                             {
-                                new TsFileViewer()
+                                new TsFileViewer
                                 {
                                     Value = GetSelectedFileContent()
                                 }
@@ -153,7 +152,7 @@ class MainWindow : Component<MainWindow.Model>
     {
         state.SelectedApiName = e.currentTarget.id;
 
-        await UpdateFiles(null);
+        await UpdateFiles();
     }
 
     async Task OnExportAllClicked(MouseEvent e)
@@ -194,35 +193,41 @@ class MainWindow : Component<MainWindow.Model>
         state.StatusMessage = $"Success / ( {count} file exported. )";
     }
 
-    async Task OnFileSelected(MouseEvent e)
+    Task OnFileSelected(MouseEvent e)
     {
         state.SelectedFilePath = e.currentTarget.id;
-
-        await UpdateFiles(null);
-    }
-
-    Task TryUpdateApiList()
-    {
-        if (!File.Exists(state.AssemblyFilePath))
-        {
-            return Task.CompletedTask;
-        }
-
-        var assembly = CecilHelper.ReadAssemblyDefinition(state.AssemblyFilePath);
-        if (assembly.HasError)
-        {
-            state.StatusMessage = assembly.Error.Message;
-            return Task.CompletedTask;
-        }
-
-        var apiTypes = from type in assembly.Value.MainModule.Types where type.BaseType?.Name == "CommonControllerBase" select type;
-
-        state.ApiNames = from type in apiTypes select type.Name.RemoveFromEnd("Controller");
 
         return Task.CompletedTask;
     }
 
-    async Task UpdateFiles(MouseEvent _)
+    
+    
+    async Task OnAssemblyFilePathChanged()
+    {
+        if (!File.Exists(state.AssemblyFilePath))
+        {
+            state.StatusMessage = "FileNotFound." + state.AssemblyFilePath;
+            return;
+        }
+        
+        var assembly = CecilHelper.ReadAssemblyDefinition(state.AssemblyFilePath);
+        if (assembly.HasError)
+        {
+            state.StatusMessage = "Fail > " +assembly.Error.Message;
+
+            return;
+        }
+
+        var apiTypes = from type in assembly.Value.MainModule.Types where type.BaseType?.Name == "CommonControllerBase" select type;
+
+        state.ApiNames = (from type in apiTypes select type.Name.RemoveFromEnd("Controller")).ToList();
+
+        state.StatusMessage = $"Ready > {state.ApiNames.Count} api listed.";
+
+        await UpdateFiles();
+    }
+    
+    async Task UpdateFiles()
     {
         if (!state.SelectedApiName.HasValue())
         {
@@ -253,7 +258,7 @@ class MainWindow : Component<MainWindow.Model>
 
         public string StatusMessage { get; set; }
 
-        public IEnumerable<string> ApiNames { get; set; }
+        public IReadOnlyList<string> ApiNames { get; set; }
 
         public string SelectedApiName { get; set; }
 
