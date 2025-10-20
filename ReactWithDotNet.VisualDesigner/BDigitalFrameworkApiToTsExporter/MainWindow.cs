@@ -13,16 +13,13 @@ class MainWindow : Component<MainWindow.Model>
     {
         state = new()
         {
-            StatusMessage = "Ready",
-
-            SelectedApiName = "Religious",
-
             AssemblyFilePath = @"D:\work\BOA.BusinessModules\Dev\BOA.InternetBanking.Payments\API\BOA.InternetBanking.Payments.API\bin\Debug\net8.0\BOA.InternetBanking.Payments.API.dll"
         };
 
         await OnAssemblyFilePathChanged();
 
-    } 
+        await OnApiSelected(new () { currentTarget = new() { id = "Religious" } });
+    }
 
     protected override Element render()
     {
@@ -40,7 +37,7 @@ class MainWindow : Component<MainWindow.Model>
                 },
                 new div(WidthFull, DisplayFlex, Flex(1, 1, 0))
                 {
-                    new div(Width(200), DisplayFlex, FlexDirectionColumn, BorderRight(1, solid, "#d1d5db"))
+                    new div(Width(300), DisplayFlex, FlexDirectionColumn, BorderRight(1, solid, "#d1d5db"))
                     {
                         new div(Height(40), FontWeight600, DisplayFlex, JustifyContentCenter, AlignItemsCenter, BorderBottom(1, solid, "#d1d5db"))
                         {
@@ -52,7 +49,7 @@ class MainWindow : Component<MainWindow.Model>
                         new div(Flex(1, 1, 0), Padding(8), DisplayFlex, FlexDirectionColumn, Gap(16), OverflowAuto)
                         {
                             from item in state.ApiNames
-                            select new div(OnClick(OnApiSelected), Id(item), Border(1, solid, Gray300), BorderRadius(4), DisplayFlex, JustifyContentCenter, AlignItemsCenter, state.SelectedApiName == item ? BackgroundColor(Gray100) : BackgroundColor(White), Hover(BorderColor(Gray500)))
+                            select new div(OnClick(OnApiSelected), Id(item), Border(1, solid, Gray300), BorderRadius(4), DisplayFlex, JustifyContentCenter, AlignItemsCenter, state.SelectedApiName == item ? BackgroundColor(Gray100) : BackgroundColor(White), Hover(BorderColor(Gray500)), BoxShadow("0 1px 3px rgba(0,0,0,0.2)"))
                             {
                                 new div(Padding(4))
                                 {
@@ -61,7 +58,7 @@ class MainWindow : Component<MainWindow.Model>
                             }
                         }
                     },
-                    new div(Width(200), BorderRight(1, solid, "#d1d5db"), DisplayFlex, FlexDirectionColumn)
+                    new div(Width(300), BorderRight(1, solid, "#d1d5db"), DisplayFlex, FlexDirectionColumn)
                     {
                         new div(Height(40), FontWeight600, DisplayFlex, JustifyContentCenter, AlignItemsCenter, BorderBottom(1, solid, "#d1d5db"))
                         {
@@ -73,7 +70,7 @@ class MainWindow : Component<MainWindow.Model>
                         new div(Flex(1, 1, 0), Padding(8), DisplayFlex, FlexDirectionColumn, Gap(16), OverflowAuto)
                         {
                             from item in state.Files
-                            select new div(Id(item.Path), OnClick(OnFileSelected), Border(1, solid, Gray300), BorderRadius(4), DisplayFlex, JustifyContentCenter, AlignItemsCenter, state.SelectedFilePath== item.Path ? BackgroundColor(Gray100) : BackgroundColor(White), Hover(BorderColor(Gray500)))
+                            select new div(Id(item.Path), OnClick(OnFileSelected), Border(1, solid, Gray300), BorderRadius(4), DisplayFlex, JustifyContentCenter, AlignItemsCenter, state.SelectedFilePath== item.Path ? BackgroundColor(Gray100) : BackgroundColor(White), Hover(BorderColor(Gray500)), BoxShadow("0 1px 3px rgba(0,0,0,0.2)"))
                             {
                                 new div(Padding(4))
                                 {
@@ -81,24 +78,28 @@ class MainWindow : Component<MainWindow.Model>
                                 }
                             }
                         }
-                    },
+                    }, 
                     new div(WidthFull, DisplayFlex, FlexDirectionColumn)
                     {
                         new div(Height(40), DisplayFlex, BorderBottom(1, solid, "#d1d5db"))
                         {
                             new div(Height(40), FontWeight600, DisplayFlex, JustifyContentCenter, AlignItemsCenter, Width("50%"))
                             {
-                                new div(OnClick(OnExportAllClicked), Padding(4, 8), Border(1, solid, Gray300), BorderRadius(4), Hover(BackgroundColor(Gray100)))
-                                {
-                                    "Export All"
-                                }
+                                state.Files.Count == 0 ? null :
+                                    new div(OnClick(OnExportAllClicked), Padding(4, 8), Border(1, solid, Gray300), BorderRadius(4), Hover(BackgroundColor(Gray100)), BoxShadow("0 1px 3px rgba(0,0,0,0.2)"))
+                                    {
+                                        "Export All"
+                                    }
+                                
                             },
                             new div(Height(40), FontWeight600, DisplayFlex, JustifyContentCenter, AlignItemsCenter, Width("50%"))
                             {
-                                new div(OnClick(OnExportClicked), Padding(4, 8), Border(1, solid, Gray300), BorderRadius(4), Hover(BackgroundColor(Gray100)))
-                                {
-                                    "Export"
-                                }
+                                state.SelectedFilePath is  null ? null :
+                                    new div(OnClick(OnExportClicked), Padding(4, 8), Border(1, solid, Gray300), BorderRadius(4), Hover(BackgroundColor(Gray100)), BoxShadow("0 1px 3px rgba(0,0,0,0.2)"))
+                                    {
+                                        "Export"
+                                    }
+                                
                             }
                         },
                         new div(DisplayFlex, FlexDirectionColumn, FlexGrow(1))
@@ -110,7 +111,7 @@ class MainWindow : Component<MainWindow.Model>
                                     CalculateSelectedFilePathRelativeToProject()
                                 }
                             },
-                            new div(Padding(4), WidthFull, Border(1, solid, Gray300), BorderRadius(4), FlexGrow(1), OverflowHidden)
+                            new div(Padding(4), WidthFull, FlexGrow(1), OverflowHidden, BorderTop(1, solid, "#d1d5db"))
                             {
                                 new TsFileViewer
                                 {
@@ -153,6 +154,43 @@ class MainWindow : Component<MainWindow.Model>
         state.SelectedApiName = e.currentTarget.id;
 
         await UpdateFiles();
+    } 
+
+    Task OnAssemblyFilePathChanged()
+    {
+        if (!File.Exists(state.AssemblyFilePath))
+        {
+            state.StatusMessage = "Fail > FileNotFound." + state.AssemblyFilePath;
+
+            state.ApiNames = [];
+
+            state.Files = [];
+
+            state.SelectedFilePath = null;
+
+            
+            return Task.CompletedTask;
+        }
+
+        var assembly = CecilHelper.ReadAssemblyDefinition(state.AssemblyFilePath);
+        if (assembly.HasError)
+        {
+            state.StatusMessage = "Fail > " + assembly.Error.Message;
+
+            return Task.CompletedTask;
+        }
+
+        var apiTypes = from type in assembly.Value.MainModule.Types where type.BaseType?.Name == "CommonControllerBase" select type;
+
+        state.ApiNames = (from type in apiTypes select type.Name.RemoveFromEnd("Controller")).ToList();
+
+        state.StatusMessage = $"Ready > {state.ApiNames.Count} api listed.";
+
+        state.SelectedApiName = null;
+
+        state.SelectedFilePath = null;
+        
+        return Task.CompletedTask;
     }
 
     async Task OnExportAllClicked(MouseEvent e)
@@ -171,7 +209,7 @@ class MainWindow : Component<MainWindow.Model>
             count++;
         }
 
-        state.StatusMessage = $"Success / ( {count} file exported. )";
+        state.StatusMessage = $"Success > {count} file exported.";
     }
 
     async Task OnExportClicked(MouseEvent e)
@@ -190,43 +228,16 @@ class MainWindow : Component<MainWindow.Model>
             count++;
         }
 
-        state.StatusMessage = $"Success / ( {count} file exported. )";
+        state.StatusMessage = $"Success > {count} file exported.";
     }
 
     Task OnFileSelected(MouseEvent e)
-    {
+    {   
         state.SelectedFilePath = e.currentTarget.id;
 
         return Task.CompletedTask;
     }
 
-    
-    
-    async Task OnAssemblyFilePathChanged()
-    {
-        if (!File.Exists(state.AssemblyFilePath))
-        {
-            state.StatusMessage = "FileNotFound." + state.AssemblyFilePath;
-            return;
-        }
-        
-        var assembly = CecilHelper.ReadAssemblyDefinition(state.AssemblyFilePath);
-        if (assembly.HasError)
-        {
-            state.StatusMessage = "Fail > " +assembly.Error.Message;
-
-            return;
-        }
-
-        var apiTypes = from type in assembly.Value.MainModule.Types where type.BaseType?.Name == "CommonControllerBase" select type;
-
-        state.ApiNames = (from type in apiTypes select type.Name.RemoveFromEnd("Controller")).ToList();
-
-        state.StatusMessage = $"Ready > {state.ApiNames.Count} api listed.";
-
-        await UpdateFiles();
-    }
-    
     async Task UpdateFiles()
     {
         if (!state.SelectedApiName.HasValue())
@@ -250,6 +261,9 @@ class MainWindow : Component<MainWindow.Model>
         }
 
         state.Files = fileModels;
+
+        state.StatusMessage = $"Ready > {fileModels.Count} file listed.";
+        
     }
 
     internal record Model

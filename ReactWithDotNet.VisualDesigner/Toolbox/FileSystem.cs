@@ -54,9 +54,16 @@ static class FileSystem
                     
                 
                 fileInfo.IsReadOnly = false;
+                
                 TfsHelper.CheckoutFile(file.Path);
+                
+                await File.WriteAllTextAsync(file.Path, file.Content, Encoding.UTF8);
+
+                return Unit.Value;
             }
 
+            TfsHelper.AddFile(file.Path);
+            
             await File.WriteAllTextAsync(file.Path, file.Content, Encoding.UTF8);
 
             return Unit.Value;
