@@ -9,9 +9,9 @@ class MainWindow : Component<MainWindow.Model>
 {
     protected override Element render()
     {
-        return new div(WidthFull, HeightFull, BackgroundColor(WhiteSmoke), Padding(16), FontSize13, FontFamily("-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'"))
+        return new div(WidthFull, HeightFull, BackgroundColor(WhiteSmoke), Padding(16), FontSize13, FontFamily("-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'"), DisplayFlex, FlexDirectionColumn, Gap(4))
         {
-            new div(WidthFull, HeightFull, BorderRadius(4), BackgroundColor(White), Border(1, solid, Gray300), DisplayFlex, FlexDirectionColumn, CursorDefault)
+            new div(WidthFull, BorderRadius(4), BackgroundColor(White), Border(1, solid, Gray300), DisplayFlex, FlexDirectionColumn, CursorDefault, FlexGrow(1))
             {
                 new div(BorderBottom(1, solid, "#d1d5db"), Padding(8))
                 {
@@ -19,7 +19,7 @@ class MainWindow : Component<MainWindow.Model>
                     {
                         "AssemblyFilePath"
                     },
-                    new input(input.Type("text"), input.Value(state.AssemblyFilePath), WidthFull, Border(1, solid, Gray300), BorderRadius(4), PaddingLeft(4), OutlineNone)
+                    new input(input.Type("text"), input.Value("state.AssemblyFilePath"), WidthFull, Border(1, solid, Gray300), BorderRadius(4), PaddingLeft(4), OutlineNone)
                 },
                 new div(WidthFull, DisplayFlex, Flex(1, 1, 0))
                 {
@@ -35,7 +35,7 @@ class MainWindow : Component<MainWindow.Model>
                         new div(Flex(1, 1, 0), Padding(8), DisplayFlex, FlexDirectionColumn, Gap(16), OverflowAuto)
                         {
                             from item in state.ApiNames
-                            select new div(OnClick(OnApiSelected), Id(item), Border(1, solid, Gray300), BorderRadius(4), DisplayFlex, JustifyContentCenter, AlignItemsCenter, state.SelectedApiName == item ? BackgroundColor(Gray100) : BackgroundColor(White), Hover(BorderColor(Gray500)))
+                            select new div(OnClick(OnApiSelected), Id("item"), Border(1, solid, Gray300), BorderRadius(4), DisplayFlex, JustifyContentCenter, AlignItemsCenter, state.SelectedApiName == item ? BackgroundColor(Gray100) : BackgroundColor(White), Hover(BorderColor(Gray500)))
                             {
                                 new div(Padding(4))
                                 {
@@ -71,14 +71,14 @@ class MainWindow : Component<MainWindow.Model>
                         {
                             new div(Height(40), FontWeight600, DisplayFlex, JustifyContentCenter, AlignItemsCenter, Width("50%"))
                             {
-                                new div(Padding(4, 8), Border(1, solid, Gray300), BorderRadius(4), Hover(BackgroundColor(Gray100)))
+                                new div(OnClick(OnExportAllClicked), Padding(4, 8), Border(1, solid, Gray300), BorderRadius(4), Hover(BackgroundColor(Gray100)))
                                 {
                                     "Export All"
                                 }
                             },
                             new div(Height(40), FontWeight600, DisplayFlex, JustifyContentCenter, AlignItemsCenter, Width("50%"))
                             {
-                                new div(Padding(4, 8), Border(1, solid, Gray300), BorderRadius(4), Hover(BackgroundColor(Gray100)))
+                                new div(OnClick(OnExportClicked), Padding(4, 8), Border(1, solid, Gray300), BorderRadius(4), Hover(BackgroundColor(Gray100)))
                                 {
                                     "Export"
                                 }
@@ -95,9 +95,19 @@ class MainWindow : Component<MainWindow.Model>
                             },
                             new div(Padding(4), WidthFull, Border(1, solid, Gray300), BorderRadius(4), FlexGrow(1), OverflowHidden)
                             {
-                                new TsFileViewer{Value=GetSelectedFileContent()}
+                                new TsFileViewer()
+                                {
+                                    Value = GetSelectedFileContent()
+                                }
                             }
                         }
+                    }
+                },
+                new div(PaddingLeft(8), BorderTop(1, solid, "#d1d5db"))
+                {
+                    new div(FontSize12)
+                    {
+                        state.StatusMessage
                     }
                 }
             }
@@ -159,6 +169,45 @@ class MainWindow : Component<MainWindow.Model>
 
         await UpdateFiles(null);
     }
+    
+    async Task OnExportClicked(MouseEvent e)
+    {
+        var count = 0;
+        
+        foreach (var fileModel in state.Files.Where(f=>f.Path == state.SelectedFilePath))
+        {
+            var result = await FileSystem.Save(fileModel);
+            if (result.HasError)
+            {
+                state.StatusMessage = result.Error.Message;
+                return;
+            }
+
+            count++;
+        }
+
+        state.StatusMessage = $"Success / ( {count} file exported. )";
+    }
+    
+    async Task OnExportAllClicked(MouseEvent e)
+    {
+        var count = 0;
+        
+        foreach (var fileModel in state.Files)
+        {
+            var result = await FileSystem.Save(fileModel);
+            if (result.HasError)
+            {
+                state.StatusMessage = result.Error.Message;
+                return;
+            } 
+            
+            count++;
+        }
+
+        state.StatusMessage = $"Success / ( {count} file exported. )";
+    }
+    
 
     string CalculateSelectedFilePathRelativeToProject()
     {
