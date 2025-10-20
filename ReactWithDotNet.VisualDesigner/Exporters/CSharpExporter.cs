@@ -1,12 +1,21 @@
-﻿using System.Collections.Immutable;
-using System.Reflection;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using ReactWithDotNet.Transformers;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Reflection;
 
 namespace ReactWithDotNet.VisualDesigner.Exporters;
 
 static class CSharpExporter
 {
+
+    sealed record PropertyTsCode
+    {
+        public bool IsDesignerSpecificProperty { get; init; }
+        public bool IsModifier { get; init; }
+        public bool IsStandardAssignment { get; init; }
+        public string Text { get; init; }
+    }
     public static async Task<Result<string>> CalculateElementTsxCode(int projectId, IReadOnlyDictionary<string, string> componentConfig, VisualElementModel visualElement)
     {
         var project = GetProjectConfig(projectId);
@@ -524,25 +533,21 @@ static class CSharpExporter
 
             var hasNoBody = node.Children.Count == 0 && node.Text.HasNoValue() && childrenProperty is null;
 
+            List<PropertyTsCode> tsPropTexts;
             string partProps;
             {
-                var propsAsTextList = new List<string>();
+                var modifiers = new List<string>();
                 {
-                    // import props except style
+                    
                     {
-                        var propsWithoutStyle =
-                            from reactProperty in from p in node.Properties where p.Name.NotIn(Design.Text, Design.TextPreview, Design.Src, Design.Name, "style") select p
-                            let text = convertReactPropertyToString(elementType, reactProperty)
-                            where text is not null
-                            select IsStringValue(reactProperty.Value) switch
-                            {
-                                true  => text,
-                                false => text.Replace('"' + reactProperty.Value + '"', reactProperty.Value)
-                            };
-
-                        propsAsTextList.AddRange(propsWithoutStyle);
-
-                        static string convertReactPropertyToString(Maybe<Type> elementType, ReactProperty reactProperty)
+                        tsPropTexts = new
+                            (
+                             from reactProperty in from p in node.Properties where p.Name.NotIn(Design.Text, Design.TextPreview, Design.Src, Design.Name, "style") select p
+                             let propertyTsCode = convertReactPropertyToString(elementType, reactProperty)
+                             select propertyTsCode
+                            );
+                        
+                         static PropertyTsCode convertReactPropertyToString(Maybe<Type> elementType, ReactProperty reactProperty)
                         {
                             var propertyName = reactProperty.Name;
 
@@ -550,7 +555,10 @@ static class CSharpExporter
 
                             if (propertyName is Design.ItemsSource || propertyName is Design.ItemsSourceDesignTimeCount)
                             {
-                                return null;
+                                return new ()
+                                {
+                                    IsDesignerSpecificProperty = true
+                                };
                             }
 
                             if (elementType.HasValue)
@@ -558,34 +566,27 @@ static class CSharpExporter
                                 var (success, modifierCode) = ToModifierTransformer.TryConvertToModifier(elementType.Value.Name, propertyName, TryClearStringValue(propertyValue));
                                 if (success)
                                 {
-                                    return modifierCode;
+                                    return new ()
+                                    {
+                                        IsModifier = true,
+                                        Text = modifierCode
+                                    };
                                 }
                             }
 
-                            if (propertyValue == "true")
-                            {
-                                return propertyName;
-                            }
-
-                            if (propertyName == Design.SpreadOperator)
-                            {
-                                return '{' + propertyValue + '}';
-                            }
-
-                            if (propertyName == nameof(HtmlElement.dangerouslySetInnerHTML))
-                            {
-                                return $"{propertyName}={{{{ __html: {propertyValue} }}}}";
-                            }
+                            
 
                             if (IsStringValue(propertyValue))
                             {
-                                return $"{propertyName}=\"{TryClearStringValue(propertyValue)}\"";
+                                return new ()
+                                {
+                                    IsStandardAssignment   = true,
+                                    
+                                    Text = $"{propertyName} = \"{TryClearStringValue(propertyValue)}\""
+                                };
                             }
 
-                            if (IsStringTemplate(propertyValue))
-                            {
-                                return $"{propertyName}={{{propertyValue}}}";
-                            }
+                           
 
                             if (elementType.HasValue)
                             {
@@ -597,14 +598,33 @@ static class CSharpExporter
                                         var isString = propertyValue.Contains('/') || propertyValue.StartsWith('#') || propertyValue.Split(' ').Length > 1;
                                         if (isString)
                                         {
-                                            return $"{propertyName}=\"{propertyValue}\"";
+                                            return new ()
+                                            {
+                                                IsStandardAssignment = true,
+                                                
+                                                Text = $"{propertyName} = \"{propertyValue}\""
+                                            };
                                         }
                                     }
                                 }
                             }
 
-                            return $"{propertyName}={propertyValue}";
+                            return new ()
+                            {
+                                IsStandardAssignment = true,
+                                                
+                                Text = $"{propertyName} = {propertyValue}"
+                            };
                         }
+                    }
+                    
+                    // import props except style
+                    {
+                        tsPropTexts.RemoveAll(x => x.IsDesignerSpecificProperty);
+
+                        modifiers.AddRange(from x in tsPropTexts where x.IsModifier select x.Text);
+                        
+                        tsPropTexts.RemoveAll(x => x.IsModifier);
                     }
 
                     // import style
@@ -667,13 +687,13 @@ static class CSharpExporter
                             }
                         }
 
-                        propsAsTextList.AddRange(styleList);
+                        modifiers.AddRange(styleList);
                     }
                 }
 
-                if (propsAsTextList.Count > 0)
+                if (modifiers.Count > 0)
                 {
-                    partProps = "(" + string.Join(", ", propsAsTextList) + ")";
+                    partProps = "(" + string.Join(", ", modifiers) + ")";
                 }
                 else
                 {
@@ -690,6 +710,31 @@ static class CSharpExporter
 
             if (hasNoBody)
             {
+                if (tsPropTexts.Count > 0)
+                {
+                    return new LineCollection
+                    {
+                        $"{indent(indentLevel)}new {tag}{partProps}",
+                        indent(indentLevel) + "{",
+                        
+                        from x in tsPropTexts.Select((x,i)=>new
+                        {
+                            text = indent(indentLevel+1) +  x.Text,  
+                            
+                            isLast =i==tsPropTexts.Count-1
+                        })
+                        
+                        select x.isLast switch
+                        {
+                            false =>x.text + ",",
+                            true =>x.text
+                        },
+                        
+                        
+                        indent(indentLevel) + "}",
+                        
+                    };
+                }
                 return new LineCollection
                 {
                     $"{indent(indentLevel)}new {tag}{partProps}"
@@ -807,5 +852,9 @@ static class CSharpExporter
 
     class LineCollection : List<string>
     {
+        public void Add(IEnumerable<string> values)
+        {
+            AddRange(values);
+        }
     }
 }

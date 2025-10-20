@@ -3,24 +3,75 @@ using System.IO;
 
 namespace Toolbox;
 
-sealed class CheckoutFileFromTfsResponse
-{
-    public string Error { get; init; }
-
-    public string Output { get; init; }
-
-    public bool Success { get; init; }
-
-    public bool TfExeNotFound { get; init; }
-
-    public bool VsInstallationPathNotFound { get; init; }
-
-    public bool VsWhereExeNotFound { get; init; }
-}
-
 static class TfsHelper
 {
-    public static CheckoutFileFromTfsResponse CheckoutFileFromTfs(string filePath)
+    public static Exception AddFile(string filePath)
+    {
+        var (tfsExePath, exception) = Find_Tfs_exe();
+        if (exception is not null)
+        {
+            return exception;
+        }
+
+        var tfProcess = new Process
+        {
+            StartInfo = new ProcessStartInfo
+            {
+                FileName               = tfsExePath,
+                Arguments              = $"add \"{filePath}\"",
+                UseShellExecute        = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError  = true,
+                CreateNoWindow         = true
+            }
+        };
+
+        tfProcess.Start();
+        var error = tfProcess.StandardError.ReadToEnd();
+        tfProcess.WaitForExit();
+
+        if (!string.IsNullOrEmpty(error))
+        {
+            return new IOException(error);
+        }
+
+        return null;
+    }
+
+    public static Exception CheckoutFile(string filePath)
+    {
+        var (tfsExePath, exception) = Find_Tfs_exe();
+        if (exception is not null)
+        {
+            return exception;
+        }
+
+        var tfProcess = new Process
+        {
+            StartInfo = new ProcessStartInfo
+            {
+                FileName               = tfsExePath,
+                Arguments              = $"checkout \"{filePath}\"",
+                UseShellExecute        = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError  = true,
+                CreateNoWindow         = true
+            }
+        };
+
+        tfProcess.Start();
+        var error = tfProcess.StandardError.ReadToEnd();
+        tfProcess.WaitForExit();
+
+        if (!string.IsNullOrEmpty(error))
+        {
+            return new IOException(error);
+        }
+
+        return null;
+    }
+
+    static (string tfsExePath, Exception exception) Find_Tfs_exe()
     {
         var vsWherePath = Path.Combine
             (
@@ -30,7 +81,7 @@ static class TfsHelper
 
         if (!File.Exists(vsWherePath))
         {
-            return new() { VsWhereExeNotFound = true };
+            return new(string.Empty, new FileNotFoundException(vsWherePath));
         }
 
         // Run vswhere to get the installation path
@@ -52,7 +103,7 @@ static class TfsHelper
 
         if (string.IsNullOrEmpty(vsInstallPath))
         {
-            return new() { VsInstallationPathNotFound = true };
+            return new(string.Empty, new FileNotFoundException("VsInstallationPathNotFound"));
         }
 
         var tfExePath = Path.Combine
@@ -63,37 +114,9 @@ static class TfsHelper
 
         if (!File.Exists(tfExePath))
         {
-            return new() { TfExeNotFound = true };
+            return new(string.Empty, new FileNotFoundException(tfExePath));
         }
 
-        // Run tf checkout
-        var tfProcess = new Process
-        {
-            StartInfo = new ProcessStartInfo
-            {
-                FileName               = tfExePath,
-                Arguments              = $"checkout \"{filePath}\"",
-                UseShellExecute        = false,
-                RedirectStandardOutput = true,
-                RedirectStandardError  = true,
-                CreateNoWindow         = true
-            }
-        };
-
-        tfProcess.Start();
-        var output = tfProcess.StandardOutput.ReadToEnd();
-        var error = tfProcess.StandardError.ReadToEnd();
-        tfProcess.WaitForExit();
-
-        if (!string.IsNullOrEmpty(error))
-        {
-            return new() { Error = error };
-        }
-
-        return new()
-        {
-            Success = true,
-            Output  = output
-        };
+        return (tfExePath, null);
     }
 }

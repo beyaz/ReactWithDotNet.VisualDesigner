@@ -54,7 +54,7 @@ static class FileSystem
                     
                 
                 fileInfo.IsReadOnly = false;
-                TfsHelper.CheckoutFileFromTfs(file.Path);
+                TfsHelper.CheckoutFile(file.Path);
             }
 
             await File.WriteAllTextAsync(file.Path, file.Content, Encoding.UTF8);
