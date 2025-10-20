@@ -1,24 +1,59 @@
 ﻿using System.IO;
+using System.Text;
+using Newtonsoft.Json;
 using ReactWithDotNet;
 using ReactWithDotNet.ThirdPartyLibraries.MonacoEditorReact;
 using ReactWithDotNet.VisualDesigner;
 
 namespace BDigitalFrameworkApiToTsExporter;
 
-class MainWindow : Component<MainWindow.Model>
+class MainWindow : Component<MainWindow.State>
 {
+    static string StateCacheFilePath => Path.Combine(Path.GetTempPath(), "BDigitalFrameworkApiToTsExporter.state.json");
+
+    static State StateCache
+    {
+        get
+        {
+            if (File.Exists(StateCacheFilePath))
+            {
+                return JsonConvert.DeserializeObject<State>(File.ReadAllText(StateCacheFilePath));
+            }
+
+            return null;
+        }
+        set => File.WriteAllText(StateCacheFilePath, JsonConvert.SerializeObject(value), Encoding.UTF8);
+    }
+
     string ProjectDirectory => new DirectoryInfo(state.AssemblyFilePath).Parent?.Parent?.Parent?.Parent?.Parent?.Parent?.FullName;
 
     protected override async Task constructor()
     {
+        var cachedState = StateCache;
+
         state = new()
         {
             AssemblyFilePath = @"D:\work\BOA.BusinessModules\Dev\BOA.InternetBanking.Payments\API\BOA.InternetBanking.Payments.API\bin\Debug\net8.0\BOA.InternetBanking.Payments.API.dll"
         };
 
+        if (cachedState is not null)
+        {
+            state = JsonConvert.DeserializeObject<State>(JsonConvert.SerializeObject(cachedState));
+        }
+
         await OnAssemblyFilePathChanged();
 
-        await OnApiSelected(new () { currentTarget = new() { id = "Religious" } });
+        await OnApiSelected(cachedState?.SelectedApiName ?? "Religious");
+
+        if (cachedState?.SelectedFilePath is not null)
+        {
+            await OnFileSelected(cachedState.SelectedFilePath);
+        }
+
+        if (cachedState is not null)
+        {
+            StateCache = cachedState;
+        }
     }
 
     protected override Element render()
@@ -33,11 +68,11 @@ class MainWindow : Component<MainWindow.Model>
                     {
                         "AssemblyFilePath"
                     },
-                    new input(input.Type("text"), input.ValueBind(()=> state.AssemblyFilePath), input.ValueBindDebounceTimeout(1000), input.ValueBindDebounceHandler(OnAssemblyFilePathChanged), WidthFull, Border(1, solid, Gray300), BorderRadius(4), PaddingLeft(4), OutlineNone)
+                    new input(input.Type("text"), input.ValueBind(() => state.AssemblyFilePath), input.ValueBindDebounceTimeout(1000), input.ValueBindDebounceHandler(OnAssemblyFilePathChanged), WidthFull, Border(1, solid, Gray300), BorderRadius(4), PaddingLeft(4), OutlineNone, PaddingTop(4), PaddingBottom(4))
                 },
                 new div(WidthFull, DisplayFlex, Flex(1, 1, 0))
                 {
-                    new div(Width(300), DisplayFlex, FlexDirectionColumn, BorderRight(1, solid, "#d1d5db"))
+                    new div(Width("20%"), DisplayFlex, FlexDirectionColumn, BorderRight(1, solid, "#d1d5db"))
                     {
                         new div(Height(40), FontWeight600, DisplayFlex, JustifyContentCenter, AlignItemsCenter, BorderBottom(1, solid, "#d1d5db"))
                         {
@@ -58,7 +93,7 @@ class MainWindow : Component<MainWindow.Model>
                             }
                         }
                     },
-                    new div(Width(300), BorderRight(1, solid, "#d1d5db"), DisplayFlex, FlexDirectionColumn)
+                    new div(Width("30%"), BorderRight(1, solid, "#d1d5db"), DisplayFlex, FlexDirectionColumn)
                     {
                         new div(Height(40), FontWeight600, DisplayFlex, JustifyContentCenter, AlignItemsCenter, BorderBottom(1, solid, "#d1d5db"))
                         {
@@ -70,7 +105,7 @@ class MainWindow : Component<MainWindow.Model>
                         new div(Flex(1, 1, 0), Padding(8), DisplayFlex, FlexDirectionColumn, Gap(16), OverflowAuto)
                         {
                             from item in state.Files
-                            select new div(Id(item.Path), OnClick(OnFileSelected), Border(1, solid, Gray300), BorderRadius(4), DisplayFlex, JustifyContentCenter, AlignItemsCenter, state.SelectedFilePath== item.Path ? BackgroundColor(Gray100) : BackgroundColor(White), Hover(BorderColor(Gray500)), BoxShadow("0 1px 3px rgba(0,0,0,0.2)"))
+                            select new div(Id(item.Path), OnClick(OnFileSelected), Border(1, solid, Gray300), BorderRadius(4), DisplayFlex, JustifyContentCenter, AlignItemsCenter, state.SelectedFilePath == item.Path ? BackgroundColor(Gray100) : BackgroundColor(White), Hover(BorderColor(Gray500)), BoxShadow("0 1px 3px rgba(0,0,0,0.2)"))
                             {
                                 new div(Padding(4))
                                 {
@@ -78,28 +113,28 @@ class MainWindow : Component<MainWindow.Model>
                                 }
                             }
                         }
-                    }, 
-                    new div(WidthFull, DisplayFlex, FlexDirectionColumn)
+                    },
+                    new div(Width("50%"), DisplayFlex, FlexDirectionColumn)
                     {
                         new div(Height(40), DisplayFlex, BorderBottom(1, solid, "#d1d5db"))
                         {
                             new div(Height(40), FontWeight600, DisplayFlex, JustifyContentCenter, AlignItemsCenter, Width("50%"))
                             {
-                                state.Files.Count == 0 ? null :
-                                    new div(OnClick(OnExportAllClicked), Padding(4, 8), Border(1, solid, Gray300), BorderRadius(4), Hover(BackgroundColor(Gray100)), BoxShadow("0 1px 3px rgba(0,0,0,0.2)"))
+                                state.Files.Count == 0
+                                    ? null
+                                    : new div(OnClick(OnExportAllClicked), Padding(4, 8), Border(1, solid, Gray300), BorderRadius(4), Hover(BackgroundColor(Gray100)), BoxShadow("0 1px 3px rgba(0,0,0,0.2)"))
                                     {
                                         "Export All"
                                     }
-                                
                             },
                             new div(Height(40), FontWeight600, DisplayFlex, JustifyContentCenter, AlignItemsCenter, Width("50%"))
                             {
-                                state.SelectedFilePath is  null ? null :
-                                    new div(OnClick(OnExportClicked), Padding(4, 8), Border(1, solid, Gray300), BorderRadius(4), Hover(BackgroundColor(Gray100)), BoxShadow("0 1px 3px rgba(0,0,0,0.2)"))
+                                state.SelectedFilePath is null
+                                    ? null
+                                    : new div(OnClick(OnExportClicked), Padding(4, 8), Border(1, solid, Gray300), BorderRadius(4), Hover(BackgroundColor(Gray100)), BoxShadow("0 1px 3px rgba(0,0,0,0.2)"))
                                     {
                                         "Export"
                                     }
-                                
                             }
                         },
                         new div(DisplayFlex, FlexDirectionColumn, FlexGrow(1))
@@ -149,12 +184,17 @@ class MainWindow : Component<MainWindow.Model>
         return state.Files.FirstOrDefault(x => x.Path == state.SelectedFilePath)?.Content ?? string.Empty;
     }
 
-    async Task OnApiSelected(MouseEvent e)
+    Task OnApiSelected(MouseEvent e)
     {
-        state.SelectedApiName = e.currentTarget.id;
+        return OnApiSelected(e.currentTarget.id);
+    }
+
+    async Task OnApiSelected(string apiName)
+    {
+        state.SelectedApiName = apiName;
 
         await UpdateFiles();
-    } 
+    }
 
     Task OnAssemblyFilePathChanged()
     {
@@ -168,7 +208,6 @@ class MainWindow : Component<MainWindow.Model>
 
             state.SelectedFilePath = null;
 
-            
             return Task.CompletedTask;
         }
 
@@ -189,7 +228,9 @@ class MainWindow : Component<MainWindow.Model>
         state.SelectedApiName = null;
 
         state.SelectedFilePath = null;
-        
+
+        StateCache = state;
+
         return Task.CompletedTask;
     }
 
@@ -231,9 +272,16 @@ class MainWindow : Component<MainWindow.Model>
         state.StatusMessage = $"Success > {count} file exported.";
     }
 
-    Task OnFileSelected(MouseEvent e)
-    {   
-        state.SelectedFilePath = e.currentTarget.id;
+    async Task OnFileSelected(MouseEvent e)
+    {
+        await OnFileSelected(e.currentTarget.id);
+
+        StateCache = state;
+    }
+
+    Task OnFileSelected(string selectedFilePath)
+    {
+        state.SelectedFilePath = selectedFilePath;
 
         return Task.CompletedTask;
     }
@@ -263,10 +311,9 @@ class MainWindow : Component<MainWindow.Model>
         state.Files = fileModels;
 
         state.StatusMessage = $"Ready > {fileModels.Count} file listed.";
-        
     }
 
-    internal record Model
+    internal record State
     {
         public string AssemblyFilePath { get; init; }
 
@@ -303,35 +350,6 @@ class TsFileViewer : PluginComponentBase
                 unicodeHighlight    = new { showExcludeOptions = false }
             }
         };
-        
-        
-        
-        //beforeMount={(monaco) => {
-        //    // TypeScript / JavaScript
-        //    monaco.languages.typescript.typescriptDefaults.setDiagnosticsOptions({
-        //        noSemanticValidation: true,
-        //        noSyntaxValidation: true,
-        //    });
-        //    monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
-        //        noSemanticValidation: true,
-        //        noSyntaxValidation: true,
-        //    });
-
-        //    // JSON
-        //    monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
-        //        validate: false,
-        //        enableSchemaRequest: false,
-        //    });
-
-        //    // CSS, SCSS, LESS
-        //    monaco.languages.css.cssDefaults.setOptions({ validate: false });
-        //    monaco.languages.css.scssDefaults.setOptions({ validate: false });
-        //    monaco.languages.css.lessDefaults.setOptions({ validate: false });
-
-        //    // HTML
-        //    monaco.languages.html.htmlDefaults.setOptions({ validate: false });
-        //}}
-
     }
 }
 

@@ -8,5 +8,5 @@ static class Page
 {
     public static readonly PageRouteInfo VisualDesigner = new("/", typeof(ApplicationView));
     public static readonly PageRouteInfo VisualDesignerPreview = new($"/{nameof(VisualDesignerPreview)}", typeof(ApplicationPreview));
-    public static readonly PageRouteInfo MainWindow = new($"/{nameof(MainWindow)}", typeof(MainWindow));
+    public static readonly PageRouteInfo MainWindow = new($"/{nameof(BDigitalFrameworkApiToTsExporter)}", typeof(MainWindow));
 }
