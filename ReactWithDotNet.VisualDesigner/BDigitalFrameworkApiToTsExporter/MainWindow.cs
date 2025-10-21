@@ -55,7 +55,13 @@ class MainWindow : Component<MainWindow.State>
             StateCache = cachedState;
         }
 
+        // clear status
+
         state.StatusMessage = "Ready";
+
+        state.IsExportingAllFiles = false;
+
+        state.IsExportingSelectedFile = false;
     }
 
     protected override Element render()
@@ -124,18 +130,26 @@ class MainWindow : Component<MainWindow.State>
                             {
                                 state.Files.Count == 0
                                     ? null
-                                    : new div(OnClick(OnExportAllClicked), Padding(4, 8), Border(1, solid, Gray300), BorderRadius(4), Hover(BackgroundColor(Gray100)), BoxShadow("0 1px 3px rgba(0,0,0,0.2)"))
+                                    : new div(OnClick(OnExportAllClicked), Padding(4, 8), Border(1, solid, Gray300), BorderRadius(4), Hover(BackgroundColor(Gray100)), BoxShadow("0 1px 3px rgba(0,0,0,0.2)"), DisplayFlex, Gap(8), AlignItemsCenter)
                                     {
-                                        "Export All"
+                                        new div
+                                        {
+                                            "Export All"
+                                        },
+                                        !state.IsExportingAllFiles ? null : new LoadingIcon(Width(20), Height(20))
                                     }
                             },
-                            new div(Height(40), FontWeight600, DisplayFlex, JustifyContentCenter, AlignItemsCenter, Width("50%"))
+                            new div(Height(40), FontWeight600, DisplayFlex, JustifyContentCenter, AlignItemsCenter, Width("50%"), Gap(8))
                             {
                                 state.SelectedFilePath is null
                                     ? null
-                                    : new div(OnClick(OnExportClicked), Padding(4, 8), Border(1, solid, Gray300), BorderRadius(4), Hover(BackgroundColor(Gray100)), BoxShadow("0 1px 3px rgba(0,0,0,0.2)"))
+                                    : new div(OnClick(OnExportClicked), Padding(4, 8), Border(1, solid, Gray300), BorderRadius(4), Hover(BackgroundColor(Gray100)), BoxShadow("0 1px 3px rgba(0,0,0,0.2)"), DisplayFlex, Gap(8), AlignItemsCenter)
                                     {
-                                        "Export"
+                                        new div
+                                        {
+                                            "Export"
+                                        },
+                                        !state.IsExportingSelectedFile ? null : new LoadingIcon(Width(20), Height(20))
                                     }
                             }
                         },
@@ -238,6 +252,8 @@ class MainWindow : Component<MainWindow.State>
 
     async Task OnExportAllClicked()
     {
+        state.IsExportingAllFiles = false;
+
         var count = 0;
 
         foreach (var fileModel in state.Files)
@@ -257,6 +273,8 @@ class MainWindow : Component<MainWindow.State>
 
     Task OnExportAllClicked(MouseEvent e)
     {
+        state.IsExportingAllFiles = true;
+
         state.StatusMessage = "Executing...";
 
         Client.GotoMethod(OnExportAllClicked, TimeSpan.FromMilliseconds(500));
@@ -268,6 +286,8 @@ class MainWindow : Component<MainWindow.State>
     {
         state.StatusMessage = "Executing...";
 
+        state.IsExportingSelectedFile = true;
+
         Client.GotoMethod(OnExportClicked, TimeSpan.FromMilliseconds(500));
 
         return Task.CompletedTask;
@@ -275,6 +295,8 @@ class MainWindow : Component<MainWindow.State>
 
     async Task OnExportClicked()
     {
+        state.IsExportingSelectedFile = false;
+
         var count = 0;
 
         foreach (var fileModel in state.Files.Where(f => f.Path == state.SelectedFilePath))
@@ -348,6 +370,10 @@ class MainWindow : Component<MainWindow.State>
         public IReadOnlyList<FileModel> Files { get; set; }
 
         public string SelectedFilePath { get; set; }
+
+        public bool IsExportingSelectedFile { get; set; }
+
+        public bool IsExportingAllFiles { get; set; }
     }
 }
 
@@ -375,6 +401,54 @@ class TsFileViewer : PluginComponentBase
     }
 }
 
+// Taken from https://www.w3schools.com/howto/tryit.asp?filename=tryhow_css_loader
+sealed class LoadingIcon : PluginComponentBase
+{
+    public LoadingIcon(params Modifier[] modifiers)
+    {
+        Add(modifiers);
+    }
+
+    public LoadingIcon()
+    {
+    }
+
+    protected override Element render()
+    {
+        return new div
+        {
+            new style
+            {
+                """
+                @-webkit-keyframes spin
+                {
+                    0% { -webkit-transform: rotate(0deg); }
+                    100% { -webkit-transform: rotate(360deg); }
+                }
+
+                @keyframes spin
+                {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
+                }
+                """,
+
+                new CssClass("loader",
+                [
+                    Border(1, solid, "#f3f3f3"),
+                    BorderRadius("50%"),
+                    BorderTop(1, solid, "#3498db"),
+                    SizeFull,
+                    WebkitAnimation("spin 1s linear infinite"),
+                    Animation("spin 1s linear infinite")
+                ])
+            },
+
+            new div { className = "loader" }
+        };
+    }
+}
+
 class ExporterPlugin : PluginBase
 {
     public override Element TryCreateElementForPreview(string tag, string id, MouseEventHandler onMouseClick)
@@ -382,6 +456,16 @@ class ExporterPlugin : PluginBase
         if (tag == nameof(TsFileViewer))
         {
             return new TsFileViewer
+            {
+                id = id,
+
+                onMouseClick = onMouseClick
+            };
+        }
+
+        if (tag == nameof(LoadingIcon))
+        {
+            return new LoadingIcon
             {
                 id = id,
 
