@@ -30,6 +30,7 @@ static class TsModelCreator
                 from propertyDefinition in typeDefinition.Properties
                 where propertyDefinition.SetMethod is not null
                 where !IsImplicitDefinition(propertyDefinition)
+                where !IsJsonIgnored(propertyDefinition)
                 select new TsFieldDefinition
                 {
                     Name          = GetTsVariableName(propertyDefinition.Name),
@@ -179,6 +180,11 @@ static class TsModelCreator
         }
 
         return propertyDefinition.Name.Contains(".");
+    }
+    
+    static bool IsJsonIgnored(PropertyDefinition propertyDefinition)
+    {
+        return propertyDefinition.CustomAttributes.Any(x => x.AttributeType.Name.Contains("JsonIgnore", StringComparison.OrdinalIgnoreCase));
     }
 
     
