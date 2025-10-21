@@ -54,6 +54,8 @@ class MainWindow : Component<MainWindow.State>
         {
             StateCache = cachedState;
         }
+
+        state.StatusMessage = "Ready";
     }
 
     protected override Element render()
@@ -234,7 +236,7 @@ class MainWindow : Component<MainWindow.State>
         return Task.CompletedTask;
     }
 
-    async Task OnExportAllClicked(MouseEvent e)
+    async Task OnExportAllClicked()
     {
         var count = 0;
 
@@ -253,7 +255,25 @@ class MainWindow : Component<MainWindow.State>
         state.StatusMessage = $"Success > {count} file exported.";
     }
 
-    async Task OnExportClicked(MouseEvent e)
+    Task OnExportAllClicked(MouseEvent e)
+    {
+        state.StatusMessage = "Executing...";
+
+        Client.GotoMethod(OnExportAllClicked, TimeSpan.FromMilliseconds(500));
+
+        return Task.CompletedTask;
+    }
+
+    Task OnExportClicked(MouseEvent e)
+    {
+        state.StatusMessage = "Executing...";
+
+        Client.GotoMethod(OnExportClicked, TimeSpan.FromMilliseconds(500));
+
+        return Task.CompletedTask;
+    }
+
+    async Task OnExportClicked()
     {
         var count = 0;
 
@@ -281,6 +301,8 @@ class MainWindow : Component<MainWindow.State>
 
     Task OnFileSelected(string selectedFilePath)
     {
+        state.StatusMessage = "Ready";
+
         state.SelectedFilePath = selectedFilePath;
 
         return Task.CompletedTask;

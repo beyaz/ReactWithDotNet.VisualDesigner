@@ -1,5 +1,5 @@
-﻿using System.IO;
-using Mono.Cecil;
+﻿using Mono.Cecil;
+using System.IO;
 
 namespace BDigitalFrameworkApiToTsExporter;
 
@@ -25,9 +25,9 @@ static class Exporter
             from controllerTypeDefinition in getControllerTypeDefinition(scope)
             from modelFile in getModelFile(scope)
             from serviceFile in getServiceFile(scope)
-            from serviceModelIntegrationFile in getServiceAndModelIntegrationFile(scope)
+            from serviceModelIntegrationFiles in getServiceAndModelIntegrationFiles(scope).AsResult()
             from typeFiles in getTypeFiles(scope).AsResult()
-            from file in new[] { modelFile, serviceFile, serviceModelIntegrationFile }.Concat(typeFiles)
+            from file in new[] { modelFile, serviceFile }.Concat(typeFiles).Concat(serviceModelIntegrationFiles)
             select file;
     }
 
@@ -50,9 +50,14 @@ static class Exporter
         return CecilHelper.GetType(assemblyDefinition, fullTypeName);
     }
 
-    static IEnumerable<MethodDefinition> getExportablePublicMethods(TypeDefinition controllerTypeDefinition)
+    static IReadOnlyList<MethodDefinition> getExportablePublicMethods(TypeDefinition controllerTypeDefinition)
     {
-        return from method in controllerTypeDefinition.Methods where method.IsPublic && method.Parameters.Count == 1 && method.ReturnType.Name != "Void" select method;
+        return (
+            from method in controllerTypeDefinition.Methods
+            where method.IsPublic && method.Parameters.Count == 1 &&
+                  method.ReturnType.Name != "Void"
+            select method
+        ).ToList();
     }
 
     static Task<Result<FileModel>> getModelFile(Scope scope)
@@ -100,21 +105,24 @@ static class Exporter
         return methodDefinition.ReturnType;
     }
 
-    static Result<FileModel> getServiceAndModelIntegrationFile(Scope scope)
+    static IEnumerable<Result<FileModel>> getServiceAndModelIntegrationFiles(Scope scope)
     {
         var projectDirectory = ProjectDirectory[scope];
         var controllerTypeDefinition = ControllerTypeDefinition[scope];
         var modelTypeDefinition = ModelTypeDefinition[scope];
+        var apiName = ApiName[scope];
 
-        return
-            from filePath in getOutputTsFilePath()
-            select new FileModel
-            {
-                Path    = filePath,
-                Content = string.Join(Environment.NewLine, getFileContent())
-            };
 
-        IReadOnlyList<string> getFileContent()
+        return from methodGroup in GroupControllerMethods(getExportablePublicMethods(controllerTypeDefinition))
+               from filePath in getOutputTsFilePath(methodGroup)
+               select new FileModel
+               {
+                   Path    = filePath,
+                   Content = string.Join(Environment.NewLine, getFileContent(methodGroup))
+               };
+
+
+        IReadOnlyList<string> getFileContent(MethodGroup methodGroup)
         {
             LineCollection lines =
             [
@@ -123,7 +131,7 @@ static class Exporter
             ];
 
             var inputOutputTypes
-                = from methodDefinition in getExportablePublicMethods(controllerTypeDefinition)
+                = from methodDefinition in methodGroup.ControllerMethods
                   from typeName in new[]
                   {
                       methodDefinition.Parameters[0].ParameterType.Name,
@@ -144,14 +152,14 @@ static class Exporter
 
             lines.Add(string.Empty);
 
-            lines.Add($"export const use{ApiName[scope]} = () => {{");
+            lines.Add($"export const use{methodGroup.FolderName} = () => {{");
 
             lines.Add(string.Empty);
             lines.Add(Tab + "const store = useStore();");
             lines.Add(string.Empty);
             lines.Add(Tab + $"const service = use{ApiName[scope]}Service();");
 
-            foreach (var methodDefinition in getExportablePublicMethods(controllerTypeDefinition))
+            foreach (var methodDefinition in methodGroup.ControllerMethods)
             {
                 lines.Add(string.Empty);
 
@@ -196,7 +204,7 @@ static class Exporter
             lines.Add(string.Empty);
             lines.Add(Tab + "return {");
 
-            var serviceNames = from m in getExportablePublicMethods(controllerTypeDefinition)
+            var serviceNames = from m in methodGroup.ControllerMethods
                                select GetTsVariableName(m.Name);
             lines.AddRange
                 (
@@ -209,11 +217,18 @@ static class Exporter
             return lines;
         }
 
-        Result<string> getOutputTsFilePath()
+        Result<string> getOutputTsFilePath(MethodGroup methodGroup)
         {
             return
                 from webProjectPath in getWebProjectFolderPath(projectDirectory)
-                select Path.Combine(webProjectPath, "ClientApp", "services", $"use{ApiName[scope]}.ts");
+                
+                select (methodGroup.FolderName == "Shared") switch
+                {
+                    true  => Path.Combine(webProjectPath, "ClientApp", "views", apiName, $"use{methodGroup.FolderName}.ts"),
+                    false => Path.Combine(webProjectPath, "ClientApp", "views", apiName, methodGroup.FolderName, $"use{methodGroup.FolderName}.ts")
+                };
+
+
         }
 
         static IEnumerable<PropertyDefinition> getMappingPropertyList(TypeDefinition model, TypeDefinition apiParameter)
@@ -384,5 +399,93 @@ static class Exporter
         var filePath = Path.Combine(projectDirectory, "API", $"{solutionName}.API", "bin", "debug", "net8.0", $"{solutionName}.API.dll");
 
         return CecilHelper.ReadAssemblyDefinition(filePath);
+    }
+
+    class MethodGroup
+    {
+        public string FolderName { get; set; }
+        public IReadOnlyList<MethodDefinition> ControllerMethods { get; set; }
+    }
+
+    static IReadOnlyList<MethodGroup> GroupControllerMethods(IReadOnlyList<MethodDefinition> controllerMethods)
+    {
+        var returnList = new List<MethodGroup>();
+        
+        var methodDefinitions = controllerMethods.ToList();
+
+        (string FolderName, Func<MethodDefinition, bool> IsMethodMatchFolderFunc)[] splitters =
+        [
+            ("Confirm", IsInConfirmMethod),
+            ("Start5", x => IsStartMethod(x, "5")),
+            ("Start4", x => IsStartMethod(x, "4")),
+            ("Start3", x => IsStartMethod(x, "3")),
+            ("Start2", x => IsStartMethod(x, "2")),
+            ("Start1", x => IsStartMethod(x, "1")),
+            ("Start", x => IsStartMethod(x, ""))
+        ];
+
+        foreach (var (folderName, matchFunc) in splitters)
+        {
+            if (methodDefinitions.Count(matchFunc) > 0)
+            {
+                returnList.Add(new MethodGroup
+                {
+                    FolderName = folderName,
+                
+                    ControllerMethods = methodDefinitions.Where(matchFunc).ToList()
+                });
+
+                methodDefinitions.RemoveAll(x=>matchFunc(x));
+            }
+        }
+        
+        if (methodDefinitions.Count > 0) 
+        {
+            returnList.Add(new MethodGroup
+            {
+                FolderName = "Shared",
+                
+                ControllerMethods = methodDefinitions
+            });
+        }
+        
+        foreach (var methodGroup in returnList)
+        {
+            methodGroup.ControllerMethods =
+            (
+                from md in methodGroup.ControllerMethods
+                orderby md.Name.Contains("pre", StringComparison.OrdinalIgnoreCase) descending
+                select md
+            ).ToList();
+        }
+        
+        return  returnList;
+
+        static bool IsInConfirmMethod(MethodDefinition methodDefinition)
+        {
+            var methodName = methodDefinition.Name;
+            
+            if (methodName.Contains("Execute") || 
+                methodName.Contains("ConfirmPreData"))
+            {
+                return true;
+            }
+            
+            return false;
+        }
+        
+        static bool IsStartMethod(MethodDefinition methodDefinition, string startNumber)
+        {
+            var methodName = methodDefinition.Name;
+            
+            if (methodName.Contains($"Start{startNumber}PreData")||
+                methodName.Contains($"Start{startNumber}PostData"))
+            {
+                return true;
+            }
+            
+            return false;
+        }
+
     }
 }
