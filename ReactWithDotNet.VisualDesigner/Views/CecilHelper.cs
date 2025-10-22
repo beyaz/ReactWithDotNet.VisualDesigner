@@ -75,7 +75,8 @@ static class CecilHelper
 
     public static Result<IReadOnlyList<string>> GetPropertyPathList(string assemblyPath, string typeFullName, string prefix, Func<PropertyDefinition, bool> matchFunc)
     {
-        return from assembly in Try(() => AssemblyDefinition.ReadAssembly(assemblyPath))
+        
+        return from assembly in CecilAssemblyReader.ReadAssembly(assemblyPath)
                let type = assembly.MainModule.GetType(typeFullName)
                select (type is null) switch
                {
@@ -118,26 +119,6 @@ static class CecilHelper
         }
     }
 
-    public static IReadOnlyList<string> GetRemoteApiMethodNames(string assemblyPath, string requestFullName)
-    {
-        var assembly = AssemblyDefinition.ReadAssembly(assemblyPath);
-        if (assembly is null)
-        {
-            return [];
-        }
-
-        var controllerFullName = requestFullName.Replace(".Types.", ".Controllers.").Replace("ClientRequest", "Controller");
-
-        var type = assembly.MainModule.GetType(controllerFullName);
-        if (type is null)
-        {
-            return [];
-        }
-
-        return type.Methods.Where(isReadyToCallFromDesignerGeneratedCodes).Select(m => m.Name).ToList();
-
-        bool isReadyToCallFromDesignerGeneratedCodes(MethodDefinition m) => m.IsPublic && m.Parameters.Count == 1 && m.Parameters[0].ParameterType.FullName == requestFullName;
-    }
 
     public static bool IsBoolean(TypeReference typeReference)
     {
@@ -207,7 +188,7 @@ static class CecilHelper
 
     public static bool IsPropertyPathProvidedByCollection(string dotNetAssemblyFilePath, string dotnetTypeFullName, string propertyPath)
     {
-        var assembly = AssemblyDefinition.ReadAssembly(dotNetAssemblyFilePath);
+        var assembly = CecilAssemblyReader.ReadAssembly(dotNetAssemblyFilePath).Value;
         if (assembly is null)
         {
             return false;

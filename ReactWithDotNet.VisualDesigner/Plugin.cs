@@ -1987,15 +1987,21 @@ class Plugin: PluginBase
                     {
                         var properties = node.Properties;
 
-                        List<string> lines =
+                        TsLineCollection lines =
                         [
                             "(selectedAccountCardIndex: number, isCardSelected: boolean) =>",
                             "{",
-                            "  updateRequest(r => {",
-                            $"       r.{selectedIndexProp.Value.RemoveFromStart("request.")} = selectedAccountCardIndex;",
-                            $"       r.{isCardSelectedProp.Value.RemoveFromStart("request.")} = isCardSelected;",
-                            "  });"
+                         
+                            $"       {selectedIndexProp.Value} = selectedAccountCardIndex;",
+                            $"       {isCardSelectedProp.Value} = isCardSelected;"
                         ];
+
+                        lines.Add(new []
+                        {
+                            GetUpdateStateLine(selectedIndexProp.Value),
+                            GetUpdateStateLine(isCardSelectedProp.Value)
+                        }.Distinct());
+                        
 
                         if (onSelectedIndexChangeProp is not null)
                         {
@@ -2015,7 +2021,7 @@ class Plugin: PluginBase
                         {
                             onSelectedIndexChangeProp = onSelectedIndexChangeProp with
                             {
-                                Value = string.Join(Environment.NewLine, lines)
+                                Value = lines.ToTsCode()
                             };
 
                             properties = properties.SetItem(properties.FindIndex(x => x.Name == onSelectedIndexChangeProp.Name), onSelectedIndexChangeProp);
@@ -2025,7 +2031,7 @@ class Plugin: PluginBase
                             properties = properties.Add(new()
                             {
                                 Name  = nameof(onSelectedIndexChange),
-                                Value = string.Join(Environment.NewLine, lines)
+                                Value = lines.ToTsCode()
                             });
                         }
 
@@ -3132,7 +3138,8 @@ class Plugin: PluginBase
                         [
                             "(value: string) =>",
                             "{",
-                            $"  updateRequest(r => {{ r.{smsPasswordProp.Value.RemoveFromStart("request.")} = value; }});",
+                            $"  {smsPasswordProp.Value} = value;",
+                            GetUpdateStateLine(smsPasswordProp.Value),
                             "}"
                         ];
 
@@ -3298,6 +3305,12 @@ sealed class NodeAnalyzerAttribute : Attribute
 
 public sealed class TsLineCollection: List<string>
 {
+
+    public void Add(IEnumerable<string> lines)
+    {
+        AddRange(lines);
+    }
+
     public string ToTsCode()
     {
         return string.Join(Environment.NewLine, from line in this where line is not null select line);

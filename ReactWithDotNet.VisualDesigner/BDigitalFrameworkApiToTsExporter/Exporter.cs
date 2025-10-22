@@ -1,4 +1,5 @@
-﻿using Mono.Cecil;
+﻿using System.Collections.Immutable;
+using Mono.Cecil;
 using System.IO;
 
 namespace BDigitalFrameworkApiToTsExporter;
@@ -126,29 +127,14 @@ static class Exporter
         {
             LineCollection lines =
             [
-                "import { BaseClientRequest, BaseClientResponse, useStore } from \"b-digital-framework\";",
-                "import {",
+                "import { useStore } from \"b-digital-framework\";"
             ];
 
-            var inputOutputTypes
-                = from methodDefinition in methodGroup.ControllerMethods
-                  from typeName in new[]
-                  {
-                      methodDefinition.Parameters[0].ParameterType.Name,
-                      getReturnType(methodDefinition).Name
-                  }
-                  where typeName != "BaseClientRequest"
-                  select Tab + typeName;
-
-            lines.AddRange(inputOutputTypes.AppendBetween(","));
-
-            lines.Add("} from \"../types\";");
+            lines.Add(string.Empty);
+            lines.Add($"import {{ use{ApiName[scope]}Service }} from \"../../../services/use{ApiName[scope]}Service\";");
 
             lines.Add(string.Empty);
-            lines.Add($"import {{ use{ApiName[scope]}Service }} from \"../services/use{ApiName[scope]}Service\"");
-
-            lines.Add(string.Empty);
-            lines.Add($"import {{ {ApiName[scope]}Model }} from \"../models/{ApiName[scope]}Model\"");
+            lines.Add($"import {{ {ApiName[scope]}Model }} from \"../../../models/{ApiName[scope]}Model\";");
 
             lines.Add(string.Empty);
 
@@ -168,16 +154,32 @@ static class Exporter
                 lines.Add(string.Empty);
                 lines.Add(Tab + Tab + "const abortController = new AbortController();");
 
-                lines.Add(string.Empty);
-                lines.Add(Tab + Tab + $"let request: {methodDefinition.Parameters[0].ParameterType.Name} = {{");
+                // define request
+                {
+                    lines.Add(string.Empty);
+                    
 
-                var mappingLines = from property in getMappingPropertyList(modelTypeDefinition, methodDefinition.Parameters[0].ParameterType.Resolve())
-                                   let name = GetTsVariableName(property.Name)
-                                   select Tab + Tab + Tab + $"{name}: model.{name}";
+                    var mappingLines = ListFrom
+                        (from property in getMappingPropertyList(modelTypeDefinition, methodDefinition.Parameters[0].ParameterType.Resolve())
+                         let name = GetTsVariableName(property.Name)
+                         select Tab + Tab + Tab + $"{name}: model.{name}"
+                        );
 
-                lines.AddRange(mappingLines.AppendBetween("," + Environment.NewLine));
+                    if (mappingLines.Count > 0)
+                    {
+                        lines.Add(Tab + Tab + "const request = {");
+                        
+                        lines.AddRange(mappingLines.AppendBetween("," + Environment.NewLine));
 
-                lines.Add(Tab + Tab + "};");
+                        lines.Add(Tab + Tab + "};");
+                    }
+                    else
+                    {
+                        lines.Add(Tab + Tab + "const request = { };");
+                    }
+                }
+                
+                
                 lines.Add(string.Empty);
 
                 lines.Add(Tab + Tab + $"const response = await service.{GetTsVariableName(methodDefinition.Name)}.send(request, abortController.signal);");
@@ -188,11 +190,11 @@ static class Exporter
 
                 lines.Add(string.Empty);
 
-                var responseMapping = from property in getMappingPropertyList(modelTypeDefinition, methodDefinition.ReturnType.Resolve())
+                var responseMapping = from property in getMappingPropertyList(modelTypeDefinition, getReturnType(methodDefinition).Resolve())
                                       let name = GetTsVariableName(property.Name)
-                                      select Tab + Tab + $"model.{name}: response.{name}";
+                                      select Tab + Tab + $"model.{name} = response.{name};";
 
-                lines.AddRange(responseMapping.AppendBetween("," + Environment.NewLine));
+                lines.AddRange(responseMapping.AppendBetween(Environment.NewLine));
 
                 lines.Add(string.Empty);
 
@@ -275,8 +277,12 @@ static class Exporter
                 "import {",
             ];
 
+            var methods = (from methodGroup in GroupControllerMethods(getExportablePublicMethods(controllerTypeDefinition))
+                          from method in methodGroup.ControllerMethods
+                          select method).ToImmutableList();
+            
             var inputOutputTypes
-                = from methodDefinition in getExportablePublicMethods(controllerTypeDefinition)
+                = from methodDefinition in methods
                   from typeName in new[]
                   {
                       methodDefinition.Parameters[0].ParameterType.Name,
@@ -298,7 +304,7 @@ static class Exporter
             lines.Add(string.Empty);
             lines.Add($"const basePath = \"/{basePath}/{ApiName[scope]}\";");
 
-            foreach (var methodDefinition in getExportablePublicMethods(controllerTypeDefinition))
+            foreach (var methodDefinition in methods)
             {
                 lines.Add(string.Empty);
                 lines.Add(Tab + $"const {GetTsVariableName(methodDefinition.Name)} = useExecuter<{methodDefinition.Parameters[0].ParameterType.Name}, {getReturnType(methodDefinition).Name}>(basePath + \"/{methodDefinition.Name}\", \"POST\");");
@@ -307,7 +313,7 @@ static class Exporter
             lines.Add(string.Empty);
             lines.Add(Tab + "return {");
 
-            var serviceNames = from m in getExportablePublicMethods(controllerTypeDefinition)
+            var serviceNames = from m in methods
                                select GetTsVariableName(m.Name);
             lines.AddRange
                 (
@@ -398,7 +404,9 @@ static class Exporter
 
         var filePath = Path.Combine(projectDirectory, "API", $"{solutionName}.API", "bin", "debug", "net8.0", $"{solutionName}.API.dll");
 
-        return CecilHelper.ReadAssemblyDefinition(filePath);
+        const string secondarySearchDirectoryPath = @"d:\boa\server\bin";
+        
+        return CecilAssemblyReader.ReadAssembly(filePath, secondarySearchDirectoryPath);
     }
 
     class MethodGroup
@@ -415,13 +423,13 @@ static class Exporter
 
         (string FolderName, Func<MethodDefinition, bool> IsMethodMatchFolderFunc)[] splitters =
         [
-            ("Confirm", IsInConfirmMethod),
-            ("Start5", x => IsStartMethod(x, "5")),
-            ("Start4", x => IsStartMethod(x, "4")),
-            ("Start3", x => IsStartMethod(x, "3")),
-            ("Start2", x => IsStartMethod(x, "2")),
+            ("Start", x => IsStartMethod(x, "")),
             ("Start1", x => IsStartMethod(x, "1")),
-            ("Start", x => IsStartMethod(x, ""))
+            ("Start2", x => IsStartMethod(x, "2")),
+            ("Start3", x => IsStartMethod(x, "3")),
+            ("Start4", x => IsStartMethod(x, "4")),
+            ("Start5", x => IsStartMethod(x, "5")),
+            ("Confirm", IsInConfirmMethod),
         ];
 
         foreach (var (folderName, matchFunc) in splitters)
