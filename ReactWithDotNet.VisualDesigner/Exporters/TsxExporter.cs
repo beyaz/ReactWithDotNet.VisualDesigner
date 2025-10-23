@@ -56,7 +56,7 @@ static class TsxExporter
 
             foreach (var tabLength in new[]{4, 2})
             {
-                foreach (var item in lines.FindLineIndexStartsWith(componentDeclarationLineIndex, leftSpaceCount + tabLength, "return ("))
+                foreach (var item in lines.FindLineIndexEquals(componentDeclarationLineIndex, leftSpaceCount + tabLength, "return ("))
                 {
                     firstReturnLineIndex = item;
                     leftPaddingCount     = leftSpaceCount + tabLength;
