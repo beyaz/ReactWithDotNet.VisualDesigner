@@ -20,8 +20,3 @@ database:
 #   isSQLServer: true
 #   schemaName: 'RVD'
 #   connectionString: 'Server=tcp:beyaz.database.windows.net,1433;Initial Catalog=ReactVisualDesigner;Persist Security Info=False;User ID=beyaz;Password=t5U7*n_5fHJ_r-yU;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'
-
-# database:
-#   isSQLServer: true
-#   schemaName: 'RVD'
-#   connectionString: 'Data Source=srvdev\atlas;Initial Catalog=boa;Min Pool Size=10; Max Pool Size=100;Application Name=Thriller;Integrated Security=true; TrustServerCertificate=true;'
