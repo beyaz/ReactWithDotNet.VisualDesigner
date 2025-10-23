@@ -53,11 +53,24 @@ static class TsxExporter
         var firstReturnLineIndex = -1;
         {
             var leftSpaceCount = Array.FindIndex(lines[componentDeclarationLineIndex].ToCharArray(), c => c != ' ');
-            
-            foreach (var item in lines.FindLineIndexStartsWith(componentDeclarationLineIndex, leftSpaceCount + 4, "return ("))
+
+            foreach (var tabLength in new[]{4, 2})
             {
-                firstReturnLineIndex = item;
-                leftPaddingCount     = leftSpaceCount + 4;
+                foreach (var item in lines.FindLineIndexStartsWith(componentDeclarationLineIndex, leftSpaceCount + tabLength, "return ("))
+                {
+                    firstReturnLineIndex = item;
+                    leftPaddingCount     = leftSpaceCount + tabLength;
+                }
+                
+                if (firstReturnLineIndex > 0)
+                {
+                    break;
+                }
+            }
+            
+            if (firstReturnLineIndex == -1)
+            {
+                return new ArgumentException($"ReturnStatementNotFound. {targetComponentName}");
             }
         }
 
