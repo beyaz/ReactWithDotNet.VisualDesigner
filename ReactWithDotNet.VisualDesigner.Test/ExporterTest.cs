@@ -11,7 +11,7 @@ public sealed class ExporterTest
         var input = new VisualElementModel
         {
             Tag        = "div",
-            Styles     = ["color: red", "bg: blue",  "hover:bg: yellow"],
+            Styles     = ["color: red", "background: blue",  "hover:background: yellow"],
             Properties = ["d-text: | Abc"]
         };
 
