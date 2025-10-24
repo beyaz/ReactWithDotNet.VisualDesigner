@@ -54,20 +54,20 @@ static class TsxExporter
         {
             var leftSpaceCount = Array.FindIndex(lines[componentDeclarationLineIndex].ToCharArray(), c => c != ' ');
 
-            foreach (var tabLength in new[]{4, 2})
+            foreach (var tabLength in new[] { 4, 2 })
             {
                 foreach (var item in lines.FindLineIndexEquals(componentDeclarationLineIndex, leftSpaceCount + tabLength, "return ("))
                 {
                     firstReturnLineIndex = item;
                     leftPaddingCount     = leftSpaceCount + tabLength;
                 }
-                
+
                 if (firstReturnLineIndex > 0)
                 {
                     break;
                 }
             }
-            
+
             if (firstReturnLineIndex == -1)
             {
                 return new ArgumentException($"ReturnStatementNotFound. {targetComponentName}");
@@ -120,7 +120,8 @@ static class TsxExporter
         var project = GetProjectConfig(projectId);
 
         return await
-            (from data in GetComponentData(new() { ComponentId = componentId, UserName = userName })
+        (
+            from data in GetComponentData(new() { ComponentId = componentId, UserName = userName })
             from rootVisualElement in GetComponentUserOrMainVersionAsync(componentId, userName)
             from file in GetComponentFileLocation(componentId, user.LocalWorkspacePath)
             from fileContentInDirectory in FileSystem.ReadAllLines(file.filePath)
@@ -335,67 +336,61 @@ static class TsxExporter
 
             string partProps;
             {
-                var propsAsTextList = new List<string>();
+                var propsAsTextList = new List<string>
+                    (
+                     from prop in node.Properties
+                     where !Design.IsDesignTimeName(prop.Name)
+                     select convertReactPropertyToString(elementType, prop)
+                    );
+
+                static string convertReactPropertyToString(Maybe<Type> elementType, ReactProperty reactProperty)
                 {
-                    
-                    foreach (var reactProperty in node.Properties.Where(p => !Design.IsDesignTimeName(p.Name)))
+                    var propertyName = reactProperty.Name;
+
+                    var propertyValue = reactProperty.Value;
+
+                    if (propertyValue == "true")
                     {
-                        var text = convertReactPropertyToString(elementType, reactProperty);
-                        if (text is not null)
-                        {
-                            propsAsTextList.Add(text);
-                        }
+                        return propertyName;
                     }
 
-                    static string convertReactPropertyToString(Maybe<Type> elementType, ReactProperty reactProperty)
+                    if (propertyName == Design.SpreadOperator)
                     {
-                        var propertyName = reactProperty.Name;
+                        return '{' + propertyValue + '}';
+                    }
 
-                        var propertyValue = reactProperty.Value;
-                        
-                        if (propertyValue == "true")
-                        {
-                            return propertyName;
-                        }
+                    if (propertyName == nameof(HtmlElement.dangerouslySetInnerHTML))
+                    {
+                        return $"{propertyName}={{{{ __html: {propertyValue} }}}}";
+                    }
 
-                        if (propertyName == Design.SpreadOperator)
-                        {
-                            return '{' + propertyValue + '}';
-                        }
+                    if (IsStringValue(propertyValue))
+                    {
+                        return $"{propertyName}=\"{TryClearStringValue(propertyValue)}\"";
+                    }
 
-                        if (propertyName == nameof(HtmlElement.dangerouslySetInnerHTML))
-                        {
-                            return $"{propertyName}={{{{ __html: {propertyValue} }}}}";
-                        }
+                    if (IsStringTemplate(propertyValue))
+                    {
+                        return $"{propertyName}={{{propertyValue}}}";
+                    }
 
-                        if (IsStringValue(propertyValue))
+                    if (elementType.HasValue)
+                    {
+                        var propertyType = elementType.Value.GetProperty(propertyName, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance)?.PropertyType;
+                        if (propertyType is not null)
                         {
-                            return $"{propertyName}=\"{TryClearStringValue(propertyValue)}\"";
-                        }
-
-                        if (IsStringTemplate(propertyValue))
-                        {
-                            return $"{propertyName}={{{propertyValue}}}";
-                        }
-
-                        if (elementType.HasValue)
-                        {
-                            var propertyType = elementType.Value.GetProperty(propertyName, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance)?.PropertyType;
-                            if (propertyType is not null)
+                            if (propertyType == typeof(string))
                             {
-                                if (propertyType == typeof(string))
+                                var isString = propertyValue.Contains('/') || propertyValue.StartsWith('#') || propertyValue.Split(' ').Length > 1;
+                                if (isString)
                                 {
-                                    var isString = propertyValue.Contains('/') || propertyValue.StartsWith('#') || propertyValue.Split(' ').Length > 1;
-                                    if (isString)
-                                    {
-                                        return $"{propertyName}=\"{propertyValue}\"";
-                                    }
+                                    return $"{propertyName}=\"{propertyValue}\"";
                                 }
                             }
                         }
-
-                        return $"{propertyName}={{{propertyValue}}}";
                     }
+
+                    return $"{propertyName}={{{propertyValue}}}";
                 }
 
                 if (propsAsTextList.Count > 0)
