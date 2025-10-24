@@ -343,11 +343,11 @@ static class TsxExporter
                      select convertReactPropertyToString(elementType, prop)
                     );
 
-                static string convertReactPropertyToString(Maybe<Type> elementType, ReactProperty reactProperty)
+                static string convertReactPropertyToString(Maybe<Type> elementType, ReactProperty prop)
                 {
-                    var propertyName = reactProperty.Name;
+                    var propertyName = prop.Name;
 
-                    var propertyValue = reactProperty.Value;
+                    var propertyValue = prop.Value;
 
                     if (propertyValue == "true")
                     {
