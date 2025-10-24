@@ -348,31 +348,30 @@ static class TsxExporter
                      select prop switch
                      {
                          _ when prop.Value == "true" => prop.Name,
-                         
-                         _ when prop.Name == Design.SpreadOperator 
+
+                         _ when prop.Name == Design.SpreadOperator
                              => '{' + prop.Value + '}',
-                         
-                         _ when prop.Name == nameof(HtmlElement.dangerouslySetInnerHTML) 
+
+                         _ when prop.Name == nameof(HtmlElement.dangerouslySetInnerHTML)
                              => $"{prop.Name}={{{{ __html: {prop.Value} }}}}",
-                         
+
                          _ when IsStringValue(prop.Value) =>
                              $"{prop.Name}=\"{TryClearStringValue(prop.Value)}\"",
-                         
+
                          _ when IsStringTemplate(prop.Value) =>
                              $"{prop.Name}={{{prop.Value}}}",
-                         
-                         _ when propertyType == typeof(string) 
-                                && prop.Value.HasMatch(x=>x.Contains('/') ||
-                                                          x.StartsWith('#') ||
-                                                          x.Split(' ').Length > 1)
-                             
-                                =>$"{prop.Name}=\"{prop.Value}\"",
+
+                         _ when elementType.Value
+                                    ?.GetProperty(prop.Name, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance)
+                                    ?.PropertyType == typeof(string)
+                                &&
+                                prop.Value.HasMatch(x => x.Contains('/') || x.StartsWith('#') || x.Split(' ').Length > 1)
+                             => $"{prop.Name}=\"{prop.Value}\"",
 
                          _ => $"{prop.Name}={{{prop.Value}}}"
                      }
                     );
 
-             
                 if (propsAsTextList.Count > 0)
                 {
                     partProps = " " + string.Join(" ", propsAsTextList);
