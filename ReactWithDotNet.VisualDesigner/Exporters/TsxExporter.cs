@@ -342,7 +342,7 @@ static class TsxExporter
                      where !Design.IsDesignTimeName(prop.Name)
                      select prop switch
                      {
-                         _ when prop.Value == "true" => prop.Name,
+                         _ when "true".Equals(prop.Value, StringComparison.OrdinalIgnoreCase) => prop.Name,
 
                          _ when prop.Name == Design.SpreadOperator
                              => '{' + prop.Value + '}',
