@@ -345,52 +345,48 @@ static class TsxExporter
 
                 static string convertReactPropertyToString(Maybe<Type> elementType, ReactProperty prop)
                 {
-                    var propertyName = prop.Name;
-
-                    var propertyValue = prop.Value;
-
-                    if (propertyValue == "true")
+                    if (prop.Value == "true")
                     {
-                        return propertyName;
+                        return prop.Name;
                     }
 
-                    if (propertyName == Design.SpreadOperator)
+                    if (prop.Name == Design.SpreadOperator)
                     {
-                        return '{' + propertyValue + '}';
+                        return '{' + prop.Value + '}';
                     }
 
-                    if (propertyName == nameof(HtmlElement.dangerouslySetInnerHTML))
+                    if (prop.Name == nameof(HtmlElement.dangerouslySetInnerHTML))
                     {
-                        return $"{propertyName}={{{{ __html: {propertyValue} }}}}";
+                        return $"{prop.Name}={{{{ __html: {prop.Value} }}}}";
                     }
 
-                    if (IsStringValue(propertyValue))
+                    if (IsStringValue(prop.Value))
                     {
-                        return $"{propertyName}=\"{TryClearStringValue(propertyValue)}\"";
+                        return $"{prop.Name}=\"{TryClearStringValue(prop.Value)}\"";
                     }
 
-                    if (IsStringTemplate(propertyValue))
+                    if (IsStringTemplate(prop.Value))
                     {
-                        return $"{propertyName}={{{propertyValue}}}";
+                        return $"{prop.Name}={{{prop.Value}}}";
                     }
 
                     if (elementType.HasValue)
                     {
-                        var propertyType = elementType.Value.GetProperty(propertyName, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance)?.PropertyType;
+                        var propertyType = elementType.Value.GetProperty(prop.Name, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance)?.PropertyType;
                         if (propertyType is not null)
                         {
                             if (propertyType == typeof(string))
                             {
-                                var isString = propertyValue.Contains('/') || propertyValue.StartsWith('#') || propertyValue.Split(' ').Length > 1;
+                                var isString = prop.Value.Contains('/') || prop.Value.StartsWith('#') || prop.Value.Split(' ').Length > 1;
                                 if (isString)
                                 {
-                                    return $"{propertyName}=\"{propertyValue}\"";
+                                    return $"{prop.Name}=\"{prop.Value}\"";
                                 }
                             }
                         }
                     }
 
-                    return $"{propertyName}={{{propertyValue}}}";
+                    return $"{prop.Name}={{{prop.Value}}}";
                 }
 
                 if (propsAsTextList.Count > 0)
