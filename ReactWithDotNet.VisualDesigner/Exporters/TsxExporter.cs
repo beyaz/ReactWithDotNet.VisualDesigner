@@ -340,35 +340,44 @@ static class TsxExporter
                     (
                      from prop in node.Properties
                      where !Design.IsDesignTimeName(prop.Name)
-                     select convertReactPropertyToString(elementType, prop)
+                     //select convertReactPropertyToString(elementType, prop)
+                     let propertyType = elementType.HasValue
+                         ? elementType.Value
+                             .GetProperty(prop.Name, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance)?
+                             .PropertyType
+                         : null
+                     select prop switch
+                     {
+                         _ when prop.Value == "true" => prop.Name,
+                         
+                         _ when prop.Name == Design.SpreadOperator 
+                             => '{' + prop.Value + '}',
+                         
+                         _ when prop.Name == nameof(HtmlElement.dangerouslySetInnerHTML) 
+                             => $"{prop.Name}={{{{ __html: {prop.Value} }}}}",
+                         
+                         _ when IsStringValue(prop.Value) =>
+                             $"{prop.Name}=\"{TryClearStringValue(prop.Value)}\"",
+                         
+                         _ when IsStringTemplate(prop.Value) =>
+                             $"{prop.Name}={{{prop.Value}}}",
+                         
+                         _ when propertyType == typeof(string) &&
+                                
+                                /*isString*/(prop.Value.Contains('/') || 
+                                             prop.Value.StartsWith('#') ||
+                                             prop.Value.Split(' ').Length > 1)
+                                =>$"{prop.Name}=\"{prop.Value}\"",
+
+                         _ => $"{prop.Name}={{{prop.Value}}}"
+                     }
                     );
 
                 static string convertReactPropertyToString(Maybe<Type> elementType, ReactProperty prop)
                 {
-                    if (prop.Value == "true")
-                    {
-                        return prop.Name;
-                    }
+                    
 
-                    if (prop.Name == Design.SpreadOperator)
-                    {
-                        return '{' + prop.Value + '}';
-                    }
-
-                    if (prop.Name == nameof(HtmlElement.dangerouslySetInnerHTML))
-                    {
-                        return $"{prop.Name}={{{{ __html: {prop.Value} }}}}";
-                    }
-
-                    if (IsStringValue(prop.Value))
-                    {
-                        return $"{prop.Name}=\"{TryClearStringValue(prop.Value)}\"";
-                    }
-
-                    if (IsStringTemplate(prop.Value))
-                    {
-                        return $"{prop.Name}={{{prop.Value}}}";
-                    }
+                    
 
                     if (elementType.HasValue)
                     {
