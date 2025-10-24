@@ -340,7 +340,6 @@ static class TsxExporter
                     (
                      from prop in node.Properties
                      where !Design.IsDesignTimeName(prop.Name)
-                     //select convertReactPropertyToString(elementType, prop)
                      let propertyType = elementType.HasValue
                          ? elementType.Value
                              .GetProperty(prop.Name, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance)?
@@ -362,42 +361,18 @@ static class TsxExporter
                          _ when IsStringTemplate(prop.Value) =>
                              $"{prop.Name}={{{prop.Value}}}",
                          
-                         _ when propertyType == typeof(string) &&
-                                
-                                /*isString*/(prop.Value.Contains('/') || 
-                                             prop.Value.StartsWith('#') ||
-                                             prop.Value.Split(' ').Length > 1)
+                         _ when propertyType == typeof(string) 
+                                && prop.Value.HasMatch(x=>x.Contains('/') ||
+                                                          x.StartsWith('#') ||
+                                                          x.Split(' ').Length > 1)
+                             
                                 =>$"{prop.Name}=\"{prop.Value}\"",
 
                          _ => $"{prop.Name}={{{prop.Value}}}"
                      }
                     );
 
-                static string convertReactPropertyToString(Maybe<Type> elementType, ReactProperty prop)
-                {
-                    
-
-                    
-
-                    if (elementType.HasValue)
-                    {
-                        var propertyType = elementType.Value.GetProperty(prop.Name, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance)?.PropertyType;
-                        if (propertyType is not null)
-                        {
-                            if (propertyType == typeof(string))
-                            {
-                                var isString = prop.Value.Contains('/') || prop.Value.StartsWith('#') || prop.Value.Split(' ').Length > 1;
-                                if (isString)
-                                {
-                                    return $"{prop.Name}=\"{prop.Value}\"";
-                                }
-                            }
-                        }
-                    }
-
-                    return $"{prop.Name}={{{prop.Value}}}";
-                }
-
+             
                 if (propsAsTextList.Count > 0)
                 {
                     partProps = " " + string.Join(" ", propsAsTextList);

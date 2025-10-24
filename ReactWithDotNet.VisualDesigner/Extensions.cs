@@ -7,6 +7,17 @@ namespace ReactWithDotNet.VisualDesigner;
 
 static class Extensions
 {
+    public static bool HasMatch<T>(this T value, Predicate<T> matchFunc) where T : class
+    {
+        if (value is null)
+        {
+            return false;
+        }
+
+        return matchFunc(value);
+    }
+    
+    
     public static IReadOnlyList<T> AsReadOnlyList<T>(this IEnumerable<T> source)
         => source as IReadOnlyList<T> ?? source.ToList();
     
