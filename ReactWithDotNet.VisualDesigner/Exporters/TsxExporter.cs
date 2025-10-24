@@ -340,11 +340,6 @@ static class TsxExporter
                     (
                      from prop in node.Properties
                      where !Design.IsDesignTimeName(prop.Name)
-                     let propertyType = elementType.HasValue
-                         ? elementType.Value
-                             .GetProperty(prop.Name, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance)?
-                             .PropertyType
-                         : null
                      select prop switch
                      {
                          _ when prop.Value == "true" => prop.Name,
