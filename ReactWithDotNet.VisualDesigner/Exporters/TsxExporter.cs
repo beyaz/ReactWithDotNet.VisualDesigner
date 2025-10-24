@@ -337,7 +337,8 @@ static class TsxExporter
             {
                 var propsAsTextList = new List<string>();
                 {
-                    foreach (var reactProperty in node.Properties.Where(p => p.Name.NotIn(Design.Text, Design.TextPreview, Design.Src, Design.Name)))
+                    
+                    foreach (var reactProperty in node.Properties.Where(p => !Design.IsDesignTimeName(p.Name)))
                     {
                         var text = convertReactPropertyToString(elementType, reactProperty);
                         if (text is not null)
@@ -351,12 +352,7 @@ static class TsxExporter
                         var propertyName = reactProperty.Name;
 
                         var propertyValue = reactProperty.Value;
-
-                        if (propertyName is Design.ItemsSource || propertyName is Design.ItemsSourceDesignTimeCount)
-                        {
-                            return null;
-                        }
-
+                        
                         if (propertyValue == "true")
                         {
                             return propertyName;
