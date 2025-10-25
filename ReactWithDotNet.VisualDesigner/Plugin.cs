@@ -6,7 +6,6 @@ using ReactWithDotNet.ThirdPartyLibraries.MUI.Material;
 using ReactWithDotNet.VisualDesigner.Configuration;
 using ReactWithDotNet.VisualDesigner.Exporters;
 using System.Collections;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Data;
 using System.Globalization;
