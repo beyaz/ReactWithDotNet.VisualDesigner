@@ -87,7 +87,7 @@ class Plugin: PluginBase
         {
             var stateName = propertyPath[0];
 
-            return $"  set{Char.ToUpper(stateName[0]) + stateName[1..]}({{ ...{stateName} }});";
+            return $"  set{char.ToUpper(stateName[0]) + stateName[1..]}({{ ...{stateName} }});";
         }
 
         return null;
