@@ -39,6 +39,11 @@ public sealed class TryCreateElementForPreviewAttribute : Attribute
 {
 }
 
+[AttributeUsage(AttributeTargets.Method)]
+public sealed class AnalyzeExportFilePathAttribute : Attribute
+{
+}
+
 
 sealed record PropSuggestionScope
 {
@@ -106,8 +111,28 @@ class Plugin: PluginBase
         return null;
     }
 
-    public override  string AnalyzeExportFilePath(string exportFilePathForComponent)
+
+    static IReadOnlyList<PluginMethod> AnalyzeExportFilePathList
     {
+        get
+        {
+            return field??= GetPluginMethods<AnalyzeExportFilePathAttribute>();
+        }
+    }
+
+    public override string AnalyzeExportFilePath(string exportFilePathForComponent)
+    {
+        var scope = Scope.Create(new()
+        {
+            { ExportFilePathForComponent, exportFilePathForComponent }
+        });
+
+        return RunPluginMethods(AnalyzeExportFilePathList, scope, ExportFilePathForComponent) ?? exportFilePathForComponent;
+    }
+    public static  Scope AnalyzeExportFilePath(Scope scope)
+    {
+        var exportFilePathForComponent = ExportFilePathForComponent[scope];
+
         var names = exportFilePathForComponent.Split('/', StringSplitOptions.RemoveEmptyEntries);
         if (names[0].StartsWith("BOA."))
         {
@@ -129,11 +154,15 @@ class Plugin: PluginBase
 
             if (Directory.Exists(clientAppFolderPath))
             {
-                return Path.Combine(clientAppFolderPath, Path.Combine(names.Skip(1).ToArray()));
+                return Scope.Create(new()
+                {
+                    { ExportFilePathForComponent, Path.Combine(clientAppFolderPath, Path.Combine(names.Skip(1).ToArray())) }
+                });
+                 
             }
         }
 
-        return exportFilePathForComponent;
+        return Scope.Empty;
     }
 
     const string BOA_MessagingByGroupName = "BOA.MessagingByGroupName";
