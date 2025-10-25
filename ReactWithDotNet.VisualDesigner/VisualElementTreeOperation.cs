@@ -56,11 +56,13 @@ static class VisualElementTreeOperation
             targetPath[^1] = (originalTargetIndex - 1).ToString();
         }
 
-        return new VisualElementTreeOperationMoveResponse
-        {
-            NewRoot   = insert(rootWithoutSource, targetPath, sourceNode, position),
-            Selection = new()
-        };
+        return
+            from newRoot in insert(rootWithoutSource, targetPath, sourceNode, position)
+            select new VisualElementTreeOperationMoveResponse
+            {
+                NewRoot   = newRoot,
+                Selection = new()
+            };
 
         static VisualElementModel getNode(VisualElementModel node, string[] path)
         {
@@ -87,7 +89,7 @@ static class VisualElementTreeOperation
             return node with { Children = children };
         }
 
-        static VisualElementModel insert(VisualElementModel node, string[] path, VisualElementModel toInsert, DragPosition pos)
+        static Result<VisualElementModel> insert(VisualElementModel node, string[] path, VisualElementModel toInsert, DragPosition pos)
         {
             var index = int.Parse(path[1]);
 
@@ -107,7 +109,7 @@ static class VisualElementTreeOperation
                         var targetNode = children[index];
                         if (targetNode.Children.Count > 0)
                         {
-                            throw new InvalidOperationException("Select valid location");
+                            return new InvalidOperationException("Select valid location");
                         }
 
                         children[index] = targetNode with
@@ -120,9 +122,12 @@ static class VisualElementTreeOperation
                 return node with { Children = children };
             }
 
-            var updated = insert(node.Children[index], path[1..], toInsert, pos);
-            var updatedChildren = node.Children.Select((c, i) => i == index ? updated : c).ToList();
-            return node with { Children = updatedChildren };
+            return
+                from updated in insert(node.Children[index], path[1..], toInsert, pos)
+
+                let updatedChildren = node.Children.Select((c, i) => i == index ? updated : c).ToList()
+
+                select node with { Children = updatedChildren };
         }
 
         static bool isSameParent(string[] a, string[] b)
