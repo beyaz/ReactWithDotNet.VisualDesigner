@@ -127,32 +127,20 @@ static class Plugin
     {
         get { return field ??= GetPluginMethods<AnalyzeExportFilePathAttribute>(); }
     }
-    
-    
-    static IReadOnlyList<Func<ReactNode,IReadOnlyDictionary<string, string>,ReactNode>> AnalyzeNodeList
-    {
-        get 
-        { 
-            return field ??= (from type in AllCustomComponents
-            from methodInfo in type.GetMethods(BindingFlags.Static | BindingFlags.Public)
-            where methodInfo.GetCustomAttribute<NodeAnalyzerAttribute>() is not null
-            select (Func<ReactNode,IReadOnlyDictionary<string, string>,ReactNode>)Delegate
-                .CreateDelegate(typeof(Func<ReactNode,IReadOnlyDictionary<string, string>,ReactNode>), methodInfo))
-                .ToList(); 
-        }
-    }
-    
-    public static ReactNode AnalyzeNode(ReactNode node, IReadOnlyDictionary<string, string> componentConfig)
-    {
-        foreach (var method in AnalyzeNodeList)
-        {
-            node = method(node, componentConfig);
-        }
 
-        return node;
-        
+    static IReadOnlyList<Func<ReactNode, IReadOnlyDictionary<string, string>, ReactNode>> AnalyzeNodeList
+    {
+        get
+        {
+            return field ??= (
+                    from type in AllCustomComponents
+                    from methodInfo in type.GetMethods(BindingFlags.Static | BindingFlags.Public)
+                    where methodInfo.GetCustomAttribute<NodeAnalyzerAttribute>() is not null
+                    select (Func<ReactNode, IReadOnlyDictionary<string, string>, ReactNode>)Delegate
+                        .CreateDelegate(typeof(Func<ReactNode, IReadOnlyDictionary<string, string>, ReactNode>), methodInfo))
+                .ToList();
+        }
     }
-    
 
     static IReadOnlyList<PluginMethod> IsImageList
     {
@@ -206,7 +194,15 @@ static class Plugin
         return RunPluginMethods(AnalyzeExportFilePathList, scope, ExportFilePathForComponent) ?? exportFilePathForComponent;
     }
 
-    
+    public static ReactNode AnalyzeNode(ReactNode node, IReadOnlyDictionary<string, string> componentConfig)
+    {
+        foreach (var method in AnalyzeNodeList)
+        {
+            node = method(node, componentConfig);
+        }
+
+        return node;
+    }
 
     public static Element BeforeComponentPreview(RenderPreviewScope scope, VisualElementModel visualElementModel, Element component)
     {
@@ -675,8 +671,6 @@ static class Plugin
             }
         }
     }
-
-   
 
     static Task<IReadOnlyList<MessagingInfo>> GetMessagingByGroupName(string messagingGroupName)
     {
