@@ -11,9 +11,23 @@ public class Program
 {
     public static void Main(string[] args)
     {
+        // i n i t   c o n f i g
+        {
+            var config = ReadConfig();
+        
+            if (config.HasError)
+            {
+                Console.WriteLine(config.Error);
+                Console.Read();
+                return;
+            }
+        
+            Config = config.Value;
+        }
+
         // SyncHelper.From_SQLite_to_SqlServer.Transfer_From_SQLite_to_SqlServer().GetAwaiter().GetResult();
         // SyncHelper.From_SqlServer_to_SQLite.Transfer_From_SqlServer_to_SQLite().GetAwaiter().GetResult();
-        
+
         ProcessHelper.KillAllNamedProcess($"{nameof(ReactWithDotNet)}.{nameof(VisualDesigner)}");
 
         var port = NetworkHelper.GetAvailablePort(Config.NextAvailablePortFrom);

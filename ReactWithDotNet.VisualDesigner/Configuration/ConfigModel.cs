@@ -71,24 +71,10 @@ static class Extensions
             }
         }
     }
-    
-    public static readonly ConfigModel Config = ReadConfig();
+
+    public static ConfigModel Config;
 
     static readonly bool IsRunningInVS = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("VisualStudioEdition"));
-
-    public static string AppFolder
-    {
-        get
-        {
-            var location = Path.GetDirectoryName(typeof(Extensions).Assembly.Location);
-            if (location == null)
-            {
-                throw new ArgumentException("assembly location not found");
-            }
-
-            return location;
-        }
-    }
 
     public static void IgnoreException(Action action)
     {
@@ -102,9 +88,15 @@ static class Extensions
         }
     }
 
-    static ConfigModel ReadConfig()
+    public static Result<ConfigModel> ReadConfig()
     {
-        var config = DeserializeFromYaml<ConfigModel>(File.ReadAllText(Path.Combine(AppFolder, "Config.yaml")));
+        var appFolder = Path.GetDirectoryName(typeof(Extensions).Assembly.Location);
+        if (appFolder == null)
+        {
+            return new ArgumentException("assembly location not found");
+        }
+        
+        var config = DeserializeFromYaml<ConfigModel>(File.ReadAllText(Path.Combine(appFolder, "Config.yaml")));
 
         if (IsRunningInVS)
         {
