@@ -828,20 +828,29 @@ sealed class ApplicationView : Component<ApplicationState>
 
     Task OnCommonSizeClicked(MouseEvent e)
     {
+        Result<int> widthResult = e.currentTarget.data["value"] switch
+        {
+            "M"   => 320,
+            "SM"  => 640,
+            "MD"  => 768,
+            "LG"  => 1024,
+            "XL"  => 1280,
+            "XXL" => 1536,
+            _     => new ArgumentOutOfRangeException(e.currentTarget.data["value"])
+        };
+
+        if (widthResult.HasError)
+        {
+            this.FailNotification(widthResult.Error.Message);
+            
+            return Task.CompletedTask;
+        }
+        
         state = state with
         {
             Preview = state.Preview with
             {
-                Width = e.currentTarget.data["value"] switch
-                {
-                    "M"   => 320,
-                    "SM"  => 640,
-                    "MD"  => 768,
-                    "LG"  => 1024,
-                    "XL"  => 1280,
-                    "XXL" => 1536,
-                    _     => throw new ArgumentOutOfRangeException(e.currentTarget.data["value"])
-                }
+                Width = widthResult.Value
             }
         };
 
