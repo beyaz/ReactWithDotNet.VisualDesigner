@@ -21,6 +21,10 @@ public sealed class TryGetIconForElementTreeNodeAttribute : Attribute
 {
 }
 
+[AttributeUsage(AttributeTargets.Method)]
+public sealed class IsImageAttribute : Attribute
+{
+}
 
 public sealed record TryCreateElementForPreviewInput
 {
@@ -73,7 +77,12 @@ class Plugin: PluginBase
     public static readonly ScopeKey<VisualElementModel> VisualElementModel = new() { Key = nameof(VisualElementModel) };
     
     public static readonly ScopeKey<Element> IconForElementTreeNode = new() { Key = nameof(IconForElementTreeNode) };
+    
+    public static readonly ScopeKey<Element> CurrentElementInstanceInPreview = new() { Key = nameof(CurrentElementInstanceInPreview) };
 
+    public static readonly ScopeKey<object> IsImageKey = new() { Key = nameof(IsImageKey) };
+
+    
     static string GetUpdateStateLine(string jsVariableName)
     {
         var propertyPath = jsVariableName.Split('.', StringSplitOptions.RemoveEmptyEntries);
@@ -456,10 +465,7 @@ class Plugin: PluginBase
         return GetAllCustomComponents().Select(x => x.Name).ToList();
     }
 
-    public static bool IsImage(object component)
-    {
-        return component is Components.Image;
-    }
+    
 
     public override Element TryCreateElementForPreview(TryCreateElementForPreviewInput input)
     {
@@ -507,20 +513,6 @@ class Plugin: PluginBase
         }
         
         
-        if (node.Tag == nameof(Components.BDigitalGroupView))
-        {
-            return new IconPanel();
-        }
-
-        if (node.Tag == nameof(Components.Link))
-        {
-            return new IconLink();
-        }
-
-        if (node.Tag == nameof(Components.Image) || node.Tag == nameof(Components.BIcon))
-        {
-            return new IconImage();
-        }
 
         if (node.Tag is nameof(Components.BDigitalGrid))
         {
@@ -770,26 +762,7 @@ class Plugin: PluginBase
             }
         }
 
-        [CustomComponent]
-        [Import(Name = "BDigitalGroupView", Package = "b-digital-group-view")]
-        public sealed class BDigitalGroupView : PluginComponentBase
-        {
-            [JsTypeInfo(JsType.String)]
-            public string title { get; set; }
-
-            protected override Element render()
-            {
-                return new FlexColumn(MarginBottom(24),MarginTop(8))
-                {
-                    title is null ? null : new div(FontSize18, FontWeight600, LineHeight32, Color(rgba(0, 0, 0, 0.87))) { title },
-                    
-                    new FlexColumn( Background(White), BorderRadius(10), Border(1, solid, "#E0E0E0"), Padding(24), Id(id), OnClick(onMouseClick))
-                    {
-                        children
-                    }
-                };
-            }
-        }
+       
 
         [CustomComponent]
         [Import(Name = nameof(BDigitalTransactionConfirm), Package = "b-digital-transaction-confirm")]
@@ -1175,92 +1148,11 @@ class Plugin: PluginBase
             };
         }
 
-        [CustomComponent]
-        [Import(Name = "BIconExtended as BIcon", Package = "../utils/FormAssistant")]
-        public sealed class BIcon : PluginComponentBase
-        {
-            [Suggestions("TimerRounded , content_copy")]
-            [JsTypeInfo(JsType.String)]
-            public string name { get; set; }
+      
 
-            [JsTypeInfo(JsType.String)]
-            public string size { get; set; }
+      
 
-            protected override Element render()
-            {
-                return new FlexRowCentered(Size(GetSize()), Id(id), OnClick(onMouseClick))
-                {
-                    createSvg
-                };
-            }
-
-            Element createSvg()
-            {
-                return new DynamicMuiIcon
-                {
-                    name     = name,
-                    fontSize = "medium"
-                };
-            }
-
-            double GetSize()
-            {
-                if (size.HasValue())
-                {
-                    if (double.TryParse(size, out var d))
-                    {
-                        return d;
-                    }
-                }
-
-                return 24;
-            }
-        }
-
-        [CustomComponent]
-        public sealed class Image : PluginComponentBase
-        {
-            public string alt { get; set; }
-
-            public string className { get; set; }
-
-            public bool? fill { get; set; }
-
-            public string height { get; set; }
-            public string src { get; set; }
-
-            public string width { get; set; }
-
-            protected override Element render()
-            {
-                return new img
-                {
-                    src       = src,
-                    alt       = alt,
-                    width     = width,
-                    height    = height,
-                    className = className
-                } + When(fill is true, SizeFull);
-            }
-        }
-
-        [CustomComponent]
-        public sealed class Link : PluginComponentBase
-        {
-            public string className { get; set; }
-            public string href { get; set; }
-            public string target { get; set; }
-
-            protected override Element render()
-            {
-                return new a
-                {
-                    href      = href,
-                    target    = target,
-                    className = className
-                };
-            }
-        }
+       
 
         [CustomComponent]
         [Import(Name = "BAlert", Package = "b-core-alert")]
@@ -3253,6 +3145,24 @@ class Plugin: PluginBase
         public string PropertyName { get; init; }
     }
 
+    static IReadOnlyList<PluginMethod> IsImageList
+    {
+        get
+        {
+            return field ??= GetPluginMethods<IsImageAttribute>();
+        }
+    }
+    public static bool IsImage(Element element)
+    {
+        var scope = Scope.Create(new()
+        {
+            { CurrentElementInstanceInPreview, element }
+        });
+
+       return (bool?) RunPluginMethods(IsImageList, scope, IsImageKey) ?? false;
+    }
+    
+    
     static IReadOnlyList<PluginMethod> AfterReadConfigs
     {
         get
@@ -3296,6 +3206,7 @@ class Plugin: PluginBase
 
         return null;
     }
+    
     
     static readonly IEnumerable<Assembly> Plugins =
     [
