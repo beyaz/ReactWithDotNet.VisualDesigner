@@ -502,3 +502,52 @@ sealed class IconParentChild : PureComponent
         };
     }
 }
+
+public sealed class IconPanel : PureComponent
+{
+    protected override Element render()
+    {
+        return new svg(ViewBox(0, 0, 16, 16), Fill(none), svg.Size(16))
+        {
+            new rect
+            {
+                x              = 1,
+                y              = 2,
+                width          = 14,
+                height         = 12,
+                rx             = 1,
+                stroke         = "currentColor",
+                strokeWidth    = 1,
+                strokeLinecap  = "round",
+                strokeLinejoin = "round"
+            },
+            new line
+            {
+                x1             = 1,
+                y1             = 4.5,
+                x2             = 15,
+                y2             = 4.5,
+                stroke         = "currentColor",
+                strokeWidth    = 1,
+                strokeLinecap  = "round",
+                strokeLinejoin = "round"
+            },
+            new rect
+            {
+                x      = 3,
+                y      = 7,
+                width  = 10,
+                height = 1,
+                fill   = "currentColor"
+            },
+            new rect
+            {
+                x      = 3,
+                y      = 9,
+                width  = 6,
+                height = 1,
+                fill   = "currentColor"
+            }
+        };
+    }
+}

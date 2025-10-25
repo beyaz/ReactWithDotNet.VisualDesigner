@@ -32,7 +32,7 @@ public sealed class BDigitalGroupView : PluginComponentBase
         {
             return Scope.Create(new()
             {
-                { Plugin.IconForElementTreeNode, new Plugin.Icons.Panel() }
+                { Plugin.IconForElementTreeNode, new IconPanel() }
             });
         }
 
