@@ -100,10 +100,23 @@ static class Plugin
 
     public static ScopeKey<ConfigModel> Config = new() { Key = nameof(Config) };
 
-    static readonly IEnumerable<Assembly> Plugins =
+    static readonly IReadOnlyList<Assembly> Plugins =
     [
         typeof(Plugin).Assembly
     ];
+
+    public static IReadOnlyList<Type> AllCustomComponents
+    {
+        get
+        {
+            return field ??=
+            (
+                from assembly in Plugins
+                from type in assembly.GetTypes()
+                where type.GetCustomAttribute<CustomComponentAttribute>() is not null
+                select type).AsReadOnlyList();
+        }
+    }
 
     static IReadOnlyList<PluginMethod> AfterReadConfigs
     {
@@ -170,7 +183,7 @@ static class Plugin
     public static ReactNode AnalyzeNode(ReactNode node, IReadOnlyDictionary<string, string> componentConfig)
     {
         foreach (var analyzeMethodInfo in
-                 from t in GetAllCustomComponents()
+                 from t in AllCustomComponents
                  from m in GetAnalyzeMethods(t)
                  select m)
         {
@@ -189,7 +202,7 @@ static class Plugin
     {
         var lines = new List<string>();
 
-        foreach (var type in GetAllCustomComponents())
+        foreach (var type in AllCustomComponents)
         {
             lines.AddRange(tryGetImportLines(type, node));
         }
@@ -246,14 +259,6 @@ static class Plugin
         }
 
         return camelCase.ToString();
-    }
-
-    public static IEnumerable<Type> GetAllCustomComponents()
-    {
-        return
-            from t in typeof(Plugin).Assembly.GetTypes()
-            where t.GetCustomAttribute<CustomComponentAttribute>() is not null
-            select t;
     }
 
     public static IEnumerable<(string variableName, string dotNetAssemblyFilePath, string dotnetTypeFullName)> GetDotNetVariables(ComponentEntity componentEntity)
@@ -520,7 +525,7 @@ static class Plugin
 
     public static IEnumerable<(string name, string value)> GetPropSuggestions(string tag)
     {
-        var type = GetAllCustomComponents().FirstOrDefault(t => t.Name.Equals(tag, StringComparison.OrdinalIgnoreCase));
+        var type = AllCustomComponents.FirstOrDefault(t => t.Name.Equals(tag, StringComparison.OrdinalIgnoreCase));
         if (type is null)
         {
             yield break;
@@ -538,7 +543,7 @@ static class Plugin
 
     public static IReadOnlyList<string> GetTagSuggestions()
     {
-        return GetAllCustomComponents().Select(x => x.Name).ToList();
+        return AllCustomComponents.Select(x => x.Name).ToList();
     }
 
     public static bool IsImage(Element element)
@@ -566,7 +571,7 @@ static class Plugin
     {
         var input = TryCreateElementForPreviewInputKey[scope];
 
-        var type = GetAllCustomComponents().FirstOrDefault(t => t.Name.Equals(input.Tag, StringComparison.OrdinalIgnoreCase));
+        var type = AllCustomComponents.FirstOrDefault(t => t.Name.Equals(input.Tag, StringComparison.OrdinalIgnoreCase));
         if (type is null)
         {
             return Scope.Empty;
@@ -598,7 +603,7 @@ static class Plugin
 
     static IReadOnlyList<ComponentMeta> GetAllTypesMetadata()
     {
-        return GetAllCustomComponents().Select(createFrom).ToList();
+        return AllCustomComponents.Select(createFrom).ToList();
 
         static ComponentMeta createFrom(Type type)
         {

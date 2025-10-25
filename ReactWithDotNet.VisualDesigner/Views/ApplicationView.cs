@@ -1634,7 +1634,7 @@ sealed class ApplicationView : Component<ApplicationState>
                 }
 
                 return
-                    from type in Plugin.GetAllCustomComponents()
+                    from type in Plugin.AllCustomComponents
                     where type.Name == CurrentVisualElement.Tag
                     from propertyInfo in type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly)
                     where !alreadyContainsProp(propertyInfo.Name)
