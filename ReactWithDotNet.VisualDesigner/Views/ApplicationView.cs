@@ -845,22 +845,22 @@ sealed class ApplicationView : Component<ApplicationState>
             
             return Task.CompletedTask;
         }
-        
+
         widthResult.Match
-        {
-            err => this.FailNotification(err.Message),
-            
-            width=>
-            {
-                state = state with
-                {
-                    Preview = state.Preview with
-                    {
-                        Width = widthResult.Value
-                    }
-                };
-            }
-        };
+        (
+             width =>
+             {
+                 state = state with
+                 {
+                     Preview = state.Preview with
+                     {
+                         Width = width
+                     }
+                 };
+             },
+
+             err => this.FailNotification(err.Message)
+        );
         
         
         state = state with

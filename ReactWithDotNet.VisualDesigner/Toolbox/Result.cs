@@ -38,6 +38,17 @@ static class Result
 
 public static class ResultExtensions
 {
+    public static void Match<T>(
+        this Result<T> result,
+        Action<T> onSuccess,
+        Action<Exception> onError)
+    {
+        if (result.HasError)
+            onError(result.Error);
+        else
+            onSuccess(result.Value);
+    }
+    
     public static Result<T> AsResult<T>(this (T value, Exception exception) tuple)
     {
         return new() { Value = tuple.value, Error = tuple.exception };
