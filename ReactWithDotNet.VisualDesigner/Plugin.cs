@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Globalization;
+using System.IO;
 using System.Reflection;
 using System.Text;
 using Mono.Cecil;
@@ -14,6 +15,8 @@ delegate Scope PluginMethod(Scope scope);
 public sealed class CustomComponentAttribute : Attribute
 {
 }
+
+
 
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
 public sealed class ImportAttribute : Attribute
@@ -60,6 +63,14 @@ public sealed class AfterReadConfigAttribute : Attribute
 public sealed class GetStringSuggestionsAttribute : Attribute
 {
 }
+
+[AttributeUsage(AttributeTargets.Method)]
+public sealed class TryFindAssemblyPathAttribute : Attribute
+{
+}
+
+
+
 
 sealed record PropSuggestionScope
 {
@@ -303,6 +314,28 @@ static class Plugin
         return GetDotNetVariables(componentEntity.GetConfig());
     }
 
+
+    static Result<string> TryFindAssemblyPath(IReadOnlyDictionary<string, string> componentConfig, string dotNetFullTypeName)
+    {
+        var methods =
+        from assembly in Plugins
+            from type in assembly.GetTypes()
+            from methodInfo in type.GetMethods(BindingFlags.Public | BindingFlags.Static)
+            where methodInfo.GetCustomAttribute<TryFindAssemblyPathAttribute>() is not null
+            select methodInfo;
+
+        foreach (var methodInfo in methods)
+        {
+            var assemblyFilePath = (string)methodInfo.Invoke(null, [componentConfig, dotNetFullTypeName]);
+            if (assemblyFilePath is not null)
+            {
+                return assemblyFilePath;
+            }
+        }
+
+        return new IOException("AssemblyNotFound @dotNetFullTypeName: " + dotNetFullTypeName);
+
+    }
     public static IEnumerable<VariableConfig> GetDotNetVariables(IReadOnlyDictionary<string, string> componentConfig)
     {
         foreach (var (key, value) in componentConfig)
@@ -318,6 +351,7 @@ static class Plugin
 
             var dotnetTypeFullName = value;
 
+            
             var assemblyFilePath = getAssemblyFilePathByFullTypeName(dotnetTypeFullName);
             if (assemblyFilePath is null)
             {

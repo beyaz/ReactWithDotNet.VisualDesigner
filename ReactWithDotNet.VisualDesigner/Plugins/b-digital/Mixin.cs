@@ -8,6 +8,21 @@ namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
 static class Mixin
 {
+    
+    [TryFindAssemblyPath]
+    public static string TryFindAssemblyPath(IReadOnlyDictionary<string, string> componentConfig, string dotNetFullTypeName)
+    {
+        if (componentConfig.TryGetValue("SolutionDirectory", out var solutionDirectory))
+        {
+            var solutionName = Path.GetFileName(solutionDirectory);
+
+            return solutionDirectory + $@"\API\{solutionName}.API\bin\Debug\net8.0\{solutionName}.API.dll";
+        }
+
+        return null;
+    }
+    
+    
     const string BOA_MessagingByGroupName = "BOA.MessagingByGroupName";
     
     [GetStringSuggestions]
