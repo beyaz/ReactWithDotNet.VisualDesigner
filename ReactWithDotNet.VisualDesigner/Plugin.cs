@@ -3270,25 +3270,29 @@ class Plugin: PluginBase
         public string PropertyName { get; init; }
     }
 
+    static IReadOnlyList<MethodInfo> AfterReadConfigs;
+    
     public static ConfigModel AfterReadConfig(ConfigModel config)
     {
+
+        AfterReadConfigs ??=
+        (
+            from assembly in Plugins
+            from type in assembly.GetTypes()
+            from methodInfo in type.GetMethods(BindingFlags.Public | BindingFlags.Static)
+            where methodInfo.GetCustomAttribute<AfterReadConfigAttribute>() is not null
+            select methodInfo
+        ).ToList();
+        
+        
         var scope = Scope.Create(new()
         {
             { Config, config }
         });
 
-        foreach (var assembly in Plugins)
+        foreach (var methodInfo in AfterReadConfigs)
         {
-            foreach (var type in assembly.GetTypes())
-            {
-                foreach (var methodInfo in type.GetMethods(BindingFlags.Public | BindingFlags.Static))
-                {
-                    if (methodInfo.GetCustomAttribute<AfterReadConfigAttribute>() is not null)
-                    {
-                        scope = (Scope)methodInfo.Invoke(null, [scope]);
-                    }
-                }
-            }
+            scope = (Scope)methodInfo.Invoke(null, [scope]);
         }
 
         return Config[scope];
