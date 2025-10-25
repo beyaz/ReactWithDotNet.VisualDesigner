@@ -545,8 +545,8 @@ static class Plugin
         foreach (var item in
                  from p in type.GetProperties()
                  from a in p.GetCustomAttributes<SuggestionsAttribute>()
-                 from s in a.Suggestions
-                 select (p.Name, s))
+                 from suggestion in a.Suggestions
+                 select (p.Name, suggestion))
         {
             yield return item;
         }
