@@ -16,6 +16,13 @@ using static Org.BouncyCastle.Math.EC.ECCurve;
 
 namespace ReactWithDotNet.VisualDesigner;
 
+
+[AttributeUsage(AttributeTargets.Method)]
+public sealed class TryGetIconForElementTreeNodeAttribute : Attribute
+{
+}
+
+
 public sealed record TryCreateElementForPreviewInput
 {
     public string Tag { get; init; }
@@ -64,6 +71,10 @@ abstract class PluginBase:IPlugin
 
 class Plugin: PluginBase
 {
+    public static readonly ScopeKey<VisualElementModel> VisualElementModel = new() { Key = nameof(VisualElementModel) };
+    
+    public static readonly ScopeKey<Element> IconForElementTreeNode = new() { Key = nameof(IconForElementTreeNode) };
+
     static string GetUpdateStateLine(string jsVariableName)
     {
         var propertyPath = jsVariableName.Split('.', StringSplitOptions.RemoveEmptyEntries);
@@ -470,8 +481,43 @@ class Plugin: PluginBase
         return component;
     }
 
+    static IReadOnlyList<MethodInfo> TryGetIconForElementTreeNodes
+    {
+        get
+        {
+            return field ??=
+            (
+                from assembly in Plugins
+                from type in assembly.GetTypes()
+                from methodInfo in type.GetMethods(BindingFlags.Public | BindingFlags.Static)
+                where methodInfo.GetCustomAttribute<TryGetIconForElementTreeNodeAttribute>() is not null
+                select methodInfo
+            ).ToList();
+        }
+    }
+    
+  
+    
+
     public static Element TryGetIconForElementTreeNode(VisualElementModel node)
     {
+        {
+            var scope = Scope.Create(new()
+            {
+                { VisualElementModel, node}
+            });
+            
+            foreach (var methodInfo in TryGetIconForElementTreeNodes)
+            {
+                var response = (Scope)methodInfo.Invoke(null, [scope]);
+                if (response!.Has(IconForElementTreeNode))
+                {
+                    return IconForElementTreeNode[response];
+                }
+            }
+        }
+        
+        
         if (node.Tag == nameof(Components.BDigitalGroupView))
         {
             return new Icons.Panel();
@@ -3196,7 +3242,7 @@ class Plugin: PluginBase
         }
     }
 
-    static class Icons
+    public static class Icons
     {
         public sealed class Panel : PureComponent
         {
@@ -3268,21 +3314,23 @@ class Plugin: PluginBase
         public string PropertyName { get; init; }
     }
 
-    static IReadOnlyList<MethodInfo> AfterReadConfigs;
+    static IReadOnlyList<MethodInfo> AfterReadConfigs
+    {
+        get
+        {
+            return field ??=
+            (
+                from assembly in Plugins
+                from type in assembly.GetTypes()
+                from methodInfo in type.GetMethods(BindingFlags.Public | BindingFlags.Static)
+                where methodInfo.GetCustomAttribute<AfterReadConfigAttribute>() is not null
+                select methodInfo
+            ).ToList();
+        }
+    }
     
     public static ConfigModel AfterReadConfig(ConfigModel config)
     {
-
-        AfterReadConfigs ??=
-        (
-            from assembly in Plugins
-            from type in assembly.GetTypes()
-            from methodInfo in type.GetMethods(BindingFlags.Public | BindingFlags.Static)
-            where methodInfo.GetCustomAttribute<AfterReadConfigAttribute>() is not null
-            select methodInfo
-        ).ToList();
-        
-        
         var scope = Scope.Create(new()
         {
             { Config, config }
@@ -3290,7 +3338,11 @@ class Plugin: PluginBase
 
         foreach (var methodInfo in AfterReadConfigs)
         {
-            scope = (Scope)methodInfo.Invoke(null, [scope]);
+            var response = (Scope)methodInfo.Invoke(null, [scope]);
+            if (response!.Has(Config))
+            {
+                return Config[response];
+            }
         }
 
         return Config[scope];
@@ -3310,6 +3362,7 @@ public sealed class AfterReadConfigAttribute : Attribute
 
 class BComponents
 {
+    [AfterReadConfig]
     public static Scope AfterReadConfig(Scope scope)
     {
         var config = Plugin.Config[scope];

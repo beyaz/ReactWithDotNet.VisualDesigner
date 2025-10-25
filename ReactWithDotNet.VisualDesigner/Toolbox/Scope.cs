@@ -56,6 +56,8 @@ public sealed class Scope
     {
     }
 
+    public static Scope Empty => new ();
+
     public static Scope Create(ScopeCreationInput input)
     {
         var scope = new Scope();
