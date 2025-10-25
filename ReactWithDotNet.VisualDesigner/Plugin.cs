@@ -15,6 +15,14 @@ using System.Text;
 
 namespace ReactWithDotNet.VisualDesigner;
 
+public sealed record TryCreateElementForPreviewInput
+{
+    public string Tag { get; init; }
+    
+    public string Id { get; init; }
+    
+    public MouseEventHandler OnMouseClick { get; init; }
+}
 
 sealed record PropSuggestionScope
 {
