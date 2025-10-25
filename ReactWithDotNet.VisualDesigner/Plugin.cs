@@ -110,26 +110,12 @@ class Plugin: PluginBase
 
     const string BOA_MessagingByGroupName = "BOA.MessagingByGroupName";
 
-    public static ConfigModel AfterReadConfig(ConfigModel config)
-    {
-        if (Environment.MachineName.StartsWith("BTARC", StringComparison.OrdinalIgnoreCase))
-        {
-            return config with
-            {
-                Database = new()
-                {
-                    //IsSQLite = true,
-                    //ConnectionString = @"Data Source=D:\work\git\ReactWithDotNet.VisualDesigner\app.db"
-
-                    IsSQLServer = true,
-                    SchemaName = "RVD",
-                    ConnectionString = @"Data Source=srvdev\atlas;Initial Catalog=boa;Min Pool Size=10; Max Pool Size=100;Application Name=Thriller;Integrated Security=true; TrustServerCertificate=true;"
-                }
-            };
-        }
-
-        return config;
-    }
+    public static ScopeKey<ConfigModel> Config = new() { Key = nameof(Config) };
+    
+        
+    
+        
+    
 
     public static IEnumerable<Type> GetAllCustomComponents()
     {
@@ -3281,6 +3267,31 @@ class Plugin: PluginBase
     {
         public string Description { get; init; }
         public string PropertyName { get; init; }
+    }
+}
+
+
+class BComponents
+{
+    public static ConfigModel AfterReadConfig(ConfigModel config)
+    {
+        if (Environment.MachineName.StartsWith("BTARC", StringComparison.OrdinalIgnoreCase))
+        {
+            return config with
+            {
+                Database = new()
+                {
+                    //IsSQLite = true,
+                    //ConnectionString = @"Data Source=D:\work\git\ReactWithDotNet.VisualDesigner\app.db"
+
+                    IsSQLServer      = true,
+                    SchemaName       = "RVD",
+                    ConnectionString = @"Data Source=srvdev\atlas;Initial Catalog=boa;Min Pool Size=10; Max Pool Size=100;Application Name=Thriller;Integrated Security=true; TrustServerCertificate=true;"
+                }
+            };
+        }
+
+        return config;
     }
 }
 
