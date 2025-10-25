@@ -298,12 +298,12 @@ static class Plugin
         return camelCase.ToString();
     }
 
-    public static IEnumerable<(string variableName, string dotNetAssemblyFilePath, string dotnetTypeFullName)> GetDotNetVariables(ComponentEntity componentEntity)
+    public static IEnumerable<VariableConfig> GetDotNetVariables(ComponentEntity componentEntity)
     {
         return GetDotNetVariables(componentEntity.GetConfig());
     }
 
-    public static IEnumerable<(string variableName, string dotNetAssemblyFilePath, string dotnetTypeFullName)> GetDotNetVariables(IReadOnlyDictionary<string, string> componentConfig)
+    public static IEnumerable<VariableConfig> GetDotNetVariables(IReadOnlyDictionary<string, string> componentConfig)
     {
         foreach (var (key, value) in componentConfig)
         {
@@ -324,7 +324,12 @@ static class Plugin
                 continue;
             }
 
-            yield return (variableName, assemblyFilePath, dotnetTypeFullName);
+            yield return new ()
+            {
+                variableName = variableName,
+                dotNetAssemblyFilePath = assemblyFilePath,
+                dotnetTypeFullName = dotnetTypeFullName
+            };
         }
 
         yield break;
@@ -399,7 +404,7 @@ static class Plugin
                 "false"
             ];
 
-            foreach (var (variableName, dotNetAssemblyFilePath, dotnetTypeFullName) in GetDotNetVariables(scope.Component))
+            foreach (var variable in GetDotNetVariables(scope.Component))
             {
                 List<(List<string> list, Func<PropertyDefinition, bool> matchFunc)> map =
                 [
@@ -412,7 +417,7 @@ static class Plugin
 
                 foreach (var (list, fn) in map)
                 {
-                    var result = CecilHelper.GetPropertyPathList(dotNetAssemblyFilePath, dotnetTypeFullName, $"{variableName}.", fn);
+                    var result = CecilHelper.GetPropertyPathList(variable.dotNetAssemblyFilePath, variable.dotnetTypeFullName, $"{variable.variableName}.", fn);
                     if (result.HasError)
                     {
                         continue;
@@ -764,4 +769,11 @@ sealed class SuggestionsAttribute : Attribute
 [AttributeUsage(AttributeTargets.Method)]
 public sealed class NodeAnalyzerAttribute : Attribute
 {
+}
+
+public sealed record VariableConfig
+{
+    public string variableName;
+    public string dotNetAssemblyFilePath;
+    public string dotnetTypeFullName;
 }

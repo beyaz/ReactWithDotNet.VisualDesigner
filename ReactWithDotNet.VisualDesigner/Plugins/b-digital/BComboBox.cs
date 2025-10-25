@@ -137,16 +137,16 @@ sealed class BComboBox : PluginComponentBase
 
     static bool IsPropertyPathProvidedByCollection(IReadOnlyDictionary<string, string> componentConfig, string propertyPathWithVariableName)
     {
-        foreach (var (variableName, dotNetAssemblyFilePath, dotnetTypeFullName) in Plugin.GetDotNetVariables(componentConfig))
+        foreach (var variable in Plugin.GetDotNetVariables(componentConfig))
         {
-            if (!propertyPathWithVariableName.StartsWith(variableName + ".", StringComparison.OrdinalIgnoreCase))
+            if (!propertyPathWithVariableName.StartsWith(variable.variableName + ".", StringComparison.OrdinalIgnoreCase))
             {
                 continue;
             }
 
-            var propertyPath = propertyPathWithVariableName.RemoveFromStart(variableName + ".");
+            var propertyPath = propertyPathWithVariableName.RemoveFromStart(variable.variableName + ".");
 
-            return CecilHelper.IsPropertyPathProvidedByCollection(dotNetAssemblyFilePath, dotnetTypeFullName, propertyPath);
+            return CecilHelper.IsPropertyPathProvidedByCollection(variable.dotNetAssemblyFilePath, variable.dotnetTypeFullName, propertyPath);
         }
 
         return false;
