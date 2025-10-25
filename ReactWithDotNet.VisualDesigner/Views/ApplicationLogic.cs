@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using System.Reflection;
 
 namespace ReactWithDotNet.VisualDesigner.Views;
@@ -122,7 +121,7 @@ static class ApplicationLogic
 
                 var tag = selectedVisualItem.Tag;
 
-                scope = new PropSuggestionScope
+                scope = new()
                 {
                     Component         = await Store.TryGetComponent(state.ComponentId),
                     SelectedComponent = await TryGetComponentByTag(selectedVisualItem.Tag),

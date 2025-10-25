@@ -12,7 +12,6 @@ using System.Text;
 
 namespace ReactWithDotNet.VisualDesigner;
 
-
 delegate Scope PluginMethod(Scope scope);
 
 [AttributeUsage(AttributeTargets.Class)]
