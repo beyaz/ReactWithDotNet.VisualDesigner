@@ -89,7 +89,7 @@ class Plugin: PluginBase
 
             var solutionName = names[0];
 
-            var clientAppFolderPath = string.Empty;
+            string clientAppFolderPath;
             {
                 clientAppFolderPath = $@"D:\work\BOA.BusinessModules\Dev\{solutionName}\OBAWeb\OBA.Web.{solutionName.RemoveFromStart("BOA.")}\ClientApp\";
                 if (solutionName == "BOA.MobilePos")
@@ -97,8 +97,6 @@ class Plugin: PluginBase
                     clientAppFolderPath = @"D:\work\BOA.BusinessModules\Dev\BOA.MobilePos\OBAWeb\OBA.Web.POSPortal.MobilePos\ClientApp\";
                 }
             }
-
-            var fileName = names[1];
 
             if (Directory.Exists(clientAppFolderPath))
             {
