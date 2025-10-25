@@ -839,38 +839,22 @@ sealed class ApplicationView : Component<ApplicationState>
             _     => new ArgumentOutOfRangeException(e.currentTarget.data["value"])
         };
 
-        if (widthResult.HasError)
-        {
-            this.FailNotification(widthResult.Error.Message);
-            
-            return Task.CompletedTask;
-        }
-
         widthResult.Match
         (
-             width =>
-             {
-                 state = state with
-                 {
-                     Preview = state.Preview with
-                     {
-                         Width = width
-                     }
-                 };
-             },
-
-             err => this.FailNotification(err.Message)
-        );
-        
-        
-        state = state with
-        {
-            Preview = state.Preview with
+            width =>
             {
-                Width = widthResult.Value
-            }
-        };
+                state = state with
+                {
+                    Preview = state.Preview with
+                    {
+                        Width = width
+                    }
+                };
+            },
 
+            err => this.FailNotification(err.Message)
+        );
+      
         return Task.CompletedTask;
     }
 
