@@ -16,8 +16,6 @@ public sealed class CustomComponentAttribute : Attribute
 {
 }
 
-
-
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
 public sealed class ImportAttribute : Attribute
 {
@@ -69,9 +67,6 @@ public sealed class TryFindAssemblyPathAttribute : Attribute
 {
 }
 
-
-
-
 sealed record PropSuggestionScope
 {
     public ComponentEntity Component { get; init; }
@@ -117,31 +112,7 @@ static class Plugin
     ];
 
     delegate Task<Result<IReadOnlyList<string>>> GetStringSuggestionsDelegate(PropSuggestionScope scope);
-    
-    static IReadOnlyList<GetStringSuggestionsDelegate> GetStringSuggestionsMethods
-    {
-        get
-        {
-            return field ??= (
-                    from assembly in Plugins
-                    from type in assembly.GetTypes()
-                    from methodInfo in type.GetMethods(BindingFlags.Static | BindingFlags.Public)
-                    where methodInfo.GetCustomAttribute<GetStringSuggestionsAttribute>() is not null
-                    select (GetStringSuggestionsDelegate)Delegate.CreateDelegate(typeof(GetStringSuggestionsDelegate), methodInfo))
-                .ToList();
-        }
-    }
 
-    static IAsyncEnumerable<Result<string>> GetStringSuggestions(PropSuggestionScope scope)
-    {
-
-      return from method in GetStringSuggestionsMethods
-            from items in method(scope)
-            from item in items
-            select item;
-    }
-    
-    
     public static IReadOnlyList<Type> AllCustomComponents
     {
         get
@@ -175,6 +146,20 @@ static class Plugin
                     where methodInfo.GetCustomAttribute<NodeAnalyzerAttribute>() is not null
                     select (Func<ReactNode, IReadOnlyDictionary<string, string>, ReactNode>)Delegate
                         .CreateDelegate(typeof(Func<ReactNode, IReadOnlyDictionary<string, string>, ReactNode>), methodInfo))
+                .ToList();
+        }
+    }
+
+    static IReadOnlyList<GetStringSuggestionsDelegate> GetStringSuggestionsMethods
+    {
+        get
+        {
+            return field ??= (
+                    from assembly in Plugins
+                    from type in assembly.GetTypes()
+                    from methodInfo in type.GetMethods(BindingFlags.Static | BindingFlags.Public)
+                    where methodInfo.GetCustomAttribute<GetStringSuggestionsAttribute>() is not null
+                    select (GetStringSuggestionsDelegate)Delegate.CreateDelegate(typeof(GetStringSuggestionsDelegate), methodInfo))
                 .ToList();
         }
     }
@@ -314,28 +299,6 @@ static class Plugin
         return GetDotNetVariables(componentEntity.GetConfig());
     }
 
-
-    static Result<string> TryFindAssemblyPath(IReadOnlyDictionary<string, string> componentConfig, string dotNetFullTypeName)
-    {
-        var methods =
-        from assembly in Plugins
-            from type in assembly.GetTypes()
-            from methodInfo in type.GetMethods(BindingFlags.Public | BindingFlags.Static)
-            where methodInfo.GetCustomAttribute<TryFindAssemblyPathAttribute>() is not null
-            select methodInfo;
-
-        foreach (var methodInfo in methods)
-        {
-            var assemblyFilePath = (string)methodInfo.Invoke(null, [componentConfig, dotNetFullTypeName]);
-            if (assemblyFilePath is not null)
-            {
-                return assemblyFilePath;
-            }
-        }
-
-        return new IOException("AssemblyNotFound @dotNetFullTypeName: " + dotNetFullTypeName);
-
-    }
     public static IEnumerable<VariableConfig> GetDotNetVariables(IReadOnlyDictionary<string, string> componentConfig)
     {
         foreach (var (key, value) in componentConfig)
@@ -351,40 +314,18 @@ static class Plugin
 
             var dotnetTypeFullName = value;
 
-            
-            var assemblyFilePath = getAssemblyFilePathByFullTypeName(dotnetTypeFullName);
-            if (assemblyFilePath is null)
+            var assemblyFilePath = TryFindAssemblyPath(componentConfig, dotnetTypeFullName);
+            if (assemblyFilePath.HasError)
             {
                 continue;
             }
 
-            yield return new ()
+            yield return new()
             {
-                variableName = variableName,
-                dotNetAssemblyFilePath = assemblyFilePath,
-                dotnetTypeFullName = dotnetTypeFullName
+                variableName           = variableName,
+                dotNetAssemblyFilePath = assemblyFilePath.Value,
+                dotnetTypeFullName     = dotnetTypeFullName
             };
-        }
-
-        yield break;
-
-        static string getAssemblyFilePathByFullTypeName(string fullTypeName)
-        {
-            if (fullTypeName.StartsWith("BOA.InternetBanking.Payments.API", StringComparison.OrdinalIgnoreCase))
-            {
-                const string projectBinDirectoryPath = @"D:\work\BOA.BusinessModules\Dev\BOA.InternetBanking.Payments\API\BOA.InternetBanking.Payments.API\bin\Debug\net8.0\";
-
-                return projectBinDirectoryPath + "BOA.InternetBanking.Payments.API.dll";
-            }
-
-            if (fullTypeName.StartsWith("BOA.POSPortal.MobilePos.API.", StringComparison.OrdinalIgnoreCase))
-            {
-                const string projectBinDirectoryPath = @"D:\work\BOA.BusinessModules\Dev\BOA.MobilePos\API\BOA.POSPortal.MobilePos.API\bin\Debug\net8.0\";
-
-                return projectBinDirectoryPath + "BOA.POSPortal.MobilePos.API.dll";
-            }
-
-            return null;
         }
     }
 
@@ -409,13 +350,10 @@ static class Plugin
                     {
                         return result.Error;
                     }
-                
+
                     stringSuggestions.Add(result.Value);
                 }
             }
-
-          
-            
 
             List<string> numberSuggestions =
             [
@@ -741,7 +679,6 @@ static class Plugin
         }
     }
 
-
     static IReadOnlyList<PluginMethod> GetPluginMethods<AttributeType>()
     {
         var items =
@@ -752,6 +689,15 @@ static class Plugin
             select (PluginMethod)Delegate.CreateDelegate(typeof(PluginMethod), methodInfo);
 
         return items.ToList();
+    }
+
+    static IAsyncEnumerable<Result<string>> GetStringSuggestions(PropSuggestionScope scope)
+    {
+        return
+            from method in GetStringSuggestionsMethods
+            from items in method(scope)
+            from item in items
+            select item;
     }
 
     static T RunPluginMethods<T>(IReadOnlyList<PluginMethod> pluginMethods, Scope scope, ScopeKey<T> returnKey) where T : class
@@ -768,6 +714,27 @@ static class Plugin
         return null;
     }
 
+    static Result<string> TryFindAssemblyPath(IReadOnlyDictionary<string, string> componentConfig, string dotNetFullTypeName)
+    {
+        var methods =
+            from assembly in Plugins
+            from type in assembly.GetTypes()
+            from methodInfo in type.GetMethods(BindingFlags.Public | BindingFlags.Static)
+            where methodInfo.GetCustomAttribute<TryFindAssemblyPathAttribute>() is not null
+            select methodInfo;
+
+        foreach (var methodInfo in methods)
+        {
+            var assemblyFilePath = (string)methodInfo.Invoke(null, [componentConfig, dotNetFullTypeName]);
+            if (assemblyFilePath is not null)
+            {
+                return assemblyFilePath;
+            }
+        }
+
+        return new IOException("AssemblyNotFound @dotNetFullTypeName: " + dotNetFullTypeName);
+    }
+
     record ComponentMeta
     {
         public IReadOnlyList<PropMeta> Props { get; init; }
@@ -781,7 +748,6 @@ static class Plugin
 
         public JsType ValueType { get; init; }
     }
-
 }
 
 [AttributeUsage(AttributeTargets.Property)]
@@ -807,7 +773,7 @@ public sealed class NodeAnalyzerAttribute : Attribute
 
 public sealed record VariableConfig
 {
-    public string variableName;
     public string dotNetAssemblyFilePath;
     public string dotnetTypeFullName;
+    public string variableName;
 }
