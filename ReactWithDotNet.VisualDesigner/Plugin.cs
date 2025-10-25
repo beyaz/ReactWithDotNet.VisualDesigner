@@ -481,18 +481,11 @@ class Plugin: PluginBase
         return component;
     }
 
-    static IReadOnlyList<MethodInfo> TryGetIconForElementTreeNodes
+    static IReadOnlyList<PluginMethod> TryGetIconForElementTreeNodes
     {
         get
         {
-            return field ??=
-            (
-                from assembly in Plugins
-                from type in assembly.GetTypes()
-                from methodInfo in type.GetMethods(BindingFlags.Public | BindingFlags.Static)
-                where methodInfo.GetCustomAttribute<TryGetIconForElementTreeNodeAttribute>() is not null
-                select methodInfo
-            ).ToList();
+            return field ??= GetPluginMethods<TryGetIconForElementTreeNodeAttribute>();
         }
     }
     
@@ -506,15 +499,14 @@ class Plugin: PluginBase
             {
                 { VisualElementModel, node}
             });
-            
-            foreach (var methodInfo in TryGetIconForElementTreeNodes)
+
+            var el = RunPluginMethods(TryGetIconForElementTreeNodes, scope, IconForElementTreeNode);
+            if (el is not null)
             {
-                var response = (Scope)methodInfo.Invoke(null, [scope]);
-                if (response!.Has(IconForElementTreeNode))
-                {
-                    return IconForElementTreeNode[response];
-                }
+                return el;
             }
+            
+           
         }
         
         
@@ -3340,17 +3332,22 @@ class Plugin: PluginBase
         {
             { Config, config }
         });
-
-        foreach (var method in AfterReadConfigs)
+        
+        return RunPluginMethods(AfterReadConfigs, scope, Config) ?? config;
+    }
+    
+    static T RunPluginMethods<T>(IReadOnlyList<PluginMethod> pluginMethods, Scope scope, ScopeKey<T> returnKey) where T:class
+    {
+        foreach (var method in pluginMethods)
         {
             var response = method(scope);
-            if (response.Has(Config))
+            if (response.Has(returnKey))
             {
-                return Config[response];
+                return returnKey[response];
             }
         }
 
-        return Config[scope];
+        return null;
     }
     
     static readonly IEnumerable<Assembly> Plugins =
