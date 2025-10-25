@@ -38,7 +38,7 @@ sealed class BComboBox : PluginComponentBase
             {
                 var properties = node.Properties;
 
-                var isCollection = IsPropertyPathProvidedByCollection(componentConfig, valueProp.Value);
+                var isCollection = IsPropertyPathProvidedByCollection(componentConfig, valueProp.Value).Value;
 
                 TsLineCollection lines =
                 [
@@ -135,7 +135,7 @@ sealed class BComboBox : PluginComponentBase
         };
     }
 
-    static bool IsPropertyPathProvidedByCollection(IReadOnlyDictionary<string, string> componentConfig, string propertyPathWithVariableName)
+    static Result<bool> IsPropertyPathProvidedByCollection(IReadOnlyDictionary<string, string> componentConfig, string propertyPathWithVariableName)
     {
         foreach (var variable in Plugin.GetDotNetVariables(componentConfig))
         {

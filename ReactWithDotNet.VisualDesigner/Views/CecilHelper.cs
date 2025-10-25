@@ -27,16 +27,16 @@ public sealed class JsTypeInfoAttribute : Attribute
 
 static class CecilHelper
 {
-    public static PropertyDefinition FindPropertyPath(TypeDefinition typeDefinition, string propertyPath)
+    public static Result<PropertyDefinition> FindPropertyPath(TypeDefinition typeDefinition, string propertyPath)
     {
         if (typeDefinition == null)
         {
-            throw new ArgumentNullException(nameof(typeDefinition));
+            return new ArgumentNullException(nameof(typeDefinition));
         }
 
         if (string.IsNullOrEmpty(propertyPath))
         {
-            throw new ArgumentException("Property path cannot be null or empty.", nameof(propertyPath));
+            return new ArgumentException("Property path cannot be null or empty.", nameof(propertyPath));
         }
 
         var properties = propertyPath.Split('.');
@@ -49,7 +49,7 @@ static class CecilHelper
 
             if (property == null)
             {
-                throw new InvalidOperationException($"Property '{propertyName}' not found in type '{currentType.FullName}'.");
+                return new InvalidOperationException($"Property '{propertyName}' not found in type '{currentType.FullName}'.");
             }
 
             if (i < properties.Length - 1)
@@ -70,7 +70,7 @@ static class CecilHelper
             }
         }
 
-        throw new InvalidOperationException("Invalid property path.");
+        return new InvalidOperationException("Invalid property path." + propertyPath);
     }
 
     public static Result<IReadOnlyList<string>> GetPropertyPathList(string assemblyPath, string typeFullName, string prefix, Func<PropertyDefinition, bool> matchFunc)
@@ -186,7 +186,7 @@ static class CecilHelper
         return IsNumber(propertyDefinition.PropertyType);
     }
 
-    public static bool IsPropertyPathProvidedByCollection(string dotNetAssemblyFilePath, string dotnetTypeFullName, string propertyPath)
+    public static Result<bool> IsPropertyPathProvidedByCollection(string dotNetAssemblyFilePath, string dotnetTypeFullName, string propertyPath)
     {
         var assembly = CecilAssemblyReader.ReadAssembly(dotNetAssemblyFilePath).Value;
         if (assembly is null)
@@ -200,13 +200,9 @@ static class CecilHelper
             return false;
         }
 
-        var propertyDefinition = FindPropertyPath(type, propertyPath);
-        if (propertyDefinition is null)
-        {
-            return false;
-        }
-
-        return IsCollection(propertyDefinition.PropertyType);
+        return
+            from propertyDefinition in FindPropertyPath(type, propertyPath)
+            select IsCollection(propertyDefinition.PropertyType);
     }
 
     public static bool IsString(TypeReference typeReference)
