@@ -846,6 +846,23 @@ sealed class ApplicationView : Component<ApplicationState>
             return Task.CompletedTask;
         }
         
+        widthResult.Match
+        {
+            err => this.FailNotification(err.Message),
+            
+            width=>
+            {
+                state = state with
+                {
+                    Preview = state.Preview with
+                    {
+                        Width = widthResult.Value
+                    }
+                };
+            }
+        };
+        
+        
         state = state with
         {
             Preview = state.Preview with
