@@ -12,7 +12,6 @@ using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Text;
-using static Org.BouncyCastle.Math.EC.ECCurve;
 
 namespace ReactWithDotNet.VisualDesigner;
 
