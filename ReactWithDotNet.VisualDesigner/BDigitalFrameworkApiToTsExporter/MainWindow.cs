@@ -450,30 +450,28 @@ sealed class LoadingIcon : PluginComponentBase
     }
 }
 
-class ExporterPlugin : PluginBase
+static class ExporterPlugin
 {
-    public override Element TryCreateElementForPreview(TryCreateElementForPreviewInput input)
+    [TryCreateElementForPreview]
+    public static Scope TryCreateElementForPreview(Scope scope)
     {
-        if (input.Tag == nameof(TsFileViewer))
-        {
-            return new TsFileViewer
-            {
-                id = input.Id,
+        var input = Plugin.TryCreateElementForPreviewInputKey[scope];
 
-                onMouseClick = input.OnMouseClick
-            };
+        Element element = input.Tag switch
+        {
+            nameof(TsFileViewer) => new TsFileViewer { id = input.Id, onMouseClick = input.OnMouseClick },
+            nameof(LoadingIcon)  => new LoadingIcon { id  = input.Id, onMouseClick = input.OnMouseClick },
+            _                    => null
+        };
+
+        if (element is not null)
+        {
+            return Scope.Create(new()
+            {
+                {Plugin.TryCreateElementForPreviewOutputKey, element}
+            });
         }
 
-        if (input.Tag == nameof(LoadingIcon))
-        {
-            return new LoadingIcon
-            {
-                id = input.Id,
-
-                onMouseClick = input.OnMouseClick
-            };
-        }
-
-        return null;
+        return Scope.Empty;
     }
 }

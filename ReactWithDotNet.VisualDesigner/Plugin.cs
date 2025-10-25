@@ -52,7 +52,6 @@ sealed record PropSuggestionScope
 interface IPlugin
 {
     string AnalyzeExportFilePath(string exportFilePathForComponent);
-    Element TryCreateElementForPreview(TryCreateElementForPreviewInput input);
 }
 
 abstract class PluginBase:IPlugin
@@ -62,10 +61,6 @@ abstract class PluginBase:IPlugin
         return exportFilePathForComponent;
     }
 
-    public virtual Element TryCreateElementForPreview(TryCreateElementForPreviewInput input)
-    {
-        return null;
-    }
 }
 
 
@@ -75,8 +70,21 @@ class Plugin: PluginBase
     
     public static readonly ScopeKey<Element> IconForElementTreeNode = new() { Key = nameof(IconForElementTreeNode) };
     
-    public static readonly ScopeKey<Element> CurrentElementInstanceInPreview = new() { Key = nameof(CurrentElementInstanceInPreview) };
+    public static readonly ScopeKey<Element> CurrentElementInstanceInPreview = new()
+    {
+        Key = nameof(CurrentElementInstanceInPreview)
+    };
 
+    
+    public static readonly ScopeKey<TryCreateElementForPreviewInput> TryCreateElementForPreviewInputKey = new()
+    {
+        Key = nameof(TryCreateElementForPreviewInputKey)
+    };
+    public static readonly ScopeKey<Element> TryCreateElementForPreviewOutputKey = new()
+    {
+        Key = nameof(TryCreateElementForPreviewOutputKey)
+    };
+    
     public static readonly ScopeKey<object> IsImageKey = new() { Key = nameof(IsImageKey) };
 
     
@@ -462,14 +470,37 @@ public    static IEnumerable<(string variableName, string dotNetAssemblyFilePath
         return GetAllCustomComponents().Select(x => x.Name).ToList();
     }
 
+    static IReadOnlyList<PluginMethod> TryCreateElementForPreviewList
+    {
+        get
+        {
+            return field ??= GetPluginMethods<TryCreateElementForPreviewAttribute>();
+        }
+    }
+    
+    
+    public static Element TryCreateElementForPreview(TryCreateElementForPreviewInput input)
+    {
+        var scope = Scope.Create(new()
+        {
+            {Plugin.TryCreateElementForPreviewInputKey, input}
+        });
+
+        return RunPluginMethods(TryCreateElementForPreviewList, scope, TryCreateElementForPreviewOutputKey);
+        
+       
+    }
     
 
-    public override Element TryCreateElementForPreview(TryCreateElementForPreviewInput input)
+    [TryCreateElementForPreview]
+    public static Scope TryCreateElementForPreview(Scope scope)
     {
+        var input = Plugin.TryCreateElementForPreviewInputKey[scope];
+        
         var type = GetAllCustomComponents().FirstOrDefault(t => t.Name.Equals(input.Tag, StringComparison.OrdinalIgnoreCase));
         if (type is null)
         {
-            return null;
+            return Scope.Empty;
         }
 
         var component = (Element)Activator.CreateInstance(type);
@@ -480,7 +511,10 @@ public    static IEnumerable<(string variableName, string dotNetAssemblyFilePath
             componentBase.onMouseClick = input.OnMouseClick;
         }
 
-        return component;
+        return Scope.Create(new()
+        {
+            {Plugin.TryCreateElementForPreviewOutputKey, component}
+        });
     }
 
     static IReadOnlyList<PluginMethod> TryGetIconForElementTreeNodes

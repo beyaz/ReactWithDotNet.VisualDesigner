@@ -25,17 +25,5 @@ static class PluginWrapper
         return exportFilePathForComponent;
     }
 
-    public static Element TryCreateElementForPreview(TryCreateElementForPreviewInput input)
-    {
-        foreach (var plugin in Plugins)
-        {
-            var element = plugin.TryCreateElementForPreview(input);
-            if (element is not null)
-            {
-                return element;
-            }
-        }
-        
-        return null;
-    }
+    
 }
