@@ -1,10 +1,7 @@
 ﻿using System.Collections;
-using System.Data;
 using System.Globalization;
 using System.Reflection;
 using System.Text;
-using Dapper;
-using Microsoft.Data.SqlClient;
 using Mono.Cecil;
 using ReactWithDotNet.VisualDesigner.Configuration;
 using ReactWithDotNet.VisualDesigner.Exporters;
@@ -75,8 +72,6 @@ sealed record PropSuggestionScope
 
 static class Plugin
 {
-    const string BOA_MessagingByGroupName = "BOA.MessagingByGroupName";
-
     public static readonly ScopeKey<Element> CurrentElementInstanceInPreview = new()
     {
         Key = nameof(CurrentElementInstanceInPreview)
@@ -124,6 +119,15 @@ static class Plugin
                     select (GetStringSuggestionsDelegate)Delegate.CreateDelegate(typeof(GetStringSuggestionsDelegate), methodInfo))
                 .ToList();
         }
+    }
+
+    static IAsyncEnumerable<Result<string>> GetStringSuggestions(PropSuggestionScope scope)
+    {
+
+      return from method in GetStringSuggestionsMethods
+            from items in method(scope)
+            from item in items
+            select item;
     }
     
     
@@ -360,15 +364,19 @@ static class Plugin
 
             var stringSuggestions = new List<string>();
             {
-                if (scope.Component.GetConfig().TryGetValue(BOA_MessagingByGroupName, out var messagingGroupName))
+                await foreach (var result in GetStringSuggestions(scope))
                 {
-                    foreach (var item in await GetMessagingByGroupName(messagingGroupName))
+                    if (result.HasError)
                     {
-                        stringSuggestions.Add(item.Description);
-                        stringSuggestions.Add($"${item.PropertyName}$ {item.Description}");
+                        return result.Error;
                     }
+                
+                    stringSuggestions.Add(result.Value);
                 }
             }
+
+          
+            
 
             List<string> numberSuggestions =
             [
@@ -694,45 +702,6 @@ static class Plugin
         }
     }
 
-    static Task<IReadOnlyList<MessagingInfo>> GetMessagingByGroupName(string messagingGroupName)
-    {
-        var cacheKey = $"{nameof(GetMessagingByGroupName)} :: {messagingGroupName}";
-
-        return Cache.AccessValue(cacheKey, async () => await getMessagingByGroupName(messagingGroupName));
-
-        static async Task<IReadOnlyList<MessagingInfo>> getMessagingByGroupName(string messagingGroupName)
-        {
-            var returnList = new List<MessagingInfo>();
-
-            const string connectionString = @"Data Source=srvdev\atlas;Initial Catalog=boa;Min Pool Size=10; Max Pool Size=100;Application Name=Thriller;Integrated Security=true; TrustServerCertificate=true;";
-
-            using IDbConnection connection = new SqlConnection(connectionString);
-
-            const string sql =
-                """
-                    SELECT m.PropertyName, Description
-                      FROM COR.MessagingDetail AS d WITH(NOLOCK)
-                INNER JOIN COR.Messaging       AS m WITH(NOLOCK) ON d.Code = m.Code
-                INNER JOIN COR.MessagingGroup  AS g WITH(NOLOCK) ON g.MessagingGroupId = m.MessagingGroupId
-                     WHERE g.Name = @messagingGroupName
-                       AND d.LanguageId = 1
-                """;
-
-            var reader = await connection.ExecuteReaderAsync(sql, new { messagingGroupName });
-
-            while (reader.Read())
-            {
-                var propertyName = reader["PropertyName"].ToString();
-                var description = reader["Description"].ToString();
-
-                returnList.Add(new() { PropertyName = propertyName, Description = description });
-            }
-
-            reader.Close();
-
-            return returnList;
-        }
-    }
 
     static IReadOnlyList<PluginMethod> GetPluginMethods<AttributeType>()
     {
@@ -774,11 +743,6 @@ static class Plugin
         public JsType ValueType { get; init; }
     }
 
-    record MessagingInfo
-    {
-        public string Description { get; init; }
-        public string PropertyName { get; init; }
-    }
 }
 
 [AttributeUsage(AttributeTargets.Property)]
