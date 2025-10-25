@@ -13,6 +13,21 @@ using System.Text;
 namespace ReactWithDotNet.VisualDesigner;
 
 
+delegate Scope PluginMethod(Scope scope);
+
+[AttributeUsage(AttributeTargets.Class)]
+public sealed class CustomComponentAttribute : Attribute
+{
+}
+
+[AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
+public sealed class ImportAttribute : Attribute
+{
+    public string Name { get; init; }
+
+    public string Package { get; init; }
+}
+
 [AttributeUsage(AttributeTargets.Method)]
 public sealed class TryGetIconForElementTreeNodeAttribute : Attribute
 {
@@ -42,7 +57,7 @@ public sealed class AnalyzeExportFilePathAttribute : Attribute
 {
 }
 
-public delegate Scope PluginMethod(Scope scope);
+
 
 [AttributeUsage(AttributeTargets.Method)]
 public sealed class AfterReadConfigAttribute : Attribute
@@ -845,21 +860,10 @@ sealed class SuggestionsAttribute : Attribute
     public IReadOnlyList<string> Suggestions { get; }
 }
 
-[AttributeUsage(AttributeTargets.Class)]
-sealed class CustomComponentAttribute : Attribute
-{
-}
 
-[AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
-sealed class ImportAttribute : Attribute
-{
-    public string Name { get; init; }
-
-    public string Package { get; init; }
-}
 
 [AttributeUsage(AttributeTargets.Method)]
-sealed class NodeAnalyzerAttribute : Attribute
+public sealed class NodeAnalyzerAttribute : Attribute
 {
 }
 
