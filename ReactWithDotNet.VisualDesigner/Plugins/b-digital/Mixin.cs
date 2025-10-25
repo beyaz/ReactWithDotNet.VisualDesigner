@@ -1,10 +1,77 @@
 ﻿global using static ReactWithDotNet.VisualDesigner.Plugins.b_digital.Mixin;
+using System.Data;
 using System.IO;
+using Dapper;
+using Microsoft.Data.SqlClient;
 
 namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
 static class Mixin
 {
+    const string BOA_MessagingByGroupName = "BOA.MessagingByGroupName";
+    
+    [GetStringSuggestions]
+    public static async Task<Result<IReadOnlyList<string>>> GetStringSuggestions(PropSuggestionScope scope)
+    {
+        var stringSuggestions = new List<string>();
+        
+        if (scope.Component.GetConfig().TryGetValue(BOA_MessagingByGroupName, out var messagingGroupName))
+        {
+            foreach (var item in await GetMessagingByGroupName(messagingGroupName))
+            {
+                stringSuggestions.Add(item.Description);
+                stringSuggestions.Add($"${item.PropertyName}$ {item.Description}");
+            }
+        }
+
+        return stringSuggestions;
+    }
+    
+    record MessagingInfo
+    {
+        public string Description { get; init; }
+        public string PropertyName { get; init; }
+    }
+    static Task<IReadOnlyList<MessagingInfo>> GetMessagingByGroupName(string messagingGroupName)
+    {
+        var cacheKey = $"{nameof(GetMessagingByGroupName)} :: {messagingGroupName}";
+
+        return Cache.AccessValue(cacheKey, async () => await getMessagingByGroupName(messagingGroupName));
+
+        static async Task<IReadOnlyList<MessagingInfo>> getMessagingByGroupName(string messagingGroupName)
+        {
+            var returnList = new List<MessagingInfo>();
+
+            const string connectionString = @"Data Source=srvdev\atlas;Initial Catalog=boa;Min Pool Size=10; Max Pool Size=100;Application Name=Thriller;Integrated Security=true; TrustServerCertificate=true;";
+
+            using IDbConnection connection = new SqlConnection(connectionString);
+
+            const string sql =
+                """
+                    SELECT m.PropertyName, Description
+                      FROM COR.MessagingDetail AS d WITH(NOLOCK)
+                INNER JOIN COR.Messaging       AS m WITH(NOLOCK) ON d.Code = m.Code
+                INNER JOIN COR.MessagingGroup  AS g WITH(NOLOCK) ON g.MessagingGroupId = m.MessagingGroupId
+                     WHERE g.Name = @messagingGroupName
+                       AND d.LanguageId = 1
+                """;
+
+            var reader = await connection.ExecuteReaderAsync(sql, new { messagingGroupName });
+
+            while (reader.Read())
+            {
+                var propertyName = reader["PropertyName"].ToString();
+                var description = reader["Description"].ToString();
+
+                returnList.Add(new() { PropertyName = propertyName, Description = description });
+            }
+
+            reader.Close();
+
+            return returnList;
+        }
+    }
+    
     [AnalyzeExportFilePath]
     public static  Scope AnalyzeExportFilePath(Scope scope)
     {

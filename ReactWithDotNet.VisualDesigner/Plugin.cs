@@ -59,6 +59,11 @@ public sealed class AfterReadConfigAttribute : Attribute
 {
 }
 
+[AttributeUsage(AttributeTargets.Method)]
+public sealed class GetStringSuggestionsAttribute : Attribute
+{
+}
+
 sealed record PropSuggestionScope
 {
     public ComponentEntity Component { get; init; }
@@ -105,6 +110,23 @@ static class Plugin
         typeof(Plugin).Assembly
     ];
 
+    delegate Task<Result<IReadOnlyList<string>>> GetStringSuggestionsDelegate(PropSuggestionScope scope);
+    
+    static IReadOnlyList<GetStringSuggestionsDelegate> GetStringSuggestionsMethods
+    {
+        get
+        {
+            return field ??= (
+                    from assembly in Plugins
+                    from type in assembly.GetTypes()
+                    from methodInfo in type.GetMethods(BindingFlags.Static | BindingFlags.Public)
+                    where methodInfo.GetCustomAttribute<GetStringSuggestionsAttribute>() is not null
+                    select (GetStringSuggestionsDelegate)Delegate.CreateDelegate(typeof(GetStringSuggestionsDelegate), methodInfo))
+                .ToList();
+        }
+    }
+    
+    
     public static IReadOnlyList<Type> AllCustomComponents
     {
         get
