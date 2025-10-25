@@ -56,12 +56,11 @@ public sealed class AnalyzeExportFilePathAttribute : Attribute
 {
 }
 
-
-
 [AttributeUsage(AttributeTargets.Method)]
 public sealed class AfterReadConfigAttribute : Attribute
 {
 }
+
 sealed record PropSuggestionScope
 {
     public ComponentEntity Component { get; init; }
@@ -74,7 +73,7 @@ sealed record PropSuggestionScope
 
 
 
-class Plugin
+static class Plugin
 {
     public static readonly ScopeKey<VisualElementModel> VisualElementModel = new() { Key = nameof(VisualElementModel) };
     
