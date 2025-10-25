@@ -74,6 +74,11 @@ class Plugin: PluginBase
     {
         Key = nameof(CurrentElementInstanceInPreview)
     };
+    
+    public static readonly ScopeKey<string> ExportFilePathForComponent = new()
+    {
+        Key = nameof(ExportFilePathForComponent)
+    };
 
     
     public static readonly ScopeKey<TryCreateElementForPreviewInput> TryCreateElementForPreviewInputKey = new()
