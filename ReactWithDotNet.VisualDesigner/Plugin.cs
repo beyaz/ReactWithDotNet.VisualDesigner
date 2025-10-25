@@ -12,6 +12,7 @@ using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Text;
+using static Org.BouncyCastle.Math.EC.ECCurve;
 
 namespace ReactWithDotNet.VisualDesigner;
 
@@ -3268,16 +3269,52 @@ class Plugin: PluginBase
         public string Description { get; init; }
         public string PropertyName { get; init; }
     }
+
+    public static ConfigModel AfterReadConfig(ConfigModel config)
+    {
+        var scope = Scope.Create(new()
+        {
+            { Config, config }
+        });
+
+        foreach (var assembly in Plugins)
+        {
+            foreach (var type in assembly.GetTypes())
+            {
+                foreach (var methodInfo in type.GetMethods(BindingFlags.Public | BindingFlags.Static))
+                {
+                    if (methodInfo.GetCustomAttribute<AfterReadConfigAttribute>() is not null)
+                    {
+                        scope = (Scope)methodInfo.Invoke(null, [scope]);
+                    }
+                }
+            }
+        }
+
+        return Config[scope];
+    }
+    
+    static readonly IEnumerable<Assembly> Plugins =
+    [
+        typeof(Plugin).Assembly
+    ];
+
 }
 
+[AttributeUsage(AttributeTargets.Method)]
+public sealed class AfterReadConfigAttribute : Attribute
+{
+}
 
 class BComponents
 {
-    public static ConfigModel AfterReadConfig(ConfigModel config)
+    public static Scope AfterReadConfig(Scope scope)
     {
+        var config = Plugin.Config[scope];
+        
         if (Environment.MachineName.StartsWith("BTARC", StringComparison.OrdinalIgnoreCase))
         {
-            return config with
+            config = config with
             {
                 Database = new()
                 {
@@ -3291,7 +3328,10 @@ class BComponents
             };
         }
 
-        return config;
+        return Scope.Create(new()
+        {
+            { Plugin.Config, config }
+        });
     }
 }
 
