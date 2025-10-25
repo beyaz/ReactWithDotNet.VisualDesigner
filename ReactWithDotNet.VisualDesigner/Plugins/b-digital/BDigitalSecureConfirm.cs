@@ -29,7 +29,7 @@ sealed class BDigitalSecureConfirm : PluginComponentBase
                     "(value: string) =>",
                     "{",
                     $"  {smsPasswordProp.Value} = value;",
-                    Plugin.GetUpdateStateLine(smsPasswordProp.Value),
+                    GetUpdateStateLine(smsPasswordProp.Value),
                     "}"
                 ];
 

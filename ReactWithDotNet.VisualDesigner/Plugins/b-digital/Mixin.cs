@@ -1,7 +1,24 @@
-﻿namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
+﻿global using static ReactWithDotNet.VisualDesigner.Plugins.b_digital.Mixin;
 
-static class BComponents
+namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
+
+static class Mixin
 {
+    
+    public static string GetUpdateStateLine(string jsVariableName)
+    {
+        var propertyPath = jsVariableName.Split('.', StringSplitOptions.RemoveEmptyEntries);
+        if (propertyPath.Length == 2)
+        {
+            var stateName = propertyPath[0];
+
+            return $"  set{char.ToUpper(stateName[0]) + stateName[1..]}({{ ...{stateName} }});";
+        }
+
+        return null;
+    }
+    
+    
     [AfterReadConfig]
     public static Scope AfterReadConfig(Scope scope)
     {

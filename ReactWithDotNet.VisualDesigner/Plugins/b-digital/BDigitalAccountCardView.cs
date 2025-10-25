@@ -46,8 +46,8 @@ sealed class BDigitalAccountCardView : PluginComponentBase
 
                 lines.Add(new []
                 {
-                    Plugin.GetUpdateStateLine(selectedIndexProp.Value),
-                    Plugin.GetUpdateStateLine(isCardSelectedProp.Value)
+                    GetUpdateStateLine(selectedIndexProp.Value),
+                    GetUpdateStateLine(isCardSelectedProp.Value)
                 }.Distinct());
                         
 

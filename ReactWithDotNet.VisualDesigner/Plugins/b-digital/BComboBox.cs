@@ -45,7 +45,7 @@ sealed class BComboBox : PluginComponentBase
                     "(selectedIndexes: [number], selectedItems: [TextValuePair], selectedValues: [string]) =>",
                     "{",
                     $"  {valueProp.Value} = selectedValues{(isCollection ? string.Empty : "[0]")};",
-                    Plugin.GetUpdateStateLine(valueProp.Value)
+                    GetUpdateStateLine(valueProp.Value)
                 ];
 
                 if (onSelectProp is not null)

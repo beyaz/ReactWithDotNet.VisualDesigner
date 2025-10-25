@@ -52,7 +52,7 @@ sealed class BInput : PluginComponentBase
                     "(e: any, value: any) =>",
                     "{",
                     $"  {valueProp.Value} = value;",
-                    Plugin.GetUpdateStateLine(valueProp.Value)
+                    GetUpdateStateLine(valueProp.Value)
                 ];
                         
                 if (onChangeProp is not null)

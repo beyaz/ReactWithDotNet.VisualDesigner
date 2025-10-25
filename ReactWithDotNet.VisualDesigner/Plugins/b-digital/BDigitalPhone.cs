@@ -37,7 +37,7 @@ sealed class BDigitalPhone : PluginComponentBase
                     "(value: string, formattedValue: string, areaCode: string) =>",
                     "{",
                     $"  {phoneNumberProp.Value} = value;",
-                    Plugin.GetUpdateStateLine(phoneNumberProp.Value)
+                    GetUpdateStateLine(phoneNumberProp.Value)
                 ];
 
                 if (handlePhoneChangeProp is not null)

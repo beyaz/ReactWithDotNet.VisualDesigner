@@ -102,18 +102,7 @@ static class Plugin
     public static readonly ScopeKey<object> IsImageKey = new() { Key = nameof(IsImageKey) };
 
     
-    public static string GetUpdateStateLine(string jsVariableName)
-    {
-        var propertyPath = jsVariableName.Split('.', StringSplitOptions.RemoveEmptyEntries);
-        if (propertyPath.Length == 2)
-        {
-            var stateName = propertyPath[0];
-
-            return $"  set{char.ToUpper(stateName[0]) + stateName[1..]}({{ ...{stateName} }});";
-        }
-
-        return null;
-    }
+    
 
 
     static IReadOnlyList<PluginMethod> AnalyzeExportFilePathList
