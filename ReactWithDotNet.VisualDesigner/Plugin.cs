@@ -408,7 +408,13 @@ static class Plugin
                 addSuggestion(name, value);
             }
 
-            foreach (var prop in from m in GetAllTypesMetadata() where m.TagName == scope.TagName from p in m.Props select p)
+            var allMetadata = GetAllTypesMetadata().AsResult();
+            if (allMetadata.HasError)
+            {
+                return allMetadata.Error;
+            }
+            
+            foreach (var prop in from m in allMetadata.Value where m.TagName == scope.TagName from p in m.Props select p)
             {
                 switch (prop.ValueType)
                 {
@@ -619,27 +625,36 @@ static class Plugin
         return RunPluginMethods(TryGetIconForElementTreeNodes, scope, IconForElementTreeNode);
     }
 
-    static IEnumerable<ComponentMeta> GetAllTypesMetadata()
+    static IEnumerable<Result<ComponentMeta>> GetAllTypesMetadata()
     {
         return from type in AllCustomComponents select createFrom(type);
 
-        static ComponentMeta createFrom(Type type)
+        static Result<ComponentMeta> createFrom(Type type)
         {
-            return new()
-            {
-                TagName = type.Name,
-                Props   = type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly).Select(createPropMetaFrom).ToList()
-            };
+            var items = from propertyInfo in type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly)
+                from props in createPropMetaFrom(propertyInfo)
+                select props;
 
-            static PropMeta createPropMetaFrom(PropertyInfo propertyInfo)
-            {
-                return new()
+            return 
+                from props in items.AsResult()
+                select new ComponentMeta
                 {
-                    Name      = propertyInfo.Name,
-                    ValueType = getValueType(propertyInfo)
+                    TagName = type.Name,
+                    Props   = props.ToList()
                 };
+                
 
-                static JsType getValueType(PropertyInfo propertyInfo)
+            static Result<PropMeta> createPropMetaFrom(PropertyInfo propertyInfo)
+            {
+                return
+                    from valueType in getValueType(propertyInfo)
+                    select new PropMeta
+                    {
+                        Name      = propertyInfo.Name,
+                        ValueType = valueType
+                    };
+
+                static Result<JsType> getValueType(PropertyInfo propertyInfo)
                 {
                     var jsTypeInfoAttribute = propertyInfo.GetCustomAttribute<JsTypeInfoAttribute>();
                     if (jsTypeInfoAttribute is not null)
@@ -673,7 +688,7 @@ static class Plugin
                         return JsType.Array;
                     }
 
-                    throw new NotImplementedException(propertyType.FullName);
+                    return new NotImplementedException(propertyType.FullName);
                 }
             }
         }
