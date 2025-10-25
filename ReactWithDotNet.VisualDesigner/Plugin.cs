@@ -9,6 +9,12 @@ using ReactWithDotNet.VisualDesigner.Exporters;
 
 namespace ReactWithDotNet.VisualDesigner;
 
+public class PluginComponentBase : Component
+{
+    public string id;
+    public MouseEventHandler onMouseClick;
+}
+
 delegate Scope PluginMethod(Scope scope);
 
 [AttributeUsage(AttributeTargets.Class)]

@@ -1203,11 +1203,7 @@ static class JsonHelper
     }
 }
 
-public class PluginComponentBase : Component
-{
-    public string id;
-    public MouseEventHandler onMouseClick;
-}
+
 
 static class FP
 {
