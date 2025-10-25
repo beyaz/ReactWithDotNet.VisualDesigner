@@ -1,6 +1,6 @@
 ﻿using System.IO;
 
-namespace ReactWithDotNet.VisualDesigner.Views;
+namespace ReactWithDotNet.VisualDesigner;
 
 static class ComponentConfigReservedName
 {
@@ -9,9 +9,12 @@ static class ComponentConfigReservedName
     public static readonly string Name = "Name";
 }
 
-static class ComponentEntityExtensions
+static partial class Extensions
 {
-    
+    public static IReadOnlyDictionary<string, string> GetConfig(this ComponentEntity componentEntity)
+    {
+        return DeserializeFromYaml<Dictionary<string, string>>(componentEntity.ConfigAsYaml);
+    }
     
     public static string GetNameWithExportFilePath(this ComponentEntity componentEntity)
     {

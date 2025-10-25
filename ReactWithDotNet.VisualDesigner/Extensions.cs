@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 
 namespace ReactWithDotNet.VisualDesigner;
 
-static class Extensions
+static partial class Extensions
 {
     public static bool HasMatch<T>(this T value, Predicate<T> matchFunc) where T : class
     {

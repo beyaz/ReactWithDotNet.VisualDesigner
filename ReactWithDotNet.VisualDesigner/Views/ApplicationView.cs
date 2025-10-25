@@ -2,7 +2,6 @@ using System.Reflection;
 using System.Text;
 using ReactWithDotNet.ThirdPartyLibraries.MonacoEditorReact;
 using ReactWithDotNet.VisualDesigner.Exporters;
-using static ReactWithDotNet.VisualDesigner.Views.ComponentEntityExtensions;
 
 namespace ReactWithDotNet.VisualDesigner.Views;
 
