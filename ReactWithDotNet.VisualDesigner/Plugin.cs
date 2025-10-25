@@ -1,14 +1,13 @@
-﻿using Dapper;
+﻿using System.Collections;
+using System.Data;
+using System.Globalization;
+using System.Reflection;
+using System.Text;
+using Dapper;
 using Microsoft.Data.SqlClient;
 using Mono.Cecil;
 using ReactWithDotNet.VisualDesigner.Configuration;
 using ReactWithDotNet.VisualDesigner.Exporters;
-using System.Collections;
-using System.Data;
-using System.Globalization;
-using System.IO;
-using System.Reflection;
-using System.Text;
 
 namespace ReactWithDotNet.VisualDesigner;
 
@@ -39,11 +38,10 @@ public sealed class IsImageAttribute : Attribute
 
 public sealed record TryCreateElementForPreviewInput
 {
-    public string Tag { get; init; }
-    
     public string Id { get; init; }
-    
+
     public MouseEventHandler OnMouseClick { get; init; }
+    public string Tag { get; init; }
 }
 
 [AttributeUsage(AttributeTargets.Method)]
@@ -66,51 +64,97 @@ sealed record PropSuggestionScope
     public ComponentEntity Component { get; init; }
 
     public Maybe<ComponentEntity> SelectedComponent { get; init; }
-    
+
     public string TagName { get; init; }
 }
 
-
-
-
 static class Plugin
 {
-    public static readonly ScopeKey<VisualElementModel> VisualElementModel = new() { Key = nameof(VisualElementModel) };
-    
-    public static readonly ScopeKey<Element> IconForElementTreeNode = new() { Key = nameof(IconForElementTreeNode) };
-    
+    const string BOA_MessagingByGroupName = "BOA.MessagingByGroupName";
+
     public static readonly ScopeKey<Element> CurrentElementInstanceInPreview = new()
     {
         Key = nameof(CurrentElementInstanceInPreview)
     };
-    
+
     public static readonly ScopeKey<string> ExportFilePathForComponent = new()
     {
         Key = nameof(ExportFilePathForComponent)
     };
 
-    
+    public static readonly ScopeKey<Element> IconForElementTreeNode = new() { Key = nameof(IconForElementTreeNode) };
+
+    public static readonly ScopeKey<object> IsImageKey = new() { Key = nameof(IsImageKey) };
+
     public static readonly ScopeKey<TryCreateElementForPreviewInput> TryCreateElementForPreviewInputKey = new()
     {
         Key = nameof(TryCreateElementForPreviewInputKey)
     };
+
     public static readonly ScopeKey<Element> TryCreateElementForPreviewOutputKey = new()
     {
         Key = nameof(TryCreateElementForPreviewOutputKey)
     };
-    
-    public static readonly ScopeKey<object> IsImageKey = new() { Key = nameof(IsImageKey) };
 
-    
-    
+    public static readonly ScopeKey<VisualElementModel> VisualElementModel = new() { Key = nameof(VisualElementModel) };
 
+    public static ScopeKey<ConfigModel> Config = new() { Key = nameof(Config) };
+
+    static readonly IEnumerable<Assembly> Plugins =
+    [
+        typeof(Plugin).Assembly
+    ];
+
+    static IReadOnlyList<PluginMethod> AfterReadConfigs
+    {
+        get { return field ??= GetPluginMethods<AfterReadConfigAttribute>(); }
+    }
 
     static IReadOnlyList<PluginMethod> AnalyzeExportFilePathList
     {
-        get
+        get { return field ??= GetPluginMethods<AnalyzeExportFilePathAttribute>(); }
+    }
+
+    static IReadOnlyList<PluginMethod> IsImageList
+    {
+        get { return field ??= GetPluginMethods<IsImageAttribute>(); }
+    }
+
+    static IReadOnlyList<PluginMethod> TryCreateElementForPreviewList
+    {
+        get { return field ??= GetPluginMethods<TryCreateElementForPreviewAttribute>(); }
+    }
+
+    static IReadOnlyList<PluginMethod> TryGetIconForElementTreeNodes
+    {
+        get { return field ??= GetPluginMethods<TryGetIconForElementTreeNodeAttribute>(); }
+    }
+
+    public static ReactNode AddContextProp(ReactNode node)
+    {
+        if (node.Properties.Any(p => p.Name == "context"))
         {
-            return field??= GetPluginMethods<AnalyzeExportFilePathAttribute>();
+            return node;
         }
+
+        return node with
+        {
+            Properties = node.Properties.Add(new()
+            {
+                Name  = "context",
+                Value = "context"
+            })
+        };
+    }
+
+    public static ConfigModel AfterReadConfig(ConfigModel config)
+    {
+        var scope = Scope.Create(new()
+        {
+            { Config, config }
+        });
+
+        return RunPluginMethods(AfterReadConfigs, scope, Config) ?? config;
     }
 
     public static string AnalyzeExportFilePath(string exportFilePathForComponent)
@@ -121,63 +165,6 @@ static class Plugin
         });
 
         return RunPluginMethods(AnalyzeExportFilePathList, scope, ExportFilePathForComponent) ?? exportFilePathForComponent;
-    }
-    public static  Scope AnalyzeExportFilePath(Scope scope)
-    {
-        var exportFilePathForComponent = ExportFilePathForComponent[scope];
-
-        var names = exportFilePathForComponent.Split('/', StringSplitOptions.RemoveEmptyEntries);
-        if (names[0].StartsWith("BOA."))
-        {
-            // project folder is d:\work\
-            // we need to calculate rest of path
-
-            // sample: /BOA.InternetBanking.MoneyTransfers/x-form.tsx
-
-            var solutionName = names[0];
-
-            string clientAppFolderPath;
-            {
-                clientAppFolderPath = $@"D:\work\BOA.BusinessModules\Dev\{solutionName}\OBAWeb\OBA.Web.{solutionName.RemoveFromStart("BOA.")}\ClientApp\";
-                if (solutionName == "BOA.MobilePos")
-                {
-                    clientAppFolderPath = @"D:\work\BOA.BusinessModules\Dev\BOA.MobilePos\OBAWeb\OBA.Web.POSPortal.MobilePos\ClientApp\";
-                }
-            }
-
-            if (Directory.Exists(clientAppFolderPath))
-            {
-                return Scope.Create(new()
-                {
-                    { ExportFilePathForComponent, Path.Combine(clientAppFolderPath, Path.Combine(names.Skip(1).ToArray())) }
-                });
-                 
-            }
-        }
-
-        return Scope.Empty;
-    }
-
-    const string BOA_MessagingByGroupName = "BOA.MessagingByGroupName";
-
-    public static ScopeKey<ConfigModel> Config = new() { Key = nameof(Config) };
-    
-        
-    
-        
-    
-
-    public static IEnumerable<Type> GetAllCustomComponents()
-    {
-        return
-            from t in typeof(Plugin).Assembly.GetTypes()
-            where t.GetCustomAttribute<CustomComponentAttribute>() is not null
-            select t;
-    }
-
-    static IEnumerable<MethodInfo> GetAnalyzeMethods(Type type)
-    {
-        return from m in type.GetMethods(BindingFlags.Static | BindingFlags.Public) select m;
     }
 
     public static ReactNode AnalyzeNode(ReactNode node, IReadOnlyDictionary<string, string> componentConfig)
@@ -191,6 +178,11 @@ static class Plugin
         }
 
         return node;
+    }
+
+    public static Element BeforeComponentPreview(RenderPreviewScope scope, VisualElementModel visualElementModel, Element component)
+    {
+        return component;
     }
 
     public static IEnumerable<string> CalculateImportLines(ReactNode node)
@@ -213,7 +205,8 @@ static class Plugin
         {
             if (type.Name == node.Tag)
             {
-                return from a in type.GetCustomAttributes<ImportAttribute>()
+                return
+                    from a in type.GetCustomAttributes<ImportAttribute>()
                     select $"import {{ {a.Name} }} from \"{a.Package}\";";
             }
 
@@ -221,12 +214,49 @@ static class Plugin
         }
     }
 
-    public static Element BeforeComponentPreview(RenderPreviewScope scope, VisualElementModel visualElementModel, Element component)
+    public static string ConvertDotNetPathToJsPath(string dotNetPath)
     {
-        return component;
+        if (string.IsNullOrEmpty(dotNetPath))
+        {
+            return dotNetPath;
+        }
+
+        var camelCase = new StringBuilder();
+        var capitalizeNext = false;
+
+        foreach (var c in dotNetPath)
+        {
+            if (c == '.')
+            {
+                capitalizeNext = true;
+                camelCase.Append('.');
+            }
+            else
+            {
+                if (capitalizeNext)
+                {
+                    camelCase.Append(char.ToLower(c, CultureInfo.InvariantCulture));
+                    capitalizeNext = false;
+                }
+                else
+                {
+                    camelCase.Append(c);
+                }
+            }
+        }
+
+        return camelCase.ToString();
     }
 
-public    static IEnumerable<(string variableName, string dotNetAssemblyFilePath, string dotnetTypeFullName)> GetDotNetVariables(ComponentEntity componentEntity)
+    public static IEnumerable<Type> GetAllCustomComponents()
+    {
+        return
+            from t in typeof(Plugin).Assembly.GetTypes()
+            where t.GetCustomAttribute<CustomComponentAttribute>() is not null
+            select t;
+    }
+
+    public static IEnumerable<(string variableName, string dotNetAssemblyFilePath, string dotnetTypeFullName)> GetDotNetVariables(ComponentEntity componentEntity)
     {
         return GetDotNetVariables(componentEntity.GetConfig());
     }
@@ -333,19 +363,17 @@ public    static IEnumerable<(string variableName, string dotNetAssemblyFilePath
                     (booleanSuggestions, CecilHelper.IsBoolean),
                     (collectionSuggestions, CecilHelper.IsCollection)
                 ];
-                
+
                 foreach (var (list, fn) in map)
                 {
                     var result = CecilHelper.GetPropertyPathList(dotNetAssemblyFilePath, dotnetTypeFullName, $"{variableName}.", fn);
                     if (result.HasError)
                     {
-                     continue;   
+                        continue;
                     }
 
                     list.AddRange(result.Value);
                 }
-                
-               
             }
 
             List<string> returnList = [];
@@ -439,8 +467,6 @@ public    static IEnumerable<(string variableName, string dotNetAssemblyFilePath
 
                     case JsType.Function:
                     {
-                       
-
                         break;
                     }
                 }
@@ -492,38 +518,54 @@ public    static IEnumerable<(string variableName, string dotNetAssemblyFilePath
         }
     }
 
+    public static IEnumerable<(string name, string value)> GetPropSuggestions(string tag)
+    {
+        var type = GetAllCustomComponents().FirstOrDefault(t => t.Name.Equals(tag, StringComparison.OrdinalIgnoreCase));
+        if (type is null)
+        {
+            yield break;
+        }
+
+        foreach (var item in
+                 from p in type.GetProperties()
+                 from a in p.GetCustomAttributes<SuggestionsAttribute>()
+                 from s in a.Suggestions
+                 select (p.Name, s))
+        {
+            yield return item;
+        }
+    }
+
     public static IReadOnlyList<string> GetTagSuggestions()
     {
         return GetAllCustomComponents().Select(x => x.Name).ToList();
     }
 
-    static IReadOnlyList<PluginMethod> TryCreateElementForPreviewList
+    public static bool IsImage(Element element)
     {
-        get
+        var scope = Scope.Create(new()
         {
-            return field ??= GetPluginMethods<TryCreateElementForPreviewAttribute>();
-        }
+            { CurrentElementInstanceInPreview, element }
+        });
+
+        return (bool?)RunPluginMethods(IsImageList, scope, IsImageKey) ?? false;
     }
-    
-    
+
     public static Element TryCreateElementForPreview(TryCreateElementForPreviewInput input)
     {
         var scope = Scope.Create(new()
         {
-            {Plugin.TryCreateElementForPreviewInputKey, input}
+            { TryCreateElementForPreviewInputKey, input }
         });
 
         return RunPluginMethods(TryCreateElementForPreviewList, scope, TryCreateElementForPreviewOutputKey);
-        
-       
     }
-    
 
     [TryCreateElementForPreview]
     public static Scope TryCreateElementForPreview(Scope scope)
     {
-        var input = Plugin.TryCreateElementForPreviewInputKey[scope];
-        
+        var input = TryCreateElementForPreviewInputKey[scope];
+
         var type = GetAllCustomComponents().FirstOrDefault(t => t.Name.Equals(input.Tag, StringComparison.OrdinalIgnoreCase));
         if (type is null)
         {
@@ -540,65 +582,83 @@ public    static IEnumerable<(string variableName, string dotNetAssemblyFilePath
 
         return Scope.Create(new()
         {
-            {Plugin.TryCreateElementForPreviewOutputKey, component}
+            { TryCreateElementForPreviewOutputKey, component }
         });
     }
 
-    static IReadOnlyList<PluginMethod> TryGetIconForElementTreeNodes
-    {
-        get
-        {
-            return field ??= GetPluginMethods<TryGetIconForElementTreeNodeAttribute>();
-        }
-    }
-    
-  
-    
-
     public static Element TryGetIconForElementTreeNode(VisualElementModel node)
     {
-        
-            var scope = Scope.Create(new()
-            {
-                { VisualElementModel, node}
-            });
+        var scope = Scope.Create(new()
+        {
+            { VisualElementModel, node }
+        });
 
-            return RunPluginMethods(TryGetIconForElementTreeNodes, scope, IconForElementTreeNode);
-
+        return RunPluginMethods(TryGetIconForElementTreeNodes, scope, IconForElementTreeNode);
     }
 
-    public static string ConvertDotNetPathToJsPath(string dotNetPath)
+    static IReadOnlyList<ComponentMeta> GetAllTypesMetadata()
     {
-        if (string.IsNullOrEmpty(dotNetPath))
+        return GetAllCustomComponents().Select(createFrom).ToList();
+
+        static ComponentMeta createFrom(Type type)
         {
-            return dotNetPath;
-        }
-
-        var camelCase = new StringBuilder();
-        var capitalizeNext = false;
-
-        foreach (var c in dotNetPath)
-        {
-            if (c == '.')
+            return new()
             {
-                capitalizeNext = true;
-                camelCase.Append('.');
-            }
-            else
+                TagName = type.Name,
+                Props   = type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly).Select(createPropMetaFrom).ToList()
+            };
+
+            static PropMeta createPropMetaFrom(PropertyInfo propertyInfo)
             {
-                if (capitalizeNext)
+                return new()
                 {
-                    camelCase.Append(char.ToLower(c, CultureInfo.InvariantCulture));
-                    capitalizeNext = false;
-                }
-                else
+                    Name      = propertyInfo.Name,
+                    ValueType = getValueType(propertyInfo)
+                };
+
+                static JsType getValueType(PropertyInfo propertyInfo)
                 {
-                    camelCase.Append(c);
+                    var jsTypeInfoAttribute = propertyInfo.GetCustomAttribute<JsTypeInfoAttribute>();
+                    if (jsTypeInfoAttribute is not null)
+                    {
+                        return jsTypeInfoAttribute.JsType;
+                    }
+
+                    var propertyType = propertyInfo.PropertyType;
+                    if (propertyType == typeof(string))
+                    {
+                        return JsType.String;
+                    }
+
+                    if (propertyType.In(typeof(short), typeof(short?), typeof(int), typeof(int?), typeof(double), typeof(double?), typeof(long), typeof(long?)))
+                    {
+                        return JsType.Number;
+                    }
+
+                    if (propertyType.In(typeof(bool), typeof(bool?)))
+                    {
+                        return JsType.Boolean;
+                    }
+
+                    if (propertyType.In(typeof(DateTime), typeof(DateTime?)))
+                    {
+                        return JsType.Date;
+                    }
+
+                    if (propertyType == typeof(IEnumerable) || typeof(IEnumerable).IsSubclassOf(propertyType))
+                    {
+                        return JsType.Array;
+                    }
+
+                    throw new NotImplementedException(propertyType.FullName);
                 }
             }
         }
+    }
 
-        return camelCase.ToString();
+    static IEnumerable<MethodInfo> GetAnalyzeMethods(Type type)
+    {
+        return from m in type.GetMethods(BindingFlags.Static | BindingFlags.Public) select m;
     }
 
     static Task<IReadOnlyList<MessagingInfo>> GetMessagingByGroupName(string messagingGroupName)
@@ -641,100 +701,30 @@ public    static IEnumerable<(string variableName, string dotNetAssemblyFilePath
         }
     }
 
-      static IReadOnlyList<ComponentMeta> GetAllTypesMetadata()
-        {
-            return GetAllCustomComponents().Select(createFrom).ToList();
-
-            static ComponentMeta createFrom(Type type)
-            {
-                return new()
-                {
-                    TagName = type.Name,
-                    Props   = type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly).Select(createPropMetaFrom).ToList()
-                };
-
-                static PropMeta createPropMetaFrom(PropertyInfo propertyInfo)
-                {
-                    return new()
-                    {
-                        Name      = propertyInfo.Name,
-                        ValueType = getValueType(propertyInfo)
-                    };
-
-                    static JsType getValueType(PropertyInfo propertyInfo)
-                    {
-                        var jsTypeInfoAttribute = propertyInfo.GetCustomAttribute<JsTypeInfoAttribute>();
-                        if (jsTypeInfoAttribute is not null)
-                        {
-                            return jsTypeInfoAttribute.JsType;
-                        }
-
-                        var propertyType = propertyInfo.PropertyType;
-                        if (propertyType == typeof(string))
-                        {
-                            return JsType.String;
-                        }
-
-                        if (propertyType.In(typeof(short), typeof(short?), typeof(int), typeof(int?), typeof(double), typeof(double?), typeof(long), typeof(long?)))
-                        {
-                            return JsType.Number;
-                        }
-
-                        if (propertyType.In(typeof(bool), typeof(bool?)))
-                        {
-                            return JsType.Boolean;
-                        }
-
-                        if (propertyType.In(typeof(DateTime), typeof(DateTime?)))
-                        {
-                            return JsType.Date;
-                        }
-
-                        if (propertyType == typeof(IEnumerable) || typeof(IEnumerable).IsSubclassOf(propertyType))
-                        {
-                            return JsType.Array;
-                        }
-
-                        throw new NotImplementedException(propertyType.FullName);
-                    }
-                }
-            }
-        }
-
-        public static IEnumerable<(string name, string value)> GetPropSuggestions(string tag)
-        {
-            var type = GetAllCustomComponents().FirstOrDefault(t => t.Name.Equals(tag, StringComparison.OrdinalIgnoreCase));
-            if (type is null)
-            {
-                yield break;
-            }
-
-            foreach (var item in
-                     from p in type.GetProperties()
-                     from a in p.GetCustomAttributes<SuggestionsAttribute>()
-                     from s in a.Suggestions
-                     select (p.Name, s))
-            {
-                yield return item;
-            }
-        }
-
-
-    public static ReactNode AddContextProp(ReactNode node)
+    static IReadOnlyList<PluginMethod> GetPluginMethods<AttributeType>()
     {
-        if (node.Properties.Any(p => p.Name == "context"))
+        var items =
+            from assembly in Plugins
+            from type in assembly.GetTypes()
+            from methodInfo in type.GetMethods(BindingFlags.Public | BindingFlags.Static)
+            where methodInfo.GetCustomAttribute(typeof(AttributeType)) is not null
+            select (PluginMethod)Delegate.CreateDelegate(typeof(PluginMethod), methodInfo);
+
+        return items.ToList();
+    }
+
+    static T RunPluginMethods<T>(IReadOnlyList<PluginMethod> pluginMethods, Scope scope, ScopeKey<T> returnKey) where T : class
+    {
+        foreach (var method in pluginMethods)
         {
-            return node;
+            var response = method(scope);
+            if (response.Has(returnKey))
+            {
+                return returnKey[response];
+            }
         }
 
-        return node with
-        {
-            Properties = node.Properties.Add(new()
-            {
-                Name  = "context",
-                Value = "context"
-            })
-        };
+        return null;
     }
 
     record ComponentMeta
@@ -756,80 +746,7 @@ public    static IEnumerable<(string variableName, string dotNetAssemblyFilePath
         public string Description { get; init; }
         public string PropertyName { get; init; }
     }
-
-    static IReadOnlyList<PluginMethod> IsImageList
-    {
-        get
-        {
-            return field ??= GetPluginMethods<IsImageAttribute>();
-        }
-    }
-    public static bool IsImage(Element element)
-    {
-        var scope = Scope.Create(new()
-        {
-            { CurrentElementInstanceInPreview, element }
-        });
-
-       return (bool?) RunPluginMethods(IsImageList, scope, IsImageKey) ?? false;
-    }
-    
-    
-    static IReadOnlyList<PluginMethod> AfterReadConfigs
-    {
-        get
-        {
-            return field ??= GetPluginMethods<AfterReadConfigAttribute>();
-        }
-    }
-
-    static IReadOnlyList<PluginMethod> GetPluginMethods<AttributeType>()
-    {
-        var items =
-            from assembly in Plugins
-            from type in assembly.GetTypes()
-            from methodInfo in type.GetMethods(BindingFlags.Public | BindingFlags.Static)
-            where methodInfo.GetCustomAttribute(typeof(AttributeType)) is not null
-            select (PluginMethod)Delegate.CreateDelegate(typeof(PluginMethod), methodInfo);
-
-        return items.ToList();
-    }
-    
-    public static ConfigModel AfterReadConfig(ConfigModel config)
-    {
-        var scope = Scope.Create(new()
-        {
-            { Config, config }
-        });
-        
-        return RunPluginMethods(AfterReadConfigs, scope, Config) ?? config;
-    }
-    
-    static T RunPluginMethods<T>(IReadOnlyList<PluginMethod> pluginMethods, Scope scope, ScopeKey<T> returnKey) where T:class
-    {
-        foreach (var method in pluginMethods)
-        {
-            var response = method(scope);
-            if (response.Has(returnKey))
-            {
-                return returnKey[response];
-            }
-        }
-
-        return null;
-    }
-    
-    
-    static readonly IEnumerable<Assembly> Plugins =
-    [
-        typeof(Plugin).Assembly
-    ];
-
 }
-
-
-
-
 
 [AttributeUsage(AttributeTargets.Property)]
 sealed class SuggestionsAttribute : Attribute
@@ -841,16 +758,13 @@ sealed class SuggestionsAttribute : Attribute
 
     public SuggestionsAttribute(string suggestions)
     {
-        Suggestions = suggestions.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(x=>x.Trim()).ToList();
+        Suggestions = suggestions.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(x => x.Trim()).ToList();
     }
 
     public IReadOnlyList<string> Suggestions { get; }
 }
 
-
-
 [AttributeUsage(AttributeTargets.Method)]
 public sealed class NodeAnalyzerAttribute : Attribute
 {
 }
-
