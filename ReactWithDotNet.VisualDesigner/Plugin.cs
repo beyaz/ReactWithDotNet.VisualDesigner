@@ -3314,19 +3314,24 @@ class Plugin: PluginBase
         public string PropertyName { get; init; }
     }
 
-    static IReadOnlyList<MethodInfo> AfterReadConfigs
+    static IReadOnlyList<PluginMethod> AfterReadConfigs
     {
         get
         {
-            return field ??=
-            (
-                from assembly in Plugins
-                from type in assembly.GetTypes()
-                from methodInfo in type.GetMethods(BindingFlags.Public | BindingFlags.Static)
-                where methodInfo.GetCustomAttribute<AfterReadConfigAttribute>() is not null
-                select methodInfo
-            ).ToList();
+            return field ??= GetPluginMethods<AfterReadConfigAttribute>();
         }
+    }
+
+    static IReadOnlyList<PluginMethod> GetPluginMethods<AttributeType>()
+    {
+        var items =
+            from assembly in Plugins
+            from type in assembly.GetTypes()
+            from methodInfo in type.GetMethods(BindingFlags.Public | BindingFlags.Static)
+            where methodInfo.GetCustomAttribute(typeof(AttributeType)) is not null
+            select (PluginMethod)Delegate.CreateDelegate(typeof(PluginMethod), methodInfo);
+
+        return items.ToList();
     }
     
     public static ConfigModel AfterReadConfig(ConfigModel config)
@@ -3336,10 +3341,10 @@ class Plugin: PluginBase
             { Config, config }
         });
 
-        foreach (var methodInfo in AfterReadConfigs)
+        foreach (var method in AfterReadConfigs)
         {
-            var response = (Scope)methodInfo.Invoke(null, [scope]);
-            if (response!.Has(Config))
+            var response = method(scope);
+            if (response.Has(Config))
             {
                 return Config[response];
             }
@@ -3354,6 +3359,8 @@ class Plugin: PluginBase
     ];
 
 }
+
+public delegate Scope PluginMethod(Scope scope);
 
 [AttributeUsage(AttributeTargets.Method)]
 public sealed class AfterReadConfigAttribute : Attribute
