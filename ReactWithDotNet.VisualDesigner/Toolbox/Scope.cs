@@ -39,7 +39,10 @@ public sealed class ScopeCreationInput : IEnumerable
         items.Add(key, value!);
     }
 
-    public IReadOnlyDictionary<ScopeKey, object> AsDictionary() => items;
+    public IReadOnlyDictionary<ScopeKey, object> AsDictionary()
+    {
+        return items;
+    }
 
     public IEnumerator GetEnumerator()
     {
@@ -56,7 +59,7 @@ public sealed class Scope
     {
     }
 
-    public static Scope Empty => new ();
+    public static Scope Empty => new();
 
     public static Scope Create(ScopeCreationInput input)
     {
@@ -70,7 +73,10 @@ public sealed class Scope
         return scope;
     }
 
-    public IReadOnlyDictionary<ScopeKey, object> AsDictionary() => items;
+    public IReadOnlyDictionary<ScopeKey, object> AsDictionary()
+    {
+        return items;
+    }
 
     public bool Has(ScopeKey key)
     {
@@ -93,8 +99,8 @@ public sealed class Scope
 
         return scope;
     }
-    
-    public Scope With<T>(ScopeKey<T> scopeKey, T value )
+
+    public Scope With<T>(ScopeKey<T> scopeKey, T value)
     {
         var scope = new Scope();
 
@@ -107,10 +113,13 @@ public sealed class Scope
 
         return scope;
     }
-    
-    
 
-    
+    [DebuggerDisplay("{Key} : {Value}")]
+    class ItemDebugView
+    {
+        public required string Key { get; init; }
+        public required object Value { get; init; }
+    }
 
     class ScopeDebugView
     {
@@ -123,13 +132,6 @@ public sealed class Scope
 
         [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
         public ItemDebugView[] Items => scope.items.Select(p => new ItemDebugView { Key = p.Key.Key, Value = p.Value }).ToArray();
-    }
-
-    [DebuggerDisplay("{Key} : {Value}")]
-    class ItemDebugView
-    {
-        public required string Key { get; init; }
-        public required object Value { get; init; }
     }
 }
 
@@ -144,6 +146,7 @@ public static class ScopeExtensions
 
         return existingScope.With(scopeKey, result.Value);
     }
+
     public static Result<Scope> With<T>(this Result<Scope> existingScope, ScopeKey<T> scopeKey, Func<Scope, Result<T>> next)
     {
         if (existingScope.HasError)
@@ -152,7 +155,7 @@ public static class ScopeExtensions
         }
 
         var result = next(existingScope.Value);
-        
+
         if (result.HasError)
         {
             return result.Error;
