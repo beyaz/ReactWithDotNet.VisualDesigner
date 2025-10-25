@@ -27,7 +27,7 @@ public sealed record TryCreateElementForPreviewInput
 public delegate Element TryCreateElementForPreview(TryCreateElementForPreviewInput input);
 
 [AttributeUsage(AttributeTargets.Method)]
-sealed class TryCreateElementForPreviewAttribute : Attribute
+public sealed class TryCreateElementForPreviewAttribute : Attribute
 {
 }
 
