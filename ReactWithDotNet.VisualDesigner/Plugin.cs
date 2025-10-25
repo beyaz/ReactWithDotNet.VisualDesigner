@@ -1,12 +1,9 @@
 ﻿using Dapper;
 using Microsoft.Data.SqlClient;
 using Mono.Cecil;
-using Newtonsoft.Json;
-using ReactWithDotNet.ThirdPartyLibraries.MUI.Material;
 using ReactWithDotNet.VisualDesigner.Configuration;
 using ReactWithDotNet.VisualDesigner.Exporters;
 using System.Collections;
-using System.Collections.Immutable;
 using System.Data;
 using System.Globalization;
 using System.IO;
@@ -320,12 +317,12 @@ public    static IEnumerable<(string variableName, string dotNetAssemblyFilePath
 
             List<(string name, string value)> distinctSuggestions = [];
 
-            foreach (var (name, value) in Components.GetPropSuggestions(scope.TagName))
+            foreach (var (name, value) in GetPropSuggestions(scope.TagName))
             {
                 addSuggestion(name, value);
             }
 
-            foreach (var prop in from m in Components.GetAllTypesMetadata() where m.TagName == scope.TagName from p in m.Props select p)
+            foreach (var prop in from m in GetAllTypesMetadata() where m.TagName == scope.TagName from p in m.Props select p)
             {
                 switch (prop.ValueType)
                 {
@@ -583,9 +580,7 @@ public    static IEnumerable<(string variableName, string dotNetAssemblyFilePath
         }
     }
 
-    static class Components
-    {
-        public static IReadOnlyList<ComponentMeta> GetAllTypesMetadata()
+      static IReadOnlyList<ComponentMeta> GetAllTypesMetadata()
         {
             return GetAllCustomComponents().Select(createFrom).ToList();
 
@@ -663,18 +658,6 @@ public    static IEnumerable<(string variableName, string dotNetAssemblyFilePath
             }
         }
 
-      
-
-       
-
-        
-
-        
-
-      
-
-      
-    }
 
     public static ReactNode AddContextProp(ReactNode node)
     {
