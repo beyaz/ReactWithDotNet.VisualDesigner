@@ -32,8 +32,6 @@ public sealed record TryCreateElementForPreviewInput
     public MouseEventHandler OnMouseClick { get; init; }
 }
 
-public delegate Element TryCreateElementForPreview(TryCreateElementForPreviewInput input);
-
 [AttributeUsage(AttributeTargets.Method)]
 public sealed class TryCreateElementForPreviewAttribute : Attribute
 {
@@ -44,7 +42,12 @@ public sealed class AnalyzeExportFilePathAttribute : Attribute
 {
 }
 
+public delegate Scope PluginMethod(Scope scope);
 
+[AttributeUsage(AttributeTargets.Method)]
+public sealed class AfterReadConfigAttribute : Attribute
+{
+}
 sealed record PropSuggestionScope
 {
     public ComponentEntity Component { get; init; }
@@ -822,42 +825,9 @@ public    static IEnumerable<(string variableName, string dotNetAssemblyFilePath
 
 }
 
-public delegate Scope PluginMethod(Scope scope);
 
-[AttributeUsage(AttributeTargets.Method)]
-public sealed class AfterReadConfigAttribute : Attribute
-{
-}
 
-class BComponents
-{
-    [AfterReadConfig]
-    public static Scope AfterReadConfig(Scope scope)
-    {
-        var config = Plugin.Config[scope];
-        
-        if (Environment.MachineName.StartsWith("BTARC", StringComparison.OrdinalIgnoreCase))
-        {
-            config = config with
-            {
-                Database = new()
-                {
-                    //IsSQLite = true,
-                    //ConnectionString = @"Data Source=D:\work\git\ReactWithDotNet.VisualDesigner\app.db"
 
-                    IsSQLServer      = true,
-                    SchemaName       = "RVD",
-                    ConnectionString = @"Data Source=srvdev\atlas;Initial Catalog=boa;Min Pool Size=10; Max Pool Size=100;Application Name=Thriller;Integrated Security=true; TrustServerCertificate=true;"
-                }
-            };
-        }
-
-        return Scope.Create(new()
-        {
-            { Plugin.Config, config }
-        });
-    }
-}
 
 [AttributeUsage(AttributeTargets.Property)]
 sealed class SuggestionsAttribute : Attribute
