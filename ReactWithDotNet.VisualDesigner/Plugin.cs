@@ -36,7 +36,7 @@ sealed record PropSuggestionScope
 interface IPlugin
 {
     string AnalyzeExportFilePath(string exportFilePathForComponent);
-    Element TryCreateElementForPreview(string tag, string id, MouseEventHandler onMouseClick);
+    Element TryCreateElementForPreview(TryCreateElementForPreviewInput input);
 }
 
 abstract class PluginBase:IPlugin
@@ -46,7 +46,7 @@ abstract class PluginBase:IPlugin
         return exportFilePathForComponent;
     }
 
-    public virtual Element TryCreateElementForPreview(string tag, string id, MouseEventHandler onMouseClick)
+    public virtual Element TryCreateElementForPreview(TryCreateElementForPreviewInput input)
     {
         return null;
     }
@@ -458,9 +458,9 @@ class Plugin: PluginBase
         return component is Components.Image;
     }
 
-    public override Element TryCreateElementForPreview(string tag, string id, MouseEventHandler onMouseClick)
+    public override Element TryCreateElementForPreview(TryCreateElementForPreviewInput input)
     {
-        var type = GetAllCustomComponents().FirstOrDefault(t => t.Name.Equals(tag, StringComparison.OrdinalIgnoreCase));
+        var type = GetAllCustomComponents().FirstOrDefault(t => t.Name.Equals(input.Tag, StringComparison.OrdinalIgnoreCase));
         if (type is null)
         {
             return null;
@@ -470,8 +470,8 @@ class Plugin: PluginBase
 
         if (component is PluginComponentBase componentBase)
         {
-            componentBase.id           = id;
-            componentBase.onMouseClick = onMouseClick;
+            componentBase.id           = input.Id;
+            componentBase.onMouseClick = input.OnMouseClick;
         }
 
         return component;

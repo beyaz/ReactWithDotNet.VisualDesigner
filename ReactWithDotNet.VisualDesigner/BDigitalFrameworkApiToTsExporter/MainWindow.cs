@@ -452,25 +452,25 @@ sealed class LoadingIcon : PluginComponentBase
 
 class ExporterPlugin : PluginBase
 {
-    public override Element TryCreateElementForPreview(string tag, string id, MouseEventHandler onMouseClick)
+    public override Element TryCreateElementForPreview(TryCreateElementForPreviewInput input)
     {
-        if (tag == nameof(TsFileViewer))
+        if (input.Tag == nameof(TsFileViewer))
         {
             return new TsFileViewer
             {
-                id = id,
+                id = input.Id,
 
-                onMouseClick = onMouseClick
+                onMouseClick = input.OnMouseClick
             };
         }
 
-        if (tag == nameof(LoadingIcon))
+        if (input.Tag == nameof(LoadingIcon))
         {
             return new LoadingIcon
             {
-                id = id,
+                id = input.Id,
 
-                onMouseClick = onMouseClick
+                onMouseClick = input.OnMouseClick
             };
         }
 
