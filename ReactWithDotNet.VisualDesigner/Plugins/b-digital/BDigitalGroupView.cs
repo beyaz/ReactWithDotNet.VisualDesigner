@@ -1,4 +1,7 @@
-﻿using ReactWithDotNet.ThirdPartyLibraries.MUI.Material;
+﻿using System.Collections.Immutable;
+using Newtonsoft.Json;
+using ReactWithDotNet.ThirdPartyLibraries.MUI.Material;
+using ReactWithDotNet.VisualDesigner.Exporters;
 
 namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
@@ -207,5 +210,1980 @@ public sealed class BIcon : PluginComponentBase
                 }
 
                 return Scope.Empty;
+            }
+        }
+
+
+
+
+
+
+       
+
+        [CustomComponent]
+        [Import(Name = "BAlert", Package = "b-core-alert")]
+        sealed class BAlert : PluginComponentBase
+        {
+            [Suggestions("success , info , warning , error")]
+            [JsTypeInfo(JsType.String)]
+            public string severity { get; set; }
+
+            [Suggestions("standard , outlined , filled")]
+            [JsTypeInfo(JsType.String)]
+            public string variant { get; set; }
+
+            protected override Element render()
+            {
+                return new div
+                {
+                    Id(id), OnClick(onMouseClick),
+
+                    new Alert
+                    {
+                        severity = severity,
+                        variant  = variant,
+
+                        children = { children }
+                    }
+                };
+            }
+        }
+
+        [CustomComponent]
+        sealed class BasePage : PluginComponentBase
+        {
+            [JsTypeInfo(JsType.String)]
+            public string pageTitle { get; set; }
+
+            protected override Element render()
+            {
+                return new FlexColumn(FontFamily("Roboto"), WidthFull, Padding(16), Background("#fafafa"))
+                {
+                    children =
+                    {
+                        new h6(FontWeight500, FontSize20, PaddingTop(32), PaddingBottom(24)) { pageTitle },
+                        children
+                    }
+                } + Id(id) + OnClick(onMouseClick);
+            }
+        }
+
+        [CustomComponent]
+        [Import(Name = "BButton", Package = "b-button")]
+        sealed class BButton : PluginComponentBase
+        {
+            [JsTypeInfo(JsType.Function)]
+            public string onClick { get; set; }
+
+            [JsTypeInfo(JsType.String)]
+            public string text { get; set; }
+
+            [NodeAnalyzer]
+            public static ReactNode AnalyzeReactNode(ReactNode node, IReadOnlyDictionary<string, string> componentConfig)
+            {
+                if (node.Tag == nameof(BButton))
+                {
+                    var onClickProp = node.Properties.FirstOrDefault(x => x.Name == nameof(onClick));
+
+                    if (onClickProp is not null)
+                    {
+                        var properties = node.Properties;
+
+                        List<string> lines =
+                        [
+                            "() =>",
+                            "{"
+                        ];
+
+                        if (IsAlphaNumeric(onClickProp.Value))
+                        {
+                            lines.Add(onClickProp.Value + "();");
+                        }
+                        else
+                        {
+                            lines.Add(onClickProp.Value);
+                        }
+
+                        lines.Add("}");
+
+                        onClickProp = onClickProp with
+                        {
+                            Value = string.Join(Environment.NewLine, lines)
+                        };
+
+                        properties = properties.SetItem(properties.FindIndex(x => x.Name == onClickProp.Name), onClickProp);
+
+                        node = node with { Properties = properties };
+                    }
+                }
+
+                return node with { Children = node.Children.Select(x => AnalyzeReactNode(x, componentConfig)).ToImmutableList() };
+            }
+
+            protected override Element render()
+            {
+                return new FlexRowCentered(Background(rgba(22, 160, 133, 1)), BorderRadius(10), PaddingY(8), PaddingX(64), MinWidth(160))
+                {
+                    FontSize(15),
+                    LineHeight26,
+                    LetterSpacing("0.46px"),
+                    Color(rgba(248, 249, 250, 1)),
+
+                    new div { text ?? "?" },
+
+                    Id(id),
+                    OnClick(onMouseClick)
+                };
+            }
+        }
+
+        [CustomComponent]
+        [Import(Name = "BDigitalPhone", Package = "b-digital-phone")]
+        sealed class BDigitalPhone : PluginComponentBase
+        {
+            [JsTypeInfo(JsType.String)]
+            public string label { get; set; }
+            
+            [JsTypeInfo(JsType.String)]
+            public string hintText { get; set; }
+            
+            [JsTypeInfo(JsType.String)]
+            public string phoneNumber { get; set; }
+
+            [JsTypeInfo(JsType.Function)]
+            public string handlePhoneChange { get; set; }
+
+             [NodeAnalyzer]
+            public static ReactNode AnalyzeReactNode(ReactNode node, IReadOnlyDictionary<string, string> componentConfig)
+            {
+                if (node.Tag == nameof(BDigitalPhone))
+                {
+                    var phoneNumberProp = node.Properties.FirstOrDefault(x => x.Name == nameof(phoneNumber));
+                    var handlePhoneChangeProp = node.Properties.FirstOrDefault(x => x.Name == nameof(handlePhoneChange));
+                   
+                    if (phoneNumberProp is not null)
+                    {
+                        var properties = node.Properties;
+
+                        
+                        TsLineCollection lines =
+                        [
+                            "(value: string, formattedValue: string, areaCode: string) =>",
+                            "{",
+                            $"  {phoneNumberProp.Value} = value;",
+                            Plugin.GetUpdateStateLine(phoneNumberProp.Value)
+                        ];
+
+                        if (handlePhoneChangeProp is not null)
+                        {
+                            if (IsAlphaNumeric(handlePhoneChangeProp.Value))
+                            {
+                                lines.Add(handlePhoneChangeProp.Value + "(value, formattedValue, areaCode);");
+                            }
+                            else
+                            {
+                                lines.Add(handlePhoneChangeProp.Value);
+                            }
+                        }
+
+                        lines.Add("}");
+
+                        if (handlePhoneChangeProp is not null)
+                        {
+                            handlePhoneChangeProp = handlePhoneChangeProp with
+                            {
+                                Value = lines.ToTsCode()
+                            };
+
+                            properties = properties.SetItem(properties.FindIndex(x => x.Name == handlePhoneChangeProp.Name), handlePhoneChangeProp);
+                        }
+                        else
+                        {
+                            properties = properties.Add(new()
+                            {
+                                Name  = "handlePhoneChange",
+                                Value = lines.ToTsCode()
+                            });
+                        }
+
+                        node = node with { Properties = properties };
+                    }
+
+                }
+
+                return node with { Children = node.Children.Select(x => AnalyzeReactNode(x, componentConfig)).ToImmutableList() };
+            }
+
+            protected override Element render()
+            {
+                var textContent = string.Empty;
+                if (hintText.HasValue())
+                {
+                    textContent = hintText;
+                }
+
+                if (phoneNumber.HasValue())
+                {
+                    textContent += " | " + phoneNumber;
+                }
+
+                return new div(PaddingTop(16), PaddingBottom(8))
+                {
+                    new FlexRow(AlignItemsCenter, PaddingLeftRight(16), Border(1, solid, "#c0c0c0"), BorderRadius(10), Height(58), JustifyContentSpaceBetween)
+                    {
+                        new div(Color(rgba(0, 0, 0, 0.54)), FontSize16, FontWeight400, FontFamily("Roboto, sans-serif")) { textContent },
+
+                        Id(id), OnClick(onMouseClick)
+                    }
+                };
+            }
+        }
+        
+        
+        
+        
+        [CustomComponent]
+        [Import(Name = nameof(BDigitalSecureConfirmAgreement), Package = "b-digital-secure-confirm-agreement")]
+        sealed class BDigitalSecureConfirmAgreement : PluginComponentBase
+        {
+            [JsTypeInfo(JsType.String)]
+            public string messageInfo { get; set; }
+
+            [JsTypeInfo(JsType.String)]
+            public string description { get; set; }
+
+            [JsTypeInfo(JsType.Boolean)]
+            public string isRefresh { get; set; }
+            
+            [JsTypeInfo(JsType.String)]
+            public string approveText { get; set; }
+       
+
+            protected override Element render()
+            {
+                return new FlexColumn(MarginBottom(24),MarginTop(8))
+                {
+                    Id(id), OnClick(onMouseClick),
+                    
+                    new div(FontSize18, FontWeight600, Color(rgba(0, 0, 0, 0.87))) { "Belge Onayı" },
+                    SpaceY(8),
+                    new FlexColumn(Background(White), BorderRadius(10), Border(1, solid, "#E0E0E0"), Padding(24))
+                    {
+                        new FlexRow(Gap(8), AlignItemsCenter)
+                        {
+                            new svg(ViewBox(0, 0, 24, 24), svg.Size(24), Fill(rgb(22, 160, 133)))
+                            {
+                                new path { d = "M0 0h24v24H0z", fill = none},
+                                new path { d = "M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"}
+                            },
+                            
+                            new div
+                            {
+                                "Bağış Tahsilat Aydınlatma Metni"
+                            },
+                            
+                            new div(Opacity(0.5),Border(1,solid, rgb(22, 160, 133)), Color(rgb(22, 160, 133)), PaddingX(8), PaddingY(4), BorderRadius(10))
+                            {
+                                "Onayla"
+                            }
+                        },
+                        SpaceY(16),
+                        new FlexRowCentered
+                        {
+                            "İşlemi tamamlayabilmeniz için belgeleri Kuveyt Türk Mobil'de Belgelerim ekranından onaylamanız gerekmektedir. Belgeleri Onayla butonu ile Kuveyt Türk Mobil'e yönlendirileceksiniz."
+                        }
+                    }
+                };
+            
+            }
+        }
+        
+        [CustomComponent]
+        [Import(Name = "BCheckBox", Package = "b-check-box")]
+        sealed class BCheckBox : PluginComponentBase
+        {
+            [JsTypeInfo(JsType.Boolean)]
+            public string @checked { get; set; }
+
+            [JsTypeInfo(JsType.String)]
+            public new string id { get; set; }
+
+            [JsTypeInfo(JsType.String)]
+            public string label { get; set; }
+
+            [JsTypeInfo(JsType.Function)]
+            public string onCheck { get; set; }
+
+            [NodeAnalyzer]
+            public static ReactNode AnalyzeReactNode(ReactNode node, IReadOnlyDictionary<string, string> componentConfig)
+            {
+                if (node.Tag == nameof(BCheckBox))
+                {
+                    var checkedProp = node.Properties.FirstOrDefault(x => x.Name == nameof(@checked));
+                    var onCheckProp = node.Properties.FirstOrDefault(x => x.Name == nameof(onCheck));
+
+                    if (checkedProp is not null)
+                    {
+                        var properties = node.Properties;
+
+                        var requestAssignmentLine = string.Empty;
+                        if (checkedProp.Value.StartsWith("request.", StringComparison.OrdinalIgnoreCase))
+                        {
+                            requestAssignmentLine = $"  updateRequest(r => {{ r.{checkedProp.Value.RemoveFromStart("request.")} = checked; }});";
+                        }
+
+                        List<string> lines =
+                        [
+                            "(e: any, checked: boolean) =>",
+                            "{",
+                            requestAssignmentLine
+                        ];
+
+                        if (onCheckProp is not null)
+                        {
+                            if (IsAlphaNumeric(onCheckProp.Value))
+                            {
+                                lines.Add(onCheckProp.Value + "(e, checked);");
+                            }
+                            else
+                            {
+                                lines.Add(onCheckProp.Value);
+                            }
+                        }
+
+                        lines.Add("}");
+
+                        if (onCheckProp is not null)
+                        {
+                            onCheckProp = onCheckProp with
+                            {
+                                Value = string.Join(Environment.NewLine, lines)
+                            };
+
+                            properties = properties.SetItem(properties.FindIndex(x => x.Name == onCheckProp.Name), onCheckProp);
+                        }
+                        else
+                        {
+                            properties = properties.Add(new()
+                            {
+                                Name  = "onCheck",
+                                Value = string.Join(Environment.NewLine, lines)
+                            });
+                        }
+
+                        node = node with { Properties = properties };
+                    }
+
+                    node = Plugin.AddContextProp(node);
+                }
+
+                return node with { Children = node.Children.Select(x => AnalyzeReactNode(x, componentConfig)).ToImmutableList() };
+            }
+
+            protected override Element render()
+            {
+                var svgForIsCheckedFalse = new svg(ViewBox(0, 0, 24, 24), Fill(rgb(22, 160, 133)))
+                {
+                    new path { d = "M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z" }
+                };
+
+                var svgForIsCheckedTrue = new svg(ViewBox(0, 0, 24, 24), Fill(rgb(22, 160, 133)))
+                {
+                    new path { d = "M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.11 0 2-.9 2-2V5c0-1.1-.89-2-2-2zm-9 14l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" }
+                };
+
+                return new FlexRowCentered(Gap(12), WidthFitContent)
+                {
+                    new FlexRowCentered(Size(24))
+                    {
+                        @checked == "true" ? svgForIsCheckedTrue : svgForIsCheckedFalse
+                    },
+                    new div { label ?? "?" },
+
+                    Id(id),
+                    OnClick(onMouseClick)
+                };
+            }
+        }
+
+        [CustomComponent]
+        [Import(Name = "BChip", Package = "b-chip")]
+        sealed class BChip : PluginComponentBase
+        {
+            [JsTypeInfo(JsType.String)]
+            public string color { get; set; }
+
+            [JsTypeInfo(JsType.String)]
+            public string label { get; set; }
+
+            [JsTypeInfo(JsType.Function)]
+            public string onClick { get; set; }
+
+            [Suggestions("default, filled , outlined")]
+            [JsTypeInfo(JsType.String)]
+            public string variant { get; set; }
+
+            [NodeAnalyzer]
+            public static ReactNode AnalyzeReactNode(ReactNode node, IReadOnlyDictionary<string, string> componentConfig)
+            {
+                if (node.Tag == nameof(BChip))
+                {
+                    var onClickProp = node.Properties.FirstOrDefault(x => x.Name == nameof(onClick));
+                    if (onClickProp is not null)
+                    {
+                        var properties = node.Properties;
+
+                        List<string> lines =
+                        [
+                            "() =>",
+                            "{"
+                        ];
+
+                        if (IsAlphaNumeric(onClickProp.Value))
+                        {
+                            lines.Add(onClickProp.Value + "();");
+                        }
+                        else
+                        {
+                            lines.Add(onClickProp.Value);
+                        }
+
+                        lines.Add("}");
+
+                        onClickProp = onClickProp with
+                        {
+                            Value = string.Join(Environment.NewLine, lines)
+                        };
+
+                        properties = properties.SetItem(properties.FindIndex(x => x.Name == onClickProp.Name), onClickProp);
+
+                        node = node with { Properties = properties };
+                    }
+
+                    node = Plugin.AddContextProp(node);
+                }
+
+                return node with { Children = node.Children.Select(x => AnalyzeReactNode(x, componentConfig)).ToImmutableList() };
+            }
+
+            protected override Element render()
+            {
+                return new div(BorderRadius(16))
+                {
+                    new Chip
+                    {
+                        color   = color,
+                        label   = label,
+                        variant = variant
+                    },
+                    Id(id), OnClick(onMouseClick)
+                };
+            }
+        }
+
+        [CustomComponent]
+        [Import(Name = "BComboBox", Package = "b-combo-box")]
+        [Import(Name = "TextValuePair", Package = "b-digital-internet-banking")]
+        sealed class BComboBox : PluginComponentBase
+        {
+            [JsTypeInfo(JsType.Array)]
+            public string dataSource { get; set; }
+
+            [JsTypeInfo(JsType.Boolean)]
+            public string hiddenClearButton { get; set; }
+
+            [JsTypeInfo(JsType.String)]
+            public string hintText { get; set; }
+
+            [JsTypeInfo(JsType.String)]
+            public string labelText { get; set; }
+
+            [JsTypeInfo(JsType.Function)]
+            public string onSelect { get; set; }
+
+            [JsTypeInfo(JsType.String)]
+            public string value { get; set; }
+
+            [NodeAnalyzer]
+            public static ReactNode AnalyzeReactNode(ReactNode node, IReadOnlyDictionary<string, string> componentConfig)
+            {
+                if (node.Tag == nameof(BComboBox))
+                {
+                    var valueProp = node.Properties.FirstOrDefault(x => x.Name == nameof(value));
+                    var onSelectProp = node.Properties.FirstOrDefault(x => x.Name == nameof(onSelect));
+
+                    if (valueProp is not null)
+                    {
+                        var properties = node.Properties;
+
+                        var isCollection = IsPropertyPathProvidedByCollection(componentConfig, valueProp.Value);
+
+                        TsLineCollection lines =
+                        [
+                            "(selectedIndexes: [number], selectedItems: [TextValuePair], selectedValues: [string]) =>",
+                            "{",
+                            $"  {valueProp.Value} = selectedValues{(isCollection ? string.Empty : "[0]")};",
+                            Plugin.GetUpdateStateLine(valueProp.Value)
+                        ];
+
+                        if (onSelectProp is not null)
+                        {
+                            if (IsAlphaNumeric(onSelectProp.Value))
+                            {
+                                lines.Add(onSelectProp.Value + "(selectedIndexes, selectedItems, selectedValues);");
+                            }
+                            else
+                            {
+                                lines.Add(onSelectProp.Value);
+                            }
+                        }
+
+                        lines.Add("}");
+
+                        if (onSelectProp is not null)
+                        {
+                            onSelectProp = onSelectProp with
+                            {
+                                Value = lines.ToTsCode()
+                            };
+
+                            properties = properties.SetItem(properties.FindIndex(x => x.Name == onSelectProp.Name), onSelectProp);
+                        }
+                        else
+                        {
+                            properties = properties.Add(new()
+                            {
+                                Name  = nameof(onSelect),
+                                Value = lines.ToTsCode()
+                            });
+                        }
+
+                        if (!isCollection)
+                        {
+                            properties = properties.SetItem(properties.IndexOf(valueProp), valueProp with
+                            {
+                                Value = $"[{valueProp.Value}]"
+                            });
+                        }
+
+                        node = node with { Properties = properties };
+                    }
+                }
+
+                return node with { Children = node.Children.Select(x => AnalyzeReactNode(x, componentConfig)).ToImmutableList() };
+            }
+
+            protected override Element render()
+            {
+                var textContent = string.Empty;
+                if (labelText.HasValue())
+                {
+                    textContent = labelText;
+                }
+
+                if (value.HasValue())
+                {
+                    textContent += " | " + value;
+                }
+
+                return new div(WidthFull, PaddingTop(16), PaddingBottom(8))
+                {
+                    Id(id), OnClick(onMouseClick),
+
+                    new FlexRow(AlignItemsCenter, PaddingLeft(16), PaddingRight(12), Border(1, solid, "#c0c0c0"), BorderRadius(10), Height(58), JustifyContentSpaceBetween)
+                    {
+                        new div(Color(rgba(0, 0, 0, 0.54)), FontSize16, FontWeight400, FontFamily("Roboto, sans-serif"))
+                        {
+                            textContent
+                        },
+                        new svg(ViewBox(0, 0, 24, 24), svg.Width(24), svg.Height(24), Color(rgb(117, 117, 117)))
+                        {
+                            new path
+                            {
+                                d    = "M7 10l5 5 5-5z",
+                                fill = "#757575"
+                            }
+                        }
+                    },
+                    new FlexRow(JustifyContentSpaceBetween, FontSize12, PaddingLeftRight(14), Color(rgb(158, 158, 158)), LineHeight15)
+                    {
+                        //new div{ helperText},
+                        //new div{ maxLength }
+                    }
+                };
+            }
+
+            static bool IsPropertyPathProvidedByCollection(IReadOnlyDictionary<string, string> componentConfig, string propertyPathWithVariableName)
+            {
+                foreach (var (variableName, dotNetAssemblyFilePath, dotnetTypeFullName) in Plugin.GetDotNetVariables(componentConfig))
+                {
+                    if (!propertyPathWithVariableName.StartsWith(variableName + ".", StringComparison.OrdinalIgnoreCase))
+                    {
+                        continue;
+                    }
+
+                    var propertyPath = propertyPathWithVariableName.RemoveFromStart(variableName + ".");
+
+                    return CecilHelper.IsPropertyPathProvidedByCollection(dotNetAssemblyFilePath, dotnetTypeFullName, propertyPath);
+                }
+
+                return false;
+            }
+        }
+
+        [CustomComponent]
+        [Import(Name = "BDigitalAccountView", Package = "b-digital-account-view")]
+        sealed class BDigitalAccountView : PluginComponentBase
+        {
+            [JsTypeInfo(JsType.Array)]
+            public string accounts { get; set; }
+
+            [JsTypeInfo(JsType.Function)]
+            public string onSelectedAccountIndexChange { get; set; }
+
+            [JsTypeInfo(JsType.Number)]
+            public string selectedAccountIndex { get; set; }
+
+            [JsTypeInfo(JsType.String)]
+            public string title { get; set; }
+
+            [NodeAnalyzer]
+            public static ReactNode AnalyzeReactNode(ReactNode node, IReadOnlyDictionary<string, string> componentConfig)
+            {
+                if (node.Tag == nameof(BDigitalAccountView))
+                {
+                    var selectedAccountIndexProp = node.Properties.FirstOrDefault(x => x.Name == nameof(selectedAccountIndex));
+                    var onSelectedAccountIndexChangeProp = node.Properties.FirstOrDefault(x => x.Name == nameof(onSelectedAccountIndexChange));
+
+                    if (selectedAccountIndexProp is not null)
+                    {
+                        var properties = node.Properties;
+
+                        List<string> lines =
+                        [
+                            "(selectedAccountIndex: number) =>",
+                            "{",
+                            $"  updateRequest(r => {{ r.{selectedAccountIndexProp.Value.RemoveFromStart("request.")} = selectedAccountIndex; }});"
+                        ];
+
+                        if (onSelectedAccountIndexChangeProp is not null)
+                        {
+                            if (IsAlphaNumeric(onSelectedAccountIndexChangeProp.Value))
+                            {
+                                lines.Add(onSelectedAccountIndexChangeProp.Value + "(selectedAccountIndex);");
+                            }
+                            else
+                            {
+                                lines.Add(onSelectedAccountIndexChangeProp.Value);
+                            }
+                        }
+
+                        lines.Add("}");
+
+                        if (onSelectedAccountIndexChangeProp is not null)
+                        {
+                            onSelectedAccountIndexChangeProp = onSelectedAccountIndexChangeProp with
+                            {
+                                Value = string.Join(Environment.NewLine, lines)
+                            };
+
+                            properties = properties.SetItem(properties.FindIndex(x => x.Name == onSelectedAccountIndexChangeProp.Name), onSelectedAccountIndexChangeProp);
+                        }
+                        else
+                        {
+                            properties = properties.Add(new()
+                            {
+                                Name  = nameof(onSelectedAccountIndexChange),
+                                Value = string.Join(Environment.NewLine, lines)
+                            });
+                        }
+
+                        node = node with { Properties = properties };
+                    }
+                }
+
+                return node with { Children = node.Children.Select(x => AnalyzeReactNode(x, componentConfig)).ToImmutableList() };
+            }
+
+            protected override Element render()
+            {
+                var textContent = string.Empty;
+                if (title.HasValue())
+                {
+                    textContent = title;
+                }
+
+                if (accounts.HasValue())
+                {
+                    textContent += " | " + accounts;
+                }
+
+                return new div
+                {
+                    Id(id), OnClick(onMouseClick),
+                    new FlexRow(AlignItemsCenter, Padding(16), Border(1, solid, "#c0c0c0"), BorderRadius(10), Height(83), JustifyContentSpaceBetween)
+                    {
+                        new div(Color(rgba(0, 0, 0, 0.54)), FontSize16, FontWeight400) { textContent },
+
+                        new FlexRow(AlignItemsCenter, TextAlignRight, Gap(8))
+                        {
+                            new FlexColumn
+                            {
+                                new div(FontWeight700) { "73.148,00 TL" },
+                                new div(Color("rgb(0 0 0 / 60%)")) { "Cari Hesap" }
+                            },
+
+                            new svg(ViewBox(0, 0, 24, 24), svg.Width(24), svg.Height(24), Color(rgb(117, 117, 117)))
+                            {
+                                new path
+                                {
+                                    d    = "M7 10l5 5 5-5z",
+                                    fill = "#757575"
+                                }
+                            }
+                        }
+                    }
+                };
+            }
+        }
+        
+        
+         [CustomComponent]
+        [Import(Name = nameof(BDigitalAccountCardView), Package = "b-digital-account-card-view")]
+        sealed class BDigitalAccountCardView : PluginComponentBase
+        {
+            [JsTypeInfo(JsType.Array)]
+            public string accounts { get; set; }
+            
+            [JsTypeInfo(JsType.Array)]
+            public string cards { get; set; }
+            
+            [JsTypeInfo(JsType.Number)]
+            public string selectedIndex { get; set; }
+            
+            [JsTypeInfo(JsType.Number)]
+            public string isCardSelected { get; set; }
+
+            [JsTypeInfo(JsType.Function)]
+            public string onSelectedIndexChange { get; set; }
+            
+            [NodeAnalyzer]
+            public static ReactNode AnalyzeReactNode(ReactNode node, IReadOnlyDictionary<string, string> componentConfig)
+            {
+                if (node.Tag == nameof(BDigitalAccountCardView))
+                {
+                    var selectedIndexProp = node.Properties.FirstOrDefault(x => x.Name == nameof(selectedIndex));
+                    var isCardSelectedProp = node.Properties.FirstOrDefault(x => x.Name == nameof(isCardSelected));
+                    var onSelectedIndexChangeProp = node.Properties.FirstOrDefault(x => x.Name == nameof(onSelectedIndexChange));
+
+                    if (selectedIndexProp is not null && isCardSelectedProp is not null)
+                    {
+                        var properties = node.Properties;
+
+                        TsLineCollection lines =
+                        [
+                            "(selectedAccountCardIndex: number, isCardSelected: boolean) =>",
+                            "{",
+                         
+                            $"       {selectedIndexProp.Value} = selectedAccountCardIndex;",
+                            $"       {isCardSelectedProp.Value} = isCardSelected;"
+                        ];
+
+                        lines.Add(new []
+                        {
+                            Plugin.GetUpdateStateLine(selectedIndexProp.Value),
+                            Plugin.GetUpdateStateLine(isCardSelectedProp.Value)
+                        }.Distinct());
+                        
+
+                        if (onSelectedIndexChangeProp is not null)
+                        {
+                            if (IsAlphaNumeric(onSelectedIndexChangeProp.Value))
+                            {
+                                lines.Add(onSelectedIndexChangeProp.Value + "(selectedAccountCardIndex, isCardSelected);");
+                            }
+                            else
+                            {
+                                lines.Add(onSelectedIndexChangeProp.Value);
+                            }
+                        }
+
+                        lines.Add("}");
+
+                        if (onSelectedIndexChangeProp is not null)
+                        {
+                            onSelectedIndexChangeProp = onSelectedIndexChangeProp with
+                            {
+                                Value = lines.ToTsCode()
+                            };
+
+                            properties = properties.SetItem(properties.FindIndex(x => x.Name == onSelectedIndexChangeProp.Name), onSelectedIndexChangeProp);
+                        }
+                        else
+                        {
+                            properties = properties.Add(new()
+                            {
+                                Name  = nameof(onSelectedIndexChange),
+                                Value = lines.ToTsCode()
+                            });
+                        }
+
+                        node = node with { Properties = properties };
+                    }
+                }
+
+                return node with { Children = node.Children.Select(x => AnalyzeReactNode(x, componentConfig)).ToImmutableList() };
+            }
+
+            protected override Element render()
+            {
+                var textContent = string.Empty;
+                if (cards.HasValue())
+                {
+                    textContent = cards;
+                }
+
+                if (accounts.HasValue())
+                {
+                    textContent += " | " + accounts;
+                }
+
+                return new div
+                {
+                    Id(id), OnClick(onMouseClick),
+                    
+                    new FlexRow(AlignItemsCenter, Padding(16), Border(1, solid, "#c0c0c0"), BorderRadius(10), Height(83), JustifyContentSpaceBetween)
+                    {
+                        PositionRelative,
+                        new div(Color("rgb(0 0 0 / 60%)"))
+                        {
+                            "Hesap / Kart Seçimi",
+                            
+                            PositionAbsolute,
+                            Top(-16),
+                            Left(8),
+                            Transform("scale(0.942723)"),
+                            
+                            WhiteSpaceNoWrap,
+                            
+                            Background(White),
+                            PaddingX(8)
+                        },
+                        
+                        
+                        new FlexColumn
+                        {
+                            new div(Color(rgba(0, 0, 0, 0.54)), FontSize16, FontWeight400)
+                            {
+                                textContent
+                            },
+                            
+                            new div(Color(rgba(0, 0, 0, 0.87)), FontSize16, FontWeight400)
+                            {
+                                "0000000-1"
+                            }
+                            
+                        },
+
+                        new FlexRow(AlignItemsCenter, TextAlignRight, Gap(8))
+                        {
+                            new FlexColumn
+                            {
+                                new div(FontWeight700) { "73.148,00 TL" },
+                                new div(FontWeight400,FontSize16, Color(rgba(0, 0, 0, 0.6))) { "Cari Hesap" }
+                            },
+
+                            new svg(ViewBox(0, 0, 24, 24), svg.Width(24), svg.Height(24), Color(rgb(117, 117, 117)))
+                            {
+                                new path
+                                {
+                                    d    = "M7 10l5 5 5-5z",
+                                    fill = "#757575"
+                                }
+                            }
+                        }
+                    }
+                };
+            }
+        }
+
+        [CustomComponent]
+        [Import(Name = "BDigitalBox", Package = "b-digital-box")]
+        sealed class BDigitalBox : PluginComponentBase
+        {
+            [Suggestions("noMargin, primary")]
+            [JsTypeInfo(JsType.String)]
+            public string styleContext { get; set; }
+
+            protected override Element render()
+            {
+                var style = new Style();
+
+                if (styleContext == "primary")
+                {
+                    style = new()
+                    {
+                        Background(rgb(255, 255, 255)),
+                        Border(1, solid, rgba(0, 0, 0, 0.12)),
+                        BorderRadius(8)
+                    };
+                }
+
+                if (styleContext == "noMargin")
+                {
+                    style = new()
+                    {
+                        Margin(0)
+                    };
+                }
+
+                return new Grid
+                {
+                    children = { children },
+                    style    = { style }
+                };
+            }
+        }
+
+        [CustomComponent]
+        [Import(Name = "BDigitalDatepicker", Package = "b-digital-datepicker")]
+        sealed class BDigitalDatepicker : PluginComponentBase
+        {
+            [JsTypeInfo(JsType.Boolean)]
+            public string disabled { get; set; }
+
+            [JsTypeInfo(JsType.String)]
+            public string format { get; set; }
+
+            [JsTypeInfo(JsType.String)]
+            public string labelText { get; set; }
+
+            [JsTypeInfo(JsType.Date)]
+            public string maxDate { get; set; }
+
+            [JsTypeInfo(JsType.Date)]
+            public string minDate { get; set; }
+
+            [JsTypeInfo(JsType.Function)]
+            public string onDateChange { get; set; }
+
+            [JsTypeInfo(JsType.String)]
+            public string placeholder { get; set; }
+
+            [JsTypeInfo(JsType.Date)]
+            public string value { get; set; }
+
+            [NodeAnalyzer]
+            public static ReactNode AnalyzeReactNode(ReactNode node, IReadOnlyDictionary<string, string> componentConfig)
+            {
+                if (node.Tag == nameof(BDigitalDatepicker))
+                {
+                    var valueProp = node.Properties.FirstOrDefault(x => x.Name == nameof(value));
+                    var onDateChangeProp = node.Properties.FirstOrDefault(x => x.Name == nameof(onDateChange));
+                    if (valueProp is not null)
+                    {
+                        var properties = node.Properties;
+
+                        List<string> lines =
+                        [
+                            "(value: Date) =>",
+                            "{",
+                            $"  updateRequest(r => {{ r.{valueProp.Value.RemoveFromStart("request.")} = value; }});"
+                        ];
+
+                        if (onDateChangeProp is not null)
+                        {
+                            if (IsAlphaNumeric(onDateChangeProp.Value))
+                            {
+                                lines.Add(onDateChangeProp.Value + "(value);");
+                            }
+                            else
+                            {
+                                lines.Add(onDateChangeProp.Value);
+                            }
+                        }
+
+                        lines.Add("}");
+
+                        if (onDateChangeProp is not null)
+                        {
+                            onDateChangeProp = onDateChangeProp with
+                            {
+                                Value = string.Join(Environment.NewLine, lines)
+                            };
+
+                            properties = properties.SetItem(properties.FindIndex(x => x.Name == onDateChangeProp.Name), onDateChangeProp);
+                        }
+                        else
+                        {
+                            properties = properties.Add(new()
+                            {
+                                Name  = nameof(onDateChange),
+                                Value = string.Join(Environment.NewLine, lines)
+                            });
+                        }
+
+                        node = node with { Properties = properties };
+                    }
+
+                    var placeholderProp = node.Properties.FirstOrDefault(x => x.Name == nameof(placeholder));
+                    if (placeholderProp is not null)
+                    {
+                        var placeholderFinalValue = string.Empty;
+                        {
+                            if (IsStringValue(placeholderProp.Value))
+                            {
+                                placeholderFinalValue = placeholderProp.Value;
+                            }
+                            else
+                            {
+                                placeholderFinalValue = $"{Plugin.ConvertDotNetPathToJsPath(placeholderProp.Value)}";
+                            }
+                        }
+
+                        node = node with
+                        {
+                            Properties = node.Properties.Remove(placeholderProp).Add(new()
+                            {
+                                Name  = "inputProps",
+                                Value = $"{{ placeholder: {placeholderFinalValue} }}"
+                            })
+                        };
+                    }
+                }
+
+                return node with { Children = node.Children.Select(x => AnalyzeReactNode(x, componentConfig)).ToImmutableList() };
+            }
+
+            protected override Element render()
+            {
+                var textContent = string.Empty;
+                if (labelText.HasValue())
+                {
+                    textContent = labelText;
+                }
+
+                if (value.HasValue())
+                {
+                    textContent += " | " + value;
+                }
+
+                return new div(WidthFull, PaddingTop(16), PaddingBottom(8))
+                {
+                    Id(id), OnClick(onMouseClick),
+
+                    new FlexRow(AlignItemsCenter, PaddingLeft(16), PaddingRight(12), Border(1, solid, "#c0c0c0"), BorderRadius(10), Height(58), JustifyContentSpaceBetween)
+                    {
+                        new div(Color(rgba(0, 0, 0, 0.54)), FontSize16, FontWeight400, FontFamily("Roboto, sans-serif"))
+                        {
+                            textContent
+                        },
+                        new DynamicMuiIcon { name = "CalendarMonthOutlined", fontSize = "medium" }
+                    }
+                };
+            }
+        }
+
+        [CustomComponent]
+        [Import(Name = "BDigitalDialog", Package = "b-digital-dialog")]
+        sealed class BDigitalDialog : PluginComponentBase
+        {
+            [JsTypeInfo(JsType.Boolean)]
+            public string displayCloseIcon { get; set; }
+
+            [JsTypeInfo(JsType.Boolean)]
+            public string displayOkButton { get; set; }
+
+            [JsTypeInfo(JsType.Boolean)]
+            public string fullScreen { get; set; }
+
+            [JsTypeInfo(JsType.Boolean)]
+            public string open { get; set; }
+
+            [JsTypeInfo(JsType.String)]
+            public string title { get; set; }
+
+            [Suggestions("error , warning , info , success")]
+            [JsTypeInfo(JsType.String)]
+            public string type { get; set; }
+
+            protected override Element render()
+            {
+                return new div(Background(rgba(0, 0, 0, 0.5)), Padding(24), BorderRadius(8))
+                {
+                    Id(id), OnClick(onMouseClick),
+                    new div(Background("white"), BorderRadius(8), Padding(16))
+                    {
+                        // TOP BAR
+                        new FlexRow(JustifyContentSpaceBetween, AlignItemsCenter, PaddingY(16))
+                        {
+                            new div(FontSize20, FontWeight400, LineHeight("160%"), LetterSpacing("0.15px")) { title },
+
+                            displayCloseIcon == "false" || displayOkButton == "false" ? null :
+                                new svg(ViewBox(0, 0, 24, 24), svg.Width(24), svg.Height(24))
+                                {
+                                    new path
+                                    {
+                                        d = "M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
+                                    }
+                                }
+                        },
+
+                        SpaceY(12),
+
+                        children
+                    }
+                };
+            }
+        }
+
+        [CustomComponent]
+        [Import(Name = "BDigitalFilterView", Package = "b-digital-filter-view")]
+        sealed class BDigitalFilterView : PluginComponentBase
+        {
+            [JsTypeInfo(JsType.Date)]
+            public string beginDate { get; set; }
+
+            [JsTypeInfo(JsType.String)]
+            public string beginDateLabel { get; set; }
+
+            [JsTypeInfo(JsType.Date)]
+            public string endDate { get; set; }
+
+            [JsTypeInfo(JsType.String)]
+            public string endDateLabel { get; set; }
+
+            [JsTypeInfo(JsType.Function)]
+            public string onFilterDetailClear { get; set; }
+
+            [JsTypeInfo(JsType.Function)]
+            public string setFilter { get; set; }
+
+            [NodeAnalyzer]
+            public static ReactNode AnalyzeReactNode(ReactNode node, IReadOnlyDictionary<string, string> componentConfig)
+            {
+                if (node.Tag == nameof(BDigitalFilterView))
+                {
+                    var beginDateProp = node.Properties.FirstOrDefault(x => x.Name == nameof(beginDate));
+                    var endDateProp = node.Properties.FirstOrDefault(x => x.Name == nameof(endDate));
+                    var setFilterProp = node.Properties.FirstOrDefault(x => x.Name == nameof(setFilter));
+
+                    if (beginDateProp is not null && endDateProp is not null && setFilterProp is not null)
+                    {
+                        var properties = node.Properties;
+
+                        properties = properties.Add(new()
+                        {
+                            Name  = "beginDateDefault",
+                            Value = beginDateProp.Value
+                        });
+
+                        properties = properties.Add(new()
+                        {
+                            Name  = "setBeginDate",
+                            Value = $"(value: Date) => {{ updateRequest(r => r.{beginDateProp.Value.RemoveFromStart("request.")} = value) }}"
+                        });
+
+                        properties = properties.Add(new()
+                        {
+                            Name  = "endDateDefault",
+                            Value = endDateProp.Value
+                        });
+                        properties = properties.Add(new()
+                        {
+                            Name  = "setEndDate",
+                            Value = $"(value: Date) => {{ updateRequest(r => r.{beginDateProp.Value.RemoveFromStart("request.")} = value) }}"
+                        });
+
+                        // setFilter
+                        {
+                            List<string> lines =
+                            [
+                                "() =>",
+                                "{"
+                            ];
+
+                            if (IsAlphaNumeric(setFilterProp.Value))
+                            {
+                                lines.Add(setFilterProp.Value + "();");
+                            }
+                            else
+                            {
+                                lines.Add(setFilterProp.Value);
+                            }
+
+                            lines.Add("}");
+
+                            setFilterProp = setFilterProp with
+                            {
+                                Value = string.Join(Environment.NewLine, lines)
+                            };
+
+                            properties = properties.SetItem(properties.FindIndex(x => x.Name == setFilterProp.Name), setFilterProp);
+                        }
+
+                        properties = properties.Remove(beginDateProp).Remove(endDateProp);
+
+                        node = node with { Properties = properties };
+                    }
+                }
+
+                return node with { Children = node.Children.Select(x => AnalyzeReactNode(x, componentConfig)).ToImmutableList() };
+            }
+
+            protected override Element render()
+            {
+                return new FlexColumn(PaddingTop(16))
+                {
+                    Id(id), OnClick(onMouseClick),
+
+                    new FlexColumn(PaddingY(16), FontSize18)
+                    {
+                        "Filtrele"
+                    },
+                    new div(WidthFull, PaddingTop(16), PaddingBottom(8))
+                    {
+                        new FlexRow(AlignItemsCenter, PaddingLeft(16), PaddingRight(12), Border(1, solid, "#c0c0c0"), BorderRadius(10), Height(58), JustifyContentSpaceBetween)
+                        {
+                            new div(Color(rgba(0, 0, 0, 0.54)), FontSize16, FontWeight400, FontFamily("Roboto, sans-serif"))
+                            {
+                                beginDateLabel + " | " + beginDate
+                            },
+                            new DynamicMuiIcon { name = "CalendarMonthOutlined", fontSize = "medium" }
+                        }
+                    },
+
+                    new div(WidthFull, PaddingTop(16), PaddingBottom(8))
+                    {
+                        new FlexRow(AlignItemsCenter, PaddingLeft(16), PaddingRight(12), Border(1, solid, "#c0c0c0"), BorderRadius(10), Height(58), JustifyContentSpaceBetween)
+                        {
+                            new div(Color(rgba(0, 0, 0, 0.54)), FontSize16, FontWeight400, FontFamily("Roboto, sans-serif"))
+                            {
+                                endDateLabel + " | " + endDate
+                            },
+                            new DynamicMuiIcon { name = "CalendarMonthOutlined", fontSize = "medium" }
+                        }
+                    },
+
+                    children,
+
+                    new BButton
+                    {
+                        text = "Sonuçları Göster"
+                    }
+                };
+            }
+        }
+
+        [CustomComponent]
+        [Import(Name = "BDigitalMoneyInput", Package = "b-digital-money-input")]
+        sealed class BDigitalMoneyInput : PluginComponentBase
+        {
+            [JsTypeInfo(JsType.Boolean)]
+            public string currencyVisible { get; set; }
+
+            [JsTypeInfo(JsType.String)]
+            public string fec { get; set; }
+
+            [JsTypeInfo(JsType.Function)]
+            public string handleMoneyInputChange { get; set; }
+
+            [JsTypeInfo(JsType.String)]
+            public string label { get; set; }
+
+            [JsTypeInfo(JsType.Number)]
+            public string value { get; set; }
+
+            [NodeAnalyzer]
+            public static ReactNode AnalyzeReactNode(ReactNode node, IReadOnlyDictionary<string, string> componentConfig)
+            {
+                if (node.Tag == nameof(BDigitalMoneyInput))
+                {
+                    var valueProp = node.Properties.FirstOrDefault(x => x.Name == nameof(value));
+                    var handleMoneyInputChangeProp = node.Properties.FirstOrDefault(x => x.Name == nameof(handleMoneyInputChange));
+                    if (valueProp is not null)
+                    {
+                        var properties = node.Properties;
+
+                        List<string> lines =
+                        [
+                            "(value: number) =>",
+                            "{",
+                            $"  updateRequest(r => {{ r.{valueProp.Value.RemoveFromStart("request.")} = value; }});"
+                        ];
+
+                        if (handleMoneyInputChangeProp is not null)
+                        {
+                            if (IsAlphaNumeric(handleMoneyInputChangeProp.Value))
+                            {
+                                lines.Add(handleMoneyInputChangeProp.Value + "(value);");
+                            }
+                            else
+                            {
+                                lines.Add(handleMoneyInputChangeProp.Value);
+                            }
+                        }
+
+                        lines.Add("}");
+
+                        if (handleMoneyInputChangeProp is not null)
+                        {
+                            handleMoneyInputChangeProp = handleMoneyInputChangeProp with
+                            {
+                                Value = string.Join(Environment.NewLine, lines)
+                            };
+
+                            properties = properties.SetItem(properties.FindIndex(x => x.Name == handleMoneyInputChangeProp.Name), handleMoneyInputChangeProp);
+                        }
+                        else
+                        {
+                            properties = properties.Add(new()
+                            {
+                                Name  = nameof(handleMoneyInputChange),
+                                Value = string.Join(Environment.NewLine, lines)
+                            });
+                        }
+
+                        node = node with { Properties = properties };
+                    }
+                }
+
+                return node with { Children = node.Children.Select(x => AnalyzeReactNode(x, componentConfig)).ToImmutableList() };
+            }
+
+            protected override Element render()
+            {
+                var textContent = label ?? "Tutar";
+
+                if (value.HasValue())
+                {
+                    textContent += " | " + value;
+                }
+
+                return new div(WidthFull, PaddingTop(16), PaddingBottom(8))
+                {
+                    new FlexRow(AlignItemsCenter, PaddingLeftRight(16), Border(1, solid, "#c0c0c0"), BorderRadius(10), Height(58), JustifyContentSpaceBetween)
+                    {
+                        new div(Color(rgba(0, 0, 0, 0.54)), FontSize16, FontWeight400, FontFamily("Roboto, sans-serif"))
+                        {
+                            textContent
+                        },
+
+                        new div { fec ?? "TL" }
+                    },
+                    new FlexRow(JustifyContentSpaceBetween, FontSize12, PaddingLeftRight(14), Color(rgb(158, 158, 158)), LineHeight15)
+                    {
+                        //new div{ helperText},
+                        //new div{ maxLength }
+                    },
+
+                    Id(id), OnClick(onMouseClick)
+                };
+            }
+        }
+
+        [CustomComponent]
+        sealed class BDigitalPlateNumber : PluginComponentBase
+        {
+            [JsTypeInfo(JsType.String)]
+            public string label { get; set; }
+
+            [JsTypeInfo(JsType.String)]
+            public string value { get; set; }
+
+            protected override Element render()
+            {
+                return new FlexRow(AlignItemsCenter, PaddingLeftRight(16), Border(1, solid, "#c0c0c0"), BorderRadius(10), Height(58), JustifyContentSpaceBetween)
+                {
+                    new div { value ?? "?" }
+                };
+            }
+        }
+
+        [CustomComponent]
+        sealed class BDigitalTabNavigator : PluginComponentBase
+        {
+            [JsTypeInfo(JsType.Array)]
+            public string items { get; set; }
+
+            [JsTypeInfo(JsType.String)]
+            public string mainResource { get; set; }
+
+            [JsTypeInfo(JsType.Number)]
+            public string selectedTab { get; set; }
+
+            protected override Element render()
+            {
+                if (items.HasNoValue())
+                {
+                    return null;
+                }
+
+                var itemList = JsonConvert.DeserializeObject<ItemModel[]>(items);
+
+                return new FlexRow(BorderBottom(1, solid, rgba(0, 0, 0, 0.12)), Color(rgb(22, 160, 133)))
+                {
+                    new FlexRow(Gap(24))
+                    {
+                        itemList.Select(x => new FlexRowCentered(Padding(24), WidthFitContent, AlignItemsCenter)
+                        {
+                            BorderBottom(2, solid, rgb(22, 160, 133)),
+
+                            new label
+                            {
+                                FontSize16, FontWeight400, LineHeight(1.5), FontFamily("Roboto, sans-serif"),
+                                x.label
+                            }
+                        })
+                    }
+                } + Id(id) + OnClick(onMouseClick);
+            }
+
+            class ItemModel
+            {
+                public string label { get; set; }
+            }
+        }
+
+        [CustomComponent]
+        [Import(Name = "BInput", Package = "b-input")]
+        sealed class BInput : PluginComponentBase
+        {
+            [JsTypeInfo(JsType.String)]
+            public string floatingLabelText { get; set; }
+
+            [JsTypeInfo(JsType.String)]
+            public string helperText { get; set; }
+
+            [JsTypeInfo(JsType.Boolean)]
+            public string isAutoComplete { get; set; }
+
+            [JsTypeInfo(JsType.Boolean)]
+            public string isRequired { get; set; }
+
+            [JsTypeInfo(JsType.Number)]
+            public string maxLength { get; set; }
+
+            [JsTypeInfo(JsType.Function)]
+            public string onChange { get; set; }
+
+            [JsTypeInfo(JsType.String)]
+            public string value { get; set; }
+            
+            [JsTypeInfo(JsType.Boolean)]
+            public string disabled { get; set; }
+
+            [NodeAnalyzer]
+            public static ReactNode AnalyzeReactNode(ReactNode node, IReadOnlyDictionary<string, string> componentConfig)
+            {
+                if (node.Tag == nameof(BInput))
+                {
+                    var valueProp = node.Properties.FirstOrDefault(x => x.Name == nameof(value));
+                    var onChangeProp = node.Properties.FirstOrDefault(x => x.Name == nameof(onChange));
+                    var isRequiredProp = node.Properties.FirstOrDefault(x => x.Name == nameof(isRequired));
+                    var isAutoCompleteProp = node.Properties.FirstOrDefault(x => x.Name == nameof(isAutoComplete));
+
+                    if (valueProp is not null)
+                    {
+                        var properties = node.Properties;
+
+                        
+                        
+                        TsLineCollection lines =
+                        [
+                            "(e: any, value: any) =>",
+                            "{",
+                            $"  {valueProp.Value} = value;",
+                            Plugin.GetUpdateStateLine(valueProp.Value)
+                        ];
+                        
+                        if (onChangeProp is not null)
+                        {
+                            if (IsAlphaNumeric(onChangeProp.Value))
+                            {
+                                lines.Add(onChangeProp.Value + "(e, value);");
+                            }
+                            else
+                            {
+                                lines.Add(onChangeProp.Value);
+                            }
+                        }
+
+                        lines.Add("}");
+
+                        if (onChangeProp is not null)
+                        {
+                            onChangeProp = onChangeProp with
+                            {
+                                Value = lines.ToTsCode()
+                            };
+
+                            properties = properties.SetItem(properties.FindIndex(x => x.Name == onChangeProp.Name), onChangeProp);
+                        }
+                        else
+                        {
+                            properties = properties.Add(new()
+                            {
+                                Name  = "onChange",
+                                Value = lines.ToTsCode()
+                            });
+                        }
+
+                        node = node with { Properties = properties };
+                    }
+
+                    if (isRequiredProp is not null && isAutoCompleteProp is not null)
+                    {
+                        var autoCompleteFinalValue = string.Empty;
+                        {
+                            if ("true".Equals(isAutoCompleteProp.Value, StringComparison.OrdinalIgnoreCase))
+                            {
+                                autoCompleteFinalValue = "'on'";
+                            }
+                            else if ("false".Equals(isAutoCompleteProp.Value, StringComparison.OrdinalIgnoreCase))
+                            {
+                                autoCompleteFinalValue = "'off'";
+                            }
+                            else
+                            {
+                                autoCompleteFinalValue = $"{Plugin.ConvertDotNetPathToJsPath(isAutoCompleteProp.Value)} ? \"on\" : \"off\" }}";
+                            }
+                        }
+
+                        node = node with
+                        {
+                            Properties = node.Properties.Remove(isRequiredProp).Remove(isAutoCompleteProp).Add(new()
+                            {
+                                Name  = "valueConstraint",
+                                Value = $"{{ required: {Plugin.ConvertDotNetPathToJsPath(isRequiredProp.Value)}, autoComplete: {autoCompleteFinalValue} }}"
+                            })
+                        };
+                    }
+
+                    node = Plugin.AddContextProp(node);
+                }
+
+                return node with { Children = node.Children.Select(x => AnalyzeReactNode(x, componentConfig)).ToImmutableList() };
+            }
+
+            protected override Element render()
+            {
+                var textContent = string.Empty;
+                if (floatingLabelText.HasValue())
+                {
+                    textContent = floatingLabelText;
+                }
+
+                if (value.HasValue())
+                {
+                    textContent += " | " + value;
+                }
+
+                return new div(PaddingTop(16), PaddingBottom(8))
+                {
+                    new FlexRow(AlignItemsCenter, PaddingLeftRight(16), Border(1, solid, "#c0c0c0"), BorderRadius(10), Height(58), JustifyContentSpaceBetween)
+                    {
+                        new div(Color(rgba(0, 0, 0, 0.54)), FontSize16, FontWeight400, FontFamily("Roboto, sans-serif")) { textContent },
+
+                        Id(id), OnClick(onMouseClick)
+                    },
+                    new FlexRow(JustifyContentSpaceBetween, FontSize12, PaddingLeftRight(14), Color(rgb(158, 158, 158)), LineHeight15)
+                    {
+                        new div { helperText },
+                        new div { maxLength }
+                    }
+                };
+            }
+        }
+
+        [CustomComponent]
+        [Import(Name = "BInputMaskExtended", Package = "b-input-mask-extended")]
+        sealed class BInputMaskExtended : PluginComponentBase
+        {
+            [JsTypeInfo(JsType.String)]
+            public string floatingLabelText { get; set; }
+
+            [JsTypeInfo(JsType.String)]
+            public string helperText { get; set; }
+
+            [JsTypeInfo(JsType.Boolean)]
+            public string isAutoComplete { get; set; }
+
+            [JsTypeInfo(JsType.Boolean)]
+            public string isReadonly { get; set; }
+
+            [JsTypeInfo(JsType.Boolean)]
+            public string isRequired { get; set; }
+
+            [JsTypeInfo(JsType.Array)]
+            public string mask { get; set; }
+
+            [JsTypeInfo(JsType.Number)]
+            public string maxLength { get; set; }
+
+            [JsTypeInfo(JsType.Function)]
+            public string onChange { get; set; }
+
+            [JsTypeInfo(JsType.String)]
+            public string value { get; set; }
+            
+            [JsTypeInfo(JsType.Boolean)]
+            public string disabled { get; set; }
+            
+
+            [NodeAnalyzer]
+            public static ReactNode AnalyzeReactNode(ReactNode node, IReadOnlyDictionary<string, string> componentConfig)
+            {
+                if (node.Tag == nameof(BInputMaskExtended))
+                {
+                    var valueProp = node.Properties.FirstOrDefault(x => x.Name == nameof(value));
+                    var onChangeProp = node.Properties.FirstOrDefault(x => x.Name == nameof(onChange));
+                    var isRequiredProp = node.Properties.FirstOrDefault(x => x.Name == nameof(isRequired));
+                    var isAutoCompleteProp = node.Properties.FirstOrDefault(x => x.Name == nameof(isAutoComplete));
+
+                    if (valueProp is not null)
+                    {
+                        var properties = node.Properties;
+
+                        List<string> lines =
+                        [
+                            "(e: any, value: any) =>",
+                            "{",
+                            $"  updateRequest(r => {{ r.{valueProp.Value.RemoveFromStart("request.")} = value; }});"
+                        ];
+
+                        if (onChangeProp is not null)
+                        {
+                            if (IsAlphaNumeric(onChangeProp.Value))
+                            {
+                                lines.Add(onChangeProp.Value + "(e, value);");
+                            }
+                            else
+                            {
+                                lines.Add(onChangeProp.Value);
+                            }
+                        }
+
+                        lines.Add("}");
+
+                        if (onChangeProp is not null)
+                        {
+                            onChangeProp = onChangeProp with
+                            {
+                                Value = string.Join(Environment.NewLine, lines)
+                            };
+
+                            properties = properties.SetItem(properties.FindIndex(x => x.Name == onChangeProp.Name), onChangeProp);
+                        }
+                        else
+                        {
+                            properties = properties.Add(new()
+                            {
+                                Name  = "onChange",
+                                Value = string.Join(Environment.NewLine, lines)
+                            });
+                        }
+
+                        node = node with { Properties = properties };
+                    }
+
+                    if (isRequiredProp is not null && isAutoCompleteProp is not null)
+                    {
+                        var autoCompleteFinalValue = string.Empty;
+                        {
+                            if ("true".Equals(isAutoCompleteProp.Value, StringComparison.OrdinalIgnoreCase))
+                            {
+                                autoCompleteFinalValue = "'on'";
+                            }
+                            else if ("false".Equals(isAutoCompleteProp.Value, StringComparison.OrdinalIgnoreCase))
+                            {
+                                autoCompleteFinalValue = "'off'";
+                            }
+                            else
+                            {
+                                autoCompleteFinalValue = $"{Plugin.ConvertDotNetPathToJsPath(isAutoCompleteProp.Value)} ? \"on\" : \"off\" }}";
+                            }
+                        }
+
+                        node = node with
+                        {
+                            Properties = node.Properties.Remove(isRequiredProp).Remove(isAutoCompleteProp).Add(new()
+                            {
+                                Name  = "valueConstraint",
+                                Value = $"{{ required: {Plugin.ConvertDotNetPathToJsPath(isRequiredProp.Value)}, autoComplete: {autoCompleteFinalValue} }}"
+                            })
+                        };
+                    }
+
+                    node = Plugin.AddContextProp(node);
+                }
+
+                return node with { Children = node.Children.Select(x => AnalyzeReactNode(x, componentConfig)).ToImmutableList() };
+            }
+
+            protected override Element render()
+            {
+                var textContent = string.Empty;
+                if (floatingLabelText.HasValue())
+                {
+                    textContent = floatingLabelText;
+                }
+
+                if (value.HasValue())
+                {
+                    textContent += " | " + value;
+                }
+
+                return new div(PaddingTop(16), PaddingBottom(8))
+                {
+                    new FlexRow(AlignItemsCenter, PaddingLeftRight(16), Border(1, solid, "#c0c0c0"), BorderRadius(10), Height(58), JustifyContentSpaceBetween)
+                    {
+                        new div(Color(rgba(0, 0, 0, 0.54)), FontSize16, FontWeight400, FontFamily("Roboto, sans-serif")) { textContent },
+
+                        Id(id), OnClick(onMouseClick)
+                    },
+                    new FlexRow(JustifyContentSpaceBetween, FontSize12, PaddingLeftRight(14), Color(rgb(158, 158, 158)), LineHeight15)
+                    {
+                        new div { helperText },
+                        new div { maxLength }
+                    }
+                };
+            }
+        }
+
+        [CustomComponent]
+        sealed class BPlateNumber : PluginComponentBase
+        {
+            [JsTypeInfo(JsType.String)]
+            public string label { get; set; }
+
+            [JsTypeInfo(JsType.String)]
+            public string value { get; set; }
+
+            protected override Element render()
+            {
+                var textContent = string.Empty;
+                if (label.HasValue())
+                {
+                    textContent = label;
+                }
+
+                if (value.HasValue())
+                {
+                    textContent += " | " + value;
+                }
+
+                return new FlexRow(AlignItemsCenter, PaddingLeftRight(16), Border(1, solid, "#c0c0c0"), BorderRadius(10), Height(58), JustifyContentSpaceBetween)
+                {
+                    new div { textContent },
+
+                    Id(id), OnClick(onMouseClick)
+                };
+            }
+        }
+
+        [CustomComponent]
+        sealed class BRadioButtonGroup : PluginComponentBase
+        {
+            [JsTypeInfo(JsType.Array)]
+            public string items { get; set; }
+
+            protected override Element render()
+            {
+                if (items.HasNoValue())
+                {
+                    return null;
+                }
+
+                var itemList = JsonConvert.DeserializeObject<ItemModel[]>(items);
+
+                return new FlexRow(Gap(24))
+                {
+                    itemList.Select(x => new FlexRowCentered(Gap(12), WidthFitContent)
+                    {
+                        new svg(ViewBox(0, 0, 24, 24), svg.Width(24), svg.Height(24), Fill(rgb(22, 160, 133)))
+                        {
+                            new path { d = "M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zm0-5C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z" }
+                        },
+
+                        new label
+                        {
+                            FontSize16, FontWeight400, LineHeight(1.5), FontFamily("Roboto, sans-serif"),
+                            x.label
+                        }
+                    })
+                } + Id(id) + OnClick(onMouseClick);
+            }
+
+            class ItemModel
+            {
+                public string label { get; set; }
+            }
+        }
+
+        [CustomComponent]
+        [Import(Name = "BTypography", Package = "b-core-typography")]
+        sealed class BTypography : PluginComponentBase
+        {
+            static readonly Dictionary<string, StyleModifier> ColorMap = new()
+            {
+                { "primary", new Style { Color("#16A085") } },
+                { "secondary", new Style { Color("#FF9500") } }
+            };
+
+            static readonly Dictionary<string, StyleModifier> VariantMap = new()
+            {
+                { "body0", new Style { FontSize18, FontWeight400, LineHeight(1.5) } },
+                { "body1", new Style { FontSize16, FontWeight400, LineHeight(1.5) } },
+                { "body2", new Style { FontSize14, FontWeight400, LineHeight(1.43) } },
+                { "body2b", new Style { FontSize14, FontWeight600, LineHeight(1.5) } },
+                { "body2m", new Style { FontSize14, FontWeight500, LineHeight(1.5) } },
+
+                { "h1", new Style { FontSize("6rem"), FontWeight300, LineHeight(1.167) } },
+                { "h2", new Style { FontSize("3.75rem"), FontWeight300, LineHeight(1.2) } },
+                { "h3", new Style { FontSize("3rem"), FontWeight400, LineHeight(1.167) } }
+            };
+
+            [Suggestions("primary, secondary")]
+            [JsTypeInfo(JsType.String)]
+            public string color { get; set; }
+
+            public string dangerouslySetInnerHTML { get; set; }
+
+            [Suggestions("h1, h2 , h3 , h4 , h5 , h6 , body0 , body1 , body2, body2m")]
+            [JsTypeInfo(JsType.String)]
+            public string variant { get; set; }
+
+            protected override Element render()
+            {
+                var styleOverride = new Style();
+
+                if (variant.HasValue())
+                {
+                    if (VariantMap.TryGetValue(variant, out var value))
+                    {
+                        styleOverride += value;
+                    }
+                }
+
+                if (color.HasValue())
+                {
+                    if (ColorMap.TryGetValue(color, out var value))
+                    {
+                        styleOverride += value;
+                    }
+                }
+
+                return new Typography
+                {
+                    children = { children },
+                    variant  = variant,
+                    color    = color,
+                    style    = { styleOverride },
+
+                    id      = id,
+                    onClick = onMouseClick
+                    //TODO: Open: dangerouslySetInnerHTML = dangerouslySetInnerHTML
+                };
+            }
+        }
+
+        [CustomComponent]
+        sealed class TransactionWizardPage : PluginComponentBase
+        {
+            [JsTypeInfo(JsType.Boolean)]
+            public string isWide { get; set; }
+
+            protected override Element render()
+            {
+                return new FlexColumn(WidthFull, Padding(16), Background("#fafafa"))
+                {
+                    children =
+                    {
+                        children
+                    }
+                } + Id(id) + OnClick(onMouseClick);
+            }
+        }
+        
+        [CustomComponent]
+        [Import(Name = nameof(BDigitalSecureConfirm), Package = "b-digital-secure-confirm")]
+        sealed class BDigitalSecureConfirm : PluginComponentBase
+        {
+            [JsTypeInfo(JsType.String)]
+            public string smsPassword { get; set; }
+
+            [JsTypeInfo(JsType.String)]
+            public string messageInfo { get; set; }
+            
+            [NodeAnalyzer]
+            public static ReactNode AnalyzeReactNode(ReactNode node, IReadOnlyDictionary<string, string> componentConfig)
+            {
+                if (node.Tag == nameof(BDigitalSecureConfirm))
+                {
+                    var smsPasswordProp = node.Properties.FirstOrDefault(x => x.Name == nameof(smsPassword));
+
+                    if (smsPasswordProp is not null)
+                    {
+                        var properties = node.Properties;
+
+                        List<string> lines =
+                        [
+                            "(value: string) =>",
+                            "{",
+                            $"  {smsPasswordProp.Value} = value;",
+                            Plugin.GetUpdateStateLine(smsPasswordProp.Value),
+                            "}"
+                        ];
+
+                        properties = properties.Remove(smsPasswordProp).Add(new()
+                        {
+                            Name  = "handleSmsPasswordSend",
+                            Value = string.Join(Environment.NewLine, lines)
+                        });
+
+                        node = node with { Properties = properties };
+                    }
+                }
+
+                return node with { Children = node.Children.Select(x => AnalyzeReactNode(x, componentConfig)).ToImmutableList() };
+            }
+
+            protected override Element render()
+            {
+                return new FlexColumn(MarginBottom(24),MarginTop(8))
+                {
+                    new div(FontSize18, FontWeight600, LineHeight32, Color(rgba(0, 0, 0, 0.87))) { "Mobil Onay" },
+                    
+                    new FlexRow(Gap(16) ,Background(White), BorderRadius(10), Border(1, solid, "#E0E0E0"), Padding(24), Id(id), OnClick(onMouseClick))
+                    {
+                        new FlexColumn(WidthFull)
+                        {
+                            new div(FontWeight500)
+                            {
+                                "Mobil Onay Bekleniyor...",
+                                Color(rgba(2, 136, 209, 1))
+                            },
+                        
+                            new div(FontWeight400)
+                            {
+                                "Ödeme işleminizi gerçekleştirmek için cihazınıza gelen Mobil Onay bildirimine belirtilen süre içerisinde onay vermeniz gerekmektedir."
+                            }
+                        },
+                        
+                        new FlexRowCentered(Size(100))
+                        {
+                            new FlexRowCentered
+                            {
+                                "29",
+                                FontSize24,
+                                Color(rgba(2, 136, 209, 1)),
+                                Size(64),
+                                Border(4,solid, rgba(2, 136, 209, 1)),
+                                BorderRadius(100)
+                            }
+                        }
+                    }
+                };
             }
         }
