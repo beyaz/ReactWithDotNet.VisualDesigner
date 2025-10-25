@@ -54,22 +54,10 @@ sealed record PropSuggestionScope
     public string TagName { get; init; }
 }
 
-interface IPlugin
-{
-    string AnalyzeExportFilePath(string exportFilePathForComponent);
-}
-
-abstract class PluginBase:IPlugin
-{
-    public virtual string AnalyzeExportFilePath(string exportFilePathForComponent)
-    {
-        return exportFilePathForComponent;
-    }
-
-}
 
 
-class Plugin: PluginBase
+
+class Plugin
 {
     public static readonly ScopeKey<VisualElementModel> VisualElementModel = new() { Key = nameof(VisualElementModel) };
     
@@ -120,7 +108,7 @@ class Plugin: PluginBase
         }
     }
 
-    public override string AnalyzeExportFilePath(string exportFilePathForComponent)
+    public static string AnalyzeExportFilePath(string exportFilePathForComponent)
     {
         var scope = Scope.Create(new()
         {
