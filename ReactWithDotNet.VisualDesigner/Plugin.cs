@@ -619,9 +619,9 @@ static class Plugin
         return RunPluginMethods(TryGetIconForElementTreeNodes, scope, IconForElementTreeNode);
     }
 
-    static IReadOnlyList<ComponentMeta> GetAllTypesMetadata()
+    static IEnumerable<ComponentMeta> GetAllTypesMetadata()
     {
-        return AllCustomComponents.Select(createFrom).ToList();
+        return from type in AllCustomComponents select createFrom(type);
 
         static ComponentMeta createFrom(Type type)
         {
