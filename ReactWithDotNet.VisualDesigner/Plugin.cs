@@ -24,6 +24,14 @@ public sealed record TryCreateElementForPreviewInput
     public MouseEventHandler OnMouseClick { get; init; }
 }
 
+public delegate Element TryCreateElementForPreview(TryCreateElementForPreviewInput input);
+
+[AttributeUsage(AttributeTargets.Method)]
+sealed class TryCreateElementForPreviewAttribute : Attribute
+{
+}
+
+
 sealed record PropSuggestionScope
 {
     public ComponentEntity Component { get; init; }
