@@ -7,7 +7,8 @@ using ReactWithDotNet.VisualDesigner;
 
 namespace BDigitalFrameworkApiToTsExporter;
 
-class MainWindow : Component<MainWindow.State>
+[Route(Routes.MainWindow)]
+sealed class MainWindow : Component<MainWindow.State>
 {
     static string StateCacheFilePath => Path.Combine(Path.GetTempPath(), "BDigitalFrameworkApiToTsExporter.state.json");
 

@@ -8,6 +8,7 @@ using ReactWithDotNet.VisualDesigner.PropertyDomain;
 
 namespace ReactWithDotNet.VisualDesigner.Views;
 
+[Route(Routes.VisualDesignerPreview)]
 sealed class ApplicationPreview : Component
 {
     public Task Refresh()

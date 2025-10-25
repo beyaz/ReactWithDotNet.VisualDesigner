@@ -1,5 +1,3 @@
-using System.IO;
-using System.Reflection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Net.Http.Headers;
@@ -13,12 +11,7 @@ public static class ReactWithDotNetIntegration
     {
         app.UseMiddleware<ReactWithDotNetJavaScriptFiles>();
 
-        var routeMap = typeof(Page)
-            .GetFields(BindingFlags.Static | BindingFlags.Public)
-            .Where(f => f.FieldType == typeof(PageRouteInfo))
-            .Select(f => (PageRouteInfo)f.GetValue(null))
-            .Where(x => x is not null)
-            .ToDictionary(x => x.Url, x => x, StringComparer.OrdinalIgnoreCase);
+        var routeMap = RouteHelper.GetRoutesFromAssembly(typeof(ReactWithDotNetIntegration).Assembly);
 
         RequestHandlerPath = "/" + nameof(HandleReactWithDotNetRequest);
 
@@ -34,13 +27,7 @@ public static class ReactWithDotNetIntegration
 
             if (routeMap.TryGetValue(path, out var routeInfo))
             {
-                await WriteHtmlResponse(httpContext, typeof(MainLayout), routeInfo.page);
-                return;
-            }
-
-            if (path == "/UploadFile")
-            {
-                await UploadFileAndWriteResponse(httpContext);
+                await WriteHtmlResponse(httpContext, typeof(MainLayout), routeInfo.Page);
                 return;
             }
 
@@ -71,8 +58,6 @@ public static class ReactWithDotNetIntegration
 
             await next();
         });
-
-        
     }
 
     static Task HandleReactWithDotNetRequest(HttpContext httpContext)
@@ -91,42 +76,10 @@ public static class ReactWithDotNetIntegration
         return Task.CompletedTask;
     }
 
-    static async Task<IResult> UploadFile(HttpContext httpContext)
-    {
-        var request = httpContext.Request;
-        if (!request.HasFormContentType)
-        {
-            return Results.BadRequest("The request doesn't contain form content type");
-        }
-
-        var form = await request.ReadFormAsync();
-        var file = form.Files["file"];
-        if (file == null || file.Length == 0)
-        {
-            return Results.BadRequest("The file is empty or not provided");
-        }
-
-        var filePath = Path.Combine(@"C:\Users\beyaz\Downloads\", file.FileName);
-
-        await using (var stream = new FileStream(filePath, FileMode.Create))
-        {
-            await file.CopyToAsync(stream);
-        }
-
-        return Results.Ok(new { FilePath = filePath });
-    }
-
-    static async Task UploadFileAndWriteResponse(HttpContext httpContext)
-    {
-        var uploadResult = await UploadFile(httpContext);
-
-        await uploadResult.ExecuteAsync(httpContext);
-    }
-
     static Task WriteHtmlResponse(HttpContext httpContext, Type layoutType, Type mainContentType)
     {
         Cache.Clear();
-        
+
         httpContext.Response.ContentType = "text/html; charset=UTF-8";
 
         httpContext.Response.Headers[HeaderNames.CacheControl] = "no-cache, no-store, must-revalidate";

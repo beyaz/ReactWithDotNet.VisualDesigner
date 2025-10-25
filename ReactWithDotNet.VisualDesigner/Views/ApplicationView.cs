@@ -7,6 +7,7 @@ using Page = ReactWithDotNet.VisualDesigner.Infrastructure.Page;
 
 namespace ReactWithDotNet.VisualDesigner.Views;
 
+[Route(Routes.VisualDesigner)]
 sealed class ApplicationView : Component<ApplicationState>
 {
     static readonly Dictionary<string, IReadOnlyList<(string Name, IReadOnlyList<string> Suggestions)>> HtmlPropSuggestions = new()
@@ -1540,7 +1541,7 @@ sealed class ApplicationView : Component<ApplicationState>
             return new iframe
             {
                 id    = "ComponentPreview",
-                src   = Page.VisualDesignerPreview.Url,
+                src   = Routes.VisualDesignerPreview,
                 style = { BorderNone, WidthFull, HeightFull },
                 title = "Component Preview"
             };

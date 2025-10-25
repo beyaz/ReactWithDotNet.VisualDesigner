@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Http.Extensions;
-using Page = ReactWithDotNet.VisualDesigner.Infrastructure.Page;
 
 namespace ReactWithDotNet.VisualDesigner;
 
@@ -80,7 +79,7 @@ sealed class MainLayout : PureComponent, IPageLayout
         
         Element ElementIndicators()
         {
-            var isPreviewPage = Context.HttpContext.Request.GetDisplayUrl().EndsWith(Page.VisualDesignerPreview.Url, StringComparison.OrdinalIgnoreCase);
+            var isPreviewPage = Context.HttpContext.Request.GetDisplayUrl().EndsWith(Routes.VisualDesignerPreview, StringComparison.OrdinalIgnoreCase);
             if (isPreviewPage)
             {
                 const string HelperJsFileResourceName = "ReactWithDotNet.UIDesigner.Resources.ComponentIndicator.js";
