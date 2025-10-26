@@ -34,19 +34,25 @@ static class Result
     {
         return new() { Value = value };
     }
+    
+    public static Result<T> Error<T>(Exception exception)
+    {
+        return new() { Error = exception};
+    }
 }
 
 public static class ResultExtensions
 {
-    public static void Match<T>(
-        this Result<T> result,
-        Action<T> onSuccess,
-        Action<Exception> onError)
+    public static void Match<T>(this Result<T> result, Action<T> onSuccess, Action<Exception> onError)
     {
         if (result.HasError)
+        {
             onError(result.Error);
+        }
         else
+        {
             onSuccess(result.Value);
+        }
     }
     
     public static Result<T> AsResult<T>(this (T value, Exception exception) tuple)
@@ -348,17 +354,17 @@ public static class ResultExtensions
     {
         if (source is null)
         {
-            throw new ArgumentNullException(nameof(source));
+            return [Result.Error<C>(new ArgumentNullException(nameof(source)))];
         }
 
         if (bind == null)
         {
-            throw new ArgumentNullException(nameof(bind));
+            return [Result.Error<C>(new ArgumentNullException(nameof(bind)))];
         }
 
         if (resultSelector == null)
         {
-            throw new ArgumentNullException(nameof(resultSelector));
+            return [Result.Error<C>(new ArgumentNullException(nameof(resultSelector)))];
         }
 
         List<Result<C>> returnItems = [];
@@ -575,17 +581,20 @@ public static class ResultExtensions
     {
         if (source == null)
         {
-            throw new ArgumentNullException(nameof(source));
+            yield return Result.Error<C>(new ArgumentNullException(nameof(source)));
+            yield break;
         }
 
         if (bind == null)
         {
-            throw new ArgumentNullException(nameof(bind));
+            yield return Result.Error<C>(new ArgumentNullException(nameof(bind)));
+            yield break;
         }
 
         if (resultSelector == null)
         {
-            throw new ArgumentNullException(nameof(resultSelector));
+            yield return Result.Error<C>(new ArgumentNullException(nameof(resultSelector)));
+            yield break;
         }
 
         foreach (var a in source)
@@ -639,12 +648,12 @@ public static class ResultExtensions
     {
         if (source == null)
         {
-            throw new ArgumentNullException(nameof(source));
+            return [Result.Error<A>(new ArgumentNullException(nameof(source)))];
         }
 
         if (predicate == null)
         {
-            throw new ArgumentNullException(nameof(predicate));
+            return [Result.Error<A>(new ArgumentNullException(nameof(predicate)))];
         }
 
         List<Result<A>> returnList = [];
@@ -772,17 +781,17 @@ public static class ResultExtensions
     {
         if (source is null)
         {
-            throw new ArgumentNullException(nameof(source));
+            return [Result.Error<C>(new ArgumentNullException(nameof(source)))];
         }
 
         if (bind == null)
         {
-            throw new ArgumentNullException(nameof(bind));
+            return [Result.Error<C>(new ArgumentNullException(nameof(bind)))];
         }
 
         if (resultSelector == null)
         {
-            throw new ArgumentNullException(nameof(resultSelector));
+            return [Result.Error<C>(new ArgumentNullException(nameof(resultSelector)))];
         }
 
         List<Result<C>> returnItems = [];
