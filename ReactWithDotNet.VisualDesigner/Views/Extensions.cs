@@ -5,6 +5,24 @@ namespace ReactWithDotNet.VisualDesigner.Views;
 
 static class Extensions
 {
+    public static Maybe<string> TryGetPropertyValue(this IReadOnlyList<string> properties, params string[] propertyNameWithAlias)
+    {
+        foreach (var property in properties)
+        {
+            foreach (var parsedProperty in TryParseProperty(property))
+            {
+                foreach (var propertyName in propertyNameWithAlias)
+                {
+                    if (parsedProperty.Name.Equals(propertyName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return parsedProperty.Value;
+                    }
+                }
+            }
+        }
+
+        return None;
+    }
     
     public static Maybe<ComponentEntity> TryFindComponentByComponentNameWithExportFilePath(int projectId, string componentNameWithExportFilePath)
     {

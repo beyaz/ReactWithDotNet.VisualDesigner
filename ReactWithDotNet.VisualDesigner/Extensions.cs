@@ -528,25 +528,6 @@ public static partial class Extensions
         return typeof(svg).Assembly.GetType(nameof(ReactWithDotNet) + "." + tag, false, false);
     }
 
-    public static Maybe<string> TryGetPropertyValue(this IReadOnlyList<string> properties, params string[] propertyNameWithAlias)
-    {
-        foreach (var property in properties)
-        {
-            foreach (var parsedProperty in TryParseProperty(property))
-            {
-                foreach (var propertyName in propertyNameWithAlias)
-                {
-                    if (parsedProperty.Name.Equals(propertyName, StringComparison.OrdinalIgnoreCase))
-                    {
-                        return parsedProperty.Value;
-                    }
-                }
-            }
-        }
-
-        return None;
-    }
-
     public static Maybe<(string width, string style, string color)> TryParseBorderCss(string text)
     {
         var parts = text.Split(' ', StringSplitOptions.RemoveEmptyEntries);
