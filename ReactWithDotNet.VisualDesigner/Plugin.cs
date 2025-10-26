@@ -46,6 +46,7 @@ public sealed record TryCreateElementForPreviewInput
     public string Id { get; init; }
 
     public MouseEventHandler OnMouseClick { get; init; }
+    
     public string Tag { get; init; }
 }
 

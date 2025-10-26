@@ -23,6 +23,7 @@ sealed class BAlert : PluginComponentBase
             new Alert
             {
                 severity = severity,
+                
                 variant  = variant,
 
                 children = { children }
