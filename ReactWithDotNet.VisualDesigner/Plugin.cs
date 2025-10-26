@@ -182,22 +182,7 @@ public static class Plugin
         get { return field ??= GetPluginMethods<TryGetIconForElementTreeNodeAttribute>(); }
     }
 
-    public static ReactNode AddContextProp(ReactNode node)
-    {
-        if (node.Properties.Any(p => p.Name == "context"))
-        {
-            return node;
-        }
-
-        return node with
-        {
-            Properties = node.Properties.Add(new()
-            {
-                Name  = "context",
-                Value = "context"
-            })
-        };
-    }
+   
 
     public static ConfigModel AfterReadConfig(ConfigModel config)
     {

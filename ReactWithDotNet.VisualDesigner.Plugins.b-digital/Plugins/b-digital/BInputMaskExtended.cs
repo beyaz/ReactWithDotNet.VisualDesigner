@@ -122,7 +122,7 @@ sealed class BInputMaskExtended : PluginComponentBase
                 };
             }
 
-            node = Plugin.AddContextProp(node);
+            node = AddContextProp(node);
         }
 
         return node with { Children = node.Children.Select(x => AnalyzeReactNode(x, componentConfig)).ToImmutableList() };
