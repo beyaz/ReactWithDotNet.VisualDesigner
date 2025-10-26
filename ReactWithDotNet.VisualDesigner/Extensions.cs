@@ -233,17 +233,7 @@ public static partial class Extensions
         return value.ToString(CultureInfo_en_US) + "px";
     }
 
-    public static VisualElementModel AsVisualElementModel(this string rootElementAsYaml)
-    {
-        if (rootElementAsYaml is null)
-        {
-            return null;
-        }
-
-        var value = DeserializeFromYaml<VisualElementModel>(rootElementAsYaml);
-
-        return value;
-    }
+    
 
     public static double CalculateTextWidth(string text)
     {
@@ -308,28 +298,13 @@ public static partial class Extensions
         };
     }
 
-    public static VisualElementModel FindTreeNodeByTreePath(VisualElementModel node, string path)
+   
+
+    
+    public static bool HasNoValue(this string value)
     {
-        if (path.HasNoValue())
-        {
-            return null;
-        }
-
-        foreach (var index in path.Split(',').Select(int.Parse).Skip(1))
-        {
-            if (node.Children.Count <= index)
-            {
-                return null;
-            }
-
-            node = node.Children[index];
-        }
-
-        return node;
+        return string.IsNullOrWhiteSpace(value);
     }
-
-    
-    
    
     public static async Task<Result<(string filePath, string targetComponentName)>> GetComponentFileLocation(int componentId, string userLocalWorkspacePath)
     {
@@ -349,47 +324,9 @@ public static partial class Extensions
         return (filePath, component.GetName());
     }
 
-    public static string GetDesignText(this VisualElementModel model)
-    {
-        var query =
-            from p in model.Properties
-            from v in TryParseProperty(p)
-            where v.Name == Design.TextPreview
-            select v.Value;
+    
 
-        return query.FirstOrDefault();
-    }
-
-    public static string GetText(this VisualElementModel model)
-    {
-        var query =
-            from p in model.Properties
-            from v in TryParseProperty(p)
-            where v.Name == Design.Text
-            select v.Value;
-
-        return query.FirstOrDefault();
-    }
-
-    public static bool HasNoChild(this VisualElementModel model)
-    {
-        return model.Children is null || model.Children.Count == 0;
-    }
-
-    public static bool HasNoText(this VisualElementModel model)
-    {
-        return GetText(model).HasNoValue();
-    }
-
-    public static bool HasNoValue(this string value)
-    {
-        return string.IsNullOrWhiteSpace(value);
-    }
-
-    public static bool HasText(this VisualElementModel model)
-    {
-        return GetText(model).HasValue();
-    }
+    
 
     public static bool HasValue(this string value)
     {
