@@ -152,19 +152,6 @@ public static class Plugin
         get { return field ??= GetPluginMethods<AnalyzeExportFilePathAttribute>(); }
     }
 
-    static IReadOnlyList<Func<ReactNode, IReadOnlyDictionary<string, string>, ReactNode>> AnalyzeNodeList
-    {
-        get
-        {
-            return field ??= (
-                    from type in AllCustomComponents
-                    from methodInfo in type.GetMethods(BindingFlags.Static | BindingFlags.Public)
-                    where methodInfo.GetCustomAttribute<NodeAnalyzerAttribute>() is not null
-                    select (Func<ReactNode, IReadOnlyDictionary<string, string>, ReactNode>)Delegate
-                        .CreateDelegate(typeof(Func<ReactNode, IReadOnlyDictionary<string, string>, ReactNode>), methodInfo))
-                .ToList();
-        }
-    }
 
     static IReadOnlyList<GetStringSuggestionsDelegate> GetStringSuggestionsMethods
     {
@@ -232,49 +219,14 @@ public static class Plugin
         return RunPluginMethods(AnalyzeExportFilePathList, scope, ExportFilePathForComponent) ?? exportFilePathForComponent;
     }
 
-    public static ReactNode AnalyzeNode(ReactNode node, IReadOnlyDictionary<string, string> componentConfig)
-    {
-        foreach (var method in AnalyzeNodeList)
-        {
-            node = method(node, componentConfig);
-        }
-
-        return node;
-    }
+    
 
     public static Element BeforeComponentPreview(RenderPreviewScope scope, VisualElementModel visualElementModel, Element component)
     {
         return component;
     }
 
-    public static IEnumerable<string> CalculateImportLines(ReactNode node)
-    {
-        var lines = new List<string>();
 
-        foreach (var type in AllCustomComponents)
-        {
-            lines.AddRange(tryGetImportLines(type, node));
-        }
-
-        foreach (var child in node.Children)
-        {
-            lines.AddRange(CalculateImportLines(child));
-        }
-
-        return lines.Distinct();
-
-        static IEnumerable<string> tryGetImportLines(Type type, ReactNode node)
-        {
-            if (type.Name == node.Tag)
-            {
-                return
-                    from a in type.GetCustomAttributes<ImportAttribute>()
-                    select $"import {{ {a.Name} }} from \"{a.Package}\";";
-            }
-
-            return [];
-        }
-    }
 
     public static string ConvertDotNetPathToJsPath(string dotNetPath)
     {

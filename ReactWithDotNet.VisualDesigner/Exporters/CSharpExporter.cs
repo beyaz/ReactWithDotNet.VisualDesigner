@@ -1,6 +1,5 @@
 ﻿using Newtonsoft.Json;
 using ReactWithDotNet.Transformers;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Reflection;
 
@@ -114,13 +113,13 @@ static class CSharpExporter
             from rootNode in ModelToNodeTransformer.ConvertVisualElementModelToReactNodeModel(project, rootVisualElement)
 
             // Analyze node
-            let analyzedRootNode = Plugin.AnalyzeNode(rootNode, componentConfig)
+            let analyzedRootNode = AnalyzeNode(rootNode, componentConfig)
 
             // Convert node to JSX tree
             from elementJsxTree in ConvertReactNodeModelToElementTreeSourceLines(project, analyzedRootNode, null, 0)
 
             // Calculate imports
-            let importLines = Plugin.CalculateImportLines(analyzedRootNode)
+            let importLines = CalculateImportLines(analyzedRootNode)
 
             // return
             select (elementJsxTree, importLines.AsReadOnlyList());
