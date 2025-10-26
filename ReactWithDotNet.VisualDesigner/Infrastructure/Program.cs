@@ -1,9 +1,10 @@
-using System.IO.Compression;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System.IO.Compression;
+using System.Runtime.Loader;
 
 namespace ReactWithDotNet.VisualDesigner.Infrastructure;
 
@@ -23,6 +24,11 @@ public class Program
             }
         
             Config = config.Value;
+        }
+
+        // A t t a c h   a s s e m b l y   r e s o l v e r   f o r   p l u g i n s
+        {
+            AssemblyLoadContext.Default.Resolving += Plugin.ResolveAssembly;
         }
 
         // SyncHelper.From_SQLite_to_SqlServer.Transfer_From_SQLite_to_SqlServer().GetAwaiter().GetResult();

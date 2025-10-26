@@ -3,6 +3,7 @@ using System.Collections.Immutable;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
+using System.Runtime.Loader;
 using System.Text;
 using Mono.Cecil;
 using ReactWithDotNet.VisualDesigner.Configuration;
@@ -113,21 +114,34 @@ public static class Plugin
 
     public static ScopeKey<ConfigModel> Config = new() { Key = nameof(Config) };
 
-    static IReadOnlyList<Assembly> Plugins
+   public static IReadOnlyList<Assembly> Plugins
     {
         get
         {
             return field ??= new[] { typeof(Plugin).Assembly }.ToImmutableList().AddRange
             (
                 from filePath in Directory.GetFiles(Path.GetDirectoryName(typeof(Plugin).Assembly.Location)!, "*.dll")
-                where filePath.StartsWith("ReactWithDotNet.VisualDesigner.Plugins.")
-                select Assembly.LoadFile(filePath)
+                where Path.GetFileName(filePath).StartsWith("ReactWithDotNet.VisualDesigner.Plugins.")
+                select Assembly.Load(File.ReadAllBytes(filePath))
             );
         }
-    } 
-    
-    
-    
+    }
+
+    public static Assembly ResolveAssembly(AssemblyLoadContext context, AssemblyName assemblyName)
+    {
+        // 1. Construct the full path to the dependent assembly (.dll)
+        string dependencyPath = Path.Combine(Path.GetDirectoryName(typeof(Plugin).Assembly.Location)!, assemblyName.Name + ".dll");
+
+        // 2. Check if the file exists in the directory
+        if (File.Exists(dependencyPath))
+        {
+            // 3. Load the dependent assembly from the path and return it
+            return context.LoadFromAssemblyPath(dependencyPath);
+        }
+
+        // 4. Return null if the dependency was not found
+        return null;
+    }
 
     delegate Task<Result<IReadOnlyList<string>>> GetStringSuggestionsDelegate(PropSuggestionScope scope);
 

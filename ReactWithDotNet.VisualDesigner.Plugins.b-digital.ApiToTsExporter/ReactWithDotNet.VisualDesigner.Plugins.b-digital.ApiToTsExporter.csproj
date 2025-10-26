@@ -5,6 +5,7 @@
 		<TargetFramework>net8.0</TargetFramework>
 		<NoWarn>CS8981</NoWarn>
 		<OutputType>Library</OutputType>
+		<BaseOutputPath>C:\github\ReactWithDotNet.VisualDesigner\ReactWithDotNet.VisualDesigner\bin\Debug\net8.0</BaseOutputPath>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -28,5 +29,13 @@
 	    <HintPath>..\lib\ReactWithDotNet\ReactWithDotNet.dll</HintPath>
 	  </Reference>
 	</ItemGroup>
+
+
+	<Target Name="CopyOutputAfterBuild" AfterTargets="Build">
+		<Copy
+			SourceFiles="$(TargetPath)"
+			DestinationFolder="$(SolutionDir)ReactWithDotNet.VisualDesigner\bin\debug\net8.0\"
+			SkipUnchangedFiles="true" />
+	</Target>
 
 </Project>

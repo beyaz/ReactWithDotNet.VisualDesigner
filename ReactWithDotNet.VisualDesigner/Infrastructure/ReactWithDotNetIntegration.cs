@@ -11,7 +11,7 @@ public static class ReactWithDotNetIntegration
     {
         app.UseMiddleware<ReactWithDotNetJavaScriptFiles>();
 
-        var routeMap = RouteHelper.GetRoutesFromAssembly(typeof(ReactWithDotNetIntegration).Assembly);
+        var routeMap = RouteHelper.GetRoutesFrom(Plugin.Plugins);
 
         RequestHandlerPath = "/" + nameof(HandleReactWithDotNetRequest);
 
