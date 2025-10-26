@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "ReactWithDotNet.VisualDesigner.Plugins.b-digital": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:59118;http://localhost:59120"
+    }
+  }
+}

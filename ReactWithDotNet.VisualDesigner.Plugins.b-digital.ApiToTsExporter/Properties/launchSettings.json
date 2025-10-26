@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "ReactWithDotNet.VisualDesigner.Plugins.b-digital.ApiToTsExporter": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:59117;http://localhost:59119"
+    }
+  }
+}
