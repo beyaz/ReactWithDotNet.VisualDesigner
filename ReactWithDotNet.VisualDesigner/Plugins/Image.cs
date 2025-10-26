@@ -10,6 +10,7 @@ public sealed class Image : PluginComponentBase
     public bool? fill { get; set; }
 
     public string height { get; set; }
+    
     public string src { get; set; }
 
     public string width { get; set; }
