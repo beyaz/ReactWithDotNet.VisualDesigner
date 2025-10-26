@@ -30,31 +30,19 @@ public sealed class Result<TValue>
 
 static class Result
 {
+    public static Result<T> Error<T>(Exception exception)
+    {
+        return new() { Error = exception };
+    }
+
     public static Result<T> From<T>(T value)
     {
         return new() { Value = value };
-    }
-    
-    public static Result<T> Error<T>(Exception exception)
-    {
-        return new() { Error = exception};
     }
 }
 
 public static class ResultExtensions
 {
-    public static void Match<T>(this Result<T> result, Action<T> onSuccess, Action<Exception> onError)
-    {
-        if (result.HasError)
-        {
-            onError(result.Error);
-        }
-        else
-        {
-            onSuccess(result.Value);
-        }
-    }
-    
     public static Result<T> AsResult<T>(this (T value, Exception exception) tuple)
     {
         return new() { Value = tuple.value, Error = tuple.exception };
@@ -78,6 +66,18 @@ public static class ResultExtensions
         }
 
         return items;
+    }
+
+    public static void Match<T>(this Result<T> result, Action<T> onSuccess, Action<Exception> onError)
+    {
+        if (result.HasError)
+        {
+            onError(result.Error);
+        }
+        else
+        {
+            onSuccess(result.Value);
+        }
     }
 
     public static IEnumerable<Result<B>> Select<A, B>
@@ -115,7 +115,7 @@ public static class ResultExtensions
             yield return selector(result.Value);
         }
     }
-    
+
     public static async IAsyncEnumerable<Result<B>> Select<A, B>
     (
         this IAsyncEnumerable<Result<A>> source,
@@ -640,44 +640,6 @@ public static class ResultExtensions
         return returnList;
     }
 
-    public static IEnumerable<Result<A>> Where<A>
-    (
-        this IEnumerable<Result<A>> source,
-        Func<A, bool> predicate
-    )
-    {
-        if (source == null)
-        {
-            return [Result.Error<A>(new ArgumentNullException(nameof(source)))];
-        }
-
-        if (predicate == null)
-        {
-            return [Result.Error<A>(new ArgumentNullException(nameof(predicate)))];
-        }
-
-        List<Result<A>> returnList = [];
-
-        foreach (var result in source)
-        {
-            if (result.HasError)
-            {
-                returnList.Add(new() { Error = result.Error });
-
-                return returnList;
-            }
-
-            if (predicate(result.Value))
-            {
-                returnList.Add(result);
-            }
-        }
-
-        return returnList;
-    }
-    
-    
-    
     public static async IAsyncEnumerable<Result<C>> SelectMany<A, B, C>
     (
         this IAsyncEnumerable<Result<A>> source,
@@ -700,8 +662,7 @@ public static class ResultExtensions
             }
         }
     }
-    
-    
+
     public static async IAsyncEnumerable<Result<C>> SelectMany<A, B, C>
     (
         this IAsyncEnumerable<Result<A>> source,
@@ -724,7 +685,7 @@ public static class ResultExtensions
             }
         }
     }
-    
+
     public static async IAsyncEnumerable<Result<C>> SelectMany<A, B, C>
     (
         this IAsyncEnumerable<Result<A>> source,
@@ -746,11 +707,11 @@ public static class ResultExtensions
                 yield return resultB.Error;
                 yield break;
             }
-            
+
             yield return resultSelector(a.Value, resultB.Value);
         }
     }
-    
+
     public static async Task<Result<C>> SelectMany<A, B, C>
     (
         this Result<A> source,
@@ -771,7 +732,7 @@ public static class ResultExtensions
 
         return resultSelector(source.Value, middle.Value);
     }
-    
+
     public static IEnumerable<Result<C>> SelectMany<A, B, C>
     (
         this IEnumerable<Result<A>> source,
@@ -814,10 +775,44 @@ public static class ResultExtensions
 
                 returnItems.Add(c);
             }
-
-            
         }
 
         return returnItems;
+    }
+
+    public static IEnumerable<Result<A>> Where<A>
+    (
+        this IEnumerable<Result<A>> source,
+        Func<A, bool> predicate
+    )
+    {
+        if (source == null)
+        {
+            return [Result.Error<A>(new ArgumentNullException(nameof(source)))];
+        }
+
+        if (predicate == null)
+        {
+            return [Result.Error<A>(new ArgumentNullException(nameof(predicate)))];
+        }
+
+        List<Result<A>> returnList = [];
+
+        foreach (var result in source)
+        {
+            if (result.HasError)
+            {
+                returnList.Add(new() { Error = result.Error });
+
+                return returnList;
+            }
+
+            if (predicate(result.Value))
+            {
+                returnList.Add(result);
+            }
+        }
+
+        return returnList;
     }
 }
