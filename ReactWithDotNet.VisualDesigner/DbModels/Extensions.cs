@@ -1,6 +1,6 @@
 ﻿using System.IO;
 
-namespace ReactWithDotNet.VisualDesigner;
+namespace ReactWithDotNet.VisualDesigner.DbModels;
 
 static class ComponentConfigReservedName
 {
@@ -9,7 +9,7 @@ static class ComponentConfigReservedName
     public static readonly string Name = "Name";
 }
 
-static partial class Extensions
+public static class Extensions
 {
     public static IReadOnlyDictionary<string, string> GetConfig(this ComponentEntity componentEntity)
     {

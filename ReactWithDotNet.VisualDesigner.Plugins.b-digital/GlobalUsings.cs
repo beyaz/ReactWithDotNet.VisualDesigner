@@ -7,3 +7,4 @@ global using Toolbox;
 global using static ReactWithDotNet.VisualDesigner.Extensions;
 global using static ReactWithDotNet.WebColors;
 global using static ReactWithDotNet.Mixin;
+global using static ReactWithDotNet.VisualDesigner.DbModels.Extensions;
