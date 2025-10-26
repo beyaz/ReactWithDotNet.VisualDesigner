@@ -1,12 +1,13 @@
-﻿using System.Collections;
+﻿using Mono.Cecil;
+using ReactWithDotNet.VisualDesigner.Configuration;
+using ReactWithDotNet.VisualDesigner.Exporters;
+using System.Collections;
 using System.Collections.Immutable;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
+using System.Runtime.Loader;
 using System.Text;
-using Mono.Cecil;
-using ReactWithDotNet.VisualDesigner.Configuration;
-using ReactWithDotNet.VisualDesigner.Exporters;
 
 namespace ReactWithDotNet.VisualDesigner;
 
@@ -121,7 +122,7 @@ public static class Plugin
             (
                 from filePath in Directory.GetFiles(Path.GetDirectoryName(typeof(Plugin).Assembly.Location)!, "*.dll")
                 where Path.GetFileName(filePath).StartsWith("ReactWithDotNet.VisualDesigner.Plugins.")
-                select Assembly.Load(File.ReadAllBytes(filePath))
+                select AssemblyLoadContext.Default.LoadFromAssemblyPath(filePath)
             );
         }
     }
