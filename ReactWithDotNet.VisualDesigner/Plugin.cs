@@ -3,7 +3,6 @@ using System.Collections.Immutable;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
-using System.Runtime.Loader;
 using System.Text;
 using Mono.Cecil;
 using ReactWithDotNet.VisualDesigner.Configuration;
@@ -126,23 +125,7 @@ public static class Plugin
             );
         }
     }
-
-    public static Assembly ResolveAssembly(AssemblyLoadContext context, AssemblyName assemblyName)
-    {
-        // 1. Construct the full path to the dependent assembly (.dll)
-        string dependencyPath = Path.Combine(Path.GetDirectoryName(typeof(Plugin).Assembly.Location)!, assemblyName.Name + ".dll");
-
-        // 2. Check if the file exists in the directory
-        if (File.Exists(dependencyPath))
-        {
-            // 3. Load the dependent assembly from the path and return it
-            return context.LoadFromAssemblyPath(dependencyPath);
-        }
-
-        // 4. Return null if the dependency was not found
-        return null;
-    }
-
+    
     delegate Task<Result<IReadOnlyList<string>>> GetStringSuggestionsDelegate(PropSuggestionScope scope);
 
     public static IReadOnlyList<Type> AllCustomComponents

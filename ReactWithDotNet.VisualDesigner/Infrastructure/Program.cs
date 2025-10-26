@@ -28,7 +28,7 @@ public class Program
 
         // A t t a c h   a s s e m b l y   r e s o l v e r   f o r   p l u g i n s
         {
-            AssemblyLoadContext.Default.Resolving += Plugin.ResolveAssembly;
+         
         }
 
         // SyncHelper.From_SQLite_to_SqlServer.Transfer_From_SQLite_to_SqlServer().GetAwaiter().GetResult();
