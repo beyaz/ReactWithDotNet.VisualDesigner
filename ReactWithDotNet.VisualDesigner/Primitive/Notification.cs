@@ -3,7 +3,7 @@ using static System.Threading.Tasks.Task;
 
 namespace ReactWithDotNet.VisualDesigner.Primitive;
 
-sealed class NotificationMessage
+public sealed class NotificationMessage
 {
     public bool IsSuccess { get; init; }
 
@@ -14,7 +14,7 @@ sealed class NotificationMessage
 
 delegate Task PublishNotification(NotificationMessage message);
 
-static class NotificationHelper
+public static class NotificationHelper
 {
     public static Element CreateNotificationContent(NotificationMessage message)
     {

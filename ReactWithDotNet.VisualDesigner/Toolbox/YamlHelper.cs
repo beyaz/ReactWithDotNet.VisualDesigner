@@ -4,7 +4,7 @@ using YamlDotNet.Serialization.NamingConventions;
 
 namespace Toolbox;
 
-static class YamlHelper
+public static class YamlHelper
 {
     public static T DeserializeFromYaml<T>(string yamlContent) where T: class
     {

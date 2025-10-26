@@ -12,6 +12,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReactWithDotNet.VisualDesig
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VsOpenFileAtLine", "VsOpenFileAtLine\VsOpenFileAtLine.csproj", "{308971CA-490F-48F8-A074-34C194E03AFE}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Plugins", "Plugins", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReactWithDotNet.VisualDesigner.Plugins.b-digital", "ReactWithDotNet.VisualDesigner.Plugins.b-digital\ReactWithDotNet.VisualDesigner.Plugins.b-digital.csproj", "{1A0E3303-7134-CC02-3210-DD4E96928B6A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReactWithDotNet.VisualDesigner.Plugins.b-digital.ApiToTsExporter", "ReactWithDotNet.VisualDesigner.Plugins.b-digital.ApiToTsExporter\ReactWithDotNet.VisualDesigner.Plugins.b-digital.ApiToTsExporter.csproj", "{DC82799F-D2F4-87A6-4697-67EAEBF355EE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,9 +36,21 @@ Global
 		{308971CA-490F-48F8-A074-34C194E03AFE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{308971CA-490F-48F8-A074-34C194E03AFE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{308971CA-490F-48F8-A074-34C194E03AFE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1A0E3303-7134-CC02-3210-DD4E96928B6A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1A0E3303-7134-CC02-3210-DD4E96928B6A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1A0E3303-7134-CC02-3210-DD4E96928B6A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1A0E3303-7134-CC02-3210-DD4E96928B6A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DC82799F-D2F4-87A6-4697-67EAEBF355EE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DC82799F-D2F4-87A6-4697-67EAEBF355EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DC82799F-D2F4-87A6-4697-67EAEBF355EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DC82799F-D2F4-87A6-4697-67EAEBF355EE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{1A0E3303-7134-CC02-3210-DD4E96928B6A} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{DC82799F-D2F4-87A6-4697-67EAEBF355EE} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DE2102C7-A6D2-4046-90A1-F2BFA3DF5035}

@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 
 namespace ReactWithDotNet.VisualDesigner.Configuration;
 
-sealed record DatabaseConfig
+public sealed record DatabaseConfig
 {
     public bool IsSQLite { get; init; }
     
@@ -18,7 +18,7 @@ sealed record DatabaseConfig
     public string SchemaName { get; init; }
 }
 
-sealed record ConfigModel
+public sealed record ConfigModel
 {
     // @formatter:off
 

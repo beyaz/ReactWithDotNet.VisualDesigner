@@ -330,7 +330,7 @@ static class ModelToNodeTransformer
     }
 }
 
-record ReactNode
+public record ReactNode
 {
     public ImmutableList<ReactNode> Children { get; init; } = [];
 
@@ -340,10 +340,10 @@ record ReactNode
 
     public string Text { get; init; }
 
-    internal required Maybe<Type> HtmlElementType { get; init; }
+    public required Maybe<Type> HtmlElementType { get; init; }
 }
 
-record ReactProperty
+public record ReactProperty
 {
     public required string Name { get; init; }
     

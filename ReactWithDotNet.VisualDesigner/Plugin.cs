@@ -73,7 +73,7 @@ public sealed class TryFindAssemblyPathAttribute : Attribute
 {
 }
 
-sealed record PropSuggestionScope
+public sealed record PropSuggestionScope
 {
     public ComponentEntity Component { get; init; }
 
@@ -82,7 +82,7 @@ sealed record PropSuggestionScope
     public string TagName { get; init; }
 }
 
-static class Plugin
+public static class Plugin
 {
     public static readonly ScopeKey<Element> CurrentElementInstanceInPreview = new()
     {
@@ -772,7 +772,7 @@ static class Plugin
 }
 
 [AttributeUsage(AttributeTargets.Property)]
-sealed class SuggestionsAttribute : Attribute
+public sealed class SuggestionsAttribute : Attribute
 {
     public SuggestionsAttribute(string[] suggestions)
     {

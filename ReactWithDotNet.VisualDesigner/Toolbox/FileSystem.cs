@@ -10,7 +10,7 @@ public sealed record FileModel
     public required string Path { get; init; }
 }
 
-static class FileSystem
+public static class FileSystem
 {
     public static async Task<Result<string[]>> ReadAllLines(string filePath)
     {

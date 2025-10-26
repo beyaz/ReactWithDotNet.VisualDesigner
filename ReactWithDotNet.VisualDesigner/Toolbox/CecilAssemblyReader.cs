@@ -3,7 +3,7 @@ using Mono.Cecil;
 
 namespace Toolbox;
 
-static class CecilAssemblyReader
+public static class CecilAssemblyReader
 {
     public static Result<AssemblyDefinition> ReadAssembly(string assemblyFilePath, string secondarySearchDirectoryPath = null)
     {

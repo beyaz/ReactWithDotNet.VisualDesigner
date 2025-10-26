@@ -191,7 +191,7 @@ sealed class IconExport : PureComponent
     }
 }
 
-sealed class IconFlexRow : PureComponent
+public sealed class IconFlexRow : PureComponent
 {
     protected override Element render()
     {
@@ -227,7 +227,7 @@ sealed class IconGrid : PureComponent
     }
 }
 
-sealed class IconFlexColumn : PureComponent
+public sealed class IconFlexColumn : PureComponent
 {
     protected override Element render()
     {
@@ -282,7 +282,7 @@ sealed class IconHeader : PureComponent
     }
 }
 
-sealed class IconLink : PureComponent
+public sealed class IconLink : PureComponent
 {
     protected override Element render()
     {
@@ -300,7 +300,7 @@ sealed class IconLink : PureComponent
     }
 }
 
-sealed class IconImage : PureComponent
+public sealed class IconImage : PureComponent
 {
     protected override Element render()
     {

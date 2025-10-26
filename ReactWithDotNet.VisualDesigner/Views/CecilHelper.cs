@@ -25,7 +25,7 @@ public sealed class JsTypeInfoAttribute : Attribute
     public JsType JsType { get; init; }
 }
 
-static class CecilHelper
+public static class CecilHelper
 {
     public static Result<PropertyDefinition> FindPropertyPath(TypeDefinition typeDefinition, string propertyPath)
     {

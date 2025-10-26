@@ -1,5 +1,6 @@
 ﻿using ReactWithDotNet.ThirdPartyLibraries.MUI.Material;
 
+
 namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
 [CustomComponent]
@@ -78,7 +79,7 @@ sealed class BDigitalGrid : PluginComponentBase
         {
             foreach (var p in node.Properties)
             {
-                foreach (var property in TryParseProperty(p))
+                foreach (var property in ReactWithDotNet.VisualDesigner.PropertyDomain.ParsedPropertyFactory.TryParseProperty(p))
                 {
                     if (property.Name == "direction")
                     {

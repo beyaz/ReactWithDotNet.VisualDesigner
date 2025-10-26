@@ -1141,7 +1141,7 @@ static class ApplicationPreviewExtensions
     }
 }
 
-sealed record RenderPreviewScope
+public sealed record RenderPreviewScope
 {
     public Client Client { get; init; }
 
