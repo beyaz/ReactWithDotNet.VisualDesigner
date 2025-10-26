@@ -7,122 +7,11 @@ namespace ReactWithDotNet.VisualDesigner;
 
 public static partial class Extensions
 {
-    public static bool HasMatch<T>(this T value, Predicate<T> matchFunc) where T : class
-    {
-        if (value is null)
-        {
-            return false;
-        }
-
-        return matchFunc(value);
-    }
-    
-    
-    public static IReadOnlyList<T> AsReadOnlyList<T>(this IEnumerable<T> source)
-        => source as IReadOnlyList<T> ?? source.ToList();
-    
-    public static T FirstOrDefaultOf<T>(IEnumerable<T> items) => items.FirstOrDefault();
-    
-    public static T FirstOf<T>(IEnumerable<T> items) => items.First();
-    
-    public static bool HasAny<T>(IEnumerable<T> items) => items.Any();
-    
-    public static string KebabToCamelCase(string kebab)
-    {
-        if (string.IsNullOrEmpty(kebab))
-        {
-            return kebab;
-        }
-
-        var camelCase = new StringBuilder();
-        var capitalizeNext = false;
-
-        foreach (var c in kebab)
-        {
-            if (c == '-')
-            {
-                capitalizeNext = true;
-            }
-            else
-            {
-                if (capitalizeNext)
-                {
-                    camelCase.Append(char.ToUpper(c, CultureInfo.InvariantCulture));
-                    capitalizeNext = false;
-                }
-                else
-                {
-                    camelCase.Append(c);
-                }
-            }
-        }
-
-        return camelCase.ToString();
-    }
-    
-    public static string EnvironmentUserName => Environment.UserName;
-    
-    public static bool IsEqualsIgnoreWhitespace(string a, string b)
-    {
-        return ignore_whitespace_characters(a) == ignore_whitespace_characters(b);
-        
-        static string ignore_whitespace_characters(string value)
-        {
-            if (value == null)
-            {
-                return null;
-            }
-
-            return Regex.Replace(value, @"\s+", string.Empty);
-        }
-    }
-    
-    public static bool IsAlphaNumeric(string input)
-    {
-        if (string.IsNullOrEmpty(input))
-        {
-            return false;
-        }
-
-        return input.All(char.IsLetterOrDigit);
-    }
-    
-    
-    
-    public static Result<T> Try<T>(Func<T> func)
-    {
-        try
-        {
-            return func();
-        }
-        catch (Exception exception)
-        {
-            return exception;
-        }
-    }
-    public static Maybe<int> TryParseInt32(string text)
-    {
-        if (int.TryParse(text, out var number))
-        {
-            return number;
-        }
-
-        return None;
-    }
-    
-    public static Maybe<double> TryParseDouble(string text)
-    {
-        if (double.TryParse(text, out var number))
-        {
-            return number;
-        }
-
-        return None;
-    }
-    
     public static readonly CachedObjectMap Cache = new() { Timeout = TimeSpan.FromMinutes(5) };
 
     public static readonly CultureInfo CultureInfo_en_US = new("en-US");
+
+    public static string EnvironmentUserName => Environment.UserName;
 
     public static IReadOnlyList<string> TagNameList =>
     [
@@ -233,7 +122,10 @@ public static partial class Extensions
         return value.ToString(CultureInfo_en_US) + "px";
     }
 
-    
+    public static IReadOnlyList<T> AsReadOnlyList<T>(this IEnumerable<T> source)
+    {
+        return source as IReadOnlyList<T> ?? source.ToList();
+    }
 
     public static double CalculateTextWidth(string text)
     {
@@ -284,7 +176,7 @@ public static partial class Extensions
             new style
             {
                 $$"""
-                  
+
                   @font-face {
                     font-family: 'Wix Madefor Text';
                     src: url('{{context.wwwroot}}/fonts/WixMadeforText-Regular.woff2') format('woff2');
@@ -298,21 +190,23 @@ public static partial class Extensions
         };
     }
 
-   
-
-    
-    public static bool HasNoValue(this string value)
+    public static T FirstOf<T>(IEnumerable<T> items)
     {
-        return string.IsNullOrWhiteSpace(value);
+        return items.First();
     }
-   
+
+    public static T FirstOrDefaultOf<T>(IEnumerable<T> items)
+    {
+        return items.FirstOrDefault();
+    }
+
     public static async Task<Result<(string filePath, string targetComponentName)>> GetComponentFileLocation(int componentId, string userLocalWorkspacePath)
     {
         if (userLocalWorkspacePath.HasNoValue())
         {
             return new ArgumentNullException(nameof(userLocalWorkspacePath));
         }
-        
+
         var component = await Store.TryGetComponent(componentId);
 
         var exportFilePath = component.GetExportFilePath();
@@ -320,13 +214,29 @@ public static partial class Extensions
         exportFilePath = Plugin.AnalyzeExportFilePath(exportFilePath);
 
         var filePath = Path.Combine(userLocalWorkspacePath, Path.Combine(exportFilePath.Split('/', Path.DirectorySeparatorChar)));
-        
+
         return (filePath, component.GetName());
     }
 
-    
+    public static bool HasAny<T>(IEnumerable<T> items)
+    {
+        return items.Any();
+    }
 
-    
+    public static bool HasMatch<T>(this T value, Predicate<T> matchFunc) where T : class
+    {
+        if (value is null)
+        {
+            return false;
+        }
+
+        return matchFunc(value);
+    }
+
+    public static bool HasNoValue(this string value)
+    {
+        return string.IsNullOrWhiteSpace(value);
+    }
 
     public static bool HasValue(this string value)
     {
@@ -338,6 +248,16 @@ public static partial class Extensions
         return list.Contains(item);
     }
 
+    public static bool IsAlphaNumeric(string input)
+    {
+        if (string.IsNullOrEmpty(input))
+        {
+            return false;
+        }
+
+        return input.All(char.IsLetterOrDigit);
+    }
+
     public static bool IsConnectedValue(string value)
     {
         if (value is null)
@@ -347,7 +267,27 @@ public static partial class Extensions
 
         return value.StartsWith("{") && value.EndsWith("}");
     }
-    
+
+    public static bool IsDouble(this string value)
+    {
+        return double.TryParse(value, CultureInfo_en_US, out _);
+    }
+
+    public static bool IsEqualsIgnoreWhitespace(string a, string b)
+    {
+        return ignore_whitespace_characters(a) == ignore_whitespace_characters(b);
+
+        static string ignore_whitespace_characters(string value)
+        {
+            if (value == null)
+            {
+                return null;
+            }
+
+            return Regex.Replace(value, @"\s+", string.Empty);
+        }
+    }
+
     public static bool IsJsonArray(string value)
     {
         if (value is null)
@@ -356,13 +296,6 @@ public static partial class Extensions
         }
 
         return value.StartsWith("[") && value.EndsWith("]");
-    }
-
-    
-    
-    public static bool IsDouble(this string value)
-    {
-        return double.TryParse(value, CultureInfo_en_US, out _);
     }
 
     public static bool IsRawStringValue(string value)
@@ -400,11 +333,44 @@ public static partial class Extensions
         return maybe.HasValue && maybe.Value;
     }
 
+    public static string KebabToCamelCase(string kebab)
+    {
+        if (string.IsNullOrEmpty(kebab))
+        {
+            return kebab;
+        }
+
+        var camelCase = new StringBuilder();
+        var capitalizeNext = false;
+
+        foreach (var c in kebab)
+        {
+            if (c == '-')
+            {
+                capitalizeNext = true;
+            }
+            else
+            {
+                if (capitalizeNext)
+                {
+                    camelCase.Append(char.ToUpper(c, CultureInfo.InvariantCulture));
+                    capitalizeNext = false;
+                }
+                else
+                {
+                    camelCase.Append(c);
+                }
+            }
+        }
+
+        return camelCase.ToString();
+    }
+
     public static List<T> ListFrom<T>(IEnumerable<T> enumerable)
     {
         return enumerable.ToList();
     }
-    
+
     public static Result<List<T>> ListFrom<T>(IEnumerable<Result<T>> enumerable)
     {
         var items = new List<T>();
@@ -425,69 +391,6 @@ public static partial class Extensions
     public static IReadOnlyDictionary<string, string> MapFrom((string key, string value)[] items)
     {
         return items.ToDictionary(x => x.key, x => x.value);
-    }
-
-    public static VisualElementModel Modify(VisualElementModel root, VisualElementModel target, Func<VisualElementModel, VisualElementModel> modifyNode)
-    {
-        if (root == target)
-        {
-            return modifyNode(root);
-        }
-
-        return root with
-        {
-            Children = ListFrom(from child in root.Children select Modify(child, target, modifyNode))
-        };
-    }
-    
-    public static VisualElementModel ModifyElements(VisualElementModel root, Func<VisualElementModel, bool> match, Func<VisualElementModel, VisualElementModel> modify)
-    {
-        // Eğer kök eleman match fonksiyonuna uyuyorsa modify et
-        var modifiedRoot = match(root) ? modify(root) : root;
-
-        // Çocuk elemanları yine bu fonksiyonla recursive olarak işleyin
-        var modifiedChildren = modifiedRoot.Children
-                                           .Select(child => ModifyElements(child, match, modify))
-                                           .ToList();
-
-        // Yeni bir VisualElementModel oluştur ve değiştirilen çocukları ekle
-        return modifiedRoot with { Children = modifiedChildren };
-    }
-
-    /// <summary>
-    ///     Bir öğeyi, listede başka bir öğenin önüne veya arkasına taşır.
-    ///     Drag-and-drop gibi işlemler için idealdir.
-    /// </summary>
-    public static IReadOnlyList<T> MoveItemRelativeTo<T>(this IReadOnlyList<T> list, int sourceIndex, int targetIndex, bool insertBefore)
-    {
-        if (list == null || sourceIndex == targetIndex || sourceIndex < 0 || targetIndex < 0 ||
-            sourceIndex >= list.Count || targetIndex >= list.Count)
-        {
-            return list;
-        }
-
-        var item = list[sourceIndex];
-
-        list = list.RemoveAt(sourceIndex);
-
-        if (sourceIndex < targetIndex)
-        {
-            targetIndex--;
-        }
-
-        var insertIndex = insertBefore ? targetIndex : targetIndex + 1;
-
-        if (insertIndex > list.Count)
-        {
-            insertIndex = list.Count;
-        }
-
-        if (insertIndex < 0)
-        {
-            insertIndex = 0;
-        }
-
-        return list.Insert(insertIndex, item);
     }
 
     public static bool NotIn<T>(this T item, params T[] list)
@@ -568,9 +471,16 @@ public static partial class Extensions
         return data;
     }
 
-    public static void Then<A, B>(this (A a, B b) tuple, Action<A, B> nextAction)
+    public static Result<T> Try<T>(Func<T> func)
     {
-        nextAction(tuple.a, tuple.b);
+        try
+        {
+            return func();
+        }
+        catch (Exception exception)
+        {
+            return exception;
+        }
     }
 
     public static string TryBeautifyPropertyValue(string nameValueCombined)
@@ -665,12 +575,21 @@ public static partial class Extensions
         return None;
     }
 
-   
-    public static Maybe<int> TryReadTagAsDesignerComponentId(VisualElementModel model)
+    public static Maybe<double> TryParseDouble(string text)
     {
-        if (int.TryParse(model.Tag, out var componentId))
+        if (double.TryParse(text, out var number))
         {
-            return componentId;
+            return number;
+        }
+
+        return None;
+    }
+
+    public static Maybe<int> TryParseInt32(string text)
+    {
+        if (int.TryParse(text, out var number))
+        {
+            return number;
         }
 
         return None;
