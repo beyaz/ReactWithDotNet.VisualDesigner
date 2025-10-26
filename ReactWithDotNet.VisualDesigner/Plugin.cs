@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Collections.Immutable;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
@@ -112,10 +113,21 @@ public static class Plugin
 
     public static ScopeKey<ConfigModel> Config = new() { Key = nameof(Config) };
 
-    static readonly IReadOnlyList<Assembly> Plugins =
-    [
-        typeof(Plugin).Assembly
-    ];
+    static IReadOnlyList<Assembly> Plugins
+    {
+        get
+        {
+            return field ??= new[] { typeof(Plugin).Assembly }.ToImmutableList().AddRange
+            (
+                from filePath in Directory.GetFiles(Path.GetDirectoryName(typeof(Plugin).Assembly.Location)!, "*.dll")
+                where filePath.StartsWith("ReactWithDotNet.VisualDesigner.Plugins.")
+                select Assembly.LoadFile(filePath)
+            );
+        }
+    } 
+    
+    
+    
 
     delegate Task<Result<IReadOnlyList<string>>> GetStringSuggestionsDelegate(PropSuggestionScope scope);
 
