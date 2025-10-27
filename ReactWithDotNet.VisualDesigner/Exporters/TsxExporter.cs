@@ -484,5 +484,6 @@ static class TsxExporter
 
     class LineCollection : List<string>
     {
+        
     }
 }
