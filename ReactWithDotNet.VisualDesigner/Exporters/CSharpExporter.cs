@@ -16,15 +16,12 @@ static class CSharpExporter
         public string Text { get; init; }
     }
     public static async Task<Result<string>> CalculateElementTsxCode(int projectId, IReadOnlyDictionary<string, string> componentConfig, VisualElementModel visualElement)
-    {
-        
+    {        
         var project = GetProjectConfig(projectId);
 
         return
             from x in await CalculateElementTreeSourceCodes(project, componentConfig, visualElement)
-            select string.Join(Environment.NewLine, x.elementTreeSourceLines);
-
-        
+            select string.Join(Environment.NewLine, x.elementTreeSourceLines);        
     }
 
     public static Task<Result<ExportOutput>> ExportToFileSystem(ExportInput input)
