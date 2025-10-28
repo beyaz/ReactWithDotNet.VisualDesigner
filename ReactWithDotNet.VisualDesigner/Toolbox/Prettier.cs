@@ -19,20 +19,20 @@ static class Prettier
 
         var options = new JsonSerializerOptions();
 
-        var requestObject = new { code = code };
+        var requestObject = new { code };
 
         var jsonPayload = JsonSerializer.Serialize(requestObject, options);
 
         var jsonContent = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
 
-        var httpResponseMessage = await HttpClient.PostAsync("http://localhost:5009/format", jsonContent);
-
-        var responseContent = await httpResponseMessage.Content.ReadAsStringAsync();
-
         Response response;
 
         try
         {
+            var httpResponseMessage = await HttpClient.PostAsync("http://localhost:5009/format", jsonContent);
+
+            var responseContent = await httpResponseMessage.Content.ReadAsStringAsync();
+            
             response = JsonSerializer.Deserialize<Response>(responseContent, options);
         }
         catch (Exception exception)
@@ -42,7 +42,7 @@ static class Prettier
 
         if (response.error is not null)
         {
-            return new FormatException(string.Join(Environment.NewLine + Environment.NewLine,[code, response.error, response.details]));
+            return new FormatException(string.Join(Environment.NewLine + Environment.NewLine, code, response.error, response.details));
         }
 
         return response.formattedCode.TrimEnd().RemoveFromEnd(";");
@@ -71,7 +71,7 @@ static class Prettier
             CreateNoWindow         = true
         };
 
-        data.NodeProcess = new() { StartInfo = processInfo };
+        data.NodeProcess = new Process { StartInfo = processInfo };
 
         data.NodeProcess.Start();
 
