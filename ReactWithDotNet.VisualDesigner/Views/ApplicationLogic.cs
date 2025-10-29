@@ -17,7 +17,7 @@ static class ApplicationLogic
             }
 
             component   = response.Value.Component;
-            userVersion = response.Value.WorkspaceVersion.Value;
+            userVersion = response.Value.ComponentWorkspaceVersion.Value;
         }
 
         if (userVersion is null)
@@ -395,7 +395,7 @@ static class ApplicationLogic
             }
 
             component   = response.Value.Component;
-            userVersion = response.Value.WorkspaceVersion.Value;
+            userVersion = response.Value.ComponentWorkspaceVersion.Value;
         }
 
         if (userVersion is null)
