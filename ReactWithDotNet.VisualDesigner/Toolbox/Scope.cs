@@ -55,6 +55,11 @@ public sealed class ScopeCreationInput : IEnumerable
     {
         return items.GetEnumerator();
     }
+    
+    public static implicit operator Scope (ScopeCreationInput input)
+    {
+        return Scope.Create(input);
+    }
 }
 
 [DebuggerTypeProxy(typeof(ScopeDebugView))]
