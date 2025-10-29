@@ -270,9 +270,9 @@ public static class Plugin
 
             yield return new()
             {
-                variableName           = variableName,
-                dotNetAssemblyFilePath = assemblyFilePath.Value,
-                dotnetTypeFullName     = dotnetTypeFullName
+                VariableName           = variableName,
+                DotNetAssemblyFilePath = assemblyFilePath.Value,
+                DotnetTypeFullName     = dotnetTypeFullName
             };
         }
     }
@@ -337,7 +337,7 @@ public static class Plugin
 
                 foreach (var (list, fn) in map)
                 {
-                    var result = CecilHelper.GetPropertyPathList(variable.dotNetAssemblyFilePath, variable.dotnetTypeFullName, $"{variable.variableName}.", fn);
+                    var result = CecilHelper.GetPropertyPathList(variable.DotNetAssemblyFilePath, variable.DotnetTypeFullName, $"{variable.VariableName}.", fn);
                     if (result.HasError)
                     {
                         continue;
@@ -736,7 +736,7 @@ public sealed class NodeAnalyzerAttribute : Attribute
 
 public sealed record VariableConfig
 {
-    public string dotNetAssemblyFilePath;
-    public string dotnetTypeFullName;
-    public string variableName;
+    public string DotNetAssemblyFilePath;
+    public string DotnetTypeFullName;
+    public string VariableName;
 }

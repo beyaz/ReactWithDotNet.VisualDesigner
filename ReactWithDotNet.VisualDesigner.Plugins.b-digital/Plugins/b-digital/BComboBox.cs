@@ -139,14 +139,14 @@ sealed class BComboBox : PluginComponentBase
     {
         foreach (var variable in Plugin.GetDotNetVariables(componentConfig))
         {
-            if (!propertyPathWithVariableName.StartsWith(variable.variableName + ".", StringComparison.OrdinalIgnoreCase))
+            if (!propertyPathWithVariableName.StartsWith(variable.VariableName + ".", StringComparison.OrdinalIgnoreCase))
             {
                 continue;
             }
 
-            var propertyPath = propertyPathWithVariableName.RemoveFromStart(variable.variableName + ".");
+            var propertyPath = propertyPathWithVariableName.RemoveFromStart(variable.VariableName + ".");
 
-            return CecilHelper.IsPropertyPathProvidedByCollection(variable.dotNetAssemblyFilePath, variable.dotnetTypeFullName, propertyPath);
+            return CecilHelper.IsPropertyPathProvidedByCollection(variable.DotNetAssemblyFilePath, variable.DotnetTypeFullName, propertyPath);
         }
 
         return false;
