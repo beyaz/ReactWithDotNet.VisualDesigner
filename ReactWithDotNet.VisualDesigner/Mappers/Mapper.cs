@@ -15,8 +15,4 @@ static class Mapper
     }
     
     
-    public static GetComponentDataInput Map(this ApplicationState state)
-    {
-        return new() { ComponentId = state.ComponentId, UserName = state.UserName };
-    }
 }

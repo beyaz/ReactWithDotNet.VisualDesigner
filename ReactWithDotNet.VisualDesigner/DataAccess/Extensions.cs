@@ -3,46 +3,24 @@ using System.IO;
 
 namespace ReactWithDotNet.VisualDesigner.DataAccess;
 
-record GetComponentDataInput
-{
-    public int ComponentId { get; init; }
-
-    public string UserName { get; init; }
-}
-
-record GetComponentDataOutput
-{
-    public ComponentEntity Component { get; init; }
-
-    public Maybe<ComponentWorkspace> ComponentWorkspaceVersion { get; init; }
-}
-
 static class Extensions
 {
-    public static readonly ScopeKey<ComponentEntity> Component = nameof(Component);
-    public static readonly ScopeKey<int> ComponentId = nameof(ComponentId);
-
-    public static readonly ScopeKey<Maybe<ComponentWorkspace>> ComponentWorkspaceVersion = nameof(ComponentWorkspaceVersion);
-
-    public static readonly ScopeKey<string> UserName = nameof(UserName);
-
-    public static async Task<Result<GetComponentDataOutput>> GetComponentData(GetComponentDataInput input)
+    public static async Task<Result<(ComponentEntity Component, Maybe<ComponentWorkspace> ComponentWorkspaceVersion)>>
+        GetComponentData(int componentId, string userName)
     {
-        var output = new GetComponentDataOutput
-        {
-            Component        = await Store.TryGetComponent(input.ComponentId),
-            ComponentWorkspaceVersion = await Store.TryGetComponentWorkspace(input.ComponentId, input.UserName)
-        };
+        var component = await Store.TryGetComponent(componentId);
 
-        if (output.Component is null)
+        var componentWorkspaceVersion = await Store.TryGetComponentWorkspace(componentId, userName);
+
+        if (component is null)
         {
-            return new IOException($"ComponentNotFound.{input.ComponentId}");
+            return new IOException($"ComponentNotFound.{componentId}");
         }
 
-        return output;
+        return (component, componentWorkspaceVersion);
     }
 
-    public static string GetRootElementAsYaml(GetComponentDataOutput x)
+    public static string GetRootElementAsYaml((ComponentEntity Component, Maybe<ComponentWorkspace> ComponentWorkspaceVersion) x)
     {
         if (x.ComponentWorkspaceVersion.HasValue)
         {

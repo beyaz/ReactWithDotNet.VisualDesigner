@@ -130,7 +130,7 @@ static class CSharpExporter
         var project = GetProjectConfig(projectId);
 
         return await
-            (from data in GetComponentData(new() { ComponentId = componentId, UserName = userName })
+            (from data in GetComponentData(componentId, userName)
             from rootVisualElement in GetComponentUserOrMainVersionAsync(componentId, userName)
             from file in GetComponentFileLocation(componentId, user.LocalWorkspacePath)
             from fileContentInDirectory in FileSystem.ReadAllLines(file.filePath)

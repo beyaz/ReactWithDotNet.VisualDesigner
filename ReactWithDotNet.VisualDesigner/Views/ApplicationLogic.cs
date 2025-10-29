@@ -10,7 +10,7 @@ static class ApplicationLogic
         ComponentEntity component;
         ComponentWorkspace userVersion;
         {
-            var response = await GetComponentData(state.Map());
+            var response = await GetComponentData(state.ComponentId,state.UserName);
             if (response.HasError)
             {
                 return response.Error;
@@ -85,10 +85,8 @@ static class ApplicationLogic
 
     public static async Task<Result<VisualElementModel>> GetComponentUserOrMainVersionAsync(int componentId, string userName)
     {
-        var input = new GetComponentDataInput { ComponentId = componentId, UserName = userName };
-
         return 
-            from x in await GetComponentData(input)
+            from x in await GetComponentData(componentId, userName)
             select DeserializeFromYaml<VisualElementModel>(GetRootElementAsYaml(x));
     }
 
@@ -388,7 +386,7 @@ static class ApplicationLogic
         ComponentEntity component;
         ComponentWorkspace userVersion;
         {
-            var response = await GetComponentData(state.Map());
+            var response = await GetComponentData(state.ComponentId, state.UserName);
             if (response.HasError)
             {
                 return response.Error;
