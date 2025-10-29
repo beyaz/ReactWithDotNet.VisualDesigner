@@ -21,13 +21,10 @@ static class TsxExporter
             from fileContentAtDisk in FileSystem.ReadAllText(file.Path)
             select IsEqualsIgnoreWhitespace(fileContentAtDisk, file.Content) switch
             {
-                true => Result.From(new ExportOutput()),
+                true => Result.From((false, file)),
                 false =>
                     from _ in FileSystem.Save(file)
-                    select new ExportOutput
-                    {
-                        HasChange = true
-                    }
+                    select (true,file)
             };
     }
 

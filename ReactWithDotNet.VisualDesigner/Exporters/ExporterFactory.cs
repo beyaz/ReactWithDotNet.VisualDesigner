@@ -1,13 +1,9 @@
 ﻿global using  ExportInput = (int ProjectId,int ComponentId,string UserName );
+global using  ExportOutput = (bool HasChange,  Toolbox.FileModel File );
 
 namespace ReactWithDotNet.VisualDesigner.Exporters;
 
 public sealed record SourceLinePoints(int LeftPaddingCount, int FirstReturnLineIndex, int FirstReturnCloseLineIndex);
-
-sealed record ExportOutput
-{
-    public bool HasChange { get; init; }
-}
 
 static class ExporterFactory
 {
