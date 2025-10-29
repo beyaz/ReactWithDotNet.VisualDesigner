@@ -1,26 +1,7 @@
-﻿namespace ReactWithDotNet.VisualDesigner.Exporters;
+﻿
+global using  ExportInput = (int ProjectId,int ComponentId,string UserName );
 
-sealed record ExportInput
-{
-    // @formatter:off
-     
-    public required int ProjectId { get; init; }
-    
-    public required int ComponentId { get; init; }
-    
-    public required string UserName { get; init; }
-    
-    public void Deconstruct(out int projectId, out int componentId,  out string userName)
-    {
-        projectId     = ProjectId;
-        
-        componentId     = ComponentId;
-        
-        userName      = UserName;
-    }
-    
-    // @formatter:on
-}
+namespace ReactWithDotNet.VisualDesigner.Exporters;
 
 sealed record ExportOutput
 {
