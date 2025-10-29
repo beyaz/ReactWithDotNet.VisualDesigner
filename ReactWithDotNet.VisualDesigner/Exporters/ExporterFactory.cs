@@ -4,6 +4,11 @@ namespace ReactWithDotNet.VisualDesigner.Exporters;
 
 public sealed record SourceLinePoints(int LeftPaddingCount, int FirstReturnLineIndex, int FirstReturnCloseLineIndex);
 
+sealed record ExportOutput
+{
+    public bool HasChange { get; init; }
+}
+
 static class ExporterFactory
 {
     public static async Task<Result<ExportOutput>> ExportToFileSystem(ExportInput input)
