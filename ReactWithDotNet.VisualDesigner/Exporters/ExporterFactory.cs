@@ -1,5 +1,5 @@
 ﻿global using  ExportInput = (int ProjectId,int ComponentId,string UserName );
-global using  ExportOutput = (bool HasChange,  Toolbox.FileModel File );
+
 
 namespace ReactWithDotNet.VisualDesigner.Exporters;
 
@@ -7,7 +7,7 @@ public sealed record SourceLinePoints(int LeftPaddingCount, int FirstReturnLineI
 
 static class ExporterFactory
 {
-    public static async Task<Result<ExportOutput>> ExportToFileSystem(ExportInput input)
+    public static async Task<Result<(bool HasChange,FileModel File)>> ExportToFileSystem(ExportInput input)
     {
         var project = GetProjectConfig(input.ProjectId);
         if (project is null)

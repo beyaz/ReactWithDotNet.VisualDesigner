@@ -14,7 +14,7 @@ static class TsxExporter
             select string.Join(Environment.NewLine, x.elementTreeSourceLines);
     }
 
-    public static Task<Result<ExportOutput>> ExportToFileSystem(ExportInput input)
+    public static Task<Result<(bool HasChange,FileModel File)>> ExportToFileSystem(ExportInput input)
     {
         return
             from file in CalculateExportInfo(input)
