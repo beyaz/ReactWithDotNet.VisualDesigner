@@ -1,8 +1,14 @@
 ﻿global using static ReactWithDotNet.VisualDesigner.DataAccess.Extensions;
+
+
 using System.IO;
 
 namespace ReactWithDotNet.VisualDesigner.DataAccess;
 
+public static class ScopeKeys
+{
+    public static readonly ScopeKey<int> ComponentId = nameof(ComponentId);
+}
 record GetComponentDataInput
 {
     public int ComponentId { get; init; }

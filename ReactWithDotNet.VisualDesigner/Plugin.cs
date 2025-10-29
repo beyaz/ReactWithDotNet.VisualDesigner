@@ -86,33 +86,28 @@ public sealed record PropSuggestionScope
 
 public static class Plugin
 {
-    public static readonly ScopeKey<Element> CurrentElementInstanceInPreview = new()
-    {
-        Key = nameof(CurrentElementInstanceInPreview)
-    };
+    public static readonly ScopeKey<Element> CurrentElementInstanceInPreview 
+        = nameof(CurrentElementInstanceInPreview);
 
-    public static readonly ScopeKey<string> ExportFilePathForComponent = new()
-    {
-        Key = nameof(ExportFilePathForComponent)
-    };
+    public static readonly ScopeKey<string> ExportFilePathForComponent 
+        = nameof(ExportFilePathForComponent);
 
-    public static readonly ScopeKey<Element> IconForElementTreeNode = new() { Key = nameof(IconForElementTreeNode) };
+    public static readonly ScopeKey<Element> IconForElementTreeNode
+        = nameof(IconForElementTreeNode);
 
-    public static readonly ScopeKey<object> IsImageKey = new() { Key = nameof(IsImageKey) };
+    public static readonly ScopeKey<object> IsImageKey = nameof(IsImageKey);
 
-    public static readonly ScopeKey<TryCreateElementForPreviewInput> TryCreateElementForPreviewInputKey = new()
-    {
-        Key = nameof(TryCreateElementForPreviewInputKey)
-    };
+    public static readonly ScopeKey<TryCreateElementForPreviewInput> TryCreateElementForPreviewInputKey
+        = nameof(TryCreateElementForPreviewInputKey);
 
-    public static readonly ScopeKey<Element> TryCreateElementForPreviewOutputKey = new()
-    {
-        Key = nameof(TryCreateElementForPreviewOutputKey)
-    };
+    public static readonly ScopeKey<Element> TryCreateElementForPreviewOutputKey
+        = nameof(TryCreateElementForPreviewOutputKey);
 
-    public static readonly ScopeKey<VisualElementModel> VisualElementModel = new() { Key = nameof(VisualElementModel) };
+    public static readonly ScopeKey<VisualElementModel> VisualElementModel
+        = nameof(VisualElementModel);
 
-    public static ScopeKey<ConfigModel> Config = new() { Key = nameof(Config) };
+    public static ScopeKey<ConfigModel> Config 
+        = nameof(Config);
 
    public static IReadOnlyList<Assembly> Plugins
     {

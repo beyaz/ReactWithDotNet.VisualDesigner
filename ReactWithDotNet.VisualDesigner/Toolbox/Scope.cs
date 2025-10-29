@@ -3,7 +3,7 @@ using System.Diagnostics;
 
 namespace Toolbox;
 
-public class ScopeKey
+public abstract class ScopeKey
 {
     public required string Key { get; init; }
 
@@ -15,6 +15,11 @@ public class ScopeKey
 
 public sealed class ScopeKey<T> : ScopeKey
 {
+    ScopeKey()
+    {
+        
+    }
+    
     public T this[Scope scope]
     {
         get
@@ -28,6 +33,8 @@ public sealed class ScopeKey<T> : ScopeKey
             throw new KeyNotFoundException(Key);
         }
     }
+
+    public static implicit operator ScopeKey<T>(string key) => new() { Key = key };
 }
 
 public sealed class ScopeCreationInput : IEnumerable
