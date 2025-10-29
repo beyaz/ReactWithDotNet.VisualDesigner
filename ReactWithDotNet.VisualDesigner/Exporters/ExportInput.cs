@@ -1,7 +1,4 @@
-﻿
-global using  ExportInput = (int ProjectId,int ComponentId,string UserName );
-
-namespace ReactWithDotNet.VisualDesigner.Exporters;
+﻿namespace ReactWithDotNet.VisualDesigner.Exporters;
 
 sealed record ExportOutput
 {

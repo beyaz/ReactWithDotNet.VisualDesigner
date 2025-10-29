@@ -1,4 +1,6 @@
-﻿namespace ReactWithDotNet.VisualDesigner.Exporters;
+﻿global using  ExportInput = (int ProjectId,int ComponentId,string UserName );
+
+namespace ReactWithDotNet.VisualDesigner.Exporters;
 
 public sealed record SourceLinePoints(int LeftPaddingCount, int FirstReturnLineIndex, int FirstReturnCloseLineIndex);
 
