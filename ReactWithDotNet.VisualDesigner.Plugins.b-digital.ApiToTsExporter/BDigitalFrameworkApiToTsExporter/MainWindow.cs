@@ -4,7 +4,6 @@ using Newtonsoft.Json;
 using ReactWithDotNet;
 using ReactWithDotNet.ThirdPartyLibraries.MonacoEditorReact;
 
-
 namespace BDigitalFrameworkApiToTsExporter;
 
 [Route(Routes.MainWindow)]
@@ -468,7 +467,7 @@ static class ExporterPlugin
         {
             return Scope.Create(new()
             {
-                {Plugin.TryCreateElementForPreviewOutputKey, element}
+                { Plugin.TryCreateElementForPreviewOutputKey, element }
             });
         }
 
