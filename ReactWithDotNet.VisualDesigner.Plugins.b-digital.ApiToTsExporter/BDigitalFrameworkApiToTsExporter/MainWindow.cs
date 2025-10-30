@@ -33,7 +33,7 @@ sealed class MainWindow : Component<MainWindow.State>
 
         state = new()
         {
-            AssemblyFilePath = @"D:\work\BOA.BusinessModules\Dev\BOA.InternetBanking.Payments\API\BOA.InternetBanking.Payments.API\bin\Debug\net8.0\BOA.InternetBanking.Payments.API.dll"
+            AssemblyFilePath = @"D:\workgit\BOA.InternetBanking.Payments\API\BOA.InternetBanking.Payments.API\bin\Debug\net8.0\BOA.InternetBanking.Payments.API.dll"
         };
 
         if (cachedState is not null)
@@ -43,7 +43,11 @@ sealed class MainWindow : Component<MainWindow.State>
 
         await OnAssemblyFilePathChanged();
 
-        await OnApiSelected(cachedState?.SelectedApiName ?? "Religious");
+        if (state.ApiNames.Count > 0)
+        {
+            await OnApiSelected(cachedState?.SelectedApiName ?? "Religious");
+        }
+        
 
         if (cachedState?.SelectedFilePath is not null)
         {
@@ -57,7 +61,7 @@ sealed class MainWindow : Component<MainWindow.State>
 
         // clear status
 
-        state.StatusMessage = "Ready";
+        state.StatusMessage ??= "Ready";
 
         state.IsExportingAllFiles = false;
 
