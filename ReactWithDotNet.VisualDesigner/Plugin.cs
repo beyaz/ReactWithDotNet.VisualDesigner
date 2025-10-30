@@ -115,7 +115,7 @@ public static class Plugin
         {
             return field ??= new[] { typeof(Plugin).Assembly }.ToImmutableList().AddRange
             (
-                from filePath in Directory.GetFiles(Path.GetDirectoryName(typeof(Plugin).Assembly.Location)!, "*.dll")
+                from filePath in Directory.GetFiles(AppContext.BaseDirectory, "*.dll")
                 where Path.GetFileName(filePath).StartsWith("ReactWithDotNet.VisualDesigner.Plugins.")
                 select AssemblyLoadContext.Default.LoadFromAssemblyPath(filePath)
             );

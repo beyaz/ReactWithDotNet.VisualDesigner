@@ -90,13 +90,15 @@ static class Extensions
 
     public static Result<ConfigModel> ReadConfig()
     {
-        var appFolder = Path.GetDirectoryName(typeof(Extensions).Assembly.Location);
-        if (appFolder == null)
+        var appFolder = AppContext.BaseDirectory;
+
+        var configFilePath = Path.Combine(appFolder, "Config.yaml");
+        if (!File.Exists(configFilePath))
         {
-            return new ArgumentException("assembly location not found");
+            return new ArgumentException($"Config not found.{configFilePath}");
         }
         
-        var config = DeserializeFromYaml<ConfigModel>(File.ReadAllText(Path.Combine(appFolder, "Config.yaml")));
+        var config = DeserializeFromYaml<ConfigModel>(File.ReadAllText(configFilePath));
 
         if (IsRunningInVS)
         {

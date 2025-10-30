@@ -115,7 +115,7 @@ static class Prettier
     {
         public static Process NodeProcess { get; set; }
 
-        public static string ProjectPath => Path.Combine(Path.GetDirectoryName(typeof(Prettier).Assembly.Location) ?? string.Empty, "HelperApps", "TsxFormatter");
+        public static string ProjectPath => Path.Combine(AppContext.BaseDirectory, "HelperApps", "TsxFormatter");
 
         public static Task StartTask { get; set; }
     }
