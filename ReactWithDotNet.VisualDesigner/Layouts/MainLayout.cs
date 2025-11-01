@@ -18,6 +18,12 @@ sealed class MainLayout : PureComponent, IPageLayout
             idOfContainerHtmlElement: '{{ContainerDomElementId}}',
             renderInfo: {{RenderInfo.ToJsonString()}}
           });
+          
+          window.addEventListener("unload", function ()
+          {
+              navigator.sendBeacon("/shutdown");
+          });
+          
           """;
 
     public ComponentRenderInfo RenderInfo { get; set; }

@@ -58,6 +58,13 @@ public static class ReactWithDotNetIntegration
 
             await next();
         });
+
+        app.MapPost("/shutdown", _ =>
+        {
+            Environment.Exit(0);
+
+            return Task.CompletedTask;
+        });
     }
 
     static Task HandleReactWithDotNetRequest(HttpContext httpContext)

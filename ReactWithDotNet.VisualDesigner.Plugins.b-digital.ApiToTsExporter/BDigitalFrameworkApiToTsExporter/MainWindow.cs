@@ -27,7 +27,21 @@ sealed class MainWindow : Component<MainWindow.State>
 
     string ProjectDirectory => new DirectoryInfo(state.AssemblyFilePath).Parent?.Parent?.Parent?.Parent?.Parent?.Parent?.FullName;
 
-    protected override async Task constructor()
+    protected override Task constructor()
+    {
+        state = new()
+        {
+            ApiNames      = [],
+            Files         = [],
+            StatusMessage = "Loading..."
+        };
+        
+        Client.GotoMethod(InitializeForm,TimeSpan.FromMilliseconds(500));
+        
+        return Task.CompletedTask;
+    }
+
+    async Task InitializeForm()
     {
         var cachedState = StateCache;
 
@@ -47,7 +61,7 @@ sealed class MainWindow : Component<MainWindow.State>
         {
             await OnApiSelected(cachedState?.SelectedApiName ?? "Religious");
         }
-        
+
 
         if (cachedState?.SelectedFilePath is not null)
         {
