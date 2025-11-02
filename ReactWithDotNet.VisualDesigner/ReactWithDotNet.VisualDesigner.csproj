@@ -32,11 +32,11 @@
 		</None>
 	</ItemGroup>
 
-	<Target Name="CopyVsOpenFileAtLineOutput" AfterTargets="Build">
+	<Target Name="CopyVsOpenFileAtLineOutput" AfterTargets="Rebuild">
 		<Exec Command="xcopy $(SolutionDir)\VsOpenFileAtLine\bin\$(ConfigurationName)\net48\*.* $(TargetDir)HelperApps\VsOpenFileAtLine\ /Y /S /E" />
 	</Target>
 
-	<Target Name="Prettier" AfterTargets="Build">
+	<Target Name="Prettier" AfterTargets="Rebuild">
 		<Exec Command="xcopy $(SolutionDir)TsxFormatter\*.* $(TargetDir)HelperApps\TsxFormatter\ /Y /S /E" />
 	</Target>
 
