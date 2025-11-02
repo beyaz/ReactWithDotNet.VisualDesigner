@@ -10,6 +10,8 @@ using ReactWithDotNet.VisualDesigner.Configuration;
 
 namespace ReactWithDotNet.VisualDesigner;
 
+using SuggestionItem = (string name, string value, string text, bool isVariable);
+
 public class PluginComponentBase : Component
 {
     public string id;
@@ -281,6 +283,8 @@ public static class Plugin
 
         static async Task<Result<IReadOnlyList<string>>> calculate(PropSuggestionScope scope)
         {
+            List<SuggestionItem> suggestionItems = [];
+            
             var collectionSuggestions = new List<string>();
 
             var stringSuggestions = new List<string>();
@@ -293,9 +297,31 @@ public static class Plugin
                     }
 
                     stringSuggestions.Add(result.Value);
+
+                    suggestionItems.Add(new()
+                    {
+                        text = result.Value
+                    });
                 }
             }
 
+            suggestionItems.AddRange
+            (
+                from x in new[]
+                {
+                    "2",
+                    "4",
+                    "8",
+                    "12",
+                    "16",
+                    "24"
+                }
+                select new SuggestionItem
+                {
+                    text = x
+                }
+            );
+            
             List<string> numberSuggestions =
             [
                 "2",
@@ -310,12 +336,34 @@ public static class Plugin
             [
                 "new Date().getDate()"
             ];
+            
+            suggestionItems.Add
+            (
+                new SuggestionItem
+                {
+                    text =  "new Date().getDate()"
+                }
+            );
 
             List<string> booleanSuggestions =
             [
                 "true",
                 "false"
             ];
+            
+            suggestionItems.AddRange
+            (
+                [
+                    new SuggestionItem
+                    {
+                        text =  "true"
+                    },
+                    new SuggestionItem
+                    {
+                        text =  "false"
+                    }
+                ]
+            );
 
             foreach (var variable in GetDotNetVariables(scope.Component))
             {
@@ -337,6 +385,37 @@ public static class Plugin
                     }
 
                     list.AddRange(result.Value);
+                }
+            }
+            
+            foreach (var variable in GetDotNetVariables(scope.Component))
+            {
+                List<Func<PropertyDefinition, bool>> map =
+                [
+                    ( CecilHelper.IsString),
+                    ( CecilHelper.IsNumber),
+                    ( CecilHelper.IsDateTime),
+                    ( CecilHelper.IsBoolean),
+                    ( CecilHelper.IsCollection)
+                ];
+
+                foreach (var fn in map)
+                {
+                    var result = CecilHelper.GetPropertyPathList(variable.DotNetAssemblyFilePath, variable.DotnetTypeFullName, $"{variable.VariableName}.", fn);
+                    if (result.HasError)
+                    {
+                        continue;
+                    }
+
+                    suggestionItems.AddRange
+                    (
+                        from x in result.Value
+                        select new SuggestionItem
+                        {
+                            text       = x,
+                            isVariable = true
+                        }
+                    );
                 }
             }
 
