@@ -94,7 +94,7 @@ sealed class MainWindow : Component<MainWindow.State>
                     {
                         "AssemblyFilePath"
                     },
-                    new input(input.Type("text"), input.ValueBind(() => state.AssemblyFilePath), input.ValueBindDebounceTimeout(1000), input.ValueBindDebounceHandler(OnAssemblyFilePathChanged), WidthFull, Border(1, solid, Gray300), BorderRadius(4), PaddingLeft(4), OutlineNone, PaddingTop(4), PaddingBottom(4))
+                    new input(input.Type("text"), input.ValueBind(()=> state.AssemblyFilePath), input.ValueBindDebounceTimeout(1000), input.ValueBindDebounceHandler(OnAssemblyFilePathChanged), WidthFull, Border(1, solid, Gray300), BorderRadius(4), PaddingLeft(4), OutlineNone, PaddingTop(4), PaddingBottom(4))
                 },
                 new div(WidthFull, DisplayFlex, Flex(1, 1, 0))
                 {
@@ -131,7 +131,7 @@ sealed class MainWindow : Component<MainWindow.State>
                         new div(Flex(1, 1, 0), Padding(8), DisplayFlex, FlexDirectionColumn, Gap(16), OverflowAuto)
                         {
                             from item in state.Files
-                            select new div(Id(item.Path), OnClick(OnFileSelected), Border(1, solid, Gray300), BorderRadius(4), DisplayFlex, JustifyContentCenter, AlignItemsCenter, state.SelectedFilePath == item.Path ? BackgroundColor(Gray100) : BackgroundColor(White), Hover(BorderColor(Gray500)), BoxShadow("0 1px 3px rgba(0,0,0,0.2)"))
+                            select new div(Id(item.Path), OnClick(OnFileSelected), Border(1, solid, Gray300), BorderRadius(4), DisplayFlex, JustifyContentCenter, AlignItemsCenter, state.SelectedFilePath== item.Path ? BackgroundColor(Gray100) : BackgroundColor(White), Hover(BorderColor(Gray500)), BoxShadow("0 1px 3px rgba(0,0,0,0.2)"))
                             {
                                 new div(Padding(4))
                                 {
@@ -146,29 +146,33 @@ sealed class MainWindow : Component<MainWindow.State>
                         {
                             new div(Height(40), FontWeight600, DisplayFlex, JustifyContentCenter, AlignItemsCenter, Width("50%"))
                             {
-                                state.Files.Count == 0
-                                    ? null
-                                    : new div(OnClick(OnExportAllClicked), Padding(4, 8), Border(1, solid, Gray300), BorderRadius(4), Hover(BackgroundColor(Gray100)), BoxShadow("0 1px 3px rgba(0,0,0,0.2)"), DisplayFlex, Gap(8), AlignItemsCenter)
+                                state.Files.Count == 0 ? null :
+                                    new div(OnClick(OnExportAllClicked), Padding(4, 8), Border(1, solid, Gray300), BorderRadius(4), Hover(BackgroundColor(Gray100)), BoxShadow("0 1px 3px rgba(0,0,0,0.2)"), DisplayFlex, Gap(8), AlignItemsCenter)
                                     {
                                         new div
                                         {
                                             "Export All"
                                         },
-                                        !state.IsExportingAllFiles ? null : new LoadingIcon(Width(20), Height(20))
+                                        !state.IsExportingAllFiles ? null :
+                                            new LoadingIcon(Width(20), Height(20))
+                                        
                                     }
+                                
                             },
                             new div(Height(40), FontWeight600, DisplayFlex, JustifyContentCenter, AlignItemsCenter, Width("50%"), Gap(8))
                             {
-                                state.SelectedFilePath is null
-                                    ? null
-                                    : new div(OnClick(OnExportClicked), Padding(4, 8), Border(1, solid, Gray300), BorderRadius(4), Hover(BackgroundColor(Gray100)), BoxShadow("0 1px 3px rgba(0,0,0,0.2)"), DisplayFlex, Gap(8), AlignItemsCenter)
+                                state.SelectedFilePath is  null ? null :
+                                    new div(OnClick(OnExportClicked), Padding(4, 8), Border(1, solid, Gray300), BorderRadius(4), Hover(BackgroundColor(Gray100)), BoxShadow("0 1px 3px rgba(0,0,0,0.2)"), DisplayFlex, Gap(8), AlignItemsCenter)
                                     {
                                         new div
                                         {
-                                            "Export"
+                                            "Export Selected File"
                                         },
-                                        !state.IsExportingSelectedFile ? null : new LoadingIcon(Width(20), Height(20))
+                                        !state.IsExportingSelectedFile ? null :
+                                            new LoadingIcon(Width(20), Height(20))
+                                        
                                     }
+                                
                             }
                         },
                         new div(DisplayFlex, FlexDirectionColumn, FlexGrow(1))
