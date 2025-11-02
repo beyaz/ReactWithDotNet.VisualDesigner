@@ -529,7 +529,7 @@ public static class Plugin
                 }
             }
             
-            // Boolean
+            // Date
             {
                 const JsType jsType = JsType.Date;
 
