@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Net.Http.Headers;
@@ -61,6 +62,11 @@ public static class ReactWithDotNetIntegration
 
         app.MapPost("/shutdown", _ =>
         {
+            if (Debugger.IsAttached)
+            {
+                return Task.CompletedTask;    
+            }
+            
             Environment.Exit(0);
 
             return Task.CompletedTask;
