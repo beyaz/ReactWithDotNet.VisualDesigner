@@ -60,16 +60,12 @@ public static class ReactWithDotNetIntegration
             await next();
         });
 
-        app.MapPost("/shutdown", _ =>
+        app.MapPost("/shutdown", async _ =>
         {
-            if (Debugger.IsAttached)
+            if (!Debugger.IsAttached)
             {
-                return Task.CompletedTask;    
+                await app.StopAsync();  
             }
-            
-            Environment.Exit(0);
-
-            return Task.CompletedTask;
         });
     }
 

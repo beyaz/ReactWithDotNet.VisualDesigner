@@ -50,8 +50,8 @@ static class Prettier
 
     public static void Register(WebApplication app)
     {
-        app.Lifetime.ApplicationStarted.Register(() => { StartServerAsync(); });
-        app.Lifetime.ApplicationStopping.Register(StopServer);
+       app.Lifetime.ApplicationStarted.Register(() => { StartServerAsync(); });
+       app.Lifetime.ApplicationStopping.Register(StopServer);
     }
 
     static Task StartServerAsync()
