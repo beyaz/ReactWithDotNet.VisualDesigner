@@ -428,6 +428,16 @@ public static class Plugin
                 addSuggestion(name, value);
             }
 
+            suggestionItems.AddRange
+            (
+                from x in GetPropSuggestions(scope.TagName)
+                select new SuggestionItem
+                {
+                    name  = x.name,
+                    value = x.value
+                }
+            );
+            
             var allMetadata = GetAllTypesMetadata().AsResult();
             if (allMetadata.HasError)
             {
