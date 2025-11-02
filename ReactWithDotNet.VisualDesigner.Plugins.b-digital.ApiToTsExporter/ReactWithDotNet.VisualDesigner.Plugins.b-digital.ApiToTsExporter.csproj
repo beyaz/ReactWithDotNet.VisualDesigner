@@ -32,10 +32,7 @@
 
 
 	<Target Name="CopyOutputAfterBuild" AfterTargets="Build">
-		<Copy
-			SourceFiles="$(TargetPath)"
-			DestinationFolder="$(SolutionDir)ReactWithDotNet.VisualDesigner\bin\debug\net8.0\"
-			SkipUnchangedFiles="true" />
+		<Copy SourceFiles="$(TargetPath)" DestinationFolder="$(SolutionDir)ReactWithDotNet.VisualDesigner\bin\debug\net8.0\" SkipUnchangedFiles="true" />
 	</Target>
 
 </Project>
