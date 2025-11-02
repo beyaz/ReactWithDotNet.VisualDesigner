@@ -284,26 +284,19 @@ public static class Plugin
         static async Task<Result<IReadOnlyList<string>>> calculate(PropSuggestionScope scope)
         {
             List<SuggestionItem> suggestionItems = [];
-            
-            var collectionSuggestions = new List<string>();
 
-            var stringSuggestions = new List<string>();
+            await foreach (var result in GetStringSuggestions(scope))
             {
-                await foreach (var result in GetStringSuggestions(scope))
+                if (result.HasError)
                 {
-                    if (result.HasError)
-                    {
-                        return result.Error;
-                    }
-
-                    stringSuggestions.Add(result.Value);
-
-                    suggestionItems.Add(new()
-                    {
-                        jsType = JsType.String,
-                         value = result.Value
-                    });
+                    return result.Error;
                 }
+
+                suggestionItems.Add(new()
+                {
+                    jsType = JsType.String,
+                    value  = result.Value
+                });
             }
 
             suggestionItems.AddRange
@@ -320,80 +313,36 @@ public static class Plugin
                 select new SuggestionItem
                 {
                     jsType = JsType.Number,
-                    
-                    value  = x
+
+                    value = x
                 }
             );
-            
-            List<string> numberSuggestions =
-            [
-                "2",
-                "4",
-                "8",
-                "12",
-                "16",
-                "24"
-            ];
 
-            List<string> dateSuggestions =
-            [
-                "new Date().getDate()"
-            ];
-            
             suggestionItems.Add
             (
                 new SuggestionItem
                 {
                     jsType = JsType.Date,
-                    value   =  "new Date().getDate()"
+                    value  = "new Date().getDate()"
                 }
             );
 
-            List<string> booleanSuggestions =
-            [
-                "true",
-                "false"
-            ];
-            
             suggestionItems.AddRange
             (
                 [
                     new SuggestionItem
                     {
                         jsType = JsType.Boolean,
-                        value   =  "true"
+                        value  = "true"
                     },
                     new SuggestionItem
                     {
                         jsType = JsType.Boolean,
-                        value   =  "false"
+                        value  = "false"
                     }
                 ]
             );
 
-            foreach (var variable in GetDotNetVariables(scope.Component))
-            {
-                List<(List<string> list, Func<PropertyDefinition, bool> matchFunc)> map =
-                [
-                    (stringSuggestions, CecilHelper.IsString),
-                    (numberSuggestions, CecilHelper.IsNumber),
-                    (dateSuggestions, CecilHelper.IsDateTime),
-                    (booleanSuggestions, CecilHelper.IsBoolean),
-                    (collectionSuggestions, CecilHelper.IsCollection)
-                ];
-
-                foreach (var (list, fn) in map)
-                {
-                    var result = CecilHelper.GetPropertyPathList(variable.DotNetAssemblyFilePath, variable.DotnetTypeFullName, $"{variable.VariableName}.", fn);
-                    if (result.HasError)
-                    {
-                        continue;
-                    }
-
-                    list.AddRange(result.Value);
-                }
-            }
-            
             foreach (var variable in GetDotNetVariables(scope.Component))
             {
                 List<(JsType jsType, Func<PropertyDefinition, bool> matchFn)> map =
@@ -419,9 +368,9 @@ public static class Plugin
                         select new SuggestionItem
                         {
                             value = x,
-                            
+
                             jsType = jsType,
-                            
+
                             isVariable = true
                         }
                     );
@@ -432,22 +381,17 @@ public static class Plugin
 
             List<(string name, string value)> distinctSuggestions = [];
 
-            foreach (var (name, value, jsType) in GetPropSuggestions(scope.TagName))
-            {
-                addSuggestion(name, value);
-            }
-
             suggestionItems.AddRange
             (
                 from x in GetPropSuggestions(scope.TagName)
                 select new SuggestionItem
                 {
-                    name  = x.name,
-                    value = x.value,
+                    name   = x.name,
+                    value  = x.value,
                     jsType = x.jsType
                 }
             );
-            
+
             var allMetadata = GetAllTypesMetadata().AsResult();
             if (allMetadata.HasError)
             {
@@ -456,24 +400,24 @@ public static class Plugin
 
             IEnumerable<string> getNames(JsType jsType, params string[] extraNames)
             {
-                return 
+                return
                     ImmutableList<string>
-                   .Empty.AddRange
-                    (
-                        from m in allMetadata.Value
-                        where m.TagName == scope.TagName
-                        from p in m.Props
-                        where p.ValueType == jsType
-                        select p.Name
-                    )
-                   .AddRange(extraNames);
+                       .Empty.AddRange
+                        (
+                            from m in allMetadata.Value
+                            where m.TagName == scope.TagName
+                            from p in m.Props
+                            where p.ValueType == jsType
+                            select p.Name
+                        )
+                       .AddRange(extraNames);
             }
 
             // s t r i n g
             {
                 const JsType jsType = JsType.String;
 
-                foreach (var name in getNames(jsType, [Design.Text]))
+                foreach (var name in getNames(jsType, Design.Text))
                 {
                     foreach (var x in from x in suggestionItems where x.jsType == jsType select x)
                     {
@@ -488,7 +432,7 @@ public static class Plugin
                     }
                 }
             }
-            
+
             // number
             {
                 const JsType jsType = JsType.Number;
@@ -503,7 +447,7 @@ public static class Plugin
                         }
                         else
                         {
-                            addSuggestion(name, x.value );
+                            addSuggestion(name, x.value);
                         }
                     }
                 }
@@ -513,7 +457,7 @@ public static class Plugin
             {
                 const JsType jsType = JsType.Boolean;
 
-                foreach (var name in getNames(jsType,Design.ShowIf,Design.HideIf))
+                foreach (var name in getNames(jsType, Design.ShowIf, Design.HideIf))
                 {
                     foreach (var x in from x in suggestionItems where x.jsType == jsType select x)
                     {
@@ -523,12 +467,12 @@ public static class Plugin
                         }
                         else
                         {
-                            addSuggestion(name, x.value );
+                            addSuggestion(name, x.value);
                         }
                     }
                 }
             }
-            
+
             // Date
             {
                 const JsType jsType = JsType.Date;
@@ -543,17 +487,17 @@ public static class Plugin
                         }
                         else
                         {
-                            addSuggestion(name, x.value );
+                            addSuggestion(name, x.value);
                         }
                     }
                 }
             }
-            
+
             // Array
             {
                 const JsType jsType = JsType.Array;
 
-                foreach (var name in getNames(jsType,Design.ItemsSource))
+                foreach (var name in getNames(jsType, Design.ItemsSource))
                 {
                     foreach (var x in from x in suggestionItems where x.jsType == jsType select x)
                     {
@@ -563,129 +507,10 @@ public static class Plugin
                         }
                         else
                         {
-                            addSuggestion(name, x.value );
+                            addSuggestion(name, x.value);
                         }
                     }
                 }
-            }
-           
-            
-            
-            
-            foreach (var prop in from m in allMetadata.Value where m.TagName == scope.TagName from p in m.Props select p)
-            {
-                switch (prop.ValueType)
-                {
-                    case JsType.String:
-                    {
-                        foreach (var item in stringSuggestions)
-                        {
-                            if (item.StartsWith("model."))
-                            {
-                                addSuggestion(prop.Name, ConvertDotNetPathToJsPath(item));
-                                continue;
-                            }
-
-                            addSuggestion(prop.Name, '"' + item + '"');
-                        }
-
-                        break;
-                    }
-                    case JsType.Number:
-                    {
-                        foreach (var item in numberSuggestions)
-                        {
-                            if (item.StartsWith("request."))
-                            {
-                                addSuggestion(prop.Name, ConvertDotNetPathToJsPath(item));
-                                continue;
-                            }
-
-                            addSuggestion(prop.Name, item);
-                        }
-
-                        break;
-                    }
-                    case JsType.Date:
-                    {
-                        foreach (var item in dateSuggestions)
-                        {
-                            if (item.StartsWith("request."))
-                            {
-                                addSuggestion(prop.Name, ConvertDotNetPathToJsPath(item));
-                                continue;
-                            }
-
-                            addSuggestion(prop.Name, item);
-                        }
-
-                        break;
-                    }
-                    case JsType.Boolean:
-                    {
-                        foreach (var item in booleanSuggestions)
-                        {
-                            if (item.StartsWith("request."))
-                            {
-                                addSuggestion(prop.Name, ConvertDotNetPathToJsPath(item));
-                                continue;
-                            }
-
-                            addSuggestion(prop.Name, item);
-                        }
-
-                        break;
-                    }
-                    case JsType.Array:
-                    {
-                        foreach (var item in collectionSuggestions)
-                        {
-                            if (item.StartsWith("request."))
-                            {
-                                addSuggestion(prop.Name, ConvertDotNetPathToJsPath(item));
-                                continue;
-                            }
-
-                            addSuggestion(prop.Name, item);
-                        }
-
-                        break;
-                    }
-
-                    case JsType.Function:
-                    {
-                        break;
-                    }
-                }
-            }
-
-            foreach (var item in stringSuggestions)
-            {
-                addSuggestion(Design.Text, '"' + item + '"');
-            }
-
-            foreach (var item in booleanSuggestions)
-            {
-                if (item.StartsWith("request."))
-                {
-                    addSuggestion(Design.ShowIf, ConvertDotNetPathToJsPath(item));
-                    addSuggestion(Design.HideIf, ConvertDotNetPathToJsPath(item));
-                    continue;
-                }
-
-                addSuggestion(Design.ShowIf, item);
-                addSuggestion(Design.HideIf, item);
-            }
-
-            foreach (var item in collectionSuggestions)
-            {
-                if (item.StartsWith("request."))
-                {
-                    addSuggestion(Design.ItemsSource, ConvertDotNetPathToJsPath(item));
-                    continue;
-                }
-
-                addSuggestion(Design.ItemsSource, item);
             }
 
             returnList.InsertRange(0, distinctSuggestions.Select(x => x.name + ": " + x.value));
@@ -715,13 +540,8 @@ public static class Plugin
 
         foreach (var item in
                  from p in type.GetProperties()
-                 
                  from a in p.GetCustomAttributes<SuggestionsAttribute>()
-                 
                  from jsTypeInfo in p.GetCustomAttributes<JsTypeInfoAttribute>()
-                 
-                 
-        
                  from suggestion in a.Suggestions
                  select (p.Name, suggestion, jsTypeInfo.JsType))
         {
