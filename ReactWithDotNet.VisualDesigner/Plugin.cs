@@ -737,6 +737,8 @@ public sealed class NodeAnalyzerAttribute : Attribute
 public sealed record VariableConfig
 {
     public string DotNetAssemblyFilePath { get; init; }
+    
     public string DotnetTypeFullName{ get; init; }
+    
     public string VariableName{ get; init; }
 }
