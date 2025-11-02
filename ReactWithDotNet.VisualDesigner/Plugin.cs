@@ -1,12 +1,12 @@
-﻿using Mono.Cecil;
-using ReactWithDotNet.VisualDesigner.Configuration;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Immutable;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Runtime.Loader;
 using System.Text;
+using Mono.Cecil;
+using ReactWithDotNet.VisualDesigner.Configuration;
 
 namespace ReactWithDotNet.VisualDesigner;
 
@@ -46,7 +46,7 @@ public sealed record TryCreateElementForPreviewInput
     public string Id { get; init; }
 
     public MouseEventHandler OnMouseClick { get; init; }
-    
+
     public string Tag { get; init; }
 }
 
@@ -86,10 +86,10 @@ public sealed record PropSuggestionScope
 
 public static class Plugin
 {
-    public static readonly ScopeKey<Element> CurrentElementInstanceInPreview 
+    public static readonly ScopeKey<Element> CurrentElementInstanceInPreview
         = nameof(CurrentElementInstanceInPreview);
 
-    public static readonly ScopeKey<string> ExportFilePathForComponent 
+    public static readonly ScopeKey<string> ExportFilePathForComponent
         = nameof(ExportFilePathForComponent);
 
     public static readonly ScopeKey<Element> IconForElementTreeNode
@@ -106,22 +106,9 @@ public static class Plugin
     public static readonly ScopeKey<VisualElementModel> VisualElementModel
         = nameof(VisualElementModel);
 
-    public static ScopeKey<ConfigModel> Config 
+    public static ScopeKey<ConfigModel> Config
         = nameof(Config);
 
-   public static IReadOnlyList<Assembly> Plugins
-    {
-        get
-        {
-            return field ??= new[] { typeof(Plugin).Assembly }.ToImmutableList().AddRange
-            (
-                from filePath in Directory.GetFiles(AppContext.BaseDirectory, "*.dll")
-                where Path.GetFileName(filePath).StartsWith("ReactWithDotNet.VisualDesigner.Plugins.")
-                select AssemblyLoadContext.Default.LoadFromAssemblyPath(filePath)
-            );
-        }
-    }
-    
     delegate Task<Result<IReadOnlyList<string>>> GetStringSuggestionsDelegate(PropSuggestionScope scope);
 
     public static IReadOnlyList<Type> AllCustomComponents
@@ -137,6 +124,19 @@ public static class Plugin
         }
     }
 
+    public static IReadOnlyList<Assembly> Plugins
+    {
+        get
+        {
+            return field ??= new[] { typeof(Plugin).Assembly }.ToImmutableList().AddRange
+            (
+                from filePath in Directory.GetFiles(AppContext.BaseDirectory, "*.dll")
+                where Path.GetFileName(filePath).StartsWith("ReactWithDotNet.VisualDesigner.Plugins.")
+                select AssemblyLoadContext.Default.LoadFromAssemblyPath(filePath)
+            );
+        }
+    }
+
     static IReadOnlyList<PluginMethod> AfterReadConfigs
     {
         get { return field ??= GetPluginMethods<AfterReadConfigAttribute>(); }
@@ -146,7 +146,6 @@ public static class Plugin
     {
         get { return field ??= GetPluginMethods<AnalyzeExportFilePathAttribute>(); }
     }
-
 
     static IReadOnlyList<GetStringSuggestionsDelegate> GetStringSuggestionsMethods
     {
@@ -158,7 +157,7 @@ public static class Plugin
                     from methodInfo in type.GetMethods(BindingFlags.Static | BindingFlags.Public)
                     where methodInfo.GetCustomAttribute<GetStringSuggestionsAttribute>() is not null
                     select (GetStringSuggestionsDelegate)Delegate.CreateDelegate(typeof(GetStringSuggestionsDelegate), methodInfo))
-                .ToList();
+               .ToList();
         }
     }
 
@@ -176,8 +175,6 @@ public static class Plugin
     {
         get { return field ??= GetPluginMethods<TryGetIconForElementTreeNodeAttribute>(); }
     }
-
-   
 
     public static ConfigModel AfterReadConfig(ConfigModel config)
     {
@@ -199,14 +196,10 @@ public static class Plugin
         return RunPluginMethods(AnalyzeExportFilePathList, scope, ExportFilePathForComponent) ?? exportFilePathForComponent;
     }
 
-    
-
     public static Element BeforeComponentPreview(RenderPreviewScope scope, VisualElementModel visualElementModel, Element component)
     {
         return component;
     }
-
-
 
     public static string ConvertDotNetPathToJsPath(string dotNetPath)
     {
@@ -361,7 +354,7 @@ public static class Plugin
             {
                 return allMetadata.Error;
             }
-            
+
             foreach (var prop in from m in allMetadata.Value where m.TagName == scope.TagName from p in m.Props select p)
             {
                 switch (prop.ValueType)
@@ -580,17 +573,16 @@ public static class Plugin
         static Result<ComponentMeta> createFrom(Type type)
         {
             var items = from propertyInfo in type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly)
-                from props in createPropMetaFrom(propertyInfo)
-                select props;
+                        from props in createPropMetaFrom(propertyInfo)
+                        select props;
 
-            return 
+            return
                 from props in items.AsResult()
                 select new ComponentMeta
                 {
                     TagName = type.Name,
                     Props   = props.ToList()
                 };
-                
 
             static Result<PropMeta> createPropMetaFrom(PropertyInfo propertyInfo)
             {
@@ -737,8 +729,8 @@ public sealed class NodeAnalyzerAttribute : Attribute
 public sealed record VariableConfig
 {
     public string DotNetAssemblyFilePath { get; init; }
-    
-    public string DotnetTypeFullName{ get; init; }
-    
-    public string VariableName{ get; init; }
+
+    public string DotnetTypeFullName { get; init; }
+
+    public string VariableName { get; init; }
 }
