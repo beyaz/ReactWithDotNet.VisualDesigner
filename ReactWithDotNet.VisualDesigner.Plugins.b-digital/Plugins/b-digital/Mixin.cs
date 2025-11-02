@@ -149,7 +149,7 @@ static class Mixin
                 Database = new()
                 {
                     //IsSQLite = true,
-                    //ConnectionString = @"Data Source=D:\work\git\ReactWithDotNet.VisualDesigner\app.db"
+                    //ConnectionString = @"Data Source=D:\workgit\ReactWithDotNet.VisualDesigner\app.db"
 
                     IsSQLServer      = true,
                     SchemaName       = "RVD",
