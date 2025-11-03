@@ -5,7 +5,7 @@ namespace ReactWithDotNet.VisualDesigner.Exporters;
 
 static class CSharpStringExporter
 {
-    public static async Task<Result<string>> CalculateElementTsxCode(int projectId, IReadOnlyDictionary<string, string> componentConfig, VisualElementModel visualElement)
+    public static async Task<Result<string>> CalculateElementTsxCode(int projectId, ComponentConfig componentConfig, VisualElementModel visualElement)
     {
         
         
@@ -111,7 +111,7 @@ static class CSharpStringExporter
 
     internal static
         Task<Result<(IReadOnlyList<string> elementTreeSourceLines, IReadOnlyList<string> importLines)>>
-        CalculateElementTreeSourceCodes(ProjectConfig project, IReadOnlyDictionary<string, string> componentConfig, VisualElementModel rootVisualElement)
+        CalculateElementTreeSourceCodes(ProjectConfig project, ComponentConfig componentConfig, VisualElementModel rootVisualElement)
     {
         return
             // Convert model to node

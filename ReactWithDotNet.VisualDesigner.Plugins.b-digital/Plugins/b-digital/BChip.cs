@@ -22,7 +22,7 @@ sealed class BChip : PluginComponentBase
     public string variant { get; set; }
 
     [NodeAnalyzer]
-    public static ReactNode AnalyzeReactNode(ReactNode node, IReadOnlyDictionary<string, string> componentConfig)
+    public static ReactNode AnalyzeReactNode(ReactNode node, ComponentConfig componentConfig)
     {
         if (node.Tag == nameof(BChip))
         {

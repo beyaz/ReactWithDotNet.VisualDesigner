@@ -23,7 +23,7 @@ sealed class BDigitalAccountCardView : PluginComponentBase
     public string onSelectedIndexChange { get; set; }
             
     [NodeAnalyzer]
-    public static ReactNode AnalyzeReactNode(ReactNode node, IReadOnlyDictionary<string, string> componentConfig)
+    public static ReactNode AnalyzeReactNode(ReactNode node, ComponentConfig componentConfig)
     {
         if (node.Tag == nameof(BDigitalAccountCardView))
         {

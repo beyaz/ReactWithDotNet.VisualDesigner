@@ -27,7 +27,7 @@ sealed class BComboBox : PluginComponentBase
     public string value { get; set; }
 
     [NodeAnalyzer]
-    public static ReactNode AnalyzeReactNode(ReactNode node, IReadOnlyDictionary<string, string> componentConfig)
+    public static ReactNode AnalyzeReactNode(ReactNode node, ComponentConfig componentConfig)
     {
         if (node.Tag == nameof(BComboBox))
         {
@@ -135,7 +135,7 @@ sealed class BComboBox : PluginComponentBase
         };
     }
 
-    static Result<bool> IsPropertyPathProvidedByCollection(IReadOnlyDictionary<string, string> componentConfig, string propertyPathWithVariableName)
+    static Result<bool> IsPropertyPathProvidedByCollection(ComponentConfig componentConfig, string propertyPathWithVariableName)
     {
         foreach (var variable in Plugin.GetDotNetVariables(componentConfig))
         {

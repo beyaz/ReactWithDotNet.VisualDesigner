@@ -10,7 +10,7 @@ static class Mixin
 {
     
     [TryFindAssemblyPath]
-    public static string TryFindAssemblyPath(IReadOnlyDictionary<string, string> componentConfig, string dotNetFullTypeName)
+    public static string TryFindAssemblyPath(ComponentConfig componentConfig, string dotNetFullTypeName)
     {
         if (componentConfig.TryGetValue("SolutionDirectory", out var solutionDirectory))
         {

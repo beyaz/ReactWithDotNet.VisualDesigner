@@ -124,7 +124,7 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
     }
             
     [NodeAnalyzer]
-    public static ReactNode AnalyzeReactNode(ReactNode node, IReadOnlyDictionary<string, string> componentConfig)
+    public static ReactNode AnalyzeReactNode(ReactNode node, ComponentConfig componentConfig)
     {
         if (node.Tag == nameof(BDigitalTransactionConfirm))
         {

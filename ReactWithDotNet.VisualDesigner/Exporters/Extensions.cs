@@ -22,7 +22,7 @@ static class Extensions
         }
     }
 
-    public static ReactNode AnalyzeNode(ReactNode node, IReadOnlyDictionary<string, string> componentConfig)
+    public static ReactNode AnalyzeNode(ReactNode node, ComponentConfig componentConfig)
     {
         foreach (var method in AnalyzeNodeList)
         {

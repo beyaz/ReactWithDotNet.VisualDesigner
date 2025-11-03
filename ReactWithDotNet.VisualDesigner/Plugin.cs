@@ -237,7 +237,7 @@ public static class Plugin
         return camelCase.ToString();
     }
     
-    public static IEnumerable<VariableConfig> GetDotNetVariables(IReadOnlyDictionary<string, string> componentConfig)
+    public static IEnumerable<VariableConfig> GetDotNetVariables(ComponentConfig componentConfig)
     {
         foreach (var (key, value) in componentConfig)
         {
@@ -707,7 +707,7 @@ public static class Plugin
         return null;
     }
 
-    static Result<string> TryFindAssemblyPath(IReadOnlyDictionary<string, string> componentConfig, string dotNetFullTypeName)
+    static Result<string> TryFindAssemblyPath(ComponentConfig componentConfig, string dotNetFullTypeName)
     {
         var methods =
             from assembly in Plugins

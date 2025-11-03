@@ -69,7 +69,7 @@ public static class Extensions
         throw new InvalidOperationException("name not found");
     }
 
-    public static Maybe<string> TryGetComponentExportFilePath(this IReadOnlyDictionary<string, string> componentConfig)
+    public static Maybe<string> TryGetComponentExportFilePath(this ComponentConfig componentConfig)
     {
         if (componentConfig.TryGetValue(ComponentConfigReservedName.ExportFilePath, out var value))
         {
@@ -79,7 +79,7 @@ public static class Extensions
         return None;
     }
 
-    public static Maybe<string> TryGetComponentName(this IReadOnlyDictionary<string, string> componentConfig)
+    public static Maybe<string> TryGetComponentName(this ComponentConfig componentConfig)
     {
         if (componentConfig.TryGetValue(ComponentConfigReservedName.Name, out var value))
         {

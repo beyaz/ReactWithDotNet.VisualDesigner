@@ -48,7 +48,7 @@ static class ExporterFactory
         
         return TsxExporter.GetComponentLineIndexPointsInTsxFile(fileContent, targetComponentName);
     }
-    public static async Task<Result<string>> CalculateElementSourceCode(int projectId, IReadOnlyDictionary<string, string> componentConfig, VisualElementModel visualElement)
+    public static async Task<Result<string>> CalculateElementSourceCode(int projectId, ComponentConfig componentConfig, VisualElementModel visualElement)
     {
         var project = GetProjectConfig(projectId);
         if (project is null)
