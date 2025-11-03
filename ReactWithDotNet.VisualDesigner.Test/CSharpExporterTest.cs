@@ -47,7 +47,9 @@ public sealed class CSharpExporterTest
                 ExportAsCSharp = true
             };
 
-            var result = await CSharpExporter.CalculateElementTreeSourceCodes(project,new Dictionary<string, string>(), visualElementModel);
+            var componentConfig = new ComponentConfig();
+
+            var result = await CSharpExporter.CalculateElementTreeSourceCodes(project,componentConfig, visualElementModel);
 
             result.HasError.ShouldBeFalse();
 
