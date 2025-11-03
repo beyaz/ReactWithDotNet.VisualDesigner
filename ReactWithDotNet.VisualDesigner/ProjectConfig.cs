@@ -30,6 +30,8 @@ public sealed record ComponentConfig
     public IReadOnlyList<VariableConfig> DotNetVariables { get; init; } = [];
 
     public bool SkipExport { get; init; }
+    
+    public string SolutionDirectory { get; init; }
 }
 
 public sealed record VariableConfig

@@ -12,7 +12,8 @@ static class Mixin
     [TryFindAssemblyPath]
     public static string TryFindAssemblyPath(ComponentConfig componentConfig, string dotNetFullTypeName)
     {
-        if (componentConfig.TryGetValue("SolutionDirectory", out var solutionDirectory))
+        var solutionDirectory = componentConfig.SolutionDirectory;
+        if (solutionDirectory.HasValue())
         {
             var solutionName = Path.GetFileName(solutionDirectory);
 
