@@ -8,6 +8,8 @@ public sealed class NextJsExportTest
     [TestMethod]
     public async Task ExportAll()
     {
+        Configuration.Extensions.Config = Configuration.Extensions.ReadConfig().Value;
+        
         const int projectId = 1;
 
         var components = await Store.GetAllComponentsInProject(projectId);
