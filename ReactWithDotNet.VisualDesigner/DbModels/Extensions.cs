@@ -2,16 +2,21 @@
 
 namespace ReactWithDotNet.VisualDesigner.DbModels;
 
-static class ComponentConfigReservedName
-{
-    public static readonly string ExportFilePath = "ExportFilePath";
-    
-    public static readonly string Name = "Name";
-}
-
 public static class Extensions
 {
-   
+    public static string GetNameWithExportFilePath(this ComponentEntity componentEntity)
+    {
+        var exportFilePath = componentEntity.Config.ExportFilePath;
+
+        var name = componentEntity.Config.Name;
+
+        if (Path.GetFileNameWithoutExtension(exportFilePath) == name)
+        {
+            return exportFilePath;
+        }
+
+        return $"{exportFilePath} > {name}";
+    }
 
     extension(ComponentEntity componentEntity)
     {
@@ -21,42 +26,10 @@ public static class Extensions
             {
                 return Cache.AccessValue
                 (
-                    nameof(ComponentEntity) +nameof(Config) + componentEntity.Id,
-                    
+                    nameof(ComponentEntity) + nameof(Config) + componentEntity.Id,
                     () => DeserializeFromYaml<ComponentConfig>(componentEntity.ConfigAsYaml)
                 );
             }
         }
     }
-    
-    
-    public static string GetNameWithExportFilePath(this ComponentEntity componentEntity)
-    {
-        var exportFilePath = componentEntity.Config.ExportFilePath;
-        
-        var name = componentEntity.Config.Name;
-
-        if (Path.GetFileNameWithoutExtension(exportFilePath) == name)
-        {
-            return exportFilePath;
-        }
-        
-        
-        return $"{exportFilePath} > {name}";
-    }
-    
-    
-    
-
-    
-
-    
-
-    
-
-    
-
-  
-    
-   
 }

@@ -499,17 +499,17 @@ sealed class ApplicationView : Component<ApplicationState>
             var config = DeserializeFromYaml<ComponentConfig>(componentConfigAsYamlNewValue);
             if (config.Name.HasNoValue())
             {
-                return new Exception($"{ComponentConfigReservedName.Name} should be entered.");
+                return new Exception($"{nameof(ComponentConfig.Name)} should be entered.");
             }
             
             if (config.ExportFilePath.HasNoValue())
             {
-                return new Exception($"{ComponentConfigReservedName.ExportFilePath} should be entered.");
+                return new Exception($"{nameof(ComponentConfig.ExportFilePath)} should be entered.");
             }
 
             if (!config.ExportFilePath.Contains('/'))
             {
-                return new Exception($"{ComponentConfigReservedName.ExportFilePath} should be entered correctly. Expected directory seperator: '/' ");
+                return new Exception($"{nameof(ComponentConfig.ExportFilePath)} should be entered correctly. Expected directory seperator: '/' ");
             }
             
             
@@ -2277,8 +2277,8 @@ sealed class ApplicationView : Component<ApplicationState>
 
                 MainContentTabs.NewComponentConfig =>
                     $"""
-                     {ComponentConfigReservedName.Name}: write_component_name_here
-                     {ComponentConfigReservedName.ExportFilePath}: write_export_file_path_here
+                     {TypescriptNaming.NormalizeBindingPath(nameof(ComponentConfig.Name))}: write_component_name_here
+                     {TypescriptNaming.NormalizeBindingPath(nameof(ComponentConfig.ExportFilePath))}: write_export_file_path_here
                      """,
 
                 MainContentTabs.Output => await calculateTsxCodeOfCurrentVisualElement(),
