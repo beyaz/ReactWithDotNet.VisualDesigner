@@ -314,39 +314,21 @@ sealed class ApplicationView : Component<ApplicationState>
             return string.Empty;
         }
 
-        var name = string.Empty;
-        var exportFilePath = string.Empty;
+        var config = DeserializeFromYaml<ComponentConfig>(componentConfigAsYamlNewValue);
+        if (config.Name.HasNoValue())
         {
-            var config = DeserializeFromYaml<Dictionary<string, string>>(componentConfigAsYamlNewValue);
-            {
-                foreach (var item in config.TryGetComponentName())
-                {
-                    name = item;
-                }
-
-                if (name.HasNoValue())
-                {
-                    return new Exception("NameMustBeEntered");
-                }
-            }
-            {
-                foreach (var item in config.TryGetComponentExportFilePath())
-                {
-                    exportFilePath = item;
-                }
-
-                if (exportFilePath.HasNoValue())
-                {
-                    return new Exception("ExportFilePathMustBeEnteredCorrectly");
-                }
-            }
+            return new Exception("NameMustBeEntered");
+        }
+        if (config.ExportFilePath.HasNoValue())
+        {
+            return new Exception("ExportFilePathMustBeEnteredCorrectly");
         }
 
         // check name & export file path
         {
             foreach (var item in (await Store.GetAllComponentsInProject(projectId)).Where(x => x.Id != component.Id))
             {
-                if (item.GetName() == name && item.GetExportFilePath() == exportFilePath)
+                if (item.GetName() == config.Name && item.GetExportFilePath() == config.ExportFilePath)
                 {
                     return new Exception("Has already same named component.");
                 }
@@ -514,44 +496,30 @@ sealed class ApplicationView : Component<ApplicationState>
 
     async Task<Result<string>> CreateNewComponent(string componentConfigAsYamlNewValue)
     {
-        var name = string.Empty;
-        var exportFilePath = string.Empty;
-        {
-            var config = DeserializeFromYaml<Dictionary<string, string>>(componentConfigAsYamlNewValue);
+            var config = DeserializeFromYaml<ComponentConfig>(componentConfigAsYamlNewValue);
+            if (config.Name.HasNoValue())
             {
-                foreach (var item in config.TryGetComponentName())
-                {
-                    name = item;
-                }
-
-                if (name.HasNoValue())
-                {
-                    return new Exception($"{ComponentConfigReservedName.Name} should be entered.");
-                }
+                return new Exception($"{ComponentConfigReservedName.Name} should be entered.");
             }
+            
+            if (config.ExportFilePath.HasNoValue())
             {
-                foreach (var item in config.TryGetComponentExportFilePath())
-                {
-                    exportFilePath = item;
-                }
-
-                if (exportFilePath.HasNoValue())
-                {
-                    return new Exception($"{ComponentConfigReservedName.ExportFilePath} should be entered.");
-                }
-
-                if (!exportFilePath.Contains('/'))
-                {
-                    return new Exception($"{ComponentConfigReservedName.ExportFilePath} should be entered correctly. Expected directory seperator: '/' ");
-                }
+                return new Exception($"{ComponentConfigReservedName.ExportFilePath} should be entered.");
             }
-        }
+
+            if (!config.ExportFilePath.Contains('/'))
+            {
+                return new Exception($"{ComponentConfigReservedName.ExportFilePath} should be entered correctly. Expected directory seperator: '/' ");
+            }
+            
+            
+        
 
         // check name & export file path
         {
             foreach (var item in await Store.GetAllComponentsInProject(state.ProjectId))
             {
-                if (item.GetName() == name && item.GetExportFilePath() == exportFilePath)
+                if (item.GetName() == config.Name && item.GetExportFilePath() == config.ExportFilePath)
                 {
                     return new Exception("Has already same named component.");
                 }
@@ -2347,7 +2315,7 @@ sealed class ApplicationView : Component<ApplicationState>
                 return $"ComponentNotFound-id:{state.ComponentId}";
             }
 
-            var result = await ExporterFactory.CalculateElementSourceCode(state.ProjectId, componentEntity.GetConfig(), CurrentVisualElement);
+            var result = await ExporterFactory.CalculateElementSourceCode(state.ProjectId, componentEntity.Config, CurrentVisualElement);
             if (result.HasError)
             {
                 return result.Error.Message;

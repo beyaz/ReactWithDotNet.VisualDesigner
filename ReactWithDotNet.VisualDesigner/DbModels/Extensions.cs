@@ -69,25 +69,9 @@ public static class Extensions
         throw new InvalidOperationException("name not found");
     }
 
-    public static Maybe<string> TryGetComponentExportFilePath(this ComponentConfig componentConfig)
-    {
-        if (componentConfig.TryGetValue(ComponentConfigReservedName.ExportFilePath, out var value))
-        {
-            return value;
-        }
+    
 
-        return None;
-    }
-
-    public static Maybe<string> TryGetComponentName(this ComponentConfig componentConfig)
-    {
-        if (componentConfig.TryGetValue(ComponentConfigReservedName.Name, out var value))
-        {
-            return value;
-        }
-
-        return None;
-    }
+    
 
     public static Maybe<string> TryGetExportFilePath(this ComponentEntity componentEntity)
     {
