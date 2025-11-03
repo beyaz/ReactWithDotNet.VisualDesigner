@@ -182,7 +182,7 @@ static class CSharpStringExporter
             from rootVisualElement in GetComponentUserOrMainVersionAsync(componentId, userName)
             from file in GetComponentFileLocation(componentId, user.LocalWorkspacePath)
             from fileContentInDirectory in FileSystem.ReadAllLines(file.filePath)
-            from source in CalculateElementTreeSourceCodes(project, data.Component.GetConfig(), rootVisualElement)
+            from source in CalculateElementTreeSourceCodes(project, data.Component.Config, rootVisualElement)
             from fileContent in InjectRender(fileContentInDirectory, file.targetComponentName, source.elementTreeSourceLines)
             select new FileModel
             {
