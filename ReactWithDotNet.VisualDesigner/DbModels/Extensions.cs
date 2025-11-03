@@ -37,7 +37,7 @@ public static class Extensions
     {
         var exportFilePath = componentEntity.Config.ExportFilePath;
         
-        var name = GetName(componentEntity);
+        var name = componentEntity.Config.Name;
 
         if (Path.GetFileNameWithoutExtension(exportFilePath) == name)
         {

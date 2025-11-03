@@ -328,7 +328,7 @@ sealed class ApplicationView : Component<ApplicationState>
         {
             foreach (var item in (await Store.GetAllComponentsInProject(projectId)).Where(x => x.Id != component.Id))
             {
-                if (item.GetName() == config.Name && item.Config.ExportFilePath == config.ExportFilePath)
+                if (item.Config.Name == config.Name && item.Config.ExportFilePath == config.ExportFilePath)
                 {
                     return new Exception("Has already same named component.");
                 }
@@ -519,7 +519,7 @@ sealed class ApplicationView : Component<ApplicationState>
         {
             foreach (var item in await Store.GetAllComponentsInProject(state.ProjectId))
             {
-                if (item.GetName() == config.Name && item.Config.ExportFilePath == config.ExportFilePath)
+                if (item.Config.Name == config.Name && item.Config.ExportFilePath == config.ExportFilePath)
                 {
                     return new Exception("Has already same named component.");
                 }

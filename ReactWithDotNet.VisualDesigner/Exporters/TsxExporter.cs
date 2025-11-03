@@ -316,7 +316,7 @@ static class TsxExporter
                     return new ArgumentNullException($"ComponentNotFound. {componentId}");
                 }
 
-                tag = component.GetName();
+                tag = component.Config.Name;
             }
 
             var childrenProperty = node.Properties.FirstOrDefault(x => x.Name == "children");

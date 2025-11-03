@@ -295,7 +295,7 @@ static class CSharpExporter
                     return new ArgumentNullException($"ComponentNotFound. {componentId}");
                 }
 
-                var tag = component.GetName();
+                var tag = component.Config.Name;
                 if (tag.EndsWith("::render"))
                 {
                     tag = tag.Replace("::render", string.Empty);

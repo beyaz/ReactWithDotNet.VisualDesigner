@@ -80,7 +80,7 @@ static class ApplicationLogic
 
     public static string GetComponentName(int projectId, int componentId)
     {
-        return GetAllComponentsInProjectFromCache(projectId).FirstOrDefault(x => x.Id == componentId)?.GetName();
+        return GetAllComponentsInProjectFromCache(projectId).FirstOrDefault(x => x.Id == componentId)?.Config.Name;
     }
 
     public static async Task<Result<VisualElementModel>> GetComponentUserOrMainVersionAsync(int componentId, string userName)
@@ -365,7 +365,7 @@ static class ApplicationLogic
     {
         foreach (var component in await TryGetComponentByTag(tag))
         {
-            return component.GetName();
+            return component.Config.Name;
         }
 
         return tag;

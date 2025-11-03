@@ -215,7 +215,7 @@ public static partial class Extensions
 
         var filePath = Path.Combine(userLocalWorkspacePath, Path.Combine(exportFilePath.Split('/', Path.DirectorySeparatorChar)));
 
-        return (filePath, component.GetName());
+        return (filePath, component.Config.Name);
     }
 
     public static bool HasAny<T>(IEnumerable<T> items)

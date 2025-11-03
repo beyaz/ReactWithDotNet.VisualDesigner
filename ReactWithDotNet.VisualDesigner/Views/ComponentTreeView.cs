@@ -164,14 +164,14 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
     {
         return Cache.AccessValue($"{nameof(ComponentTreeView)}-{nameof(GetAllNodes)}-{ProjectId}",
                                  () => ListFrom(from x in GetAllComponentsInProjectFromCache(ProjectId)
-                                                orderby x.GetName() descending
+                                                orderby x.Config.Name descending
                                                 select CreateNode(x)));
 
         static NodeModel CreateNode(ComponentEntity x)
         {
             var directoryName = Path.GetDirectoryName(x.Config.ExportFilePath);
 
-            var name = x.GetName();
+            var name = x.Config.Name;
 
             var names = (directoryName + "/" + name).Split(['/', '\\'], StringSplitOptions.RemoveEmptyEntries);
             
