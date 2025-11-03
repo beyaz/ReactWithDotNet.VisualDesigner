@@ -209,7 +209,7 @@ public static partial class Extensions
 
         var component = await Store.TryGetComponent(componentId);
 
-        var exportFilePath = component.GetExportFilePath();
+        var exportFilePath = component.Config.ExportFilePath;
 
         exportFilePath = Plugin.AnalyzeExportFilePath(exportFilePath);
 

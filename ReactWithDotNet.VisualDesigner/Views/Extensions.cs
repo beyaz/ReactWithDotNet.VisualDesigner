@@ -38,7 +38,7 @@ static class Extensions
             var exportFilePath = componentNameWithExportFilePath.Substring(0, index);
             var componentName = componentNameWithExportFilePath.Substring(index + 3, componentNameWithExportFilePath.Length -index -3);
 
-            var record = GetAllComponentsInProjectFromCache(projectId).FirstOrDefault(x => x.GetExportFilePath() == exportFilePath && x.GetName() == componentName);
+            var record = GetAllComponentsInProjectFromCache(projectId).FirstOrDefault(x => x.Config.ExportFilePath == exportFilePath && x.GetName() == componentName);
             if (record is not null)
             {
                 return record;
@@ -50,7 +50,7 @@ static class Extensions
             var exportFilePath = componentNameWithExportFilePath;
             var componentName = Path.GetFileNameWithoutExtension(componentNameWithExportFilePath);
 
-            var record = GetAllComponentsInProjectFromCache(projectId).FirstOrDefault(x => x.GetExportFilePath() == exportFilePath && x.GetName() == componentName);
+            var record = GetAllComponentsInProjectFromCache(projectId).FirstOrDefault(x => x.Config.ExportFilePath == exportFilePath && x.GetName() == componentName);
             if (record is not null)
             {
                 return record;

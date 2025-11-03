@@ -35,7 +35,7 @@ public static class Extensions
     
     public static string GetNameWithExportFilePath(this ComponentEntity componentEntity)
     {
-        var exportFilePath = GetExportFilePath(componentEntity);
+        var exportFilePath = componentEntity.Config.ExportFilePath;
         
         var name = GetName(componentEntity);
 
@@ -49,15 +49,7 @@ public static class Extensions
     }
     
     
-    public static string GetExportFilePath(this ComponentEntity componentEntity)
-    {
-        foreach (var name in componentEntity.TryGetExportFilePath())
-        {
-            return name;
-        }
-
-        throw new InvalidOperationException("exportFilePath not found");
-    }
+    
 
     public static string GetName(this ComponentEntity componentEntity)
     {
