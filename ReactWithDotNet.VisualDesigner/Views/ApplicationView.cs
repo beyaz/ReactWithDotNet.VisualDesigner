@@ -1417,7 +1417,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
         return new FlexColumn(SizeFull, AlignItemsCenter, BorderRight(1, dotted, "#d9d9d9"), Background(White))
         {
-            new FlexRow(WidthFull, AlignItemsCenter, Gap(4), PaddingLeft(8))
+            new FlexRow(WidthFull, AlignItemsCenter, Gap(4), PaddingLeft(8), OverflowHidden)
             {
                 new IconDelete() + Size(16) + Color(text_primary) + Hover(Color(Blue300)) + OnClick(OnDeleteSelectedComponentClicked),
 
