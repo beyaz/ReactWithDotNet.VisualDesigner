@@ -3,6 +3,7 @@ using System.Data;
 using System.IO;
 using Dapper;
 using Microsoft.Data.SqlClient;
+using ReactWithDotNet.VisualDesigner.DbModels;
 
 namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
@@ -24,14 +25,14 @@ static class Mixin
     }
     
     
-    const string BOA_MessagingByGroupName = "BOA.MessagingByGroupName";
-    
     [GetStringSuggestions]
     public static async Task<Result<IReadOnlyList<string>>> GetStringSuggestions(PropSuggestionScope scope)
     {
         var stringSuggestions = new List<string>();
+
+        var messagingGroupName = scope.Component.Config.Translate;
         
-        if (scope.Component.GetConfig().TryGetValue(BOA_MessagingByGroupName, out var messagingGroupName))
+        if (messagingGroupName.HasValue())
         {
             foreach (var item in await GetMessagingByGroupName(messagingGroupName))
             {

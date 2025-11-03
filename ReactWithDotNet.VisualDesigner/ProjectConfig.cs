@@ -32,6 +32,8 @@ public sealed record ComponentConfig
     public bool SkipExport { get; init; }
     
     public string SolutionDirectory { get; init; }
+    
+    public string Translate { get; init; }
 }
 
 public sealed record VariableConfig
