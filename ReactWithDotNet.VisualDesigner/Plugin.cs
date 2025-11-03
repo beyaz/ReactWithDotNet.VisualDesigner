@@ -237,9 +237,13 @@ public static class Plugin
         return camelCase.ToString();
     }
 
-    public static IEnumerable<VariableConfig> GetDotNetVariables(ComponentEntity componentEntity)
+    public static IReadOnlyList<VariableConfig> GetDotNetVariables(ComponentEntity componentEntity)
     {
-        return GetDotNetVariables(componentEntity.GetConfig());
+        return Cache.AccessValue
+        (
+            nameof(GetDotNetVariables) + componentEntity.Id,
+            () => GetDotNetVariables(componentEntity.GetConfig()).ToList()
+        );
     }
 
     public static IEnumerable<VariableConfig> GetDotNetVariables(IReadOnlyDictionary<string, string> componentConfig)
