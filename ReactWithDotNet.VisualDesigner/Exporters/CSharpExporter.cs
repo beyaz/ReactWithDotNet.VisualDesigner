@@ -349,7 +349,7 @@ static class CSharpExporter
 
                                 if (elementType.HasValue)
                                 {
-                                    var (success, modifierCode) = ToModifierTransformer.TryConvertToModifier(elementType.Value.Name, propertyName, TryClearStringValue(propertyValue));
+                                    var (success, modifierCode) = ToModifierTransformer.TryConvertToModifier(elementType.Value.Name, propertyName, propertyValue);
                                     if (success)
                                     {
                                         return modifierCode;
@@ -555,7 +555,7 @@ static class CSharpExporter
 
                             if (elementType.HasValue)
                             {
-                                var (success, modifierCode) = ToModifierTransformer.TryConvertToModifier(elementType.Value.Name, propertyName, TryClearStringValue(propertyValue));
+                                var (success, modifierCode) = ToModifierTransformer.TryConvertToModifier(elementType.Value.Name, propertyName, propertyValue);
                                 if (success)
                                 {
                                     if (!IsStringValue(propertyValue))
@@ -649,9 +649,9 @@ static class CSharpExporter
                                     {
                                         if (left.HasValue() && right.HasValue())
                                         {
-                                            var modifierCodeForLeft = ToModifierTransformer.TryConvertToModifier(tagName, styleAttribute.Name, TryClearStringValue(left));
+                                            var modifierCodeForLeft = ToModifierTransformer.TryConvertToModifier(tagName, styleAttribute.Name, left);
 
-                                            var modifierCodeForRight = ToModifierTransformer.TryConvertToModifier(tagName, styleAttribute.Name, TryClearStringValue(right));
+                                            var modifierCodeForRight = ToModifierTransformer.TryConvertToModifier(tagName, styleAttribute.Name, right);
 
                                             if (modifierCodeForLeft.success && modifierCodeForRight.success)
                                             {

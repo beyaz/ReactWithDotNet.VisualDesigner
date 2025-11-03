@@ -378,7 +378,7 @@ static class CSharpStringExporter
 
                                 if (elementType.HasValue)
                                 {
-                                    var (success, modifierCode) = ToModifierTransformer.TryConvertToModifier(elementType.Value.Name, propertyName, TryClearStringValue(propertyValue));
+                                    var (success, modifierCode) = ToModifierTransformer.TryConvertToModifier(elementType.Value.Name, propertyName, propertyValue);
                                     if (success)
                                     {
                                         return modifierCode;
