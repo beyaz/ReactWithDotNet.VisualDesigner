@@ -236,16 +236,7 @@ public static class Plugin
 
         return camelCase.ToString();
     }
-
-    public static IReadOnlyList<VariableConfig> GetDotNetVariables(ComponentEntity componentEntity)
-    {
-        return Cache.AccessValue
-        (
-            nameof(GetDotNetVariables) + componentEntity.Id,
-            () => GetDotNetVariables(componentEntity.GetConfig()).ToList()
-        );
-    }
-
+    
     public static IEnumerable<VariableConfig> GetDotNetVariables(IReadOnlyDictionary<string, string> componentConfig)
     {
         foreach (var (key, value) in componentConfig)
@@ -347,7 +338,7 @@ public static class Plugin
                 ]
             );
 
-            foreach (var variable in GetDotNetVariables(scope.Component))
+            foreach (var variable in scope.Component.Config.DotNetVariables)
             {
                 List<(JsType jsType, Func<PropertyDefinition, bool> matchFn)> map =
                 [

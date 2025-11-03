@@ -14,7 +14,7 @@ public sealed class NextJsExportTest
 
         foreach (var component in components)
         {
-            if (component.GetConfig().TryGetValue("IsExportable", out var isExportable) && isExportable.Equals("False", StringComparison.OrdinalIgnoreCase))
+            if (component.Config.SkipExport)
             {
                 continue;
             }

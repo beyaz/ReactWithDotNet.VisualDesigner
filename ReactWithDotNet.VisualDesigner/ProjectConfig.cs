@@ -28,6 +28,8 @@ public sealed record ComponentConfig
     public string ExportFilePath { get; init; }
 
     public IReadOnlyList<VariableConfig> DotNetVariables { get; init; } = [];
+
+    public bool SkipExport { get; init; }
 }
 
 public sealed record VariableConfig
@@ -38,3 +40,4 @@ public sealed record VariableConfig
 
     public string VariableName { get; init; }
 }
+

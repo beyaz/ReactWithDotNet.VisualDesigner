@@ -15,11 +15,23 @@ public static class Extensions
     {
         return DeserializeFromYaml<Dictionary<string, string>>(componentEntity.ConfigAsYaml);
     }
-    
-    public static ComponentConfig GetConfig2(this ComponentEntity componentEntity)
+
+    extension(ComponentEntity componentEntity)
     {
-        return DeserializeFromYaml<ComponentConfig>(componentEntity.ConfigAsYaml);
+        public ComponentConfig Config
+        {
+            get
+            {
+                return Cache.AccessValue
+                (
+                    nameof(ComponentEntity) +nameof(Config) + componentEntity.Id,
+                    
+                    () => DeserializeFromYaml<ComponentConfig>(componentEntity.ConfigAsYaml)
+                );
+            }
+        }
     }
+    
     
     public static string GetNameWithExportFilePath(this ComponentEntity componentEntity)
     {
