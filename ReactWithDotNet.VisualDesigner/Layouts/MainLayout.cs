@@ -75,7 +75,9 @@ sealed class MainLayout : PureComponent, IPageLayout
 
                 new script { src = "https://cdn.tailwindcss.com" },
 
-                ElementIndicators()
+                ElementIndicators,
+                
+                HomePageUnload
             },
             new body(Margin(0), Height100vh)
             {
@@ -92,6 +94,25 @@ sealed class MainLayout : PureComponent, IPageLayout
                 return new script
                 {
                     src = HelperJsFileResourceName
+                };
+            }
+
+            return null;
+        }
+        
+        Element HomePageUnload()
+        {
+            var isHomePage = Context.HttpContext.Request.GetDisplayUrl().EndsWith(Routes.VisualDesigner, StringComparison.OrdinalIgnoreCase);
+            if (isHomePage)
+            {
+                return new script
+                {
+                    """
+                    window.addEventListener("unload", function ()
+                    {
+                        navigator.sendBeacon("/shutdown");
+                    });
+                    """
                 };
             }
 
