@@ -5,7 +5,7 @@ namespace ReactWithDotNet.VisualDesigner.Exporters;
 
 static class Extensions
 {
-    static IReadOnlyList<Func<ReactNode, IReadOnlyDictionary<string, string>, ReactNode>> AnalyzeNodeList
+    static IReadOnlyList<Func<ReactNode, ComponentConfig, ReactNode>> AnalyzeNodeList
     {
         get
         {
@@ -15,8 +15,8 @@ static class Extensions
                         from type in Plugin.AllCustomComponents
                         from methodInfo in type.GetMethods(BindingFlags.Static | BindingFlags.Public)
                         where methodInfo.GetCustomAttribute<NodeAnalyzerAttribute>() is not null
-                        select (Func<ReactNode, IReadOnlyDictionary<string, string>, ReactNode>)Delegate
-                            .CreateDelegate(typeof(Func<ReactNode, IReadOnlyDictionary<string, string>, ReactNode>), methodInfo)
+                        select (Func<ReactNode, ComponentConfig, ReactNode>)Delegate
+                            .CreateDelegate(typeof(Func<ReactNode, ComponentConfig, ReactNode>), methodInfo)
                     )
                     .ToList();
         }

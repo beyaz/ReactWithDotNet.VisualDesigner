@@ -137,7 +137,7 @@ sealed class BComboBox : PluginComponentBase
 
     static Result<bool> IsPropertyPathProvidedByCollection(ComponentConfig componentConfig, string propertyPathWithVariableName)
     {
-        foreach (var variable in Plugin.GetDotNetVariables(componentConfig))
+        foreach (var variable in componentConfig.DotNetVariables)
         {
             if (!propertyPathWithVariableName.StartsWith(variable.VariableName + ".", StringComparison.OrdinalIgnoreCase))
             {

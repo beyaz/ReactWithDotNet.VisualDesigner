@@ -237,35 +237,7 @@ public static class Plugin
         return camelCase.ToString();
     }
     
-    public static IEnumerable<VariableConfig> GetDotNetVariables(ComponentConfig componentConfig)
-    {
-        foreach (var (key, value) in componentConfig)
-        {
-            const string dotNetVariable = "DotNetVariable.";
-
-            if (!key.StartsWith(dotNetVariable, StringComparison.OrdinalIgnoreCase))
-            {
-                continue;
-            }
-
-            var variableName = key.RemoveFromStart(dotNetVariable);
-
-            var dotnetTypeFullName = value;
-
-            var assemblyFilePath = TryFindAssemblyPath(componentConfig, dotnetTypeFullName);
-            if (assemblyFilePath.HasError)
-            {
-                continue;
-            }
-
-            yield return new()
-            {
-                VariableName           = variableName,
-                DotNetAssemblyFilePath = assemblyFilePath.Value,
-                DotnetTypeFullName     = dotnetTypeFullName
-            };
-        }
-    }
+  
 
     public static async Task<Result<IReadOnlyList<string>>> GetPropSuggestions(PropSuggestionScope scope)
     {
