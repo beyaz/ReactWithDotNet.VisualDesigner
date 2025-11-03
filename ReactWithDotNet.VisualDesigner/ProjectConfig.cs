@@ -20,3 +20,21 @@ public sealed record ProjectConfig
     
     public bool ExportAsCSharpString { get; init; }
 }
+
+public sealed record ComponentConfig
+{
+    public string Name { get; init; }
+    
+    public string ExportFilePath { get; init; }
+
+    public IReadOnlyList<VariableConfig> DotNetVariables { get; init; } = [];
+}
+
+public sealed record VariableConfig
+{
+    public string DotNetAssemblyFilePath { get; init; }
+
+    public string DotnetTypeFullName { get; init; }
+
+    public string VariableName { get; init; }
+}

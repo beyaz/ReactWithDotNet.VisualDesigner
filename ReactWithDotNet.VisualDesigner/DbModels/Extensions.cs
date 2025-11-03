@@ -16,6 +16,11 @@ public static class Extensions
         return DeserializeFromYaml<Dictionary<string, string>>(componentEntity.ConfigAsYaml);
     }
     
+    public static ComponentConfig GetConfig2(this ComponentEntity componentEntity)
+    {
+        return DeserializeFromYaml<ComponentConfig>(componentEntity.ConfigAsYaml);
+    }
+    
     public static string GetNameWithExportFilePath(this ComponentEntity componentEntity)
     {
         var exportFilePath = GetExportFilePath(componentEntity);
