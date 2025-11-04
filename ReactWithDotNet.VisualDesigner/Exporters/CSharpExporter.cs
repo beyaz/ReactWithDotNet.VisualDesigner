@@ -349,7 +349,7 @@ static class CSharpExporter
 
                                 if (elementType.HasValue)
                                 {
-                                    var (success, modifierCode) = ToModifierTransformer.TryConvertToModifier(elementType.Value.Name, propertyName, propertyValue);
+                                    var (success, modifierCode) = ToModifierTransformer.TryConvertToModifier(isStyleValue: false, elementType.Value.Name, propertyName, propertyValue);
                                     if (success)
                                     {
                                         return modifierCode;
@@ -555,7 +555,7 @@ static class CSharpExporter
 
                             if (elementType.HasValue)
                             {
-                                var (success, modifierCode) = ToModifierTransformer.TryConvertToModifier(elementType.Value.Name, propertyName, propertyValue);
+                                var (success, modifierCode) = ToModifierTransformer.TryConvertToModifier(isStyleValue: false, elementType.Value.Name, propertyName, propertyValue);
                                 if (success)
                                 {
                                     if (!IsStringValue(propertyValue))
@@ -649,9 +649,9 @@ static class CSharpExporter
                                     {
                                         if (left.HasValue() && right.HasValue())
                                         {
-                                            var modifierCodeForLeft = ToModifierTransformer.TryConvertToModifier(tagName, styleAttribute.Name, left);
+                                            var modifierCodeForLeft = ToModifierTransformer.TryConvertToModifier(isStyleValue: true, tagName, styleAttribute.Name, left);
 
-                                            var modifierCodeForRight = ToModifierTransformer.TryConvertToModifier(tagName, styleAttribute.Name, right);
+                                            var modifierCodeForRight = ToModifierTransformer.TryConvertToModifier(isStyleValue: true, tagName, styleAttribute.Name, right);
 
                                             if (modifierCodeForLeft.success && modifierCodeForRight.success)
                                             {
@@ -664,7 +664,7 @@ static class CSharpExporter
 
                                 // try import from modifier
                                 {
-                                    var modifierCode = ToModifierTransformer.TryConvertToModifier(tagName, styleAttribute.Name, attributeValue);
+                                    var modifierCode = ToModifierTransformer.TryConvertToModifier(isStyleValue: true, tagName, styleAttribute.Name, attributeValue);
                                     if (modifierCode.success)
                                     {
                                         if (styleAttribute.Pseudo.HasNoValue())
