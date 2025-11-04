@@ -6,11 +6,11 @@ sealed class ProjectSelectionView : Component<ProjectSelectionView.State>
     public required Func<Task> OnAddNewComponent { get; set; }
 
     [CustomEvent]
-    public required Func<double, Task> OnChange { get; init; }
+    public required Func<string, Task> OnChange { get; init; }
 
     public required string ProjectName { get; init; }
 
-    public required IReadOnlyList<string> Suggestions { get; init; }
+    public required IReadOnlyList<string> Suggestions { get; init; } 
 
     protected override Element render()
     {
@@ -24,7 +24,7 @@ sealed class ProjectSelectionView : Component<ProjectSelectionView.State>
             {
                 new div(OnClick(OnAddNewComponentClicked), DisplayFlex, JustifyContentCenter, AlignItemsCenter, BorderRadius(100), Padding(3))
                 {
-                    new svg(ViewBox(0, 0, 16, 16), Width(16), Height(16), Width(24), Height(24))
+                    new svg(ViewBox(0, 0, 16, 16), Width(16), Height(16), Fill("currentcolor"), Width(24), Height(24), Color(Gray300), Hover(Color(Gray600)))
                     {
                         new path(Fill("currentColor"), path.D("M12 8.667H8.667V12c0 .367-.3.667-.667.667A.669.669 0 0 1 7.333 12V8.667H4A.669.669 0 0 1 3.333 8c0-.367.3-.667.667-.667h3.333V4c0-.366.3-.667.667-.667.367 0 .667.3.667.667v3.333H12c.367 0 .667.3.667.667 0 .367-.3.667-.667.667Z"))
                     }
@@ -32,10 +32,10 @@ sealed class ProjectSelectionView : Component<ProjectSelectionView.State>
                 new div
                 {
                     ProjectName
-                },
+                }, 
                 new div(OnClick(ToggleSuggestions), DisplayFlex, JustifyContentCenter, AlignItemsCenter, Padding(3))
                 {
-                    new svg(svg.Height(20), svg.Width(20), ViewBox(0, 0, 20, 20))
+                    new svg(svg.Height(20), svg.Width(20), ViewBox(0, 0, 20, 20), Fill("currentcolor"), Color(Gray300), Hover(Color(Gray600)))
                     {
                         new path(path.D("M4.516 7.548c0.436-0.446 1.043-0.481 1.576 0l3.908 3.747 3.908-3.747c0.533-0.481 1.141-0.446 1.574 0 0.436 0.445 0.408 1.197 0 1.615-0.406 0.418-4.695 4.502-4.695 4.502-0.217 0.223-0.502 0.335-0.787 0.335s-0.57-0.112-0.789-0.335c0 0-4.287-4.084-4.695-4.502s-0.436-1.17 0-1.615z"))
                     }
@@ -53,6 +53,7 @@ sealed class ProjectSelectionView : Component<ProjectSelectionView.State>
                         }
                     }
                 }
+            
         };
     }
 
@@ -84,7 +85,7 @@ sealed class ProjectSelectionView : Component<ProjectSelectionView.State>
         state = state with
         {
             IsSuggestionsVisible = !state.IsSuggestionsVisible,
-            SuggestionPopupLocationX = rect.left + rect.width / 2 - 24,
+            SuggestionPopupLocationX = rect.left-100,
             SuggestionPopupLocationY = rect.top + rect.height + 8
         };
 

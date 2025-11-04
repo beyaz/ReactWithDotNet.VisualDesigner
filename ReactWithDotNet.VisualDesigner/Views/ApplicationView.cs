@@ -1074,6 +1074,40 @@ sealed class ApplicationView : Component<ApplicationState>
         return new FlexRow(UserSelect(none))
         {
             // P R O J E C T
+            new ProjectSelectionView
+            {
+                Suggestions = GetProjectNames(state),
+                ProjectName       = GetAllProjectsCached().FirstOrDefault(p => p.Id == state.ProjectId)?.Name,
+                OnChange = async (projectName) =>
+                {
+                    var projectEntity = GetAllProjectsCached().FirstOrDefault(x => x.Name == projectName);
+                    if (projectEntity is null)
+                    {
+                        this.FailNotification("Project not found. @" + projectName);
+
+                        return;
+                    }
+
+                    await ChangeSelectedProject(projectEntity.Id);
+                },
+                
+                OnAddNewComponent = () =>
+                {
+                    if (state.MainContentTab == MainContentTabs.NewComponentConfig)
+                    {
+                        state = state with { MainContentTab = MainContentTabs.Design };
+
+                        return Task.CompletedTask;
+                    }
+
+                    state = state with
+                    {
+                        MainContentTab = MainContentTabs.NewComponentConfig
+                    };
+
+                    return Task.CompletedTask;
+                }
+            },
             new FlexRowCentered(Gap(16), Border(1, solid, Theme.BorderColor), BorderRadius(4), PaddingX(8), Height(36))
             {
                 PositionRelative,
