@@ -1108,14 +1108,7 @@ sealed class ApplicationView : Component<ApplicationState>
                     return Task.CompletedTask;
                 }
             },
-            new FlexRowCentered(Gap(16), Border(1, solid, Theme.BorderColor), BorderRadius(4), PaddingX(8), Height(36))
-            {
-                PositionRelative,
-                new label(PositionAbsolute, Top(-4), Left(8), FontSize10, LineHeight7, BackgroundTheme, PaddingX(4)) { "Project" },
-
-                PartProject
-            },
-
+            
             // A C T I O N S
 
             new FlexRowCentered
@@ -1564,56 +1557,7 @@ sealed class ApplicationView : Component<ApplicationState>
             };
         }
     }
-
-    Element PartProject()
-    {
-        return new FlexRowCentered(Gap(4))
-        {
-            new MagicInput
-            {
-                Name = string.Empty,
-
-                Suggestions = GetProjectNames(state),
-                Value       = GetAllProjectsCached().FirstOrDefault(p => p.Id == state.ProjectId)?.Name,
-                OnChange = async (_, projectName) =>
-                {
-                    var projectEntity = GetAllProjectsCached().FirstOrDefault(x => x.Name == projectName);
-                    if (projectEntity is null)
-                    {
-                        this.FailNotification("Project not found. @" + projectName);
-
-                        return;
-                    }
-
-                    await ChangeSelectedProject(projectEntity.Id);
-                },
-                FitContent = true
-            },
-
-            new FlexRowCentered
-            {
-                new IconPlus() + Size(24) + Color(state.MainContentTab == MainContentTabs.NewComponentConfig ? Gray600 : Gray300) + Hover(Color(Gray600)),
-
-                OnClick(_ =>
-                {
-                    if (state.MainContentTab == MainContentTabs.NewComponentConfig)
-                    {
-                        state = state with { MainContentTab = MainContentTabs.Design };
-
-                        return Task.CompletedTask;
-                    }
-
-                    state = state with
-                    {
-                        MainContentTab = MainContentTabs.NewComponentConfig
-                    };
-
-                    return Task.CompletedTask;
-                })
-            }
-        };
-    }
-
+    
     Element PartRightPanel()
     {
         VisualElementModel visualElementModel = null;
