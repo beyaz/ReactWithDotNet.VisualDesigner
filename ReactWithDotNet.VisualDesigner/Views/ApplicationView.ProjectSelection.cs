@@ -1,16 +1,16 @@
 ﻿namespace ReactWithDotNet.VisualDesigner.Views;
 
-class ProjectSelectionView : Component<ProjectSelectionView.State>
+sealed class ProjectSelectionView : Component<ProjectSelectionView.State>
 {
     [CustomEvent]
-    public Func<Task> OnAddNewComponent { get; set; }
+    public required Func<Task> OnAddNewComponent { get; set; }
 
     [CustomEvent]
-    public Func<double, Task> OnChange { get; init; }
+    public required Func<double, Task> OnChange { get; init; }
 
-    public string ProjectName { get; init; }
+    public required string ProjectName { get; init; }
 
-    public IReadOnlyList<string> Suggestions { get; init; }
+    public required IReadOnlyList<string> Suggestions { get; init; }
 
     protected override Element render()
     {
