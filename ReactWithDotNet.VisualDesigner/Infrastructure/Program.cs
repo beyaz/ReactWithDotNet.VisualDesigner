@@ -94,7 +94,7 @@ public class Program
 
         if (Config.UseUrls)
         {
-            app.Run($"https://*:{port}");
+            app.Run($"http://*:{port}");
         }
         else
         {

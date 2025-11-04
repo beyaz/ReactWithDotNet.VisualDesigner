@@ -7,9 +7,9 @@ browsers:
     - '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
   'linux':
     - '/usr/bin/google-chrome'
-browserExeArguments: "--app=https://localhost:{Port}/"
+browserExeArguments: "--app=http://localhost:{Port}/"
 hideConsoleWindow: true
-nextAvailablePortFrom: 5005
+nextAvailablePortFrom: 5006
 useUrls: true
 
 database:
