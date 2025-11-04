@@ -9,22 +9,6 @@ namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
 static class Mixin
 {
-    
-    [TryFindAssemblyPath]
-    public static string TryFindAssemblyPath(ComponentConfig componentConfig, string dotNetFullTypeName)
-    {
-        var solutionDirectory = componentConfig.SolutionDirectory;
-        if (solutionDirectory.HasValue())
-        {
-            var solutionName = Path.GetFileName(solutionDirectory);
-
-            return solutionDirectory + $@"\API\{solutionName}.API\bin\Debug\net8.0\{solutionName}.API.dll";
-        }
-
-        return null;
-    }
-    
-    
     [GetStringSuggestions]
     public static async Task<Result<IReadOnlyList<string>>> GetStringSuggestions(PropSuggestionScope scope)
     {

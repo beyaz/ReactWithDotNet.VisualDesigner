@@ -72,11 +72,6 @@ public sealed class GetStringSuggestionsAttribute : Attribute
 {
 }
 
-[AttributeUsage(AttributeTargets.Method)]
-public sealed class TryFindAssemblyPathAttribute : Attribute
-{
-}
-
 public sealed record PropSuggestionScope
 {
     public ComponentEntity Component { get; init; }
@@ -678,28 +673,7 @@ public static class Plugin
 
         return null;
     }
-
-    static Result<string> TryFindAssemblyPath(ComponentConfig componentConfig, string dotNetFullTypeName)
-    {
-        var methods =
-            from assembly in Plugins
-            from type in assembly.GetTypes()
-            from methodInfo in type.GetMethods(BindingFlags.Public | BindingFlags.Static)
-            where methodInfo.GetCustomAttribute<TryFindAssemblyPathAttribute>() is not null
-            select methodInfo;
-
-        foreach (var methodInfo in methods)
-        {
-            var assemblyFilePath = (string)methodInfo.Invoke(null, [componentConfig, dotNetFullTypeName]);
-            if (assemblyFilePath is not null)
-            {
-                return assemblyFilePath;
-            }
-        }
-
-        return new IOException("AssemblyNotFound @dotNetFullTypeName: " + dotNetFullTypeName);
-    }
-
+    
     record ComponentMeta
     {
         public IReadOnlyList<PropMeta> Props { get; init; }
