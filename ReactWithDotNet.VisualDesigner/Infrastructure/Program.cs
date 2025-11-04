@@ -4,8 +4,6 @@ using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.IO.Compression;
-using System.Runtime.Loader;
-
 namespace ReactWithDotNet.VisualDesigner.Infrastructure;
 
 public class Program
