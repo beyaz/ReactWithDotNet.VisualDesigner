@@ -899,72 +899,72 @@ sealed class StylerComponent : Component<StylerComponent.State>
                 {
                     new GroupItem
                     {
-                        Label           = TryGetGroupLabelAt(0),
-                        SelectionChange = OnGroupItemChanged,
-                        IsSelected      = IsSelectedGroup(0)
+                        Label=TryGetGroupLabelAt(0),
+                        SelectionChange=OnGroupItemChanged,
+                        IsSelected=IsSelectedGroup(0)
                     },
                     new GroupItem
                     {
-                        Label           = TryGetGroupLabelAt(1),
-                        SelectionChange = OnGroupItemChanged,
-                        IsSelected      = IsSelectedGroup(1)
+                        Label=TryGetGroupLabelAt(1),
+                        SelectionChange=OnGroupItemChanged,
+                        IsSelected=IsSelectedGroup(1)
                     },
                     new GroupItem
                     {
-                        Label           = TryGetGroupLabelAt(2),
-                        SelectionChange = OnGroupItemChanged,
-                        IsSelected      = IsSelectedGroup(2)
+                        Label=TryGetGroupLabelAt(2),
+                        SelectionChange=OnGroupItemChanged,
+                        IsSelected=IsSelectedGroup(2)
                     }
                 },
                 new div(PositionAbsolute, Left(0), Bottom(-8), DisplayFlex, Right(0), JustifyContentSpaceAround)
                 {
                     new GroupItem
                     {
-                        Label           = TryGetGroupLabelAt(7),
-                        SelectionChange = OnGroupItemChanged,
-                        IsSelected      = IsSelectedGroup(7)
+                        Label=TryGetGroupLabelAt(7),
+                        SelectionChange=OnGroupItemChanged,
+                        IsSelected=IsSelectedGroup(7)
                     },
                     new GroupItem
                     {
-                        Label           = TryGetGroupLabelAt(8),
-                        SelectionChange = OnGroupItemChanged,
-                        IsSelected      = IsSelectedGroup(8)
+                        Label=TryGetGroupLabelAt(8),
+                        SelectionChange=OnGroupItemChanged,
+                        IsSelected=IsSelectedGroup(8)
                     },
                     new GroupItem
                     {
-                        Label           = TryGetGroupLabelAt(9),
-                        SelectionChange = OnGroupItemChanged,
-                        IsSelected      = IsSelectedGroup(9)
+                        Label=TryGetGroupLabelAt(9),
+                        SelectionChange=OnGroupItemChanged,
+                        IsSelected=IsSelectedGroup(9)
                     }
                 },
                 new div(PositionAbsolute, Left(-9), Top(0), DisplayFlex, Bottom(0), JustifyContentSpaceAround, FlexDirectionColumn, Width(7))
                 {
                     new GroupItem
                     {
-                        Label           = TryGetGroupLabelAt(3),
-                        SelectionChange = OnGroupItemChanged,
-                        IsSelected      = IsSelectedGroup(3)
+                        Label=TryGetGroupLabelAt(3),
+                        SelectionChange=OnGroupItemChanged,
+                        IsSelected=IsSelectedGroup(3)
                     },
                     new GroupItem
                     {
-                        Label           = TryGetGroupLabelAt(4),
-                        SelectionChange = OnGroupItemChanged,
-                        IsSelected      = IsSelectedGroup(4)
+                        Label=TryGetGroupLabelAt(4),
+                        SelectionChange=OnGroupItemChanged,
+                        IsSelected=IsSelectedGroup(4)
                     }
                 },
                 new div(PositionAbsolute, Right(1), Top(0), DisplayFlex, Bottom(0), JustifyContentSpaceAround, FlexDirectionColumn, Width(7))
                 {
                     new GroupItem
                     {
-                        Label           = TryGetGroupLabelAt(5),
-                        SelectionChange = OnGroupItemChanged,
-                        IsSelected      = IsSelectedGroup(5)
+                        Label=TryGetGroupLabelAt(5),
+                        SelectionChange=OnGroupItemChanged,
+                        IsSelected=IsSelectedGroup(5)
                     },
                     new GroupItem
                     {
-                        Label           = TryGetGroupLabelAt(6),
-                        SelectionChange = OnGroupItemChanged,
-                        IsSelected      = IsSelectedGroup(6)
+                        Label=TryGetGroupLabelAt(6),
+                        SelectionChange=OnGroupItemChanged,
+                        IsSelected=IsSelectedGroup(6)
                     }
                 },
                 new div(WidthFull, HeightFull, Border(1, solid, Gray200), BorderRadius(4), PositionRelative, Background(White))
@@ -973,72 +973,72 @@ sealed class StylerComponent : Component<StylerComponent.State>
                     {
                         new SubGroupItem
                         {
-                            Label           = TryGetSubGroupLabelAt(0),
-                            SelectionChange = OnSubGroupItemChanged,
-                            IsSelected      = IsSelectedSubGroup(0)
+                            Label=TryGetSubGroupLabelAt(0),
+                            SelectionChange=OnSubGroupItemChanged,
+                            IsSelected=IsSelectedSubGroup(0)
                         },
                         new SubGroupItem
                         {
-                            Label           = TryGetSubGroupLabelAt(1),
-                            SelectionChange = OnSubGroupItemChanged,
-                            IsSelected      = IsSelectedSubGroup(1)
+                            Label=TryGetSubGroupLabelAt(1),
+                            SelectionChange=OnSubGroupItemChanged,
+                            IsSelected=IsSelectedSubGroup(1)
                         },
                         new SubGroupItem
                         {
-                            Label           = TryGetSubGroupLabelAt(2),
-                            SelectionChange = OnSubGroupItemChanged,
-                            IsSelected      = IsSelectedSubGroup(2)
+                            Label=TryGetSubGroupLabelAt(2),
+                            SelectionChange=OnSubGroupItemChanged,
+                            IsSelected=IsSelectedSubGroup(2)
                         }
                     },
                     new div(PositionAbsolute, Left(0), Bottom(-8), DisplayFlex, Right(0), JustifyContentSpaceAround)
                     {
                         new SubGroupItem
                         {
-                            Label           = TryGetSubGroupLabelAt(7),
-                            SelectionChange = OnSubGroupItemChanged,
-                            IsSelected      = IsSelectedSubGroup(7)
+                            Label=TryGetSubGroupLabelAt(7),
+                            SelectionChange=OnSubGroupItemChanged,
+                            IsSelected=IsSelectedSubGroup(7)
                         },
                         new SubGroupItem
                         {
-                            Label           = TryGetSubGroupLabelAt(8),
-                            SelectionChange = OnSubGroupItemChanged,
-                            IsSelected      = IsSelectedSubGroup(8)
+                            Label=TryGetSubGroupLabelAt(8),
+                            SelectionChange=OnSubGroupItemChanged,
+                            IsSelected=IsSelectedSubGroup(8)
                         },
                         new SubGroupItem
                         {
-                            Label           = TryGetSubGroupLabelAt(9),
-                            SelectionChange = OnSubGroupItemChanged,
-                            IsSelected      = IsSelectedSubGroup(9)
+                            Label=TryGetSubGroupLabelAt(9),
+                            SelectionChange=OnSubGroupItemChanged,
+                            IsSelected=IsSelectedSubGroup(9)
                         }
                     },
                     new div(PositionAbsolute, Left(-9), Top(0), DisplayFlex, Bottom(0), JustifyContentSpaceAround, FlexDirectionColumn, Width(7))
                     {
                         new SubGroupItem
                         {
-                            Label           = TryGetSubGroupLabelAt(3),
-                            SelectionChange = OnSubGroupItemChanged,
-                            IsSelected      = IsSelectedSubGroup(3)
+                            Label=TryGetSubGroupLabelAt(3),
+                            SelectionChange=OnSubGroupItemChanged,
+                            IsSelected=IsSelectedSubGroup(3)
                         },
                         new SubGroupItem
                         {
-                            Label           = TryGetSubGroupLabelAt(4),
-                            SelectionChange = OnSubGroupItemChanged,
-                            IsSelected      = IsSelectedSubGroup(4)
+                            Label=TryGetSubGroupLabelAt(4),
+                            SelectionChange=OnSubGroupItemChanged,
+                            IsSelected=IsSelectedSubGroup(4)
                         }
                     },
                     new div(PositionAbsolute, Right(1), Top(0), DisplayFlex, Bottom(0), JustifyContentSpaceAround, FlexDirectionColumn, Width(7))
                     {
                         new SubGroupItem
                         {
-                            Label           = TryGetSubGroupLabelAt(5),
-                            SelectionChange = OnSubGroupItemChanged,
-                            IsSelected      = IsSelectedSubGroup(5)
+                            Label=TryGetSubGroupLabelAt(5),
+                            SelectionChange=OnSubGroupItemChanged,
+                            IsSelected=IsSelectedSubGroup(5)
                         },
                         new SubGroupItem
                         {
-                            Label           = TryGetSubGroupLabelAt(6),
-                            SelectionChange = OnSubGroupItemChanged,
-                            IsSelected      = IsSelectedSubGroup(6)
+                            Label=TryGetSubGroupLabelAt(6),
+                            SelectionChange=OnSubGroupItemChanged,
+                            IsSelected=IsSelectedSubGroup(6)
                         }
                     },
                     !HasAnyActiveSubGroup ? null :
@@ -1050,22 +1050,25 @@ sealed class StylerComponent : Component<StylerComponent.State>
                                     from item in ActiveSubGroup.Suggestions
                                     select new CssValueItem
                                     {
-                                        Label         = item.Label,
-                                        Value         = item.Value,
-                                        Click         = OnCssItemClicked,
-                                        TargetCssName = ActiveSubGroup.TargetCssName
+                                        Label=item.Label,
+                                        Value=item.Value,
+                                        Click=OnCssItemClicked,
+                                        TargetCssName=ActiveSubGroup.TargetCssName
                                     }
-                                },
+                                }
+                            ,
                             !ActiveSubGroup.IsCssUnitEnabled ? null :
                                 new div(DisplayFlex, AlignItemsCenter, JustifyContentCenter)
                                 {
                                     new CssUnitEditor
                                     {
-                                        Change  = OnCssItemClicked,
-                                        CssName = ActiveSubGroup.TargetCssName
+                                        Change=OnCssItemClicked,
+                                        CssName=ActiveSubGroup.TargetCssName
                                     }
                                 }
+                            
                         }
+                    
                 }
             }
         };
