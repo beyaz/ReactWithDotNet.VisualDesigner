@@ -921,6 +921,13 @@ sealed class ApplicationView : Component<ApplicationState>
 
         if (state.MainContentTab == MainContentTabs.ComponentConfig)
         {
+            var parseResult = Try(() => DeserializeFromYaml<ComponentConfig>(state.MainContentText));
+            if (parseResult.HasError)
+            {
+                this.FailNotification(parseResult.Error.ToString());
+                return;
+            }
+            
             var result = await UpdateComponentConfig(state.ProjectId, state.ComponentId, state.MainContentText, state.UserName);
             if (result.HasError)
             {
