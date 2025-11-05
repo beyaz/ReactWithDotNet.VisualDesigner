@@ -299,7 +299,7 @@ sealed class MagicInput : Component<MagicInput.State>
                 return (true, null, null, []);
             }
 
-            var words = searchTerm.Split(": -", StringSplitOptions.RemoveEmptyEntries);
+            var words = searchTerm.Split(": -".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
             
             
             var indexOfColonInSearchTerm = searchTerm.IndexOf(':');
