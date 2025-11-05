@@ -422,8 +422,8 @@ public sealed record SuggestionItem
     public JsType jsType { get; init; }
     
     public bool isVariable { get; init; }
-    
-    
+
+
     public static implicit operator string(SuggestionItem item)
     {
         if (item.name is null)
@@ -431,6 +431,11 @@ public sealed record SuggestionItem
             return item.value;
         }
         
+        if (item.value is null)
+        {
+            return item.value;
+        }
+
         return $"{item.name}: {item.value}";
     }
 }
