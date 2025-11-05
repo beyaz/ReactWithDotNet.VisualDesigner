@@ -346,18 +346,12 @@ static class ApplicationLogic
     {
         var projectId = state.ProjectId;
         
-        return Cache.AccessValue($"{nameof(GetTagSuggestions)}-{projectId}", () =>
+        return Cache.AccessValue($"{nameof(GetTagSuggestions)}-{projectId}", () => new List<string>
         {
-            var suggestions = new List<string>();
-            
-            suggestions.AddRange(Plugin.GetTagSuggestions());
-            
-            suggestions.AddRange(TagNameList);
-
-            suggestions.AddRange(from x in GetAllComponentsInProjectFromCache(projectId)
-                                 select x.GetNameWithExportFilePath());
-
-            return suggestions;
+            Plugin.GetTagSuggestions(),
+            TagNameList,
+            from x in GetAllComponentsInProjectFromCache(projectId)
+            select x.GetNameWithExportFilePath()
         });
     }
 
