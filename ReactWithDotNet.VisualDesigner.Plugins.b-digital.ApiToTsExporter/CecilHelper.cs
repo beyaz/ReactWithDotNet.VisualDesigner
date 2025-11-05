@@ -21,35 +21,7 @@ static class CecilHelper
         return new MissingMemberException(fullTypeName);
     }
     
-    public static IReadOnlyList<TypeDefinition> GetTypes(AssemblyDefinition assemblyDefinition, IReadOnlyList<string> listOfTypes)
-    {
-        var typeDefinitions = new List<TypeDefinition>();
-
-        foreach (var item in listOfTypes)
-        {
-            var typeNamePrefix = item;
-
-            if (typeNamePrefix.EndsWith("*", StringComparison.OrdinalIgnoreCase))
-            {
-                typeNamePrefix = typeNamePrefix.Remove(typeNamePrefix.Length - 1);
-
-                foreach (var typeDefinition in assemblyDefinition.MainModule.Types)
-                {
-                    if (typeDefinition.FullName.StartsWith(typeNamePrefix, StringComparison.OrdinalIgnoreCase))
-                    {
-                        typeDefinitions.Add(typeDefinition);
-                    }
-                }
-
-                continue;
-            }
-
-            typeDefinitions.Add(assemblyDefinition.MainModule.FindTypeByClrName(typeNamePrefix));
-        }
-
-        return typeDefinitions;
-    }
-
+   
     public static bool IsNullableProperty(PropertyDefinition propertyDefinition)
     {
         // is value type
