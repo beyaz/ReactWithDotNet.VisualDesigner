@@ -279,43 +279,65 @@ sealed class MagicInput : Component<MagicInput.State>
             return Task.CompletedTask;
         }
 
+
+        var parseResponse = ParseSearchTerm(state.Value);
+        
         state = state with
         {
             ShowSuggestions = true,
             SelectedSuggestionOffset = null,
-            FilteredSuggestions = Suggestions.OrderByDescending(x => hasMatch(x,state.Value)).Take(5).ToList()
+            FilteredSuggestions = Suggestions.OrderByDescending(x => hasMatch(x,parseResponse)).Take(5).ToList()
         };
 
-        return Task.CompletedTask;
         
-        static int hasMatch(string source, string searchTerm)
+        return Task.CompletedTask;
+
+        static (bool isEmpty, string partName, string partValue, string[] words) ParseSearchTerm(string searchTerm)
         {
-            if (string.IsNullOrWhiteSpace(source) || string.IsNullOrWhiteSpace(searchTerm))
+            if (searchTerm.HasNoValue())
+            {
+                return (true, null, null, []);
+            }
+
+            var words = searchTerm.Split(": -", StringSplitOptions.RemoveEmptyEntries);
+            
+            
+            var indexOfColonInSearchTerm = searchTerm.IndexOf(':');
+            if (indexOfColonInSearchTerm > 0)
+            {
+                var name = searchTerm[..indexOfColonInSearchTerm];
+                
+                var value = searchTerm[indexOfColonInSearchTerm..];
+
+                return (isEmpty: false, name, value, words);
+            }
+           
+            return (isEmpty: false, searchTerm, null, words);
+        }
+        
+        static int hasMatch(SuggestionItem suggestionItem, (bool isEmpty, string partName, string partValue, string[] words) searchTerm)
+        {
+            if (searchTerm.isEmpty)
             {
                 return 1;
             }
 
             var count = 0;
-            foreach (var term in searchTerm.Split(' ', StringSplitOptions.RemoveEmptyEntries))
+           if ( suggestionItem.name?.Contains(searchTerm.partName) is true)
             {
-                if (source.Contains(term, StringComparison.OrdinalIgnoreCase))
+                count +=5;
+            }
+           
+            foreach (var word in searchTerm.words)
+            {
+                if (suggestionItem.value?.Contains(word, StringComparison.OrdinalIgnoreCase) is true)
                 {
                     count++;
                 }
             }
 
-            // give more value for same prop
-            {
-                var indexOfColonInSearchTerm = searchTerm.IndexOf(':');
-                var indexOfColonInSource = source.IndexOf(':');
-                if (indexOfColonInSource == indexOfColonInSearchTerm && indexOfColonInSource > 0)
-                {
-                    if (IsEqualsIgnoreWhitespace(searchTerm[..indexOfColonInSearchTerm], source[..indexOfColonInSource]))
-                    {
-                        count += 100;
-                    }
-                }
-            }
+            
+            
 
             return count;
         }
