@@ -342,17 +342,26 @@ static class ApplicationLogic
         return items;
     }
 
-    public static IReadOnlyList<string> GetTagSuggestions(ApplicationState state)
+    public static IReadOnlyList<SuggestionItem> GetTagSuggestions(ApplicationState state)
     {
         var projectId = state.ProjectId;
-        
-        return Cache.AccessValue($"{nameof(GetTagSuggestions)}-{projectId}", () => new List<string>
-        {
-            Plugin.GetTagSuggestions(),
-            TagNameList,
-            from x in GetAllComponentsInProjectFromCache(projectId)
-            select x.GetNameWithExportFilePath()
-        });
+
+        return Cache.AccessValue($"{nameof(GetTagSuggestions)}-{projectId}", () =>
+        (
+            from name in new List<string>
+            {
+                Plugin.GetTagSuggestions(),
+                TagNameList,
+                from x in GetAllComponentsInProjectFromCache(projectId)
+                select x.GetNameWithExportFilePath()
+            }
+            select new SuggestionItem
+            {
+                value = name,
+
+                isVariable = true
+            }
+        ).AsReadOnlyList());
     }
 
     public static async Task<string> GetTagText(string tag)
