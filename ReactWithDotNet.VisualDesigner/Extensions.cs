@@ -204,7 +204,7 @@ public static partial class Extensions
         var component = await Store.TryGetComponent(componentId);
         
 
-        return (component.Config.OutputFilePath, component.Config.Name);
+        return (component.Config.OutputFilePath.Trim(), component.Config.Name);
     }
 
     public static bool HasAny<T>(IEnumerable<T> items)
@@ -514,6 +514,11 @@ public static partial class Extensions
 
     public static Maybe<Type> TryGetHtmlElementTypeByTagName(string tag)
     {
+        if ("React.Fragment".Equals(tag, StringComparison.OrdinalIgnoreCase))
+        {
+            return typeof(Fragment);
+        }
+        
         return typeof(svg).Assembly.GetType(nameof(ReactWithDotNet) + "." + tag, false, false);
     }
 
