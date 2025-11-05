@@ -263,7 +263,7 @@ static class ApplicationLogic
 
         var project = GetProjectConfig(state.ProjectId);
 
-        var items = new List<SuggestionItem>
+        return new List<SuggestionItem>
         {
             from name in project.Styles.Keys
             select new SuggestionItem()
@@ -343,9 +343,17 @@ static class ApplicationLogic
                 isVariable = true
             },
             
-            // r a d i u s
+            // r a d i u s - p a d d i n g s - m a r g i n s
             from i in Enumerable.Range(1, 48)
-            from name in new[]{"border-radius", "border-top-left-radius", "border-top-right-radius", "border-bottom-left-radius", "border-bottom-right-radius"}
+            where i%4 == 0
+            from name in new[]
+            {
+                "border-radius", "border-top-left-radius", "border-top-right-radius", "border-bottom-left-radius", "border-bottom-right-radius",
+                
+                "padding", "padding-left", "padding-right", "padding-top", "padding-bottom",
+                
+                "margin", "margin-left", "margin-right", "margin-top", "margin-bottom"
+            }
             select new SuggestionItem
             {
                 name = name,
@@ -357,46 +365,7 @@ static class ApplicationLogic
         };
 
 
-
-        // paddings
-        {
-            string[] names = ["padding", "padding-left", "padding-right", "padding-top", "padding-bottom"];
-
-            foreach (var name in names)
-            {
-                for (var i = 1; i <= 1000; i++)
-                {
-                    if (i % 2 == 0 || i % 5 == 0)
-                    {
-                        items.Add($"{name}: {i}");
-                    }
-                }
-            }
-        }
-
-        // margins
-        {
-            string[] names = ["margin", "margin-left", "margin-right", "margin-top", "margin-bottom"];
-
-            foreach (var name in names)
-            {
-                for (var i = 1; i <= 1000; i++)
-                {
-                    if (i % 2 == 0 || i % 5 == 0)
-                    {
-                        items.Add($"{name}: {i}");
-                    }
-                }
-            }
-        }
-
         
-
-       
-
-        
-
-        return items;
     }
 
     public static IReadOnlyList<SuggestionItem> GetTagSuggestions(ApplicationState state)
