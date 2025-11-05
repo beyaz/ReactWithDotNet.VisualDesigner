@@ -389,3 +389,25 @@ sealed class MagicInput : Component<MagicInput.State>
         public string Value { get; init; }
     }
 }
+
+public enum SuggestionType
+{
+    String,
+    Number,
+    Date,
+    Boolean,
+    Collection,
+    Function,
+    
+}
+
+public sealed record SuggestionItem
+{
+    public string name { get; init; }
+    
+    public string value { get; init; }
+    
+    public JsType jsType { get; init; }
+    
+    public bool isVariable { get; init; }
+}

@@ -10,8 +10,6 @@ using ReactWithDotNet.VisualDesigner.Configuration;
 
 namespace ReactWithDotNet.VisualDesigner;
 
-using SuggestionItem = (string name, string value, JsType jsType, bool isVariable);
-
 public class PluginComponentBase : Component
 {
     public string id;
