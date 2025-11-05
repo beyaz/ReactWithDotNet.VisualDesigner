@@ -22,7 +22,20 @@ sealed class BDigitalSecureConfirmAgreement : PluginComponentBase
         return new FlexColumn(MarginBottom(24),MarginTop(8))
         {
             Id(id), OnClick(onMouseClick),
-                    
+            
+            new FlexColumn(Background(White), BorderRadius(10), Border(1, solid, "#E0E0E0"), Padding(32))
+            {
+                new BAlert
+                {
+                    severity = "info",
+                    children=
+                    {
+                        "İşlemi tamamlayabilmeniz için belgeleri Kuveyt Türk Mobil'de Belgelerim ekranından onaylamanız gerekmektedir. Belgeleri Onayla butonu ile Kuveyt Türk Mobil'e yönlendirileceksiniz."
+                    }
+                }
+            },
+            SpaceY(24),
+            
             new div(FontSize18, FontWeight600, Color(rgba(0, 0, 0, 0.87))) { "Belge Onayı" },
             SpaceY(8),
             new FlexColumn(Background(White), BorderRadius(10), Border(1, solid, "#E0E0E0"), Padding(24))

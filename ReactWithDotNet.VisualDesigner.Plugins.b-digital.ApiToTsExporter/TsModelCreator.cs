@@ -184,7 +184,9 @@ static class TsModelCreator
     
     static bool IsJsonIgnored(PropertyDefinition propertyDefinition)
     {
-        return propertyDefinition.CustomAttributes.Any(x => x.AttributeType.Name.Contains("JsonIgnore", StringComparison.OrdinalIgnoreCase));
+        return propertyDefinition.CustomAttributes.Any(x => 
+            x.AttributeType.Name.Contains("JsonIgnore", StringComparison.OrdinalIgnoreCase)||
+            x.AttributeType.Name.Contains("TsIgnore", StringComparison.OrdinalIgnoreCase));
     }
 
     
