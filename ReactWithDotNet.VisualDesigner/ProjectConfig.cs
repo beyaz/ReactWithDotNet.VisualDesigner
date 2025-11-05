@@ -31,19 +31,19 @@ public sealed record ComponentConfig
 
     public bool SkipExport { get; init; }
     
-    public string SolutionDirectory { get; init; }
+    public string SolutionDirectory { get => field?.Trim(); init; }
     
-    public string Translate { get; init; }
-    
-    public string OutputFilePath { get; init; }
+    public string Translate { get => field?.Trim(); init; }
+
+    public string OutputFilePath { get => field?.Trim(); init; }
 }
 
 public sealed record VariableConfig
 {
-    public string DotNetAssemblyFilePath { get; init; }
+    public string DotNetAssemblyFilePath { get => field?.Trim(); init; }
 
-    public string DotnetTypeFullName { get; init; }
+    public string DotnetTypeFullName { get => field?.Trim(); init; }
 
-    public string VariableName { get; init; }
+    public string VariableName { get => field?.Trim(); init; }
 }
 
