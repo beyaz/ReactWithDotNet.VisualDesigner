@@ -34,6 +34,8 @@ public sealed record ComponentConfig
     public string SolutionDirectory { get; init; }
     
     public string Translate { get; init; }
+    
+    public string OutputFilePathInProject { get; init; }
 }
 
 public sealed record VariableConfig
