@@ -77,13 +77,13 @@ public static class CecilHelper
     {
         
         return from assembly in CecilAssemblyReader.ReadAssembly(assemblyPath)
-               let type = assembly.MainModule.GetType(typeFullName)
-               select (type is null) switch
+               let maybeType = assembly.MainModule.FindTypeByClrName(typeFullName)
+               select maybeType.HasNoValue switch
                {
                    true => new Exception($"TypeNotFound.{typeFullName}"),
                    false => new Result<IReadOnlyList<string>>
                    {
-                       Value = findProperties(isInSameAssembly, type, prefix, matchFunc)
+                       Value = findProperties(isInSameAssembly, maybeType.Value, prefix, matchFunc)
                    }
                };
         
@@ -194,14 +194,14 @@ public static class CecilHelper
             return false;
         }
 
-        var type = assembly.MainModule.GetType(dotnetTypeFullName);
-        if (type is null)
+        var type = assembly.MainModule.FindTypeByClrName(dotnetTypeFullName);
+        if (type.HasNoValue)
         {
             return false;
         }
 
         return
-            from propertyDefinition in FindPropertyPath(type, propertyPath)
+            from propertyDefinition in FindPropertyPath(type.Value, propertyPath)
             select IsCollection(propertyDefinition.PropertyType);
     }
 
@@ -233,4 +233,30 @@ public static class CecilHelper
         return typeReference.FullName.StartsWith("System.Collections.Generic.List`1", StringComparison.OrdinalIgnoreCase)||
                typeReference.FullName.StartsWith("System.Collections.Generic.IReadOnlyList`1", StringComparison.OrdinalIgnoreCase);
     }
+    
+    
+        public static Maybe<TypeDefinition> FindTypeByClrName(this ModuleDefinition module, string clrFullName)
+        {
+            // CLR format: Namespace.Outer+Inner+Inner2
+            var parts = clrFullName.Split('+');
+            var outerFullName = parts[0];
+            var outerType = module.GetType(outerFullName);
+
+            if (outerType == null)
+                return None;
+
+            // İç içe sınıfları sırayla ara
+            TypeDefinition current = outerType;
+            for (int i = 1; i < parts.Length; i++)
+            {
+                var nestedName = parts[i];
+                current = current.NestedTypes.FirstOrDefault(t => t.Name == nestedName);
+                if (current == null)
+                    return None;
+            }
+
+            return current;
+        }
+    
+
 }

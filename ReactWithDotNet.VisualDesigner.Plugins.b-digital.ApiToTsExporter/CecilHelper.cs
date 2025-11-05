@@ -44,7 +44,7 @@ static class CecilHelper
                 continue;
             }
 
-            typeDefinitions.Add(assemblyDefinition.MainModule.GetType(typeNamePrefix));
+            typeDefinitions.Add(assemblyDefinition.MainModule.FindTypeByClrName(typeNamePrefix));
         }
 
         return typeDefinitions;
