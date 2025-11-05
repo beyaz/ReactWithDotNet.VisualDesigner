@@ -58,11 +58,6 @@ public sealed class TryCreateElementForPreviewAttribute : Attribute
 }
 
 [AttributeUsage(AttributeTargets.Method)]
-public sealed class AnalyzeExportFilePathAttribute : Attribute
-{
-}
-
-[AttributeUsage(AttributeTargets.Method)]
 public sealed class AfterReadConfigAttribute : Attribute
 {
 }
@@ -138,12 +133,7 @@ public static class Plugin
     {
         get { return field ??= GetPluginMethods<AfterReadConfigAttribute>(); }
     }
-
-    static IReadOnlyList<PluginMethod> AnalyzeExportFilePathList
-    {
-        get { return field ??= GetPluginMethods<AnalyzeExportFilePathAttribute>(); }
-    }
-
+    
     static IReadOnlyList<GetStringSuggestionsDelegate> GetStringSuggestionsMethods
     {
         get
@@ -182,17 +172,7 @@ public static class Plugin
 
         return RunPluginMethods(AfterReadConfigs, scope, Config) ?? config;
     }
-
-    public static string AnalyzeExportFilePath(string exportFilePathForComponent)
-    {
-        var scope = Scope.Create(new()
-        {
-            { ExportFilePathForComponent, exportFilePathForComponent }
-        });
-
-        return RunPluginMethods(AnalyzeExportFilePathList, scope, ExportFilePathForComponent) ?? exportFilePathForComponent;
-    }
-
+    
     public static Element BeforeComponentPreview(RenderPreviewScope scope, VisualElementModel visualElementModel, Element component)
     {
         return component;

@@ -1,5 +1,4 @@
 ﻿using System.Globalization;
-using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -202,20 +201,10 @@ public static partial class Extensions
 
     public static async Task<Result<(string filePath, string targetComponentName)>> GetComponentFileLocation(int componentId, string userLocalWorkspacePath)
     {
-        if (userLocalWorkspacePath.HasNoValue())
-        {
-            return new ArgumentNullException(nameof(userLocalWorkspacePath));
-        }
-
         var component = await Store.TryGetComponent(componentId);
+        
 
-        var exportFilePath = component.Config.ExportFilePath;
-
-        exportFilePath = Plugin.AnalyzeExportFilePath(exportFilePath);
-
-        var filePath = Path.Combine(userLocalWorkspacePath, Path.Combine(exportFilePath.Split('/', Path.DirectorySeparatorChar)));
-
-        return (filePath, component.Config.Name);
+        return (component.Config.OutputFilePath, component.Config.Name);
     }
 
     public static bool HasAny<T>(IEnumerable<T> items)
