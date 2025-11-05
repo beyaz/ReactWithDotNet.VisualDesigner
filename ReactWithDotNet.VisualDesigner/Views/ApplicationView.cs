@@ -596,7 +596,7 @@ sealed class ApplicationView : Component<ApplicationState>
                 Id          = "TagEditor",
                 Name        = string.Empty,
                 Value       = inputValue,
-                Suggestions = GetTagSuggestions(state),
+                Suggestions________ = GetTagSuggestions(state),
                 OnChange = (_, newValue) =>
                 {
                     foreach (var dbRecord in TryFindComponentByComponentNameWithExportFilePath(state.ProjectId, newValue))
@@ -1735,7 +1735,7 @@ sealed class ApplicationView : Component<ApplicationState>
                 return new MagicInput
                 {
                     Placeholder = "Add style",
-                    Suggestions = GetStyleAttributeNameSuggestions(state),
+                    Suggestions________ = GetStyleAttributeNameSuggestions(state),
                     Name        = "style_editor" + styles.Count,
                     Id          = "style_editor",
                     OnChange = (_, newValue) =>
@@ -1943,7 +1943,7 @@ sealed class ApplicationView : Component<ApplicationState>
                 {
                     Placeholder = "Add property",
 
-                    Suggestions = suggestions.Value,
+                    Suggestions________ = suggestions.Value,
 
                     Name = (state.Selection.SelectedPropertyIndex ?? (props.Count + 1) * -1).ToString(),
 

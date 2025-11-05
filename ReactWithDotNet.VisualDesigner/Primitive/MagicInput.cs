@@ -28,7 +28,7 @@ sealed class MagicInput : Component<MagicInput.State>
 
     public string Placeholder { get; init; }
 
-    public IReadOnlyList<string> Suggestions { get; init; } = [];
+    public IReadOnlyList<string> Suggestions________ { get; init; } = [];
 
     public string Value { get; init; }
 
@@ -107,7 +107,7 @@ sealed class MagicInput : Component<MagicInput.State>
 
             IgnoreTypingFinishedEvent = state?.IgnoreTypingFinishedEvent ?? false,
 
-            FilteredSuggestions = Suggestions ?? []
+            FilteredSuggestions = Suggestions________ ?? []
         };
     }
 
@@ -283,7 +283,7 @@ sealed class MagicInput : Component<MagicInput.State>
         {
             ShowSuggestions = true,
             SelectedSuggestionOffset = null,
-            FilteredSuggestions = Suggestions.OrderByDescending(x => hasMatch(x,state.Value)).Take(5).ToList()
+            FilteredSuggestions = Suggestions________.OrderByDescending(x => hasMatch(x,state.Value)).Take(5).ToList()
         };
 
         return Task.CompletedTask;
