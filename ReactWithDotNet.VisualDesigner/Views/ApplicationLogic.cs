@@ -275,7 +275,7 @@ static class ApplicationLogic
             
             // z-index 1 to 10
             from i in Enumerable.Range(1, 10)
-            select new SuggestionItem()
+            select new SuggestionItem
             {
                 name = "z-index",
 
@@ -307,50 +307,56 @@ static class ApplicationLogic
                 value = value,
                 
                 isVariable = true
-            }
+            },
+            
+            // c o l o r s
+            from colorName in project.Colors.Select(x => x.Key)
+            from name in new []{"background","color"}
+            select new SuggestionItem
+            {
+                name = name,
+                
+                value = colorName,
+                
+                isVariable = true
+            },
+            
+            from colorName in project.Colors.Select(x => x.Key)
+            from name in new[]{"border", "border-left", "border-right", "border-top", "border-bottom"}
+            select new SuggestionItem
+            {
+                name = name,
+                
+                value = $"1px solid {colorName}",
+                
+                isVariable = true
+            },
+            
+            // flex-grow 1 to 12
+            from i in Enumerable.Range(1, 12)
+            select new SuggestionItem
+            {
+                name = "flex-grow",
+
+                value = i.ToString(),
+
+                isVariable = true
+            },
+            
+            // r a d i u s
+            from i in Enumerable.Range(1, 48)
+            from name in new[]{"border-radius", "border-top-left-radius", "border-top-right-radius", "border-bottom-left-radius", "border-bottom-right-radius"}
+            select new SuggestionItem
+            {
+                name = name,
+
+                value = i + "px",
+
+                isVariable = true
+            },
         };
 
 
-
-        foreach (var colorName in project.Colors.Select(x => x.Key))
-        {
-            items.Add("color: " + colorName);
-            items.Add($"border: 1px solid {colorName}");
-        }
-
-       
-
-
-        foreach (var colorName in project.Colors.Select(x => x.Key))
-        {
-            items.Add("bg: " + colorName);
-            items.Add("background: " + colorName);
-        }
-
-        // w
-        {
-            items.Add("w-full");
-            items.Add("w-fit");
-            items.Add("h-fit");
-            items.Add("size-fit");
-            items.Add("w-screen");
-            items.Add("w-screen");
-            for (var i = 1; i <= 100; i++)
-            {
-                if (i % 5 == 0)
-                {
-                    items.Add($"w-{i}vw");
-                }
-            }
-        }
-
-        // flex-frow
-        {
-            for (var i = 1; i <= 10; i++)
-            {
-                items.Add($"flex-grow: {i}");
-            }
-        }
 
         // paddings
         {
@@ -384,30 +390,9 @@ static class ApplicationLogic
             }
         }
 
-        // border
-        {
-            string[] names = ["border", "border-left", "border-right", "border-top", "border-bottom"];
+        
 
-            foreach (var name in names)
-            {
-                foreach (var (key, _) in project.Colors)
-                {
-                    items.Add($"{name}: 1px solid {key}");
-                }
-            }
-        }
-
-        // border radius
-        {
-            for (var i = 1; i <= 48; i++)
-            {
-                items.Add($"border-top-left-radius: {i}");
-                items.Add($"border-top-right-radius: {i}");
-
-                items.Add($"border-bottom-left-radius: {i}");
-                items.Add($"border-bottom-right-radius: {i}");
-            }
-        }
+       
 
         
 
