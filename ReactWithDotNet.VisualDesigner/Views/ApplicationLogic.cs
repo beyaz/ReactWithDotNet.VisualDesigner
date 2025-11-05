@@ -180,13 +180,10 @@ static class ApplicationLogic
                 name = Design.HideIf,
             
                 jsType = JsType.Boolean
-            }
-        };
+            },
+            
+            scope.TagName is null ? [] :
 
-        if (scope.TagName != null)
-        {
-            items.Add
-            (
                 from htmlElementType in TryGetHtmlElementTypeByTagName(scope.TagName)
                 from propertyInfo in htmlElementType.GetProperties(BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance)
                 let jsType = propertyInfo.PropertyType.FullName switch
@@ -215,9 +212,8 @@ static class ApplicationLogic
 
                     name = propertyInfo.Name
                 }
-            );
-        }
-        
+        };
+
         if (scope.TagName == "img")
         {
             var user = await Store.TryGetUser(state.ProjectId, state.UserName);
@@ -261,27 +257,60 @@ static class ApplicationLogic
         return items;
     }
 
-    public static IReadOnlyList<string> GetStyleAttributeNameSuggestions(ApplicationState state)
+    public static IReadOnlyList<SuggestionItem> GetStyleAttributeNameSuggestions(ApplicationState state)
     {
-        var items = new List<string>();
+       
 
         var project = GetProjectConfig(state.ProjectId);
 
-        items.AddRange(project.Styles.Keys);
-
-        for (var i = 1; i <= 10; i++)
+        var items = new List<SuggestionItem>
         {
-            items.Add($"z-index: {i}");
-        }
+            from name in project.Styles.Keys
+            select new SuggestionItem()
+            {
+                name = name,
 
-        foreach (var number in new[] { 2, 4, 6, 8, 10, 12, 16, 20, 24, 28, 32, 36, 40 })
-        {
-            items.Add($"gap: {number}");
-            items.Add($"border-radius: {number}");
-        }
+                isVariable = true
+            },
+            
+            // z-index 1 to 10
+            from i in Enumerable.Range(1, 10)
+            select new SuggestionItem()
+            {
+                name = "z-index",
 
-        items.Add("flex-row-centered");
-        items.Add("flex-col-centered");
+                value = i.ToString(),
+
+                isVariable = true
+            },
+            
+            // gap and border-radius
+            
+            from number in new[] { 2, 4, 6, 8, 10, 12, 16, 20, 24, 28, 32, 36, 40 }
+            from name in new[] { "gap", "border-radius" }
+            select new SuggestionItem()
+            {
+                name = name,
+
+                value = number + "px",
+
+                isVariable = true
+            },
+
+            // common css suggestions
+            from item in CommonCssSuggestions.Map
+            from value in item.Value
+            select new SuggestionItem
+            {
+                name = item.Key,
+                
+                value = value,
+                
+                isVariable = true
+            }
+        };
+
+
 
         foreach (var colorName in project.Colors.Select(x => x.Key))
         {
@@ -289,20 +318,8 @@ static class ApplicationLogic
             items.Add($"border: 1px solid {colorName}");
         }
 
-        items.Add("text-decoration: line-through");
-        items.Add("text-decoration: underline");
-        items.Add("text-decoration: overline");
-        items.Add("text-decoration: none");
+       
 
-        items.Add("overflow-y: hidden");
-        items.Add("overflow-y: scroll");
-        items.Add("overflow-y: auto");
-        items.Add("overflow-y: visible");
-
-        items.Add("overflow-x: hidden");
-        items.Add("overflow-x: scroll");
-        items.Add("overflow-x: auto");
-        items.Add("overflow-x: visible");
 
         foreach (var colorName in project.Colors.Select(x => x.Key))
         {
@@ -392,13 +409,7 @@ static class ApplicationLogic
             }
         }
 
-        foreach (var (key, values) in CommonCssSuggestions.Map)
-        {
-            foreach (var value in values)
-            {
-                items.Add($"{key}: {value}");
-            }
-        }
+        
 
         return items;
     }
