@@ -472,7 +472,9 @@ static class ApplicationLogic
         {
             foreach (var componentId in TryParseInt32(tag))
             {
-                return (Maybe<ComponentEntity>)await Store.TryGetComponent(componentId) ?? None;
+                Maybe<ComponentEntity> returnValue = await Store.TryGetComponent(componentId);
+                
+                return returnValue;
             }
 
             return None;

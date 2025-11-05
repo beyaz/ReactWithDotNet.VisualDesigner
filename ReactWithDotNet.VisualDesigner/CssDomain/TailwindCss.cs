@@ -736,15 +736,16 @@ static class TailwindCss
             {
                 return Cache.AccessValue($"{nameof(tryConvert_HtmlCssStyle_to_ProjectDefinedCssClass)}-{project.Name}-{cssAttributeName}-{cssAttributeValue}", () =>
                 {
+                    
                     foreach (var (key, value) in project.Styles)
                     {
                         if (value == $"{cssAttributeName}: {cssAttributeValue};")
                         {
-                            return (Maybe<string>)key;
+                            return  key;
                         }
                     }
 
-                    return None;
+                    return null;
                 });
             }
 
