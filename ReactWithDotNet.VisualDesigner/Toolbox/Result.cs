@@ -1,11 +1,7 @@
 ﻿namespace Toolbox;
 
-public readonly struct Result<TValue>
+public sealed class  Result<TValue>
 {
-    public Result()
-    {
-    }
-    
     // @formatter:off
     
     public TValue Value { get; init; } = default!;

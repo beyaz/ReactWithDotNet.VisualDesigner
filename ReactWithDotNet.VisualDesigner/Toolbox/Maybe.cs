@@ -4,7 +4,7 @@ using System.Collections;
 
 namespace Toolbox;
 
-public readonly struct Maybe<TValue> : IEnumerable<TValue>
+public sealed class Maybe<TValue> : IEnumerable<TValue>
 {
     public bool HasNoValue => !HasValue;
 
