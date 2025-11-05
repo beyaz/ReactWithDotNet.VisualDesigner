@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 
 namespace ReactWithDotNet.VisualDesigner;
 
-public static partial class Extensions
+public static class Extensions
 {
     public static readonly CachedObjectMap Cache = new() { Timeout = TimeSpan.FromMinutes(5) };
 
