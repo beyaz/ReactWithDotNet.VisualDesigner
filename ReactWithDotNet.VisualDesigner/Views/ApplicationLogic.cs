@@ -140,57 +140,49 @@ static class ApplicationLogic
             pluginSuggestionItems = result.Value;
         }
         
-        var items = new List<SuggestionItem>();
+        var items = new List<SuggestionItem>
+        {
+            pluginSuggestionItems,
+            
+            new()
+            {
+                name = Design.Text,
+                jsType = JsType.String
+            },
+            new()
+            {
+                name = Design.TextPreview,
+            
+                jsType = JsType.String
+            },
+            new()
+            {
+                name = Design.ItemsSourceDesignTimeCount,
+            
+                jsType = JsType.Number,
+            
+                value = "3"
+            },
+            new()
+            {
+                name = Design.ItemsSource,
+            
+                jsType = JsType.Array
+            },
+            new()
+            {
+                name = Design.ShowIf,
+            
+                jsType = JsType.Boolean
+            },
+            new()
+            {
+                name = Design.HideIf,
+            
+                jsType = JsType.Boolean
+            }
+        };
 
-        items.Add(pluginSuggestionItems);
-
-
-        items.Add(new()
-        {
-            name = Design.Text,
-            
-            jsType = JsType.String
-        });
-        
-        items.Add(new()
-        {
-            name = Design.TextPreview,
-            
-            jsType = JsType.String
-        });
-        
-        
-        
-        items.Add(new()
-        {
-            name = Design.ItemsSourceDesignTimeCount,
-            
-            jsType = JsType.Number,
-            
-            value = "3"
-        });
-        
-        items.Add(new()
-        {
-            name = Design.ItemsSource,
-            
-            jsType = JsType.Array
-        });
-        
-        items.Add(new()
-        {
-            name = Design.ShowIf,
-            
-            jsType = JsType.Boolean
-        });
-        
-        items.Add(new()
-        {
-            name = Design.HideIf,
-            
-            jsType = JsType.Boolean
-        });
-        
         if (scope.TagName != null)
         {
             items.Add
