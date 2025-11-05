@@ -17,7 +17,7 @@ sealed class MagicInput : Component<MagicInput.State>
     public bool IsTextAlignCenter { get; init; }
     public bool IsTextAlignRight { get; init; }
 
-    public Func<string, Element> ItemRender { get; set; }
+    
     public required string Name { get; init; }
 
     [CustomEvent]
@@ -352,13 +352,13 @@ sealed class MagicInput : Component<MagicInput.State>
             IsTextAlignCenter ? AlignItemsCenter : null
         };
 
-        Element ToOption(string text, int index)
+        Element ToOption(SuggestionItem text, int index)
         {
             return new div(BorderRadius(4), OnClick(OnSuggestionItemClicked))
             {
                 Data("INDEX", index),
 
-                ItemRender is not null ? ItemRender(text) : text,
+                (string)text,
                 PaddingLeft(5),
                 Color(rgb(0, 6, 36)),
                 WhiteSpaceNormal, OverflowWrapAnywhere,
@@ -374,7 +374,7 @@ sealed class MagicInput : Component<MagicInput.State>
 
     internal record State
     {
-        public IReadOnlyList<string> FilteredSuggestions { get; init; }
+        public IReadOnlyList<SuggestionItem> FilteredSuggestions { get; init; }
 
         public bool IgnoreTypingFinishedEvent { get; init; }
 
@@ -390,16 +390,6 @@ sealed class MagicInput : Component<MagicInput.State>
     }
 }
 
-public enum SuggestionType
-{
-    String,
-    Number,
-    Date,
-    Boolean,
-    Collection,
-    Function,
-    
-}
 
 public sealed record SuggestionItem
 {
@@ -410,4 +400,15 @@ public sealed record SuggestionItem
     public JsType jsType { get; init; }
     
     public bool isVariable { get; init; }
+    
+    
+    public static implicit operator string(SuggestionItem item)
+    {
+        if (item.name is null)
+        {
+            return item.value;
+        }
+        
+        return $"{item.name}: {item.value}";
+    }
 }

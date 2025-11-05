@@ -109,7 +109,7 @@ static class ApplicationLogic
         return GetAllProjectsCached().Select(x => x.Name).ToList();
     }
 
-    public static async Task<Result<IReadOnlyList<string>>> GetPropSuggestions(ApplicationState state)
+    public static async Task<Result<IReadOnlyList<SuggestionItem>>> GetPropSuggestions(ApplicationState state)
     {
         var scope = new PropSuggestionScope();
         {
@@ -128,47 +128,120 @@ static class ApplicationLogic
             }
         }
 
-        var items = new List<string>();
 
+        IReadOnlyList < SuggestionItem >  pluginSuggestionItems;
         {
             var result = await Plugin.GetPropSuggestions(scope);
             if (result.HasError)
             {
                 return result.Error;
             }
-            
-            items.AddRange(result.Value);
+
+            pluginSuggestionItems = result.Value;
         }
         
+        var items = new List<SuggestionItem>();
 
+        items.Add(pluginSuggestionItems);
+
+
+        items.Add(new()
+        {
+            name = Design.Text,
+            
+            jsType = JsType.String
+        });
+        
+        items.Add(new()
+        {
+            name = Design.TextPreview,
+            
+            jsType = JsType.String
+        });
+        
+        
+        
+        items.Add(new()
+        {
+            name = Design.ItemsSourceDesignTimeCount,
+            
+            jsType = JsType.Number,
+            
+            value = "3"
+        });
+        
+        items.Add(new()
+        {
+            name = Design.ItemsSource,
+            
+            jsType = JsType.Array
+        });
+        
+        items.Add(new()
+        {
+            name = Design.ShowIf,
+            
+            jsType = JsType.Boolean
+        });
+        
+        items.Add(new()
+        {
+            name = Design.HideIf,
+            
+            jsType = JsType.Boolean
+        });
+        
         if (scope.TagName != null)
         {
-            items.AddRange(Cache.AccessValue($"{nameof(GetPropSuggestions)}-{scope.TagName}", () =>
-            {
-                var returnList = new List<string>();
-                foreach (var htmlElementType in TryGetHtmlElementTypeByTagName(scope.TagName))
+            items.Add
+            (
+                from htmlElementType in TryGetHtmlElementTypeByTagName(scope.TagName)
+                from propertyInfo in htmlElementType.GetProperties(BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance)
+                let jsType = propertyInfo.PropertyType.FullName switch
                 {
-                    foreach (var propertyInfo in htmlElementType.GetProperties(BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance))
-                    {
-                        returnList.Add($"{propertyInfo.Name}: {propertyInfo.PropertyType.Name}");
-                    }
+                    var t when t == typeof(string).FullName  => JsType.String,
+                    var t when t == typeof(decimal).FullName => JsType.String,
+
+                    var t when t == typeof(long).FullName   => JsType.Number,
+                    var t when t == typeof(int).FullName    => JsType.Number,
+                    var t when t == typeof(short).FullName  => JsType.Number,
+                    var t when t == typeof(double).FullName => JsType.Number,
+
+                    var t when t == typeof(float).FullName => JsType.Number,
+
+                    var t when t == typeof(bool).FullName => JsType.Boolean,
+
+                    var t when t == typeof(DateTime).FullName => JsType.Date,
+
+                    _ => (JsType?)null
                 }
+                where jsType.HasValue
 
-                return returnList;
-            }));
+                select new SuggestionItem
+                {
+                    jsType = jsType.Value,
+
+                    name = propertyInfo.Name
+                }
+            );
         }
-
-        items.Add($"{Design.Text}: ?");
-        items.Add($"{Design.TextPreview}: ?");
-
+        
         if (scope.TagName == "img")
         {
-            items.AddRange(await Cache.AccessValue("image_suggestions", async () =>
-            {
-                var user = await Store.TryGetUser(state.ProjectId, state.UserName);
+            var user = await Store.TryGetUser(state.ProjectId, state.UserName);
 
-                return getImagesIsPublicFolder(user?.LocalWorkspacePath);
-            }));
+            items.Add
+            (
+                from path in getImagesIsPublicFolder(user?.LocalWorkspacePath)
+                select new SuggestionItem
+                {
+                    name = nameof(img.src),
+                    
+                    value = path,
+                    
+                    jsType = JsType.String
+                }
+            );
 
             static IEnumerable<string> getImagesIsPublicFolder(string localWorkspacePath)
             {
@@ -190,12 +263,8 @@ static class ApplicationLogic
                 }
             }
         }
+        
 
-        items.Add($"{Design.ItemsSourceDesignTimeCount}: 3");
-        items.Add($"{Design.ItemsSource}: {{state.userList}}");
-
-        items.Add($"{Design.ShowIf}: {{state.isSelectedUser}}");
-        items.Add($"{Design.HideIf}: {{state.isSelectedUser}}");
 
         return items;
     }

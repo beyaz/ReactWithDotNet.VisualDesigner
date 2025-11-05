@@ -212,16 +212,16 @@ public static class Plugin
     
   
 
-    public static async Task<Result<IReadOnlyList<string>>> GetPropSuggestions(PropSuggestionScope scope)
+    public static async Task<Result<IReadOnlyList<SuggestionItem>>> GetPropSuggestions(PropSuggestionScope scope)
     {
         if (scope.TagName.HasNoValue())
         {
-            return Result.From((IReadOnlyList<string>)[]);
+            return Result.From((IReadOnlyList<SuggestionItem>)[]);
         }
 
         return await Cache.AccessValue($"{nameof(Plugin)}-{scope.TagName}", () => calculate(scope));
 
-        static async Task<Result<IReadOnlyList<string>>> calculate(PropSuggestionScope scope)
+        static async Task<Result<IReadOnlyList<SuggestionItem>>> calculate(PropSuggestionScope scope)
         {
             List<SuggestionItem> suggestionItems = [];
 
@@ -317,9 +317,7 @@ public static class Plugin
                 }
             }
 
-            List<string> returnList = [];
-
-            List<(string name, string value)> distinctSuggestions = [];
+           
 
             suggestionItems.AddRange
             (
@@ -340,133 +338,41 @@ public static class Plugin
 
             IEnumerable<string> getNames(JsType jsType, params string[] extraNames)
             {
-                return
-                    ImmutableList<string>
-                       .Empty.AddRange
-                        (
-                            from m in allMetadata.Value
-                            where m.TagName == scope.TagName
-                            from p in m.Props
-                            where p.ValueType == jsType
-                            select p.Name
-                        )
-                       .AddRange(extraNames);
-            }
-
-            // s t r i n g
-            {
-                const JsType jsType = JsType.String;
-
-                foreach (var name in getNames(jsType, Design.Text))
+                return new List<string>
                 {
-                    foreach (var x in from x in suggestionItems where x.jsType == jsType select x)
-                    {
-                        if (x.isVariable)
-                        {
-                            addSuggestion(name, ConvertDotNetPathToJsPath(x.value));
-                        }
-                        else
-                        {
-                            addSuggestion(name, '"' + x.value + '"');
-                        }
-                    }
-                }
+                    from m in allMetadata.Value
+                    where m.TagName == scope.TagName
+                    from p in m.Props
+                    where p.ValueType == jsType
+                    select p.Name,
+
+                    extraNames
+                };
             }
 
-            // number
+            var  returnList = new List<SuggestionItem>
             {
-                const JsType jsType = JsType.Number;
-
-                foreach (var name in getNames(jsType))
+                from jsType in new[]
                 {
-                    foreach (var x in from x in suggestionItems where x.jsType == jsType select x)
-                    {
-                        if (x.isVariable)
-                        {
-                            addSuggestion(name, ConvertDotNetPathToJsPath(x.value));
-                        }
-                        else
-                        {
-                            addSuggestion(name, x.value);
-                        }
-                    }
+                    JsType.String, JsType.Number, JsType.Boolean, JsType.Date, JsType.Array, JsType.Function
                 }
-            }
-
-            // Boolean
-            {
-                const JsType jsType = JsType.Boolean;
-
-                foreach (var name in getNames(jsType, Design.ShowIf, Design.HideIf))
+                from name in getNames(jsType, jsType switch
                 {
-                    foreach (var x in from x in suggestionItems where x.jsType == jsType select x)
-                    {
-                        if (x.isVariable)
-                        {
-                            addSuggestion(name, ConvertDotNetPathToJsPath(x.value));
-                        }
-                        else
-                        {
-                            addSuggestion(name, x.value);
-                        }
-                    }
-                }
-            }
-
-            // Date
-            {
-                const JsType jsType = JsType.Date;
-
-                foreach (var name in getNames(jsType))
-                {
-                    foreach (var x in from x in suggestionItems where x.jsType == jsType select x)
-                    {
-                        if (x.isVariable)
-                        {
-                            addSuggestion(name, ConvertDotNetPathToJsPath(x.value));
-                        }
-                        else
-                        {
-                            addSuggestion(name, x.value);
-                        }
-                    }
-                }
-            }
-
-            // Array
-            {
-                const JsType jsType = JsType.Array;
-
-                foreach (var name in getNames(jsType, Design.ItemsSource))
-                {
-                    foreach (var x in from x in suggestionItems where x.jsType == jsType select x)
-                    {
-                        if (x.isVariable)
-                        {
-                            addSuggestion(name, ConvertDotNetPathToJsPath(x.value));
-                        }
-                        else
-                        {
-                            addSuggestion(name, x.value);
-                        }
-                    }
-                }
-            }
-
-            returnList.InsertRange(0, distinctSuggestions.Select(x => x.name + ": " + x.value));
+                    JsType.String  => [Design.Text],
+                    
+                    JsType.Boolean => [Design.ShowIf, Design.HideIf],
+                    
+                    JsType.Array   => [Design.ItemsSource],
+                    
+                    _              => []
+                })
+                from x in suggestionItems
+                where x.jsType == jsType
+                select x with { name = name }
+            };
 
             return returnList;
 
-            void addSuggestion(string name, string value)
-            {
-                if (!distinctSuggestions.Any(x => name.Equals(x.name, StringComparison.OrdinalIgnoreCase)))
-                {
-                    distinctSuggestions.Add((name, value));
-                    return;
-                }
-
-                returnList.Add($"{name}: {value}");
-            }
         }
     }
 
