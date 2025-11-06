@@ -73,10 +73,17 @@ public static class CecilHelper
         return new InvalidOperationException("Invalid property path." + propertyPath);
     }
 
+    static Result<AssemblyDefinition> ReadAssemblyDefinition(string assemblyFilePath)
+    {
+        var cacheKey = $"{nameof(ReadAssemblyDefinition)}-{assemblyFilePath}";
+        
+        return Cache.AccessValue(cacheKey, () => CecilAssemblyReader.ReadAssembly(assemblyFilePath));
+    }
+    
     public static Result<IReadOnlyList<string>> GetPropertyPathList(string assemblyPath, string typeFullName, string prefix, Func<PropertyDefinition, bool> matchFunc)
     {
         
-        return from assembly in CecilAssemblyReader.ReadAssembly(assemblyPath)
+        return from assembly in ReadAssemblyDefinition(assemblyPath)
                let maybeType = assembly.MainModule.FindTypeByClrName(typeFullName)
                select maybeType.HasNoValue switch
                {
@@ -188,20 +195,24 @@ public static class CecilHelper
 
     public static Result<bool> IsPropertyPathProvidedByCollection(string dotNetAssemblyFilePath, string dotnetTypeFullName, string propertyPath)
     {
-        var assembly = CecilAssemblyReader.ReadAssembly(dotNetAssemblyFilePath).Value;
-        if (assembly is null)
-        {
-            return false;
-        }
+        
+        
+        //var assembly = ReadAssemblyDefinition(dotNetAssemblyFilePath);
+        //if (assembly is null)
+        //{
+        //    return false;
+        //}
 
-        var type = assembly.MainModule.FindTypeByClrName(dotnetTypeFullName);
-        if (type.HasNoValue)
-        {
-            return false;
-        }
+        //var type = assembly.MainModule.FindTypeByClrName(dotnetTypeFullName);
+        //if (type.HasNoValue)
+        //{
+        //    return false;
+        //}
 
         return
-            from propertyDefinition in FindPropertyPath(type.Value, propertyPath)
+            from assembly in ReadAssemblyDefinition(dotNetAssemblyFilePath)
+            from type in assembly.MainModule.FindTypeByClrName(dotnetTypeFullName)
+            from propertyDefinition in FindPropertyPath(type, propertyPath)
             select IsCollection(propertyDefinition.PropertyType);
     }
 

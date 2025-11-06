@@ -109,6 +109,10 @@ static class CecilHelper
     {
         const string secondarySearchDirectoryPath = @"d:\boa\server\bin";
 
-        return CecilAssemblyReader.ReadAssembly(assemblyFilePath, secondarySearchDirectoryPath);
+        var cacheKey = $"{nameof(ReadAssemblyDefinition)}-{assemblyFilePath}";
+        
+        return Cache.AccessValue(cacheKey, () => CecilAssemblyReader.ReadAssembly(assemblyFilePath, secondarySearchDirectoryPath));
     }
+    
+    
 }
