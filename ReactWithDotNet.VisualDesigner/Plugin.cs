@@ -221,7 +221,7 @@ public static class Plugin
 
         static async Task<Result<IReadOnlyList<SuggestionItem>>> calculate(PropSuggestionScope scope)
         {
-            List<SuggestionItem> suggestionItems = new List<SuggestionItem>();
+            List<SuggestionItem> suggestionItems = [];
             
             suggestionItems.Add
             (
@@ -244,16 +244,12 @@ public static class Plugin
 
             suggestionItems.Add
             (
-                new()
-                {
-                    jsType = JsType.Date,
-                    value  = "new Date().getDate()"
-                }
-            );
-
-            suggestionItems.Add
-            (
                 [
+                    new()
+                    {
+                        jsType = JsType.Date,
+                        value  = "new Date().getDate()"
+                    },
                     new()
                     {
                         jsType = JsType.Boolean,
