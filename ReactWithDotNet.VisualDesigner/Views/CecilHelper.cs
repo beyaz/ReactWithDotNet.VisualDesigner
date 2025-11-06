@@ -197,27 +197,16 @@ public static class CecilHelper
     {
 
 
-        //var assembly = ReadAssemblyDefinition(dotNetAssemblyFilePath);
-        //if (assembly is null)
-        //{
-        //    return false;
-        //}
+       
 
-        //var type = assembly.MainModule.FindTypeByClrName(dotnetTypeFullName);
-        //if (type.HasNoValue)
-        //{
-        //    return false;
-        //}
 
-        var a = from assembly in ReadAssemblyDefinition(dotNetAssemblyFilePath)
-                from type in assembly.MainModule.FindTypeByClrName(dotnetTypeFullName)
-                from propertyDefinition in FindPropertyPath(type, propertyPath)
-                select IsCollection(propertyDefinition.PropertyType);
-
-        return from value in a
-               select value.HasValue switch
+        return from maybe in from assembly in ReadAssemblyDefinition(dotNetAssemblyFilePath)
+                             from type in assembly.MainModule.FindTypeByClrName(dotnetTypeFullName)
+                             from propertyDefinition in FindPropertyPath(type, propertyPath)
+                             select IsCollection(propertyDefinition.PropertyType)
+               select maybe.HasValue switch
                {
-                   true => value.Value,
+                   true => maybe.Value,
                    false => false
                };
 
