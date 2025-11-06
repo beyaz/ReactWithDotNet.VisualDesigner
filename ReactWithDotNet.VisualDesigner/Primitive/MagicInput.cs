@@ -296,15 +296,14 @@ abstract class MagicInput : Component<MagicInput.State>
         };
         return;
 
-        static (bool isEmpty, string partName, string partValue, string[] words) ParseSearchTerm(string searchTerm)
+        static (bool isEmpty, string[] nameInWords, string[] valueInWords) ParseSearchTerm(string searchTerm)
         {
             if (searchTerm.HasNoValue())
             {
-                return (true, null, null, []);
+                return (true, null, null);
             }
 
-            var words = searchTerm.Split(": -".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
-            
+            var splitters = " -".ToCharArray();
             
             var indexOfColonInSearchTerm = searchTerm.IndexOf(':');
             if (indexOfColonInSearchTerm > 0)
@@ -313,13 +312,21 @@ abstract class MagicInput : Component<MagicInput.State>
 
                 var value = searchTerm[(indexOfColonInSearchTerm+1)..];
 
-                return (isEmpty: false, name.Trim(), value.Trim(), words);
+                var nameInWords = name.Split(splitters, StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+                
+                var valueInWords = value.Split(splitters, StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+                
+                return (isEmpty: false, nameInWords, valueInWords);
             }
-           
-            return (isEmpty: false, searchTerm, null, words);
+            else
+            {
+                var nameInWords = searchTerm.Split(splitters, StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+
+                return (isEmpty: false, nameInWords, null);
+            }
         }
         
-        static int hasMatch(SuggestionItem suggestionItem, (bool isEmpty, string partName, string partValue, string[] words) searchTerm)
+        static int hasMatch(SuggestionItem suggestionItem, (bool isEmpty, string[] nameInWords, string[] valueInWords) searchTerm)
         {
             if (searchTerm.isEmpty)
             {
@@ -327,12 +334,7 @@ abstract class MagicInput : Component<MagicInput.State>
             }
 
             var count = 0;
-           if ( suggestionItem.name?.Contains(searchTerm.partName) is true)
-            {
-                count +=50;
-            }
-           
-            foreach (var word in searchTerm.words)
+            foreach (var word in searchTerm.nameInWords)
             {
                 if (suggestionItem.value?.Contains(word, StringComparison.OrdinalIgnoreCase) is true)
                 {
@@ -340,9 +342,17 @@ abstract class MagicInput : Component<MagicInput.State>
                 }
             }
 
-            
-            
-
+            if (searchTerm.valueInWords is not null)
+            {
+                foreach (var word in searchTerm.valueInWords)
+                {
+                    if (suggestionItem.value?.Contains(word, StringComparison.OrdinalIgnoreCase) is true)
+                    {
+                        count++;
+                    }
+                }
+            }
+          
             return count;
         }
     }
