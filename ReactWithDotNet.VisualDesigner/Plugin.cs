@@ -237,7 +237,7 @@ public static class Plugin
                 });
             }
 
-            suggestionItems.AddRange
+            suggestionItems.Add
             (
                 from x in new[]
                 {
@@ -265,7 +265,7 @@ public static class Plugin
                 }
             );
 
-            suggestionItems.AddRange
+            suggestionItems.Add
             (
                 [
                     new()
