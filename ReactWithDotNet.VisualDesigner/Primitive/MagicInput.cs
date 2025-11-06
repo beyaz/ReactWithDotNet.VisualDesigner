@@ -303,7 +303,7 @@ abstract class MagicInput : Component<MagicInput.State>
                 return (true, null, null);
             }
 
-            var splitters = " -".ToCharArray();
+            var splitters = " -.".ToCharArray();
             
             var indexOfColonInSearchTerm = searchTerm.IndexOf(':');
             if (indexOfColonInSearchTerm > 0)
@@ -334,24 +334,54 @@ abstract class MagicInput : Component<MagicInput.State>
             }
 
             var count = 0;
-            foreach (var word in searchTerm.nameInWords)
-            {
-                if (suggestionItem.value?.Contains(word, StringComparison.OrdinalIgnoreCase) is true)
-                {
-                    count++;
-                }
-            }
 
-            if (searchTerm.valueInWords is not null)
+            var suggestionItemName = suggestionItem.name;
+            
+            if (suggestionItemName.HasValue())
             {
-                foreach (var word in searchTerm.valueInWords)
+                foreach (var word in searchTerm.nameInWords)
                 {
-                    if (suggestionItem.value?.Contains(word, StringComparison.OrdinalIgnoreCase) is true)
+                    if (word is null)
                     {
-                        count++;
+                        continue;
+                    }
+                
+                    if (suggestionItemName.Equals(word, StringComparison.OrdinalIgnoreCase))
+                    {
+                        count += 12;
+                        continue;
+                    }
+                
+                    if (suggestionItemName.Contains(word, StringComparison.OrdinalIgnoreCase))
+                    {
+                        count+=6;
                     }
                 }
             }
+
+            var suggestionItemValue = suggestionItem.value;
+            if (suggestionItemValue.HasValue() && searchTerm.valueInWords is not null)
+            {
+                foreach (var word in searchTerm.valueInWords)
+                {
+                    if (word is null)
+                    {
+                        continue;
+                    }
+
+                    if (suggestionItemValue.Equals(word, StringComparison.OrdinalIgnoreCase))
+                    {
+                        count += 10;
+                        continue;
+                    }
+                
+                    if (suggestionItemValue.Contains(word, StringComparison.OrdinalIgnoreCase))
+                    {
+                        count+=5;
+                    }
+                }
+            }
+           
           
             return count;
         }
@@ -378,7 +408,7 @@ abstract class MagicInput : Component<MagicInput.State>
         return new FlexColumn(PositionRelative, SizeFull)
         {
             Zindex3,
-            new FlexColumn(PositionAbsolute, MinWidth(200), Top(4), HeightAuto, Background(White), BoxShadow(0, 6, 6, 0, rgba(22, 45, 61, .06)), Padding(5), BorderRadius(5))
+            new FlexColumn(PositionAbsolute, Gap(4), MinWidth(200), Top(4), HeightAuto, Background(White), BoxShadow(0, 6, 6, 0, rgba(22, 45, 61, .06)), Padding(5), BorderRadius(5))
             {
                 Zindex4,
                 IsTextAlignRight ? Right(0) : null,
@@ -403,6 +433,7 @@ abstract class MagicInput : Component<MagicInput.State>
 
                 CursorDefault,
 
+                Background(Gray50),
                 Hover(Background(Gray100)),
 
                 index == state.SelectedSuggestionOffset ? Color("#495cef") + Background("#e7eaff") : null
