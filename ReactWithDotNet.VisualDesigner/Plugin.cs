@@ -131,7 +131,7 @@ public static class Plugin
     {
         get { return field ??= GetPluginMethods<AfterReadConfigAttribute>(); }
     }
-    
+
     static IReadOnlyList<GetStringSuggestionsDelegate> GetStringSuggestionsMethods
     {
         get
@@ -142,7 +142,7 @@ public static class Plugin
                     from methodInfo in type.GetMethods(BindingFlags.Static | BindingFlags.Public)
                     where methodInfo.GetCustomAttribute<GetStringSuggestionsAttribute>() is not null
                     select (GetStringSuggestionsDelegate)Delegate.CreateDelegate(typeof(GetStringSuggestionsDelegate), methodInfo))
-               .ToList();
+                .ToList();
         }
     }
 
@@ -170,7 +170,7 @@ public static class Plugin
 
         return RunPluginMethods(AfterReadConfigs, scope, Config) ?? config;
     }
-    
+
     public static Element BeforeComponentPreview(RenderPreviewScope scope, VisualElementModel visualElementModel, Element component)
     {
         return component;
@@ -209,8 +209,6 @@ public static class Plugin
 
         return camelCase.ToString();
     }
-    
-  
 
     public static async Task<Result<IReadOnlyList<SuggestionItem>>> GetPropSuggestions(PropSuggestionScope scope)
     {
@@ -260,7 +258,7 @@ public static class Plugin
 
             suggestionItems.Add
             (
-                new SuggestionItem
+                new()
                 {
                     jsType = JsType.Date,
                     value  = "new Date().getDate()"
@@ -270,12 +268,12 @@ public static class Plugin
             suggestionItems.AddRange
             (
                 [
-                    new SuggestionItem
+                    new()
                     {
                         jsType = JsType.Boolean,
                         value  = "true"
                     },
-                    new SuggestionItem
+                    new()
                     {
                         jsType = JsType.Boolean,
                         value  = "false"
@@ -317,8 +315,6 @@ public static class Plugin
                 }
             }
 
-           
-
             suggestionItems.AddRange
             (
                 from x in GetPropSuggestions(scope.TagName)
@@ -336,6 +332,27 @@ public static class Plugin
                 return allMetadata.Error;
             }
 
+            return new List<SuggestionItem>
+            {
+                from jsType in new[]
+                {
+                    JsType.String, JsType.Number, JsType.Boolean, JsType.Date, JsType.Array, JsType.Function
+                }
+                from name in getNames(jsType, jsType switch
+                {
+                    JsType.String => [Design.Text],
+
+                    JsType.Boolean => [Design.ShowIf, Design.HideIf],
+
+                    JsType.Array => [Design.ItemsSource],
+
+                    _ => []
+                })
+                from x in suggestionItems
+                where x.jsType == jsType
+                select x with { name = name }
+            };
+
             IEnumerable<string> getNames(JsType jsType, params string[] extraNames)
             {
                 return new List<string>
@@ -349,30 +366,6 @@ public static class Plugin
                     extraNames
                 };
             }
-
-            var  returnList = new List<SuggestionItem>
-            {
-                from jsType in new[]
-                {
-                    JsType.String, JsType.Number, JsType.Boolean, JsType.Date, JsType.Array, JsType.Function
-                }
-                from name in getNames(jsType, jsType switch
-                {
-                    JsType.String  => [Design.Text],
-                    
-                    JsType.Boolean => [Design.ShowIf, Design.HideIf],
-                    
-                    JsType.Array   => [Design.ItemsSource],
-                    
-                    _              => []
-                })
-                from x in suggestionItems
-                where x.jsType == jsType
-                select x with { name = name }
-            };
-
-            return returnList;
-
         }
     }
 
@@ -461,9 +454,10 @@ public static class Plugin
 
         static Result<ComponentMeta> createFrom(Type type)
         {
-            var items = from propertyInfo in type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly)
-                        from props in createPropMetaFrom(propertyInfo)
-                        select props;
+            var items =
+                from propertyInfo in type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly)
+                from props in createPropMetaFrom(propertyInfo)
+                select props;
 
             return
                 from props in items.AsResult()
@@ -557,7 +551,7 @@ public static class Plugin
 
         return null;
     }
-    
+
     record ComponentMeta
     {
         public IReadOnlyList<PropMeta> Props { get; init; }
@@ -593,4 +587,3 @@ public sealed class SuggestionsAttribute : Attribute
 public sealed class NodeAnalyzerAttribute : Attribute
 {
 }
-
