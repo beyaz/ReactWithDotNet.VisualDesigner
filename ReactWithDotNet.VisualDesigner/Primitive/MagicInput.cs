@@ -292,7 +292,7 @@ abstract class MagicInput : Component<MagicInput.State>
         {
             ShowSuggestions = true,
             SelectedSuggestionOffset = null,
-            FilteredSuggestions = suggestions.Value.OrderByDescending(x => hasMatch(x,parseResponse)).Take(5).ToList()
+           FilteredSuggestions = suggestions.Value.OrderByDescending(x => hasMatch(x,parseResponse)).Take(5).ToList()
         };
         return;
 
@@ -310,10 +310,10 @@ abstract class MagicInput : Component<MagicInput.State>
             if (indexOfColonInSearchTerm > 0)
             {
                 var name = searchTerm[..indexOfColonInSearchTerm];
-                
-                var value = searchTerm[indexOfColonInSearchTerm..];
 
-                return (isEmpty: false, name, value, words);
+                var value = searchTerm[(indexOfColonInSearchTerm+1)..];
+
+                return (isEmpty: false, name.Trim(), value.Trim(), words);
             }
            
             return (isEmpty: false, searchTerm, null, words);
@@ -329,7 +329,7 @@ abstract class MagicInput : Component<MagicInput.State>
             var count = 0;
            if ( suggestionItem.name?.Contains(searchTerm.partName) is true)
             {
-                count +=5;
+                count +=50;
             }
            
             foreach (var word in searchTerm.words)
@@ -346,8 +346,10 @@ abstract class MagicInput : Component<MagicInput.State>
             return count;
         }
     }
-
     
+  
+
+ 
 
     Element ViewSuggestions()
     {
