@@ -60,8 +60,8 @@ static class Mixin
 
             while (reader.Read())
             {
-                var propertyName = reader["PropertyName"].ToString();
-                var description = reader["Description"].ToString();
+                var propertyName = (string)reader["PropertyName"];
+                var description = (string)reader["Description"];
 
                 returnList.Add(new() { PropertyName = propertyName, Description = description });
             }
