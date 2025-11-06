@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using ReactWithDotNet.ThirdPartyLibraries.MUI.Material;
 using ReactWithDotNet.VisualDesigner.Exporters;
 
 namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
@@ -12,6 +13,9 @@ sealed class BButton : PluginComponentBase
 
     [JsTypeInfo(JsType.String)]
     public string text { get; set; }
+    
+    [JsTypeInfo(JsType.String)]
+    public string type { get; set; }
 
     [NodeAnalyzer]
     public static ReactNode AnalyzeReactNode(ReactNode node, ComponentConfig componentConfig)
@@ -57,19 +61,30 @@ sealed class BButton : PluginComponentBase
 
     protected override Element render()
     {
-        return new FlexRowCentered(Background(rgba(22, 160, 133, 1)), BorderRadius(10), PaddingY(8), PaddingX(64), MinWidth(160))
+
+        return new Button
         {
-            FontSize(15),
-            LineHeight26,
-            LetterSpacing("0.46px"),
-            Color(rgba(248, 249, 250, 1)),
-
-            new div { text ?? "?" },
-
-            Id(id),
-            OnClick(onMouseClick),
+            variant = type,
             
-            
+            children=
+            {
+                new div{ text}
+            }
         };
+
+        //return new FlexRowCentered(Background(rgba(22, 160, 133, 1)), BorderRadius(10), PaddingY(8), PaddingX(64), MinWidth(160))
+        //{
+        //    FontSize(15),
+        //    LineHeight26,
+        //    LetterSpacing("0.46px"),
+        //    Color(rgba(248, 249, 250, 1)),
+
+        //    new div { text ?? "?" },
+
+        //    Id(id),
+        //    OnClick(onMouseClick),
+
+
+        //};
     }
 }

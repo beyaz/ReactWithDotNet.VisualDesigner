@@ -30,11 +30,14 @@ sealed class BDigitalDialog : PluginComponentBase
             Id(id), OnClick(onMouseClick),
             new div(Background("white"), BorderRadius(8), Padding(16))
             {
-                // TOP BAR
+                // T o p   B a r
+                title.HasNoValue() ? null :
                 new FlexRow(JustifyContentSpaceBetween, AlignItemsCenter, PaddingY(16))
                 {
+                    // t i t l e
                     new div(FontSize20, FontWeight400, LineHeight("160%"), LetterSpacing("0.15px")) { title },
 
+                    // c l o s e   i c o n
                     displayCloseIcon == "false" || displayOkButton == "false" ? null :
                         new svg(ViewBox(0, 0, 24, 24), svg.Width(24), svg.Height(24))
                         {
@@ -44,7 +47,8 @@ sealed class BDigitalDialog : PluginComponentBase
                             }
                         }
                 },
-
+                
+                title.HasNoValue() ? null :
                 SpaceY(12),
 
                 children
