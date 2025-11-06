@@ -67,7 +67,9 @@ sealed class BButton : PluginComponentBase
             new div { text ?? "?" },
 
             Id(id),
-            OnClick(onMouseClick)
+            OnClick(onMouseClick),
+            
+            
         };
     }
 }

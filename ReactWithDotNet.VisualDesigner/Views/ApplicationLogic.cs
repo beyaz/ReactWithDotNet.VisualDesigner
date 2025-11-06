@@ -328,7 +328,7 @@ static class ApplicationLogic
             }
             select new SuggestionItem
             {
-                value = name,
+                name = name,
 
                 isVariable = true
             }
