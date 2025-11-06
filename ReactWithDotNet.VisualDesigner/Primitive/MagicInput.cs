@@ -470,19 +470,23 @@ public sealed record SuggestionItem
     
     public bool isVariable { get; init; }
 
-
     public static implicit operator string(SuggestionItem item)
     {
-        if (item.name is null)
+        if (item.name.HasValue() && item.value.HasValue())
         {
-            return item.value;
+            return $"{item.name}: {item.value}";
         }
         
-        if (item.value is null)
+        if (item.name is null)
         {
-            return item.value;
+            if (item.value.HasValue())
+            {
+                return item.value;
+            }
+
+            throw new InvalidOperationException();
         }
 
-        return $"{item.name}: {item.value}";
+        return item.name;
     }
 }
