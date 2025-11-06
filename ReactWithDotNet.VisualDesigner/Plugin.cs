@@ -221,22 +221,8 @@ public static class Plugin
 
         static async Task<Result<IReadOnlyList<SuggestionItem>>> calculate(PropSuggestionScope scope)
         {
-            List<SuggestionItem> suggestionItems = [];
-
-            await foreach (var result in GetStringSuggestions(scope))
-            {
-                if (result.HasError)
-                {
-                    return result.Error;
-                }
-
-                suggestionItems.Add(new()
-                {
-                    jsType = JsType.String,
-                    value  = result.Value
-                });
-            }
-
+            List<SuggestionItem> suggestionItems = new List<SuggestionItem>();
+            
             suggestionItems.Add
             (
                 from x in new[]
@@ -281,6 +267,22 @@ public static class Plugin
                 ]
             );
 
+
+            await foreach (var result in GetStringSuggestions(scope))
+            {
+                if (result.HasError)
+                {
+                    return result.Error;
+                }
+
+                suggestionItems.Add(new()
+                {
+                    jsType = JsType.String,
+                    value  = result.Value
+                });
+            }
+
+            
             foreach (var variable in scope.Component.Config.DotNetVariables)
             {
                 List<(JsType jsType, Func<PropertyDefinition, bool> matchFn)> map =
