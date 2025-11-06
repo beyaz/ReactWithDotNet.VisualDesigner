@@ -1,5 +1,4 @@
-﻿using Mysqlx.Crud;
-using System.IO;
+﻿using System.IO;
 using System.Reflection;
 
 namespace ReactWithDotNet.VisualDesigner.Views;
@@ -110,24 +109,14 @@ static class ApplicationLogic
         return GetAllProjectsCached().Select(x => x.Name).ToList();
     }
 
-    public static async Task<Result<IReadOnlyList<SuggestionItem>>> GetPropSuggestions(ApplicationState state)
+    public static async Task<Result<IReadOnlyList<SuggestionItem>>> GetPropSuggestions(int componentId, string selectedTag)
     {
-        var scope = new PropSuggestionScope();
+        var  scope = new PropSuggestionScope
         {
-            if (state.Selection.VisualElementTreeItemPath.HasValue())
-            {
-                var selectedVisualItem = FindTreeNodeByTreePath(state.ComponentRootElement, state.Selection.VisualElementTreeItemPath);
-
-                var tag = selectedVisualItem.Tag;
-
-                scope = new()
-                {
-                    Component         = await Store.TryGetComponent(state.ComponentId),
-                    SelectedComponent = await TryGetComponentByTag(selectedVisualItem.Tag),
-                    TagName           = await GetTagText(tag)
-                };
-            }
-        }
+            Component         = await Store.TryGetComponent(componentId),
+            SelectedComponent = await TryGetComponentByTag(selectedTag),
+            TagName           = await GetTagText(selectedTag)
+        };
 
 
         IReadOnlyList < SuggestionItem >  pluginSuggestionItems;
@@ -141,7 +130,7 @@ static class ApplicationLogic
             pluginSuggestionItems = result.Value;
         }
         
-        var items = new List<SuggestionItem>
+        return new List<SuggestionItem>
         {
             pluginSuggestionItems,
             
@@ -215,47 +204,6 @@ static class ApplicationLogic
                 }
         };
 
-        if (scope.TagName == "img")
-        {
-            var user = await Store.TryGetUser(state.ProjectId, state.UserName);
-
-            items.Add
-            (
-                from path in getImagesIsPublicFolder(user?.LocalWorkspacePath)
-                select new SuggestionItem
-                {
-                    name = nameof(img.src),
-                    
-                    value = path,
-                    
-                    jsType = JsType.String
-                }
-            );
-
-            static IEnumerable<string> getImagesIsPublicFolder(string localWorkspacePath)
-            {
-                if (string.IsNullOrWhiteSpace(localWorkspacePath))
-                {
-                    yield break;
-                }
-
-                var publicFolder = Path.Combine(localWorkspacePath, "public");
-                if (Directory.Exists(publicFolder))
-                {
-                    foreach (var pattern in new[] { "*.svg", "*.png" })
-                    {
-                        foreach (var file in Directory.GetFiles(publicFolder, pattern, SearchOption.AllDirectories))
-                        {
-                            yield return file.RemoveFromStart(publicFolder).Replace(Path.DirectorySeparatorChar, '/');
-                        }
-                    }
-                }
-            }
-        }
-        
-
-
-        return items;
     }
 
     public static IReadOnlyList<SuggestionItem> GetStyleAttributeNameSuggestions(int projectId)
@@ -369,8 +317,8 @@ static class ApplicationLogic
 
     public static IReadOnlyList<SuggestionItem> GetTagSuggestions(int projectId)
     {
-        return Cache.AccessValue($"{nameof(GetTagSuggestions)}-{projectId}", () =>
-        (
+        return new List<SuggestionItem>
+        {
             from name in new List<string>
             {
                 Plugin.GetTagSuggestions(),
@@ -384,7 +332,7 @@ static class ApplicationLogic
 
                 isVariable = true
             }
-        ).AsReadOnlyList());
+        };
     }
 
     public static async Task<string> GetTagText(string tag)

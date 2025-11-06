@@ -1,7 +1,7 @@
-﻿using System.Reflection;
-using System.Text;
-using ReactWithDotNet.ThirdPartyLibraries.MonacoEditorReact;
+﻿using ReactWithDotNet.ThirdPartyLibraries.MonacoEditorReact;
 using ReactWithDotNet.VisualDesigner.Exporters;
+using System.Reflection;
+using System.Text;
 
 namespace ReactWithDotNet.VisualDesigner.Views;
 
@@ -630,8 +630,16 @@ sealed class ApplicationView : Component<ApplicationState>
     class TagEditor : MagicInput
     {
         public required int ProjectId { get; init; }
+        
+        protected override Task<Result<IReadOnlyList<SuggestionItem>>> Suggestions
+        {
+            get
+            {
+                var cacheKey = $"{nameof(TagEditor)}-{ProjectId}";
 
-        protected override IReadOnlyList<SuggestionItem> Suggestions => GetTagSuggestions(ProjectId);
+                return Result.From(Cache.AccessValue(cacheKey, () => GetTagSuggestions(ProjectId)));
+            }
+        }
     }
 
     Task DeleteSelectedTreeItem()
@@ -1931,7 +1939,7 @@ sealed class ApplicationView : Component<ApplicationState>
                 }
             };
 
-            async Task<Element> inputEditor()
+            Element inputEditor()
             {
                 string value = null;
 
@@ -1940,19 +1948,19 @@ sealed class ApplicationView : Component<ApplicationState>
                     value = props[state.Selection.SelectedPropertyIndex.Value];
                 }
 
-                var suggestions = await GetPropSuggestions(state);
-                if (suggestions.HasError)
-                {
-                    return new div { suggestions.Error.ToString() };
+            
 
-                }
+                string selectedTag = FindTreeNodeByTreePath(state.ComponentRootElement, state.Selection.VisualElementTreeItemPath).Tag;
+               
 
-                return new MagicInput
+                return new PropEditor
                 {
+                    ComponentId = state.ComponentId,
+                    
+                    SelectedTag = selectedTag,
+                    
                     Placeholder = "Add property",
-
-                    Suggestions = suggestions.Value,
-
+                    
                     Name = (state.Selection.SelectedPropertyIndex ?? (props.Count + 1) * -1).ToString(),
 
                     Id = "PROPS-INPUT-EDITOR-" + (state.Selection.SelectedPropertyIndex ?? -1),
@@ -2140,12 +2148,38 @@ sealed class ApplicationView : Component<ApplicationState>
         }
     }
 
+    class PropEditor: MagicInput
+    {
+        public required int ComponentId { get; init; }
+        
+        public required string SelectedTag { get; init; }
+
+        protected override Task<Result<IReadOnlyList<SuggestionItem>>> Suggestions
+        {
+            get
+            {
+                var cacheKey = $"{nameof(PropEditor)}-{ComponentId}-{SelectedTag}";
+
+                return Cache.AccessValue(cacheKey, () => GetPropSuggestions(ComponentId, SelectedTag));
+            }
+        }
+        
+        
+    }
+    
     class StyleEditor: MagicInput
     {
-        public required int ProjectId { get; set; }
+        public required int ProjectId { get; init; }
 
-        protected override IReadOnlyList<SuggestionItem> Suggestions 
-            => Cache.AccessValue(nameof(StyleEditor), () => GetStyleAttributeNameSuggestions(ProjectId));
+        protected override Task<Result<IReadOnlyList<SuggestionItem>>> Suggestions
+        {
+            get
+            {
+                var cacheKey = $"{nameof(StyleEditor)}-{ProjectId}";
+
+                return Result.From(Cache.AccessValue(cacheKey, () => GetStyleAttributeNameSuggestions(ProjectId)));
+            }
+        }
     }
     
     Element PartScale()
@@ -2526,9 +2560,9 @@ sealed class ApplicationView : Component<ApplicationState>
         {
             if (PropertyName != state.Value)
             {
-                state = state with
+                state = new State
                 {
-                    Value = PropertyName,
+                    Value        = PropertyName,
                     InitialValue = PropertyName
                 };
             }

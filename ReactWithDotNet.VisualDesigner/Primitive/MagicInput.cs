@@ -28,7 +28,7 @@ abstract class MagicInput : Component<MagicInput.State>
 
     public string Placeholder { get; init; }
 
-    protected abstract IReadOnlyList<SuggestionItem> Suggestions { get; }
+    protected abstract Task<Result<IReadOnlyList<SuggestionItem>>> Suggestions { get; }
     
     public string Value { get; init; }
 
@@ -107,7 +107,7 @@ abstract class MagicInput : Component<MagicInput.State>
 
             IgnoreTypingFinishedEvent = state?.IgnoreTypingFinishedEvent ?? false,
 
-            FilteredSuggestions = Suggestions ?? []
+            FilteredSuggestions = []
         };
     }
 
@@ -271,14 +271,20 @@ abstract class MagicInput : Component<MagicInput.State>
         return Task.CompletedTask;
     }
 
-    Task OnTypingFinished()
+    async Task OnTypingFinished()
     {
         if (state.IgnoreTypingFinishedEvent)
         {
             state = state with { IgnoreTypingFinishedEvent = false };
-            return Task.CompletedTask;
+            return;
         }
 
+        var suggestions = await Suggestions;
+        if (suggestions.HasError)
+        {
+            this.FailNotification(suggestions.Error.Message);
+            return;
+        }
 
         var parseResponse = ParseSearchTerm(state.Value);
         
@@ -286,11 +292,9 @@ abstract class MagicInput : Component<MagicInput.State>
         {
             ShowSuggestions = true,
             SelectedSuggestionOffset = null,
-            FilteredSuggestions = Suggestions.OrderByDescending(x => hasMatch(x,parseResponse)).Take(5).ToList()
+            FilteredSuggestions = suggestions.Value.OrderByDescending(x => hasMatch(x,parseResponse)).Take(5).ToList()
         };
-
-        
-        return Task.CompletedTask;
+        return;
 
         static (bool isEmpty, string partName, string partValue, string[] words) ParseSearchTerm(string searchTerm)
         {
