@@ -73,16 +73,35 @@ public static class CecilHelper
         return new InvalidOperationException("Invalid property path." + propertyPath);
     }
 
-    static Result<AssemblyDefinition> ReadAssemblyDefinition(string assemblyFilePath)
+    public static Maybe<TypeDefinition> FindTypeByClrName(this ModuleDefinition module, string clrFullName)
     {
-        var cacheKey = $"{nameof(ReadAssemblyDefinition)}-{assemblyFilePath}";
-        
-        return Cache.AccessValue(cacheKey, () => CecilAssemblyReader.ReadAssembly(assemblyFilePath));
+        // CLR format: Namespace.Outer+Inner+Inner2
+        var parts = clrFullName.Split('+');
+        var outerFullName = parts[0];
+        var outerType = module.GetType(outerFullName);
+
+        if (outerType == null)
+        {
+            return None;
+        }
+
+        // İç içe sınıfları sırayla ara
+        var current = outerType;
+        for (var i = 1; i < parts.Length; i++)
+        {
+            var nestedName = parts[i];
+            current = current.NestedTypes.FirstOrDefault(t => t.Name == nestedName);
+            if (current == null)
+            {
+                return None;
+            }
+        }
+
+        return current;
     }
-    
+
     public static Result<IReadOnlyList<string>> GetPropertyPathList(string assemblyPath, string typeFullName, string prefix, Func<PropertyDefinition, bool> matchFunc)
     {
-        
         return from assembly in ReadAssemblyDefinition(assemblyPath)
                let maybeType = assembly.MainModule.FindTypeByClrName(typeFullName)
                select maybeType.HasNoValue switch
@@ -93,7 +112,6 @@ public static class CecilHelper
                        Value = findProperties(isInSameAssembly, maybeType.Value, prefix, matchFunc)
                    }
                };
-        
 
         bool isInSameAssembly(TypeReference typeReference)
         {
@@ -125,7 +143,6 @@ public static class CecilHelper
             return (from path in properties.Concat(nestedProperties).Concat(contractProperties) select TypescriptNaming.NormalizeBindingPath(path)).ToList();
         }
     }
-
 
     public static bool IsBoolean(TypeReference typeReference)
     {
@@ -195,23 +212,11 @@ public static class CecilHelper
 
     public static Result<bool> IsPropertyPathProvidedByCollection(string dotNetAssemblyFilePath, string dotnetTypeFullName, string propertyPath)
     {
-
-
-       
-
-
         return from maybe in from assembly in ReadAssemblyDefinition(dotNetAssemblyFilePath)
                              from type in assembly.MainModule.FindTypeByClrName(dotnetTypeFullName)
                              from propertyDefinition in FindPropertyPath(type, propertyPath)
                              select IsCollection(propertyDefinition.PropertyType)
-               select maybe.HasValue switch
-               {
-                   true => maybe.Value,
-                   false => false
-               };
-
-
-
+               select maybe is { HasValue: true, Value: true };
     }
 
     public static bool IsString(TypeReference typeReference)
@@ -239,33 +244,14 @@ public static class CecilHelper
 
     static bool IsCollection(TypeReference typeReference)
     {
-        return typeReference.FullName.StartsWith("System.Collections.Generic.List`1", StringComparison.OrdinalIgnoreCase)||
+        return typeReference.FullName.StartsWith("System.Collections.Generic.List`1", StringComparison.OrdinalIgnoreCase) ||
                typeReference.FullName.StartsWith("System.Collections.Generic.IReadOnlyList`1", StringComparison.OrdinalIgnoreCase);
     }
-    
-    
-        public static Maybe<TypeDefinition> FindTypeByClrName(this ModuleDefinition module, string clrFullName)
-        {
-            // CLR format: Namespace.Outer+Inner+Inner2
-            var parts = clrFullName.Split('+');
-            var outerFullName = parts[0];
-            var outerType = module.GetType(outerFullName);
 
-            if (outerType == null)
-                return None;
+    static Result<AssemblyDefinition> ReadAssemblyDefinition(string assemblyFilePath)
+    {
+        var cacheKey = $"{nameof(ReadAssemblyDefinition)}-{assemblyFilePath}";
 
-            // İç içe sınıfları sırayla ara
-            TypeDefinition current = outerType;
-            for (int i = 1; i < parts.Length; i++)
-            {
-                var nestedName = parts[i];
-                current = current.NestedTypes.FirstOrDefault(t => t.Name == nestedName);
-                if (current == null)
-                    return None;
-            }
-
-            return current;
-        }
-    
-
+        return Cache.AccessValue(cacheKey, () => CecilAssemblyReader.ReadAssembly(assemblyFilePath));
+    }
 }
