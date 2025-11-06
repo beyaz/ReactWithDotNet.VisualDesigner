@@ -6,7 +6,7 @@ delegate Task InputFocusHandler(string senderName);
 
 delegate Task InputPasteHandler(string text);
 
-sealed class MagicInput : Component<MagicInput.State>
+abstract class MagicInput : Component<MagicInput.State>
 {
     public bool AutoFocus { get; init; }
 
@@ -28,8 +28,8 @@ sealed class MagicInput : Component<MagicInput.State>
 
     public string Placeholder { get; init; }
 
-    public IReadOnlyList<SuggestionItem> Suggestions { get; init; } = [];
-
+    protected abstract IReadOnlyList<SuggestionItem> Suggestions { get; }
+    
     public string Value { get; init; }
 
     protected override Task constructor()

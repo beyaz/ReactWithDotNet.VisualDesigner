@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using Mysqlx.Crud;
+using System.IO;
 using System.Reflection;
 
 namespace ReactWithDotNet.VisualDesigner.Views;
@@ -257,11 +258,9 @@ static class ApplicationLogic
         return items;
     }
 
-    public static IReadOnlyList<SuggestionItem> GetStyleAttributeNameSuggestions(ApplicationState state)
+    public static IReadOnlyList<SuggestionItem> GetStyleAttributeNameSuggestions(int projectId)
     {
-       
-
-        var project = GetProjectConfig(state.ProjectId);
+        var project = GetProjectConfig(projectId);
 
         return new List<SuggestionItem>
         {
@@ -361,17 +360,15 @@ static class ApplicationLogic
                 value = i + "px",
 
                 isVariable = true
-            },
+            }
         };
 
 
         
     }
 
-    public static IReadOnlyList<SuggestionItem> GetTagSuggestions(ApplicationState state)
+    public static IReadOnlyList<SuggestionItem> GetTagSuggestions(int projectId)
     {
-        var projectId = state.ProjectId;
-
         return Cache.AccessValue($"{nameof(GetTagSuggestions)}-{projectId}", () =>
         (
             from name in new List<string>

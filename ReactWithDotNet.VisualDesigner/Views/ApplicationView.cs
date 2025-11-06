@@ -591,12 +591,13 @@ sealed class ApplicationView : Component<ApplicationState>
             BorderRadius(4),
             PaddingLeft(8),
 
-            new MagicInput
+            new TagEditor
             {
+                ProjectId = state.ProjectId,
+                
                 Id          = "TagEditor",
                 Name        = string.Empty,
                 Value       = inputValue,
-                Suggestions = GetTagSuggestions(state),
                 OnChange = (_, newValue) =>
                 {
                     foreach (var dbRecord in TryFindComponentByComponentNameWithExportFilePath(state.ProjectId, newValue))
@@ -624,6 +625,13 @@ sealed class ApplicationView : Component<ApplicationState>
                              """);
 
         return inputTag;
+    }
+
+    class TagEditor : MagicInput
+    {
+        public required int ProjectId { get; init; }
+
+        protected override IReadOnlyList<SuggestionItem> Suggestions => GetTagSuggestions(ProjectId);
     }
 
     Task DeleteSelectedTreeItem()
@@ -1732,10 +1740,10 @@ sealed class ApplicationView : Component<ApplicationState>
                     value = CurrentVisualElement.Styles[state.Selection.SelectedStyleIndex.Value];
                 }
 
-                return new MagicInput
+                return new StyleEditor
                 {
                     Placeholder = "Add style",
-                    Suggestions = GetStyleAttributeNameSuggestions(state),
+                    ProjectId   = state.ProjectId,
                     Name        = "style_editor" + styles.Count,
                     Id          = "style_editor",
                     OnChange = (_, newValue) =>
@@ -2132,6 +2140,14 @@ sealed class ApplicationView : Component<ApplicationState>
         }
     }
 
+    class StyleEditor: MagicInput
+    {
+        public required int ProjectId { get; set; }
+
+        protected override IReadOnlyList<SuggestionItem> Suggestions 
+            => Cache.AccessValue(nameof(StyleEditor), () => GetStyleAttributeNameSuggestions(ProjectId));
+    }
+    
     Element PartScale()
     {
         return new ZoomComponent
