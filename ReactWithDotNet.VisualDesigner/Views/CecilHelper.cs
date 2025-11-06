@@ -195,8 +195,8 @@ public static class CecilHelper
 
     public static Result<bool> IsPropertyPathProvidedByCollection(string dotNetAssemblyFilePath, string dotnetTypeFullName, string propertyPath)
     {
-        
-        
+
+
         //var assembly = ReadAssemblyDefinition(dotNetAssemblyFilePath);
         //if (assembly is null)
         //{
@@ -209,11 +209,20 @@ public static class CecilHelper
         //    return false;
         //}
 
-        return
-            from assembly in ReadAssemblyDefinition(dotNetAssemblyFilePath)
-            from type in assembly.MainModule.FindTypeByClrName(dotnetTypeFullName)
-            from propertyDefinition in FindPropertyPath(type, propertyPath)
-            select IsCollection(propertyDefinition.PropertyType);
+        var a = from assembly in ReadAssemblyDefinition(dotNetAssemblyFilePath)
+                from type in assembly.MainModule.FindTypeByClrName(dotnetTypeFullName)
+                from propertyDefinition in FindPropertyPath(type, propertyPath)
+                select IsCollection(propertyDefinition.PropertyType);
+
+        return from value in a
+               select value.HasValue switch
+               {
+                   true => value.Value,
+                   false => false
+               };
+
+
+
     }
 
     public static bool IsString(TypeReference typeReference)

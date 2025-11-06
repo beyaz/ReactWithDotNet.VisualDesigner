@@ -23,4 +23,33 @@ public static class MaybeResultExtensions
 
         return c;
     }
+
+    public static Result<Maybe<C>> SelectMany<A, B, C>(
+        this Result<Maybe<A>> source,
+        Func<A, Result<B>> bind,
+        Func<A, B, C> resultSelector
+    )
+    {
+        if (source.HasError)
+        {
+            return source.Error;
+        }
+
+        Maybe<C> none = None;
+
+        if (source.Value.HasNoValue)
+        {
+            return none;
+        }
+
+        var resultB = bind(source.Value.Value);
+        if (resultB.HasError)
+        {
+            return resultB.Error;
+        }
+
+        Maybe<C> c = resultSelector(source.Value.Value, resultB.Value);
+
+        return c;
+    }
 }
