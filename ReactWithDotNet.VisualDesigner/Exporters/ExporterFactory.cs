@@ -1,6 +1,5 @@
 ﻿global using  ExportInput = (int ProjectId,int ComponentId,string UserName );
 
-
 namespace ReactWithDotNet.VisualDesigner.Exporters;
 
 public sealed record SourceLinePoints(int LeftPaddingCount, int FirstReturnLineIndex, int FirstReturnCloseLineIndex);
@@ -74,7 +73,7 @@ static class ExporterFactory
                 return result.Error;
             }
         
-            result = await Prettier.FormatCode(result.Value);
+            result = await Prettier.FormatCode(result.Value, new (){ TabWidth = project.TabWidth});
             if (result.HasError)
             {
                 return result.Error.Message;

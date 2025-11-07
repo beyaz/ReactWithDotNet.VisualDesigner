@@ -123,7 +123,7 @@ static class TsxExporter
             from file in GetComponentFileLocation(componentId, user.LocalWorkspacePath)
             from fileContentInDirectory in FileSystem.ReadAllLines(file.filePath)
             from source in CalculateElementTreeSourceCodes(project, data.Component.Config, rootVisualElement)
-            from formattedSourceLines in Prettier.FormatCode(string.Join(Environment.NewLine, source.elementTreeSourceLines))
+            from formattedSourceLines in Prettier.FormatCode(string.Join(Environment.NewLine, source.elementTreeSourceLines), new (){ TabWidth = project.TabWidth})
             let content = mergeImportLines(fileContentInDirectory, source.importLines)
             from fileContent in InjectRender(content, file.targetComponentName, formattedSourceLines.Split(Environment.NewLine.ToCharArray()))
             select new FileModel

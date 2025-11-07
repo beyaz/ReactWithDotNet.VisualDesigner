@@ -19,6 +19,8 @@ public sealed record ProjectConfig
     public bool ExportAsCSharp { get; init; }
     
     public bool ExportAsCSharpString { get; init; }
+
+    public int TabWidth { get; init; } = 2;
 }
 
 public sealed record ComponentConfig

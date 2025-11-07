@@ -7,19 +7,24 @@ using Microsoft.AspNetCore.Builder;
 
 namespace Toolbox;
 
+sealed class PrettierOptions
+{
+    public int? TabWidth { get; init; }
+}
+
 static class Prettier
 {
     static readonly object _lock = new();
 
     static readonly HttpClient HttpClient = new();
 
-    public static async Task<Result<string>> FormatCode(string code)
+    public static async Task<Result<string>> FormatCode(string code, PrettierOptions prettierOptions)
     {
         await StartServerIfNeeded();
 
         var options = new JsonSerializerOptions();
 
-        var requestObject = new { code };
+        var requestObject = new { code, options = prettierOptions };
 
         var jsonPayload = JsonSerializer.Serialize(requestObject, options);
 
