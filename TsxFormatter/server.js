@@ -9,7 +9,7 @@ app.use(express.json({ limit: '4mb' }));
 app.post('/format', async (req, res) => 
 {
   const code = req.body.code;
-  const parser = req.body.parser || 'typescript';
+  const options = req.body.options || {}
 
   if (!code) 
   {
@@ -20,24 +20,23 @@ app.post('/format', async (req, res) =>
   {
     
     const formattedCode = await prettier.format(code, { 
-      parser: parser,
-      semi: true,         
-      singleQuote: false,  
+      parser: 'typescript',
+      semi: true,
+      singleQuote: false,
       trailingComma: 'es5',
-	  arrowParens: 'avoid',
-	  useTabs: false,
-	  tabWidth: 2
+      arrowParens: 'avoid',
+      useTabs: false,
+      tabWidth: 2,
+      ...options
     });
 
     res.status(200).json({ formattedCode });
-
   } 
   catch (err) 
   {
     res.status(500).json({ error: "FormattingErrorOccurred", details: err.message });
   }
 });
-
 
 app.listen(port, () => 
 {
