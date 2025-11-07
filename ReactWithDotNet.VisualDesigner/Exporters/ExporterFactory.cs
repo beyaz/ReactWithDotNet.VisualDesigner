@@ -47,41 +47,27 @@ static class ExporterFactory
         
         return TsxExporter.GetComponentLineIndexPointsInTsxFile(fileContent, targetComponentName);
     }
-    public static async Task<Result<string>> CalculateElementSourceCode(int projectId, ComponentConfig componentConfig, VisualElementModel visualElement)
+    public static  Task<Result<string>> CalculateElementSourceCode(int projectId, ComponentConfig componentConfig, VisualElementModel visualElement)
     {
         var project = GetProjectConfig(projectId);
         if (project is null)
         {
-            return new ArgumentNullException($"ProjectNotFound. {projectId}");
+            return Result.Error<string>(new ArgumentNullException($"ProjectNotFound. {projectId}"));
         }
         
         if (project.ExportAsCSharp)
         {
-            return await CSharpExporter.CalculateElementTsxCode(projectId, componentConfig, visualElement);
+            return  CSharpExporter.CalculateElementTsxCode(projectId, componentConfig, visualElement);
         }
         
         if (project.ExportAsCSharpString)
         {
-            return await CSharpStringExporter.CalculateElementTsxCode(projectId, componentConfig, visualElement);
+            return  CSharpStringExporter.CalculateElementTsxCode(projectId, componentConfig, visualElement);
         }
 
-        string tsxCode;
-        {
-            var result =  await TsxExporter.CalculateElementTsxCode(projectId, componentConfig, visualElement);
-            if (result.HasError)
-            {
-                return result.Error;
-            }
         
-            result = await Prettier.FormatCode(result.Value, new (){ TabWidth = project.TabWidth});
-            if (result.HasError)
-            {
-                return result.Error.Message;
-            }
-
-            tsxCode = result.Value;
-        }
-
-        return tsxCode;
+        return from tsCode in TsxExporter.CalculateElementTsxCode(projectId, componentConfig, visualElement)
+               from formattedTsCode in Prettier.FormatCode(tsCode, new (){ TabWidth = project.TabWidth})
+               select formattedTsCode;
     }
 }
