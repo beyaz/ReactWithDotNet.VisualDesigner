@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System.Configuration;
+using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -207,9 +208,13 @@ public static class Extensions
     public static async Task<Result<(string filePath, string targetComponentName)>> GetComponentFileLocation(int componentId, string userLocalWorkspacePath)
     {
         var component = await Store.TryGetComponent(componentId);
-        
 
-        return (component.Config.OutputFilePath.Trim(), component.Config.Name);
+        var outputFilePath = component.Config.OutputFilePath;
+        if (outputFilePath.HasNoValue())
+        {
+            return new ConfigurationErrorsException("Config error: Please specify the OutputFile property.");
+        }
+        return (outputFilePath.Trim(), component.Config.Name);
     }
 
     public static bool HasAny<T>(IEnumerable<T> items)
