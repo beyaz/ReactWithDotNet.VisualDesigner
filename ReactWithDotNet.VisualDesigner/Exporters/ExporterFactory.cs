@@ -50,10 +50,6 @@ static class ExporterFactory
     public static  Task<Result<string>> CalculateElementSourceCode(int projectId, ComponentConfig componentConfig, VisualElementModel visualElement)
     {
         var project = GetProjectConfig(projectId);
-        if (project is null)
-        {
-            return Result.Error<string>(new ArgumentNullException($"ProjectNotFound. {projectId}"));
-        }
         
         if (project.ExportAsCSharp)
         {
@@ -64,7 +60,6 @@ static class ExporterFactory
         {
             return  CSharpStringExporter.CalculateElementTsxCode(projectId, componentConfig, visualElement);
         }
-
         
         return from tsCode in TsxExporter.CalculateElementTsxCode(projectId, componentConfig, visualElement)
                from formattedTsCode in Prettier.FormatCode(tsCode, new (){ TabWidth = project.TabWidth})
