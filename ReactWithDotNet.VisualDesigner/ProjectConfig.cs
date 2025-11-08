@@ -38,6 +38,8 @@ public sealed record ComponentConfig
     public string Translate { get => field?.Trim(); init; }
 
     public string OutputFilePath { get => field?.Trim(); init; }
+    
+    public string DesignLocation { get => field?.Trim(); init; }
 }
 
 public sealed record VariableConfig
