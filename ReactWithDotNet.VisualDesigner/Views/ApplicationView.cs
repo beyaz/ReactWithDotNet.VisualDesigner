@@ -319,16 +319,16 @@ sealed class ApplicationView : Component<ApplicationState>
         {
             return new Exception("NameMustBeEntered");
         }
-        if (config.ExportFilePath.HasNoValue())
+        if (config.DesignLocation.HasNoValue())
         {
-            return new Exception("ExportFilePathMustBeEnteredCorrectly");
+            return new Exception("DesignLocationMustBeEnteredCorrectly");
         }
 
         // check name & export file path
         {
             foreach (var item in (await Store.GetAllComponentsInProject(projectId)).Where(x => x.Id != component.Id))
             {
-                if (item.Config.Name == config.Name && item.Config.ExportFilePath == config.ExportFilePath)
+                if (item.Config.Name == config.Name && item.Config.DesignLocation == config.DesignLocation)
                 {
                     return new Exception("Has already same named component.");
                 }
