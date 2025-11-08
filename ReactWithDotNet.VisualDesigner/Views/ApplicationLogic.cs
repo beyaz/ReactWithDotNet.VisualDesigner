@@ -72,8 +72,13 @@ static class ApplicationLogic
 
     public static string GetComponentDisplayText(int projectId, int componentId)
     {
-        var directoryName = GetAllComponentsInProjectFromCache(projectId).FirstOrDefault(x => x.Id == componentId)?.Config.ExportFilePath
-                                                                         .Split("/").TakeLast(2).FirstOrDefault();
+        var componentEntities = GetAllComponentsInProjectFromCache(projectId);
+
+        var componentEntity = componentEntities.FirstOrDefault(x => x.Id == componentId);
+
+        var componentConfig = componentEntity.Config;
+        
+        var directoryName = componentConfig.DesignLocation.Split("/").TakeLast(2).FirstOrDefault();
 
         return directoryName + "/" + GetComponentName(projectId, componentId);
     }
