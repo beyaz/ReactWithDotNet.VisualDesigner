@@ -9,7 +9,7 @@ public class Fixer
     public async Task FixAll()
     {
         Configuration.Extensions.Config = Configuration.Extensions.ReadConfig().Value;
-        
+
         foreach (var component in await Store.GetAllComponentsInProject(ProjectId))
         {
             var config = DeserializeFromYaml<ComponentConfig>(component.ConfigAsYaml);
@@ -19,7 +19,6 @@ public class Fixer
                 ConfigAsYaml = SerializeToYaml(Fix(config))
             });
         }
-
     }
 
     static ComponentConfig Fix(ComponentConfig config)
@@ -28,19 +27,27 @@ public class Fixer
         {
             config = config with
             {
-                DesignLocation = "/"+config.ExportFilePath.RemoveFromStart("/src/"),
-                
-                OutputFilePath = config.ExportFilePath
+                DesignLocation = "/" + config.ExportFilePath.RemoveFromStart("/src/").RemoveFromEnd(".tsx")
             };
-            
-            config = config with
+            if (config.ExportFilePath.EndsWith(config.Name + ".tsx"))
             {
-                ExportFilePath = null,
-                
-                OutputFilePath = "{projectDirectory}/src/{designLocation}"
-            };
+                config = config with
+                {
+                    ExportFilePath = null,
+
+                    OutputFilePath = "{projectDirectory}/src/{designLocation}.tsx"
+                };
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
         }
-        
+        else
+        {
+            throw new NotImplementedException();
+        }
+
         return config;
     }
 }
