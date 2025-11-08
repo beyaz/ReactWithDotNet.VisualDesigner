@@ -28,7 +28,7 @@ public class Fixer
         {
             config = config with
             {
-                DesignLocation = config.ExportFilePath.RemoveFromStart("/src/"),
+                DesignLocation = "/"+config.ExportFilePath.RemoveFromStart("/src/"),
                 
                 OutputFilePath = config.ExportFilePath
             };
