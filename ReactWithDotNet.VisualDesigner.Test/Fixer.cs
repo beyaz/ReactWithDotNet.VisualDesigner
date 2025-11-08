@@ -16,7 +16,7 @@ public class Fixer
 
             await Store.Update(component with
             {
-                RootElementAsYaml = SerializeToYaml(Fix(config))
+                ConfigAsYaml = SerializeToYaml(Fix(config))
             });
         }
 
