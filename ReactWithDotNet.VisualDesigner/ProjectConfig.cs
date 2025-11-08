@@ -21,6 +21,8 @@ public sealed record ProjectConfig
     public bool ExportAsCSharpString { get; init; }
 
     public int TabWidth { get; init; } = 2;
+    
+    public string ProjectDirectory { get; init; }
 }
 
 public sealed record ComponentConfig
