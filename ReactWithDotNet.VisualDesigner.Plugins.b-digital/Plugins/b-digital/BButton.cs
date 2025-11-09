@@ -64,7 +64,11 @@ sealed class BButton : PluginComponentBase
 
         return new Button
         {
-            variant = type,
+            variant = type ?? "text",
+            
+            id = id,
+            
+            onClick = onMouseClick,
             
             children=
             {

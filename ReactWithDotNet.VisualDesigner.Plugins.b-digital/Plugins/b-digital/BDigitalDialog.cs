@@ -22,6 +22,9 @@ sealed class BDigitalDialog : PluginComponentBase
     [Suggestions("error , warning , info , success")]
     [JsTypeInfo(JsType.String)]
     public string type { get; set; }
+    
+    [JsTypeInfo(JsType.Function)]
+    public string onClose { get; set; }
 
     protected override Element render()
     {
