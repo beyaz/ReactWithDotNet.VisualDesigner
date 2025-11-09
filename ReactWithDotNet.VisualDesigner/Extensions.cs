@@ -1,5 +1,6 @@
 ﻿using System.Configuration;
 using System.Globalization;
+using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -204,17 +205,36 @@ public static class Extensions
     {
         return items.FirstOrDefault();
     }
-
-    public static async Task<Result<(string filePath, string targetComponentName)>> GetComponentFileLocation(int componentId, string userLocalWorkspacePath)
+    
+    public static async Task<Result<(string filePath, string targetComponentName)>> GetComponentFileLocation(int componentId, string userName)
     {
         var component = await Store.TryGetComponent(componentId);
 
-        var outputFilePath = component.Config.OutputFilePath;
+        var componentConfig = component.Config;
+        
+        var outputFilePath = componentConfig.OutputFilePath;
         if (outputFilePath.HasNoValue())
         {
             return new ConfigurationErrorsException("Config error: Please specify the OutputFile property.");
         }
-        return (outputFilePath.Trim(), component.Config.Name);
+        
+        var projectConfig = GetProjectConfig(component.ProjectId);
+
+        var projectDirectory = projectConfig.ProjectDirectory;
+        
+        var user = await Store.TryGetUser(component.ProjectId, userName);
+        if (user is not null && user.LocalWorkspacePath.HasValue())
+        {
+            projectDirectory = user.LocalWorkspacePath;
+        }
+
+        outputFilePath = outputFilePath.Replace("{projectDirectory}", projectDirectory,StringComparison.OrdinalIgnoreCase);
+        
+        outputFilePath = outputFilePath.Replace("{designLocation}", componentConfig.ResolvedDesignLocation,StringComparison.OrdinalIgnoreCase);
+
+        outputFilePath = string.Join(Path.DirectorySeparatorChar, outputFilePath.Split('/', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
+        
+        return (outputFilePath, componentConfig.Name);
     }
 
     public static bool HasAny<T>(IEnumerable<T> items)
