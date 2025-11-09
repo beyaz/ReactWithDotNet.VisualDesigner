@@ -1,5 +1,4 @@
 ﻿global using static  ReactWithDotNet.VisualDesigner.Views.Extensions;
-using System.IO;
 
 namespace ReactWithDotNet.VisualDesigner.Views;
 
@@ -24,37 +23,19 @@ static class Extensions
         return None;
     }
     
-    public static Maybe<ComponentEntity> TryFindComponentByComponentNameWithExportFilePath(int projectId, string componentNameWithExportFilePath)
+    public static Maybe<ComponentEntity> TryFindComponentByComponentNameWithExportFilePath(int projectId, string designLocation)
     {
-        if (componentNameWithExportFilePath.HasNoValue())
+        if (designLocation.HasNoValue())
         {
             return None;
         }
         
-        if (componentNameWithExportFilePath.Contains(" > ",StringComparison.OrdinalIgnoreCase))
+        var allComponentsInProject = GetAllComponentsInProjectFromCache(projectId);
+            
+        var record = allComponentsInProject.FirstOrDefault(x=>x.Config.ResolvedDesignLocation == designLocation);
+        if (record is not null)
         {
-            var index = componentNameWithExportFilePath.IndexOf(" > ", StringComparison.OrdinalIgnoreCase);
-
-            var exportFilePath = componentNameWithExportFilePath.Substring(0, index);
-            var componentName = componentNameWithExportFilePath.Substring(index + 3, componentNameWithExportFilePath.Length -index -3);
-
-            var record = GetAllComponentsInProjectFromCache(projectId).FirstOrDefault(x => x.Config.ExportFilePath == exportFilePath && x.Config.Name == componentName);
-            if (record is not null)
-            {
-                return record;
-            }
-        }
-        
-        if (componentNameWithExportFilePath.Contains("/",StringComparison.OrdinalIgnoreCase))
-        {
-            var exportFilePath = componentNameWithExportFilePath;
-            var componentName = Path.GetFileNameWithoutExtension(componentNameWithExportFilePath);
-
-            var record = GetAllComponentsInProjectFromCache(projectId).FirstOrDefault(x => x.Config.ExportFilePath == exportFilePath && x.Config.Name == componentName);
-            if (record is not null)
-            {
-                return record;
-            }
+            return record;
         }
 
         return None;

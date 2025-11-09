@@ -32,4 +32,11 @@ public static class Extensions
             }
         }
     }
+    extension(ComponentConfig componentConfig)
+    {
+        public string ResolvedDesignLocation 
+            => componentConfig.DesignLocation.Replace("{name}", componentConfig.Name);
+    }
+    
+    
 }
