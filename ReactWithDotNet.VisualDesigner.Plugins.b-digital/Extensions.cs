@@ -23,4 +23,43 @@ static class Extensions
             })
         };
     }
+    
+    public static ReactNode TryFindDesignNamedNode(this ReactNode node, string designName)
+    {
+        if (node.Properties.Any(p=>p.Name == Design.Name))
+        {
+            return node;
+        }
+
+        foreach (var child in node.Children)
+        {
+            var namedNode = child.TryFindDesignNamedNode(designName);
+            if (namedNode is not null)
+            {
+                return namedNode;
+            }
+        }
+
+        return null;
+    }
+    
+    public static ReactNode TryGetNodeItemAt(this ReactNode node, int[] location)
+    {
+        foreach (var childIndex in location)
+        {
+            if (node is null)
+            {
+                return null;
+            }
+
+            if (!(node.Children.Count > childIndex))
+            {
+                return null;
+            }
+                        
+            node = node.Children[childIndex];
+        }
+
+        return node;
+    }
 }

@@ -143,16 +143,16 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
                         
                 var sender = new
                 {
-                    title = tryGetValueAt(node, [0, 1, 0, 0]),
+                    title = node.TryGetNodeItemAt( [0, 1, 0, 0]),
 
-                    item1Text  = tryGetValueAt(node, [0, 1, 0, 1, 0]),
-                    item1Value = tryGetValueAt(node, [0, 1, 0, 1, 1]),
+                    item1Text  = node.TryGetNodeItemAt( [0, 1, 0, 1, 0]),
+                    item1Value = node.TryGetNodeItemAt( [0, 1, 0, 1, 1]),
                         
-                    item2Text  = tryGetValueAt(node, [0, 1, 0, 2, 0]),
-                    item2Value = tryGetValueAt(node, [0, 1, 0, 2, 1]),
+                    item2Text  = node.TryGetNodeItemAt( [0, 1, 0, 2, 0]),
+                    item2Value = node.TryGetNodeItemAt( [0, 1, 0, 2, 1]),
                         
-                    item3Text  = tryGetValueAt(node, [0, 1, 0, 3, 0]),
-                    item3Value = tryGetValueAt(node, [0, 1, 0, 3, 1])
+                    item3Text  = node.TryGetNodeItemAt( [0, 1, 0, 3, 0]),
+                    item3Value = node.TryGetNodeItemAt( [0, 1, 0, 3, 1])
                 };
                         
                 if (sender.title is not null)
@@ -192,7 +192,7 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
 
             // amount
             {
-                var transferAmount = tryGetValueAt(node, [1, 1]);
+                var transferAmount = node.TryGetNodeItemAt( [1, 1]);
                 if (transferAmount is not null)
                 {
                     finalProps.Add(new ReactProperty
@@ -216,16 +216,16 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
                         
                 var receiver = new
                 {
-                    title = tryGetValueAt(node, [2, 1, 0, 0]),
+                    title = node.TryGetNodeItemAt( [2, 1, 0, 0]),
 
-                    item1Text  = tryGetValueAt(node, [2, 1, 0, 1, 0]),
-                    item1Value = tryGetValueAt(node, [2, 1, 0, 1, 1]),
+                    item1Text  = node.TryGetNodeItemAt( [2, 1, 0, 1, 0]),
+                    item1Value = node.TryGetNodeItemAt( [2, 1, 0, 1, 1]),
                         
-                    item2Text  = tryGetValueAt(node, [2, 1, 0, 2, 0]),
-                    item2Value = tryGetValueAt(node, [2, 1, 0, 2, 1]),
+                    item2Text  = node.TryGetNodeItemAt( [2, 1, 0, 2, 0]),
+                    item2Value = node.TryGetNodeItemAt( [2, 1, 0, 2, 1]),
                         
-                    item3Text  = tryGetValueAt(node, [2, 1, 0, 3, 0]),
-                    item3Value = tryGetValueAt(node, [2, 1, 0, 3, 1])
+                    item3Text  = node.TryGetNodeItemAt( [2, 1, 0, 3, 0]),
+                    item3Value = node.TryGetNodeItemAt( [2, 1, 0, 3, 1])
                 };
                         
                 if (receiver.title is not null)
@@ -270,14 +270,14 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
                         
                 var items = new
                 {
-                    item1Text  = tryGetValueAt(node, [4, 0, 0]),
-                    item1Value = tryGetValueAt(node, [4, 0, 1]),
+                    item1Text  = node.TryGetNodeItemAt( [4, 0, 0]),
+                    item1Value = node.TryGetNodeItemAt( [4, 0, 1]),
                         
-                    item2Text  = tryGetValueAt(node, [4, 1, 0]),
-                    item2Value = tryGetValueAt(node, [4, 1, 1]),
+                    item2Text  = node.TryGetNodeItemAt( [4, 1, 0]),
+                    item2Value = node.TryGetNodeItemAt( [4, 1, 1]),
                         
-                    item3Text  = tryGetValueAt(node, [4, 2, 0]),
-                    item3Value = tryGetValueAt(node, [4, 2, 1])
+                    item3Text  = node.TryGetNodeItemAt( [4, 2, 0]),
+                    item3Value = node.TryGetNodeItemAt( [4, 2, 1])
                 };
                         
                        
@@ -347,25 +347,7 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
             }
         }
                 
-        static ReactNode tryGetValueAt(ReactNode node, int[] location)
-        {
-            foreach (var childIndex in location)
-            {
-                if (node is null)
-                {
-                    return null;
-                }
-
-                if (!(node.Children.Count > childIndex))
-                {
-                    return null;
-                }
-                        
-                node = node.Children[childIndex];
-            }
-
-            return node;
-        }
+       
     }
 
 }

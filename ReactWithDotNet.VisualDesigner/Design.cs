@@ -1,6 +1,6 @@
 ﻿namespace ReactWithDotNet.VisualDesigner;
 
-static class Design
+public static class Design
 {
     public const string PREFIX = "d-";
     
