@@ -23,10 +23,10 @@ app.post('/format', async (req, res) =>
       parser: 'typescript',
       semi: true,
       singleQuote: false,
-      trailingComma: 'es5',
+      trailingComma: 'none',
       arrowParens: 'avoid',
       useTabs: false,
-      tabWidth: 2,
+      tabWidth: 4,
       ...options
     });
 
