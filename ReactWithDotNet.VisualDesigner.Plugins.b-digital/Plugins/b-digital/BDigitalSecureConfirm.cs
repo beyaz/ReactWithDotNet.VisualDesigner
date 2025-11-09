@@ -12,6 +12,10 @@ sealed class BDigitalSecureConfirm : PluginComponentBase
 
     [JsTypeInfo(JsType.String)]
     public string messageInfo { get; set; }
+    
+    [JsTypeInfo(JsType.Boolean)]
+    public string isPreDataLoaded { get; set; }
+    
             
     [NodeAnalyzer]
     public static ReactNode AnalyzeReactNode(ReactNode node, ComponentConfig componentConfig)
