@@ -1,8 +1,10 @@
 ﻿global using static ReactWithDotNet.VisualDesigner.Plugins.b_digital.Mixin;
+using System.Collections.Immutable;
 using System.Data;
 using Dapper;
 using Microsoft.Data.SqlClient;
 using ReactWithDotNet.VisualDesigner.DbModels;
+using ReactWithDotNet.VisualDesigner.Exporters;
 
 namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
@@ -14,6 +16,49 @@ record MessagingRecord
 
 static class Mixin
 {
+    public static ReactNode ApplyTranslateOperationOnProps(ReactNode node, ComponentConfig componentConfig, params string[] propNames)
+    {
+        return node with
+        {
+            Properties = node.Properties.Select(x => AnalyzeTranslate(x, componentConfig, propNames)).ToImmutableList()
+        };
+
+        static ReactProperty AnalyzeTranslate(ReactProperty property, ComponentConfig componentConfig, IReadOnlyList<string> propNames)
+        {
+            if (!propNames.Contains(property.Name))
+            {
+                return property;
+            }
+
+            var (hasAnyChange, value) = ApplyTranslateOperation(componentConfig.Translate, property.Value);
+            if (!hasAnyChange)
+            {
+                return property;
+            }
+
+            return property with
+            {
+                Value = value
+            };
+        }
+        
+        static (bool hasAnyChange, string value) ApplyTranslateOperation(string translate, string label)
+        {
+            var messagingRecords = GetMessagingByGroupName(translate).GetAwaiter().GetResult();
+
+            var labelRawValue = TryClearStringValue(label);
+
+            var propertyName = FirstOrDefaultOf(from m in messagingRecords where m.Description.Trim() == labelRawValue.Trim() select m.PropertyName);
+            if (propertyName is null)
+            {
+                return (false, label);
+            }
+
+            return (true, $"getMessage(\"{propertyName}\")");
+        }
+    }
+    
+    
     [GetStringSuggestions]
     public static async Task<Result<IReadOnlyList<string>>> GetStringSuggestions(PropSuggestionScope scope)
     {

@@ -35,6 +35,7 @@ sealed class BDigitalDatepicker : PluginComponentBase
     [JsTypeInfo(JsType.Date)]
     public string value { get; set; }
 
+    
     [NodeAnalyzer]
     public static ReactNode AnalyzeReactNode(ReactNode node, ComponentConfig componentConfig)
     {
@@ -45,6 +46,8 @@ sealed class BDigitalDatepicker : PluginComponentBase
                 Children = node.Children.Select(x => AnalyzeReactNode(x, componentConfig)).ToImmutableList()
             };
         }
+
+        node = ApplyTranslateOperationOnProps(node, componentConfig, nameof(labelText));
 
         var valueProp = node.Properties.FirstOrDefault(x => x.Name == nameof(value));
         var isRequiredProp = node.Properties.FirstOrDefault(x => x.Name == nameof(isRequired));
