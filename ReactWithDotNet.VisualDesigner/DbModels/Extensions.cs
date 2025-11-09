@@ -6,16 +6,16 @@ public static class Extensions
 {
     public static string GetNameWithExportFilePath(this ComponentEntity componentEntity)
     {
-        var exportFilePath = componentEntity.Config.ExportFilePath;
+        var designLocation = componentEntity.Config.DesignLocation;
 
         var name = componentEntity.Config.Name;
 
-        if (Path.GetFileNameWithoutExtension(exportFilePath) == name)
+        if (Path.GetFileNameWithoutExtension(designLocation) == "{name}")
         {
-            return exportFilePath;
+            return designLocation.Replace("{name}",name);
         }
 
-        return $"{exportFilePath} > {name}";
+        return $"{designLocation} > {name}";
     }
 
     extension(ComponentEntity componentEntity)
