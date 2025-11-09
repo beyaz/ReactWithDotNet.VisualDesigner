@@ -9,7 +9,7 @@ namespace Toolbox;
 
 sealed class PrettierOptions
 {
-    public int? TabWidth { get; init; }
+    public int? tabWidth { get; init; }
 }
 
 static class Prettier

@@ -26,7 +26,7 @@ app.post('/format', async (req, res) =>
       trailingComma: 'none',
       arrowParens: 'avoid',
       useTabs: false,
-      tabWidth: 4,
+      tabWidth: 2,
       ...options
     });
 

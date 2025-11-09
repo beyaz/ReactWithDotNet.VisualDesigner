@@ -62,7 +62,7 @@ static class ExporterFactory
         }
         
         return from tsCode in TsxExporter.CalculateElementTsxCode(projectId, componentConfig, visualElement)
-               from formattedTsCode in Prettier.FormatCode(tsCode, new (){ TabWidth = project.TabWidth})
+               from formattedTsCode in Prettier.FormatCode(tsCode, new (){ tabWidth = project.TabWidth})
                select formattedTsCode;
     }
 }
