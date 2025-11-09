@@ -2310,7 +2310,8 @@ sealed class ApplicationView : Component<ApplicationState>
                 MainContentTabs.NewComponentConfig =>
                     $"""
                      {TypescriptNaming.NormalizeBindingPath(nameof(ComponentConfig.Name))}: write_component_name_here
-                     {TypescriptNaming.NormalizeBindingPath(nameof(ComponentConfig.ExportFilePath))}: write_export_file_path_here
+                     {TypescriptNaming.NormalizeBindingPath(nameof(ComponentConfig.DesignLocation))}: write_design_file_path_here
+                     {TypescriptNaming.NormalizeBindingPath(nameof(ComponentConfig.OutputFilePath))}: write_export_file_path_here
                      """,
 
                 MainContentTabs.Output => await calculateTsxCodeOfCurrentVisualElement(),
