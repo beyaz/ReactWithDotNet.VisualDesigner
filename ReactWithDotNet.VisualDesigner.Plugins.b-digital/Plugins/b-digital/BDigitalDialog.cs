@@ -54,7 +54,7 @@ sealed class BDigitalDialog : PluginComponentBase
                             from actionButton in actions.Children
                             let label = actionButton.Properties.First(x => x.Name == nameof(BButton.text)).Value
                             let onClick = actionButton.Properties.First(x => x.Name == nameof(BButton.onClick)).Value
-                            select $"{{{{ label: {label}, onClick: {onClick} }}}}") +
+                            select $"{{ label: {label}, onClick: {onClick} }}") +
                         "]"
             };
 

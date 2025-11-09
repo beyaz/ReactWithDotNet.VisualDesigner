@@ -24,26 +24,18 @@ sealed class BButton : PluginComponentBase
         {
             var onClickProp = node.Properties.FirstOrDefault(x => x.Name == nameof(onClick));
 
-            if (onClickProp is not null)
+            if (onClickProp is not null && !IsAlphaNumeric(onClickProp.Value) )
             {
                 var properties = node.Properties;
 
                 List<string> lines =
                 [
                     "() =>",
-                    "{"
+
+                    "{",
+                    onClickProp.Value,
+                    "}"
                 ];
-
-                if (IsAlphaNumeric(onClickProp.Value))
-                {
-                    lines.Add(onClickProp.Value + "();");
-                }
-                else
-                {
-                    lines.Add(onClickProp.Value);
-                }
-
-                lines.Add("}");
 
                 onClickProp = onClickProp with
                 {

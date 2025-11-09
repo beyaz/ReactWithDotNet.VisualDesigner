@@ -26,7 +26,7 @@ static class Extensions
     
     public static ReactNode TryFindDesignNamedNode(this ReactNode node, string designName)
     {
-        if (node.Properties.Any(p=>p.Name == Design.Name))
+        if (node.Properties.Any(p=>p.Name == Design.Name && p.Value == designName))
         {
             return node;
         }
