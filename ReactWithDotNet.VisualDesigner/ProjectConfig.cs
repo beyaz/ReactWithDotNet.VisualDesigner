@@ -27,30 +27,36 @@ public sealed record ProjectConfig
 
 public sealed record ComponentConfig
 {
+    // @formatter:off
+    
     public string Name { get; init; }
     
-    public string ExportFilePath { get; init; }
-
-    public IReadOnlyList<VariableConfig> DotNetVariables { get; init; } = [];
+    public string DesignLocation { get => field?.Trim(); init; }
+    
+    public string OutputFilePath { get => field?.Trim(); init; }
+    
+    public string Translate { get => field?.Trim(); init; }
 
     public bool SkipExport { get; init; }
     
     public string SolutionDirectory { get => field?.Trim(); init; }
     
-    public string Translate { get => field?.Trim(); init; }
+    public IReadOnlyList<VariableConfig> DotNetVariables { get; init; } = [];
 
-    public string DesignLocation { get => field?.Trim(); init; }
-    
-    public string OutputFilePath { get => field?.Trim(); init; }
+    // @formatter:on
    
 }
 
 public sealed record VariableConfig
 {
-    public string DotNetAssemblyFilePath { get => field?.Trim(); init; }
-
-    public string DotnetTypeFullName { get => field?.Trim(); init; }
-
+    // @formatter:off
+    
     public string VariableName { get => field?.Trim(); init; }
+    
+    public string DotnetTypeFullName { get => field?.Trim(); init; }
+    
+    public string DotNetAssemblyFilePath { get => field?.Trim(); init; }
+    
+    // @formatter:on
 }
 
