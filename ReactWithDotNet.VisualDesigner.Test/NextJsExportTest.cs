@@ -9,7 +9,7 @@ public sealed class NextJsExportTest
     public async Task ExportAll()
     {
         Configuration.Extensions.Config = Configuration.Extensions.ReadConfig().Value;
-        
+
         const int projectId = 1;
 
         var components = await Store.GetAllComponentsInProject(projectId);
@@ -28,9 +28,10 @@ public sealed class NextJsExportTest
                 UserName    = EnvironmentUserName
             });
 
-            result.HasError.ShouldBeFalse();
+            if (result.HasError)
+            {
+                throw result.Error;
+            }
         }
     }
-
-   
 }
