@@ -14,6 +14,9 @@ sealed class BDigitalDatepicker : PluginComponentBase
     [JsTypeInfo(JsType.String)]
     public string format { get; set; }
 
+    [JsTypeInfo(JsType.Boolean)]
+    public string isRequired { get; set; }
+
     [JsTypeInfo(JsType.String)]
     public string labelText { get; set; }
 
@@ -31,10 +34,6 @@ sealed class BDigitalDatepicker : PluginComponentBase
 
     [JsTypeInfo(JsType.Date)]
     public string value { get; set; }
-    
-    
-    [JsTypeInfo(JsType.Boolean)]
-    public string isRequired { get; set; }
 
     [NodeAnalyzer]
     public static ReactNode AnalyzeReactNode(ReactNode node, ComponentConfig componentConfig)
@@ -47,93 +46,91 @@ sealed class BDigitalDatepicker : PluginComponentBase
             };
         }
 
+        var valueProp = node.Properties.FirstOrDefault(x => x.Name == nameof(value));
+        var isRequiredProp = node.Properties.FirstOrDefault(x => x.Name == nameof(isRequired));
+        var onDateChangeProp = node.Properties.FirstOrDefault(x => x.Name == nameof(onDateChange));
+        if (valueProp is not null)
         {
-            var valueProp = node.Properties.FirstOrDefault(x => x.Name == nameof(value));
-            var isRequiredProp = node.Properties.FirstOrDefault(x => x.Name == nameof(isRequired));
-            var onDateChangeProp = node.Properties.FirstOrDefault(x => x.Name == nameof(onDateChange));
-            if (valueProp is not null)
+            var properties = node.Properties;
+
+            List<string> lines =
+            [
+                "(value: Date) =>",
+                "{",
+                $"  {valueProp.Value} = value;",
+                GetUpdateStateLine(valueProp.Value)
+            ];
+
+            if (onDateChangeProp is not null)
             {
-                var properties = node.Properties;
-
-                List<string> lines =
-                [
-                    "(value: Date) =>",
-                    "{",
-                    $"  {valueProp.Value} = value;",
-                    GetUpdateStateLine(valueProp.Value)
-                ];
-
-                if (onDateChangeProp is not null)
+                if (IsAlphaNumeric(onDateChangeProp.Value))
                 {
-                    if (IsAlphaNumeric(onDateChangeProp.Value))
-                    {
-                        lines.Add(onDateChangeProp.Value + "(value);");
-                    }
-                    else
-                    {
-                        lines.Add(onDateChangeProp.Value);
-                    }
-                }
-
-                lines.Add("}");
-
-                if (onDateChangeProp is not null)
-                {
-                    onDateChangeProp = onDateChangeProp with
-                    {
-                        Value = string.Join(Environment.NewLine, lines)
-                    };
-
-                    properties = properties.SetItem(properties.FindIndex(x => x.Name == onDateChangeProp.Name), onDateChangeProp);
+                    lines.Add(onDateChangeProp.Value + "(value);");
                 }
                 else
                 {
-                    properties = properties.Add(new()
-                    {
-                        Name  = nameof(onDateChange),
-                        Value = string.Join(Environment.NewLine, lines)
-                    });
+                    lines.Add(onDateChangeProp.Value);
                 }
-
-                node = node with { Properties = properties };
             }
 
-            var placeholderProp = node.Properties.FirstOrDefault(x => x.Name == nameof(placeholder));
-            if (placeholderProp is not null)
+            lines.Add("}");
+
+            if (onDateChangeProp is not null)
             {
-                var placeholderFinalValue = string.Empty;
+                onDateChangeProp = onDateChangeProp with
                 {
-                    if (IsStringValue(placeholderProp.Value))
-                    {
-                        placeholderFinalValue = placeholderProp.Value;
-                    }
-                    else
-                    {
-                        placeholderFinalValue = $"{Plugin.ConvertDotNetPathToJsPath(placeholderProp.Value)}";
-                    }
+                    Value = string.Join(Environment.NewLine, lines)
+                };
+
+                properties = properties.SetItem(properties.FindIndex(x => x.Name == onDateChangeProp.Name), onDateChangeProp);
+            }
+            else
+            {
+                properties = properties.Add(new()
+                {
+                    Name  = nameof(onDateChange),
+                    Value = string.Join(Environment.NewLine, lines)
+                });
+            }
+
+            node = node with { Properties = properties };
+        }
+
+        var placeholderProp = node.Properties.FirstOrDefault(x => x.Name == nameof(placeholder));
+        if (placeholderProp is not null)
+        {
+            var placeholderFinalValue = string.Empty;
+            {
+                if (IsStringValue(placeholderProp.Value))
+                {
+                    placeholderFinalValue = placeholderProp.Value;
                 }
+                else
+                {
+                    placeholderFinalValue = $"{Plugin.ConvertDotNetPathToJsPath(placeholderProp.Value)}";
+                }
+            }
 
-                node = node with
-                {
-                    Properties = node.Properties.Remove(placeholderProp).Add(new()
-                    {
-                        Name  = "inputProps",
-                        Value = $"{{ placeholder: {placeholderFinalValue} }}"
-                    })
-                };
-            }
-            
-            if (isRequiredProp is not null )
+            node = node with
             {
-                node = node with
+                Properties = node.Properties.Remove(placeholderProp).Add(new()
                 {
-                    Properties = node.Properties.Remove(isRequiredProp).Add(new()
-                    {
-                        Name  = "valueConstraint",
-                        Value = $"{{ required: {Plugin.ConvertDotNetPathToJsPath(isRequiredProp.Value)} }}"
-                    })
-                };
-            }
+                    Name  = "inputProps",
+                    Value = $"{{ placeholder: {placeholderFinalValue} }}"
+                })
+            };
+        }
+
+        if (isRequiredProp is not null)
+        {
+            node = node with
+            {
+                Properties = node.Properties.Remove(isRequiredProp).Add(new()
+                {
+                    Name  = "valueConstraint",
+                    Value = $"{{ required: {Plugin.ConvertDotNetPathToJsPath(isRequiredProp.Value)} }}"
+                })
+            };
         }
 
         return node;
