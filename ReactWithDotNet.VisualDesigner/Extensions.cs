@@ -232,7 +232,7 @@ public static class Extensions
         
         outputFilePath = outputFilePath.Replace("{designLocation}", componentConfig.ResolvedDesignLocation,StringComparison.OrdinalIgnoreCase);
 
-        outputFilePath = string.Join(Path.DirectorySeparatorChar, outputFilePath.Split('/', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
+        outputFilePath = string.Join(Path.DirectorySeparatorChar, outputFilePath.Split(['/', Path.DirectorySeparatorChar], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
         
         return (outputFilePath, componentConfig.Name);
     }

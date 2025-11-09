@@ -681,21 +681,8 @@ sealed class ApplicationView : Component<ApplicationState>
             this.FailNotification("UserName has no value");
             return;
         }
-
-        var user = await Store.TryGetUser(state.ProjectId, state.UserName);
-        if (user is null)
-        {
-            this.FailNotification($"UserNotFound {state.UserName}");
-            return;
-        }
-
-        if (user.LocalWorkspacePath.HasNoValue())
-        {
-            this.FailNotification("UserLocalWorkspacePathShouldBeSet");
-            return;
-        }
-
-        var location = await GetComponentFileLocation(state.ComponentId, user.LocalWorkspacePath);
+        
+        var location = await GetComponentFileLocation(state.ComponentId, state.UserName);
         if (location.HasError)
         {
             this.FailNotification(location.Error.Message);

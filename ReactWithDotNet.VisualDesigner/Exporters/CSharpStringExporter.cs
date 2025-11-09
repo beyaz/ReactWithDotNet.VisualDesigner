@@ -180,7 +180,7 @@ static class CSharpStringExporter
         return await
             (from data in GetComponentData(componentId,userName)
             from rootVisualElement in GetComponentUserOrMainVersionAsync(componentId, userName)
-            from file in GetComponentFileLocation(componentId, user.LocalWorkspacePath)
+            from file in GetComponentFileLocation(componentId, userName)
             from fileContentInDirectory in FileSystem.ReadAllLines(file.filePath)
             from source in CalculateElementTreeSourceCodes(project, data.Component.Config, rootVisualElement)
             from fileContent in InjectRender(fileContentInDirectory, file.targetComponentName, source.elementTreeSourceLines)
