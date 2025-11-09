@@ -70,25 +70,14 @@ sealed class BButton : PluginComponentBase
             
             onClick = onMouseClick,
             
+            color = "success",
+            
+            sx={ textTransform= "none", fontWeight= "bold", color = "#16A085"},
             children=
             {
                 new div{ text}
             }
         };
 
-        //return new FlexRowCentered(Background(rgba(22, 160, 133, 1)), BorderRadius(10), PaddingY(8), PaddingX(64), MinWidth(160))
-        //{
-        //    FontSize(15),
-        //    LineHeight26,
-        //    LetterSpacing("0.46px"),
-        //    Color(rgba(248, 249, 250, 1)),
-
-        //    new div { text ?? "?" },
-
-        //    Id(id),
-        //    OnClick(onMouseClick),
-
-
-        //};
     }
 }
