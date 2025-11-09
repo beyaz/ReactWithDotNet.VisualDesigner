@@ -23,7 +23,15 @@ sealed partial class BDigitalEmptyPage : PluginComponentBase
             {
                 loading = "lazy",
                 src     = FirstOrDefaultOf(from x in Images where x.Name == infoImageSource select x.Src) ?? Images[0].Src
-            }
+            },
+            
+            new BTypography
+            {
+                variant="body2",
+                color="rgba(0, 0, 0, 0.6)",
+                children = { description }
+            },
+            SpaceY(24)
         };
     }
 }
