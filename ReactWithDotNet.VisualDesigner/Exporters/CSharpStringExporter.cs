@@ -173,8 +173,6 @@ static class CSharpStringExporter
     {
         var (projectId, componentId, userName) = input;
 
-        var user = await Store.TryGetUser(projectId, userName);
-
         var project = GetProjectConfig(projectId);
 
         return await
