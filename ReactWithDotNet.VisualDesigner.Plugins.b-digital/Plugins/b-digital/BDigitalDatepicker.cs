@@ -31,6 +31,10 @@ sealed class BDigitalDatepicker : PluginComponentBase
 
     [JsTypeInfo(JsType.Date)]
     public string value { get; set; }
+    
+    
+    [JsTypeInfo(JsType.Boolean)]
+    public string isRequired { get; set; }
 
     [NodeAnalyzer]
     public static ReactNode AnalyzeReactNode(ReactNode node, ComponentConfig componentConfig)
@@ -38,6 +42,7 @@ sealed class BDigitalDatepicker : PluginComponentBase
         if (node.Tag == nameof(BDigitalDatepicker))
         {
             var valueProp = node.Properties.FirstOrDefault(x => x.Name == nameof(value));
+            var isRequiredProp = node.Properties.FirstOrDefault(x => x.Name == nameof(isRequired));
             var onDateChangeProp = node.Properties.FirstOrDefault(x => x.Name == nameof(onDateChange));
             if (valueProp is not null)
             {
@@ -47,7 +52,8 @@ sealed class BDigitalDatepicker : PluginComponentBase
                 [
                     "(value: Date) =>",
                     "{",
-                    $"  updateRequest(r => {{ r.{valueProp.Value.RemoveFromStart("request.")} = value; }});"
+                    $"  {valueProp.Value} = value;",
+                    GetUpdateStateLine(valueProp.Value)
                 ];
 
                 if (onDateChangeProp is not null)
@@ -106,6 +112,18 @@ sealed class BDigitalDatepicker : PluginComponentBase
                     {
                         Name  = "inputProps",
                         Value = $"{{ placeholder: {placeholderFinalValue} }}"
+                    })
+                };
+            }
+            
+            if (isRequiredProp is not null )
+            {
+                node = node with
+                {
+                    Properties = node.Properties.Remove(isRequiredProp).Add(new()
+                    {
+                        Name  = "valueConstraint",
+                        Value = $"{{ required: {Plugin.ConvertDotNetPathToJsPath(isRequiredProp.Value)} }}"
                     })
                 };
             }
