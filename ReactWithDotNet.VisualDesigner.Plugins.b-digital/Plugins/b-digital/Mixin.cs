@@ -6,6 +6,12 @@ using ReactWithDotNet.VisualDesigner.DbModels;
 
 namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
+record MessagingRecord
+{
+    public string Description { get; init; }
+    public string PropertyName { get; init; }
+} 
+
 static class Mixin
 {
     [GetStringSuggestions]
@@ -27,20 +33,16 @@ static class Mixin
         return stringSuggestions;
     }
     
-    record MessagingInfo
-    {
-        public string Description { get; init; }
-        public string PropertyName { get; init; }
-    }
-    static Task<IReadOnlyList<MessagingInfo>> GetMessagingByGroupName(string messagingGroupName)
+   
+    internal static Task<IReadOnlyList<MessagingRecord>> GetMessagingByGroupName(string messagingGroupName)
     {
         var cacheKey = $"{nameof(GetMessagingByGroupName)} :: {messagingGroupName}";
 
         return Cache.AccessValue(cacheKey, async () => await getMessagingByGroupName(messagingGroupName));
 
-        static async Task<IReadOnlyList<MessagingInfo>> getMessagingByGroupName(string messagingGroupName)
+        static async Task<IReadOnlyList<MessagingRecord>> getMessagingByGroupName(string messagingGroupName)
         {
-            var returnList = new List<MessagingInfo>();
+            var returnList = new List<MessagingRecord>();
 
             const string connectionString = @"Data Source=srvdev\atlas;Initial Catalog=boa;Min Pool Size=10; Max Pool Size=100;Application Name=Thriller;Integrated Security=true; TrustServerCertificate=true;";
 

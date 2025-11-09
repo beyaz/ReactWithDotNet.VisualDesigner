@@ -39,7 +39,14 @@ sealed class BDigitalDatepicker : PluginComponentBase
     [NodeAnalyzer]
     public static ReactNode AnalyzeReactNode(ReactNode node, ComponentConfig componentConfig)
     {
-        if (node.Tag == nameof(BDigitalDatepicker))
+        if (node.Tag != nameof(BDigitalDatepicker))
+        {
+            return node with
+            {
+                Children = node.Children.Select(x => AnalyzeReactNode(x, componentConfig)).ToImmutableList()
+            };
+        }
+
         {
             var valueProp = node.Properties.FirstOrDefault(x => x.Name == nameof(value));
             var isRequiredProp = node.Properties.FirstOrDefault(x => x.Name == nameof(isRequired));
@@ -129,7 +136,7 @@ sealed class BDigitalDatepicker : PluginComponentBase
             }
         }
 
-        return node with { Children = node.Children.Select(x => AnalyzeReactNode(x, componentConfig)).ToImmutableList() };
+        return node;
     }
 
     protected override Element render()
