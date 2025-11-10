@@ -130,12 +130,6 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
         {
 
             List<ReactProperty> finalProps = [];
-                    
-                    
-
-                   
-                   
-                        
 
             // sender
             {
@@ -337,7 +331,7 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
             {
                 var text = textNode.Children[0].Properties[0].Value;
 
-                var textVariant = textNode.Properties[0].Value;
+                 var textVariant = textNode.Properties[0].Value;
                             
                 var value = valueNode.Children[0].Properties[0].Value;
 

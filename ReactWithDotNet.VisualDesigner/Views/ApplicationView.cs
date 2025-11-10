@@ -760,6 +760,11 @@ sealed class ApplicationView : Component<ApplicationState>
 
         Element left()
         {
+            if (state.ComponentId <= 0)
+            {
+                return null;
+            }
+            
             return PartLeftPanel() + BorderBottomLeftRadius(8);
         }
 
