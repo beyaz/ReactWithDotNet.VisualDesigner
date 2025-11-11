@@ -426,7 +426,16 @@ static class Exporter
         return
             from methodDefinition in getExportablePublicMethods(controllerTypeDefinition)
             from file in getMethodRequestResponseTypesInFile(scope, methodDefinition)
-            select file;
+
+            from extraTypes in ExportExtraTypes(scope, getReturnType(methodDefinition).Resolve()).AsResult()
+
+            from item in new List<FileModel>
+            {
+                file,
+                extraTypes
+            }
+
+            select item;
 
         static Result<FileModel> getMethodRequestResponseTypesInFile(Scope scope, MethodDefinition methodDefinition)
         {
