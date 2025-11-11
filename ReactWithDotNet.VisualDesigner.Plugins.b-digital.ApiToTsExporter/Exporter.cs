@@ -28,12 +28,8 @@ static class Exporter
             from serviceFile in getServiceFile(scope)
             from serviceModelIntegrationFiles in getServiceAndModelIntegrationFiles(scope).AsResult()
             from typeFiles in getTypeFiles(scope).AsResult()
-            
-            from extraFiles in (
-                from x in GetExtraTypes(modelTypeDefinition) select ExportExtraType(scope, x)
-                ).AsResult()
-            
-            from file in new[] { modelFile, serviceFile }.Concat(typeFiles).Concat(serviceModelIntegrationFiles).Concat(extraFiles)
+            from extraFiles in (from x in GetExtraTypes(modelTypeDefinition) select ExportExtraType(scope, x)).AsResult()
+            from file in new List<FileModel> { modelFile, serviceFile, typeFiles, serviceModelIntegrationFiles, extraFiles }
             select file;
     }
 
