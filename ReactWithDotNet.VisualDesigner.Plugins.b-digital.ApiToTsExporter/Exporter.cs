@@ -125,25 +125,27 @@ static class Exporter
 
         IReadOnlyList<string> getFileContent(MethodGroup methodGroup)
         {
+            
+            var directoryPath = (methodGroup.FolderName == "Shared") switch
+            {
+                true  => "../../../",
+                false => "../../../"
+            };
+            
             LineCollection lines =
             [
-                "import { useStore } from \"b-digital-framework\";"
+                "import { useStore } from \"b-digital-framework\";",
+                string.Empty,
+                $"import {{ use{ApiName[scope]}Service }} from \"{directoryPath}services/use{ApiName[scope]}Service\";",
+                string.Empty,
+                $"import {{ {ApiName[scope]}Model }} from \"{directoryPath}models/{ApiName[scope]}Model\";",
+                string.Empty,
+                $"export const use{methodGroup.FolderName} = () => {{",
+                string.Empty,
+                Tab + "const store = useStore();",
+                string.Empty,
+                Tab + $"const service = use{ApiName[scope]}Service();"
             ];
-
-            lines.Add(string.Empty);
-            lines.Add($"import {{ use{ApiName[scope]}Service }} from \"../../../services/use{ApiName[scope]}Service\";");
-
-            lines.Add(string.Empty);
-            lines.Add($"import {{ {ApiName[scope]}Model }} from \"../../../models/{ApiName[scope]}Model\";");
-
-            lines.Add(string.Empty);
-
-            lines.Add($"export const use{methodGroup.FolderName} = () => {{");
-
-            lines.Add(string.Empty);
-            lines.Add(Tab + "const store = useStore();");
-            lines.Add(string.Empty);
-            lines.Add(Tab + $"const service = use{ApiName[scope]}Service();");
 
             foreach (var methodDefinition in methodGroup.ControllerMethods)
             {
