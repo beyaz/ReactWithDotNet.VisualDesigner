@@ -96,8 +96,9 @@ static class Exporter
             
             let propertyTypeDefinition = propertyDefinition switch
             {
-               _ when IsCollection(propertyType) =>  propertyType.GetElementType().Resolve(),
-                _                                =>propertyType.Resolve()
+               _ when IsCollection(propertyType) =>  ((GenericInstanceType)propertyType).GenericArguments[0].Resolve(),
+               
+                _ =>propertyType.Resolve()
             }
             
             where IsExtraType(propertyTypeDefinition)
@@ -107,7 +108,7 @@ static class Exporter
 
         static bool IsExtraType(TypeDefinition typeDefinition)
         {
-            return typeDefinition.BaseType.FullName == "System.Object";
+            return typeDefinition.BaseType?.FullName == "System.Object";
         }
         
         static bool IsCollection(TypeReference typeReference)
