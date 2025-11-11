@@ -423,16 +423,19 @@ static class Exporter
     {
         var controllerTypeDefinition = ControllerTypeDefinition[scope];
 
-        var extraTypeList = 
-            from methodDefinition in getExportablePublicMethods(controllerTypeDefinition)
-            from extraTypes in ExportExtraTypes(scope, getReturnType(methodDefinition).Resolve()).AsResult()
-            from x in extraTypes select x;
-        
-        
-        return
+        return new List<Result<FileModel>>
+        {
+            // r e q u e s t  -  r e s p o n s e   t y p e s
             from methodDefinition in getExportablePublicMethods(controllerTypeDefinition)
             from file in getMethodRequestResponseTypesInFile(scope, methodDefinition)
-            select file;
+            select file,
+
+            // e x t r a   t y p e s
+            from methodDefinition in getExportablePublicMethods(controllerTypeDefinition)
+            from extraTypes in ExportExtraTypes(scope, getReturnType(methodDefinition).Resolve()).AsResult()
+            from x in extraTypes
+            select x
+        };
 
         static Result<FileModel> getMethodRequestResponseTypesInFile(Scope scope, MethodDefinition methodDefinition)
         {
