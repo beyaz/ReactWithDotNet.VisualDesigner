@@ -5,7 +5,8 @@ namespace BDigitalFrameworkApiToTsExporter;
 
 static class Extensions
 {
-    
+
+    public static void Add<T>(this List<T> collection, IEnumerable<T> items) => collection.AddRange(items);
     
     static readonly CamelCasePropertyNamesContractResolver CamelCasePropertyNamesContractResolver = new();
 

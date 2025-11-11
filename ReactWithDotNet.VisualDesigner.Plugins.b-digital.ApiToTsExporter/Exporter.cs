@@ -28,7 +28,12 @@ static class Exporter
             from serviceFile in getServiceFile(scope)
             from serviceModelIntegrationFiles in getServiceAndModelIntegrationFiles(scope).AsResult()
             from typeFiles in getTypeFiles(scope).AsResult()
-            from file in new[] { modelFile, serviceFile }.Concat(typeFiles).Concat(serviceModelIntegrationFiles)
+            
+            from extraFiles in (
+                from x in GetExtraTypes(modelTypeDefinition) select ExportExtraType(scope, x)
+                ).AsResult()
+            
+            from file in new[] { modelFile, serviceFile }.Concat(typeFiles).Concat(serviceModelIntegrationFiles).Concat(extraFiles)
             select file;
     }
 
@@ -82,6 +87,66 @@ static class Exporter
             return
                 from webProjectPath in getWebProjectFolderPath(projectDirectory)
                 select Path.Combine(webProjectPath, "ClientApp", "models", $"{modelTypeDefinition.Name}.ts");
+        }
+    }
+    
+    static IReadOnlyList<TypeDefinition> GetExtraTypes(TypeDefinition modelTypeDefinition)
+    {
+        return new List<TypeDefinition>
+        {
+            from propertyDefinition in modelTypeDefinition.Properties
+            
+            let propertyType = propertyDefinition.PropertyType
+            
+            let propertyTypeDefinition = propertyDefinition switch
+            {
+               _ when IsCollection(propertyType) =>  propertyType.GetElementType().Resolve(),
+                _                                =>propertyType.Resolve()
+            }
+            
+            where IsExtraType(propertyTypeDefinition)
+            
+            select propertyTypeDefinition
+        };
+
+        static bool IsExtraType(TypeDefinition typeDefinition)
+        {
+            return typeDefinition.BaseType.FullName == "System.Object";
+        }
+        
+        static bool IsCollection(TypeReference typeReference)
+        {
+            return typeReference.FullName.StartsWith("System.Collections.Generic.List`1", StringComparison.OrdinalIgnoreCase) ||
+                   typeReference.FullName.StartsWith("System.Collections.Generic.IReadOnlyList`1", StringComparison.OrdinalIgnoreCase);
+        }
+    }
+    
+    static Result<FileModel> ExportExtraType(Scope scope, TypeDefinition extraTypeDefinition)
+    {
+        var projectDirectory = ProjectDirectory[scope];
+
+        var externalTypes = ExternalTypes[scope];
+
+        return
+            from outputFilePath in getOutputTsFilePath()
+            let tsType = TsModelCreator.CreateFrom(externalTypes, extraTypeDefinition)
+            select new FileModel
+            {
+                Path    = outputFilePath,
+                Content = TsOutput.LinesToString(TsOutput.GetTsCode(tsType))
+            };
+
+        Result<string> getOutputTsFilePath()
+        {
+
+            return
+                from webProjectPath in getWebProjectFolderPath(projectDirectory)
+
+                let fileName = extraTypeDefinition.Name
+                                                  .RemoveFromStart(ApiName[scope], StringComparison.OrdinalIgnoreCase)
+                                                  .RemoveFromEnd("Contract")
+
+                select Path.Combine(webProjectPath, "ClientApp", "types", ApiName[scope], $"{fileName}.ts");
         }
     }
 
