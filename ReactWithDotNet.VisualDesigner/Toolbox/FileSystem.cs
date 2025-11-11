@@ -23,7 +23,7 @@ public static class FileSystem
             return exception;
         }
     }
-    
+
     public static async Task<Result<string>> ReadAllText(string filePath)
     {
         try
@@ -46,24 +46,25 @@ public static class FileSystem
             {
                 // check already same
                 var fileContentInDirectory = await File.ReadAllTextAsync(file.Path);
-                
+
                 if (IsEqualsIgnoreWhitespace(fileContentInDirectory, file.Content))
                 {
                     return Unit.Value;
                 }
-                    
-                
+
                 fileInfo.IsReadOnly = false;
-                
-                TfsHelper.CheckoutFile(file.Path);
-                
+
                 await File.WriteAllTextAsync(file.Path, file.Content, Encoding.UTF8);
 
                 return Unit.Value;
             }
 
-            TfsHelper.AddFile(file.Path);
-            
+            var directoryName = Path.GetDirectoryName(file.Path);
+            if (!string.IsNullOrWhiteSpace(directoryName) && !Directory.Exists(directoryName))
+            {
+                Directory.CreateDirectory(directoryName);
+            }
+
             await File.WriteAllTextAsync(file.Path, file.Content, Encoding.UTF8);
 
             return Unit.Value;
