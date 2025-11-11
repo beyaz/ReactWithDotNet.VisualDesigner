@@ -28,7 +28,7 @@ static class Exporter
             from serviceFile in getServiceFile(scope)
             from serviceModelIntegrationFiles in getServiceAndModelIntegrationFiles(scope).AsResult()
             from typeFiles in getTypeFiles(scope).AsResult()
-            from extraFiles in (from x in GetExtraTypes(modelTypeDefinition) select ExportExtraType(scope, x)).AsResult()
+            from extraFiles in ExportExtraTypes(scope,modelTypeDefinition).AsResult()
             from file in new List<FileModel> { modelFile, serviceFile, typeFiles, serviceModelIntegrationFiles, extraFiles }
             select file;
     }
@@ -85,8 +85,14 @@ static class Exporter
                 select Path.Combine(webProjectPath, "ClientApp", "models", $"{modelTypeDefinition.Name}.ts");
         }
     }
-    
-    static IReadOnlyList<TypeDefinition> GetExtraTypes(TypeDefinition modelTypeDefinition)
+
+
+    static IEnumerable<Result<FileModel>> ExportExtraTypes(Scope scope, TypeDefinition containerTypeDefinition)
+    {
+        return from type in GetExtraTypes(containerTypeDefinition)
+            select ExportExtraType(scope, type);
+        
+        static IReadOnlyList<TypeDefinition> GetExtraTypes(TypeDefinition modelTypeDefinition)
     {
         return new List<TypeDefinition>
         {
@@ -146,6 +152,9 @@ static class Exporter
                 select Path.Combine(webProjectPath, "ClientApp", "types", ApiName[scope], $"{fileName}.ts");
         }
     }
+    }
+    
+  
 
     static Result<TypeDefinition> getModelTypeDefinition(Scope scope)
     {
