@@ -16,6 +16,9 @@ record MessagingRecord
 
 static class Mixin
 {
+    
+    public const string textSecondary = "rgba(0, 0, 0, 0.6)";
+    
     public static ReactNode ApplyTranslateOperationOnProps(ReactNode node, ComponentConfig componentConfig, params string[] propNames)
     {
         return node with
