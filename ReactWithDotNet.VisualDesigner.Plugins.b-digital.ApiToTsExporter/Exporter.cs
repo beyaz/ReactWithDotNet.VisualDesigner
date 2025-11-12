@@ -206,7 +206,7 @@ static class Exporter
             
             var directoryPath = (methodGroup.FolderName == "Shared") switch
             {
-                true  => "../../../",
+                true  => "../../",
                 false => "../../../"
             };
             
