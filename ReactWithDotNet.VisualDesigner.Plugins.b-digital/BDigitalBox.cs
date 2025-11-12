@@ -26,14 +26,14 @@ sealed class BDigitalBox : PluginComponentBase
 
         if (styleContext == "noMargin")
         {
-            style = new()
-            {
-                Margin(0)
-            };
+            style = [Margin(0)];
         }
 
         return new Grid
         {
+            id = id,
+            onClick = onMouseClick,
+            
             children = { children },
             style    = { style }
         };

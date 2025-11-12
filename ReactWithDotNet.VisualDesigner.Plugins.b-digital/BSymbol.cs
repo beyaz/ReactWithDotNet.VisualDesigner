@@ -6,7 +6,6 @@ namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 [Import(Name = nameof(BSymbol), Package = "b-icon")]
 sealed class BSymbol : PluginComponentBase
 {
-    [Suggestions("outlined , sharp , rounded")]
     [JsTypeInfo(JsType.String)]
     public string color { get; set; }
 
@@ -53,7 +52,7 @@ sealed class BSymbol : PluginComponentBase
 
             size = size.HasValue() ? int.Parse(size) : null,
 
-            styleVariant = Enum.Parse<MaterialSymbolVariant>(type),
+            styleVariant = type.HasValue() ? Enum.Parse<MaterialSymbolVariant>(type) : MaterialSymbolVariant.outlined,
 
             color = color,
 
