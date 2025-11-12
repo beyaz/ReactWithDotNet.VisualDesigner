@@ -75,14 +75,7 @@ sealed class MainLayout : PureComponent, IPageLayout
 
                 ElementIndicators,
                 
-                HomePageUnload,
-                
-                // M a t e r i a l   I c o n s
-                new link { href = "https://fonts.googleapis.com/icon?family=Material+Icons", rel          = "stylesheet" },
-                new link { href = "https://fonts.googleapis.com/icon?family=Material+Icons+Outlined", rel = "stylesheet" },
-                new link { href = "https://fonts.googleapis.com/icon?family=Material+Icons+Round", rel    = "stylesheet" },
-                new link { href = "https://fonts.googleapis.com/icon?family=Material+Icons+Sharp", rel    = "stylesheet" },
-                new link { href = "https://fonts.googleapis.com/icon?family=Material+Icons+Two+Tone", rel    = "stylesheet" }
+                HomePageUnload
             },
             new body(Margin(0), Height100vh)
             {
