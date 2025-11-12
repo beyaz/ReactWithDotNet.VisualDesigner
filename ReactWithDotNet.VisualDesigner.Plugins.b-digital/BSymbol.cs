@@ -1,4 +1,4 @@
-﻿using ReactWithDotNet.ThirdPartyLibraries.MUI.Material;
+﻿using ReactWithDotNet.ThirdPartyLibraries.GoogleMaterialSymbols;
 
 namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
@@ -9,6 +9,10 @@ sealed class BSymbol : PluginComponentBase
     [Suggestions("outlined , sharp , rounded")]
     [JsTypeInfo(JsType.String)]
     public string color { get; set; }
+
+    [Suggestions("true , false")]
+    [JsTypeInfo(JsType.Boolean)]
+    public string filled { get; set; }
 
     [Suggestions("16 , 24 , 32 , 36")]
     [JsTypeInfo(JsType.Number)]
@@ -43,27 +47,19 @@ sealed class BSymbol : PluginComponentBase
 
     protected override Element render()
     {
-        return new FlexRowCentered(Size(GetSize()), Id(id), OnClick(onMouseClick))
+        return new MaterialSymbol
         {
-            new span
-            {
-                className = "material-icons",
-                style = { fontSize = "64px", color="#1976d2"},
-                children = { symbol }
-            }
+            name = symbol,
+
+            size = size.HasValue() ? int.Parse(size) : null,
+
+            styleVariant = Enum.Parse<MaterialSymbolVariant>(type),
+
+            color = color,
+
+            weight = weight.HasValue() ? int.Parse(weight) : null,
+
+            fill = filled.HasValue() ? filled == "true" ? 1 : 0 : null
         };
-    }
-
-    double GetSize()
-    {
-        if (size.HasValue())
-        {
-            if (double.TryParse(size, out var d))
-            {
-                return d;
-            }
-        }
-
-        return 24;
     }
 }
