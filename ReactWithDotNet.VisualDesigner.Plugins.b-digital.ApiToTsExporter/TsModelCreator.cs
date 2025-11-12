@@ -4,8 +4,10 @@ namespace BDigitalFrameworkApiToTsExporter;
 
 static class TsModelCreator
 {
-    public static TsTypeDefinition CreateFrom(IReadOnlyList<ExternalTypeInfo> externalTypes, TypeDefinition typeDefinition)
+    public static TsTypeDefinition CreateFrom(IReadOnlyList<ExternalTypeInfo> externalTypes, TypeDefinition typeDefinition, string apiName)
     {
+        var isExportingForModelFile = typeDefinition.Name.EndsWith("Model");
+        
         IEnumerable<TsFieldDefinition> fields;
         if (typeDefinition.IsEnum)
         {
@@ -35,7 +37,7 @@ static class TsModelCreator
                 {
                     Name          = GetTsVariableName(propertyDefinition.Name),
                     IsNullable    = CecilHelper.IsNullableProperty(propertyDefinition),
-                    Type          = GetTSType(externalTypes, propertyDefinition.PropertyType),
+                    Type          = GetTSType(externalTypes, propertyDefinition.PropertyType,isExportingForModelFile,apiName),
                     ConstantValue = string.Empty
                 };
         }
@@ -53,18 +55,18 @@ static class TsModelCreator
                     Name    = string.Empty,
                     Imports = []
                 },
-                false => GetTSType(externalTypes, typeDefinition.BaseType)
+                false => GetTSType(externalTypes, typeDefinition.BaseType,isExportingForModelFile, apiName)
             },
 
             Fields = fields.ToList()
         };
     }
 
-    static TsTypeReference GetTSType(IReadOnlyList<ExternalTypeInfo> externalTypes, TypeReference typeReference)
+    static TsTypeReference GetTSType(IReadOnlyList<ExternalTypeInfo> externalTypes, TypeReference typeReference, bool isExportingForModelFile, string apiName)
     {
         if (CecilHelper.IsNullableType(typeReference))
         {
-            return GetTSType(externalTypes, ((GenericInstanceType)typeReference).GenericArguments[0]);
+            return GetTSType(externalTypes, ((GenericInstanceType)typeReference).GenericArguments[0], isExportingForModelFile,apiName);
         }
 
         if (typeReference.FullName == "System.String")
@@ -139,7 +141,7 @@ static class TsModelCreator
             {
                 var arrayType = genericInstanceType.GenericArguments[0];
 
-                var tsTypeReference = GetTSType(externalTypes, arrayType);
+                var tsTypeReference = GetTSType(externalTypes, arrayType, isExportingForModelFile, apiName);
 
                 return tsTypeReference with
                 {
@@ -151,19 +153,48 @@ static class TsModelCreator
         return new()
         {
             Name    = typeReference.Name,
-            Imports = GetImports(externalTypes, typeReference).ToList()
+            Imports = GetImports(externalTypes, typeReference, isExportingForModelFile,apiName).ToList()
         };
 
-        static IEnumerable<TsImportInfo> GetImports(IReadOnlyList<ExternalTypeInfo> externalTypes, TypeReference typeReference)
+        static IEnumerable<TsImportInfo> GetImports(IReadOnlyList<ExternalTypeInfo> externalTypes, TypeReference typeReference, bool isExportingForModelFile, string apiName)
         {
-            return
+            var list = new List<TsImportInfo>
+            {
                 from externalType in externalTypes
                 where externalType.DotNetFullTypeName == typeReference.FullName
                 select new TsImportInfo
                 {
                     LocalName = externalType.LocalName,
                     Source    = externalType.Source
-                };
+                }
+            };
+
+            if (list.Count > 0)
+            {
+                return list;
+            }
+
+            if (isExportingForModelFile)
+            {
+                return
+                [
+                    new TsImportInfo
+                    {
+                        LocalName = typeReference.Name,
+                        Source    = "../types"
+                    }
+                ];
+            }
+
+            return
+            [
+                new TsImportInfo
+                {
+                    LocalName = typeReference.Name,
+                    Source    = $"./{GetExtraClassFileName(typeReference, apiName)}"
+                }
+            ];
+
         }
     }
 
@@ -189,6 +220,11 @@ static class TsModelCreator
             x.AttributeType.Name.Contains("TsIgnore", StringComparison.OrdinalIgnoreCase));
     }
 
+
+    public static string GetExtraClassFileName(TypeReference typeReference, string apiName)
+    {
+        return typeReference.Name.RemoveFromStart(apiName, StringComparison.OrdinalIgnoreCase).RemoveFromEnd("Contract");
+    }
     
 }
 
