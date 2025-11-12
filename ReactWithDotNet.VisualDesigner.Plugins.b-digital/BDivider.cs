@@ -10,10 +10,10 @@ sealed class BDivider : PluginComponentBase
     {
         return new Divider
         {
-            //id       = id,
-            
-            //onClick  = onMouseClick,
-            
+            id = id,
+
+            onClick = onMouseClick,
+
             children = { children }
         };
     }

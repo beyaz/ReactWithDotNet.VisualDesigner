@@ -58,7 +58,10 @@ sealed class BSymbol : PluginComponentBase
 
             weight = weight.HasValue() ? int.Parse(weight) : null,
 
-            fill = filled.HasValue() ? filled == "true" ? 1 : 0 : null
+            fill = filled.HasValue() ? filled == "true" ? 1 : 0 : null,
+            
+            id = id,
+            onClick = onMouseClick
         };
     }
 }
