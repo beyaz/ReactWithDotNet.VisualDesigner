@@ -9328,6 +9328,16 @@
                 new MediaQuery("only screen and (max-width: 600px)", new Style { width:"5px" }
             </summary>
         </member>
+        <member name="P:ReactWithDotNet.ThirdPartyLibraries.GoogleMaterialSymbols.MaterialSymbol.id">
+            <summary>
+                The id of the component.
+            </summary>
+        </member>
+        <member name="P:ReactWithDotNet.ThirdPartyLibraries.GoogleMaterialSymbols.MaterialSymbol.onClick">
+            <summary>
+                Callback fired when the button is clicked.
+            </summary>
+        </member>
         <member name="P:ReactWithDotNet.ThirdPartyLibraries.MonacoEditorReact.Editor.valueBindDebounceHandler">
             <summary>
                 if you want to handle when user iteraction finished see example below<br />
