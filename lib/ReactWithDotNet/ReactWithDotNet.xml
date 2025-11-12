@@ -9512,11 +9512,6 @@
             The system prop that allows defining system overrides as well as additional CSS styles.
             </summary>
         </member>
-        <member name="P:ReactWithDotNet.ThirdPartyLibraries.MUI.Material.Alert.id">
-            <summary>
-            The id of the component.
-            </summary>
-        </member>
         <member name="P:ReactWithDotNet.ThirdPartyLibraries.MUI.Material.Autocomplete.clearIcon">
             <summary>
                 Props applied to the [`Chip`](https://mui.com/material-ui/api/chip/) element.
@@ -9930,16 +9925,6 @@
         <member name="P:ReactWithDotNet.ThirdPartyLibraries.MUI.Material.Button.sx">
             <summary>
             The system prop that allows defining system overrides as well as additional CSS styles.
-            </summary>
-        </member>
-        <member name="P:ReactWithDotNet.ThirdPartyLibraries.MUI.Material.Button.id">
-            <summary>
-            The id of the component.
-            </summary>
-        </member>
-        <member name="P:ReactWithDotNet.ThirdPartyLibraries.MUI.Material.Button.onClick">
-            <summary>
-            Callback fired when the button is clicked.
             </summary>
         </member>
         <member name="P:ReactWithDotNet.ThirdPartyLibraries.MUI.Material.ButtonBase.centerRipple">
@@ -10401,9 +10386,14 @@
                 @default 'fullWidth'
             </summary>
         </member>
-        <member name="P:ReactWithDotNet.ThirdPartyLibraries.MUI.Material.Grid.id">
+        <member name="P:ReactWithDotNet.ThirdPartyLibraries.MUI.Material.ElementBase.id">
             <summary>
-            Defines the justification of items along the horizontal axis.
+                The id of the component.
+            </summary>
+        </member>
+        <member name="P:ReactWithDotNet.ThirdPartyLibraries.MUI.Material.ElementBase.onClick">
+            <summary>
+                Callback fired when the button is clicked.
             </summary>
         </member>
         <member name="P:ReactWithDotNet.ThirdPartyLibraries.MUI.Material.Grid.justifyContent">
@@ -11669,11 +11659,6 @@
             The system prop that allows defining system overrides as well as additional CSS styles.
             </summary>
         </member>
-        <member name="P:ReactWithDotNet.ThirdPartyLibraries.MUI.Material.Tab.id">
-            <summary>
-            The id of the component.
-            </summary>
-        </member>
         <member name="P:ReactWithDotNet.ThirdPartyLibraries.MUI.Material.Tabs.value">
             <summary>
             The value of the currently selected Tab. 
@@ -12061,11 +12046,6 @@
         <member name="M:ReactWithDotNet.ThirdPartyLibraries.MUI.Material.Tooltip.Title(ReactWithDotNet.Element)">
             <summary>
                 Tooltip title. Zero-length titles string, undefined, null and false are never displayed.
-            </summary>
-        </member>
-        <member name="P:ReactWithDotNet.ThirdPartyLibraries.MUI.Material.Typography.id">
-            <summary>
-            Defines the justification of items along the horizontal axis.
             </summary>
         </member>
         <member name="P:ReactWithDotNet.ThirdPartyLibraries.MUI.Material.Typography.align">
