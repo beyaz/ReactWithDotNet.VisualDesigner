@@ -1541,8 +1541,13 @@ sealed class ApplicationView : Component<ApplicationState>
     {
         return new FlexRow(JustifyContentFlexStart, PositionRelative, OnMouseLeave(OnPreviewMouseLeave))
         {
-            BackgroundImage("radial-gradient(#a5a8ed 0.5px, #f8f8f8 0.5px)"),
-            BackgroundSize("10px 10px"),
+            BackgroundImage($"""
+                       
+                       repeating-linear-gradient(0deg, rgba(209,213,219,0.3) 0, rgba(209,213,219,0.3) 1px, transparent 1px, transparent 15px),
+                         repeating-linear-gradient(90deg, rgba(209,213,219,0.3) 0, rgba(209,213,219,0.3) 1px, transparent 1px, transparent 15px)
+                       
+                       """),
+            BackgroundSize("15px 15px"),
 
             createElement(),
 
