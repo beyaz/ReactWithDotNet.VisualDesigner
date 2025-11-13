@@ -14,7 +14,7 @@ sealed class BDigitalListAction : PluginComponentBase
 
     [JsTypeInfo(JsType.Function)]
     public string onLineClick { get; set; }
-    
+
     [Suggestions("0")]
     [JsTypeInfo(JsType.Number)]
     public string selectedCount { get; set; }
@@ -26,14 +26,11 @@ sealed class BDigitalListAction : PluginComponentBase
         {
             return await AnalyzeChildren(input, AnalyzeReactNode);
         }
-        
+
         var (node, componentConfig) = input;
-        
-        
-        
-       
+
         var leftListData = node.TryFindDesignNamedNode("leftListData");
-        
+
         if (leftListData is not null)
         {
             IReadOnlyList<string> linesCollection;
@@ -45,25 +42,20 @@ sealed class BDigitalListAction : PluginComponentBase
                     from lines in input.ReactNodeModelToElementTreeSourceLinesConverter(analyzedChild)
                     select string.Join(Environment.NewLine, lines)
                 ).AsResult();
-            
+
                 if (response.HasError)
                 {
                     return response.Error;
                 }
-            
+
                 linesCollection = response.Value;
             }
-            
-           
 
-            
+            var leftListDataItems = string.Join("," + Environment.NewLine, linesCollection);
 
-            var leftListDataItems = string.Join("," + Environment.NewLine,  linesCollection);
-            
-                
             var leftListDataProperty = new ReactProperty
             {
-                Name = "leftListData",
+                Name  = "leftListData",
                 Value = "[" + leftListDataItems + "]"
             };
 
@@ -73,9 +65,10 @@ sealed class BDigitalListAction : PluginComponentBase
                 Properties = node.Properties.Add(leftListDataProperty)
             };
         }
-
-        return await AnalyzeChildren(input with{Node = node}, AnalyzeReactNode);
         
+        
+
+        return await AnalyzeChildren(input with { Node = node }, AnalyzeReactNode);
     }
 
     protected override Element render()
