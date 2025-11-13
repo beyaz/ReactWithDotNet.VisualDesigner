@@ -3,6 +3,20 @@ using System.Reflection;
 
 namespace ReactWithDotNet.VisualDesigner.Exporters;
 
+public sealed record NodeAnalyzeInput
+{
+    public ReactNode Node { get; init; }
+    public ComponentConfig ComponentConfig{ get; init; }
+    
+    
+    public void Deconstruct(out ReactNode node, out ComponentConfig componentConfig)
+    {
+        node            = Node;
+        componentConfig = ComponentConfig;
+    }
+
+}
+
 static class Extensions
 {
     static IReadOnlyList<Func<ReactNode, ComponentConfig, ReactNode>> AnalyzeNodeList

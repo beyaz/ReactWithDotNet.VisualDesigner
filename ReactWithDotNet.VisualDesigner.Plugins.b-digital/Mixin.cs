@@ -16,6 +16,13 @@ record MessagingRecord
 
 static class Mixin
 {
+    public static ReactNode AnalyzeChildren(NodeAnalyzeInput input, Func<NodeAnalyzeInput, ReactNode> analyzeMethod)
+    {
+        return input.Node with
+        {
+            Children = input.Node.Children.Select(x => analyzeMethod(input with{Node = x})).ToImmutableList()
+        };
+    }
     
     public const string textSecondary = "rgba(0, 0, 0, 0.6)";
     

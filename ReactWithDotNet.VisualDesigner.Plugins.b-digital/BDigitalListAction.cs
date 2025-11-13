@@ -21,15 +21,16 @@ sealed class BDigitalListAction : PluginComponentBase
     public string selectedCount { get; set; }
 
     [NodeAnalyzer]
-    public static ReactNode AnalyzeReactNode(ReactNode node, ComponentConfig componentConfig)
+    public static ReactNode AnalyzeReactNode(NodeAnalyzeInput input)
     {
-        if (node.Tag != nameof(BDigitalListAction))
+        if (input.Node.Tag != nameof(BDigitalListAction))
         {
-            return node with
-            {
-                Children = node.Children.Select(x => AnalyzeReactNode(x, componentConfig)).ToImmutableList()
-            };
+            return AnalyzeChildren(input, AnalyzeReactNode);
         }
+        
+        var (node, componentConfig) = input;
+        
+        
         
        
         var leftListData = node.TryFindDesignNamedNode("leftListData");
