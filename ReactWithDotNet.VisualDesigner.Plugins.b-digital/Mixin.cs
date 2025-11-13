@@ -1,6 +1,6 @@
 ﻿global using static ReactWithDotNet.VisualDesigner.Plugins.b_digital.Mixin;
 
-global using NodeAnalyzeOutput= System.Threading.Tasks.Task<Toolbox.Result<ReactWithDotNet.VisualDesigner.Exporters.ReactNode>>;
+global using NodeAnalyzeOutput = System.Threading.Tasks.Task<Toolbox.Result<ReactWithDotNet.VisualDesigner.Exporters.ReactNode>>;
 
 using System.Collections.Immutable;
 using System.Data;
@@ -31,7 +31,7 @@ static class Mixin
     
     public static async NodeAnalyzeOutput AnalyzeChildren(NodeAnalyzeInput input, Func<NodeAnalyzeInput, NodeAnalyzeOutput> analyzeMethod)
     {
-        var chilren = new List<ReactNode>();
+        var children = new List<ReactNode>();
 
         foreach (var child in input.Node.Children)
         {
@@ -41,12 +41,12 @@ static class Mixin
                 return response.Error;
             }
             
-            chilren.Add(response.Value);
+            children.Add(response.Value);
         }
 
         return input.Node with
         {
-            Children = chilren.ToImmutableList()
+            Children = children.ToImmutableList()
         };
     }
     

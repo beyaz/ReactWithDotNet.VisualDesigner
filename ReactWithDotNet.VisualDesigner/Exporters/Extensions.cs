@@ -1,11 +1,13 @@
 ﻿global using static ReactWithDotNet.VisualDesigner.Exporters.Extensions;
 
-global using NodeAnalyzeOutput= System.Threading.Tasks.Task<Toolbox.Result<ReactWithDotNet.VisualDesigner.Exporters.ReactNode>>;
+global using NodeAnalyzeOutput = System.Threading.Tasks.Task<Toolbox.Result<ReactWithDotNet.VisualDesigner.Exporters.ReactNode>>;
 
     
 using System.Reflection;
 
 namespace ReactWithDotNet.VisualDesigner.Exporters;
+
+public delegate NodeAnalyzeOutput AnalyzeNodeDelegate(NodeAnalyzeInput input);
 
 public sealed record NodeAnalyzeInput
 {
@@ -23,7 +25,7 @@ public sealed record NodeAnalyzeInput
 
 static class Extensions
 {
-    static IReadOnlyList<Func<NodeAnalyzeInput, NodeAnalyzeOutput>> AnalyzeNodeList
+    static IReadOnlyList<AnalyzeNodeDelegate> AnalyzeNodeList
     {
         get
         {
@@ -33,8 +35,8 @@ static class Extensions
                         from type in Plugin.AllCustomComponents
                         from methodInfo in type.GetMethods(BindingFlags.Static | BindingFlags.Public)
                         where methodInfo.GetCustomAttribute<NodeAnalyzerAttribute>() is not null
-                        select (Func<NodeAnalyzeInput, NodeAnalyzeOutput>)Delegate
-                            .CreateDelegate(typeof(Func<NodeAnalyzeInput, NodeAnalyzeOutput>), methodInfo)
+                        select (AnalyzeNodeDelegate)Delegate
+                            .CreateDelegate(typeof(AnalyzeNodeDelegate), methodInfo)
                     )
                     .ToList();
         }
