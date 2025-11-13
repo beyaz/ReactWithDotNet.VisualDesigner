@@ -23,7 +23,7 @@ public sealed record NodeAnalyzeInput
 
 static class Extensions
 {
-    static IReadOnlyList<Func<NodeAnalyzeInput, ReactNode>> AnalyzeNodeList
+    static IReadOnlyList<Func<NodeAnalyzeInput, NodeAnalyzeOutput>> AnalyzeNodeList
     {
         get
         {
@@ -33,8 +33,8 @@ static class Extensions
                         from type in Plugin.AllCustomComponents
                         from methodInfo in type.GetMethods(BindingFlags.Static | BindingFlags.Public)
                         where methodInfo.GetCustomAttribute<NodeAnalyzerAttribute>() is not null
-                        select (Func<NodeAnalyzeInput, ReactNode>)Delegate
-                            .CreateDelegate(typeof(Func<NodeAnalyzeInput, ReactNode>), methodInfo)
+                        select (Func<NodeAnalyzeInput, NodeAnalyzeOutput>)Delegate
+                            .CreateDelegate(typeof(Func<NodeAnalyzeInput, NodeAnalyzeOutput>), methodInfo)
                     )
                     .ToList();
         }
