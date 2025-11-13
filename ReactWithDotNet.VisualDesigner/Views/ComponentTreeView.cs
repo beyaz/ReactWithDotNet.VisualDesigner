@@ -254,7 +254,9 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
 
     IReadOnlyList<Element> ToVisual(NodeModel node, int indent)
     {
-        var foldIcon = new FlexRowCentered(Size(16), PositionAbsolute, Top(4), Left(indent * 16 - 12), Hover(BorderRadius(36), Background(Gray50)))
+        const int paddingLength = 18;
+        
+        var foldIcon = new FlexRowCentered(Size(16), PositionAbsolute, Top(4), Left(indent * paddingLength - 12), Hover(BorderRadius(36), Background(Gray50)))
         {
             new IconArrowRightOrDown { IsArrowDown = !state.CollapsedNodes.Contains(node.Path) },
 
@@ -265,10 +267,10 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
         {
             foldIcon = null;
         }
-
+        
         var returnList = new List<Element>
         {
-            new FlexRow(PaddingLeft(indent * 16), Id(node.Path), OnClick(OnTreeItemClicked))
+            new FlexRow(PaddingLeft(indent * paddingLength), Id(node.Path), OnClick(OnTreeItemClicked))
             {
                 When(node.ComponentId == ComponentId, Background(Blue100), BorderRadius(3)),
 

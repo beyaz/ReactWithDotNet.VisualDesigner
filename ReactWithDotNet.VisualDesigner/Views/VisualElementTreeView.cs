@@ -287,6 +287,8 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
 
         var icon = calculateVisualElementIcon(node);
 
+        const int paddingLength = 18;
+        
         Element secondaryIcon = null;
         {
             if (hasNamedProperty(node, Design.ItemsSourceDesignTimeCount))
@@ -295,7 +297,7 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
             }
         }
 
-        var foldIcon = new FlexRowCentered(Size(16), PositionAbsolute, Top(4), Left(indent * 16 - 12), Hover(BorderRadius(36), Background(Gray50)))
+        var foldIcon = new FlexRowCentered(Size(16), PositionAbsolute, Top(4), Left(indent * paddingLength - 12), Hover(BorderRadius(36), Background(Gray50)))
         {
             new IconArrowRightOrDown { IsArrowDown = !state.CollapsedNodes.Contains(path) },
 
@@ -325,7 +327,7 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
 
         var returnList = new List<Element>
         {
-            new FlexColumn(PaddingLeft(indent * 16), Id(path), OnClick(OnTreeItemClicked), OnMouseEnter(OnMouseEnterHandler))
+            new FlexColumn(PaddingLeft(indent * paddingLength), Id(path), OnClick(OnTreeItemClicked), OnMouseEnter(OnMouseEnterHandler))
             {
                 OnKeyDown(OnKeyDownHandler), TabIndex(0), OutlineNone,
 
