@@ -1541,12 +1541,11 @@ sealed class ApplicationView : Component<ApplicationState>
     {
         return new FlexRow(JustifyContentFlexStart, PositionRelative, OnMouseLeave(OnPreviewMouseLeave))
         {
-            BackgroundImage($"""
-                       
-                       repeating-linear-gradient(0deg, rgba(209,213,219,0.3) 0, rgba(209,213,219,0.3) 1px, transparent 1px, transparent 15px),
-                         repeating-linear-gradient(90deg, rgba(209,213,219,0.3) 0, rgba(209,213,219,0.3) 1px, transparent 1px, transparent 15px)
-                       
-                       """),
+            // s o f t   g r i d   b a c k g r o u n d
+            BackgroundImage("""
+                            repeating-linear-gradient(0deg,  rgba(209,213,219,0.3) 0, rgba(209,213,219,0.3) 1px, transparent 1px, transparent 15px),
+                            repeating-linear-gradient(90deg, rgba(209,213,219,0.3) 0, rgba(209,213,219,0.3) 1px, transparent 1px, transparent 15px)
+                            """),
             BackgroundSize("15px 15px"),
 
             createElement(),
