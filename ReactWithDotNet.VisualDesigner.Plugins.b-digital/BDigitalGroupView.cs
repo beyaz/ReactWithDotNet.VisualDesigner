@@ -1,23 +1,82 @@
 ﻿namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
 [CustomComponent]
-[Import(Name = "BDigitalGroupView", Package = "b-digital-group-view")]
+[Import(Name = nameof(BDigitalGroupView), Package = "b-digital-group-view")]
 sealed class BDigitalGroupView : PluginComponentBase
 {
+    
     [JsTypeInfo(JsType.String)]
     public string title { get; set; }
 
+    [JsTypeInfo(JsType.String)]
+    public string subTitle { get; set; }
+    
+    
+    [Suggestions("true , false")]
+    [JsTypeInfo(JsType.Boolean)]
+    public string applySideMargin { get; set; }
+    
+    [Suggestions("true , false")]
+    [JsTypeInfo(JsType.Boolean)]
+    public string applyVerticalMargin { get; set; }
+
     protected override Element render()
     {
-        return new FlexColumn(MarginBottom(24),MarginTop(8))
+        var style = new Style();
+        
+        if (applySideMargin == "true" && applyVerticalMargin == "true")
         {
-            title is null ? null : new div(FontSize18, FontWeight600, LineHeight32, Color(rgba(0, 0, 0, 0.87))) { title },
+            style.Add(Padding(24));
+            style.Add(MarginTop(8));
+        }
+        else if (applySideMargin == "true")
+        {
+            style.Add(PaddingX(24));
+            style.Add(MarginTop(8));
+        }
+        else if (applyVerticalMargin == "true")
+        {
+            style.Add(PaddingY(24));
+            style.Add(MarginTop(8));
+        }
+        else
+        {
+            style.Add(MarginTop(8));
+        }
+
+
+
+        return new Fragment
+        {
+            title.HasValue()
+                ? new BTypography
+                {
+                    variant  = "body0m",
+                    children = { title },
                     
-            new FlexColumn( Background(White), BorderRadius(10), Border(1, solid, "#E0E0E0"), Padding(24), Id(id), OnClick(onMouseClick))
+                    id           =id,
+                    onMouseClick = onMouseClick
+                }
+                : null,
+
+            subTitle.HasValue()
+                ? new BTypography
+                {
+                    variant  = "body2",
+                    color = textSecondary,
+                    children = { subTitle },
+                    
+                    id=id,
+                    onMouseClick= onMouseClick
+                }
+                : null,
+
+            new FlexColumn( Background(White), BorderRadius(10), Border(1, solid, "#E0E0E0"), style, Id(id), OnClick(onMouseClick))
             {
                 children
             }
         };
+        
     }
 
     [TryGetIconForElementTreeNode]
