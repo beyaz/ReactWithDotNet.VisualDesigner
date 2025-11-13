@@ -22,19 +22,23 @@ sealed class BDigitalGroupView : PluginComponentBase
 
     protected override Element render()
     {
+        var _applySideMargin = applySideMargin ?? "true";
+        
+        var _applyVerticalMargin = applyVerticalMargin ?? "true";
+
         var style = new Style();
         
-        if (applySideMargin == "true" && applyVerticalMargin == "true")
+        if (_applySideMargin == "true" && _applyVerticalMargin == "true")
         {
             style.Add(Padding(24));
             style.Add(MarginTop(8));
         }
-        else if (applySideMargin == "true")
+        else if (_applySideMargin == "true")
         {
             style.Add(PaddingX(24));
             style.Add(MarginTop(8));
         }
-        else if (applyVerticalMargin == "true")
+        else if (_applyVerticalMargin == "true")
         {
             style.Add(PaddingY(24));
             style.Add(MarginTop(8));
@@ -43,8 +47,6 @@ sealed class BDigitalGroupView : PluginComponentBase
         {
             style.Add(MarginTop(8));
         }
-
-
 
         return new Fragment
         {
