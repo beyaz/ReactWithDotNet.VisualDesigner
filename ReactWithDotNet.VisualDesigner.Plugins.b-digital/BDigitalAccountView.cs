@@ -21,7 +21,7 @@ sealed class BDigitalAccountView : PluginComponentBase
     
 
     [NodeAnalyzer]
-    public static ReactNode AnalyzeReactNode(NodeAnalyzeInput input)
+    public static NodeAnalyzeOutput AnalyzeReactNode(NodeAnalyzeInput input)
     {
         if (input.Node.Tag != nameof(BDigitalAccountView))
         {

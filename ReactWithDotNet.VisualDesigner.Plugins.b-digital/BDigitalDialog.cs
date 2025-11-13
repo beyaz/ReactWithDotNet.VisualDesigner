@@ -30,15 +30,15 @@ sealed class BDigitalDialog : PluginComponentBase
     public string type { get; set; }
 
     [NodeAnalyzer]
-    public static ReactNode AnalyzeReactNode(ReactNode node, ComponentConfig componentConfig)
+    public static NodeAnalyzeOutput AnalyzeReactNode(NodeAnalyzeInput input)
     {
-        if (node.Tag != nameof(BDigitalDialog))
+        if (input.Node.Tag != nameof(BDigitalDialog))
         {
-            return node with
-            {
-                Children = node.Children.Select(x => AnalyzeReactNode(x, componentConfig)).ToImmutableList()
-            };
+            return AnalyzeChildren(input, AnalyzeReactNode);
         }
+        
+        
+        var (node, componentConfig) = input;
 
         var content = node.TryFindDesignNamedNode("content");
 
@@ -65,7 +65,7 @@ sealed class BDigitalDialog : PluginComponentBase
             };
         }
 
-        return node;
+        return AnalyzeChildren(input with{Node = node}, AnalyzeReactNode);
     }
 
     protected override Element render()

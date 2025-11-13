@@ -19,7 +19,7 @@ sealed class BDigitalSearchInput : PluginComponentBase
     
 
     [NodeAnalyzer]
-    public static ReactNode AnalyzeReactNode(NodeAnalyzeInput input)
+    public static NodeAnalyzeOutput AnalyzeReactNode(NodeAnalyzeInput input)
     {
         if (input.Node.Tag != nameof(BDigitalSearchInput))
         {
@@ -37,7 +37,7 @@ sealed class BDigitalSearchInput : PluginComponentBase
 
         node = ApplyTranslateOperationOnProps(node, componentConfig, nameof(hintText));
 
-        return node;
+        return Result.From(node);
     }
 
     protected override Element render()

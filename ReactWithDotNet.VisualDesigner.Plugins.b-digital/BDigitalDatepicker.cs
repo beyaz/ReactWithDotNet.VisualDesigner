@@ -37,16 +37,15 @@ sealed class BDigitalDatepicker : PluginComponentBase
 
     
     [NodeAnalyzer]
-    public static ReactNode AnalyzeReactNode(ReactNode node, ComponentConfig componentConfig)
+    public static NodeAnalyzeOutput AnalyzeReactNode(NodeAnalyzeInput input)
     {
-        if (node.Tag != nameof(BDigitalDatepicker))
+        if (input.Node.Tag != nameof(BDigitalDatepicker))
         {
-            return node with
-            {
-                Children = node.Children.Select(x => AnalyzeReactNode(x, componentConfig)).ToImmutableList()
-            };
+            return AnalyzeChildren(input, AnalyzeReactNode);
         }
-
+        
+        var (node, componentConfig) = input;
+        
         node = ApplyTranslateOperationOnProps(node, componentConfig, nameof(labelText));
 
         var valueProp = node.Properties.FirstOrDefault(x => x.Name == nameof(value));
@@ -136,7 +135,7 @@ sealed class BDigitalDatepicker : PluginComponentBase
             };
         }
 
-        return node;
+        return Result.From(node);
     }
 
     protected override Element render()

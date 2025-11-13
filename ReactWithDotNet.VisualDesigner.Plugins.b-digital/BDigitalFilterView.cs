@@ -29,7 +29,7 @@ sealed class BDigitalFilterView : PluginComponentBase
     
 
     [NodeAnalyzer]
-    public static ReactNode AnalyzeReactNode(NodeAnalyzeInput input)
+    public static NodeAnalyzeOutput AnalyzeReactNode(NodeAnalyzeInput input)
     {
         if (input.Node.Tag != nameof(BDigitalFilterView))
         {

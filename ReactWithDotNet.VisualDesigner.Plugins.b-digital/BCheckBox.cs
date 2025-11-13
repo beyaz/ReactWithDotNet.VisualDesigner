@@ -20,7 +20,7 @@ sealed class BCheckBox : PluginComponentBase
     public string onCheck { get; set; }
 
     [NodeAnalyzer]
-    public static ReactNode AnalyzeReactNode(NodeAnalyzeInput input)
+    public static NodeAnalyzeOutput AnalyzeReactNode(NodeAnalyzeInput input)
     {
         if (input.Node.Tag != nameof(BCheckBox))
         {

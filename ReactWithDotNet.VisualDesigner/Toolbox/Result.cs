@@ -28,7 +28,7 @@ public sealed class  Result<TValue>
     // @formatter:on
 }
 
-static class Result
+public static class Result
 {
     public static Result<T> Error<T>(Exception exception)
     {

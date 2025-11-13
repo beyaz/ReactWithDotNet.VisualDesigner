@@ -21,7 +21,7 @@ sealed class BDigitalListAction : PluginComponentBase
     public string selectedCount { get; set; }
 
     [NodeAnalyzer]
-    public static ReactNode AnalyzeReactNode(NodeAnalyzeInput input)
+    public static NodeAnalyzeOutput AnalyzeReactNode(NodeAnalyzeInput input)
     {
         if (input.Node.Tag != nameof(BDigitalListAction))
         {
@@ -54,7 +54,7 @@ sealed class BDigitalListAction : PluginComponentBase
             };
         }
 
-        return node;
+        return AnalyzeChildren(input with{Node = node}, AnalyzeReactNode);
         
     }
 

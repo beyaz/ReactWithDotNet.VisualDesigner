@@ -32,7 +32,7 @@ sealed class BInput : PluginComponentBase
     public string disabled { get; set; }
 
     [NodeAnalyzer]
-    public static ReactNode AnalyzeReactNode(NodeAnalyzeInput input)
+    public static NodeAnalyzeOutput AnalyzeReactNode(NodeAnalyzeInput input)
     {
         if (input.Node.Tag != nameof(BInput))
         {
@@ -128,7 +128,7 @@ sealed class BInput : PluginComponentBase
             node = AddContextProp(node);
         }
 
-        return node;
+        return Result.From(node);
     }
 
     protected override Element render()

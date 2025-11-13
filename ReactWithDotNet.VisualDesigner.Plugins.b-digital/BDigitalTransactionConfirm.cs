@@ -125,7 +125,7 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
      
 
     [NodeAnalyzer]
-    public static ReactNode AnalyzeReactNode(NodeAnalyzeInput input)
+    public static NodeAnalyzeOutput AnalyzeReactNode(NodeAnalyzeInput input)
     {
         if (input.Node.Tag != nameof(BDigitalTransactionConfirm))
         {
@@ -313,12 +313,13 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
 
                  
                     
-        return  node with
+        node =  node with
         {
             Children = [],
             Properties = finalProps.ToImmutableList()
         };
 
+        return Result.From(node);
 
         static string getItem(ReactNode textNode, ReactNode valueNode)
         {
