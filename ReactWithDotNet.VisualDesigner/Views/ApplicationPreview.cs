@@ -93,7 +93,7 @@ sealed class ApplicationPreview : Component
             finalElement = result.Value;
         }
 
-        var scaleStyle = TransformOrigin("0 0") + Transform($"scale({appState.Preview.Scale / 100})");
+        var scaleStyle = Zoom(appState.Preview.Scale / 100 + "");
 
         return new Fragment
         {
