@@ -1,5 +1,4 @@
-﻿using System.Collections.Immutable;
-using ReactWithDotNet.ThirdPartyLibraries.MUI.Material;
+﻿using ReactWithDotNet.ThirdPartyLibraries.MUI.Material;
 using ReactWithDotNet.VisualDesigner.Exporters;
 
 namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
@@ -24,39 +23,36 @@ sealed class BButton : PluginComponentBase
         {
             return AnalyzeChildren(input, AnalyzeReactNode);
         }
-        
-        var (node, componentConfig) = input;
-        
-        
-        
-       
-            var onClickProp = node.Properties.FirstOrDefault(x => x.Name == nameof(onClick));
 
-            if (onClickProp is not null && !IsAlphaNumeric(onClickProp.Value) )
+        var node = input.Node;
+
+        var onClickProp = node.Properties.FirstOrDefault(x => x.Name == nameof(onClick));
+
+        if (onClickProp is not null && !IsAlphaNumeric(onClickProp.Value))
+        {
+            var properties = node.Properties;
+
+            List<string> lines =
+            [
+                "() =>",
+
+                "{",
+                onClickProp.Value,
+                "}"
+            ];
+
+            onClickProp = onClickProp with
             {
-                var properties = node.Properties;
+                Value = string.Join(Environment.NewLine, lines)
+            };
 
-                List<string> lines =
-                [
-                    "() =>",
+            properties = properties.SetItem(properties.FindIndex(x => x.Name == onClickProp.Name), onClickProp);
 
-                    "{",
-                    onClickProp.Value,
-                    "}"
-                ];
+            node = node with { Properties = properties };
+        }
 
-                onClickProp = onClickProp with
-                {
-                    Value = string.Join(Environment.NewLine, lines)
-                };
 
-                properties = properties.SetItem(properties.FindIndex(x => x.Name == onClickProp.Name), onClickProp);
-
-                node = node with { Properties = properties };
-            }
-        
-
-        return AnalyzeChildren(input with{Node = node}, AnalyzeReactNode);
+        return AnalyzeChildren(input with { Node = node }, AnalyzeReactNode);
     }
 
     protected override Element render()
