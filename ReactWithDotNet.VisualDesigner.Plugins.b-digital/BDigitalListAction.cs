@@ -41,9 +41,7 @@ sealed class BDigitalListAction : PluginComponentBase
                 Name = "leftListData",
                 Value = "[" +
                         
-                        Exporters.
-                        
-                        +
+                       
                         
                         "]"
             };
