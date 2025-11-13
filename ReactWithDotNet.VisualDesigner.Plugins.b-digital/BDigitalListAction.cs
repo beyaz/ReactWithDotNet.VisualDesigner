@@ -36,25 +36,27 @@ sealed class BDigitalListAction : PluginComponentBase
         
         if (leftListData is not null)
         {
-
-            IAsyncEnumerable<Result<string>> results = 
-                
-            from child in leftListData.Children
-                from analyzedChild in input.AnalyzeNode(child)
-                from lines in input.ReactNodeModelToElementTreeSourceLinesConverter(analyzedChild)
-            select string.Join(Environment.NewLine, lines);
-
-            var linesCollection = new List<string>();
-            
-            await foreach (var result in results)
+            IReadOnlyList<string> linesCollection;
             {
-                if (result.HasError)
+                var response = await
+                (
+                    from child in leftListData.Children
+                    from analyzedChild in input.AnalyzeNode(child)
+                    from lines in input.ReactNodeModelToElementTreeSourceLinesConverter(analyzedChild)
+                    select string.Join(Environment.NewLine, lines)
+                ).AsResult();
+            
+                if (response.HasError)
                 {
-                    return result.Error;
+                    return response.Error;
                 }
-                
-                linesCollection.Add(result.Value);
+            
+                linesCollection = response.Value;
             }
+            
+           
+
+            
 
             var leftListDataItems = string.Join("," + Environment.NewLine,  linesCollection);
             

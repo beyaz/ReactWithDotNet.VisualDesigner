@@ -67,6 +67,27 @@ public static class ResultExtensions
 
         return items;
     }
+    
+    public static async Task<Result<IReadOnlyList<T>>> AsResult<T>(this IAsyncEnumerable<Result<T>> enumerable)
+    {
+        List<T> items = [];
+
+        await foreach (var result in enumerable)
+        {
+            items.Add(result.Value);
+
+            if (result.HasError)
+            {
+                return new()
+                {
+                    Error = result.Error
+                };
+            }
+        }
+
+        return items;
+    }
+    
 
     public static void Match<T>(this Result<T> result, Action<T> onSuccess, Action<Exception> onError)
     {
