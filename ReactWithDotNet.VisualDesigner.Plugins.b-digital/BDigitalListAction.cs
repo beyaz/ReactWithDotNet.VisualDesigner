@@ -37,14 +37,14 @@ sealed class BDigitalListAction : PluginComponentBase
         if (leftListData is not null)
         {
 
-            IAsyncEnumerable<Result<IReadOnlyList<string>>> results = 
+            IAsyncEnumerable<Result<string>> results = 
                 
             from child in leftListData.Children
                 from analyzedChild in input.AnalyzeNode(child)
                 from lines in input.ReactNodeModelToElementTreeSourceLinesConverter(analyzedChild)
-            select lines;
+            select string.Join(Environment.NewLine, lines);
 
-            var linesCollection = new List<IReadOnlyList<string>>();
+            var linesCollection = new List<string>();
             
             await foreach (var result in results)
             {
@@ -56,7 +56,7 @@ sealed class BDigitalListAction : PluginComponentBase
                 linesCollection.Add(result.Value);
             }
 
-            var leftListDataItems = string.Join("," + Environment.NewLine, from lines in linesCollection select string.Join(Environment.NewLine, lines));
+            var leftListDataItems = string.Join("," + Environment.NewLine,  linesCollection);
             
                 
             var leftListDataProperty = new ReactProperty
