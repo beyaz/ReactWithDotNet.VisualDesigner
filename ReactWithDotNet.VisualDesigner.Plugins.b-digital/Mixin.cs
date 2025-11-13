@@ -1,10 +1,14 @@
 ﻿global using static ReactWithDotNet.VisualDesigner.Plugins.b_digital.Mixin;
+global using NodeAnalyzeOutput= System.Threading.Tasks.Task<Toolbox.Result<ReactWithDotNet.VisualDesigner.Exporters.ReactNode>>;
+
 using System.Collections.Immutable;
 using System.Data;
 using Dapper;
 using Microsoft.Data.SqlClient;
 using ReactWithDotNet.VisualDesigner.DbModels;
 using ReactWithDotNet.VisualDesigner.Exporters;
+
+
 
 namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
@@ -21,6 +25,27 @@ static class Mixin
         return input.Node with
         {
             Children = input.Node.Children.Select(x => analyzeMethod(input with{Node = x})).ToImmutableList()
+        };
+    }
+    
+    public static async NodeAnalyzeOutput AnalyzeChildren(NodeAnalyzeInput input, Func<NodeAnalyzeInput, NodeAnalyzeOutput> analyzeMethod)
+    {
+        var chilren = new List<ReactNode>();
+
+        foreach (var child in input.Node.Children)
+        {
+            var response = await analyzeMethod(input with { Node = child });
+            if (response.HasError)
+            {
+                return response.Error;
+            }
+            
+            chilren.Add(response.Value);
+        }
+
+        return input.Node with
+        {
+            Children = chilren.ToImmutableList()
         };
     }
     

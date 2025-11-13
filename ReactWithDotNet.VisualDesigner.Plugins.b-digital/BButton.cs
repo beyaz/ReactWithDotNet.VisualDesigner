@@ -17,7 +17,7 @@ sealed class BButton : PluginComponentBase
     public string type { get; set; }
 
     [NodeAnalyzer]
-    public static ReactNode AnalyzeReactNode(NodeAnalyzeInput input)
+    public static Result<ReactNode> AnalyzeReactNode(NodeAnalyzeInput input)
     {
         if (input.Node.Tag != nameof(BButton))
         {

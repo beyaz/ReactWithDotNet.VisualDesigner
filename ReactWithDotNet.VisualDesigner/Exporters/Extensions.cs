@@ -1,4 +1,8 @@
 ﻿global using static ReactWithDotNet.VisualDesigner.Exporters.Extensions;
+
+global using NodeAnalyzeOutput= System.Threading.Tasks.Task<Toolbox.Result<ReactWithDotNet.VisualDesigner.Exporters.ReactNode>>;
+
+    
 using System.Reflection;
 
 namespace ReactWithDotNet.VisualDesigner.Exporters;
