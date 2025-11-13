@@ -19,7 +19,7 @@ public sealed record NodeAnalyzeInput
 
 static class Extensions
 {
-    static IReadOnlyList<Func<ReactNode, ComponentConfig, ReactNode>> AnalyzeNodeList
+    static IReadOnlyList<Func<NodeAnalyzeInput, ReactNode>> AnalyzeNodeList
     {
         get
         {
@@ -29,21 +29,24 @@ static class Extensions
                         from type in Plugin.AllCustomComponents
                         from methodInfo in type.GetMethods(BindingFlags.Static | BindingFlags.Public)
                         where methodInfo.GetCustomAttribute<NodeAnalyzerAttribute>() is not null
-                        select (Func<ReactNode, ComponentConfig, ReactNode>)Delegate
-                            .CreateDelegate(typeof(Func<ReactNode, ComponentConfig, ReactNode>), methodInfo)
+                        select (Func<NodeAnalyzeInput, ReactNode>)Delegate
+                            .CreateDelegate(typeof(Func<NodeAnalyzeInput, ReactNode>), methodInfo)
                     )
                     .ToList();
         }
     }
 
-    public static ReactNode AnalyzeNode(ReactNode node, ComponentConfig componentConfig)
+    public static ReactNode AnalyzeNode(NodeAnalyzeInput input)
     {
         foreach (var method in AnalyzeNodeList)
         {
-            node = method(node, componentConfig);
+            input = input with
+            {
+                Node =  method(input)
+            };
         }
 
-        return node;
+        return input.Node;
     }
 
     public static IEnumerable<string> CalculateImportLines(ReactNode node)
