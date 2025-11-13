@@ -81,7 +81,7 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
 
         foreach (var item in nodes)
         {
-            openPath(rootNode, item.ExportFilePath);
+            openPath(rootNode, item.DesignLocation);
 
             append(rootNode, item);
         }
@@ -169,17 +169,15 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
 
         static NodeModel CreateNode(ComponentEntity x)
         {
-            var directoryName = Path.GetDirectoryName(x.Config.DesignLocation);
+            var designLocation = x.Config.DesignLocation.Replace("{name}", x.Config.Name);
 
-            var name = x.Config.Name;
-
-            var names = (directoryName + "/" + name).Split(['/', '\\'], StringSplitOptions.RemoveEmptyEntries);
+            var names = designLocation.Split(['/', Path.DirectorySeparatorChar], StringSplitOptions.RemoveEmptyEntries|StringSplitOptions.TrimEntries);
             
             return new NodeModel
             {
                 ComponentId    = x.Id,
                 Names          = names,
-                ExportFilePath = x.Config.DesignLocation
+                DesignLocation = x.Config.DesignLocation
             };
         }
     }
@@ -324,7 +322,7 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
 
         public int? ComponentId { get; init; }
 
-        public string ExportFilePath { get; init; }
+        public string DesignLocation { get; init; }
 
         public string Label { get; init; }
 
