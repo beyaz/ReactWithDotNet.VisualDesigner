@@ -67,7 +67,7 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
 
             new FlexColumn(Flex(1), OverflowAuto)
             {
-                ToVisual(CalculateRootNode(), 0)
+                ToVisual(CalculateRootNode(), 0, null)
             }
         };
     }
@@ -252,7 +252,7 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
         return Task.CompletedTask;
     }
 
-    IReadOnlyList<Element> ToVisual(NodeModel node, int indent)
+    IReadOnlyList<Element> ToVisual(NodeModel node, int indent, NodeModel parentNode)
     {
         var foldIcon = new FlexRowCentered(Size(16), PositionAbsolute, Top(4), Left(indent * 16 - 12), Hover(BorderRadius(36), Background(Gray50)))
         {
@@ -301,7 +301,7 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
 
         foreach (var child in node.Children)
         {
-            returnList.AddRange(ToVisual(child, indent + 1));
+            returnList.AddRange(ToVisual(child, indent + 1, node));
         }
 
         return returnList;
