@@ -40,13 +40,19 @@ static class Extensions
         }
     }
 
-    public static ReactNode AnalyzeNode(NodeAnalyzeInput input)
+    public static async NodeAnalyzeOutput AnalyzeNode(NodeAnalyzeInput input)
     {
-        foreach (var method in AnalyzeNodeList)
+        foreach (var analyze in AnalyzeNodeList)
         {
+            var response = await analyze(input);
+            if (response.HasError)
+            {
+                return response.Error;
+            }
+                
             input = input with
             {
-                Node =  method(input)
+                Node =  response.Value
             };
         }
 

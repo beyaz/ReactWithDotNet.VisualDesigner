@@ -118,7 +118,7 @@ static class CSharpStringExporter
             from rootNode in ModelToNodeTransformer.ConvertVisualElementModelToReactNodeModel(project, rootVisualElement)
 
             // Analyze node
-            let analyzedRootNode = AnalyzeNode(new() {Node = rootNode, ComponentConfig = componentConfig})
+            from analyzedRootNode in AnalyzeNode(new() {Node = rootNode, ComponentConfig = componentConfig})
 
             // Convert node to tree
             from elementTree in ConvertReactNodeModelToElementTreeSourceLines(project, analyzedRootNode, null, 0)
