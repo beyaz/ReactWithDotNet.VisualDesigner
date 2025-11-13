@@ -56,18 +56,18 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
                         }
                     },
                     When(state.FilterText?.Length > 0,
-                         () => new IconClose() +
-                               Size(20) +
-                               Color(Gray300) +
-                               Hover(Color(Gray400)) +
-                               OnClick(OnClearFilterTextClicked))
+                        () => new IconClose() +
+                              Size(20) +
+                              Color(Gray300) +
+                              Hover(Color(Gray400)) +
+                              OnClick(OnClearFilterTextClicked))
                 },
                 new div(WidthFull, BorderBottom(1, dotted, "#d9d9d9"))
             },
 
             new FlexColumn(Flex(1), OverflowAuto)
             {
-                ToVisual(CalculateRootNode(), 0, null)
+                ToVisual(CalculateRootNode(), 0)
             }
         };
     }
@@ -163,16 +163,16 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
     IReadOnlyList<NodeModel> GetAllNodes()
     {
         return Cache.AccessValue($"{nameof(ComponentTreeView)}-{nameof(GetAllNodes)}-{ProjectId}",
-                                 () => ListFrom(from x in GetAllComponentsInProjectFromCache(ProjectId)
-                                                orderby x.Config.Name descending
-                                                select CreateNode(x)));
+            () => ListFrom(from x in GetAllComponentsInProjectFromCache(ProjectId)
+                           orderby x.Config.Name descending
+                           select CreateNode(x)));
 
         static NodeModel CreateNode(ComponentEntity x)
         {
             var designLocation = x.Config.DesignLocation.Replace("{name}", x.Config.Name);
 
-            var names = designLocation.Split(['/', Path.DirectorySeparatorChar], StringSplitOptions.RemoveEmptyEntries|StringSplitOptions.TrimEntries);
-            
+            var names = designLocation.Split(['/', Path.DirectorySeparatorChar], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
             return new NodeModel
             {
                 ComponentId    = x.Id,
@@ -252,7 +252,7 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
         return Task.CompletedTask;
     }
 
-    IReadOnlyList<Element> ToVisual(NodeModel node, int indent, NodeModel parentNode)
+    IReadOnlyList<Element> ToVisual(NodeModel node, int indent)
     {
         var foldIcon = new FlexRowCentered(Size(16), PositionAbsolute, Top(4), Left(indent * 16 - 12), Hover(BorderRadius(36), Background(Gray50)))
         {
@@ -266,11 +266,9 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
             foldIcon = null;
         }
 
-        // foldIcon is not null ? null :  new div{ MarginX(2), HeightFull, Width(1), Background(Gray300)},
-        
         var returnList = new List<Element>
         {
-            new FlexColumn(PaddingLeft(indent * 16), Id(node.Path), OnClick(OnTreeItemClicked))
+            new FlexRow(PaddingLeft(indent * 16), Id(node.Path), OnClick(OnTreeItemClicked))
             {
                 When(node.ComponentId == ComponentId, Background(Blue100), BorderRadius(3)),
 
@@ -301,7 +299,7 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
 
         foreach (var child in node.Children)
         {
-            returnList.AddRange(ToVisual(child, indent + 1, node));
+            returnList.AddRange(ToVisual(child, indent + 1));
         }
 
         return returnList;
