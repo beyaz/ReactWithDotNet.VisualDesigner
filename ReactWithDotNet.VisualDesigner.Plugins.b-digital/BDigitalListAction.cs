@@ -1,5 +1,4 @@
-﻿using System.Collections.Immutable;
-using ReactWithDotNet.VisualDesigner.Exporters;
+﻿using ReactWithDotNet.VisualDesigner.Exporters;
 
 namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
@@ -21,11 +20,11 @@ sealed class BDigitalListAction : PluginComponentBase
     public string selectedCount { get; set; }
 
     [NodeAnalyzer]
-    public static NodeAnalyzeOutput AnalyzeReactNode(NodeAnalyzeInput input)
+    public static async NodeAnalyzeOutput AnalyzeReactNode(NodeAnalyzeInput input)
     {
         if (input.Node.Tag != nameof(BDigitalListAction))
         {
-            return AnalyzeChildren(input, AnalyzeReactNode);
+            return await AnalyzeChildren(input, AnalyzeReactNode);
         }
         
         var (node, componentConfig) = input;
@@ -37,14 +36,33 @@ sealed class BDigitalListAction : PluginComponentBase
         
         if (leftListData is not null)
         {
+
+            IAsyncEnumerable<Result<IReadOnlyList<string>>> results = 
+                
+            from child in leftListData.Children
+                from analyzedChild in input.AnalyzeNode(child)
+                from lines in input.ReactNodeModelToElementTreeSourceLinesConverter(analyzedChild)
+            select lines;
+
+            var linesCollection = new List<IReadOnlyList<string>>();
+            
+            await foreach (var result in results)
+            {
+                if (result.HasError)
+                {
+                    return result.Error;
+                }
+                
+                linesCollection.Add(result.Value);
+            }
+
+            var leftListDataItems = string.Join("," + Environment.NewLine, from lines in linesCollection select string.Join(Environment.NewLine, lines));
+            
+                
             var leftListDataProperty = new ReactProperty
             {
                 Name = "leftListData",
-                Value = "[" +
-                        
-                       
-                        
-                        "]"
+                Value = "[" + leftListDataItems + "]"
             };
 
             node = node with
@@ -54,7 +72,7 @@ sealed class BDigitalListAction : PluginComponentBase
             };
         }
 
-        return AnalyzeChildren(input with{Node = node}, AnalyzeReactNode);
+        return await AnalyzeChildren(input with{Node = node}, AnalyzeReactNode);
         
     }
 

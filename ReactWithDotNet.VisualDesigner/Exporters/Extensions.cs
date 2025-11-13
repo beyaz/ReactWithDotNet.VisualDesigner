@@ -9,12 +9,17 @@ namespace ReactWithDotNet.VisualDesigner.Exporters;
 
 public delegate NodeAnalyzeOutput AnalyzeNodeDelegate(NodeAnalyzeInput input);
 
+
 public sealed record NodeAnalyzeInput
 {
     public ReactNode Node { get; init; }
+    
     public ComponentConfig ComponentConfig{ get; init; }
     
+    public Func<ReactNode,Task<Result<IReadOnlyList<string>>>> ReactNodeModelToElementTreeSourceLinesConverter{ get; init; }
     
+    public Func<ReactNode, NodeAnalyzeOutput> AnalyzeNode { get; set; }
+
     public void Deconstruct(out ReactNode node, out ComponentConfig componentConfig)
     {
         node            = Node;
