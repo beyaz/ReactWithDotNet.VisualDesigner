@@ -266,6 +266,8 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
             foldIcon = null;
         }
 
+        // foldIcon is not null ? null :  new div{ MarginX(2), HeightFull, Width(1), Background(Gray300)},
+        
         var returnList = new List<Element>
         {
             new FlexColumn(PaddingLeft(indent * 16), Id(node.Path), OnClick(OnTreeItemClicked))
