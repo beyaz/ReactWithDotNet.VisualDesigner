@@ -33,27 +33,25 @@ sealed class BDigitalListAction : PluginComponentBase
         
        
         var leftListData = node.TryFindDesignNamedNode("leftListData");
-
-        var actions = node.TryFindDesignNamedNode("action");
-
-        if (leftListData is not null && actions is not null)
+        
+        if (leftListData is not null)
         {
-            var actionsProperty = new ReactProperty
+            var leftListDataProperty = new ReactProperty
             {
-                Name = "actions",
+                Name = "leftListData",
                 Value = "[" +
-                        string.Join(", ",
-                            from actionButton in actions.Children
-                            let label = actionButton.Properties.First(x => x.Name == nameof(BButton.text)).Value
-                            let onClick = actionButton.Properties.First(x => x.Name == nameof(BButton.onClick)).Value
-                            select $"{{ label: {label}, onClick: {onClick} }}") +
+                        
+                        Exporters.
+                        
+                        +
+                        
                         "]"
             };
 
             node = node with
             {
-                Children = [leftListData],
-                Properties = node.Properties.Add(actionsProperty)
+                Children = [],
+                Properties = node.Properties.Add(leftListDataProperty)
             };
         }
 
