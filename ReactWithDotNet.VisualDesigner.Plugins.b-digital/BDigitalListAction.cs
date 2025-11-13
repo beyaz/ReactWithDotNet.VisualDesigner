@@ -77,8 +77,11 @@ sealed class BDigitalListAction : PluginComponentBase
 
     protected override Element render()
     {
-        return new FlexRow(JustifyContentSpaceBetween, AlignItemsCenter, Padding(16))
+        return new FlexRow(JustifyContentSpaceBetween)
         {
+            Id(id),
+            OnClick(onMouseClick),
+            
             // leftListData
             new FlexColumn
             {

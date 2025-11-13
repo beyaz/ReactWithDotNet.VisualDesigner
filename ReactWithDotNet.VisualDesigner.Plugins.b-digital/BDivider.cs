@@ -14,7 +14,9 @@ sealed class BDivider : PluginComponentBase
 
             onClick = onMouseClick,
 
-            children = { children }
+            children = { children },
+            
+            style = { Margin(12) }
         };
     }
 }

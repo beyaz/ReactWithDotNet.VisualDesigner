@@ -6,7 +6,7 @@ namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 [Import(Name = "BDigitalBox", Package = "b-digital-box")]
 sealed class BDigitalBox : PluginComponentBase
 {
-    [Suggestions("noMargin, primary")]
+    [Suggestions("noMargin, primary, secondary , info ")]
     [JsTypeInfo(JsType.String)]
     public string styleContext { get; set; }
 
@@ -16,19 +16,34 @@ sealed class BDigitalBox : PluginComponentBase
 
         if (styleContext == "primary")
         {
-            style = new()
-            {
+            style =
+            [
                 Background(rgb(255, 255, 255)),
                 Border(1, solid, rgba(0, 0, 0, 0.12)),
-                BorderRadius(8)
-            };
+                BorderRadius(8),
+                MarginBottom(3 * 8)
+            ];
+        }
+        if (styleContext == "secondary")
+        {
+            style = [MarginBottom(3 * 8)];
         }
 
+        if (styleContext == "info")
+        {
+            style =
+            [
+                Background(Gray50),
+                BorderRadius(8),
+                MarginBottom(3 * 8)
+            ];
+        }
+        
         if (styleContext == "noMargin")
         {
             style = [Margin(0)];
         }
-
+        
         return new Grid
         {
             id = id,
