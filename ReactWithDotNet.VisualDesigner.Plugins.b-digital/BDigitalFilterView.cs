@@ -26,10 +26,24 @@ sealed class BDigitalFilterView : PluginComponentBase
     [JsTypeInfo(JsType.Function)]
     public string setFilter { get; set; }
 
+    
+
     [NodeAnalyzer]
-    public static ReactNode AnalyzeReactNode(ReactNode node, ComponentConfig componentConfig)
+    public static ReactNode AnalyzeReactNode(NodeAnalyzeInput input)
     {
-        if (node.Tag == nameof(BDigitalFilterView))
+        if (input.Node.Tag != nameof(BDigitalFilterView))
+        {
+            return AnalyzeChildren(input, AnalyzeReactNode);
+        }
+        
+        var (node, componentConfig) = input;
+
+
+
+
+        
+
+
         {
             var beginDateProp = node.Properties.FirstOrDefault(x => x.Name == nameof(beginDate));
             var endDateProp = node.Properties.FirstOrDefault(x => x.Name == nameof(endDate));
@@ -95,7 +109,7 @@ sealed class BDigitalFilterView : PluginComponentBase
             }
         }
 
-        return node with { Children = node.Children.Select(x => AnalyzeReactNode(x, componentConfig)).ToImmutableList() };
+        return AnalyzeChildren(input with{Node = node}, AnalyzeReactNode);
     }
 
     protected override Element render()

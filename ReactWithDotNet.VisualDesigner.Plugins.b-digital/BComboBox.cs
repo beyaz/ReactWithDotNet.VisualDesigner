@@ -26,73 +26,83 @@ sealed class BComboBox : PluginComponentBase
     [JsTypeInfo(JsType.String)]
     public string value { get; set; }
 
+    
+
+
+
     [NodeAnalyzer]
-    public static ReactNode AnalyzeReactNode(ReactNode node, ComponentConfig componentConfig)
+    public static ReactNode AnalyzeReactNode(NodeAnalyzeInput input)
     {
-        if (node.Tag == nameof(BComboBox))
+        if (input.Node.Tag != nameof(BComboBox))
         {
-            var valueProp = node.Properties.FirstOrDefault(x => x.Name == nameof(value));
-            var onSelectProp = node.Properties.FirstOrDefault(x => x.Name == nameof(onSelect));
+            return AnalyzeChildren(input, AnalyzeReactNode);
+        }
+        
+        var (node, componentConfig) = input;
+        
+        
+        var valueProp = node.Properties.FirstOrDefault(x => x.Name == nameof(value));
+        var onSelectProp = node.Properties.FirstOrDefault(x => x.Name == nameof(onSelect));
 
-            if (valueProp is not null)
+        if (valueProp is not null)
+        {
+            var properties = node.Properties;
+
+            var isCollection = IsPropertyPathProvidedByCollection(componentConfig, valueProp.Value).Value;
+
+            TsLineCollection lines =
+            [
+                "(selectedIndexes: [number], selectedItems: [TextValuePair], selectedValues: [string]) =>",
+                "{",
+                $"  {valueProp.Value} = selectedValues{(isCollection ? string.Empty : "[0]")};",
+                GetUpdateStateLine(valueProp.Value)
+            ];
+
+            if (onSelectProp is not null)
             {
-                var properties = node.Properties;
-
-                var isCollection = IsPropertyPathProvidedByCollection(componentConfig, valueProp.Value).Value;
-
-                TsLineCollection lines =
-                [
-                    "(selectedIndexes: [number], selectedItems: [TextValuePair], selectedValues: [string]) =>",
-                    "{",
-                    $"  {valueProp.Value} = selectedValues{(isCollection ? string.Empty : "[0]")};",
-                    GetUpdateStateLine(valueProp.Value)
-                ];
-
-                if (onSelectProp is not null)
+                if (IsAlphaNumeric(onSelectProp.Value))
                 {
-                    if (IsAlphaNumeric(onSelectProp.Value))
-                    {
-                        lines.Add(onSelectProp.Value + "(selectedIndexes, selectedItems, selectedValues);");
-                    }
-                    else
-                    {
-                        lines.Add(onSelectProp.Value);
-                    }
-                }
-
-                lines.Add("}");
-
-                if (onSelectProp is not null)
-                {
-                    onSelectProp = onSelectProp with
-                    {
-                        Value = lines.ToTsCode()
-                    };
-
-                    properties = properties.SetItem(properties.FindIndex(x => x.Name == onSelectProp.Name), onSelectProp);
+                    lines.Add(onSelectProp.Value + "(selectedIndexes, selectedItems, selectedValues);");
                 }
                 else
                 {
-                    properties = properties.Add(new()
-                    {
-                        Name  = nameof(onSelect),
-                        Value = lines.ToTsCode()
-                    });
+                    lines.Add(onSelectProp.Value);
                 }
-
-                if (!isCollection)
-                {
-                    properties = properties.SetItem(properties.IndexOf(valueProp), valueProp with
-                    {
-                        Value = $"[{valueProp.Value}]"
-                    });
-                }
-
-                node = node with { Properties = properties };
             }
+
+            lines.Add("}");
+
+            if (onSelectProp is not null)
+            {
+                onSelectProp = onSelectProp with
+                {
+                    Value = lines.ToTsCode()
+                };
+
+                properties = properties.SetItem(properties.FindIndex(x => x.Name == onSelectProp.Name), onSelectProp);
+            }
+            else
+            {
+                properties = properties.Add(new()
+                {
+                    Name  = nameof(onSelect),
+                    Value = lines.ToTsCode()
+                });
+            }
+
+            if (!isCollection)
+            {
+                properties = properties.SetItem(properties.IndexOf(valueProp), valueProp with
+                {
+                    Value = $"[{valueProp.Value}]"
+                });
+            }
+
+            node = node with { Properties = properties };
         }
 
-        return node with { Children = node.Children.Select(x => AnalyzeReactNode(x, componentConfig)).ToImmutableList() };
+        
+        return AnalyzeChildren(input with{Node = node}, AnalyzeReactNode);
     }
 
     protected override Element render()

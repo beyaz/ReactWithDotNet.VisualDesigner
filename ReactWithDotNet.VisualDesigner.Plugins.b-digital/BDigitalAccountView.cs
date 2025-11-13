@@ -18,11 +18,26 @@ sealed class BDigitalAccountView : PluginComponentBase
 
     [JsTypeInfo(JsType.String)]
     public string title { get; set; }
+    
 
     [NodeAnalyzer]
-    public static ReactNode AnalyzeReactNode(ReactNode node, ComponentConfig componentConfig)
+    public static ReactNode AnalyzeReactNode(NodeAnalyzeInput input)
     {
-        if (node.Tag == nameof(BDigitalAccountView))
+        if (input.Node.Tag != nameof(BDigitalAccountView))
+        {
+            return AnalyzeChildren(input, AnalyzeReactNode);
+        }
+        
+        var (node, componentConfig) = input;
+
+
+
+
+        
+
+
+        
+        
         {
             var selectedAccountIndexProp = node.Properties.FirstOrDefault(x => x.Name == nameof(selectedAccountIndex));
             var onSelectedAccountIndexChangeProp = node.Properties.FirstOrDefault(x => x.Name == nameof(onSelectedAccountIndexChange));
@@ -74,7 +89,7 @@ sealed class BDigitalAccountView : PluginComponentBase
             }
         }
 
-        return node with { Children = node.Children.Select(x => AnalyzeReactNode(x, componentConfig)).ToImmutableList() };
+        return AnalyzeChildren(input with{Node = node}, AnalyzeReactNode);
     }
 
     protected override Element render()

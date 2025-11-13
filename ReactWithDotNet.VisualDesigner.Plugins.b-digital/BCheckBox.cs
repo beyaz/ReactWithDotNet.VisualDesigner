@@ -20,69 +20,73 @@ sealed class BCheckBox : PluginComponentBase
     public string onCheck { get; set; }
 
     [NodeAnalyzer]
-    public static ReactNode AnalyzeReactNode(ReactNode node, ComponentConfig componentConfig)
+    public static ReactNode AnalyzeReactNode(NodeAnalyzeInput input)
     {
-        if (node.Tag == nameof(BCheckBox))
+        if (input.Node.Tag != nameof(BCheckBox))
         {
-            var checkedProp = node.Properties.FirstOrDefault(x => x.Name == nameof(@checked));
-            var onCheckProp = node.Properties.FirstOrDefault(x => x.Name == nameof(onCheck));
+            return AnalyzeChildren(input, AnalyzeReactNode);
+        }
+        
+        var (node, componentConfig) = input;
+        
+        var checkedProp = node.Properties.FirstOrDefault(x => x.Name == nameof(@checked));
+        var onCheckProp = node.Properties.FirstOrDefault(x => x.Name == nameof(onCheck));
 
-            if (checkedProp is not null)
+        if (checkedProp is not null)
+        {
+            var properties = node.Properties;
+
+            var requestAssignmentLine = string.Empty;
+            if (checkedProp.Value.StartsWith("request.", StringComparison.OrdinalIgnoreCase))
             {
-                var properties = node.Properties;
+                requestAssignmentLine = $"  updateRequest(r => {{ r.{checkedProp.Value.RemoveFromStart("request.")} = checked; }});";
+            }
 
-                var requestAssignmentLine = string.Empty;
-                if (checkedProp.Value.StartsWith("request.", StringComparison.OrdinalIgnoreCase))
+            List<string> lines =
+            [
+                "(e: any, checked: boolean) =>",
+                "{",
+                requestAssignmentLine
+            ];
+
+            if (onCheckProp is not null)
+            {
+                if (IsAlphaNumeric(onCheckProp.Value))
                 {
-                    requestAssignmentLine = $"  updateRequest(r => {{ r.{checkedProp.Value.RemoveFromStart("request.")} = checked; }});";
-                }
-
-                List<string> lines =
-                [
-                    "(e: any, checked: boolean) =>",
-                    "{",
-                    requestAssignmentLine
-                ];
-
-                if (onCheckProp is not null)
-                {
-                    if (IsAlphaNumeric(onCheckProp.Value))
-                    {
-                        lines.Add(onCheckProp.Value + "(e, checked);");
-                    }
-                    else
-                    {
-                        lines.Add(onCheckProp.Value);
-                    }
-                }
-
-                lines.Add("}");
-
-                if (onCheckProp is not null)
-                {
-                    onCheckProp = onCheckProp with
-                    {
-                        Value = string.Join(Environment.NewLine, lines)
-                    };
-
-                    properties = properties.SetItem(properties.FindIndex(x => x.Name == onCheckProp.Name), onCheckProp);
+                    lines.Add(onCheckProp.Value + "(e, checked);");
                 }
                 else
                 {
-                    properties = properties.Add(new()
-                    {
-                        Name  = "onCheck",
-                        Value = string.Join(Environment.NewLine, lines)
-                    });
+                    lines.Add(onCheckProp.Value);
                 }
-
-                node = node with { Properties = properties };
             }
 
-            node = AddContextProp(node);
+            lines.Add("}");
+
+            if (onCheckProp is not null)
+            {
+                onCheckProp = onCheckProp with
+                {
+                    Value = string.Join(Environment.NewLine, lines)
+                };
+
+                properties = properties.SetItem(properties.FindIndex(x => x.Name == onCheckProp.Name), onCheckProp);
+            }
+            else
+            {
+                properties = properties.Add(new()
+                {
+                    Name  = "onCheck",
+                    Value = string.Join(Environment.NewLine, lines)
+                });
+            }
+
+            node = node with { Properties = properties };
         }
 
-        return node with { Children = node.Children.Select(x => AnalyzeReactNode(x, componentConfig)).ToImmutableList() };
+        node = AddContextProp(node);
+
+        return AnalyzeChildren(input with{Node = node}, AnalyzeReactNode);
     }
 
     protected override Element render()

@@ -30,10 +30,18 @@ sealed class BComboBoxExtended : PluginComponentBase
     public string isRequired { get; set; }
    
 
+    
+
     [NodeAnalyzer]
-    public static ReactNode AnalyzeReactNode(ReactNode node, ComponentConfig componentConfig)
+    public static ReactNode AnalyzeReactNode(NodeAnalyzeInput input)
     {
-        if (node.Tag == nameof(BComboBoxExtended))
+        if (input.Node.Tag != nameof(BComboBoxExtended))
+        {
+            return AnalyzeChildren(input, AnalyzeReactNode);
+        }
+        
+        var (node, componentConfig) = input;
+        
         {
             var valueProp = node.Properties.FirstOrDefault(x => x.Name == nameof(value));
             var onChangeProp = node.Properties.FirstOrDefault(x => x.Name == nameof(onChange));
@@ -108,7 +116,9 @@ sealed class BComboBoxExtended : PluginComponentBase
             }
         }
 
-        return node with { Children = node.Children.Select(x => AnalyzeReactNode(x, componentConfig)).ToImmutableList() };
+        
+
+        return AnalyzeChildren(input with{Node = node}, AnalyzeReactNode);
     }
 
     protected override Element render()

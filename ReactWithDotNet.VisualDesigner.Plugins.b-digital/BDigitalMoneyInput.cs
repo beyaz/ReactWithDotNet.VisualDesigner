@@ -22,10 +22,25 @@ sealed class BDigitalMoneyInput : PluginComponentBase
     [JsTypeInfo(JsType.Number)]
     public string value { get; set; }
 
+    
+
     [NodeAnalyzer]
-    public static ReactNode AnalyzeReactNode(ReactNode node, ComponentConfig componentConfig)
+    public static ReactNode AnalyzeReactNode(NodeAnalyzeInput input)
     {
-        if (node.Tag == nameof(BDigitalMoneyInput))
+        if (input.Node.Tag != nameof(BDigitalMoneyInput))
+        {
+            return AnalyzeChildren(input, AnalyzeReactNode);
+        }
+        
+        var (node, componentConfig) = input;
+
+
+
+
+        
+
+
+        
         {
             var valueProp = node.Properties.FirstOrDefault(x => x.Name == nameof(value));
             var handleMoneyInputChangeProp = node.Properties.FirstOrDefault(x => x.Name == nameof(handleMoneyInputChange));
@@ -76,7 +91,7 @@ sealed class BDigitalMoneyInput : PluginComponentBase
             }
         }
 
-        return node with { Children = node.Children.Select(x => AnalyzeReactNode(x, componentConfig)).ToImmutableList() };
+        return AnalyzeChildren(input with{Node = node}, AnalyzeReactNode);
     }
 
     protected override Element render()

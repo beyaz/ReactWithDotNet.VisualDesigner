@@ -21,11 +21,24 @@ sealed class BDigitalAccountCardView : PluginComponentBase
 
     [JsTypeInfo(JsType.Function)]
     public string onSelectedIndexChange { get; set; }
-            
+     
+
     [NodeAnalyzer]
-    public static ReactNode AnalyzeReactNode(ReactNode node, ComponentConfig componentConfig)
+    public static ReactNode AnalyzeReactNode(NodeAnalyzeInput input)
     {
-        if (node.Tag == nameof(BDigitalAccountCardView))
+        if (input.Node.Tag != nameof(BDigitalAccountCardView))
+        {
+            return AnalyzeChildren(input, AnalyzeReactNode);
+        }
+        
+        var (node, componentConfig) = input;
+
+
+
+
+        
+
+
         {
             var selectedIndexProp = node.Properties.FirstOrDefault(x => x.Name == nameof(selectedIndex));
             var isCardSelectedProp = node.Properties.FirstOrDefault(x => x.Name == nameof(isCardSelected));
@@ -87,7 +100,7 @@ sealed class BDigitalAccountCardView : PluginComponentBase
             }
         }
 
-        return node with { Children = node.Children.Select(x => AnalyzeReactNode(x, componentConfig)).ToImmutableList() };
+        return AnalyzeChildren(input with{Node = node}, AnalyzeReactNode);
     }
 
     protected override Element render()

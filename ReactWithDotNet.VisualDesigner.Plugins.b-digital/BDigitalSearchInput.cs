@@ -16,16 +16,24 @@ sealed class BDigitalSearchInput : PluginComponentBase
     [JsTypeInfo(JsType.String)]
     public string searchTerm { get; set; }
 
+    
+
     [NodeAnalyzer]
-    public static ReactNode AnalyzeReactNode(ReactNode node, ComponentConfig componentConfig)
+    public static ReactNode AnalyzeReactNode(NodeAnalyzeInput input)
     {
-        if (node.Tag != nameof(BDigitalSearchInput))
+        if (input.Node.Tag != nameof(BDigitalSearchInput))
         {
-            return node with
-            {
-                Children = node.Children.Select(x => AnalyzeReactNode(x, componentConfig)).ToImmutableList()
-            };
+            return AnalyzeChildren(input, AnalyzeReactNode);
         }
+        
+        var (node, componentConfig) = input;
+
+
+
+
+        
+
+
 
         node = ApplyTranslateOperationOnProps(node, componentConfig, nameof(hintText));
 

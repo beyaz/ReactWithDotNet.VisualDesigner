@@ -18,11 +18,24 @@ sealed class BDigitalPhone : PluginComponentBase
 
     [JsTypeInfo(JsType.Function)]
     public string handlePhoneChange { get; set; }
+    
 
     [NodeAnalyzer]
-    public static ReactNode AnalyzeReactNode(ReactNode node, ComponentConfig componentConfig)
+    public static ReactNode AnalyzeReactNode(NodeAnalyzeInput input)
     {
-        if (node.Tag == nameof(BDigitalPhone))
+        if (input.Node.Tag != nameof(BDigitalPhone))
+        {
+            return AnalyzeChildren(input, AnalyzeReactNode);
+        }
+        
+        var (node, componentConfig) = input;
+
+
+
+
+        
+
+
         {
             var phoneNumberProp = node.Properties.FirstOrDefault(x => x.Name == nameof(phoneNumber));
             var handlePhoneChangeProp = node.Properties.FirstOrDefault(x => x.Name == nameof(handlePhoneChange));
@@ -77,7 +90,7 @@ sealed class BDigitalPhone : PluginComponentBase
 
         }
 
-        return node with { Children = node.Children.Select(x => AnalyzeReactNode(x, componentConfig)).ToImmutableList() };
+        return AnalyzeChildren(input with{Node = node}, AnalyzeReactNode);
     }
 
     protected override Element render()

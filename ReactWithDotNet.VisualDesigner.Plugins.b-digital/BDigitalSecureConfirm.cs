@@ -16,11 +16,24 @@ sealed class BDigitalSecureConfirm : PluginComponentBase
     [JsTypeInfo(JsType.Boolean)]
     public string isPreDataLoaded { get; set; }
     
-            
+     
+
     [NodeAnalyzer]
-    public static ReactNode AnalyzeReactNode(ReactNode node, ComponentConfig componentConfig)
+    public static ReactNode AnalyzeReactNode(NodeAnalyzeInput input)
     {
-        if (node.Tag == nameof(BDigitalSecureConfirm))
+        if (input.Node.Tag != nameof(BDigitalSecureConfirm))
+        {
+            return AnalyzeChildren(input, AnalyzeReactNode);
+        }
+        
+        var (node, componentConfig) = input;
+
+
+
+
+        
+
+
         {
             var smsPasswordProp = node.Properties.FirstOrDefault(x => x.Name == nameof(smsPassword));
 
@@ -47,7 +60,7 @@ sealed class BDigitalSecureConfirm : PluginComponentBase
             }
         }
 
-        return node with { Children = node.Children.Select(x => AnalyzeReactNode(x, componentConfig)).ToImmutableList() };
+        return AnalyzeChildren(input with{Node = node}, AnalyzeReactNode);
     }
 
     protected override Element render()

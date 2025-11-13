@@ -32,9 +32,16 @@ sealed class BInput : PluginComponentBase
     public string disabled { get; set; }
 
     [NodeAnalyzer]
-    public static ReactNode AnalyzeReactNode(ReactNode node, ComponentConfig componentConfig)
+    public static ReactNode AnalyzeReactNode(NodeAnalyzeInput input)
     {
-        if (node.Tag == nameof(BInput))
+        if (input.Node.Tag != nameof(BInput))
+        {
+            return AnalyzeChildren(input, AnalyzeReactNode);
+        }
+        
+        var (node, componentConfig) = input;
+        
+        
         {
             var valueProp = node.Properties.FirstOrDefault(x => x.Name == nameof(value));
             var onChangeProp = node.Properties.FirstOrDefault(x => x.Name == nameof(onChange));
@@ -121,7 +128,7 @@ sealed class BInput : PluginComponentBase
             node = AddContextProp(node);
         }
 
-        return node with { Children = node.Children.Select(x => AnalyzeReactNode(x, componentConfig)).ToImmutableList() };
+        return node;
     }
 
     protected override Element render()

@@ -22,8 +22,16 @@ sealed class BChip : PluginComponentBase
     public string variant { get; set; }
 
     [NodeAnalyzer]
-    public static ReactNode AnalyzeReactNode(ReactNode node, ComponentConfig componentConfig)
+    public static ReactNode AnalyzeReactNode(NodeAnalyzeInput input)
     {
+        if (input.Node.Tag != nameof(BChip))
+        {
+            return AnalyzeChildren(input, AnalyzeReactNode);
+        }
+        
+        var (node, componentConfig) = input;
+        
+        
         if (node.Tag == nameof(BChip))
         {
             var onClickProp = node.Properties.FirstOrDefault(x => x.Name == nameof(onClick));
@@ -61,7 +69,7 @@ sealed class BChip : PluginComponentBase
             node = AddContextProp(node);
         }
 
-        return node with { Children = node.Children.Select(x => AnalyzeReactNode(x, componentConfig)).ToImmutableList() };
+        return AnalyzeChildren(input with{Node = node}, AnalyzeReactNode);
     }
 
     protected override Element render()
