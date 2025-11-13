@@ -27,17 +27,21 @@ sealed class BDigitalListAction : PluginComponentBase
             return await AnalyzeChildren(input, AnalyzeReactNode);
         }
 
-        var (node, componentConfig) = input;
+        var node = input.Node;
 
-        var leftListData = node.TryFindDesignNamedNode("leftListData");
-
-        if (leftListData is not null)
+        foreach (var name in new[] { "leftListData", "rightListData" })
         {
+            var listData = node.TryFindDesignNamedNode(name);
+            if (listData is null)
+            {
+                continue;
+            }
+
             IReadOnlyList<string> linesCollection;
             {
                 var response = await
                 (
-                    from child in leftListData.Children
+                    from child in listData.Children
                     from analyzedChild in input.AnalyzeNode(child)
                     from lines in input.ReactNodeModelToElementTreeSourceLinesConverter(analyzedChild)
                     select string.Join(Environment.NewLine, lines)
@@ -51,24 +55,24 @@ sealed class BDigitalListAction : PluginComponentBase
                 linesCollection = response.Value;
             }
 
-            var leftListDataItems = string.Join("," + Environment.NewLine, linesCollection);
+            var items = string.Join("," + Environment.NewLine, linesCollection);
 
-            var leftListDataProperty = new ReactProperty
+            var property = new ReactProperty
             {
-                Name  = "leftListData",
-                Value = "[" + leftListDataItems + "]"
+                Name  = name,
+                Value = "[" + items + "]"
             };
 
             node = node with
             {
-                Children = [],
-                Properties = node.Properties.Add(leftListDataProperty)
+                Properties = node.Properties.Add(property)
             };
         }
-        
-        
 
-        return await AnalyzeChildren(input with { Node = node }, AnalyzeReactNode);
+        return node with
+        {
+            Children = []
+        };
     }
 
     protected override Element render()
