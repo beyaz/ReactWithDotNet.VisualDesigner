@@ -18,10 +18,18 @@ sealed class BButton : PluginComponentBase
     public string type { get; set; }
 
     [NodeAnalyzer]
-    public static ReactNode AnalyzeReactNode(ReactNode node, ComponentConfig componentConfig)
+    public static ReactNode AnalyzeReactNode(NodeAnalyzeInput input)
     {
-        if (node.Tag == nameof(BButton))
+        if (input.Node.Tag != nameof(BButton))
         {
+            return AnalyzeChildren(input, AnalyzeReactNode);
+        }
+        
+        var (node, componentConfig) = input;
+        
+        
+        
+       
             var onClickProp = node.Properties.FirstOrDefault(x => x.Name == nameof(onClick));
 
             if (onClickProp is not null && !IsAlphaNumeric(onClickProp.Value) )
@@ -46,9 +54,9 @@ sealed class BButton : PluginComponentBase
 
                 node = node with { Properties = properties };
             }
-        }
+        
 
-        return node with { Children = node.Children.Select(x => AnalyzeReactNode(x, componentConfig)).ToImmutableList() };
+        return AnalyzeChildren(input with{Node = node}, AnalyzeReactNode);
     }
 
     protected override Element render()
