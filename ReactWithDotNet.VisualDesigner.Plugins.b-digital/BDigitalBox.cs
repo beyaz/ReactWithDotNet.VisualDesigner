@@ -24,12 +24,11 @@ sealed class BDigitalBox : PluginComponentBase
                 MarginBottom(3 * 8)
             ];
         }
-        if (styleContext == "secondary")
+        else if (styleContext == "secondary")
         {
             style = [MarginBottom(3 * 8)];
         }
-
-        if (styleContext == "info")
+        else if (styleContext == "info")
         {
             style =
             [
@@ -38,10 +37,13 @@ sealed class BDigitalBox : PluginComponentBase
                 MarginBottom(3 * 8)
             ];
         }
-        
-        if (styleContext == "noMargin")
+        else if (styleContext == "noMargin")
         {
             style = [Margin(0)];
+        }
+        else
+        {
+            style = [MarginBottom(3 * 8)];
         }
         
         return new Grid
