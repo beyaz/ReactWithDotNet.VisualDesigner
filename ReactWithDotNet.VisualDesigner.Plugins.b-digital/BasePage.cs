@@ -1,6 +1,7 @@
 ﻿namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
 [CustomComponent]
+[Import(Name = nameof(BasePage), Package = "b-digital-framework")]
 sealed class BasePage : PluginComponentBase
 {
     [JsTypeInfo(JsType.String)]

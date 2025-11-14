@@ -62,7 +62,16 @@ sealed class BDigitalFilterView : PluginComponentBase
                 properties = properties.Add(new()
                 {
                     Name  = "setBeginDate",
-                    Value = $"(value: Date) => {{ updateRequest(r => r.{beginDateProp.Value.RemoveFromStart("request.")} = value) }}"
+                    Value = new TsLineCollection
+                    {
+                        "(value: Date) =>", "{",
+                        
+                        $"  {beginDateProp.Value} = value;",
+                        
+                        GetUpdateStateLine(beginDateProp.Value),
+                        
+                        "}"
+                    }.ToTsCode()
                 });
 
                 properties = properties.Add(new()
@@ -73,7 +82,16 @@ sealed class BDigitalFilterView : PluginComponentBase
                 properties = properties.Add(new()
                 {
                     Name  = "setEndDate",
-                    Value = $"(value: Date) => {{ updateRequest(r => r.{beginDateProp.Value.RemoveFromStart("request.")} = value) }}"
+                    Value = new TsLineCollection
+                    {
+                        "(value: Date) =>", "{",
+                        
+                        $"  {endDateProp.Value} = value;",
+                        
+                        GetUpdateStateLine(endDateProp.Value),
+                        
+                        "}"
+                    }.ToTsCode()
                 });
 
                 // setFilter
