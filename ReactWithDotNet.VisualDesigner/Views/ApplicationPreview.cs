@@ -603,17 +603,19 @@ sealed class ApplicationPreview : Component
 
                         static VisualElementModel modifyElement(VisualElementModel m, JsonNode[] arr, int index)
                         {
+                            const string itemName = "item";
+
                             return m with
                             {
                                 Properties = ListFrom(m.Properties.Select(p =>
                                 {
                                     foreach (var prop in TryParseProperty(p))
                                     {
-                                        if (prop.Value.StartsWith("_item.", StringComparison.OrdinalIgnoreCase))
+                                        if (prop.Value.StartsWith($"{itemName}.", StringComparison.OrdinalIgnoreCase))
                                         {
                                             var _item = arr[index];
 
-                                            var path = prop.Value.RemoveFromStart("_item.");
+                                            var path = prop.Value.RemoveFromStart($"{itemName}.");
 
                                             foreach (var realValue in JsonHelper.ReadValueAtPathFromJsonObject(_item, path))
                                             {

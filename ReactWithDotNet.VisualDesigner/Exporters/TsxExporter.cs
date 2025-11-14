@@ -198,12 +198,16 @@ static class TsxExporter
         {
             List<string> lines = [];
 
+            
             var itemsSource = parentNode?.Properties.FirstOrDefault(x => x.Name is Design.ItemsSource);
             if (itemsSource is not null)
             {
+                const string itemName = "item";
+                const string indexName = "index";
+                
                 parentNode = parentNode with { Properties = parentNode.Properties.Remove(itemsSource) };
 
-                lines.Add($"{indent(indentLevel)}{{{ClearConnectedValue(itemsSource.Value)}.map((_item, _index) => {{");
+                lines.Add($"{indent(indentLevel)}{{{ClearConnectedValue(itemsSource.Value)}.map(({itemName}, {indexName}) => {{");
                 indentLevel++;
 
                 lines.Add(indent(indentLevel) + "return (");
