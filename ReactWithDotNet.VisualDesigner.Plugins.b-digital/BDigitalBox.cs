@@ -3,13 +3,13 @@
 namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
 [CustomComponent]
-[Import(Name = "BDigitalBox", Package = "b-digital-box")]
+[Import(Name = nameof(BDigitalBox), Package = "b-digital-box")]
 sealed class BDigitalBox : PluginComponentBase
 {
     [Suggestions("noMargin, primary, secondary , info ")]
     [JsTypeInfo(JsType.String)]
     public string styleContext { get; set; }
-
+    
     protected override Element render()
     {
         var style = new Style();

@@ -134,16 +134,30 @@ static class ModelToNodeTransformer
                                 return new ArgumentException($"{name} has no value.");
                             }
 
-                            name = KebabToCamelCase(name);
-                            
-                            value = value switch
+                            var parseResult = TryParseConditionalValue(finalCssItem.Value);
+                            if (parseResult.success)
                             {
-                                var x when x.StartsWith("request.") || x.StartsWith("context.") => x,
-
-                                var x => '"' + TryClearStringValue(x) + '"'
-                            };
-
-                            listOfStyleAttributes.Add($"{name}: {value}");
+                                if (parseResult.left is null)
+                                {
+                                    return new ArgumentException($"{name} left condition has no value.");
+                                }
+                                
+                                if (parseResult.right is null)
+                                {
+                                    return new ArgumentException($"{name} right condition has no value.");
+                                }
+                                
+                                value = $"{parseResult.condition} ? \"{parseResult.left}\" : \"{parseResult.right}\"";
+                            }
+                            else if (value.StartsWith("request.") || value.StartsWith("context.")) // todo: think better
+                            {
+                            }
+                            else
+                            {
+                                value = '"' + TryClearStringValue(value) + '"';
+                            }
+                            
+                            listOfStyleAttributes.Add($"{KebabToCamelCase(name)}: {value}");
                         }
                     }
                 }

@@ -518,7 +518,7 @@ sealed class ApplicationPreview : Component
 
                 static bool isKnownProp(string name)
                 {
-                    if (name is "ref" or "key" or Design.ItemsSource or "size" or "onClick" or "onInput" or Design.ShowIf or Design.HideIf)
+                    if (name is "ref" or "id" or "key" or Design.ItemsSource or "size" or "onClick" or "onInput" or Design.ShowIf or Design.HideIf)
                     {
                         return true;
                     }
