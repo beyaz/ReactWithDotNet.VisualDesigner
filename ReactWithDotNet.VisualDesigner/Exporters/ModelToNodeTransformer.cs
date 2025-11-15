@@ -1,5 +1,5 @@
-﻿using Newtonsoft.Json;
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
+using Newtonsoft.Json;
 
 namespace ReactWithDotNet.VisualDesigner.Exporters;
 
@@ -88,7 +88,7 @@ static class ModelToNodeTransformer
 
         static Result<IReadOnlyList<ReactProperty>> calculatePropsForInlineStyle(ProjectConfig project, IReadOnlyList<string> properties, IReadOnlyList<string> styles)
         {
-            return  ListFrom
+            return ListFrom
             (
                 from property in properties
                 from parsedProperty in ParseProperty(property)
@@ -97,33 +97,32 @@ static class ModelToNodeTransformer
                     Name  = parsedProperty.Name,
                     Value = parsedProperty.Value
                 },
-                
                 project switch
                 {
-                    {ExportStylesAsInline: true}=> ListFrom
+                    { ExportStylesAsInline: true } => ListFrom
+                    (
+                        from listOfStyleAttributes in ListFrom
                         (
-                            from listOfStyleAttributes in ListFrom
-                            (
-                                from text in styles
-                                where !Design.IsDesignTimeName(ParseStyleAttribute(text).Name)
-                                from item in CreateDesignerStyleItemFromText(project, text)
-                                from finalCssItem in item.FinalCssItems
-                                from finalCssItem1 in ReprocessFontWeight(finalCssItem)
-                                from value in RecalculateCssValueForOutput(finalCssItem1.Name, finalCssItem1.Value)
-                                select $"{KebabToCamelCase(finalCssItem.Name)}: {value}"
-                            )
-                            select (listOfStyleAttributes.Count > 0) switch
+                            from text in styles
+                            where !Design.IsDesignTimeName(ParseStyleAttribute(text).Name)
+                            from item in CreateDesignerStyleItemFromText(project, text)
+                            from finalCssItem in item.FinalCssItems
+                            from finalCssItem1 in ReprocessFontWeight(finalCssItem)
+                            from value in RecalculateCssValueForOutput(finalCssItem1.Name, finalCssItem1.Value)
+                            select $"{KebabToCamelCase(finalCssItem.Name)}: {value}"
+                        )
+                        select (listOfStyleAttributes.Count > 0) switch
+                        {
+                            true => new ReactProperty
                             {
-                                true => new ReactProperty
-                                {
-                                    Name  = "style",
-                                    Value = "{" + string.Join(", ", listOfStyleAttributes) + "}"
-                                },
-                                false => null
-                            }
-                        ),
-                    
-                    {ExportAsCSharp: true}=> ListFrom
+                                Name  = "style",
+                                Value = "{" + string.Join(", ", listOfStyleAttributes) + "}"
+                            },
+                            false => null
+                        }
+                    ),
+
+                    { ExportAsCSharp: true } => ListFrom
                     (
                         from listOfStyleAttributes in ListFrom
                         (
@@ -156,9 +155,9 @@ static class ModelToNodeTransformer
                             },
                             false => null
                         }
-                    ) ,
-                    
-                    {ExportAsCSharpString:true}=>
+                    ),
+
+                    { ExportAsCSharpString: true } =>
                         ListFrom
                         (
                             from listOFinalCssItems in ListFrom
@@ -181,7 +180,6 @@ static class ModelToNodeTransformer
                                         var x => TryClearStringValue(x)
                                     }
                                 })
-                        
                                 select finalValue
                             )
                             select (listOFinalCssItems.Count > 0) switch
@@ -189,19 +187,14 @@ static class ModelToNodeTransformer
                                 true => new ReactProperty
                                 {
                                     Name  = "style",
-                                    Value = JsonConvert.SerializeObject(listOFinalCssItems, new JsonSerializerSettings{ TypeNameHandling = TypeNameHandling.Auto})
+                                    Value = JsonConvert.SerializeObject(listOFinalCssItems, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Auto })
                                 },
                                 false => null
                             }
-                        ) ,
-                    _=> ListFrom(Result.Error<ReactProperty>(new Exception("Project config Error")))
+                        ),
+                    _ => ListFrom(Result.Error<ReactProperty>(new($"Project config Error. Specify {nameof(ProjectConfig.ExportAsCSharp)} or {nameof(ProjectConfig.ExportAsCSharpString)} or {nameof(ProjectConfig.ExportStylesAsInline)}")))
                 }
-
             );
-
-            
-            
-
 
             static Result<DesignerStyleItem> EnsurePseudoIsEmpty(DesignerStyleItem item)
             {
@@ -212,25 +205,25 @@ static class ModelToNodeTransformer
 
                 return Result.From(item);
             }
-            
+
             static Result<FinalCssItem> ReprocessFontWeight(FinalCssItem finalCssItem)
             {
-                if (finalCssItem.Name !="font-weight")
+                if (finalCssItem.Name != "font-weight")
                 {
                     return Result.From(finalCssItem);
                 }
-                
+
                 var fontWeightMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
                 {
-                    { "100","thin" },
-                    { "200","extralight" },
-                    { "300","light" },
-                    { "400","normal" },
-                    { "500","medium" },
-                    { "600","semibold" },
-                    { "700","bold" },
-                    { "800","extrabold" },
-                    { "900","black" }
+                    { "100", "thin" },
+                    { "200", "extralight" },
+                    { "300", "light" },
+                    { "400", "normal" },
+                    { "500", "medium" },
+                    { "600", "semibold" },
+                    { "700", "bold" },
+                    { "800", "extrabold" },
+                    { "900", "black" }
                 };
 
                 if (fontWeightMap.TryGetValue(finalCssItem.Value, out var weightAsName))
@@ -240,7 +233,7 @@ static class ModelToNodeTransformer
 
                 return Result.From(finalCssItem);
             }
-            
+
             static Result<string> RecalculateCssValueForOutput(string name, string value)
             {
                 var parseResult = TryParseConditionalValue(value);
@@ -250,7 +243,7 @@ static class ModelToNodeTransformer
                     {
                         return new ArgumentException($"{name} left condition has no value.");
                     }
-                                
+
                     if (parseResult.right is null)
                     {
                         return new ArgumentException($"{name} right condition has no value.");
@@ -260,15 +253,14 @@ static class ModelToNodeTransformer
                         from left in RecalculateCssValueForOutput(name, parseResult.left)
                         from right in RecalculateCssValueForOutput(name, parseResult.right)
                         select $"{parseResult.condition} ? {left} : {right}";
-                                
                 }
-                                
+
                 if (value.StartsWith("request.") || value.StartsWith("context.")) // todo: think better
                 {
                     return value;
-                } 
-                                
-                return  '"' + TryClearStringValue(value) + '"';
+                }
+
+                return '"' + TryClearStringValue(value) + '"';
             }
         }
 
@@ -343,18 +335,18 @@ public record ReactNode
 {
     public ImmutableList<ReactNode> Children { get; init; } = [];
 
+    public required Maybe<Type> HtmlElementType { get; init; }
+
     public ImmutableList<ReactProperty> Properties { get; init; } = [];
 
     public string Tag { get; init; }
 
     public string Text { get; init; }
-
-    public required Maybe<Type> HtmlElementType { get; init; }
 }
 
 public record ReactProperty
 {
     public required string Name { get; init; }
-    
+
     public required string Value { get; init; }
 }
