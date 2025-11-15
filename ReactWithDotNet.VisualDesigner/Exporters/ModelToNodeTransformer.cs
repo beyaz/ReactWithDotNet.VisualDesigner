@@ -90,47 +90,48 @@ static class ModelToNodeTransformer
         {
             var props = new List<ReactProperty>();
 
-            // Transfer properties
-            foreach (var property in properties)
-            {
-                var parsedProperty = ParseProperty(property);
-                if (parsedProperty.HasError)
+            var abc = ListFrom
+            (
+                from property in properties
+                from parsedProperty in ParseProperty(property)
+                select new ReactProperty
                 {
-                    return parsedProperty.Error;
-                }
-
-                props.Add(new()
-                {
-                    Name  = parsedProperty.Value.Name,
-                    Value = parsedProperty.Value.Value
-                });
-            }
-
-            if (project.ExportStylesAsInline)
-            {
-
-                var prop = from listOfStyleAttributes in ListFrom
+                    Name  = parsedProperty.Name,
+                    Value = parsedProperty.Value
+                },
+                
+                // tsx
+                project.ExportStylesAsInline ?
+                    ListFrom
                     (
-                        from text in styles
-                        where !Design.IsDesignTimeName(ParseStyleAttribute(text).Name)
-                        from item in CreateDesignerStyleItemFromText(project, text)
-                        from finalCssItem in item.FinalCssItems
-                        from finalCssItem1 in ReprocessFontWeight(finalCssItem)
-                        from value in RecalculateCssValueForOutput(finalCssItem1.Name, finalCssItem1.Value)
-                        select $"{KebabToCamelCase(finalCssItem.Name)}: {value}"
-                    )
-                    select (listOfStyleAttributes.Count > 0) switch
-                    {
-                        true => new ReactProperty
+                        from listOfStyleAttributes in ListFrom
+                        (
+                            from text in styles
+                            where !Design.IsDesignTimeName(ParseStyleAttribute(text).Name)
+                            from item in CreateDesignerStyleItemFromText(project, text)
+                            from finalCssItem in item.FinalCssItems
+                            from finalCssItem1 in ReprocessFontWeight(finalCssItem)
+                            from value in RecalculateCssValueForOutput(finalCssItem1.Name, finalCssItem1.Value)
+                            select $"{KebabToCamelCase(finalCssItem.Name)}: {value}"
+                        )
+                        select (listOfStyleAttributes.Count > 0) switch
                         {
-                            Name  = "style",
-                            Value = "{" + string.Join(", ", listOfStyleAttributes) + "}"
-                        },
-                        _ => null
-                    };
+                            true => new ReactProperty
+                            {
+                                Name  = "style",
+                                Value = "{" + string.Join(", ", listOfStyleAttributes) + "}"
+                            },
+                            false => null
+                        }
+                    ) : Enumerable.Empty<Result<ReactProperty>>()
 
-                props.Add(prop.Value);
-            }
+
+               
+
+            );
+
+            
+            
             
             if (project.ExportAsCSharp)
             {

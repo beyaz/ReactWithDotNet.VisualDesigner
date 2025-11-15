@@ -148,6 +148,31 @@ public static class Extensions
         
         return list;
     }
+    
+    public static IReadOnlyList<T> ListFrom<T>(T source)
+    {
+        return new List<T> { source };
+    }
+    
+    public static Result<IReadOnlyList<T>> ListFrom<T>(params IEnumerable<Result<T>>[] sources)
+    {
+        var list = new List<T>();
+        
+        foreach (var source in sources)
+        {
+            foreach (var result in source)
+            {
+                if (result.HasError)
+                {
+                    return result.Error;
+                }
+
+                list.Add(result.Value);
+            }
+        }
+        
+        return list;
+    }
 
     public static double CalculateTextWidth(string text)
     {
