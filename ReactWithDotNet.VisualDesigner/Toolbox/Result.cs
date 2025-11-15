@@ -1,6 +1,6 @@
 ﻿namespace Toolbox;
 
-public sealed class  Result<TValue>
+public sealed class Result<TValue>
 {
     // @formatter:off
     
@@ -67,7 +67,7 @@ public static class ResultExtensions
 
         return items;
     }
-    
+
     public static async Task<Result<IReadOnlyList<T>>> AsResult<T>(this IAsyncEnumerable<Result<T>> enumerable)
     {
         List<T> items = [];
@@ -87,7 +87,6 @@ public static class ResultExtensions
 
         return items;
     }
-    
 
     public static void Match<T>(this Result<T> result, Action<T> onSuccess, Action<Exception> onError)
     {
@@ -404,6 +403,61 @@ public static class ResultExtensions
             }
 
             var c = resultSelector(a, b.Value);
+
+            returnItems.Add(c);
+        }
+
+        return returnItems;
+    }
+
+    public static IEnumerable<Result<C>> SelectMany<A, B, C>
+    (
+        this IEnumerable<Result<A>> source,
+        Func<A, Result<B>> bind,
+        Func<A, B, C> resultSelector
+    )
+    {
+        if (source is null)
+        {
+            return [Result.Error<C>(new ArgumentNullException(nameof(source)))];
+        }
+
+        if (bind == null)
+        {
+            return [Result.Error<C>(new ArgumentNullException(nameof(bind)))];
+        }
+
+        if (resultSelector == null)
+        {
+            return [Result.Error<C>(new ArgumentNullException(nameof(resultSelector)))];
+        }
+
+        List<Result<C>> returnItems = [];
+
+        foreach (var a in source)
+        {
+            if (a.HasError)
+            {
+                returnItems.Add(new()
+                {
+                    Error = a.Error
+                });
+
+                return returnItems;
+            }
+
+            var b = bind(a.Value);
+            if (b.HasError)
+            {
+                returnItems.Add(new()
+                {
+                    Error = b.Error
+                });
+
+                return returnItems;
+            }
+
+            var c = resultSelector(a.Value, b.Value);
 
             returnItems.Add(c);
         }
