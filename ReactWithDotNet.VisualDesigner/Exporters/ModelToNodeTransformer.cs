@@ -108,58 +108,23 @@ static class ModelToNodeTransformer
 
             if (project.ExportStylesAsInline)
             {
-                List<string> listOfStyleAttributes = [];
-                {
+                var listOfStyleAttributes = 
+                (
+                    from text in styles
+                    where !Design.IsDesignTimeName(ParseStyleAttribute(text).Name)
+                    from item in CreateDesignerStyleItemFromText(project, text)
+                    from finalCssItem in item.FinalCssItems
+                    from finalCssItem1 in ReprocessFontWeight(finalCssItem)
+                    from value in RecalculateCssValueForOutput(finalCssItem1.Name, finalCssItem1.Value)
+                    select $"{KebabToCamelCase(finalCssItem.Name)}: {value}"
+                ).AsReadOnlyList();
 
-                    var a =
-                        from text in styles
-                        where !Design.IsDesignTimeName(ParseStyleAttribute(text).Name)
-                        from item in CreateDesignerStyleItemFromText(project, text)
-                        from finalCssItem in item.FinalCssItems
-                        from finalCssItem1 in ReprocessFontWeight(finalCssItem)
-                        from value in RecalculateCssValueForOutput(finalCssItem1.Name, finalCssItem1.Value)
-                        select $"{KebabToCamelCase(finalCssItem.Name)}: {value}";
-
-
-                    //listOfStyleAttributes.AddRange(a.Value);
-
-
-                    foreach (var text in styles)
-                    {
-                        if (Design.IsDesignTimeName(ParseStyleAttribute(text).Name))
-                        {
-                            continue;
-                        }
-
-                        var item = CreateDesignerStyleItemFromText(project, text);
-                        if (item.HasError)
-                        {
-                            return item.Error;
-                        }
-
-                        foreach (var finalCssItem in item.Value.FinalCssItems)
-                        {
-                            var styleText
-                                = from finalCssItem1 in ReprocessFontWeight(finalCssItem)
-                                  from value in RecalculateCssValueForOutput(finalCssItem1.Name, finalCssItem1.Value)
-                                  select $"{KebabToCamelCase(finalCssItem.Name)}: {value}";
-
-                            if (styleText.HasError)
-                            {
-                                return styleText.Error;
-                            }
-
-                            listOfStyleAttributes.Add(styleText.Value);
-                        }
-                    }
-                }
-
-                if (listOfStyleAttributes.Count > 0)
+                if (listOfStyleAttributes.Value.Count > 0)
                 {
                     props.Add(new()
                     {
                         Name  = "style",
-                        Value = "{" + string.Join(", ", listOfStyleAttributes) + "}"
+                        Value = "{" + string.Join(", ", listOfStyleAttributes.Value) + "}"
                     });
                 }
             }

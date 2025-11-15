@@ -132,6 +132,22 @@ public static class Extensions
     {
         return source as IReadOnlyList<T> ?? source.ToList();
     }
+    
+    public static Result<IReadOnlyList<T>> AsReadOnlyList<T>(this IEnumerable<Result<T>> source)
+    {
+        var list = new List<T>();
+        foreach (var result in source)
+        {
+            if (result.HasError)
+            {
+                return result.Error;
+            }
+
+            list.Add(result.Value);
+        }
+        
+        return list;
+    }
 
     public static double CalculateTextWidth(string text)
     {
