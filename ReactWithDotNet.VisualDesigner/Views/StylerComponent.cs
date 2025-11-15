@@ -1280,7 +1280,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                 from item in GetChars()
                 select new div(WidthFitContent, HeightFitContent, LineHeight7, FontSize14)
                 {
-                    item
+                    item , ArrangeSizeForTopBottomLeftRight
                 }
             };
         }
