@@ -473,73 +473,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
             ]
         },
 
-        new()
-        {
-            Label = "Border",
-
-            SubGroups =
-            [
-                new()
-                {
-                    Label         = "style",
-                    TargetCssName = "border-style",
-                    Suggestions =
-                    [
-                        new(solid),
-                        new(dashed),
-                        new(dotted)
-                    ]
-                },
-
-                new()
-                {
-                    Label = "width",
-
-                    TargetCssName = "border-width",
-
-                    IsCssUnitEnabled = true,
-
-                    Suggestions =
-                    [
-                        new("1px"),
-                        new("2px"),
-                        new("3px")
-                    ]
-                },
-
-                new()
-                {
-                    Label = "radius",
-
-                    TargetCssName = "border-radius",
-
-                    IsCssUnitEnabled = true,
-
-                    Suggestions =
-                    [
-                        new("4px"),
-                        new("8px"),
-                        new("16px")
-                    ]
-                },
-
-                new()
-                {
-                    Label = "shadow",
-
-                    TargetCssName = "box-shadow",
-
-                    Suggestions =
-                    [
-                        new() { Label = "small", Value  = "0 1px 3px rgba(0,0,0,0.2)" },
-                        new() { Label = "medium", Value = "0 4px 6px rgba(0,0,0,0.2)" },
-                        new() { Label = "large", Value  = "0 10px 15px rgba(0,0,0,0.3)" }
-                    ]
-                }
-            ]
-        },
-
-        new()
+          new()
         {
             Label = "Space",
 
@@ -716,6 +650,74 @@ sealed class StylerComponent : Component<StylerComponent.State>
                 }
             ]
         },
+        
+        new()
+        {
+            Label = "Border",
+
+            SubGroups =
+            [
+                new()
+                {
+                    Label         = "style",
+                    TargetCssName = "border-style",
+                    Suggestions =
+                    [
+                        new(solid),
+                        new(dashed),
+                        new(dotted)
+                    ]
+                },
+
+                new()
+                {
+                    Label = "width",
+
+                    TargetCssName = "border-width",
+
+                    IsCssUnitEnabled = true,
+
+                    Suggestions =
+                    [
+                        new("1px"),
+                        new("2px"),
+                        new("3px")
+                    ]
+                },
+
+                new()
+                {
+                    Label = "radius",
+
+                    TargetCssName = "border-radius",
+
+                    IsCssUnitEnabled = true,
+
+                    Suggestions =
+                    [
+                        new("4px"),
+                        new("8px"),
+                        new("16px")
+                    ]
+                },
+
+                new()
+                {
+                    Label = "shadow",
+
+                    TargetCssName = "box-shadow",
+
+                    Suggestions =
+                    [
+                        new() { Label = "small", Value  = "0 1px 3px rgba(0,0,0,0.2)" },
+                        new() { Label = "medium", Value = "0 4px 6px rgba(0,0,0,0.2)" },
+                        new() { Label = "large", Value  = "0 10px 15px rgba(0,0,0,0.3)" }
+                    ]
+                }
+            ]
+        },
+
+      
 
         new()
         {
