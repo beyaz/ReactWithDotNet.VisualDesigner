@@ -108,28 +108,33 @@ static class ModelToNodeTransformer
 
             if (project.ExportStylesAsInline)
             {
-                var listOfStyleAttributes = ListFrom
-                (
-                    from text in styles
-                    where !Design.IsDesignTimeName(ParseStyleAttribute(text).Name)
-                    from item in CreateDesignerStyleItemFromText(project, text)
-                    from finalCssItem in item.FinalCssItems
-                    from finalCssItem1 in ReprocessFontWeight(finalCssItem)
-                    from value in RecalculateCssValueForOutput(finalCssItem1.Name, finalCssItem1.Value)
-                    select $"{KebabToCamelCase(finalCssItem.Name)}: {value}"
-                );
-                
-                if (listOfStyleAttributes.HasError)
+                IReadOnlyList<string> listOfStyleAttributes;
                 {
-                    return listOfStyleAttributes.Error;
+                    var result = ListFrom
+                    (
+                        from text in styles
+                        where !Design.IsDesignTimeName(ParseStyleAttribute(text).Name)
+                        from item in CreateDesignerStyleItemFromText(project, text)
+                        from finalCssItem in item.FinalCssItems
+                        from finalCssItem1 in ReprocessFontWeight(finalCssItem)
+                        from value in RecalculateCssValueForOutput(finalCssItem1.Name, finalCssItem1.Value)
+                        select $"{KebabToCamelCase(finalCssItem.Name)}: {value}"
+                    );
+                
+                    if (result.HasError)
+                    {
+                        return result.Error;
+                    }
+                    
+                    listOfStyleAttributes = result.Value;
                 }
 
-                if (listOfStyleAttributes.Value.Count > 0)
+                if (listOfStyleAttributes.Count > 0)
                 {
                     props.Add(new()
                     {
                         Name  = "style",
-                        Value = "{" + string.Join(", ", listOfStyleAttributes.Value) + "}"
+                        Value = "{" + string.Join(", ", listOfStyleAttributes) + "}"
                     });
                 }
             }
