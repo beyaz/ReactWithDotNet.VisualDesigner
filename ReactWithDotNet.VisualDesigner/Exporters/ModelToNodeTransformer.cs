@@ -194,10 +194,10 @@ static class ModelToNodeTransformer
                     Value = parsedProperty.Value
                 },
                 
-                from x in ListFrom(styleProp) 
-                from y in x
-                where y is not null 
-                select y
+                from result in ListFrom(styleProp) 
+                from reactProperty in result
+                where reactProperty is not null 
+                select reactProperty
 
             );
 
