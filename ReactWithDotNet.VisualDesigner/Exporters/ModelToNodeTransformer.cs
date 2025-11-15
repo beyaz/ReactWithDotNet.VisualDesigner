@@ -125,36 +125,17 @@ static class ModelToNodeTransformer
 
                         foreach (var finalCssItem in item.Value.FinalCssItems)
                         {
-                            var name = finalCssItem.Name;
+                            var styleText
+                                = from finalCssItem1 in ReprocessFontWeight(finalCssItem)
+                                  from value in RecalculateCssValueForOutput(finalCssItem1.Name, finalCssItem1.Value)
+                                  select $"{KebabToCamelCase(finalCssItem.Name)}: {value}";
 
-                            var value = finalCssItem.Value;
-                            
-                            
+                            if (styleText.HasError)
+                            {
+                                return styleText.Error;
+                            }
 
-                            var parseResult = TryParseConditionalValue(finalCssItem.Value);
-                            if (parseResult.success)
-                            {
-                                if (parseResult.left is null)
-                                {
-                                    return new ArgumentException($"{name} left condition has no value.");
-                                }
-                                
-                                if (parseResult.right is null)
-                                {
-                                    return new ArgumentException($"{name} right condition has no value.");
-                                }
-                                
-                                value = $"{parseResult.condition} ? \"{parseResult.left}\" : \"{parseResult.right}\"";
-                            }
-                            else if (value.StartsWith("request.") || value.StartsWith("context.")) // todo: think better
-                            {
-                            }
-                            else
-                            {
-                                value = '"' + TryClearStringValue(value) + '"';
-                            }
-                            
-                            listOfStyleAttributes.Add($"{KebabToCamelCase(name)}: {value}");
+                            listOfStyleAttributes.Add(styleText.Value);
                         }
                     }
                 }
@@ -301,6 +282,35 @@ static class ModelToNodeTransformer
                 return Result.From(finalCssItem);
             }
             
+            static Result<string> RecalculateCssValueForOutput(string name, string value)
+            {
+                var parseResult = TryParseConditionalValue(value);
+                if (parseResult.success)
+                {
+                    if (parseResult.left is null)
+                    {
+                        return new ArgumentException($"{name} left condition has no value.");
+                    }
+                                
+                    if (parseResult.right is null)
+                    {
+                        return new ArgumentException($"{name} right condition has no value.");
+                    }
+
+                    return
+                        from left in RecalculateCssValueForOutput(name, parseResult.left)
+                        from right in RecalculateCssValueForOutput(name, parseResult.right)
+                        select $"{parseResult.condition} ? {left} : {right}";
+                                
+                }
+                                
+                if (value.StartsWith("request.") || value.StartsWith("context.")) // todo: think better
+                {
+                    return value;
+                } 
+                                
+                return  '"' + TryClearStringValue(value) + '"';
+            }
         }
 
         static Result<IReadOnlyList<ReactProperty>> calculatePropsForTailwind(ProjectConfig project, IReadOnlyList<string> properties, IReadOnlyList<string> styles)
