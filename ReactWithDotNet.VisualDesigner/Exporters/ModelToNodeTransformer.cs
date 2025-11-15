@@ -88,9 +88,7 @@ static class ModelToNodeTransformer
 
         static Result<IReadOnlyList<ReactProperty>> calculatePropsForInlineStyle(ProjectConfig project, IReadOnlyList<string> properties, IReadOnlyList<string> styles)
         {
-            var props = new List<ReactProperty>();
-
-            var abc = ListFrom
+            return  ListFrom
             (
                 from property in properties
                 from parsedProperty in ParseProperty(property)
@@ -123,6 +121,80 @@ static class ModelToNodeTransformer
                             },
                             false => null
                         }
+                    ) : Enumerable.Empty<Result<ReactProperty>>(),
+                
+                project.ExportAsCSharp ?
+                    ListFrom
+                    (
+                        from listOfStyleAttributes in ListFrom
+                        (
+                            from text in styles
+                            where !Design.IsDesignTimeName(ParseStyleAttribute(text).Name)
+                            from item in CreateDesignerStyleItemFromText(project, text)
+                            from finalCssItem in item.FinalCssItems
+                            select new StyleAttribute
+                            {
+                                Pseudo = item.Pseudo,
+
+                                Name = KebabToCamelCase(finalCssItem.Name),
+
+                                Value = finalCssItem.Value switch
+                                {
+                                    null => null,
+
+                                    var x when x.StartsWith("request.") || x.StartsWith("context.") => x,
+
+                                    var x => '"' + TryClearStringValue(x) + '"'
+                                }
+                            }
+                        )
+                        select (listOfStyleAttributes.Count > 0) switch
+                        {
+                            true => new ReactProperty
+                            {
+                                Name  = "style",
+                                Value = Json.Serialize(listOfStyleAttributes)
+                            },
+                            false => null
+                        }
+                    ) : Enumerable.Empty<Result<ReactProperty>>(),
+                
+                
+                project.ExportAsCSharpString ?
+                    ListFrom
+                    (
+                        from listOFinalCssItems in ListFrom
+                        (
+                            from text in styles
+                            where !Design.IsDesignTimeName(ParseStyleAttribute(text).Name)
+                            from item in CreateDesignerStyleItemFromText(project, text)
+                            from _ in EnsurePseudoIsEmpty(item)
+                            from finalCssItem in item.FinalCssItems
+                            from finalValue in CreateFinalCssItem(new()
+                            {
+                                Name = finalCssItem.Name,
+
+                                Value = finalCssItem.Value switch
+                                {
+                                    null => null,
+
+                                    var x when x.StartsWith("request.") || x.StartsWith("context.") => x,
+
+                                    var x => TryClearStringValue(x)
+                                }
+                            })
+                        
+                            select finalValue
+                        )
+                        select (listOFinalCssItems.Count > 0) switch
+                        {
+                            true => new ReactProperty
+                            {
+                                Name  = "style",
+                                Value = JsonConvert.SerializeObject(listOFinalCssItems, new JsonSerializerSettings{ TypeNameHandling = TypeNameHandling.Auto})
+                            },
+                            false => null
+                        }
                     ) : Enumerable.Empty<Result<ReactProperty>>()
 
 
@@ -132,111 +204,18 @@ static class ModelToNodeTransformer
 
             
             
+
+
+            static Result<DesignerStyleItem> EnsurePseudoIsEmpty(DesignerStyleItem item)
+            {
+                if (item.Pseudo.HasValue())
+                {
+                    return new NotSupportedException($"Pseudo styles are not supported in inline styles. {item.OriginalText}");
+                }
+
+                return Result.From(item);
+            }
             
-            if (project.ExportAsCSharp)
-            {
-                IReadOnlyList<StyleAttribute> listOfStyleAttributes;
-                {
-                    var result = ListFrom
-                    (
-                        from text in styles
-                        where !Design.IsDesignTimeName(ParseStyleAttribute(text).Name)
-                        from item in CreateDesignerStyleItemFromText(project, text)
-                        from finalCssItem in item.FinalCssItems
-                        select new StyleAttribute
-                        {
-                            Pseudo = item.Pseudo,
-
-                            Name = KebabToCamelCase(finalCssItem.Name),
-
-                            Value = finalCssItem.Value switch
-                            {
-                                null => null,
-
-                                var x when x.StartsWith("request.") || x.StartsWith("context.") => x,
-
-                                var x => '"' + TryClearStringValue(x) + '"'
-                            }
-                        }
-                    );
-                
-                    if (result.HasError)
-                    {
-                        return result.Error;
-                    }
-                    listOfStyleAttributes = result.Value;
-                }
-                
-                
-                if (listOfStyleAttributes.Count > 0)
-                {
-                    props.Add(new()
-                    {
-                        Name  = "style",
-                        Value = Json.Serialize(listOfStyleAttributes)
-                    });
-                }
-            }
-
-            if (project.ExportAsCSharpString)
-            {
-                IReadOnlyList<FinalCssItem> listOFinalCssItems;
-                {
-                    var result = ListFrom
-                    (
-                        from text in styles
-                        where !Design.IsDesignTimeName(ParseStyleAttribute(text).Name)
-                        from item in CreateDesignerStyleItemFromText(project, text)
-                        from _ in EnsurePseudoIsEmpty(item)
-                        from finalCssItem in item.FinalCssItems
-                        from finalValue in CreateFinalCssItem(new()
-                        {
-                            Name = finalCssItem.Name,
-
-                            Value = finalCssItem.Value switch
-                            {
-                                null => null,
-
-                                var x when x.StartsWith("request.") || x.StartsWith("context.") => x,
-
-                                var x => TryClearStringValue(x)
-                            }
-                        })
-                        
-                        select finalValue
-                    );
-                
-                    if (result.HasError)
-                    {
-                        return result.Error;
-                    }
-                    listOFinalCssItems = result.Value;
-
-
-                    static Result<DesignerStyleItem> EnsurePseudoIsEmpty(DesignerStyleItem item)
-                    {
-                        if (item.Pseudo.HasValue())
-                        {
-                            return new NotSupportedException($"Pseudo styles are not supported in inline styles. {item.OriginalText}");
-                        }
-
-                        return Result.From(item);
-                    }
-                    
-                }
-
-                if (listOFinalCssItems.Count > 0)
-                {
-                    props.Add(new()
-                    {
-                        Name  = "style",
-                        Value = JsonConvert.SerializeObject(listOFinalCssItems, new JsonSerializerSettings{ TypeNameHandling = TypeNameHandling.Auto})
-                    });
-                }
-            }
-
-            return props;
-
             static Result<FinalCssItem> ReprocessFontWeight(FinalCssItem finalCssItem)
             {
                 if (finalCssItem.Name !="font-weight")
