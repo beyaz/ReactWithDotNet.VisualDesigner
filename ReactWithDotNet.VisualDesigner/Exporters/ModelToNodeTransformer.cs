@@ -98,6 +98,8 @@ static class ModelToNodeTransformer
                     Value = parsedProperty.Value
                 },
                 
+                
+                
                 // tsx
                 project.ExportStylesAsInline ?
                     ListFrom
