@@ -475,47 +475,13 @@ sealed class StylerComponent : Component<StylerComponent.State>
 
         new()
         {
-            Label = "Space",
+            Label = "P",
 
             SubGroups =
             [
                 new()
                 {
-                    Label = "padding",
-
-                    TargetCssName = "padding",
-
-                    IsCssUnitEnabled = true,
-
-                    Suggestions =
-                    [
-                        new("4px"),
-                        new("8px"),
-                        new("16px"),
-                        new("auto")
-                    ]
-                },
-
-                new()
-                {
-                    Label = "margin",
-
-                    TargetCssName = "margin",
-
-                    IsCssUnitEnabled = true,
-
-                    Suggestions =
-                    [
-                        new("4px"),
-                        new("8px"),
-                        new("16px"),
-                        new("auto")
-                    ]
-                },
-
-                new()
-                {
-                    Label = "p · L",
+                    Label = "l",
 
                     TargetCssName = "padding-left",
 
@@ -532,7 +498,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
 
                 new()
                 {
-                    Label = "p · R",
+                    Label = "r",
 
                     TargetCssName = "padding-right",
 
@@ -546,10 +512,10 @@ sealed class StylerComponent : Component<StylerComponent.State>
                         new("24px")
                     ]
                 },
-
+                null,
                 new()
                 {
-                    Label = "p · T",
+                    Label = "t",
 
                     TargetCssName = "padding-top",
 
@@ -566,7 +532,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
 
                 new()
                 {
-                    Label = "p · B",
+                    Label = "b",
 
                     TargetCssName = "padding-bottom",
 
@@ -581,62 +547,17 @@ sealed class StylerComponent : Component<StylerComponent.State>
                     ]
                 },
 
-                new()
-                {
-                    Label = "m · L",
+                null,
 
-                    TargetCssName = "margin-left",
+                null,
 
-                    IsCssUnitEnabled = true,
-
-                    Suggestions =
-                    [
-                        new("4px"),
-                        new("8px"),
-                        new("16px"),
-                        new("24px")
-                    ]
-                },
+                null,
 
                 new()
                 {
-                    Label = "m · R",
+                    Label = "padding",
 
-                    TargetCssName = "margin-right",
-
-                    IsCssUnitEnabled = true,
-
-                    Suggestions =
-                    [
-                        new("4px"),
-                        new("8px"),
-                        new("16px"),
-                        new("24px")
-                    ]
-                },
-
-                new()
-                {
-                    Label = "m · T",
-
-                    TargetCssName = "margin-top",
-
-                    IsCssUnitEnabled = true,
-
-                    Suggestions =
-                    [
-                        new("4px"),
-                        new("8px"),
-                        new("16px"),
-                        new("24px")
-                    ]
-                },
-
-                new()
-                {
-                    Label = "m · B",
-
-                    TargetCssName = "margin-bottom",
+                    TargetCssName = "padding",
 
                     IsCssUnitEnabled = true,
 
@@ -653,115 +574,13 @@ sealed class StylerComponent : Component<StylerComponent.State>
         
         new()
         {
-            Label = "Space",
+            Label = "M",
 
             SubGroups =
             [
                 new()
                 {
-                    Label = "padding",
-
-                    TargetCssName = "padding",
-
-                    IsCssUnitEnabled = true,
-
-                    Suggestions =
-                    [
-                        new("4px"),
-                        new("8px"),
-                        new("16px"),
-                        new("auto")
-                    ]
-                },
-
-                new()
-                {
-                    Label = "margin",
-
-                    TargetCssName = "margin",
-
-                    IsCssUnitEnabled = true,
-
-                    Suggestions =
-                    [
-                        new("4px"),
-                        new("8px"),
-                        new("16px"),
-                        new("auto")
-                    ]
-                },
-
-                new()
-                {
-                    Label = "p · L",
-
-                    TargetCssName = "padding-left",
-
-                    IsCssUnitEnabled = true,
-
-                    Suggestions =
-                    [
-                        new("4px"),
-                        new("8px"),
-                        new("16px"),
-                        new("24px")
-                    ]
-                },
-
-                new()
-                {
-                    Label = "p · R",
-
-                    TargetCssName = "padding-right",
-
-                    IsCssUnitEnabled = true,
-
-                    Suggestions =
-                    [
-                        new("4px"),
-                        new("8px"),
-                        new("16px"),
-                        new("24px")
-                    ]
-                },
-
-                new()
-                {
-                    Label = "p · T",
-
-                    TargetCssName = "padding-top",
-
-                    IsCssUnitEnabled = true,
-
-                    Suggestions =
-                    [
-                        new("4px"),
-                        new("8px"),
-                        new("16px"),
-                        new("24px")
-                    ]
-                },
-
-                new()
-                {
-                    Label = "p · B",
-
-                    TargetCssName = "padding-bottom",
-
-                    IsCssUnitEnabled = true,
-
-                    Suggestions =
-                    [
-                        new("4px"),
-                        new("8px"),
-                        new("16px"),
-                        new("24px")
-                    ]
-                },
-
-                new()
-                {
-                    Label = "m · L",
+                    Label = "l",
 
                     TargetCssName = "margin-left",
 
@@ -778,7 +597,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
 
                 new()
                 {
-                    Label = "m · R",
+                    Label = "r",
 
                     TargetCssName = "margin-right",
 
@@ -792,10 +611,10 @@ sealed class StylerComponent : Component<StylerComponent.State>
                         new("24px")
                     ]
                 },
-
+                null,
                 new()
                 {
-                    Label = "m · T",
+                    Label = "t",
 
                     TargetCssName = "margin-top",
 
@@ -812,9 +631,32 @@ sealed class StylerComponent : Component<StylerComponent.State>
 
                 new()
                 {
-                    Label = "m · B",
+                    Label = "b",
 
                     TargetCssName = "margin-bottom",
+
+                    IsCssUnitEnabled = true,
+
+                    Suggestions =
+                    [
+                        new("4px"),
+                        new("8px"),
+                        new("16px"),
+                        new("24px")
+                    ]
+                },
+
+                null,
+
+                null,
+
+                null,
+
+                new()
+                {
+                    Label = "margin",
+
+                    TargetCssName = "margin",
 
                     IsCssUnitEnabled = true,
 
@@ -1064,7 +906,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
 
     SubGroupItemModel ActiveSubGroup =>
         FirstOrDefaultOf(from sg in ActiveGroup?.SubGroups ?? []
-                         where sg.Label == state.SelectedSubGroupName
+                         where sg is not null &&  sg.Label == state.SelectedSubGroupName
                          select sg);
 
     bool HasAnyActiveSubGroup => ActiveSubGroup != null;
@@ -1330,7 +1172,12 @@ sealed class StylerComponent : Component<StylerComponent.State>
         var groupModel = AllGroups.First(x => x.Label == groupName);
         if (groupModel.SubGroups.Count > index)
         {
-            return groupModel.SubGroups[index].Label;
+            var subGroup = groupModel.SubGroups[index];
+            if (subGroup is null)
+            {
+                return null;
+            }
+            return subGroup.Label;
         }
 
         return null;
@@ -1428,6 +1275,11 @@ sealed class StylerComponent : Component<StylerComponent.State>
                 return string.Empty;
             }
 
+            return draw() + ArrangeSizeForTopBottomLeftRight;
+        }
+        
+        Element draw()
+        {
             return new div(OnMouseEnter(OnSubGroupItemMouseEnter), Id(Label), BorderRadius(4), DisplayFlex, JustifyContentCenter, AlignItemsCenter, WidthFitContent, HeightFitContent, TextAlignCenter, Padding(4), LineHeight16, Background(White), DisplayFlex, Gap(3), IsSelected ? Background(Gray200) : Background(White), Border(1, solid, Gray300), FlexWrap, FontSize13)
             {
                 from item in GetChars()
@@ -1436,6 +1288,24 @@ sealed class StylerComponent : Component<StylerComponent.State>
                     item
                 }
             };
+        }
+
+        StyleModifier ArrangeSizeForTopBottomLeftRight
+        {
+            get
+            {
+                if (Label =="t" || Label =="b")
+                {
+                    return PaddingY(8);
+                }
+                
+                if (Label =="l" || Label =="r")
+                {
+                    return PaddingX(8);
+                }
+
+                return null;
+            }
         }
 
         IReadOnlyList<string> GetChars()
