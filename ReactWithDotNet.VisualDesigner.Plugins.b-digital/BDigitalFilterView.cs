@@ -5,8 +5,8 @@ using ReactWithDotNet.VisualDesigner.Exporters;
 namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
 [CustomComponent]
-[Import(Name = "BDigitalFilterView", Package = "b-digital-filter-view")]
-sealed class BDigitalFilterView : PluginComponentBase
+[Import(Name = nameof(BDigitalFilterView), Package = "b-digital-filter-view")]
+sealed class  BDigitalFilterView: PluginComponentBase
 {
     [JsTypeInfo(JsType.Date)]
     public string beginDate { get; set; }
@@ -148,7 +148,7 @@ sealed class BDigitalFilterView : PluginComponentBase
                     {
                         beginDateLabel + " | " + beginDate
                     },
-                    new DynamicMuiIcon { name = "CalendarMonthOutlined", fontSize = "medium" }
+                    new BSymbol { symbol = "Calendar_Month", weight = "400", color = rgb(22, 160, 133)}
                 }
             },
 
@@ -160,7 +160,9 @@ sealed class BDigitalFilterView : PluginComponentBase
                     {
                         endDateLabel + " | " + endDate
                     },
-                    new DynamicMuiIcon { name = "CalendarMonthOutlined", fontSize = "medium" }
+                    
+                    new BSymbol { symbol = "Calendar_Month", weight = "400", color = rgb(22, 160, 133)}
+                    
                 }
             },
 
@@ -168,7 +170,11 @@ sealed class BDigitalFilterView : PluginComponentBase
 
             new BButton
             {
-                text = "Sonuçları Göster"
+                text      = "Sonuçları Göster",
+                type      ="raised",
+                colorType ="primary",
+                fullWidth = "true",
+                style=new Style(MarginTop(8))
             }
         };
     }

@@ -13,8 +13,19 @@ sealed class BButton : PluginComponentBase
     [JsTypeInfo(JsType.String)]
     public string text { get; set; }
     
+    
+    [Suggestions("raised , flat")]
     [JsTypeInfo(JsType.String)]
     public string type { get; set; }
+    
+    [Suggestions("primary")]
+    [JsTypeInfo(JsType.String)]
+    public string colorType { get; set; }
+    
+    
+    [Suggestions("true , false")]
+    [JsTypeInfo(JsType.Boolean)]
+    public string fullWidth { get; set; }
 
     [NodeAnalyzer]
     public static NodeAnalyzeOutput AnalyzeReactNode(NodeAnalyzeInput input)
@@ -55,23 +66,39 @@ sealed class BButton : PluginComponentBase
         return AnalyzeChildren(input with { Node = node }, AnalyzeReactNode);
     }
 
+    public Style style { get; set; }
+    
     protected override Element render()
     {
+        var variant = type switch
+        {
+            "raised"=>"contained",
+            
+            _=> "text"
+        };
+
+        Style defaultStyle = [];
+        
+        if (colorType == "primary")
+        {
+            defaultStyle = [FontWeightBold, TextTransform(none), BackgroundColor("#16A085"), Color("white"), BorderRadius(10)];
+        }
 
         return new Button
         {
-            variant = type ?? "text",
-            
+            fullWidth = fullWidth == "true",
+
+            style = { defaultStyle, style },
+
+            variant = variant,
+
             id = id,
-            
+
             onClick = onMouseClick,
-            
-            color = "success",
-            
-            sx={ textTransform= "none", fontWeight= "bold", color = "#16A085"},
-            children=
+
+            children =
             {
-                new div{ text}
+                new div { text }
             }
         };
 

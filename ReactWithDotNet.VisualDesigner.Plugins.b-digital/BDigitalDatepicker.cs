@@ -161,8 +161,8 @@ sealed class BDigitalDatepicker : PluginComponentBase
                 {
                     textContent
                 },
-                new DynamicMuiIcon { name = "CalendarMonthOutlined", fontSize = "medium" }
+                new BSymbol { symbol = "CalendarMonthOutlined", weight = "500", color = rgb(22, 160, 133)}
             }
-        };
+        }; 
     }
 }
