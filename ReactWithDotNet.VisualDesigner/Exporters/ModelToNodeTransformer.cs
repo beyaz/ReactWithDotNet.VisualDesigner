@@ -108,7 +108,7 @@ static class ModelToNodeTransformer
 
             if (project.ExportStylesAsInline)
             {
-                var listOfStyleAttributes = 
+                var listOfStyleAttributes = ListFrom
                 (
                     from text in styles
                     where !Design.IsDesignTimeName(ParseStyleAttribute(text).Name)
@@ -117,7 +117,12 @@ static class ModelToNodeTransformer
                     from finalCssItem1 in ReprocessFontWeight(finalCssItem)
                     from value in RecalculateCssValueForOutput(finalCssItem1.Name, finalCssItem1.Value)
                     select $"{KebabToCamelCase(finalCssItem.Name)}: {value}"
-                ).AsReadOnlyList();
+                );
+                
+                if (listOfStyleAttributes.HasError)
+                {
+                    return listOfStyleAttributes.Error;
+                }
 
                 if (listOfStyleAttributes.Value.Count > 0)
                 {

@@ -133,7 +133,7 @@ public static class Extensions
         return source as IReadOnlyList<T> ?? source.ToList();
     }
     
-    public static Result<IReadOnlyList<T>> AsReadOnlyList<T>(this IEnumerable<Result<T>> source)
+    public static Result<IReadOnlyList<T>> ListFrom<T>(IEnumerable<Result<T>> source)
     {
         var list = new List<T>();
         foreach (var result in source)
@@ -406,22 +406,6 @@ public static class Extensions
         return enumerable.ToList();
     }
 
-    public static Result<List<T>> ListFrom<T>(IEnumerable<Result<T>> enumerable)
-    {
-        var items = new List<T>();
-
-        foreach (var item in enumerable)
-        {
-            if (item.HasError)
-            {
-                return item.Error;
-            }
-
-            items.Add(item.Value);
-        }
-
-        return items;
-    }
 
     public static IReadOnlyDictionary<string, string> MapFrom((string key, string value)[] items)
     {
