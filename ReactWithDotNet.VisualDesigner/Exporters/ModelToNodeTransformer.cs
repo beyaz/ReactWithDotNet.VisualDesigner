@@ -1,5 +1,5 @@
-﻿using System.Collections.Immutable;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
+using System.Collections.Immutable;
 
 namespace ReactWithDotNet.VisualDesigner.Exporters;
 
@@ -186,44 +186,49 @@ static class ModelToNodeTransformer
 
             if (project.ExportAsCSharpString)
             {
-                List<FinalCssItem> listOFinalCssItems = [];
+                IReadOnlyList<FinalCssItem> listOFinalCssItems;
                 {
-                    foreach (var text in styles)
-                    {
-                        var designerStyleItem = CreateDesignerStyleItemFromText(project, text);
-                        if (designerStyleItem.HasError)
+                    var result = ListFrom
+                    (
+                        from text in styles
+                        where !Design.IsDesignTimeName(ParseStyleAttribute(text).Name)
+                        from item in CreateDesignerStyleItemFromText(project, text)
+                        from _ in EnsurePseudoIsEmpty(item)
+                        from finalCssItem in item.FinalCssItems
+                        from finalValue in CreateFinalCssItem(new()
                         {
-                            return designerStyleItem.Error;
-                        }
+                            Name = finalCssItem.Name,
 
-                        if (designerStyleItem.Value.Pseudo.HasValue())
-                        {
-                            return new NotSupportedException($"Pseudo styles are not supported in inline styles. {text}");
-                        }
-
-                        foreach (var finalCssItem in designerStyleItem.Value.FinalCssItems)
-                        {
-                            var finalCssItemResult = CreateFinalCssItem(new()
+                            Value = finalCssItem.Value switch
                             {
-                                Name = finalCssItem.Name,
+                                null => null,
 
-                                Value = finalCssItem.Value switch
-                                {
-                                    null => null,
+                                var x when x.StartsWith("request.") || x.StartsWith("context.") => x,
 
-                                    var x when x.StartsWith("request.") || x.StartsWith("context.") => x,
-
-                                    var x => TryClearStringValue(x)
-                                }
-                            });
-                            if (finalCssItemResult.HasError)
-                            {
-                                return finalCssItemResult.Error;
+                                var x => TryClearStringValue(x)
                             }
-
-                            listOFinalCssItems.Add(finalCssItemResult.Value);
-                        }
+                        })
+                        
+                        select finalValue
+                    );
+                
+                    if (result.HasError)
+                    {
+                        return result.Error;
                     }
+                    listOFinalCssItems = result.Value;
+
+
+                    static Result<DesignerStyleItem> EnsurePseudoIsEmpty(DesignerStyleItem item)
+                    {
+                        if (item.Pseudo.HasValue())
+                        {
+                            return new NotSupportedException($"Pseudo styles are not supported in inline styles. {item.OriginalText}");
+                        }
+
+                        return Result.From(item);
+                    }
+                    
                 }
 
                 if (listOFinalCssItems.Count > 0)
