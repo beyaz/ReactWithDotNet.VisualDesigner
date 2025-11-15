@@ -129,10 +129,7 @@ static class ModelToNodeTransformer
 
                             var value = finalCssItem.Value;
                             
-                            if (value.HasNoValue())
-                            {
-                                return new ArgumentException($"{name} has no value.");
-                            }
+                            
 
                             var parseResult = TryParseConditionalValue(finalCssItem.Value);
                             if (parseResult.success)
@@ -275,6 +272,35 @@ static class ModelToNodeTransformer
             }
 
             return props;
+
+            static Result<FinalCssItem> ReprocessFontWeight(FinalCssItem finalCssItem)
+            {
+                if (finalCssItem.Name !="font-weight")
+                {
+                    return Result.From(finalCssItem);
+                }
+                
+                var fontWeightMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    { "100","thin" },
+                    { "200","extralight" },
+                    { "300","light" },
+                    { "400","normal" },
+                    { "500","medium" },
+                    { "600","semibold" },
+                    { "700","bold" },
+                    { "800","extrabold" },
+                    { "900","black" }
+                };
+
+                if (fontWeightMap.TryGetValue(finalCssItem.Value, out var weightAsName))
+                {
+                    return CreateFinalCssItem(finalCssItem.Name, weightAsName);
+                }
+
+                return Result.From(finalCssItem);
+            }
+            
         }
 
         static Result<IReadOnlyList<ReactProperty>> calculatePropsForTailwind(ProjectConfig project, IReadOnlyList<string> properties, IReadOnlyList<string> styles)
