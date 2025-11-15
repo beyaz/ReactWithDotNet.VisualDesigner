@@ -110,6 +110,20 @@ static class ModelToNodeTransformer
             {
                 List<string> listOfStyleAttributes = [];
                 {
+                    
+                    //var a =
+                    //    from text in styles
+                    //    where !Design.IsDesignTimeName(ParseStyleAttribute(text).Name)
+                    //    from item in CreateDesignerStyleItemFromText(project, text)
+                    //    from finalCssItem in item.FinalCssItems
+                    //    from finalCssItem1 in ReprocessFontWeight(finalCssItem)
+                    //    from value in RecalculateCssValueForOutput(finalCssItem1.Name, finalCssItem1.Value)
+                    //    select $"{KebabToCamelCase(finalCssItem.Name)}: {value}";
+
+
+                    //listOfStyleAttributes.AddRange(a.Value);
+                    
+                    
                     foreach (var text in styles)
                     {
                         if (Design.IsDesignTimeName(ParseStyleAttribute(text).Name))
