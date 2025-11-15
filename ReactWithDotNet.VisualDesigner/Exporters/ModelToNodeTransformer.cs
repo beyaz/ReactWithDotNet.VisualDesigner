@@ -194,8 +194,11 @@ static class ModelToNodeTransformer
                     Value = parsedProperty.Value
                 },
                 
-                [styleProp]
-               
+                from x in ListFrom(styleProp) 
+                from y in x
+                where y is not null 
+                select y
+
             );
 
             static Result<DesignerStyleItem> EnsurePseudoIsEmpty(DesignerStyleItem item)

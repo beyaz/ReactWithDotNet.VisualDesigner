@@ -154,6 +154,16 @@ public static class Extensions
         return new List<T> { source };
     }
     
+    public static Result<IReadOnlyList<T>> ListFrom<T>(Result<T> source)
+    {
+        if (source.HasError)
+        {
+            return source.Error;
+        }
+        
+        return new List<T> { source.Value };
+    }
+    
     public static Result<IReadOnlyList<T>> ListFrom<T>(params IEnumerable<Result<T>>[] sources)
     {
         var list = new List<T>();
