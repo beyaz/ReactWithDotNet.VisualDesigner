@@ -1275,11 +1275,6 @@ sealed class StylerComponent : Component<StylerComponent.State>
                 return string.Empty;
             }
 
-            return draw() + ArrangeSizeForTopBottomLeftRight;
-        }
-        
-        Element draw()
-        {
             return new div(OnMouseEnter(OnSubGroupItemMouseEnter), Id(Label), BorderRadius(4), DisplayFlex, JustifyContentCenter, AlignItemsCenter, WidthFitContent, HeightFitContent, TextAlignCenter, Padding(4), LineHeight16, Background(White), DisplayFlex, Gap(3), IsSelected ? Background(Gray200) : Background(White), Border(1, solid, Gray300), FlexWrap, FontSize13)
             {
                 from item in GetChars()
@@ -1289,7 +1284,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                 }
             };
         }
-
+        
         StyleModifier ArrangeSizeForTopBottomLeftRight
         {
             get
