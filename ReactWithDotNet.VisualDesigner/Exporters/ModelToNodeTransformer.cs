@@ -136,44 +136,39 @@ static class ModelToNodeTransformer
             
             if (project.ExportAsCSharp)
             {
-                List<StyleAttribute> listOfStyleAttributes = [];
+                IReadOnlyList<StyleAttribute> listOfStyleAttributes;
                 {
-                    foreach (var text in styles)
-                    {
-                        if (Design.IsDesignTimeName(ParseStyleAttribute(text).Name))
+                    var result = ListFrom
+                    (
+                        from text in styles
+                        where !Design.IsDesignTimeName(ParseStyleAttribute(text).Name)
+                        from item in CreateDesignerStyleItemFromText(project, text)
+                        from finalCssItem in item.FinalCssItems
+                        select new StyleAttribute
                         {
-                            continue;
-                        }
+                            Pseudo = item.Pseudo,
 
-                        var item = CreateDesignerStyleItemFromText(project, text);
-                        if (item.HasError)
-                        {
-                            return item.Error;
-                        }
+                            Name = KebabToCamelCase(finalCssItem.Name),
 
-                        foreach (var finalCssItem in item.Value.FinalCssItems)
-                        {
-                            var styleAttribute = new StyleAttribute
+                            Value = finalCssItem.Value switch
                             {
-                                Pseudo = item.Value.Pseudo,
+                                null => null,
 
-                                Name = KebabToCamelCase(finalCssItem.Name),
+                                var x when x.StartsWith("request.") || x.StartsWith("context.") => x,
 
-                                Value = finalCssItem.Value switch
-                                {
-                                    null => null,
-
-                                    var x when x.StartsWith("request.") || x.StartsWith("context.") => x,
-
-                                    var x => '"' + TryClearStringValue(x) + '"'
-                                }
-                            };
-
-                            listOfStyleAttributes.Add(styleAttribute);
+                                var x => '"' + TryClearStringValue(x) + '"'
+                            }
                         }
+                    );
+                
+                    if (result.HasError)
+                    {
+                        return result.Error;
                     }
+                    listOfStyleAttributes = result.Value;
                 }
-
+                
+                
                 if (listOfStyleAttributes.Count > 0)
                 {
                     props.Add(new()
