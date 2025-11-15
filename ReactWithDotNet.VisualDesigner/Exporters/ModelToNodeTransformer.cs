@@ -98,35 +98,32 @@ static class ModelToNodeTransformer
                     Value = parsedProperty.Value
                 },
                 
-                
-                
-                // tsx
-                project.ExportStylesAsInline ?
-                    ListFrom
-                    (
-                        from listOfStyleAttributes in ListFrom
+                project switch
+                {
+                    {ExportStylesAsInline: true}=> ListFrom
                         (
-                            from text in styles
-                            where !Design.IsDesignTimeName(ParseStyleAttribute(text).Name)
-                            from item in CreateDesignerStyleItemFromText(project, text)
-                            from finalCssItem in item.FinalCssItems
-                            from finalCssItem1 in ReprocessFontWeight(finalCssItem)
-                            from value in RecalculateCssValueForOutput(finalCssItem1.Name, finalCssItem1.Value)
-                            select $"{KebabToCamelCase(finalCssItem.Name)}: {value}"
-                        )
-                        select (listOfStyleAttributes.Count > 0) switch
-                        {
-                            true => new ReactProperty
+                            from listOfStyleAttributes in ListFrom
+                            (
+                                from text in styles
+                                where !Design.IsDesignTimeName(ParseStyleAttribute(text).Name)
+                                from item in CreateDesignerStyleItemFromText(project, text)
+                                from finalCssItem in item.FinalCssItems
+                                from finalCssItem1 in ReprocessFontWeight(finalCssItem)
+                                from value in RecalculateCssValueForOutput(finalCssItem1.Name, finalCssItem1.Value)
+                                select $"{KebabToCamelCase(finalCssItem.Name)}: {value}"
+                            )
+                            select (listOfStyleAttributes.Count > 0) switch
                             {
-                                Name  = "style",
-                                Value = "{" + string.Join(", ", listOfStyleAttributes) + "}"
-                            },
-                            false => null
-                        }
-                    ) : Enumerable.Empty<Result<ReactProperty>>(),
-                
-                project.ExportAsCSharp ?
-                    ListFrom
+                                true => new ReactProperty
+                                {
+                                    Name  = "style",
+                                    Value = "{" + string.Join(", ", listOfStyleAttributes) + "}"
+                                },
+                                false => null
+                            }
+                        ),
+                    
+                    {ExportAsCSharp: true}=> ListFrom
                     (
                         from listOfStyleAttributes in ListFrom
                         (
@@ -159,48 +156,46 @@ static class ModelToNodeTransformer
                             },
                             false => null
                         }
-                    ) : Enumerable.Empty<Result<ReactProperty>>(),
-                
-                
-                project.ExportAsCSharpString ?
-                    ListFrom
-                    (
-                        from listOFinalCssItems in ListFrom
+                    ) ,
+                    
+                    {ExportAsCSharpString:true}=>
+                        ListFrom
                         (
-                            from text in styles
-                            where !Design.IsDesignTimeName(ParseStyleAttribute(text).Name)
-                            from item in CreateDesignerStyleItemFromText(project, text)
-                            from _ in EnsurePseudoIsEmpty(item)
-                            from finalCssItem in item.FinalCssItems
-                            from finalValue in CreateFinalCssItem(new()
-                            {
-                                Name = finalCssItem.Name,
-
-                                Value = finalCssItem.Value switch
+                            from listOFinalCssItems in ListFrom
+                            (
+                                from text in styles
+                                where !Design.IsDesignTimeName(ParseStyleAttribute(text).Name)
+                                from item in CreateDesignerStyleItemFromText(project, text)
+                                from _ in EnsurePseudoIsEmpty(item)
+                                from finalCssItem in item.FinalCssItems
+                                from finalValue in CreateFinalCssItem(new()
                                 {
-                                    null => null,
+                                    Name = finalCssItem.Name,
 
-                                    var x when x.StartsWith("request.") || x.StartsWith("context.") => x,
+                                    Value = finalCssItem.Value switch
+                                    {
+                                        null => null,
 
-                                    var x => TryClearStringValue(x)
-                                }
-                            })
+                                        var x when x.StartsWith("request.") || x.StartsWith("context.") => x,
+
+                                        var x => TryClearStringValue(x)
+                                    }
+                                })
                         
-                            select finalValue
-                        )
-                        select (listOFinalCssItems.Count > 0) switch
-                        {
-                            true => new ReactProperty
+                                select finalValue
+                            )
+                            select (listOFinalCssItems.Count > 0) switch
                             {
-                                Name  = "style",
-                                Value = JsonConvert.SerializeObject(listOFinalCssItems, new JsonSerializerSettings{ TypeNameHandling = TypeNameHandling.Auto})
-                            },
-                            false => null
-                        }
-                    ) : Enumerable.Empty<Result<ReactProperty>>()
-
-
-               
+                                true => new ReactProperty
+                                {
+                                    Name  = "style",
+                                    Value = JsonConvert.SerializeObject(listOFinalCssItems, new JsonSerializerSettings{ TypeNameHandling = TypeNameHandling.Auto})
+                                },
+                                false => null
+                            }
+                        ) ,
+                    _=> ListFrom(Result.Error<ReactProperty>(new Exception("Project config Error")))
+                }
 
             );
 
