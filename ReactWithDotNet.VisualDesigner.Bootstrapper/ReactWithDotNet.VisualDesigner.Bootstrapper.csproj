@@ -1,53 +1,57 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>net8.0</TargetFramework>
-    <AssemblyName>ReactWithDotNet.VisualDesigner.Bootstrapper</AssemblyName>
-    <StartupObject>ReactWithDotNet.VisualDesigner.Bootstrapper.Program</StartupObject>
-    <ApplicationIcon>favicon.ico</ApplicationIcon>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <Content Include="favicon.ico" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Data.SqlClient" Version="6.1.0" />
-  </ItemGroup>
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net8.0</TargetFramework>
+        <AssemblyName>ReactWithDotNet.VisualDesigner.Bootstrapper</AssemblyName>
+        <StartupObject>ReactWithDotNet.VisualDesigner.Bootstrapper.Program</StartupObject>
+        <ApplicationIcon>favicon.ico</ApplicationIcon>
+    </PropertyGroup>
 
     <ItemGroup>
-        <RuntimeHostConfigurationOption Include="InstallationFolder" Value="{MyDocuments}\ApiInspector\Application\Api Inspector (.net method invoker)\" />
-        <RuntimeHostConfigurationOption Include="VersionUrl" Value="https://raw.githubusercontent.com/beyaz/ApiInspector/main/ApiInspector.Bootstrapper/Version.txt" />
-        <RuntimeHostConfigurationOption Include="NewVersionZipFileUrl" Value="https://github.com/beyaz/ApiInspector/raw/main/ApiInspector.Bootstrapper/ApiInspectorLatestVersion.zip" />
+        <Content Include="favicon.ico" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.Data.SqlClient" Version="6.1.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+
+        <RuntimeHostConfigurationOption
+            Include="AppExeFilePath"
+            Value="d:\boa\tools\b-digital-api-to-ts-exporter\ReactWithDotNet.VisualDesigner.exe"
+        />
+
+        <RuntimeHostConfigurationOption
+            Include="DbConnectionString"
+            Value="Server=srvdev\atlas;Database=boa;Integrated Security=true;TrustServerCertificate=true;"
+        />
+
+        <RuntimeHostConfigurationOption
+            Include="InstallationFolder"
+            Value="d:\boa\tools\b-digital-api-to-ts-exporter\"
+        />
 
         <RuntimeHostConfigurationOption
             Include="KillAllNamedProcess"
             Value="ReactWithDotNet.VisualDesigner.Bootstrapper, ReactWithDotNet.VisualDesigner"
         />
-        
-        <RuntimeHostConfigurationOption 
-            Include="DbConnectionString"
-            Value="Server=srvdev\atlas;Database=boa;Integrated Security=true;TrustServerCertificate=true;"
-            />
 
         <RuntimeHostConfigurationOption
-            Include="QueryGetLastModificationDate"
-            Value="SELECT LastModification FROM [WHT].[File] WHERE ApplicationName = 'b-digital-api-to-ts-exporter'"
+            Include="LocalZipFilePath"
+            Value="d:\boa\tools\b-digital-api-to-ts-exporter\archive.zip"
         />
 
         <RuntimeHostConfigurationOption
             Include="QueryGetFileContent"
             Value="SELECT Content FROM [WHT].[File] WHERE ApplicationName = 'b-digital-api-to-ts-exporter'"
         />
-        
+
         <RuntimeHostConfigurationOption
-            Include="LocalZipFilePath"
-            Value="d:\boa\tools\b-digital-api-to-ts-exporter\archive.zip"
+            Include="QueryGetLastModificationDate"
+            Value="SELECT LastModification FROM [WHT].[File] WHERE ApplicationName = 'b-digital-api-to-ts-exporter'"
         />
-
-        
-
 
     </ItemGroup>
 

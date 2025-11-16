@@ -27,13 +27,13 @@ static class Program
     {
         return new Config
         {
-            InstallationFolder           = (string)AppContext.GetData(nameof(Config.InstallationFolder)),
             AppExeFilePath               = (string)AppContext.GetData(nameof(Config.AppExeFilePath)),
-            KillAllNamedProcess          = (string)AppContext.GetData(nameof(Config.KillAllNamedProcess)),
             DbConnectionString           = (string)AppContext.GetData(nameof(Config.DbConnectionString)),
-            QueryGetLastModificationDate = (string)AppContext.GetData(nameof(Config.QueryGetLastModificationDate)),
+            InstallationFolder           = (string)AppContext.GetData(nameof(Config.InstallationFolder)),
+            KillAllNamedProcess          = (string)AppContext.GetData(nameof(Config.KillAllNamedProcess)),
             LocalZipFilePath             = (string)AppContext.GetData(nameof(Config.LocalZipFilePath)),
-            QueryGetFileContent          = (string)AppContext.GetData(nameof(Config.QueryGetFileContent))
+            QueryGetFileContent          = (string)AppContext.GetData(nameof(Config.QueryGetFileContent)),
+            QueryGetLastModificationDate = (string)AppContext.GetData(nameof(Config.QueryGetLastModificationDate)),
         };
     }
 
