@@ -21,10 +21,10 @@
 /BDigitalFrameworkApiToTsExporter/bin
 /BDigitalFrameworkApiToTsExporter/_ReSharper.Caches/
 
-/ReactWithDotNet.VisualDesigner.Plugins.b-digital/bin
-/ReactWithDotNet.VisualDesigner.Plugins.b-digital/obj
-/ReactWithDotNet.VisualDesigner.Plugins.b-digital-api-to-ts-exporter/bin
-/ReactWithDotNet.VisualDesigner.Plugins.b-digital-api-to-ts-exporter/obj
+/Plugins/ReactWithDotNet.VisualDesigner.Plugins.b-digital/bin
+/Plugins/ReactWithDotNet.VisualDesigner.Plugins.b-digital/obj
+/Plugins/ReactWithDotNet.VisualDesigner.Plugins.b-digital-api-to-ts-exporter/bin
+/Plugins/ReactWithDotNet.VisualDesigner.Plugins.b-digital-api-to-ts-exporter/obj
 
 
 /Bootstrappers/.vs/
@@ -37,4 +37,3 @@
 /Bootstrappers/b-visual-designer/Properties/PublishProfiles/FolderProfile.pubxml.user
 /Bootstrappers/b-visual-designer/bin
 /Bootstrappers/b-visual-designer/b-visual-designer.csproj.user
-/Plugins/ReactWithDotNet.VisualDesigner.Plugins.b-digital/bin/Debug/net8.0
