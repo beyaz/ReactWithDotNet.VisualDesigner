@@ -98,6 +98,8 @@ static class Program
                             process.Kill(true);
                         }
                     }
+
+                    File.Delete(file);
                 }
             }
         }
@@ -186,7 +188,7 @@ static class Program
                 WorkingDirectory = Path.GetDirectoryName(config.AppExeFilePath) ?? Environment.CurrentDirectory,
 
                 CreateNoWindow = true,
-                
+
                 UseShellExecute = false
             };
 
