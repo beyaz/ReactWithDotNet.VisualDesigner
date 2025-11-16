@@ -88,6 +88,10 @@ static class Program
             // G e t   l a t e s t   v e r s i o n
             if (needToUpdate)
             {
+                trace("Deleting old version");
+
+                Directory.Delete(config.InstallationFolder, true);
+
                 trace("Getting latest version.");
 
                 await using var command = new SqlCommand(config.QueryGetFileContent, connection);
