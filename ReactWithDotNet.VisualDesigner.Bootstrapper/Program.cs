@@ -122,7 +122,7 @@ static class Program
 
             var processStartInfo = new ProcessStartInfo(config.AppExeFilePath)
             {
-                WorkingDirectory = Path.GetDirectoryName(config.AppExeFilePath) ?? string.Empty
+                WorkingDirectory = Path.GetDirectoryName(config.AppExeFilePath) ?? Environment.CurrentDirectory
             };
 
             var process = Process.Start(processStartInfo);
@@ -141,6 +141,7 @@ static class Program
         public string AppExeFilePath { get; init; }
 
         public string DbConnectionString { get; init; }
+
         public string InstallationFolder { get; init; }
 
         public string KillAllNamedProcess { get; init; }
