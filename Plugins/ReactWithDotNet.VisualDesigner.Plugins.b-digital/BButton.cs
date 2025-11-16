@@ -66,7 +66,7 @@ sealed class BButton : PluginComponentBase
         return AnalyzeChildren(input with { Node = node }, AnalyzeReactNode);
     }
 
-    public Style style { get; set; }
+    internal Style style { get; set; }
     
     protected override Element render()
     {
