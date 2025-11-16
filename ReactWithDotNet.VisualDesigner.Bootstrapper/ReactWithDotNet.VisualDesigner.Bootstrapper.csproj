@@ -3,8 +3,8 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
-    <AssemblyName>ApiInspector</AssemblyName>
-    <StartupObject>ApiInspector.Bootstrapper.Program</StartupObject>
+    <AssemblyName>ReactWithDotNet.VisualDesigner.Bootstrapper</AssemblyName>
+    <StartupObject>ReactWithDotNet.VisualDesigner.Bootstrapper.Program</StartupObject>
     <ApplicationIcon>favicon.ico</ApplicationIcon>
   </PropertyGroup>
 

@@ -5,7 +5,7 @@ using System.IO.Compression;
 using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace ApiInspector.Bootstrapper;
+namespace ReactWithDotNet.VisualDesigner.Bootstrapper;
 
 static class Program
 {
