@@ -57,32 +57,31 @@ static class Exporter
             {
                 from propertyDefinition in modelTypeDefinition.Properties
                 let propertyType = propertyDefinition.PropertyType
-                let propertyTypeDefinition = propertyDefinition switch
-                {
-                    _ when IsCollection(propertyType) => ((GenericInstanceType)propertyType).GenericArguments[0].Resolve(),
-
-                    _ => propertyType.Resolve()
-                }
-                where IsExtraType(externalTypes, propertyTypeDefinition)
-                select propertyTypeDefinition
+                where IsExtraType(externalTypes, propertyType)
+                select propertyType.Resolve()
             };
 
-            static bool IsExtraType(IReadOnlyList<ExternalTypeInfo> externalTypes, TypeDefinition typeDefinition)
+            static bool IsExtraType(IReadOnlyList<ExternalTypeInfo> externalTypes, TypeReference typeReference)
             {
+                if (CecilHelper.IsNullableType(typeReference) || IsCollection(typeReference))
+                {
+                    return IsExtraType(externalTypes, ((GenericInstanceType)typeReference).GenericArguments[0]);
+                }
+                
                 foreach (var externalType in externalTypes)
                 {
-                    if (externalType.DotNetFullTypeName == typeDefinition.FullName)
+                    if (externalType.DotNetFullTypeName == typeReference.FullName)
                     {
                         return false;
                     }
                 }
                 
-                if (typeDefinition.IsString || typeDefinition.IsNumber || typeDefinition.IsBoolean || typeDefinition.IsDateTime || typeDefinition.IsObject)
+                if (typeReference.IsString || typeReference.IsNumber || typeReference.IsBoolean || typeReference.IsDateTime || typeReference.IsObject)
                 {
                     return false;
                 }
 
-                return typeDefinition.BaseType?.FullName == "System.Object";
+                return typeReference.Resolve().BaseType?.FullName == "System.Object";
             }
 
             static bool IsCollection(TypeReference typeReference)
