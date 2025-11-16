@@ -1,0 +1,41 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net8.0</TargetFramework>
+        <AssemblyName>b-digital-api-to-ts-exporter</AssemblyName>
+        <StartupObject>ReactWithDotNet.VisualDesigner.Bootstrapper.Program</StartupObject>
+        <ApplicationIcon>app.ico</ApplicationIcon>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <Compile Include="..\Program.cs" Link="Program.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Content Include="app.ico" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.Data.SqlClient" Version="6.1.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+
+        <RuntimeHostConfigurationOption Include="AppExeFilePath" Value="d:\boa\tools\b-digital-api-to-ts-exporter\ReactWithDotNet.VisualDesigner.exe" />
+
+        <RuntimeHostConfigurationOption Include="DbConnectionString" Value="Server=srvdev\atlas;Database=boa;Integrated Security=true;TrustServerCertificate=true;" />
+
+        <RuntimeHostConfigurationOption Include="InstallationFolder" Value="d:\boa\tools\b-digital-api-to-ts-exporter\" />
+
+        <RuntimeHostConfigurationOption Include="KillAllNamedProcess" Value="ReactWithDotNet.VisualDesigner.Bootstrapper, ReactWithDotNet.VisualDesigner" />
+
+        <RuntimeHostConfigurationOption Include="LocalZipFilePath" Value="d:\boa\tools\b-digital-api-to-ts-exporter\archive.zip" />
+
+        <RuntimeHostConfigurationOption Include="QueryGetFileContent" Value="SELECT Content FROM [WHT].[File] WHERE ApplicationName = 'b-digital-api-to-ts-exporter'" />
+
+        <RuntimeHostConfigurationOption Include="QueryGetLastModificationDate" Value="SELECT LastModification FROM [WHT].[File] WHERE ApplicationName = 'b-digital-api-to-ts-exporter'" />
+
+    </ItemGroup>
+
+</Project>

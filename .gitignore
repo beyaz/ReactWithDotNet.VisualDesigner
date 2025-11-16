@@ -33,8 +33,5 @@
 /Bootstrappers/b-digital-api-to-ts-exporter/b-digital-api-to-ts-exporter.csproj.user
 /Bootstrappers/b-visual-designer/obj
 /Bootstrappers/b-visual-designer/Properties/PublishProfiles/FolderProfile.pubxml.user
-/Bootstrappers/b-visual-designer/bin/Release/net8.0
+/Bootstrappers/b-visual-designer/bin
 /Bootstrappers/b-visual-designer/b-visual-designer.csproj.user
-/ReactWithDotNet.VisualDesigner.Bootstrapper/bin
-/ReactWithDotNet.VisualDesigner.Bootstrapper/obj
-/ReactWithDotNet.VisualDesigner.Bootstrapper/Properties/PublishProfiles/FolderProfile.pubxml.user
