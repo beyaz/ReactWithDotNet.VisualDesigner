@@ -1,6 +1,6 @@
 ﻿using System.Collections.Immutable;
-using Mono.Cecil;
 using System.IO;
+using Mono.Cecil;
 
 namespace BDigitalFrameworkApiToTsExporter;
 
@@ -10,7 +10,6 @@ static class Exporter
 
     public static IAsyncEnumerable<Result<FileModel>> CalculateFiles(string projectDirectory, string apiName)
     {
-
         return
             from scope in Scope.Create(new()
                                 {
@@ -20,19 +19,18 @@ static class Exporter
                                 })
                                .With(Assembly, ReadAPIAssembly(projectDirectory))
                                .With(ModelTypeDefinition, getModelTypeDefinition)
-                               .With(ControllerTypeDefinition,getControllerTypeDefinition)
-                                
+                               .With(ControllerTypeDefinition, getControllerTypeDefinition)
             from modelTypeDefinition in getModelTypeDefinition(scope)
             from controllerTypeDefinition in getControllerTypeDefinition(scope)
             from modelFile in getModelFile(scope)
             from serviceFile in getServiceFile(scope)
             from serviceModelIntegrationFiles in getServiceAndModelIntegrationFiles(scope).AsResult()
             from typeFiles in getTypeFiles(scope).AsResult()
-            from extraFilesInModel in ExportExtraTypes(scope,modelTypeDefinition).AsResult()
+            from extraFilesInModel in ExportExtraTypes(scope, modelTypeDefinition).AsResult()
             from file in new List<FileModel>
             {
-                modelFile, 
-                serviceFile, 
+                modelFile,
+                serviceFile,
                 typeFiles,
                 serviceModelIntegrationFiles,
                 extraFilesInModel
@@ -46,6 +44,69 @@ static class Exporter
         const string apiName = "Religious";
 
         return from file in CalculateFiles(projectDirectory, apiName) select FileSystem.Save(file);
+    }
+
+    static IEnumerable<Result<FileModel>> ExportExtraTypes(Scope scope, TypeDefinition containerTypeDefinition)
+    {
+        return from type in GetExtraTypes(containerTypeDefinition)
+               select ExportExtraType(scope, type);
+
+        static IReadOnlyList<TypeDefinition> GetExtraTypes(TypeDefinition modelTypeDefinition)
+        {
+            return new List<TypeDefinition>
+            {
+                from propertyDefinition in modelTypeDefinition.Properties
+                let propertyType = propertyDefinition.PropertyType
+                let propertyTypeDefinition = propertyDefinition switch
+                {
+                    _ when IsCollection(propertyType) => ((GenericInstanceType)propertyType).GenericArguments[0].Resolve(),
+
+                    _ => propertyType.Resolve()
+                }
+                where IsExtraType(propertyTypeDefinition)
+                select propertyTypeDefinition
+            };
+
+            static bool IsExtraType(TypeDefinition typeDefinition)
+            {
+                if (typeDefinition.IsString || typeDefinition.IsNumber || typeDefinition.IsBoolean || typeDefinition.IsDateTime || typeDefinition.IsObject)
+                {
+                    return false;
+                }
+
+                return typeDefinition.BaseType?.FullName == "System.Object";
+            }
+
+            static bool IsCollection(TypeReference typeReference)
+            {
+                return typeReference.FullName.StartsWith("System.Collections.Generic.List`1", StringComparison.OrdinalIgnoreCase) ||
+                       typeReference.FullName.StartsWith("System.Collections.Generic.IReadOnlyList`1", StringComparison.OrdinalIgnoreCase);
+            }
+        }
+
+        static Result<FileModel> ExportExtraType(Scope scope, TypeDefinition extraTypeDefinition)
+        {
+            var projectDirectory = ProjectDirectory[scope];
+
+            var externalTypes = ExternalTypes[scope];
+
+            return
+                from outputFilePath in getOutputTsFilePath()
+                let tsType = TsModelCreator.CreateFrom(externalTypes, extraTypeDefinition, ApiName[scope])
+                select new FileModel
+                {
+                    Path    = outputFilePath,
+                    Content = TsOutput.LinesToString(TsOutput.GetTsCode(tsType))
+                };
+
+            Result<string> getOutputTsFilePath()
+            {
+                return
+                    from webProjectPath in getWebProjectFolderPath(projectDirectory)
+                    let fileName = TsModelCreator.GetExtraClassFileName(extraTypeDefinition, ApiName[scope])
+                    select Path.Combine(webProjectPath, "ClientApp", "types", ApiName[scope], $"{fileName}.ts");
+            }
+        }
     }
 
     static Result<TypeDefinition> getControllerTypeDefinition(Scope scope)
@@ -93,74 +154,6 @@ static class Exporter
         }
     }
 
-
-    static IEnumerable<Result<FileModel>> ExportExtraTypes(Scope scope, TypeDefinition containerTypeDefinition)
-    {
-        return from type in GetExtraTypes(containerTypeDefinition)
-            select ExportExtraType(scope, type);
-        
-        static IReadOnlyList<TypeDefinition> GetExtraTypes(TypeDefinition modelTypeDefinition)
-    {
-        return new List<TypeDefinition>
-        {
-            from propertyDefinition in modelTypeDefinition.Properties
-            
-            let propertyType = propertyDefinition.PropertyType
-            
-            let propertyTypeDefinition = propertyDefinition switch
-            {
-               _ when IsCollection(propertyType) =>  ((GenericInstanceType)propertyType).GenericArguments[0].Resolve(),
-               
-                _ =>propertyType.Resolve()
-            }
-            
-            where IsExtraType(propertyTypeDefinition)
-            
-            select propertyTypeDefinition
-        };
-
-        static bool IsExtraType(TypeDefinition typeDefinition)
-        {
-            return typeDefinition.BaseType?.FullName == "System.Object";
-        }
-        
-        static bool IsCollection(TypeReference typeReference)
-        {
-            return typeReference.FullName.StartsWith("System.Collections.Generic.List`1", StringComparison.OrdinalIgnoreCase) ||
-                   typeReference.FullName.StartsWith("System.Collections.Generic.IReadOnlyList`1", StringComparison.OrdinalIgnoreCase);
-        }
-    }
-    
-    static Result<FileModel> ExportExtraType(Scope scope, TypeDefinition extraTypeDefinition)
-    {
-        var projectDirectory = ProjectDirectory[scope];
-
-        var externalTypes = ExternalTypes[scope];
-
-        return
-            from outputFilePath in getOutputTsFilePath()
-            let tsType = TsModelCreator.CreateFrom(externalTypes, extraTypeDefinition, ApiName[scope])
-            select new FileModel
-            {
-                Path    = outputFilePath,
-                Content = TsOutput.LinesToString(TsOutput.GetTsCode(tsType))
-            };
-
-        Result<string> getOutputTsFilePath()
-        {
-
-            return
-                from webProjectPath in getWebProjectFolderPath(projectDirectory)
-
-                let fileName = TsModelCreator.GetExtraClassFileName(extraTypeDefinition,ApiName[scope])
-
-                select Path.Combine(webProjectPath, "ClientApp", "types", ApiName[scope], $"{fileName}.ts");
-        }
-    }
-    }
-    
-  
-
     static Result<TypeDefinition> getModelTypeDefinition(Scope scope)
     {
         var assemblyDefinition = Assembly[scope];
@@ -189,7 +182,6 @@ static class Exporter
         var modelTypeDefinition = ModelTypeDefinition[scope];
         var apiName = ApiName[scope];
 
-
         return from methodGroup in GroupControllerMethods(getExportablePublicMethods(controllerTypeDefinition))
                from filePath in getOutputTsFilePath(methodGroup)
                select new FileModel
@@ -198,16 +190,14 @@ static class Exporter
                    Content = string.Join(Environment.NewLine, getFileContent(methodGroup))
                };
 
-
         IReadOnlyList<string> getFileContent(MethodGroup methodGroup)
         {
-            
             var directoryPath = (methodGroup.FolderName == "Shared") switch
             {
                 true  => "../../",
                 false => "../../../"
             };
-            
+
             LineCollection lines =
             [
                 "import { useStore } from \"b-digital-framework\";",
@@ -235,18 +225,17 @@ static class Exporter
                 // define request
                 {
                     lines.Add(string.Empty);
-                    
 
                     var mappingLines = ListFrom
-                        (from property in getMappingPropertyList(modelTypeDefinition, methodDefinition.Parameters[0].ParameterType.Resolve())
-                         let name = GetTsVariableName(property.Name)
-                         select Tab + Tab + Tab + $"{name}: model.{name}"
-                        );
+                    (from property in getMappingPropertyList(modelTypeDefinition, methodDefinition.Parameters[0].ParameterType.Resolve())
+                     let name = GetTsVariableName(property.Name)
+                     select Tab + Tab + Tab + $"{name}: model.{name}"
+                    );
 
                     if (mappingLines.Count > 0)
                     {
                         lines.Add(Tab + Tab + "const request = {");
-                        
+
                         lines.AddRange(mappingLines.AppendBetween("," + Environment.NewLine));
 
                         lines.Add(Tab + Tab + "};");
@@ -256,8 +245,7 @@ static class Exporter
                         lines.Add(Tab + Tab + "const request = { };");
                     }
                 }
-                
-                
+
                 lines.Add(string.Empty);
 
                 lines.Add(Tab + Tab + $"const response = await service.{GetTsVariableName(methodDefinition.Name)}.send(request, abortController.signal);");
@@ -287,9 +275,9 @@ static class Exporter
             var serviceNames = from m in methodGroup.ControllerMethods
                                select GetTsVariableName(m.Name);
             lines.AddRange
-                (
-                 (from serviceName in serviceNames select Tab + Tab + serviceName).AppendBetween("," + Environment.NewLine)
-                );
+            (
+                (from serviceName in serviceNames select Tab + Tab + serviceName).AppendBetween("," + Environment.NewLine)
+            );
 
             lines.Add(Tab + "};");
             lines.Add("}");
@@ -301,14 +289,11 @@ static class Exporter
         {
             return
                 from webProjectPath in getWebProjectFolderPath(projectDirectory)
-                
                 select (methodGroup.FolderName == "Shared") switch
                 {
                     true  => Path.Combine(webProjectPath, "ClientApp", "views", apiName, $"use{methodGroup.FolderName}.ts"),
                     false => Path.Combine(webProjectPath, "ClientApp", "views", apiName, methodGroup.FolderName, $"use{methodGroup.FolderName}.ts")
                 };
-
-
         }
 
         static IEnumerable<PropertyDefinition> getMappingPropertyList(TypeDefinition model, TypeDefinition apiParameter)
@@ -356,9 +341,9 @@ static class Exporter
             ];
 
             var methods = (from methodGroup in GroupControllerMethods(getExportablePublicMethods(controllerTypeDefinition))
-                          from method in methodGroup.ControllerMethods
-                          select method).ToImmutableList();
-            
+                           from method in methodGroup.ControllerMethods
+                           select method).ToImmutableList();
+
             var inputOutputTypes
                 = from methodDefinition in methods
                   from typeName in new[]
@@ -394,9 +379,9 @@ static class Exporter
             var serviceNames = from m in methods
                                select GetTsVariableName(m.Name);
             lines.AddRange
-                (
-                 (from serviceName in serviceNames select Tab + Tab + serviceName).AppendBetween("," + Environment.NewLine)
-                );
+            (
+                (from serviceName in serviceNames select Tab + Tab + serviceName).AppendBetween("," + Environment.NewLine)
+            );
 
             lines.Add(Tab + "};");
             lines.Add("}");
@@ -446,7 +431,7 @@ static class Exporter
                     from webProjectPath in getWebProjectFolderPath(projectDirectory)
                     let returnTypeDefinition = getReturnType(methodDefinition).Resolve()
                     let requestTypeDefinition = methodDefinition.Parameters[0].ParameterType.Resolve()
-                    let tsRequest = TsModelCreator.CreateFrom(externalTypes, requestTypeDefinition,ApiName[scope])
+                    let tsRequest = TsModelCreator.CreateFrom(externalTypes, requestTypeDefinition, ApiName[scope])
                     let tsResponse = TsModelCreator.CreateFrom(externalTypes, returnTypeDefinition, ApiName[scope])
                     select new FileModel
                     {
@@ -485,27 +470,10 @@ static class Exporter
         return directory;
     }
 
-    static Result<AssemblyDefinition> ReadAPIAssembly(string projectDirectory)
-    {
-        var solutionName = getSolutionName(projectDirectory);
-
-        var filePath = Path.Combine(projectDirectory, "API", $"{solutionName}.API", "bin", "debug", "net8.0", $"{solutionName}.API.dll");
-
-        const string secondarySearchDirectoryPath = @"d:\boa\server\bin";
-        
-        return CecilAssemblyReader.ReadAssembly(filePath, secondarySearchDirectoryPath);
-    }
-
-    class MethodGroup
-    {
-        public string FolderName { get; set; }
-        public IReadOnlyList<MethodDefinition> ControllerMethods { get; set; }
-    }
-
     static IReadOnlyList<MethodGroup> GroupControllerMethods(IReadOnlyList<MethodDefinition> controllerMethods)
     {
         var returnList = new List<MethodGroup>();
-        
+
         var methodDefinitions = controllerMethods.ToList();
 
         (string FolderName, Func<MethodDefinition, bool> IsMethodMatchFolderFunc)[] splitters =
@@ -526,24 +494,24 @@ static class Exporter
                 returnList.Add(new MethodGroup
                 {
                     FolderName = folderName,
-                
+
                     ControllerMethods = methodDefinitions.Where(matchFunc).ToList()
                 });
 
-                methodDefinitions.RemoveAll(x=>matchFunc(x));
+                methodDefinitions.RemoveAll(x => matchFunc(x));
             }
         }
-        
-        if (methodDefinitions.Count > 0) 
+
+        if (methodDefinitions.Count > 0)
         {
             returnList.Add(new MethodGroup
             {
                 FolderName = "Shared",
-                
+
                 ControllerMethods = methodDefinitions
             });
         }
-        
+
         foreach (var methodGroup in returnList)
         {
             methodGroup.ControllerMethods =
@@ -553,34 +521,50 @@ static class Exporter
                 select md
             ).ToList();
         }
-        
-        return  returnList;
+
+        return returnList;
 
         static bool IsInConfirmMethod(MethodDefinition methodDefinition)
         {
             var methodName = methodDefinition.Name;
-            
-            if (methodName.Contains("Execute") || 
+
+            if (methodName.Contains("Execute") ||
                 methodName.Contains("ConfirmPreData"))
             {
                 return true;
             }
-            
+
             return false;
         }
-        
+
         static bool IsStartMethod(MethodDefinition methodDefinition, string startNumber)
         {
             var methodName = methodDefinition.Name;
-            
-            if (methodName.Contains($"Start{startNumber}PreData")||
+
+            if (methodName.Contains($"Start{startNumber}PreData") ||
                 methodName.Contains($"Start{startNumber}PostData"))
             {
                 return true;
             }
-            
+
             return false;
         }
+    }
 
+    static Result<AssemblyDefinition> ReadAPIAssembly(string projectDirectory)
+    {
+        var solutionName = getSolutionName(projectDirectory);
+
+        var filePath = Path.Combine(projectDirectory, "API", $"{solutionName}.API", "bin", "debug", "net8.0", $"{solutionName}.API.dll");
+
+        const string secondarySearchDirectoryPath = @"d:\boa\server\bin";
+
+        return CecilAssemblyReader.ReadAssembly(filePath, secondarySearchDirectoryPath);
+    }
+
+    class MethodGroup
+    {
+        public IReadOnlyList<MethodDefinition> ControllerMethods { get; set; }
+        public string FolderName { get; set; }
     }
 }

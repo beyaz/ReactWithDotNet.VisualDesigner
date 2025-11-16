@@ -69,7 +69,7 @@ static class TsModelCreator
             return GetTSType(externalTypes, ((GenericInstanceType)typeReference).GenericArguments[0], isExportingForModelFile,apiName);
         }
 
-        if (typeReference.FullName == "System.String")
+        if (typeReference.IsString)
         {
             return new()
             {
@@ -78,16 +78,7 @@ static class TsModelCreator
             };
         }
 
-        if (typeReference.FullName == typeof(short).FullName ||
-            typeReference.FullName == typeof(int).FullName ||
-            typeReference.FullName == typeof(byte).FullName ||
-            typeReference.FullName == typeof(sbyte).FullName ||
-            typeReference.FullName == typeof(short).FullName ||
-            typeReference.FullName == typeof(ushort).FullName ||
-            typeReference.FullName == typeof(double).FullName ||
-            typeReference.FullName == typeof(float).FullName ||
-            typeReference.FullName == typeof(decimal).FullName ||
-            typeReference.FullName == typeof(long).FullName)
+        if (typeReference.IsNumber)
 
         {
             return new()
@@ -97,7 +88,7 @@ static class TsModelCreator
             };
         }
 
-        if (typeReference.FullName == "System.DateTime")
+        if (typeReference.IsDateTime)
         {
             return new()
             {
@@ -106,7 +97,7 @@ static class TsModelCreator
             };
         }
 
-        if (typeReference.FullName == "System.Boolean")
+        if (typeReference.IsBoolean)
         {
             return new()
             {
@@ -115,7 +106,7 @@ static class TsModelCreator
             };
         }
 
-        if (typeReference.FullName == "System.Object")
+        if (typeReference.IsObject)
         {
             return new()
             {
