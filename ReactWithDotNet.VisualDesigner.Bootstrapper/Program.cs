@@ -37,6 +37,32 @@ static class Program
         };
     }
 
+    /// <summary>
+    ///     Removes value from start of str
+    /// </summary>
+    static string RemoveFromStart(this string data, string value)
+    {
+        return RemoveFromStart(data, value, StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
+    ///     Removes value from start of str
+    /// </summary>
+    static string RemoveFromStart(this string data, string value, StringComparison comparison)
+    {
+        if (data == null)
+        {
+            return null;
+        }
+
+        if (data.StartsWith(value, comparison))
+        {
+            return data.Substring(value.Length, data.Length - value.Length);
+        }
+
+        return data;
+    }
+
     static async Task Run(Config config)
     {
         Action<string> trace = Console.WriteLine;
@@ -51,7 +77,26 @@ static class Program
                 {
                     if (Process.GetCurrentProcess().Id != process.Id)
                     {
-                        process.Kill();
+                        process.Kill(true);
+                    }
+                }
+            }
+
+            // K i l l   r e l a t e d   n o d e j s    p r o c e s s
+            if (Directory.Exists(config.InstallationFolder))
+            {
+                foreach (var file in Directory.GetFiles(config.InstallationFolder, "node.js.process.id.*"))
+                {
+                    var processId = Path.GetFileNameWithoutExtension(file).RemoveFromStart("node.js.process.id.");
+
+                    var processIdAsNumber = int.Parse(processId);
+
+                    foreach (var process in Process.GetProcesses())
+                    {
+                        if (processIdAsNumber == process.Id)
+                        {
+                            process.Kill(true);
+                        }
                     }
                 }
             }
@@ -140,7 +185,9 @@ static class Program
             {
                 WorkingDirectory = Path.GetDirectoryName(config.AppExeFilePath) ?? Environment.CurrentDirectory,
 
-                CreateNoWindow = true
+                CreateNoWindow = true,
+                
+                UseShellExecute = false
             };
 
             Process.Start(processStartInfo);

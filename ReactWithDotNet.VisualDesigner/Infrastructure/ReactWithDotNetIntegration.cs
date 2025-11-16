@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Net.Http.Headers;
@@ -58,14 +57,6 @@ public static class ReactWithDotNetIntegration
             }
 
             await next();
-        });
-
-        app.MapPost("/shutdown", async _ =>
-        {
-            if (!Debugger.IsAttached)
-            {
-                await app.StopAsync();  
-            }
         });
     }
 

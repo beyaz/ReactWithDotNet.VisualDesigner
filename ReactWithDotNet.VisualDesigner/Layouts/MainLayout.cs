@@ -18,12 +18,6 @@ sealed class MainLayout : PureComponent, IPageLayout
             idOfContainerHtmlElement: '{{ContainerDomElementId}}',
             renderInfo: {{RenderInfo.ToJsonString()}}
           });
-          
-          window.addEventListener("unload", function ()
-          {
-              navigator.sendBeacon("/shutdown");
-          });
-          
           """;
 
     public ComponentRenderInfo RenderInfo { get; set; }
@@ -73,9 +67,7 @@ sealed class MainLayout : PureComponent, IPageLayout
 
                 new script { src = "https://cdn.tailwindcss.com" },
 
-                ElementIndicators,
-                
-                HomePageUnload
+                ElementIndicators
             },
             new body(Margin(0), Height100vh)
             {
@@ -98,23 +90,5 @@ sealed class MainLayout : PureComponent, IPageLayout
             return null;
         }
         
-        Element HomePageUnload()
-        {
-            var isHomePage = Context.HttpContext.Request.GetDisplayUrl().EndsWith(Routes.VisualDesigner, StringComparison.OrdinalIgnoreCase);
-            if (isHomePage)
-            {
-                return new script
-                {
-                    """
-                    window.addEventListener("unload", function ()
-                    {
-                        navigator.sendBeacon("/shutdown");
-                    });
-                    """
-                };
-            }
-
-            return null;
-        }
     }
 }

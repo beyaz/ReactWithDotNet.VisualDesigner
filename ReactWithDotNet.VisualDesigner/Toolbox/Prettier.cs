@@ -79,6 +79,8 @@ static class Prettier
         data.NodeProcess = new Process { StartInfo = processInfo };
 
         data.NodeProcess.Start();
+        
+        File.WriteAllText(Path.Combine(AppContext.BaseDirectory, $"node.js.process.id.{data.NodeProcess.Id}.txt"),string.Empty);
 
         return Task.CompletedTask;
     }
