@@ -161,7 +161,7 @@ sealed class BDigitalDatepicker : PluginComponentBase
                 {
                     textContent
                 },
-                new BSymbol { symbol = "CalendarMonthOutlined", weight = "500", color = rgb(22, 160, 133)}
+                new BSymbol { symbol = "Calendar_Month", weight = "500", color = rgb(22, 160, 133)}
             }
         }; 
     }
