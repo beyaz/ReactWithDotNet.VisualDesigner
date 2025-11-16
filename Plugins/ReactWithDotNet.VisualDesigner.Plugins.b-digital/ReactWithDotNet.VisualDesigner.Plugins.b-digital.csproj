@@ -19,12 +19,12 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\ReactWithDotNet.VisualDesigner\ReactWithDotNet.VisualDesigner.csproj" />
+	  <ProjectReference Include="$(SolutionDir)ReactWithDotNet.VisualDesigner\ReactWithDotNet.VisualDesigner.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
 	  <Reference Include="ReactWithDotNet">
-	    <HintPath>..\lib\ReactWithDotNet\ReactWithDotNet.dll</HintPath>
+	    <HintPath>$(SolutionDir)lib\ReactWithDotNet\ReactWithDotNet.dll</HintPath>
 	  </Reference>
 	</ItemGroup>
 
