@@ -1236,9 +1236,22 @@ sealed class StylerComponent : Component<StylerComponent.State>
                 from item in GetChars()
                 select new div(WidthFitContent, HeightFitContent, LineHeight7)
                 {
-                    item
+                    item, ArrangeSizeForTopBottomLeftRight
                 }
             };
+        }
+        
+        StyleModifier ArrangeSizeForTopBottomLeftRight
+        {
+            get
+            {
+                if (Label =="P" || Label =="M")
+                {
+                    return PaddingY(8*2);
+                }
+                
+                return null;
+            }
         }
 
         IReadOnlyList<string> GetChars()
@@ -1291,12 +1304,12 @@ sealed class StylerComponent : Component<StylerComponent.State>
             {
                 if (Label =="t" || Label =="b")
                 {
-                    return PaddingY(8);
+                    return PaddingY(6*2);
                 }
                 
                 if (Label =="l" || Label =="r")
                 {
-                    return PaddingX(8);
+                    return PaddingX(6*2);
                 }
 
                 return null;
