@@ -90,7 +90,10 @@ static class Program
             {
                 trace("Deleting old version");
 
-                Directory.Delete(config.InstallationFolder, true);
+                if (Directory.Exists(config.InstallationFolder))
+                {
+                    Directory.Delete(config.InstallationFolder, true);
+                }
 
                 trace("Getting latest version.");
 
@@ -106,13 +109,22 @@ static class Program
                 {
                     trace($"Saving local file: {config.LocalZipFilePath}");
 
+                    var directoryName = Path.GetDirectoryName(config.LocalZipFilePath);
+
+                    if (directoryName != null && !Directory.Exists(directoryName))
+                    {
+                        Directory.CreateDirectory(directoryName);
+                    }
+
                     await File.WriteAllBytesAsync(config.LocalZipFilePath, bytes);
                 }
 
                 // E x t r a c t   l o c a l   z i p   f i l e
                 {
                     trace("Started to extract zip file...");
+
                     ZipFile.ExtractToDirectory(config.LocalZipFilePath, config.InstallationFolder, true);
+
                     trace("Zip file extracted");
                 }
             }
@@ -126,15 +138,12 @@ static class Program
 
             var processStartInfo = new ProcessStartInfo(config.AppExeFilePath)
             {
-                WorkingDirectory = Path.GetDirectoryName(config.AppExeFilePath) ?? Environment.CurrentDirectory
+                WorkingDirectory = Path.GetDirectoryName(config.AppExeFilePath) ?? Environment.CurrentDirectory,
+
+                CreateNoWindow = true
             };
 
-            var process = Process.Start(processStartInfo);
-
-            if (process?.HasExited == true)
-            {
-                throw new Exception($"Exieted with exitCode: {process.ExitCode}");
-            }
+            Process.Start(processStartInfo);
 
             trace("Started.");
         }
