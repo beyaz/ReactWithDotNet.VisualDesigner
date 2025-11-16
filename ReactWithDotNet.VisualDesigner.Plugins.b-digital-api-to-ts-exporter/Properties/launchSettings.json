@@ -1,6 +1,6 @@
 {
   "profiles": {
-    "ReactWithDotNet.VisualDesigner.Plugins.b-digital.ApiToTsExporter": {
+    "ReactWithDotNet.VisualDesigner.Plugins.b-digital-api-to-ts-exporter": {
       "commandName": "Project",
       "launchBrowser": true,
       "environmentVariables": {
