@@ -41,7 +41,7 @@ static class Program
     {
         Action<string> trace = Console.WriteLine;
 
-        // K i l l   N a m e d   P r o c e s s
+        // K i l l   n a m e d   p r o c e s s
         {
             foreach (var processName in config.KillAllNamedProcess.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
             {
@@ -57,7 +57,7 @@ static class Program
             }
         }
 
-        // D o w n l o a d   L a t e s t   V e r s i o n
+        // D o w n l o a d   l a t e s t   v e r s i o n
         {
             trace("Checking version...");
         
@@ -66,9 +66,13 @@ static class Program
             await using var connection = new SqlConnection(config.DbConnectionString);
             
             connection.Open();
+
+            bool needToUpdate = true;
             
-            await using (var command = new SqlCommand(config.QueryGetLastModificationDate, connection))
+            // C o m p a r e   d a t e s
             {
+                await using var command = new SqlCommand(config.QueryGetLastModificationDate, connection);
+                
                 var  dbValue = await command.ExecuteScalarAsync();
 
                 var lastModificationDate = Convert.ToDateTime(dbValue);
@@ -77,38 +81,46 @@ static class Program
                 {
                     trace("Already using latest version.");
                     
-                    return;
+                    needToUpdate = false;
                 }
             }
-            
-            trace("Getting latest version.");
-            
-            await using (var command = new SqlCommand(config.QueryGetFileContent, connection))
+
+            // G e t   l a t e s t   v e r s i o n
+            if(needToUpdate)
             {
+                trace("Getting latest version.");
+
+                await using var command = new SqlCommand(config.QueryGetFileContent, connection);
+                
                 var  bytes = (byte[])await command.ExecuteScalarAsync();
                 if (bytes is null)
                 {
                     throw new Exception("File content not fetched. Zero bytes fetched.");
                 }
+
+                // S a v e   a s   l o c a l   f i l e
+                {
+                    trace($"Saving local file: {config.LocalZipFilePath}");
                 
-                trace($"Saving local file: {config.LocalZipFilePath}");
+                    await File.WriteAllBytesAsync(config.LocalZipFilePath, bytes);
+                }
                 
-                await File.WriteAllBytesAsync(config.LocalZipFilePath, bytes);
+                // E x t r a c t   l o c a l   z i p   f i l e
+                {
+                    trace("Started to extract zip file...");
+                    ZipFile.ExtractToDirectory(config.LocalZipFilePath, config.InstallationFolder, true);
+                    trace("Zip file extracted");
+                }
             }
 
             await connection.CloseAsync();
         }
 
-        // E x t r a c t   L o c a l   z i p   F i l e
-        {
-            trace("Started to extract zip file...");
-            ZipFile.ExtractToDirectory(config.LocalZipFilePath, config.InstallationFolder, true);
-            trace("Zip file extracted");
-        }
+        
         
 
 
-        // S t a r t   A p p l i c a t i o n
+        // S t a r t   a p p l i c a t i o n
         {
             trace($"Starting application: {config.AppExeFilePath}");
             
