@@ -59,7 +59,6 @@ sealed class BTabBar : PluginComponentBase
 
             new FlexRow(BorderBottom("1px solid rgb(189, 189, 189)"))
             {
-
                 from tab in children.Select((el,index)=>new{el,index})
                 select new FlexRowCentered
                 {
@@ -67,19 +66,15 @@ sealed class BTabBar : PluginComponentBase
                     
                      Color("#16A085"),
                      
-                     SelectedTabIndex == tab.index ? Opacity(1) : Opacity(0.7) ,  
+                     SelectedTabIndex == tab.index.ToString() ? Opacity(1) : Opacity(0.7) ,  
                     
                     OnClick(OnClickHandler)
                 }
             },
             
-            new FlexRow
-            {
-                new FlexRowCentered
-                {
-                    textContent
-                }
-            },
+            from tab in children.Select((el,index)=>new{el,index})
+            where SelectedTabIndex == tab.index.ToString()
+            select tab.el
         }; 
     }
 
