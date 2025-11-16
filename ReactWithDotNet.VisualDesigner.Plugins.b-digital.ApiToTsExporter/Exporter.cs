@@ -81,7 +81,9 @@ static class Exporter
                     return false;
                 }
 
-                return typeReference.Resolve().BaseType?.FullName == "System.Object";
+                var typeDefinition = typeReference.Resolve();
+                
+                return typeDefinition.BaseType?.FullName == "System.Object";
             }
 
             static bool IsCollection(TypeReference typeReference)
