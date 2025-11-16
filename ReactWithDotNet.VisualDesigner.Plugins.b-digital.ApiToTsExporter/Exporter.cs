@@ -48,10 +48,10 @@ static class Exporter
 
     static IEnumerable<Result<FileModel>> ExportExtraTypes(Scope scope, TypeDefinition containerTypeDefinition)
     {
-        return from type in GetExtraTypes(containerTypeDefinition)
+        return from type in GetExtraTypes(ExternalTypes[scope], containerTypeDefinition)
                select ExportExtraType(scope, type);
 
-        static IReadOnlyList<TypeDefinition> GetExtraTypes(TypeDefinition modelTypeDefinition)
+        static IReadOnlyList<TypeDefinition> GetExtraTypes(IReadOnlyList<ExternalTypeInfo> externalTypes, TypeDefinition modelTypeDefinition)
         {
             return new List<TypeDefinition>
             {
@@ -63,12 +63,20 @@ static class Exporter
 
                     _ => propertyType.Resolve()
                 }
-                where IsExtraType(propertyTypeDefinition)
+                where IsExtraType(externalTypes, propertyTypeDefinition)
                 select propertyTypeDefinition
             };
 
-            static bool IsExtraType(TypeDefinition typeDefinition)
+            static bool IsExtraType(IReadOnlyList<ExternalTypeInfo> externalTypes, TypeDefinition typeDefinition)
             {
+                foreach (var externalType in externalTypes)
+                {
+                    if (externalType.DotNetFullTypeName == typeDefinition.FullName)
+                    {
+                        return false;
+                    }
+                }
+                
                 if (typeDefinition.IsString || typeDefinition.IsNumber || typeDefinition.IsBoolean || typeDefinition.IsDateTime || typeDefinition.IsObject)
                 {
                     return false;
