@@ -136,9 +136,9 @@ sealed class  BDigitalFilterView: PluginComponentBase
         {
             Id(id), OnClick(onMouseClick),
 
-            new FlexColumn(PaddingY(16), FontSize18)
+            new FlexColumn(PaddingBottom(8), FontSize18)
             {
-                "Filtrele"
+                "Filtrele" 
             },
             new div(WidthFull, PaddingTop(16), PaddingBottom(8))
             {

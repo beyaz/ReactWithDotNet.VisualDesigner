@@ -40,14 +40,8 @@ sealed class BTabBar : PluginComponentBase
         return Result.From(node);
     }
 
-    public string SelectedTabIndex { get; set; }
+  
     
-    Task OnClickHandler(MouseEvent e)
-    {
-        SelectedTabIndex = e.target.id;
-
-        return Task.CompletedTask;
-    }
     
     protected override Element render()
     {
@@ -60,21 +54,20 @@ sealed class BTabBar : PluginComponentBase
             new FlexRow(BorderBottom("1px solid rgb(189, 189, 189)"))
             {
                 from tab in children.Select((el,index)=>new{el,index})
-                select new FlexRowCentered
+                where ((HtmlElement)tab.el).data.ContainsKey("text")
+                select new FlexRowCentered(MarginX(24), Height(30))
                 {
-                    ((HtmlElement)tab.el).data["text"],
+                    TryClearStringValue(((HtmlElement)tab.el).data["text"]),
                     
                      Color("#16A085"),
                      
-                     SelectedTabIndex == tab.index.ToString() ? Opacity(1) : Opacity(0.7) ,  
-                    
-                    OnClick(OnClickHandler)
+                     BorderBottom(2, solid, "#16A085"),
+                     
+                     FontWeight500, FontSize13
                 }
             },
             
-            from tab in children.Select((el,index)=>new{el,index})
-            where SelectedTabIndex == tab.index.ToString()
-            select tab.el
+            children
         }; 
     }
 
