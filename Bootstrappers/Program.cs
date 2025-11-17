@@ -5,7 +5,7 @@ using System.IO.Compression;
 using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
 
-namespace ReactWithDotNet.VisualDesigner.Bootstrapper;
+namespace Bootstrapper;
 
 static class Program
 {
@@ -25,25 +25,50 @@ static class Program
 
     static Config CalculateConfig()
     {
+        var readConfig = CreateConfigReader();
+
         var config = new Config
         {
-            AppExeFilePath               = (string)AppContext.GetData(nameof(Config.AppExeFilePath)),
-            DbConnectionString           = (string)AppContext.GetData(nameof(Config.DbConnectionString)),
-            InstallationFolder           = (string)AppContext.GetData(nameof(Config.InstallationFolder)),
-            KillAllNamedProcess          = (string)AppContext.GetData(nameof(Config.KillAllNamedProcess)),
-            LocalZipFilePath             = (string)AppContext.GetData(nameof(Config.LocalZipFilePath)),
-            QueryGetFileContent          = (string)AppContext.GetData(nameof(Config.QueryGetFileContent)),
-            QueryGetLastModificationDate = (string)AppContext.GetData(nameof(Config.QueryGetLastModificationDate)),
-        };
-
-        var myDocuments = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-
-        config = config with
-        {
-            InstallationFolder = config.InstallationFolder?.Replace("{MyDocuments}", myDocuments)
+            AppName                      = readConfig(nameof(Config.AppName)),
+            AppExeFilePath               = readConfig(nameof(Config.AppExeFilePath)),
+            DbConnectionString           = readConfig(nameof(Config.DbConnectionString)),
+            InstallationFolder           = readConfig(nameof(Config.InstallationFolder)),
+            KillAllNamedProcess          = readConfig(nameof(Config.KillAllNamedProcess)),
+            LocalZipFilePath             = readConfig(nameof(Config.LocalZipFilePath)),
+            QueryGetFileContent          = readConfig(nameof(Config.QueryGetFileContent)),
+            QueryGetLastModificationDate = readConfig(nameof(Config.QueryGetLastModificationDate)),
         };
 
         return config;
+
+        static Func<string, string> CreateConfigReader()
+        {
+            var replaces = new[]
+            {
+                new
+                {
+                    name  = nameof(Config.AppName),
+                    value = (string)AppContext.GetData(nameof(Config.AppName))
+                },
+                new
+                {
+                    name  = nameof(Environment.SpecialFolder.MyDocuments),
+                    value = (string)AppContext.GetData(nameof(Config.AppName))
+                }
+            };
+
+            return name =>
+            {
+                var configValue = (string)AppContext.GetData(name);
+
+                foreach (var item in replaces)
+                {
+                    configValue = configValue?.Replace("{" + item.name + "}", item.value);
+                }
+
+                return configValue;
+            };
+        }
     }
 
     static async Task Run(Config config)
@@ -183,6 +208,8 @@ static class Program
 
     sealed record Config
     {
+        public string AppName { get; init; }
+
         public string AppExeFilePath { get; init; }
 
         public string DbConnectionString { get; init; }

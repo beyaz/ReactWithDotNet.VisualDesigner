@@ -4,7 +4,7 @@
         <OutputType>Exe</OutputType>
         <TargetFramework>net8.0</TargetFramework>
         <AssemblyName>ApiInspector</AssemblyName>
-        <StartupObject>ReactWithDotNet.VisualDesigner.Bootstrapper.Program</StartupObject>
+        <StartupObject>Bootstrapper.Program</StartupObject>
         <ApplicationIcon>app.ico</ApplicationIcon>
     </PropertyGroup>
 
@@ -22,21 +22,23 @@
 
     <ItemGroup>
 
-        <RuntimeHostConfigurationOption Include="AppExeFilePath" Value="d:\boa\tools\b-visual-designer\ReactWithDotNet.VisualDesigner.exe" />
+        <RuntimeHostConfigurationOption Include="AppName" Value="ApiInspector" />
+
+        <RuntimeHostConfigurationOption Include="AppExeFilePath" Value="d:\boa\tools\{AppName}\ApiInspector.WebUI.exe" />
 
         <RuntimeHostConfigurationOption Include="DbConnectionString" Value="Server=srvdev\atlas;Database=boa;Integrated Security=true;TrustServerCertificate=true;" />
 
         <RuntimeHostConfigurationOption Include="DeleteOldVersion" Value="true" />
-        
-        <RuntimeHostConfigurationOption Include="InstallationFolder" Value="d:\boa\tools\b-visual-designer\" />
 
-        <RuntimeHostConfigurationOption Include="KillAllNamedProcess" Value="ReactWithDotNet.VisualDesigner.Bootstrapper, ReactWithDotNet.VisualDesigner" />
+        <RuntimeHostConfigurationOption Include="InstallationFolder" Value="d:\boa\tools\{AppName}\" />
 
-        <RuntimeHostConfigurationOption Include="LocalZipFilePath" Value="d:\boa\tools\b-visual-designer\archive.zip" />
+        <RuntimeHostConfigurationOption Include="KillAllNamedProcess" Value="ApiInspector.WebUI, ApiInspector" />
 
-        <RuntimeHostConfigurationOption Include="QueryGetFileContent" Value="SELECT Content FROM [WHT].[File] WHERE ApplicationName = 'b-visual-designer'" />
+        <RuntimeHostConfigurationOption Include="LocalZipFilePath" Value="d:\boa\tools\{AppName}\archive.zip" />
 
-        <RuntimeHostConfigurationOption Include="QueryGetLastModificationDate" Value="SELECT LastModification FROM [WHT].[File] WHERE ApplicationName = 'b-visual-designer'" />
+        <RuntimeHostConfigurationOption Include="QueryGetFileContent" Value="SELECT Content FROM [WHT].[File] WHERE ApplicationName = '{AppName}'" />
+
+        <RuntimeHostConfigurationOption Include="QueryGetLastModificationDate" Value="SELECT LastModification FROM [WHT].[File] WHERE ApplicationName = '{AppName}'" />
 
     </ItemGroup>
 
