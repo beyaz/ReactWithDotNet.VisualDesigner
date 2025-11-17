@@ -137,7 +137,7 @@ static class Program
             {
                 trace("Deleting old version");
 
-                if (Directory.Exists(config.InstallationFolder))
+                if (config.DeleteOldVersion == "true" && Directory.Exists(config.InstallationFolder))
                 {
                     Directory.Delete(config.InstallationFolder, true);
                 }
@@ -203,6 +203,8 @@ static class Program
         public string AppExeFilePath { get; init; }
 
         public string DbConnectionString { get; init; }
+
+        public string DeleteOldVersion { get; init; }
 
         public string InstallationFolder { get; init; }
 

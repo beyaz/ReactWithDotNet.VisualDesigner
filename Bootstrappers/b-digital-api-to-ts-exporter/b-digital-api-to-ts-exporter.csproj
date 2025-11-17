@@ -26,6 +26,8 @@
 
         <RuntimeHostConfigurationOption Include="DbConnectionString" Value="Server=srvdev\atlas;Database=boa;Integrated Security=true;TrustServerCertificate=true;" />
 
+        <RuntimeHostConfigurationOption Include="DeleteOldVersion" Value="true" />
+        
         <RuntimeHostConfigurationOption Include="InstallationFolder" Value="d:\boa\tools\b-digital-api-to-ts-exporter\" />
 
         <RuntimeHostConfigurationOption Include="KillAllNamedProcess" Value="ReactWithDotNet.VisualDesigner.Bootstrapper, ReactWithDotNet.VisualDesigner" />
