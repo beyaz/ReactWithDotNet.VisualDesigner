@@ -50,7 +50,8 @@ sealed class BDigitalAccountView : PluginComponentBase
                 [
                     "(selectedAccountIndex: number) =>",
                     "{",
-                    $"  updateRequest(r => {{ r.{selectedAccountIndexProp.Value.RemoveFromStart("request.")} = selectedAccountIndex; }});"
+                    $"  {selectedAccountIndexProp.Value} = selectedAccountIndex;",
+                    GetUpdateStateLine(selectedAccountIndexProp.Value)
                 ];
 
                 if (onSelectedAccountIndexChangeProp is not null)

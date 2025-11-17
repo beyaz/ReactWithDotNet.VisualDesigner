@@ -16,7 +16,10 @@ sealed class BasePage : PluginComponentBase
         {
             children =
             {
-                new h6(FontWeight500, FontSize20, PaddingTop(32), PaddingBottom(24)) { pageTitle },
+                new h6(FontWeight500, FontSize20, PaddingTop(32), PaddingBottom(56))
+                {
+                    pageTitle
+                },
                 children
             }
         } + Id(id) + OnClick(onMouseClick);

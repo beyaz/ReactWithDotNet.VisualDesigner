@@ -32,6 +32,7 @@ sealed class BDigitalGroupView : PluginComponentBase
         {
             style.Add(Padding(24));
             style.Add(MarginTop(8));
+            style.Add(MarginBottom(24));
         }
         else if (_applySideMargin == "true")
         {
