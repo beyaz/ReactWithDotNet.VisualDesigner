@@ -25,7 +25,7 @@ static class Program
 
     static Config CalculateConfig()
     {
-        return new Config
+        var config = new Config
         {
             AppExeFilePath               = (string)AppContext.GetData(nameof(Config.AppExeFilePath)),
             DbConnectionString           = (string)AppContext.GetData(nameof(Config.DbConnectionString)),
@@ -35,6 +35,15 @@ static class Program
             QueryGetFileContent          = (string)AppContext.GetData(nameof(Config.QueryGetFileContent)),
             QueryGetLastModificationDate = (string)AppContext.GetData(nameof(Config.QueryGetLastModificationDate)),
         };
+
+        var myDocuments = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+
+        config = config with
+        {
+            InstallationFolder = config.InstallationFolder?.Replace("{MyDocuments}", myDocuments)
+        };
+
+        return config;
     }
 
     static async Task Run(Config config)
@@ -172,7 +181,7 @@ static class Program
         }
     }
 
-    sealed class Config
+    sealed record Config
     {
         public string AppExeFilePath { get; init; }
 
