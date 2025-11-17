@@ -6,6 +6,9 @@ sealed class BasePage : PluginComponentBase
 {
     [JsTypeInfo(JsType.String)]
     public string pageTitle { get; set; }
+    
+    [JsTypeInfo(JsType.Function)]
+    public string handleBackClick { get; set; }
 
     protected override Element render()
     {
