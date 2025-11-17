@@ -36,6 +36,7 @@
 /Bootstrappers/b-digital-api-to-ts-exporter/obj
 /Bootstrappers/b-digital-api-to-ts-exporter/Properties/PublishProfiles/FolderProfile.pubxml.user
 /Bootstrappers/b-digital-api-to-ts-exporter/b-digital-api-to-ts-exporter.csproj.user
+
 /Bootstrappers/b-visual-designer/obj
 /Bootstrappers/b-visual-designer/Properties/PublishProfiles/FolderProfile.pubxml.user
 /Bootstrappers/b-visual-designer/bin
@@ -44,3 +45,8 @@
 
 
 /Bootstrappers/_ReSharper.Caches
+
+/Bootstrappers/ApiInspector/bin
+/Bootstrappers/ApiInspector/obj
+/Bootstrappers/ApiInspector/Properties/PublishProfiles/FolderProfile.pubxml.user
+/Bootstrappers/ApiInspector/ApiInspector.csproj.user
