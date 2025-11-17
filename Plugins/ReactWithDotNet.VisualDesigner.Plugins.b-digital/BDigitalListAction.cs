@@ -44,7 +44,8 @@ sealed class BDigitalListAction : PluginComponentBase
                     from child in listData.Children
                     from analyzedChild in input.AnalyzeNode(child)
                     from lines in input.ReactNodeModelToElementTreeSourceLinesConverter(analyzedChild)
-                    select string.Join(Environment.NewLine, lines)
+                    let childAsTsxLines = string.Join(Environment.NewLine, lines)
+                    select childAsTsxLines
                 ).AsResult();
 
                 if (response.HasError)

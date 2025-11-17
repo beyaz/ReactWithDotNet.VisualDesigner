@@ -81,7 +81,8 @@ sealed class BTabBar : PluginComponentBase
                 (
                     from analyzedChild in input.AnalyzeNode(childNode.Children[0])
                     from lines in input.ReactNodeModelToElementTreeSourceLinesConverter(analyzedChild)
-                    select string.Join(Environment.NewLine, lines)
+                    let childAsTsxLines = string.Join(Environment.NewLine, lines)
+                    select childAsTsxLines
                 );
 
                 if (response.HasError)
@@ -98,7 +99,8 @@ sealed class BTabBar : PluginComponentBase
                     from x in childNode.Children
                     from analyzedChild in input.AnalyzeNode(x)
                     from lines in input.ReactNodeModelToElementTreeSourceLinesConverter(analyzedChild)
-                    select string.Join(Environment.NewLine, lines)
+                    let childAsTsxLines = string.Join(Environment.NewLine, lines)
+                    select childAsTsxLines
                 ).AsResult();
 
                 if (response.HasError)
