@@ -4,7 +4,7 @@ using ReactWithDotNet.VisualDesigner.Exporters;
 namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
 [CustomComponent]
-[Import(Name = "BButton", Package = "b-button")]
+[Import(Name = nameof(BButton), Package = "b-button")]
 sealed class BButton : PluginComponentBase
 {
     [JsTypeInfo(JsType.Function)]
@@ -13,8 +13,12 @@ sealed class BButton : PluginComponentBase
     [JsTypeInfo(JsType.String)]
     public string text { get; set; }
     
+    [JsTypeInfo(JsType.Boolean)]
+    public string allowLabelCase { get; set; }
     
-    [Suggestions("raised , flat")]
+    
+    
+    [Suggestions("raised , flat , contained")]
     [JsTypeInfo(JsType.String)]
     public string type { get; set; }
     
@@ -74,18 +78,44 @@ sealed class BButton : PluginComponentBase
         {
             "raised"=>"contained",
             
-            _=> "text"
+            not null =>type,
+            
+            null => "text"
         };
 
         Style defaultStyle = [];
         
         if (colorType == "primary")
         {
-            defaultStyle = [FontWeightBold, TextTransform(none), BackgroundColor("#16A085"), Color("white"), BorderRadius(10)];
+            defaultStyle =
+            [
+                DisplayFlexRowCentered,
+                TextTransform(none),
+                FontWeightBold,
+                BackgroundColor("#16A085"),
+                Color("white"),
+                BorderRadius(10)
+            ];
         }
-
+        
+        if (variant == "contained")
+        {
+            defaultStyle =
+            [
+                DisplayFlexRowCentered,
+                TextTransform(none),
+                FontWeightBold,
+                BackgroundColor("#d5d5d5"),
+                Color("black"),
+                BorderRadius(10)
+            ];
+        }
+       
+        
         return new Button
         {
+      
+            
             fullWidth = fullWidth == "true",
 
             style = { defaultStyle, style },
