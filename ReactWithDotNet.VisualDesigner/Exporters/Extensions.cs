@@ -19,7 +19,7 @@ public sealed record NodeAnalyzeInput
     
     public Func<ReactNode,Task<Result<IReadOnlyList<string>>>> ReactNodeModelToElementTreeSourceLinesConverter{ get; init; }
     
-    public Func<ReactNode, NodeAnalyzeOutput> AnalyzeNode { get; set; }
+    public Func<ReactNode, NodeAnalyzeOutput> AnalyzeNode { get; init; }
 
     public void Deconstruct(out ReactNode node, out ComponentConfig componentConfig)
     {

@@ -105,7 +105,7 @@ static class TsxExporter
                 ReactNodeModelToElementTreeSourceLinesConverter =
                     node => ConvertReactNodeModelToElementTreeSourceLines(project, node, null, 2),
                 
-                AnalyzeNode = node=>AnalyzeNode(new NodeAnalyzeInput
+                AnalyzeNode = node=>AnalyzeNode(new()
                 {
                     Node = node, 
                     
