@@ -1,4 +1,5 @@
 ﻿global using static ReactWithDotNet.VisualDesigner.Exporters.Extensions;
+global using static ReactWithDotNet.VisualDesigner.Exporters.PublicExtensions;
 
 global using NodeAnalyzeOutput = System.Threading.Tasks.Task<Toolbox.Result<ReactWithDotNet.VisualDesigner.Exporters.ReactNode>>;
 
@@ -66,6 +67,11 @@ static class Extensions
         return input.Node;
     }
 
+
+}
+
+public static class PublicExtensions
+{
     public static IEnumerable<string> CalculateImportLines(ReactNode node)
     {
         var lines = new List<string>();
