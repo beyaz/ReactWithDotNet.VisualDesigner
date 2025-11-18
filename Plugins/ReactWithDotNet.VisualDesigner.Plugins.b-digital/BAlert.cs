@@ -23,7 +23,9 @@ sealed class BAlert : PluginComponentBase
             return  AnalyzeChildren(input, AnalyzeReactNode);
         }
         
-        return  AnalyzeChildren(input, AnalyzeReactNode).WithImport(nameof(BAlert),"b-core-alert");
+        var import = (nameof(BAlert),"b-core-alert");
+        
+        return  AnalyzeChildren(input, AnalyzeReactNode).With(import);
     }
 
     protected override Element render()

@@ -17,14 +17,13 @@ record MessagingRecord
 static class Mixin
 {
     public const string textSecondary = "rgba(0, 0, 0, 0.6)";
-
-
-    public static async NodeAnalyzeOutput WithImport(this NodeAnalyzeOutput task, string name, string package)
+    
+    public static async NodeAnalyzeOutput With(this NodeAnalyzeOutput task, (string name, string package) tsImport)
     {
         var output = await task;
         if (!output.HasError)
         {
-            output.Value.TsImportCollection.Add(name, package);
+            output.Value.TsImportCollection.Add(tsImport.name, tsImport.package);
         }
 
         return output;

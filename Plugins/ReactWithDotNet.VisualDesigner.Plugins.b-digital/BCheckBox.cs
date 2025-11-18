@@ -1,10 +1,6 @@
-﻿using System.Collections.Immutable;
-using ReactWithDotNet.VisualDesigner.Exporters;
-
-namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
+﻿namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
 [CustomComponent]
-[TsImport(Name = "BCheckBox", Package = "b-check-box")]
 sealed class BCheckBox : PluginComponentBase
 {
     [JsTypeInfo(JsType.Boolean)]
@@ -86,7 +82,9 @@ sealed class BCheckBox : PluginComponentBase
 
         node = AddContextProp(node);
 
-        return AnalyzeChildren(input with{Node = node}, AnalyzeReactNode);
+        var import = (nameof(BCheckBox), "b-check-box");
+        
+        return AnalyzeChildren(input with{Node = node}, AnalyzeReactNode).With(import);
     }
 
     protected override Element render()

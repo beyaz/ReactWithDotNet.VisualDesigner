@@ -1,7 +1,6 @@
 ﻿namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
 [CustomComponent]
-[TsImport(Name = nameof(BasePage), Package = "b-digital-framework")]
 sealed class BasePage : PluginComponentBase
 {
     [JsTypeInfo(JsType.String)]
@@ -10,6 +9,19 @@ sealed class BasePage : PluginComponentBase
     [JsTypeInfo(JsType.Function)]
     public string handleBackClick { get; set; }
 
+    [NodeAnalyzer]
+    public static NodeAnalyzeOutput AnalyzeReactNode(NodeAnalyzeInput input)
+    {
+        if (input.Node.Tag != nameof(BasePage))
+        {
+            return  AnalyzeChildren(input, AnalyzeReactNode);
+        }
+        
+        var import = (nameof(BasePage),"b-digital-framework");
+        
+        return  AnalyzeChildren(input, AnalyzeReactNode).With(import);
+    }
+    
     protected override Element render()
     {
         return new FlexColumn(FontFamily("Roboto"), WidthFull, Padding(16), Background("#fafafa"))
