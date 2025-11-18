@@ -20,9 +20,13 @@ sealed class BButton : PluginComponentBase
     [JsTypeInfo(JsType.String)]
     public string type { get; set; }
     
-    [Suggestions("primary")]
+    [Suggestions("primary , default")]
     [JsTypeInfo(JsType.String)]
     public string colorType { get; set; }
+    
+    [Suggestions("primary , default")]
+    [JsTypeInfo(JsType.String)]
+    public string color { get; set; }
     
     
     [Suggestions("true , false")]
@@ -85,7 +89,7 @@ sealed class BButton : PluginComponentBase
 
         Style defaultStyle = [];
         
-        if (colorType == "primary")
+        if (color == "primary" || colorType == "primary")
         {
             defaultStyle =
             [
