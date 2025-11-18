@@ -10,6 +10,19 @@ sealed class BDigitalBox : PluginComponentBase
     [JsTypeInfo(JsType.String)]
     public string styleContext { get; set; }
     
+    [NodeAnalyzer]
+    public static NodeAnalyzeOutput AnalyzeReactNode(NodeAnalyzeInput input)
+    {
+        if (input.Node.Tag != nameof(BDigitalBox))
+        {
+            return  AnalyzeChildren(input, AnalyzeReactNode);
+        }
+        
+        var import = (nameof(BDigitalBox),"b-digital-box");
+        
+        return  AnalyzeChildren(input, AnalyzeReactNode).With(import);
+    }
+    
     protected override Element render()
     {
         var style = new Style();

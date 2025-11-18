@@ -69,7 +69,7 @@ sealed class BButton : PluginComponentBase
 
         var import = (nameof(BButton), "b-button");
         
-        return AnalyzeChildren(input with { Node = node }, AnalyzeReactNode).With(import);;
+        return AnalyzeChildren(input with { Node = node }, AnalyzeReactNode).With(import);
     }
 
     internal Style style { get; set; }

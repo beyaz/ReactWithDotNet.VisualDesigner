@@ -4,8 +4,6 @@ using ReactWithDotNet.VisualDesigner.Exporters;
 namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
 [CustomComponent]
-[TsImport(Name = "BComboBoxExtended", Package = "b-combo-box-extended")]
-[TsImport(Name = "TextValuePair", Package = "b-digital-internet-banking")]
 sealed class BComboBoxExtended : PluginComponentBase
 {
     [JsTypeInfo(JsType.Array)]
@@ -118,7 +116,9 @@ sealed class BComboBoxExtended : PluginComponentBase
 
         
 
-        return AnalyzeChildren(input with{Node = node}, AnalyzeReactNode);
+        var import = (nameof(BComboBoxExtended), "b-combo-box-extended");
+   
+        return AnalyzeChildren(input with { Node = node }, AnalyzeReactNode).With(import);
     }
 
     protected override Element render()

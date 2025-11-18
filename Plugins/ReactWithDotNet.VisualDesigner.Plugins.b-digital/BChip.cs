@@ -69,7 +69,9 @@ sealed class BChip : PluginComponentBase
             node = AddContextProp(node);
         }
 
-        return AnalyzeChildren(input with{Node = node}, AnalyzeReactNode);
+        var import = (nameof(BChip), "b-chip");
+        
+        return AnalyzeChildren(input with { Node = node }, AnalyzeReactNode).With(import);
     }
 
     protected override Element render()

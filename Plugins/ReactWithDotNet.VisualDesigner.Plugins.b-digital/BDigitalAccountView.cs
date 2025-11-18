@@ -4,7 +4,6 @@ using ReactWithDotNet.VisualDesigner.Exporters;
 namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
 [CustomComponent]
-[TsImport(Name = "BDigitalAccountView", Package = "b-digital-account-view")]
 sealed class BDigitalAccountView : PluginComponentBase
 {
     [JsTypeInfo(JsType.Array)]
@@ -90,7 +89,9 @@ sealed class BDigitalAccountView : PluginComponentBase
             }
         }
 
-        return AnalyzeChildren(input with{Node = node}, AnalyzeReactNode);
+        var import = (nameof(BDigitalAccountView), "b-digital-account-view");
+   
+        return AnalyzeChildren(input with { Node = node }, AnalyzeReactNode).With(import);
     }
 
     protected override Element render()

@@ -4,7 +4,6 @@ using ReactWithDotNet.VisualDesigner.Exporters;
 namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
 [CustomComponent]
-[TsImport(Name = nameof(BDigitalAccountCardView), Package = "b-digital-account-card-view")]
 sealed class BDigitalAccountCardView : PluginComponentBase
 {
     [JsTypeInfo(JsType.Array)]
@@ -100,7 +99,9 @@ sealed class BDigitalAccountCardView : PluginComponentBase
             }
         }
 
-        return AnalyzeChildren(input with{Node = node}, AnalyzeReactNode);
+        var import = (nameof(BDigitalAccountCardView), "b-digital-account-card-view");
+   
+        return AnalyzeChildren(input with { Node = node }, AnalyzeReactNode).With(import);
     }
 
     protected override Element render()

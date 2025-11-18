@@ -1,11 +1,8 @@
-﻿using System.Collections.Immutable;
-using ReactWithDotNet.VisualDesigner.Exporters;
+﻿
 
 namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
 [CustomComponent]
-[TsImport(Name = "BComboBox", Package = "b-combo-box")]
-[TsImport(Name = "TextValuePair", Package = "b-digital-internet-banking")]
 sealed class BComboBox : PluginComponentBase
 {
     [JsTypeInfo(JsType.Array)]
@@ -102,7 +99,10 @@ sealed class BComboBox : PluginComponentBase
         }
 
         
-        return AnalyzeChildren(input with{Node = node}, AnalyzeReactNode);
+        var import1 = (nameof(BComboBox), "b-combo-box");
+        var import2 = ("TextValuePair", "b-digital-internet-banking");
+   
+        return AnalyzeChildren(input with { Node = node }, AnalyzeReactNode).With(import1).With(import2);
     }
 
     protected override Element render()

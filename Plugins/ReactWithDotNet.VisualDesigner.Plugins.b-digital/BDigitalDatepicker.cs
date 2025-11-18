@@ -5,7 +5,6 @@ using ReactWithDotNet.VisualDesigner.Exporters;
 namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
 [CustomComponent]
-[TsImport(Name = "BDigitalDatepicker", Package = "b-digital-datepicker")]
 sealed class BDigitalDatepicker : PluginComponentBase
 {
     [JsTypeInfo(JsType.Boolean)]
