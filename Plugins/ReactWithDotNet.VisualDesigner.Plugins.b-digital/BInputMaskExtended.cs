@@ -4,7 +4,7 @@ using ReactWithDotNet.VisualDesigner.Exporters;
 namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
 [CustomComponent]
-[Import(Name = "BInputMaskExtended", Package = "b-input-mask-extended")]
+[TsImport(Name = "BInputMaskExtended", Package = "b-input-mask-extended")]
 sealed class BInputMaskExtended : PluginComponentBase
 {
     [JsTypeInfo(JsType.String)]

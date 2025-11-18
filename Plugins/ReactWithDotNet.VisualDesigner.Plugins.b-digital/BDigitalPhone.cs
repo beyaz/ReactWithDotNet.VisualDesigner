@@ -4,7 +4,7 @@ using ReactWithDotNet.VisualDesigner.Exporters;
 namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
 [CustomComponent]
-[Import(Name = "BDigitalPhone", Package = "b-digital-phone")]
+[TsImport(Name = "BDigitalPhone", Package = "b-digital-phone")]
 sealed class BDigitalPhone : PluginComponentBase
 {
     [JsTypeInfo(JsType.String)]

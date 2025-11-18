@@ -3,7 +3,7 @@
 namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
 [CustomComponent]
-[Import(Name = "BIconExtended as BIcon", Package = "../utils/FormAssistant")]
+[TsImport(Name = "BIconExtended as BIcon", Package = "../utils/FormAssistant")]
 sealed class BIcon : PluginComponentBase
 {
     [Suggestions("TimerRounded , content_copy")]

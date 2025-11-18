@@ -3,7 +3,7 @@
 namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
 [CustomComponent]
-[Import(Name = "BTypography", Package = "b-core-typography")]
+[TsImport(Name = "BTypography", Package = "b-core-typography")]
 sealed class BTypography : PluginComponentBase
 {
     static readonly Dictionary<string, StyleModifier> ColorMap = new()

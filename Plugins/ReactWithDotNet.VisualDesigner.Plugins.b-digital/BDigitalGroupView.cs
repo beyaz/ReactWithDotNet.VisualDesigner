@@ -1,7 +1,7 @@
 ﻿namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
 [CustomComponent]
-[Import(Name = nameof(BDigitalGroupView), Package = "b-digital-group-view")]
+[TsImport(Name = nameof(BDigitalGroupView), Package = "b-digital-group-view")]
 sealed class BDigitalGroupView : PluginComponentBase
 {
     

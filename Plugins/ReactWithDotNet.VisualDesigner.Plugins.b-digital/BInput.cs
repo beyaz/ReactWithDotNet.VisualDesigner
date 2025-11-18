@@ -4,7 +4,7 @@ using ReactWithDotNet.VisualDesigner.Exporters;
 namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
 [CustomComponent]
-[Import(Name = "BInput", Package = "b-input")]
+[TsImport(Name = "BInput", Package = "b-input")]
 sealed class BInput : PluginComponentBase
 {
     [JsTypeInfo(JsType.String)]

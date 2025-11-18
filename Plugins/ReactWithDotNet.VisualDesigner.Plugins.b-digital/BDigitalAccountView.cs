@@ -4,7 +4,7 @@ using ReactWithDotNet.VisualDesigner.Exporters;
 namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
 [CustomComponent]
-[Import(Name = "BDigitalAccountView", Package = "b-digital-account-view")]
+[TsImport(Name = "BDigitalAccountView", Package = "b-digital-account-view")]
 sealed class BDigitalAccountView : PluginComponentBase
 {
     [JsTypeInfo(JsType.Array)]

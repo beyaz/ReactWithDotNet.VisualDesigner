@@ -4,8 +4,8 @@ using ReactWithDotNet.VisualDesigner.Exporters;
 namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
 [CustomComponent]
-[Import(Name = "BComboBox", Package = "b-combo-box")]
-[Import(Name = "TextValuePair", Package = "b-digital-internet-banking")]
+[TsImport(Name = "BComboBox", Package = "b-combo-box")]
+[TsImport(Name = "TextValuePair", Package = "b-digital-internet-banking")]
 sealed class BComboBox : PluginComponentBase
 {
     [JsTypeInfo(JsType.Array)]

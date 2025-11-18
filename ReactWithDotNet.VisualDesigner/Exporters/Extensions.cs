@@ -94,7 +94,7 @@ public static class PublicExtensions
             if (type.Name == node.Tag)
             {
                 return
-                    from a in type.GetCustomAttributes<ImportAttribute>()
+                    from a in type.GetCustomAttributes<TsImportAttribute>()
                     select $"import {{ {a.Name} }} from \"{a.Package}\";";
             }
 

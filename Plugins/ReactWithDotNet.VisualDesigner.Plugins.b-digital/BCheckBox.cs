@@ -4,7 +4,7 @@ using ReactWithDotNet.VisualDesigner.Exporters;
 namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
 [CustomComponent]
-[Import(Name = "BCheckBox", Package = "b-check-box")]
+[TsImport(Name = "BCheckBox", Package = "b-check-box")]
 sealed class BCheckBox : PluginComponentBase
 {
     [JsTypeInfo(JsType.Boolean)]

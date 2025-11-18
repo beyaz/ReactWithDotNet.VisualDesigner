@@ -3,7 +3,7 @@
 namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
 [CustomComponent]
-[Import(Name = nameof(BSymbol), Package = "b-icon")]
+[TsImport(Name = nameof(BSymbol), Package = "b-icon")]
 sealed class BSymbol : PluginComponentBase
 {
     [JsTypeInfo(JsType.String)]

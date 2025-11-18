@@ -1,7 +1,7 @@
 ﻿namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
 [CustomComponent]
-[Import(Name = nameof(BDigitalEmptyPage), Package = "b-digital-empty-page")]
+[TsImport(Name = nameof(BDigitalEmptyPage), Package = "b-digital-empty-page")]
 sealed partial class BDigitalEmptyPage : PluginComponentBase
 {
     [JsTypeInfo(JsType.String)]

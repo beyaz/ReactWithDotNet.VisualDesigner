@@ -5,7 +5,7 @@ using ReactWithDotNet.VisualDesigner.Exporters;
 namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
 [CustomComponent]
-[Import(Name = nameof(BDigitalFilterView), Package = "b-digital-filter-view")]
+[TsImport(Name = nameof(BDigitalFilterView), Package = "b-digital-filter-view")]
 sealed class  BDigitalFilterView: PluginComponentBase
 {
     [JsTypeInfo(JsType.Date)]

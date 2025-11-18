@@ -4,7 +4,7 @@
 namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
 [CustomComponent]
-[Import(Name = "BDigitalGrid", Package = "b-digital-grid")]
+[TsImport(Name = "BDigitalGrid", Package = "b-digital-grid")]
 sealed class BDigitalGrid : PluginComponentBase
 {
     [Suggestions("flex-start , flex-end , stretch , center , baseline")]

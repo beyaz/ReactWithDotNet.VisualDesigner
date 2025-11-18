@@ -5,7 +5,7 @@ using ReactWithDotNet.VisualDesigner.Exporters;
 namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
 [CustomComponent]
-[Import(Name = "BChip", Package = "b-chip")]
+[TsImport(Name = "BChip", Package = "b-chip")]
 sealed class BChip : PluginComponentBase
 {
     [JsTypeInfo(JsType.String)]

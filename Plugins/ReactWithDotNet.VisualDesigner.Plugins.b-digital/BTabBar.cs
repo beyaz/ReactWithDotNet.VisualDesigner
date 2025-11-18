@@ -4,7 +4,7 @@ using ReactWithDotNet.VisualDesigner.Exporters;
 namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
 [CustomComponent]
-[Import(Name = nameof(BTabBar), Package = "b-tab-bar")]
+[TsImport(Name = nameof(BTabBar), Package = "b-tab-bar")]
 sealed class BTabBar : PluginComponentBase
 {
     [Suggestions("secondary , primary")]

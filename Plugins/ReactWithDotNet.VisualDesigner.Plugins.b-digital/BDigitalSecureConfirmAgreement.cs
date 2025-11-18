@@ -1,7 +1,7 @@
 ﻿namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
 [CustomComponent]
-[Import(Name = nameof(BDigitalSecureConfirmAgreement), Package = "b-digital-secure-confirm-agreement")]
+[TsImport(Name = nameof(BDigitalSecureConfirmAgreement), Package = "b-digital-secure-confirm-agreement")]
 sealed class BDigitalSecureConfirmAgreement : PluginComponentBase
 {
     [JsTypeInfo(JsType.String)]

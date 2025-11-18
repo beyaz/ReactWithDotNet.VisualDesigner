@@ -4,7 +4,7 @@ using ReactWithDotNet.VisualDesigner.Exporters;
 namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
 [CustomComponent]
-[Import(Name = "BDigitalDialog", Package = "b-digital-dialog")]
+[TsImport(Name = "BDigitalDialog", Package = "b-digital-dialog")]
 sealed class BDigitalDialog : PluginComponentBase
 {
     [JsTypeInfo(JsType.Boolean)]

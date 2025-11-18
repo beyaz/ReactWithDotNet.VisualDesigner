@@ -24,7 +24,7 @@ public sealed class CustomComponentAttribute : Attribute
 }
 
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
-public sealed class ImportAttribute : Attribute
+public sealed class TsImportAttribute : Attribute
 {
     public string Name { get; init; }
 

@@ -4,7 +4,7 @@ using ReactWithDotNet.VisualDesigner.Exporters;
 namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
 [CustomComponent]
-[Import(Name = nameof(BDigitalTransactionConfirm), Package = "b-digital-transaction-confirm")]
+[TsImport(Name = nameof(BDigitalTransactionConfirm), Package = "b-digital-transaction-confirm")]
 sealed class BDigitalTransactionConfirm : PluginComponentBase
 {
     // @formatter:on

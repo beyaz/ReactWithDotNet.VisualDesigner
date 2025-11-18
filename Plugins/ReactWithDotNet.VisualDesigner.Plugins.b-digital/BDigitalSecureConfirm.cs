@@ -4,7 +4,7 @@ using ReactWithDotNet.VisualDesigner.Exporters;
 namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
 [CustomComponent]
-[Import(Name = nameof(BDigitalSecureConfirm), Package = "b-digital-secure-confirm")]
+[TsImport(Name = nameof(BDigitalSecureConfirm), Package = "b-digital-secure-confirm")]
 sealed class BDigitalSecureConfirm : PluginComponentBase
 {
     [JsTypeInfo(JsType.String)]

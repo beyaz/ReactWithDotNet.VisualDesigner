@@ -3,7 +3,7 @@
 namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
 [CustomComponent]
-[Import(Name = nameof(BDivider), Package = "b-divider")]
+[TsImport(Name = nameof(BDivider), Package = "b-divider")]
 sealed class BDivider : PluginComponentBase
 {
     protected override Element render()

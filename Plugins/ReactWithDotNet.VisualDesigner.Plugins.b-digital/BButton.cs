@@ -4,7 +4,7 @@ using ReactWithDotNet.VisualDesigner.Exporters;
 namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
 [CustomComponent]
-[Import(Name = nameof(BButton), Package = "b-button")]
+[TsImport(Name = nameof(BButton), Package = "b-button")]
 sealed class BButton : PluginComponentBase
 {
     [JsTypeInfo(JsType.Function)]

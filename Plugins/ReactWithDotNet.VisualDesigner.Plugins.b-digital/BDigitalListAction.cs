@@ -3,7 +3,7 @@
 namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
 [CustomComponent]
-[Import(Name = nameof(BDigitalListAction), Package = "b-digital-list-action")]
+[TsImport(Name = nameof(BDigitalListAction), Package = "b-digital-list-action")]
 sealed class BDigitalListAction : PluginComponentBase
 {
     [JsTypeInfo(JsType.Array)]

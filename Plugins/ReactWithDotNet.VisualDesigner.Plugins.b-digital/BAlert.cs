@@ -3,7 +3,7 @@
 namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
 [CustomComponent]
-[Import(Name = "BAlert", Package = "b-core-alert")]
+[TsImport(Name = "BAlert", Package = "b-core-alert")]
 sealed class BAlert : PluginComponentBase
 {
     [Suggestions("success , info , warning , error")]
