@@ -23,19 +23,6 @@ public sealed class CustomComponentAttribute : Attribute
 {
 }
 
-[AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
-public sealed class TsImportAttribute : Attribute
-{
-    public string Name { get; init; }
-
-    public string Package { get; init; }
-
-    public override string ToString()
-    {
-        return TsImport.ToString(Name, Package);
-    }
-}
-
 static class TsImport
 {
     public static string ToString(string name, string package)
@@ -63,10 +50,6 @@ public sealed class TsImportCollection : IEnumerable<(string Name, string Packag
         items.Add((name, package));
     }
     
-    public void Add(TsImportAttribute tsImportAttribute)
-    {
-        Add(tsImportAttribute.Name, tsImportAttribute.Package);
-    }
     
     public void Add(TsImportCollection tsImportCollection)
     {
@@ -84,13 +67,7 @@ public sealed class TsImportCollection : IEnumerable<(string Name, string Packag
         }
     }
     
-    public void Add(IEnumerable<TsImportAttribute> tsImportAttributes)
-    {
-        foreach (var item in tsImportAttributes)
-        {
-            Add(item);
-        }
-    }
+   
 
     public IEnumerator<(string Name, string Package)> GetEnumerator()
     {
