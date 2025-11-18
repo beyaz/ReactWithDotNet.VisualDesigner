@@ -44,12 +44,13 @@ sealed class BDigitalMoneyInput : PluginComponentBase
             {
                 var properties = node.Properties;
 
-                List<string> lines =
-                [
+                var lines = new TsLineCollection
+                {
                     "(value: number) =>",
                     "{",
-                    $"  updateRequest(r => {{ r.{valueProp.Value.RemoveFromStart("request.")} = value; }});"
-                ];
+                    GetUpdateStateLines(valueProp.Value, "value")
+
+                };
 
                 if (handleMoneyInputChangeProp is not null)
                 {
@@ -69,7 +70,7 @@ sealed class BDigitalMoneyInput : PluginComponentBase
                 {
                     handleMoneyInputChangeProp = handleMoneyInputChangeProp with
                     {
-                        Value = string.Join(Environment.NewLine, lines)
+                        Value = lines.ToTsCode()
                     };
 
                     properties = properties.SetItem(properties.FindIndex(x => x.Name == handleMoneyInputChangeProp.Name), handleMoneyInputChangeProp);
@@ -79,7 +80,7 @@ sealed class BDigitalMoneyInput : PluginComponentBase
                     properties = properties.Add(new()
                     {
                         Name  = nameof(handleMoneyInputChange),
-                        Value = string.Join(Environment.NewLine, lines)
+                        Value = lines.ToTsCode()
                     });
                 }
 
