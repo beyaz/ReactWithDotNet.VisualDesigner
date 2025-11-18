@@ -36,20 +36,22 @@ sealed class BDigitalSecureConfirm : PluginComponentBase
             if (smsPasswordProp is not null)
             {
                 var properties = node.Properties;
-
-                List<string> lines =
-                [
+                
+                var lines = new TsLineCollection
+                {
                     "(value: string) =>",
                     "{",
-                    $"  {smsPasswordProp.Value} = value;",
-                    GetUpdateStateLine(smsPasswordProp.Value),
+                    GetUpdateStateLines(smsPasswordProp.Value, "value"),
+                    
                     "}"
-                ];
+                };
+                
+                
 
                 properties = properties.Remove(smsPasswordProp).Add(new()
                 {
                     Name  = "handleSmsPasswordSend",
-                    Value = string.Join(Environment.NewLine, lines)
+                    Value = lines.ToTsCode()
                 });
 
                 node = node with { Properties = properties };
