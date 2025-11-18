@@ -4,7 +4,6 @@ using ReactWithDotNet.VisualDesigner.Exporters;
 namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
 [CustomComponent]
-[TsImport(Name = "BDigitalMoneyInput", Package = "b-digital-money-input")]
 sealed class BDigitalMoneyInput : PluginComponentBase
 {
     [JsTypeInfo(JsType.Boolean)]
@@ -91,7 +90,9 @@ sealed class BDigitalMoneyInput : PluginComponentBase
             }
         }
 
-        return AnalyzeChildren(input with{Node = node}, AnalyzeReactNode);
+        var import = (nameof(BDigitalMoneyInput), "b-digital-money-input");
+   
+        return AnalyzeChildren(input with { Node = node }, AnalyzeReactNode).With(import);
     }
 
     protected override Element render()

@@ -1,7 +1,6 @@
 ﻿namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
 [CustomComponent]
-[TsImport(Name = nameof(BDigitalGroupView), Package = "b-digital-group-view")]
 sealed class BDigitalGroupView : PluginComponentBase
 {
     
@@ -20,6 +19,20 @@ sealed class BDigitalGroupView : PluginComponentBase
     [JsTypeInfo(JsType.Boolean)]
     public string applyVerticalMargin { get; set; }
 
+    [NodeAnalyzer]
+    public static NodeAnalyzeOutput AnalyzeReactNode(NodeAnalyzeInput input)
+    {
+        if (input.Node.Tag != nameof(BDigitalGroupView))
+        {
+            return  AnalyzeChildren(input, AnalyzeReactNode);
+        }
+        
+        var import = (nameof(BDigitalGroupView),"b-digital-group-view");
+        
+        return  AnalyzeChildren(input, AnalyzeReactNode).With(import);
+    }
+    
+    
     protected override Element render()
     {
         var _applySideMargin = applySideMargin ?? "true";

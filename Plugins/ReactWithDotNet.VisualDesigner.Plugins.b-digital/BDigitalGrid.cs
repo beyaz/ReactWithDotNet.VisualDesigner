@@ -4,7 +4,6 @@
 namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
 [CustomComponent]
-[TsImport(Name = "BDigitalGrid", Package = "b-digital-grid")]
 sealed class BDigitalGrid : PluginComponentBase
 {
     [Suggestions("flex-start , flex-end , stretch , center , baseline")]
@@ -46,6 +45,19 @@ sealed class BDigitalGrid : PluginComponentBase
     [JsTypeInfo(JsType.Number)]
     public string xs { get; set; }
 
+    [NodeAnalyzer]
+    public static NodeAnalyzeOutput AnalyzeReactNode(NodeAnalyzeInput input)
+    {
+        if (input.Node.Tag != nameof(BDigitalGrid))
+        {
+            return  AnalyzeChildren(input, AnalyzeReactNode);
+        }
+        
+        var import = (nameof(BDigitalGrid),"b-digital-grid");
+        
+        return  AnalyzeChildren(input, AnalyzeReactNode).With(import);
+    }
+    
     protected override Element render()
     {
         return new Grid
