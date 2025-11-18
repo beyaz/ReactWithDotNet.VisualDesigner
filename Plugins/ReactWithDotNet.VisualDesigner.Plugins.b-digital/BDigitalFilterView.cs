@@ -75,9 +75,8 @@ sealed class  BDigitalFilterView: PluginComponentBase
                     {
                         "(value: Date) =>", "{",
                         
-                        $"  {beginDateProp.Value} = value;",
-                        
-                        GetUpdateStateLine(beginDateProp.Value),
+                       
+                        GetUpdateStateLines(beginDateProp.Value, "value"),
                         
                         "}"
                     }.ToTsCode()
@@ -95,9 +94,9 @@ sealed class  BDigitalFilterView: PluginComponentBase
                     {
                         "(value: Date) =>", "{",
                         
-                        $"  {endDateProp.Value} = value;",
                         
-                        GetUpdateStateLine(endDateProp.Value),
+                        GetUpdateStateLines(endDateProp.Value, "value"),
+                        
                         
                         "}"
                     }.ToTsCode()
