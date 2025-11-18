@@ -1,7 +1,4 @@
-﻿using System.Collections.Immutable;
-using ReactWithDotNet.VisualDesigner.Exporters;
-
-namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
+﻿namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
 [CustomComponent]
 [TsImport(Name = nameof(BDigitalSearchInput), Package = "b-digital-search-input")]

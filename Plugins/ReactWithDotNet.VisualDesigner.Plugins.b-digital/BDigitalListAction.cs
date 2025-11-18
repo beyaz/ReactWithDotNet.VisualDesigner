@@ -1,6 +1,4 @@
-﻿using ReactWithDotNet.VisualDesigner.Exporters;
-
-namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
+﻿namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
 [CustomComponent]
 sealed class BDigitalListAction : PluginComponentBase

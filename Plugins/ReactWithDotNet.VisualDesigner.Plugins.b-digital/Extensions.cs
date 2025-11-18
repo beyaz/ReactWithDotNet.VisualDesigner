@@ -1,8 +1,6 @@
 ﻿
 global using static ReactWithDotNet.VisualDesigner.Plugins.Extensions;
 
-using ReactWithDotNet.VisualDesigner.Exporters;
-
 namespace ReactWithDotNet.VisualDesigner.Plugins;
 
 static class Extensions

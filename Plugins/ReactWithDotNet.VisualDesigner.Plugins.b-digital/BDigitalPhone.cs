@@ -1,10 +1,6 @@
-﻿using System.Collections.Immutable;
-using ReactWithDotNet.VisualDesigner.Exporters;
-
-namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
+﻿namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
 [CustomComponent]
-[TsImport(Name = "BDigitalPhone", Package = "b-digital-phone")]
 sealed class BDigitalPhone : PluginComponentBase
 {
     [JsTypeInfo(JsType.String)]
@@ -90,7 +86,9 @@ sealed class BDigitalPhone : PluginComponentBase
 
         }
 
-        return AnalyzeChildren(input with{Node = node}, AnalyzeReactNode);
+        var import = (nameof(BDigitalPhone), "b-digital-phone");
+   
+        return AnalyzeChildren(input with { Node = node }, AnalyzeReactNode).With(import);
     }
 
     protected override Element render()
