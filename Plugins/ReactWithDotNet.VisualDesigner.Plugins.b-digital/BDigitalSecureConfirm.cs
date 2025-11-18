@@ -1,7 +1,6 @@
 ﻿namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
 [CustomComponent]
-[TsImport(Name = nameof(BDigitalSecureConfirm), Package = "b-digital-secure-confirm")]
 sealed class BDigitalSecureConfirm : PluginComponentBase
 {
     [JsTypeInfo(JsType.String)]
@@ -57,7 +56,9 @@ sealed class BDigitalSecureConfirm : PluginComponentBase
             }
         }
 
-        return AnalyzeChildren(input with{Node = node}, AnalyzeReactNode);
+        var import = (nameof(BDigitalSecureConfirm), "b-digital-secure-confirm");
+   
+        return AnalyzeChildren(input with { Node = node }, AnalyzeReactNode).With(import);
     }
 
     protected override Element render()

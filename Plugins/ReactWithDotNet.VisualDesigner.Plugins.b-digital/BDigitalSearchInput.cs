@@ -1,7 +1,6 @@
 ﻿namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
 [CustomComponent]
-[TsImport(Name = nameof(BDigitalSearchInput), Package = "b-digital-search-input")]
 sealed class BDigitalSearchInput : PluginComponentBase
 {
     [JsTypeInfo(JsType.Function)]
