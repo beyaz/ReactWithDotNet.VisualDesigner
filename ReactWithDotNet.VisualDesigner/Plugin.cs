@@ -49,7 +49,7 @@ static class TsImport
     }
 }
 
-public sealed class TsImportCollection
+public sealed class TsImportCollection : IEnumerable<(string Name, string Package)>
 {
     readonly List<(string Name, string Package)> items = [];        
     
@@ -68,6 +68,14 @@ public sealed class TsImportCollection
         Add(tsImportAttribute.Name, tsImportAttribute.Package);
     }
     
+    public void Add(TsImportCollection tsImportCollection)
+    {
+        foreach (var item in tsImportCollection)
+        {
+            Add(item.Name, item.Package);
+        }
+    }
+    
     public void Add(IEnumerable<TsImportAttribute> tsImportAttributes)
     {
         foreach (var item in tsImportAttributes)
@@ -76,10 +84,22 @@ public sealed class TsImportCollection
         }
     }
 
+    public IEnumerator<(string Name, string Package)> GetEnumerator()
+    {
+        return items.GetEnumerator();
+    }
+    
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return GetEnumerator();
+    }
+
     public override string ToString()
     {
         return TsImport.ToString(items);
     }
+
+   
 }
 
 [AttributeUsage(AttributeTargets.Method)]
