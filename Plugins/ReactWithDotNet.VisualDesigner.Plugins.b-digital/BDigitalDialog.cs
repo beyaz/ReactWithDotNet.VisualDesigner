@@ -4,7 +4,6 @@ using ReactWithDotNet.VisualDesigner.Exporters;
 namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
 [CustomComponent]
-[TsImport(Name = "BDigitalDialog", Package = "b-digital-dialog")]
 sealed class BDigitalDialog : PluginComponentBase
 {
     [JsTypeInfo(JsType.Boolean)]
@@ -65,7 +64,9 @@ sealed class BDigitalDialog : PluginComponentBase
             };
         }
 
-        return AnalyzeChildren(input with{Node = node}, AnalyzeReactNode);
+        var import = (nameof(BDigitalDialog), "b-digital-dialog");
+   
+        return AnalyzeChildren(input with { Node = node }, AnalyzeReactNode).With(import);
     }
 
     protected override Element render()

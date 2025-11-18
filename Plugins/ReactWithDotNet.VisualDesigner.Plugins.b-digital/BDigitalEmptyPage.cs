@@ -1,7 +1,6 @@
 ﻿namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
 [CustomComponent]
-[TsImport(Name = nameof(BDigitalEmptyPage), Package = "b-digital-empty-page")]
 sealed partial class BDigitalEmptyPage : PluginComponentBase
 {
     [JsTypeInfo(JsType.String)]
@@ -11,6 +10,21 @@ sealed partial class BDigitalEmptyPage : PluginComponentBase
     [JsTypeInfo(JsType.String)]
     public string infoImageSource { get; set; }
 
+    
+    [NodeAnalyzer]
+    public static NodeAnalyzeOutput AnalyzeReactNode(NodeAnalyzeInput input)
+    {
+        if (input.Node.Tag != nameof(BDigitalEmptyPage))
+        {
+            return  AnalyzeChildren(input, AnalyzeReactNode);
+        }
+        
+        var import = (nameof(BDigitalEmptyPage),"b-digital-empty-page");
+        
+        return  AnalyzeChildren(input, AnalyzeReactNode).With(import);
+    }
+    
+    
     protected override Element render()
     {
         return new div

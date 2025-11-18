@@ -5,7 +5,6 @@ using ReactWithDotNet.VisualDesigner.Exporters;
 namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
 [CustomComponent]
-[TsImport(Name = nameof(BDigitalFilterView), Package = "b-digital-filter-view")]
 sealed class  BDigitalFilterView: PluginComponentBase
 {
     [JsTypeInfo(JsType.Date)]
@@ -127,7 +126,9 @@ sealed class  BDigitalFilterView: PluginComponentBase
             }
         }
 
-        return AnalyzeChildren(input with{Node = node}, AnalyzeReactNode);
+        var import = (nameof(BDigitalFilterView), "b-digital-filter-view");
+   
+        return AnalyzeChildren(input with { Node = node }, AnalyzeReactNode).With(import);
     }
 
     protected override Element render()
