@@ -216,7 +216,11 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
             Properties = finalProps.ToImmutableList()
         };
 
-        return Result.From(node);
+        
+        return Result.From((node, new TsImportCollection
+        {
+            {nameof(BDigitalTransactionConfirm),"b-digital-transaction-confirm"}
+        }));
 
         static string getItem(ReactNode textNode, ReactNode valueNode)
         {

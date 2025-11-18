@@ -135,7 +135,10 @@ sealed class BDigitalDatepicker : PluginComponentBase
             };
         }
 
-        return Result.From(node);
+        return Result.From((node, new TsImportCollection
+        {
+            { nameof(BDigitalDatepicker), "b-digital-datepicker" }
+        }));
     }
 
     protected override Element render()

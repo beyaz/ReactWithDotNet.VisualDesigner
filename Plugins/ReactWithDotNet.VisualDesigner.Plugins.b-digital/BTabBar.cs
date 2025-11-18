@@ -56,11 +56,16 @@ sealed class BTabBar : PluginComponentBase
             };
         }
 
-        return node with
+        node = node with
         {
             Children = []
         };
 
+        return Result.From((node, new TsImportCollection
+        {
+            {nameof(BTabBar),"b-tab-bar"}
+        }));
+        
         async Task<Result<string>> ConvertToTabItem(ReactNode childNode)
         {
             List<string> lineList = [];

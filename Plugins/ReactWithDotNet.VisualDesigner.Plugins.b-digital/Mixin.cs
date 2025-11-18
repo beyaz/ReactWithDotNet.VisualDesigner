@@ -1,5 +1,5 @@
 ﻿global using static ReactWithDotNet.VisualDesigner.Plugins.b_digital.Mixin;
-global using NodeAnalyzeOutput = System.Threading.Tasks.Task<Toolbox.Result<ReactWithDotNet.VisualDesigner.Exporters.ReactNode>>;
+global using NodeAnalyzeOutput = System.Threading.Tasks.Task<Toolbox.Result<(ReactWithDotNet.VisualDesigner.Exporters.ReactNode Node, ReactWithDotNet.VisualDesigner.TsImportCollection TsImportCollection)>>;
 using System.Collections.Immutable;
 using System.Data;
 using Dapper;
@@ -49,6 +49,8 @@ static class Mixin
     public static async NodeAnalyzeOutput AnalyzeChildren(NodeAnalyzeInput input, Func<NodeAnalyzeInput, NodeAnalyzeOutput> analyzeMethod)
     {
         var children = new List<ReactNode>();
+        
+        TsImportCollection tsImportCollection = new();
 
         foreach (var child in input.Node.Children)
         {
@@ -58,13 +60,17 @@ static class Mixin
                 return response.Error;
             }
 
-            children.Add(response.Value);
+            children.Add(response.Value.Node);
+            
+            tsImportCollection.Add(response.Value.TsImportCollection);
         }
 
-        return input.Node with
+        var node = input.Node with
         {
             Children = children.ToImmutableList()
         };
+        
+        return (node, tsImportCollection);
     }
 
     public static ReactNode ApplyTranslateOperationOnProps(ReactNode node, ComponentConfig componentConfig, params string[] propNames)

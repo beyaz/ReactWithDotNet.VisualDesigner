@@ -37,7 +37,14 @@ sealed class BDigitalSearchInput : PluginComponentBase
 
         node = ApplyTranslateOperationOnProps(node, componentConfig, nameof(hintText));
 
-        return Result.From(node);
+        
+        
+        
+        
+        return Result.From((node, new TsImportCollection
+        {
+            {nameof(BDigitalSearchInput),"b-digital-search-input"}
+        }));
     }
 
     protected override Element render()

@@ -70,10 +70,17 @@ sealed class BDigitalListAction : PluginComponentBase
             };
         }
 
-        return node with
+        node = node with
         {
             Children = []
         };
+        
+        return (node, new()
+        {
+            { nameof(BDigitalListAction), "b-digital-list-action" }
+        });
+        
+        
     }
 
     protected override Element render()

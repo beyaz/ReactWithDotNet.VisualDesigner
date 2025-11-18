@@ -129,7 +129,10 @@ sealed class BInputMaskExtended : PluginComponentBase
 
         node = AddContextProp(node);
 
-        return Result.From(node);
+        return Result.From((node, new TsImportCollection
+        {
+            {nameof(BInputMaskExtended),"b-input-mask-extended"}
+        }));
     }
 
     protected override Element render()

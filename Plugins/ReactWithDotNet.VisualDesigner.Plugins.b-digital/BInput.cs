@@ -128,7 +128,10 @@ sealed class BInput : PluginComponentBase
             node = AddContextProp(node);
         }
 
-        return Result.From(node);
+        return Result.From((node, new TsImportCollection
+        {
+            {nameof(BInput),"b-input"}
+        }));
     }
 
     protected override Element render()
