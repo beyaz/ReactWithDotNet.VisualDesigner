@@ -163,12 +163,14 @@ static class Mixin
 
         return null;
     }
+    
     public static IReadOnlyList<string> GetUpdateStateLines(string jsVariableName, string jsValueName)
     {
-        var propertyPath = jsVariableName.Split('.', StringSplitOptions.RemoveEmptyEntries);
-        if (propertyPath.Length == 2)
+
+        var result = CalculateUpdateStateLines(jsVariableName);
+        if (result.isUpdateContainerState)
         {
-            var stateName = propertyPath[0];
+            var stateName = result.stateName;
 
             return
             [
@@ -177,9 +179,9 @@ static class Mixin
             ];
         }
         
-        if (propertyPath.Length == 1)
+        if (result.isUpdateState)
         {
-            var stateName = propertyPath[0];
+            var stateName = result.stateName;
 
             return
             [
@@ -192,6 +194,31 @@ static class Mixin
             $"  {jsVariableName} = {jsValueName};"
         ];
     }
+    
+    static (
+        bool isUpdateContainerState,
+        bool isUpdateState, 
+        string stateName) 
+        CalculateUpdateStateLines(string jsVariableName)
+    {
+        var propertyPath = jsVariableName.Split('.', StringSplitOptions.RemoveEmptyEntries);
+        if (propertyPath.Length == 2)
+        {
+            var stateName = propertyPath[0];
+
+            return (isUpdateContainerState: true, isUpdateState: false,  stateName);
+        }
+        
+        if (propertyPath.Length == 1)
+        {
+            var stateName = propertyPath[0];
+
+            return (isUpdateContainerState: false, isUpdateState: true,  stateName);
+        }
+
+        return (isUpdateContainerState: false, isUpdateState: false,  null);
+    }
+    
 
     internal static Task<IReadOnlyList<MessagingRecord>> GetMessagingByGroupName(string messagingGroupName)
     {
