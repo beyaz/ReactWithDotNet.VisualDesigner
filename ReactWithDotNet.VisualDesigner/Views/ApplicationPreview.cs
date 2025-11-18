@@ -480,6 +480,13 @@ sealed class ApplicationPreview : Component
                         data = data with { propValue = propRealValue };
                     }
                 }
+                {
+                    var parseResponse = TryParseConditionalValue(data.propValue);
+                    if (parseResponse.success)
+                    {
+                        data = data with { propValue = parseResponse.left };
+                    }
+                }
 
                 var result = await FP.RunWhile(data, x => !x.IsProcessed,
                 [
@@ -870,6 +877,8 @@ sealed class ApplicationPreview : Component
                         return data with { IsProcessed = true };
                     }
 
+                   
+                    
                     if (propertyInfo.PropertyType == typeof(string))
                     {
                         propertyInfo.SetValue(element, TryClearStringValue(propValue));
