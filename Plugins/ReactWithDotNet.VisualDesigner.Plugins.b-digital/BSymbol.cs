@@ -16,6 +16,7 @@ sealed class BSymbol : PluginComponentBase
     [JsTypeInfo(JsType.Number)]
     public string size { get; set; }
 
+    [Suggestions("chevron_right")]
     [JsTypeInfo(JsType.String)]
     public string symbol { get; set; }
 

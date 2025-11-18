@@ -7,6 +7,11 @@ sealed class TsLineCollection: List<string>
     {
         AddRange(lines);
     }
+    
+    public void Add(IReadOnlyList<string> lines)
+    {
+        AddRange(lines);
+    }
 
     public string ToTsCode()
     {

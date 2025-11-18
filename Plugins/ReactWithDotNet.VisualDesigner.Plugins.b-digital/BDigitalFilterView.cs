@@ -21,7 +21,21 @@ sealed class  BDigitalFilterView: PluginComponentBase
     [JsTypeInfo(JsType.Function)]
     public string setFilter { get; set; }
 
+    [JsTypeInfo(JsType.Date)]
+    public string beginMinDate { get; set; }
     
+    [JsTypeInfo(JsType.Date)]
+    public string beginMaxDate { get; set; }
+
+    [JsTypeInfo(JsType.Date)]
+    public string endMinDate { get; set; }
+    
+    [JsTypeInfo(JsType.Date)]
+    public string endMaxDate { get; set; }
+
+    
+    
+        
 
     [NodeAnalyzer]
     public static NodeAnalyzeOutput AnalyzeReactNode(NodeAnalyzeInput input)
@@ -30,8 +44,8 @@ sealed class  BDigitalFilterView: PluginComponentBase
         {
             return AnalyzeChildren(input, AnalyzeReactNode);
         }
-        
-        var (node, componentConfig) = input;
+
+        var node = input.Node;
 
 
 
@@ -171,7 +185,7 @@ sealed class  BDigitalFilterView: PluginComponentBase
                 type      ="raised",
                 colorType ="primary",
                 fullWidth = "true",
-                style=new Style(MarginTop(8))
+                style=new Style(MarginTop(8), Background("#16A085"), Color("#fff"))
             }
         };
     }

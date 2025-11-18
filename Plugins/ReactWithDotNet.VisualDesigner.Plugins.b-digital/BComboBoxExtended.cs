@@ -49,13 +49,12 @@ sealed class BComboBoxExtended : PluginComponentBase
                 var properties = node.Properties;
 
 
-                TsLineCollection lines =
-                [
+                var lines = new TsLineCollection
+                {
                     "(event: React.ChangeEvent<{}>, value: any, selectedObject?: any) =>",
                     "{",
-                    $"  {valueProp.Value} = value;",
-                    GetUpdateStateLine(valueProp.Value)
-                ];
+                    GetUpdateStateLines(valueProp.Value, "value")
+                };
 
                 if (onChangeProp is not null)
                 {

@@ -153,8 +153,44 @@ static class Mixin
 
             return $"  set{char.ToUpper(stateName[0]) + stateName[1..]}({{ ...{stateName} }});";
         }
+        
+        if (propertyPath.Length == 1)
+        {
+            var stateName = propertyPath[0];
+
+            return $"  set{char.ToUpper(stateName[0]) + stateName[1..]}({stateName});";
+        }
 
         return null;
+    }
+    public static IReadOnlyList<string> GetUpdateStateLines(string jsVariableName, string jsValueName)
+    {
+        var propertyPath = jsVariableName.Split('.', StringSplitOptions.RemoveEmptyEntries);
+        if (propertyPath.Length == 2)
+        {
+            var stateName = propertyPath[0];
+
+            return
+            [
+                $"  {jsVariableName} = {jsValueName};",
+                $"  set{char.ToUpper(stateName[0]) + stateName[1..]}({{ ...{stateName} }});"
+            ];
+        }
+        
+        if (propertyPath.Length == 1)
+        {
+            var stateName = propertyPath[0];
+
+            return
+            [
+                $"  set{char.ToUpper(stateName[0]) + stateName[1..]}({jsValueName});"
+            ];
+        }
+
+        return
+        [
+            $"  {jsVariableName} = {jsValueName};"
+        ];
     }
 
     internal static Task<IReadOnlyList<MessagingRecord>> GetMessagingByGroupName(string messagingGroupName)
