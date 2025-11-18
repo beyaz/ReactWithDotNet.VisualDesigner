@@ -15,6 +15,9 @@ sealed class BDigitalListAction : PluginComponentBase
     [Suggestions("0")]
     [JsTypeInfo(JsType.Number)]
     public string selectedCount { get; set; }
+    
+    [JsTypeInfo(JsType.Array)]
+    public string action { get; set; }
 
     [NodeAnalyzer]
     public static async NodeAnalyzeOutput AnalyzeReactNode(NodeAnalyzeInput input)

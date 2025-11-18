@@ -29,6 +29,7 @@ sealed class BTypography : PluginComponentBase
     {
         { "body0", new Style { FontSize18, FontWeight400, LineHeight(1.5) } },
         { "body1", new Style { FontSize16, FontWeight400, LineHeight(1.5) } },
+        { "body1b", new Style { FontSize16, FontWeight600, LineHeight(1.5) } },
         { "body2", new Style { FontSize14, FontWeight400, LineHeight(1.43) } },
         { "body2b", new Style { FontSize14, FontWeight600, LineHeight(1.5) } },
         { "body2m", new Style { FontSize14, FontWeight500, LineHeight(1.5) } },
@@ -44,7 +45,7 @@ sealed class BTypography : PluginComponentBase
 
     public string dangerouslySetInnerHTML { get; set; }
 
-    [Suggestions("h1, h2 , h3 , h4 , h5 , h6 , body0 , body1 , body2, body2m")]
+    [Suggestions("h1, h2 , h3 , h4 , h5 , h6 , body0 , body1 , body1b, body2, body2m")]
     [JsTypeInfo(JsType.String)]
     public string variant { get; set; }
 
