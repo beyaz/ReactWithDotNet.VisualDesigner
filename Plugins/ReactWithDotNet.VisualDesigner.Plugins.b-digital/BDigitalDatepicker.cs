@@ -49,14 +49,14 @@ sealed class BDigitalDatepicker : PluginComponentBase
         if (valueProp is not null)
         {
             var properties = node.Properties;
-
-            List<string> lines =
-            [
+            
+            var lines = new TsLineCollection
+            {
                 "(value: Date) =>",
                 "{",
-                $"  {valueProp.Value} = value;",
-                GetUpdateStateLine(valueProp.Value)
-            ];
+                GetUpdateStateLines(valueProp.Value, "value")
+            };
+            
 
             if (onDateChangeProp is not null)
             {
@@ -76,7 +76,7 @@ sealed class BDigitalDatepicker : PluginComponentBase
             {
                 onDateChangeProp = onDateChangeProp with
                 {
-                    Value = string.Join(Environment.NewLine, lines)
+                    Value = lines.ToTsCode()
                 };
 
                 properties = properties.SetItem(properties.FindIndex(x => x.Name == onDateChangeProp.Name), onDateChangeProp);
@@ -86,7 +86,7 @@ sealed class BDigitalDatepicker : PluginComponentBase
                 properties = properties.Add(new()
                 {
                     Name  = nameof(onDateChange),
-                    Value = string.Join(Environment.NewLine, lines)
+                    Value = lines.ToTsCode()
                 });
             }
 
