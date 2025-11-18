@@ -75,11 +75,13 @@ public static class PublicExtensions
 {
     public static IEnumerable<string> CalculateImportLines(ReactNode node)
     {
+        var tsImportCollection = new TsImportCollection();
+        
         var lines = new List<string>();
 
         foreach (var type in Plugin.AllCustomComponents)
         {
-            lines.AddRange(tryGetImportLines(type, node));
+            tsImportCollection.Add(tryGetImportLines(type, node));
         }
 
         foreach (var child in node.Children)
@@ -89,13 +91,11 @@ public static class PublicExtensions
 
         return lines.Distinct();
 
-        static IEnumerable<string> tryGetImportLines(Type type, ReactNode node)
+        static IEnumerable<TsImportAttribute> tryGetImportLines(Type type, ReactNode node)
         {
             if (type.Name == node.Tag)
             {
-                return
-                    from a in type.GetCustomAttributes<TsImportAttribute>()
-                    select $"import {{ {a.Name} }} from \"{a.Package}\";";
+                return type.GetCustomAttributes<TsImportAttribute>();
             }
 
             return [];

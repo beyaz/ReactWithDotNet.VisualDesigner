@@ -67,6 +67,14 @@ public sealed class TsImportCollection
     {
         Add(tsImportAttribute.Name, tsImportAttribute.Package);
     }
+    
+    public void Add(IEnumerable<TsImportAttribute> tsImportAttributes)
+    {
+        foreach (var item in tsImportAttributes)
+        {
+            Add(item);
+        }
+    }
 
     public override string ToString()
     {
