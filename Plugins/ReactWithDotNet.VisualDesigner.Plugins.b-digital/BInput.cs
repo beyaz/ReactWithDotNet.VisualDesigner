@@ -48,15 +48,12 @@ sealed class BInput : PluginComponentBase
             {
                 var properties = node.Properties;
 
-                        
-                        
-                TsLineCollection lines =
-                [
+                var lines = new TsLineCollection
+                {
                     "(e: any, value: any) =>",
                     "{",
-                    $"  {valueProp.Value} = value;",
-                    GetUpdateStateLine(valueProp.Value)
-                ];
+                    GetUpdateStateLines(valueProp.Value, "value")
+                };   
                         
                 if (onChangeProp is not null)
                 {

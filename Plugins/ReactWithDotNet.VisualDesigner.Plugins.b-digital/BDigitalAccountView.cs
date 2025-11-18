@@ -42,13 +42,14 @@ sealed class BDigitalAccountView : PluginComponentBase
             {
                 var properties = node.Properties;
 
-                List<string> lines =
-                [
+               
+                
+                var lines = new TsLineCollection
+                {
                     "(selectedAccountIndex: number) =>",
                     "{",
-                    $"  {selectedAccountIndexProp.Value} = selectedAccountIndex;",
-                    GetUpdateStateLine(selectedAccountIndexProp.Value)
-                ];
+                    GetUpdateStateLines(selectedAccountIndexProp.Value, "selectedAccountIndex")
+                };
 
                 if (onSelectedAccountIndexChangeProp is not null)
                 {
@@ -68,7 +69,7 @@ sealed class BDigitalAccountView : PluginComponentBase
                 {
                     onSelectedAccountIndexChangeProp = onSelectedAccountIndexChangeProp with
                     {
-                        Value = string.Join(Environment.NewLine, lines)
+                        Value = lines.ToTsCode()
                     };
 
                     properties = properties.SetItem(properties.FindIndex(x => x.Name == onSelectedAccountIndexChangeProp.Name), onSelectedAccountIndexChangeProp);
@@ -78,7 +79,7 @@ sealed class BDigitalAccountView : PluginComponentBase
                     properties = properties.Add(new()
                     {
                         Name  = nameof(onSelectedAccountIndexChange),
-                        Value = string.Join(Environment.NewLine, lines)
+                        Value = lines.ToTsCode()
                     });
                 }
 
