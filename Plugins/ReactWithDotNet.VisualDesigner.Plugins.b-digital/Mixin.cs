@@ -5,7 +5,6 @@ using System.Data;
 using Dapper;
 using Microsoft.Data.SqlClient;
 using ReactWithDotNet.VisualDesigner.DbModels;
-using ReactWithDotNet.VisualDesigner.Exporters;
 
 namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
@@ -19,6 +18,18 @@ static class Mixin
 {
     public const string textSecondary = "rgba(0, 0, 0, 0.6)";
 
+
+    public static async NodeAnalyzeOutput WithImport(this NodeAnalyzeOutput task, string name, string package)
+    {
+        var output = await task;
+        if (!output.HasError)
+        {
+            output.Value.TsImportCollection.Add(name, package);
+        }
+
+        return output;
+    }
+    
     [AfterReadConfig]
     public static Scope AfterReadConfig(Scope scope)
     {

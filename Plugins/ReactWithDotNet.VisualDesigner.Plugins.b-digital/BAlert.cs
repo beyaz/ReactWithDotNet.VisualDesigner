@@ -1,9 +1,9 @@
 ﻿using ReactWithDotNet.ThirdPartyLibraries.MUI.Material;
 
+
 namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
 [CustomComponent]
-[TsImport(Name = "BAlert", Package = "b-core-alert")]
 sealed class BAlert : PluginComponentBase
 {
     [Suggestions("success , info , warning , error")]
@@ -13,6 +13,18 @@ sealed class BAlert : PluginComponentBase
     [Suggestions("standard , outlined , filled")]
     [JsTypeInfo(JsType.String)]
     public string variant { get; set; }
+
+
+    [NodeAnalyzer]
+    public static NodeAnalyzeOutput AnalyzeReactNode(NodeAnalyzeInput input)
+    {
+        if (input.Node.Tag != nameof(BAlert))
+        {
+            return  AnalyzeChildren(input, AnalyzeReactNode);
+        }
+        
+        return  AnalyzeChildren(input, AnalyzeReactNode).WithImport(nameof(BAlert),"b-core-alert");
+    }
 
     protected override Element render()
     {
