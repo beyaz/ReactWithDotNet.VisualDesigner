@@ -1,7 +1,5 @@
 ﻿global using static ReactWithDotNet.VisualDesigner.Plugins.b_digital.Mixin;
-
 global using NodeAnalyzeOutput = System.Threading.Tasks.Task<Toolbox.Result<ReactWithDotNet.VisualDesigner.Exporters.ReactNode>>;
-
 using System.Collections.Immutable;
 using System.Data;
 using Dapper;
@@ -9,26 +7,45 @@ using Microsoft.Data.SqlClient;
 using ReactWithDotNet.VisualDesigner.DbModels;
 using ReactWithDotNet.VisualDesigner.Exporters;
 
-
-
 namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
 record MessagingRecord
 {
     public string Description { get; init; }
     public string PropertyName { get; init; }
-} 
+}
 
 static class Mixin
 {
-    public static ReactNode AnalyzeChildren(NodeAnalyzeInput input, Func<NodeAnalyzeInput, ReactNode> analyzeMethod)
+    public const string textSecondary = "rgba(0, 0, 0, 0.6)";
+
+    [AfterReadConfig]
+    public static Scope AfterReadConfig(Scope scope)
     {
-        return input.Node with
+        var config = Plugin.Config[scope];
+
+        if (Environment.MachineName.StartsWith("BTARC", StringComparison.OrdinalIgnoreCase))
         {
-            Children = input.Node.Children.Select(x => analyzeMethod(input with{Node = x})).ToImmutableList()
-        };
+            config = config with
+            {
+                Database = new()
+                {
+                    //IsSQLite = true,
+                    //ConnectionString = @"Data Source=D:\workgit\ReactWithDotNet.VisualDesigner\app.db"
+
+                    IsSQLServer      = true,
+                    SchemaName       = "RVD",
+                    ConnectionString = @"Data Source=srvdev\atlas;Initial Catalog=boa;Min Pool Size=10; Max Pool Size=100;Application Name=Thriller;Integrated Security=true; TrustServerCertificate=true;"
+                }
+            };
+        }
+
+        return Scope.Create(new()
+        {
+            { Plugin.Config, config }
+        });
     }
-    
+
     public static async NodeAnalyzeOutput AnalyzeChildren(NodeAnalyzeInput input, Func<NodeAnalyzeInput, NodeAnalyzeOutput> analyzeMethod)
     {
         var children = new List<ReactNode>();
@@ -40,7 +57,7 @@ static class Mixin
             {
                 return response.Error;
             }
-            
+
             children.Add(response.Value);
         }
 
@@ -49,9 +66,7 @@ static class Mixin
             Children = children.ToImmutableList()
         };
     }
-    
-    public const string textSecondary = "rgba(0, 0, 0, 0.6)";
-    
+
     public static ReactNode ApplyTranslateOperationOnProps(ReactNode node, ComponentConfig componentConfig, params string[] propNames)
     {
         return node with
@@ -77,7 +92,7 @@ static class Mixin
                 Value = value
             };
         }
-        
+
         static (bool hasAnyChange, string value) ApplyTranslateOperation(string translate, string label)
         {
             var messagingRecords = GetMessagingByGroupName(translate).GetAwaiter().GetResult();
@@ -93,15 +108,14 @@ static class Mixin
             return (true, $"getMessage(\"{propertyName}\")");
         }
     }
-    
-    
+
     [GetStringSuggestions]
     public static async Task<Result<IReadOnlyList<string>>> GetStringSuggestions(PropSuggestionScope scope)
     {
         var stringSuggestions = new List<string>();
 
         var messagingGroupName = scope.Component.Config.Translate;
-        
+
         if (messagingGroupName.HasValue())
         {
             foreach (var item in await GetMessagingByGroupName(messagingGroupName))
@@ -113,8 +127,20 @@ static class Mixin
 
         return stringSuggestions;
     }
-    
-   
+
+    public static string GetUpdateStateLine(string jsVariableName)
+    {
+        var propertyPath = jsVariableName.Split('.', StringSplitOptions.RemoveEmptyEntries);
+        if (propertyPath.Length == 2)
+        {
+            var stateName = propertyPath[0];
+
+            return $"  set{char.ToUpper(stateName[0]) + stateName[1..]}({{ ...{stateName} }});";
+        }
+
+        return null;
+    }
+
     internal static Task<IReadOnlyList<MessagingRecord>> GetMessagingByGroupName(string messagingGroupName)
     {
         var cacheKey = $"{nameof(GetMessagingByGroupName)} :: {messagingGroupName}";
@@ -153,47 +179,5 @@ static class Mixin
 
             return returnList;
         }
-    }
-    
- 
-    public static string GetUpdateStateLine(string jsVariableName)
-    {
-        var propertyPath = jsVariableName.Split('.', StringSplitOptions.RemoveEmptyEntries);
-        if (propertyPath.Length == 2)
-        {
-            var stateName = propertyPath[0];
-
-            return $"  set{char.ToUpper(stateName[0]) + stateName[1..]}({{ ...{stateName} }});";
-        }
-
-        return null;
-    }
-    
-    
-    [AfterReadConfig]
-    public static Scope AfterReadConfig(Scope scope)
-    {
-        var config = Plugin.Config[scope];
-        
-        if (Environment.MachineName.StartsWith("BTARC", StringComparison.OrdinalIgnoreCase))
-        {
-            config = config with
-            {
-                Database = new()
-                {
-                    //IsSQLite = true,
-                    //ConnectionString = @"Data Source=D:\workgit\ReactWithDotNet.VisualDesigner\app.db"
-
-                    IsSQLServer      = true,
-                    SchemaName       = "RVD",
-                    ConnectionString = @"Data Source=srvdev\atlas;Initial Catalog=boa;Min Pool Size=10; Max Pool Size=100;Application Name=Thriller;Integrated Security=true; TrustServerCertificate=true;"
-                }
-            };
-        }
-
-        return Scope.Create(new()
-        {
-            { Plugin.Config, config }
-        });
     }
 }
