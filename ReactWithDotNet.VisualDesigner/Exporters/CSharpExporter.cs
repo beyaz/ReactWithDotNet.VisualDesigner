@@ -110,12 +110,9 @@ static class CSharpExporter
 
             // Convert node to JSX tree
             from elementJsxTree in ConvertReactNodeModelToElementTreeSourceLines(project, analyzedRootNode, null, 0)
-
-            // Calculate imports
-            let importLines = CalculateImportLines(analyzedRootNode)
-
+            
             // return
-            select (elementJsxTree, importLines.AsReadOnlyList());
+            select (elementJsxTree, Enumerable.Empty<string>().AsReadOnlyList());
     }
 
     static async Task<Result<FileModel>> CalculateExportInfo(ExportInput input)

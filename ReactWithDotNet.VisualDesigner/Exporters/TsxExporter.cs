@@ -122,7 +122,7 @@ static class TsxExporter
             let importLines = CalculateImportLines(analyzedRootNode)
 
             // return
-            select (elementJsxTree, importLines.AsReadOnlyList());
+            select (elementJsxTree, importLines.ToTsLines());
     }
 
     static async Task<Result<FileModel>> CalculateExportInfo(ExportInput input)

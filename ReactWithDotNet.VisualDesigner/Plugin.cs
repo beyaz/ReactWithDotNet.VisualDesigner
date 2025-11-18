@@ -99,6 +99,14 @@ public sealed class TsImportCollection : IEnumerable<(string Name, string Packag
         return TsImport.ToString(items);
     }
 
+    public IReadOnlyList<string> ToTsLines()
+    {
+        return new List<string>
+        {
+            from x in items select TsImport.ToString(x.Name, x.Package)
+        };
+    }
+
    
 }
 

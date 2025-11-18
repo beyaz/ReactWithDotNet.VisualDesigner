@@ -122,15 +122,12 @@ static class CSharpStringExporter
 
             // Convert node to tree
             from elementTree in ConvertReactNodeModelToElementTreeSourceLines(project, analyzedRootNode, null, 0)
-
-            // Calculate imports
-            let importLines = CalculateImportLines(analyzedRootNode)
-
+            
             // apply $, append , ent of file
             let elementTreeFinalVersion = appendDollarSignAtLineStartIfNeed(appendCommaEndOfLine(elementTree))
 
             // return
-            select (elementTreeFinalVersion.AsReadOnlyList(), importLines.AsReadOnlyList());
+            select (elementTreeFinalVersion.AsReadOnlyList(), Enumerable.Empty<string>().AsReadOnlyList());
 
         static List<string> appendCommaEndOfLine(IReadOnlyList<string> lines)
         {
