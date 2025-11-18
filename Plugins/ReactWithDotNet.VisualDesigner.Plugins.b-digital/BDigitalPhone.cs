@@ -39,15 +39,13 @@ sealed class BDigitalPhone : PluginComponentBase
             if (phoneNumberProp is not null)
             {
                 var properties = node.Properties;
-
-                        
-                TsLineCollection lines =
-                [
+                
+                var lines = new TsLineCollection
+                {
                     "(value: string, formattedValue: string, areaCode: string) =>",
                     "{",
-                    $"  {phoneNumberProp.Value} = value;",
-                    GetUpdateStateLine(phoneNumberProp.Value)
-                ];
+                    GetUpdateStateLines(phoneNumberProp.Value, "value")
+                };
 
                 if (handlePhoneChangeProp is not null)
                 {
