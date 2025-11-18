@@ -3,7 +3,6 @@
 namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
 [CustomComponent]
-[TsImport(Name = "BChip", Package = "b-chip")]
 sealed class BChip : PluginComponentBase
 {
     [JsTypeInfo(JsType.String)]

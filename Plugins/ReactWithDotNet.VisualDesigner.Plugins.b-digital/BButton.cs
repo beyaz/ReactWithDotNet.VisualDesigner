@@ -3,7 +3,6 @@
 namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
 [CustomComponent]
-[TsImport(Name = nameof(BButton), Package = "b-button")]
 sealed class BButton : PluginComponentBase
 {
     [JsTypeInfo(JsType.Function)]

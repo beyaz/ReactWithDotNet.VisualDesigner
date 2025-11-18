@@ -3,7 +3,6 @@
 namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
 [CustomComponent]
-[TsImport(Name = nameof(BDigitalBox), Package = "b-digital-box")]
 sealed class BDigitalBox : PluginComponentBase
 {
     [Suggestions("noMargin, primary, secondary , info ")]
