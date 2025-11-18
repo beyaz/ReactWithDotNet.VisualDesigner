@@ -29,6 +29,11 @@ public sealed class ImportAttribute : Attribute
     public string Name { get; init; }
 
     public string Package { get; init; }
+
+    public override string ToString()
+    {
+        return $"import {{ {Name} }} from \"{Package}\";";
+    }
 }
 
 [AttributeUsage(AttributeTargets.Method)]
