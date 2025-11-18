@@ -3,7 +3,6 @@
 namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
 [CustomComponent]
-[TsImport(Name = nameof(BSymbol), Package = "b-icon")]
 sealed class BSymbol : PluginComponentBase
 {
     [JsTypeInfo(JsType.String)]
@@ -28,6 +27,20 @@ sealed class BSymbol : PluginComponentBase
     [JsTypeInfo(JsType.Number)]
     public string weight { get; set; }
 
+    
+    [NodeAnalyzer]
+    public static NodeAnalyzeOutput AnalyzeReactNode(NodeAnalyzeInput input)
+    {
+        if (input.Node.Tag != nameof(BSymbol))
+        {
+            return  AnalyzeChildren(input, AnalyzeReactNode);
+        }
+        
+        var import = (nameof(BSymbol),"b-icon");
+        
+        return  AnalyzeChildren(input, AnalyzeReactNode).With(import);
+    }
+    
     [TryGetIconForElementTreeNode]
     public static Scope TryGetIconForElementTreeNode(Scope scope)
     {

@@ -8,6 +8,19 @@ sealed class BRadioButtonGroup : PluginComponentBase
     [JsTypeInfo(JsType.Array)]
     public string items { get; set; }
 
+    [NodeAnalyzer]
+    public static NodeAnalyzeOutput AnalyzeReactNode(NodeAnalyzeInput input)
+    {
+        if (input.Node.Tag != nameof(BRadioButtonGroup))
+        {
+            return  AnalyzeChildren(input, AnalyzeReactNode);
+        }
+        
+        var import = (nameof(BRadioButtonGroup),"b-radio-button-group");
+        
+        return  AnalyzeChildren(input, AnalyzeReactNode).With(import);
+    }
+    
     protected override Element render()
     {
         if (items.HasNoValue())

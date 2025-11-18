@@ -3,9 +3,22 @@
 namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
 [CustomComponent]
-[TsImport(Name = "BTypography", Package = "b-core-typography")]
 sealed class BTypography : PluginComponentBase
 {
+    [NodeAnalyzer]
+    public static NodeAnalyzeOutput AnalyzeReactNode(NodeAnalyzeInput input)
+    {
+        if (input.Node.Tag != nameof(BTypography))
+        {
+            return  AnalyzeChildren(input, AnalyzeReactNode);
+        }
+        
+        var import = (nameof(BTypography),"b-core-typography");
+        
+        return  AnalyzeChildren(input, AnalyzeReactNode).With(import);
+    }
+    
+    
     static readonly Dictionary<string, StyleModifier> ColorMap = new()
     {
         { "primary", new Style { Color("#16A085") } },
