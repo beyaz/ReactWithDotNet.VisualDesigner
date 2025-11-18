@@ -28,6 +28,8 @@ sealed class BDigitalListAction : PluginComponentBase
         }
 
         var node = input.Node;
+        
+        TsImportCollection tsImports = new();
 
         foreach (var name in new[] { "leftListData", "rightListData" })
         {
@@ -37,15 +39,16 @@ sealed class BDigitalListAction : PluginComponentBase
                 continue;
             }
 
+            
             IReadOnlyList<string> linesCollection;
             {
                 var response = await
                 (
                     from child in listData.Children
-                    from analyzedChild in input.AnalyzeNode(child)
-                    from lines in input.ReactNodeModelToElementTreeSourceLinesConverter(analyzedChild)
+                    from nodeAnalyzeOutput in input.AnalyzeNode(child)
+                    from lines in input.ReactNodeModelToElementTreeSourceLinesConverter(nodeAnalyzeOutput.Node)
                     let childAsTsxLines = string.Join(Environment.NewLine, lines)
-                    select childAsTsxLines
+                    select (tsx: childAsTsxLines, tsImports: nodeAnalyzeOutput.TsImportCollection)
                 ).AsResult();
 
                 if (response.HasError)
@@ -53,7 +56,9 @@ sealed class BDigitalListAction : PluginComponentBase
                     return response.Error;
                 }
 
-                linesCollection = response.Value;
+                linesCollection = new List<string>{ from x in response.Value select x.tsx};
+                
+                tsImports.Add(from x in response.Value select x.tsImports);
             }
 
             var items = string.Join("," + Environment.NewLine, linesCollection);
@@ -77,7 +82,8 @@ sealed class BDigitalListAction : PluginComponentBase
         
         return (node, new()
         {
-            { nameof(BDigitalListAction), "b-digital-list-action" }
+            { nameof(BDigitalListAction), "b-digital-list-action" },
+            tsImports
         });
         
         

@@ -1,5 +1,4 @@
-﻿using Azure;
-using ReactWithDotNet.VisualDesigner.Exporters;
+﻿using ReactWithDotNet.VisualDesigner.Exporters;
 
 namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
@@ -30,30 +29,36 @@ sealed class BTabBar : PluginComponentBase
 
         var node = input.Node;
         
+        TsImportCollection tsImportCollection = new();
+
         if (node.Properties.All(p => p.Name != nameof(tabItems)))
         {
-            var tabItemTexts = await
+            var tabsResult = await
             (
                 from x in node.Children
                 from tabItem in ConvertToTabItem(x)
                 select tabItem
             ).AsResult();
 
-            if (tabItemTexts.HasError)
+            if (tabsResult.HasError)
             {
-                return tabItemTexts.Error;
+                return tabsResult.Error;
             }
+
+            var tabs = tabsResult.Value;
 
             var property = new ReactProperty
             {
                 Name  = nameof(tabItems),
-                Value = "[" + string.Join("," + Environment.NewLine, tabItemTexts.Value) + "]"
+                Value = "[" + string.Join("," + Environment.NewLine, from x in tabs select x.tsx) + "]"
             };
 
             node = node with
             {
                 Properties = node.Properties.Add(property)
             };
+            
+            tsImportCollection.Add(from x in tabs select x.tsImports);
         }
 
         node = node with
@@ -63,12 +68,15 @@ sealed class BTabBar : PluginComponentBase
 
         return Result.From((node, new TsImportCollection
         {
-            {nameof(BTabBar),"b-tab-bar"}
+            {nameof(BTabBar),"b-tab-bar"},
+            tsImportCollection
         }));
         
-        async Task<Result<string>> ConvertToTabItem(ReactNode childNode)
+        async Task<Result<(string tsx, TsImportCollection tsImports )>> ConvertToTabItem(ReactNode childNode)
         {
             List<string> lineList = [];
+            
+            TsImportCollection tsImports = new();
 
             var textProperty = childNode.Properties.FirstOrDefault(p => p.Name == "data-text");
 
@@ -84,10 +92,10 @@ sealed class BTabBar : PluginComponentBase
             {
                 var response = await
                 (
-                    from analyzedChild in input.AnalyzeNode(childNode.Children[0])
-                    from lines in input.ReactNodeModelToElementTreeSourceLinesConverter(analyzedChild)
+                    from nodeAnalyzeOutput in input.AnalyzeNode(childNode.Children[0])
+                    from lines in input.ReactNodeModelToElementTreeSourceLinesConverter(nodeAnalyzeOutput.Node)
                     let childAsTsxLines = string.Join(Environment.NewLine, lines)
-                    select childAsTsxLines
+                    select (tsx: childAsTsxLines, tsImports: nodeAnalyzeOutput.TsImportCollection)
                 );
 
                 if (response.HasError)
@@ -95,27 +103,35 @@ sealed class BTabBar : PluginComponentBase
                     return response.Error;
                 }
 
-                content = response.Value;
+                content = response.Value.tsx;
+                
+                tsImports.Add(response.Value.tsImports);
             }
             else
             {
                 var response = await
                 (
                     from x in childNode.Children
-                    from analyzedChild in input.AnalyzeNode(x)
-                    from lines in input.ReactNodeModelToElementTreeSourceLinesConverter(analyzedChild)
+                    from nodeAnalyzeOutput in input.AnalyzeNode(x)
+                    from lines in input.ReactNodeModelToElementTreeSourceLinesConverter(nodeAnalyzeOutput.Node)
                     let childAsTsxLines = string.Join(Environment.NewLine, lines)
-                    select childAsTsxLines
+                    select (tsx: childAsTsxLines, tsImports: nodeAnalyzeOutput.TsImportCollection)
                 ).AsResult();
 
                 if (response.HasError)
                 {
                     return response.Error;
                 }
+                
+              
+                
+                
 
-                content = string.Join(Environment.NewLine, response.Value);
+                content = string.Join(Environment.NewLine, from x in response.Value select x.tsx);
 
                 content = $"<>{content}</>";
+                
+                tsImports.Add(from x in response.Value select x.tsImports);
             }
 
             lineList.Add("{");
@@ -125,7 +141,7 @@ sealed class BTabBar : PluginComponentBase
             lineList.Add("content:" + content);
             lineList.Add("}");
 
-            return string.Join(Environment.NewLine, lineList);
+            return (tsx: string.Join(Environment.NewLine, lineList) , tsImports);
         }
     }
 

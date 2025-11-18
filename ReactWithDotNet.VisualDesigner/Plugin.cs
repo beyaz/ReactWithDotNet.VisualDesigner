@@ -76,6 +76,14 @@ public sealed class TsImportCollection : IEnumerable<(string Name, string Packag
         }
     }
     
+    public void Add(IEnumerable<TsImportCollection> tsImportCollection)
+    {
+        foreach (var item in tsImportCollection)
+        {
+            Add(item);
+        }
+    }
+    
     public void Add(IEnumerable<TsImportAttribute> tsImportAttributes)
     {
         foreach (var item in tsImportAttributes)
