@@ -32,7 +32,45 @@ public sealed class TsImportAttribute : Attribute
 
     public override string ToString()
     {
-        return $"import {{ {Name} }} from \"{Package}\";";
+        return TsImport.ToString(Name, Package);
+    }
+}
+
+static class TsImport
+{
+    public static string ToString(string name, string package)
+    {
+        return $"import {{ {name} }} from \"{package}\";";
+    }
+    
+    public static string ToString(IReadOnlyList<(string Name, string Package)> imports)
+    {
+        return string.Join(Environment.NewLine, from x in imports select ToString(x.Name, x.Package));
+    }
+}
+
+public sealed class TsImportCollection
+{
+    readonly List<(string Name, string Package)> items = [];        
+    
+    public void Add(string name, string package)
+    {
+        if (items.Any(x=>x.Name == name && x.Package == package))
+        {
+            return;
+        }
+        
+        items.Add((name, package));
+    }
+    
+    public void Add(TsImportAttribute tsImportAttribute)
+    {
+        Add(tsImportAttribute.Name, tsImportAttribute.Package);
+    }
+
+    public override string ToString()
+    {
+        return TsImport.ToString(items);
     }
 }
 
