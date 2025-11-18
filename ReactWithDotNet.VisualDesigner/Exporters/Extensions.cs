@@ -1,8 +1,5 @@
 ﻿global using static ReactWithDotNet.VisualDesigner.Exporters.Extensions;
-global using static ReactWithDotNet.VisualDesigner.Exporters.PublicExtensions;
-
-global using NodeAnalyzeOutput = System.Threading.Tasks.Task<Toolbox.Result<ReactWithDotNet.VisualDesigner.Exporters.ReactNode>>;
-
+global using NodeAnalyzeOutput = System.Threading.Tasks.Task<Toolbox.Result<(ReactWithDotNet.VisualDesigner.Exporters.ReactNode Node, ReactWithDotNet.VisualDesigner.TsImportCollection TsImportCollection)>>;
     
 using System.Reflection;
 
@@ -51,6 +48,8 @@ static class Extensions
 
     public static async NodeAnalyzeOutput AnalyzeNode(NodeAnalyzeInput input)
     {
+        TsImportCollection tsImportCollection = new();
+        
         foreach (var analyze in AnalyzeNodeList)
         {
             var response = await analyze(input);
@@ -61,42 +60,14 @@ static class Extensions
                 
             input = input with
             {
-                Node =  response.Value
+                Node =  response.Value.Node
             };
-        }
-
-        return input.Node;
-    }
-
-
-}
-
-public static class PublicExtensions
-{
-    public static TsImportCollection CalculateImportLines(ReactNode node)
-    {
-        var tsImportCollection = new TsImportCollection();
-        
-        foreach (var type in Plugin.AllCustomComponents)
-        {
-            tsImportCollection.Add(tryGetImportLines(type, node));
-        }
-
-        foreach (var child in node.Children)
-        {
-            tsImportCollection.Add(CalculateImportLines(child));
-        }
-
-        return tsImportCollection;
-
-        static IEnumerable<TsImportAttribute> tryGetImportLines(Type type, ReactNode node)
-        {
-            if (type.Name == node.Tag)
-            {
-                return type.GetCustomAttributes<TsImportAttribute>();
-            }
             
-            return [];
+            tsImportCollection.Add(response.Value.TsImportCollection);
         }
+
+        return (input.Node, tsImportCollection);
     }
+
+
 }

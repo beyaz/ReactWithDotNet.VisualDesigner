@@ -106,10 +106,10 @@ static class CSharpExporter
             from rootNode in ModelToNodeTransformer.ConvertVisualElementModelToReactNodeModel(project, rootVisualElement)
 
             // Analyze node
-            from analyzedRootNode in AnalyzeNode(new() {Node = rootNode, ComponentConfig = componentConfig})
+            from nodeAnalyzeOutput in AnalyzeNode(new() {Node = rootNode, ComponentConfig = componentConfig})
 
             // Convert node to JSX tree
-            from elementJsxTree in ConvertReactNodeModelToElementTreeSourceLines(project, analyzedRootNode, null, 0)
+            from elementJsxTree in ConvertReactNodeModelToElementTreeSourceLines(project, nodeAnalyzeOutput.Node, null, 0)
             
             // return
             select (elementJsxTree, Enumerable.Empty<string>().AsReadOnlyList());

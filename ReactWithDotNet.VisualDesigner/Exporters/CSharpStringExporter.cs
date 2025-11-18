@@ -118,10 +118,10 @@ static class CSharpStringExporter
             from rootNode in ModelToNodeTransformer.ConvertVisualElementModelToReactNodeModel(project, rootVisualElement)
 
             // Analyze node
-            from analyzedRootNode in AnalyzeNode(new() {Node = rootNode, ComponentConfig = componentConfig})
+            from nodeAnalyzeOutput in AnalyzeNode(new() {Node = rootNode, ComponentConfig = componentConfig})
 
             // Convert node to tree
-            from elementTree in ConvertReactNodeModelToElementTreeSourceLines(project, analyzedRootNode, null, 0)
+            from elementTree in ConvertReactNodeModelToElementTreeSourceLines(project, nodeAnalyzeOutput.Node, null, 0)
             
             // apply $, append , ent of file
             let elementTreeFinalVersion = appendDollarSignAtLineStartIfNeed(appendCommaEndOfLine(elementTree))

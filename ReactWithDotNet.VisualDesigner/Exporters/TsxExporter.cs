@@ -96,7 +96,7 @@ static class TsxExporter
             from rootNode in ModelToNodeTransformer.ConvertVisualElementModelToReactNodeModel(project, rootVisualElement)
 
             // Analyze node
-            from analyzedRootNode  in AnalyzeNode(new()
+            from nodeAnalyzeOutput  in AnalyzeNode(new()
             {
                 Node = rootNode, 
                 
@@ -116,13 +116,10 @@ static class TsxExporter
             })
 
             // Convert node to JSX tree
-            from elementJsxTree in ConvertReactNodeModelToElementTreeSourceLines(project, analyzedRootNode, null, 2)
-
-            // Calculate imports
-            let importLines = CalculateImportLines(analyzedRootNode)
-
+            from elementJsxTree in ConvertReactNodeModelToElementTreeSourceLines(project, nodeAnalyzeOutput.Node, null, 2)
+            
             // return
-            select (elementJsxTree, importLines.ToTsLines());
+            select (elementJsxTree, nodeAnalyzeOutput.TsImportCollection.ToTsLines());
     }
 
     static async Task<Result<FileModel>> CalculateExportInfo(ExportInput input)
