@@ -144,25 +144,6 @@ static class Mixin
         return stringSuggestions;
     }
 
-    public static string GetUpdateStateLine(string jsVariableName)
-    {
-        var propertyPath = jsVariableName.Split('.', StringSplitOptions.RemoveEmptyEntries);
-        if (propertyPath.Length == 2)
-        {
-            var stateName = propertyPath[0];
-
-            return $"  set{char.ToUpper(stateName[0]) + stateName[1..]}({{ ...{stateName} }});";
-        }
-        
-        if (propertyPath.Length == 1)
-        {
-            var stateName = propertyPath[0];
-
-            return $"  set{char.ToUpper(stateName[0]) + stateName[1..]}({stateName});";
-        }
-
-        return null;
-    }
     
     public static IReadOnlyList<string> GetUpdateStateLines(string jsVariableName, string jsValueName)
     {
@@ -193,6 +174,56 @@ static class Mixin
         [
             $"  {jsVariableName} = {jsValueName};"
         ];
+    }
+    
+    public static IReadOnlyList<string> GetUpdateStateLines(string jsVariableName1, string jsValueName1, 
+                                                            string jsVariableName2, string jsValueName2)
+    {
+
+        var result1 = CalculateUpdateStateLines(jsVariableName1);
+        var result2 = CalculateUpdateStateLines(jsVariableName2);
+        
+        if (result1.isUpdateContainerState && result2.isUpdateContainerState)
+        {
+            if (result1.stateName == result2.stateName)
+            {
+                var stateName = result1.stateName;
+
+                return
+                [
+                    $"  {jsVariableName1} = {jsValueName1};",
+                    $"  {jsVariableName2} = {jsValueName2};",
+                    $"  set{char.ToUpper(stateName[0]) + stateName[1..]}({{ ...{stateName} }});"
+                ];
+            }
+           
+        }
+
+        var list = new List<string>();
+        
+        if (result1.isUpdateState)
+        {
+            var stateName = result1.stateName;
+
+            list.Add($"  set{char.ToUpper(stateName[0]) + stateName[1..]}({jsValueName1});");
+        }
+        else
+        {
+            list.Add(  $"  {jsVariableName1} = {jsValueName1};");
+        }
+        
+        if (result2.isUpdateState)
+        {
+            var stateName = result2.stateName;
+
+            list.Add($"  set{char.ToUpper(stateName[0]) + stateName[1..]}({jsValueName2});");
+        }
+        else
+        {
+            list.Add(  $"  {jsVariableName2} = {jsValueName2};");
+        }
+
+        return list;
     }
     
     static (

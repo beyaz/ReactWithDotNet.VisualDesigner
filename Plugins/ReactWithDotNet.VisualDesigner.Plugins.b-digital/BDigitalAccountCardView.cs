@@ -44,21 +44,18 @@ sealed class BDigitalAccountCardView : PluginComponentBase
             {
                 var properties = node.Properties;
 
-                TsLineCollection lines =
-                [
+                var lines = new TsLineCollection
+                {
                     "(selectedAccountCardIndex: number, isCardSelected: boolean) =>",
                     "{",
-                         
-                    $"       {selectedIndexProp.Value} = selectedAccountCardIndex;",
-                    $"       {isCardSelectedProp.Value} = isCardSelected;"
-                ];
 
-                lines.Add(new []
-                {
-                    GetUpdateStateLine(selectedIndexProp.Value),
-                    GetUpdateStateLine(isCardSelectedProp.Value)
-                }.Distinct());
-                        
+                    GetUpdateStateLines
+                    (
+                        selectedIndexProp.Value, "selectedAccountCardIndex",
+                        isCardSelectedProp.Value, "isCardSelected"
+                        )
+                };
+
 
                 if (onSelectedIndexChangeProp is not null)
                 {
