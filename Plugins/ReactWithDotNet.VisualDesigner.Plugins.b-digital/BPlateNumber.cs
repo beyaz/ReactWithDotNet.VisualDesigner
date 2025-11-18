@@ -9,6 +9,20 @@ sealed class BPlateNumber : PluginComponentBase
     [JsTypeInfo(JsType.String)]
     public string value { get; set; }
 
+    [NodeAnalyzer]
+    public static NodeAnalyzeOutput AnalyzeReactNode(NodeAnalyzeInput input)
+    {
+        if (input.Node.Tag != nameof(BPlateNumber))
+        {
+            return  AnalyzeChildren(input, AnalyzeReactNode);
+        }
+        
+        var import = (nameof(BPlateNumber),"b-plate-number");
+        
+        return  AnalyzeChildren(input, AnalyzeReactNode).With(import);
+    }
+    
+    
     protected override Element render()
     {
         var textContent = string.Empty;

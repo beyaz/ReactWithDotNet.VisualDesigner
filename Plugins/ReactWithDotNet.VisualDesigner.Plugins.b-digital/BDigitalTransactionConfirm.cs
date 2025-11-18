@@ -3,7 +3,6 @@
 namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
 [CustomComponent]
-[TsImport(Name = nameof(BDigitalTransactionConfirm), Package = "b-digital-transaction-confirm")]
 sealed class BDigitalTransactionConfirm : PluginComponentBase
 {
     // @formatter:on

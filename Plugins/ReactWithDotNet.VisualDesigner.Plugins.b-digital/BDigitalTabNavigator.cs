@@ -14,6 +14,19 @@ sealed class BDigitalTabNavigator : PluginComponentBase
     [JsTypeInfo(JsType.Number)]
     public string selectedTab { get; set; }
 
+    [NodeAnalyzer]
+    public static NodeAnalyzeOutput AnalyzeReactNode(NodeAnalyzeInput input)
+    {
+        if (input.Node.Tag != nameof(BDigitalTabNavigator))
+        {
+            return  AnalyzeChildren(input, AnalyzeReactNode);
+        }
+        
+        var import = (nameof(BDigitalTabNavigator),"b-digital-tab-navigator");
+        
+        return  AnalyzeChildren(input, AnalyzeReactNode).With(import);
+    }
+    
     protected override Element render()
     {
         if (items.HasNoValue())

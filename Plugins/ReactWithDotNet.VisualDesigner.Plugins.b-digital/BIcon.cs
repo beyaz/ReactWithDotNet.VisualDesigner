@@ -3,7 +3,6 @@
 namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
 [CustomComponent]
-[TsImport(Name = "BIconExtended as BIcon", Package = "../utils/FormAssistant")]
 sealed class BIcon : PluginComponentBase
 {
     [Suggestions("TimerRounded , content_copy")]
@@ -13,6 +12,20 @@ sealed class BIcon : PluginComponentBase
     [JsTypeInfo(JsType.String)]
     public string size { get; set; }
 
+    [NodeAnalyzer]
+    public static NodeAnalyzeOutput AnalyzeReactNode(NodeAnalyzeInput input)
+    {
+        if (input.Node.Tag != nameof(BIcon))
+        {
+            return  AnalyzeChildren(input, AnalyzeReactNode);
+        }
+        
+        var import = ("BIconExtended as BIcon","?");
+        
+        return  AnalyzeChildren(input, AnalyzeReactNode).With(import);
+    }
+    
+    
     protected override Element render()
     {
         return new FlexRowCentered(Size(GetSize()), Id(id), OnClick(onMouseClick))

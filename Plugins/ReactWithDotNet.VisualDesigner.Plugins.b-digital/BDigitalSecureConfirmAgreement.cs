@@ -1,7 +1,6 @@
 ﻿namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
 [CustomComponent]
-[TsImport(Name = nameof(BDigitalSecureConfirmAgreement), Package = "b-digital-secure-confirm-agreement")]
 sealed class BDigitalSecureConfirmAgreement : PluginComponentBase
 {
     [JsTypeInfo(JsType.String)]
@@ -16,6 +15,18 @@ sealed class BDigitalSecureConfirmAgreement : PluginComponentBase
     [JsTypeInfo(JsType.String)]
     public string approveText { get; set; }
        
+    [NodeAnalyzer]
+    public static NodeAnalyzeOutput AnalyzeReactNode(NodeAnalyzeInput input)
+    {
+        if (input.Node.Tag != nameof(BDigitalSecureConfirmAgreement))
+        {
+            return  AnalyzeChildren(input, AnalyzeReactNode);
+        }
+        
+        var import = (nameof(BDigitalSecureConfirmAgreement),"b-digital-secure-confirm-agreement");
+        
+        return  AnalyzeChildren(input, AnalyzeReactNode).With(import);
+    }
 
     protected override Element render()
     {

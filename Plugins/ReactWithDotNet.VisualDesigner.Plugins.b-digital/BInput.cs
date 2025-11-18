@@ -1,7 +1,6 @@
 ﻿namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
 [CustomComponent]
-[TsImport(Name = "BInput", Package = "b-input")]
 sealed class BInput : PluginComponentBase
 {
     [JsTypeInfo(JsType.String)]
