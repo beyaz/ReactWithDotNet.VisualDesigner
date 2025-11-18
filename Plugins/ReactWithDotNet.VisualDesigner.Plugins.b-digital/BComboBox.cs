@@ -47,13 +47,12 @@ sealed class BComboBox : PluginComponentBase
 
             var isCollection = IsPropertyPathProvidedByCollection(componentConfig, valueProp.Value).Value;
 
-            TsLineCollection lines =
-            [
+            var lines = new TsLineCollection
+            {
                 "(selectedIndexes: [number], selectedItems: [TextValuePair], selectedValues: [string]) =>",
                 "{",
-                $"  {valueProp.Value} = selectedValues{(isCollection ? string.Empty : "[0]")};",
-                GetUpdateStateLine(valueProp.Value)
-            ];
+                GetUpdateStateLines(valueProp.Value,    $"selectedValues{(isCollection ? string.Empty : "[0]")}")
+            };
 
             if (onSelectProp is not null)
             {
