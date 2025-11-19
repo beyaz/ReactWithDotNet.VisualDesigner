@@ -654,7 +654,7 @@ sealed class ApplicationView : Component<ApplicationState>
             {
                 if (Name == Design.HideIf)
                 {
-                    const string todo = @"C:\github\hopgogo\web\enduser-ui\src\components\PasswordInput.tsx";
+                    const string todo = @"C:\github\hopgogo\web\enduser-ui\src\components\Account\UserAddresses\UserAddresses.tsx";
 
                    var result = SuggestionFromTsxCode.GetBooleans(todo).Result;
 
