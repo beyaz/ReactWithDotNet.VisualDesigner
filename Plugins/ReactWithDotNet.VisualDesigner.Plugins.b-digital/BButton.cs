@@ -24,6 +24,10 @@ sealed class BButton : PluginComponentBase
     [JsTypeInfo(JsType.String)]
     public string colorType { get; set; }
     
+    [Suggestions("contained , outlined , text")]
+    [JsTypeInfo(JsType.String)]
+    public string variant { get; set; }
+    
     [Suggestions("primary , default")]
     [JsTypeInfo(JsType.String)]
     public string color { get; set; }
@@ -78,16 +82,23 @@ sealed class BButton : PluginComponentBase
     
     protected override Element render()
     {
-        var variant = type switch
+        if (variant is null)
         {
-            "raised"=>"contained",
+            if (type.HasValue())
+            {
+                variant = type switch
+                {
+                    "raised"=>"contained",
             
-            not null =>type,
+                    not null =>type,
             
-            null => "text"
-        };
+                    null => "text"
+                };
+            }
+        }
+       
 
-        Style defaultStyle = [];
+        Style defaultStyle = [BorderRadius(10),  TextTransform(none)];
         
         if (color == "primary" || colorType == "primary")
         {
@@ -102,7 +113,7 @@ sealed class BButton : PluginComponentBase
             ];
         }
         
-        if (variant == "contained" || color == "default" || (type is null && color is null) )
+        if (variant == "contained" || color == "default" || (type is null && color is null && variant.HasNoValue()) )
         {
             defaultStyle =
             [
@@ -118,8 +129,6 @@ sealed class BButton : PluginComponentBase
         
         return new Button
         {
-      
-            
             fullWidth = fullWidth == "true",
 
             style = { defaultStyle, style },
@@ -132,7 +141,7 @@ sealed class BButton : PluginComponentBase
 
             children =
             {
-                new div { text }
+                new div { text } , children
             }
         };
 
