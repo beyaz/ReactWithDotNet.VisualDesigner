@@ -2536,20 +2536,6 @@ sealed class ApplicationView : Component<ApplicationState>
             return new PopupView();
         }
 
-        protected override Task constructor()
-        {
-            var sender = SHADOW_PROP_PREFIX + PropertyName;
-
-            Client.ListenEvent<PopupItemSelect>(e =>
-            {
-                DispatchEvent(OnChange, [PropertyName, e.Value]);
-
-                return Task.CompletedTask;
-            }, sender);
-
-            return base.constructor();
-        }
-
         protected override Task OverrideStateFromPropsBeforeRender()
         {
             if (PropertyName != state.Value)
@@ -2557,8 +2543,19 @@ sealed class ApplicationView : Component<ApplicationState>
                 state = new State
                 {
                     Value        = PropertyName,
-                    InitialValue = PropertyName
+                    InitialValue = PropertyName,
+
                 };
+                
+                // todo: check client js core
+                var sender = SHADOW_PROP_PREFIX + PropertyName;
+                
+                Client.ListenEvent<PopupItemSelect>(e =>
+                {
+                    DispatchEvent(OnChange, [PropertyName, e.Value]);
+
+                    return Task.CompletedTask;
+                }, sender);
             }
 
             return Task.CompletedTask;
