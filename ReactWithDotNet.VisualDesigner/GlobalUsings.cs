@@ -31,6 +31,7 @@ global using static ReactWithDotNet.Tailwind;
 global using static ReactWithDotNet.WebColors;
 global using static Toolbox.YamlHelper;
 global using Toolbox;
+global using ReactWithDotNet.VisualDesigner.TsxAnalyze;
 
 
 using System.Runtime.CompilerServices;
