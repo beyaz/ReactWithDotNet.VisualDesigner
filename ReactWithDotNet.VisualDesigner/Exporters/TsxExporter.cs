@@ -350,35 +350,35 @@ static class TsxExporter
             string partProps;
             {
                 var propsAsTextList = new List<string>
-                    (
-                     from prop in node.Properties
-                     where !Design.IsDesignTimeName(prop.Name)
-                     select prop switch
-                     {
-                         _ when "true".Equals(prop.Value, StringComparison.OrdinalIgnoreCase) => prop.Name,
+                (
+                    from prop in node.Properties
+                    where !Design.IsDesignTimeName(prop.Name)
+                    select prop switch
+                    {
+                        _ when "true".Equals(prop.Value, StringComparison.OrdinalIgnoreCase) => prop.Name,
 
-                         _ when prop.Name == Design.SpreadOperator
-                             => '{' + prop.Value + '}',
+                        _ when prop.Name == Design.SpreadOperator
+                            => '{' + prop.Value + '}',
 
-                         _ when prop.Name == nameof(HtmlElement.dangerouslySetInnerHTML)
-                             => $"{prop.Name}={{{{ __html: {prop.Value} }}}}",
+                        _ when prop.Name == nameof(HtmlElement.dangerouslySetInnerHTML)
+                            => $"{prop.Name}={{{{ __html: {prop.Value} }}}}",
 
-                         _ when IsStringValue(prop.Value) =>
-                             $"{prop.Name}=\"{TryClearStringValue(prop.Value)}\"",
+                        _ when IsStringValue(prop.Value) =>
+                            $"{prop.Name}=\"{TryClearStringValue(prop.Value)}\"",
 
-                         _ when IsStringTemplate(prop.Value) =>
-                             $"{prop.Name}={{{prop.Value}}}",
+                        _ when IsStringTemplate(prop.Value) =>
+                            $"{prop.Name}={{{prop.Value}}}",
 
-                         _ when elementType.Value
-                                    ?.GetProperty(prop.Name, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance)
-                                    ?.PropertyType == typeof(string)
-                                &&
-                                prop.Value.HasMatch(x => x.Contains('/') || x.StartsWith('#') || x.Split(' ').Length > 1)
-                             => $"{prop.Name}=\"{prop.Value}\"",
+                        _ when elementType.Value
+                                   ?.GetProperty(prop.Name, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance)
+                                   ?.PropertyType == typeof(string)
+                               &&
+                               prop.Value.HasMatch(x => x.Contains('/') || x.StartsWith('#') || x.Split(' ').Length > 1)
+                            => $"{prop.Name}=\"{prop.Value}\"",
 
-                         _ => $"{prop.Name}={{{prop.Value}}}"
-                     }
-                    );
+                        _ => $"{prop.Name}={{{prop.Value}}}"
+                    }
+                );
 
                 if (propsAsTextList.Count > 0)
                 {
@@ -388,6 +388,16 @@ static class TsxExporter
                 {
                     partProps = string.Empty;
                 }
+            }
+
+            // adjust tag for fragment
+            if (tag == "<>" && partProps.HasValue())
+            {
+                tag = "React.Fragment";
+            }
+            else if (tag.Equals("React.Fragment", StringComparison.OrdinalIgnoreCase) && partProps.HasNoValue())
+            {
+                tag = string.Empty;
             }
 
             if (node.Children.Count == 0 && node.Text.HasNoValue() && childrenProperty is null)
