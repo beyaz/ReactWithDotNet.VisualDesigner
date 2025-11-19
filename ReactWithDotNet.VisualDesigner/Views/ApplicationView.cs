@@ -647,7 +647,7 @@ sealed class ApplicationView : Component<ApplicationState>
         {
             get
             {
-                var cacheKey = $"{nameof(DesignPropEditor)}-{ProjectId}";
+                var cacheKey = $"{nameof(DesignPropEditor)}-{ProjectId}-{Name}";
 
                 return Result.From(Cache.AccessValue(cacheKey, () => GetTagSuggestions(ProjectId)));
             }
