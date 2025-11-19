@@ -60,7 +60,7 @@ public class Program
             app.UseDeveloperExceptionPage();
         }
         
-        Prettier.Register(app);
+        NodeJsBridge.Register(app);
 
         app.UseHttpsRedirection();
 

@@ -12,7 +12,7 @@ sealed class PrettierOptions
     public int? tabWidth { get; init; }
 }
 
-static class Prettier
+static class NodeJsBridge
 {
     static readonly object _lock = new();
 
