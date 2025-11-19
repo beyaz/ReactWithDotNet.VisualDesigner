@@ -223,37 +223,35 @@ public class TsxAnalyzer
 
         return "unknown";
     }
+
+    public static void Test()
+    {
+
+        var analyzer = new TsxAnalyzer("typescript.js");
+
+        string code = @"
+function Test() {
+  const [count, setCount] = useState<number>(0);
+  const [user, setUser] = useState({
+    name: 'Ali',
+    age: 25
+  });
+
+  function increase() {}
+  const hello = () => {};
+}
+";
+
+        var result = analyzer.Analyze(code);
+
+        Console.WriteLine("Functions:");
+        foreach (var fn in result.Functions)
+            Console.WriteLine("  " + fn);
+
+        Console.WriteLine("\nStates:");
+        foreach (var s in result.States)
+            Console.WriteLine($"  {s.State} : {s.Type}");
+
+    }
 }
 
-
-
-
-//var analyzer = new TsxAnalyzer("typescript.js");
-
-//string code = @"
-//function Test() {
-//  const [count, setCount] = useState<number>(0);
-//  const [user, setUser] = useState({
-//    name: 'Ali',
-//    age: 25
-//  });
-
-//  function increase() {}
-//  const hello = () => {};
-//}
-//";
-
-//var result = analyzer.Analyze(code);
-
-//Console.WriteLine("Functions:");
-//foreach (var fn in result.Functions)
-//    Console.WriteLine("  " + fn);
-
-//Console.WriteLine("\nStates:");
-//foreach (var s in result.States)
-//    Console.WriteLine($"  {s.State} : {s.Type}");
-
-
-//using var http = new HttpClient();
-//var tsCode = await http.GetStringAsync("https://unpkg.com/typescript@5.1.6/lib/typescript.js");
-//_engine.Execute(tsCode);
