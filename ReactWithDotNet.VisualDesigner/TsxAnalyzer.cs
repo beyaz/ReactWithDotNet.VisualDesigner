@@ -34,7 +34,7 @@ public class TsxAnalyzer
         _engine = new Engine(cfg => cfg.LimitRecursion(5000));
 
         // TS Compiler API yükle
-        var tsCode = File.ReadAllText(typeScriptCompilerPath);
+        var tsCode = System.IO.File.ReadAllText(typeScriptCompilerPath);
         _engine.Execute(tsCode);
 
         // TS namespace alınır
@@ -57,18 +57,24 @@ public class TsxAnalyzer
 
     private JsValue ParseToAst(string code)
     {
-        string js = $@"
-            ts.createSourceFile(
-                'file.tsx',
-                `{code.Replace("`", "\\`")}`,
-                ts.ScriptTarget.Latest,
-                true,
-                ts.ScriptKind.TSX
-            );
-        ";
+        // Backtick kaçışını düzgün yap
+        string safeCode = code.Replace("`", "\\`");
 
-        return _engine.Execute(js).GetCompletionValue();
+        string js = $@"
+        ts.createSourceFile(
+            'file.tsx',
+            `{safeCode}`,
+            ts.ScriptTarget.Latest,
+            true,
+            ts.ScriptKind.TSX
+        )
+    ";
+
+        // AST doğrudan evaluate ile döner
+        var result = _engine.Evaluate(js);
+        return result;
     }
+
 
 
     // ------------------------
@@ -101,8 +107,16 @@ public class TsxAnalyzer
                 Walk(val, result);
 
             else if (val.IsArray())
-                foreach (var item in val.AsArray())
-                    Walk(item.Value, result);
+            {
+                var arr = val.AsArray();
+                var length = (int)arr.Length;
+
+                for (int i = 0; i < length; i++)
+                {
+                    var element = arr.Get(i);   // JsValue
+                    Walk(element, result);
+                }
+            }
         }
     }
 
@@ -133,35 +147,37 @@ public class TsxAnalyzer
         var initObj = initializer.AsObject();
         var expr = initObj.Get("expression");
 
-        // MUST be:   useState
+        // MUST be:   useState(...)
         if (!expr.IsObject()) return;
         if (expr.AsObject().Get("escapedText")?.AsString() != "useState")
             return;
 
-        // Left-hand destructuring: const [x, setX] = ...
+        // Left-hand destructuring: const [x, setX] = useState(...)
         var nameNode = node.Get("name");
         if (!nameNode.IsObject()) return;
 
         var arr = nameNode.AsObject().Get("elements");
         if (!arr.IsArray()) return;
 
-        var elements = arr.AsArray().GetOwnProperties()
+        // GetOwnProperties → PropertyDescriptor dictionary
+        var elements = arr.AsArray()
+            .GetOwnProperties()
             .OrderBy(x => int.Parse(x.Key.ToString()))
             .ToList();
 
         if (elements.Count < 2) return;
 
-        var stateName = elements[0].Value.AsObject()
-            .Get("name")
+        // Extract state name
+        var stateName = elements[0].Value.Value   // PropertyDescriptor → JsValue
             .AsObject()
-            .Get("escapedText")
-            .AsString();
+            .Get("name").AsObject()
+            .Get("escapedText").AsString();
 
-        var setterName = elements[1].Value.AsObject()
-            .Get("name")
+        // Extract setter name
+        var setterName = elements[1].Value.Value
             .AsObject()
-            .Get("escapedText")
-            .AsString();
+            .Get("name").AsObject()
+            .Get("escapedText").AsString();
 
         // Type: useState<number>() → typeArguments[0]
         string type = "any";
@@ -175,9 +191,9 @@ public class TsxAnalyzer
 
         result.States.Add(new StateInfo
         {
-            State = stateName,
+            State  = stateName,
             Setter = setterName,
-            Type = type
+            Type   = type
         });
     }
 
