@@ -1726,45 +1726,41 @@ sealed class ApplicationView : Component<ApplicationState>
             }
         }
 
+        static Element CreateGroupLabel(string label)
+        {
+            return new FlexRow(WidthFull, AlignItemsCenter)
+            {
+                new div { Height(1), FlexGrow(1), Background(Gray200) },
+                new span { label, WhiteSpaceNoWrap, UserSelect(none), PaddingX(4) },
+                new div { Height(1), FlexGrow(1), Background(Gray200) }
+            };
+        }
         return new FlexColumn(BorderLeft(1, dotted, "#d9d9d9"), PaddingX(2), Gap(8), OverflowYAuto, Background(White))
         {
             createTagEditor,
             
             new FlexColumn(WidthFull)
             {
-                new FlexRow(WidthFull, AlignItemsCenter)
-                {
-                    new div { Height(1), FlexGrow(1), Background(Gray200) },
-                    new span { "t e x t", WhiteSpaceNoWrap, UserSelect(none), PaddingX(4) },
-                    new div { Height(1), FlexGrow(1), Background(Gray200) }
-                },
+                CreateGroupLabel("c o n t e n t"),
                 new FlexColumn(WidthFull,PaddingX(4), Gap(12))
                 {
                     CreateDesignPropEditor("Text", Design.Text, JsType.String),
                     CreateDesignPropEditor("Text Preview", Design.TextPreview, JsType.String)
                 },
-                new FlexRow(WidthFull, AlignItemsCenter)
-                {
-                    new div { Height(1), FlexGrow(1), Background(Gray200) },
-                    new span { "v i s i b i l i t y", WhiteSpaceNoWrap, UserSelect(none), PaddingX(4) },
-                    new div { Height(1), FlexGrow(1), Background(Gray200) }
-                },
+                
+                CreateGroupLabel("v i s i b i l i t y"),
                 new FlexColumn(WidthFull,PaddingX(4), Gap(12))
                 {
                     CreateDesignPropEditor("Show-if", Design.ShowIf, JsType.Boolean),
                     CreateDesignPropEditor("Hide-if", Design.HideIf, JsType.Boolean),
                 },
-                new FlexRow(WidthFull, AlignItemsCenter)
-                {
-                    new div { Height(1), FlexGrow(1), Background(Gray200) },
-                    new span { "l o o p", WhiteSpaceNoWrap, UserSelect(none), PaddingX(4) },
-                    new div { Height(1), FlexGrow(1), Background(Gray200) }
-                },
+                
+                CreateGroupLabel("l o o p"),
                 new FlexColumn(WidthFull,PaddingX(4), Gap(12))
                 {
                     CreateDesignPropEditor("Items Source", Design.ItemsSource, JsType.Array),
                     CreateDesignPropEditor("Items Source Design Time Child Count", Design.ItemsSourceDesignTimeCount, JsType.Number)
-                },
+                }
                 
             },
             
