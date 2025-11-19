@@ -639,7 +639,7 @@ sealed class ApplicationView : Component<ApplicationState>
         }
     }
     
-    class DesignPropEditorFor_Text : MagicInput
+    class DesignPropEditor : MagicInput
     {
         public required int ProjectId { get; init; }
         
@@ -647,7 +647,7 @@ sealed class ApplicationView : Component<ApplicationState>
         {
             get
             {
-                var cacheKey = $"{nameof(DesignPropEditorFor_Text)}-{ProjectId}";
+                var cacheKey = $"{nameof(DesignPropEditor)}-{ProjectId}";
 
                 return Result.From(Cache.AccessValue(cacheKey, () => GetTagSuggestions(ProjectId)));
             }
@@ -681,37 +681,34 @@ sealed class ApplicationView : Component<ApplicationState>
             }
         }
         
-        var inputEditor = new DesignPropEditorFor_Text
+        var inputEditor = new DesignPropEditor
         {
             ProjectId = state.ProjectId,
-                
-            Id    = nameof(DesignPropEditorFor_Text),
-            Name  = string.Empty,
+            Id    = designPropName,
+            Name  = designPropName,
             Value = inputValue,
-            OnChange = (_, newValue) =>
+            OnChange = (name, newValue) =>
             {
-
-                static string RecalculateProp(string prop, string newValue)
-                {
-                    var maybe = TryParseProperty(prop);
-                    if (maybe.HasValue && maybe.Value.Name == Design.Text)
-                    {
-                        return Design.Text + " : " + newValue;
-                    }
-
-                    return prop;
-                }
-
                 UpdateCurrentVisualElement(x => x with
                 {
                     Properties = new List<string>
                     {
-                        from prop in x.Properties select RecalculateProp(prop,newValue)
+                        from prop in x.Properties select RecalculateProp(prop,name, newValue)
                     }
                 });
 
-
                 return Task.CompletedTask;
+
+                static string RecalculateProp(string prop, string designPropName, string newValue)
+                {
+                    var maybe = TryParseProperty(prop);
+                    if (maybe.HasValue && maybe.Value.Name == designPropName)
+                    {
+                        return designPropName + " : " + newValue;
+                    }
+
+                    return prop;
+                }
             }
         };
 
