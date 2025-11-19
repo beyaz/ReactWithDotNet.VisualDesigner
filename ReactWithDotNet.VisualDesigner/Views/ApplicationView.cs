@@ -654,10 +654,8 @@ sealed class ApplicationView : Component<ApplicationState>
         }
     }
     
-    Element CreateDesignPropEditor()
+    Element CreateDesignPropEditor(string label, string designPropName, JsType jsType)
     {
-       
-            
         VisualElementModel visualElementModel = null;
 
         if (state.Selection.VisualElementTreeItemPath.HasValue())
@@ -717,10 +715,10 @@ sealed class ApplicationView : Component<ApplicationState>
             }
         };
 
-        return new FlexRow(AlignItemsCenter, Gap(16), Border(1, solid, Theme.BorderColor), BorderRadius(4), PaddingX(8), Height(36))
+        return new FlexRow(AlignItemsCenter, Gap(16), Border(1, solid, Theme.BorderColor), BorderRadius(4), PaddingX(8), Height(32))
         {
             PositionRelative,
-            new label(PositionAbsolute, Top(-4), Left(8), FontSize10, LineHeight7, Background(White), PaddingX(4)) { "Text" },
+            new label(PositionAbsolute, Top(-4), Left(8), FontSize10, LineHeight7, Background(White), PaddingX(4)) { label },
 
             inputEditor
         };
@@ -1734,17 +1732,45 @@ sealed class ApplicationView : Component<ApplicationState>
         return new FlexColumn(BorderLeft(1, dotted, "#d9d9d9"), PaddingX(2), Gap(8), OverflowYAuto, Background(White))
         {
             createTagEditor,
-
-            new FlexRow(WidthFull, AlignItemsCenter)
+            
+            new FlexColumn(WidthFull)
             {
-                new div { Height(1), FlexGrow(1), Background(Gray200) },
-                new span { "D E S I G N", WhiteSpaceNoWrap, UserSelect(none), PaddingX(4) },
-                new div { Height(1), FlexGrow(1), Background(Gray200) }
+                new FlexRow(WidthFull, AlignItemsCenter)
+                {
+                    new div { Height(1), FlexGrow(1), Background(Gray200) },
+                    new span { "t e x t", WhiteSpaceNoWrap, UserSelect(none), PaddingX(4) },
+                    new div { Height(1), FlexGrow(1), Background(Gray200) }
+                },
+                new FlexColumn(WidthFull,PaddingX(4), Gap(12))
+                {
+                    CreateDesignPropEditor("Text", Design.Text, JsType.String),
+                    CreateDesignPropEditor("Text Preview", Design.TextPreview, JsType.String)
+                },
+                new FlexRow(WidthFull, AlignItemsCenter)
+                {
+                    new div { Height(1), FlexGrow(1), Background(Gray200) },
+                    new span { "v i s i b i l i t y", WhiteSpaceNoWrap, UserSelect(none), PaddingX(4) },
+                    new div { Height(1), FlexGrow(1), Background(Gray200) }
+                },
+                new FlexColumn(WidthFull,PaddingX(4), Gap(12))
+                {
+                    CreateDesignPropEditor("Show-if", Design.ShowIf, JsType.Boolean),
+                    CreateDesignPropEditor("Hide-if", Design.HideIf, JsType.Boolean),
+                },
+                new FlexRow(WidthFull, AlignItemsCenter)
+                {
+                    new div { Height(1), FlexGrow(1), Background(Gray200) },
+                    new span { "l o o p", WhiteSpaceNoWrap, UserSelect(none), PaddingX(4) },
+                    new div { Height(1), FlexGrow(1), Background(Gray200) }
+                },
+                new FlexColumn(WidthFull,PaddingX(4), Gap(12))
+                {
+                    CreateDesignPropEditor("Items Source", Design.ItemsSource, JsType.Array),
+                    CreateDesignPropEditor("Items Source Design Time Child Count", Design.ItemsSourceDesignTimeCount, JsType.Number)
+                },
+                
             },
-            new FlexColumn(WidthFull,PaddingX(4), Gap(4))
-            {
-                CreateDesignPropEditor
-            },
+            
             
             SpaceY(16),
             new FlexRow(WidthFull, AlignItemsCenter)
