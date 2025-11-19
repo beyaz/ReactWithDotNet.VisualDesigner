@@ -2547,16 +2547,17 @@ sealed class ApplicationView : Component<ApplicationState>
 
                 };
                 
-                // todo: check client js core
-                var sender = SHADOW_PROP_PREFIX + PropertyName;
-                
-                Client.ListenEvent<PopupItemSelect>(e =>
-                {
-                    DispatchEvent(OnChange, [PropertyName, e.Value]);
-
-                    return Task.CompletedTask;
-                }, sender);
+                Client.ListenEvent<PopupItemSelect>(OnPopupItemSelected, Sender);
             }
+
+            return Task.CompletedTask;
+        }
+
+        string Sender => SHADOW_PROP_PREFIX + PropertyName;
+
+        Task OnPopupItemSelected(PopupItemSelectArgs e)
+        {
+            DispatchEvent(OnChange, [PropertyName, e.Value]);
 
             return Task.CompletedTask;
         }
