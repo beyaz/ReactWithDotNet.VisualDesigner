@@ -654,7 +654,7 @@ sealed class ApplicationView : Component<ApplicationState>
         }
     }
     
-    async Task<Element> CreateDesignPropEditorFor_Text()
+    Element CreateDesignPropEditorFor_Text()
     {
         VisualElementModel visualElementModel = null;
 
@@ -680,55 +680,40 @@ sealed class ApplicationView : Component<ApplicationState>
                 }
             }
         }
-
-        var inputTag = new FlexRow(WidthFull)
+        
+        return new DesignPropEditorFor_Text
         {
-            PositionFixed,
-            Left(state.ElementTreeEditPosition.left),
-            Top(state.ElementTreeEditPosition.top),
-            Width(state.ElementTreeEditPosition.width),
-            Height(state.ElementTreeEditPosition.height),
-            Background(White),
-            Border(1, solid, Gray100),
-            BorderRadius(4),
-            PaddingLeft(8),
-
-            new DesignPropEditorFor_Text
-            {
-                ProjectId = state.ProjectId,
+            ProjectId = state.ProjectId,
                 
-                Id    = nameof(DesignPropEditorFor_Text),
-                Name  = string.Empty,
-                Value = inputValue,
-                OnChange = (_, newValue) =>
+            Id    = nameof(DesignPropEditorFor_Text),
+            Name  = string.Empty,
+            Value = inputValue,
+            OnChange = (_, newValue) =>
+            {
+
+                static string RecalculateProp(string prop, string newValue)
                 {
-                    
-                    
-                    
-                    var inputValue = string.Empty;
+                    var maybe = TryParseProperty(prop);
+                    if (maybe.HasValue && maybe.Value.Name == Design.Text)
                     {
-                        foreach (var property in visualElementModel.Properties)
-                        {
-                            var maybe = TryParseProperty(property);
-                            if (maybe.HasValue && maybe.Value.Name == Design.Text)
-                            {
-                                inputValue = maybe.Value.Value;
-                                break;
-                            }
-                        }
+                        return Design.Text + " : " + newValue;
                     }
-                    
 
-                    UpdateCurrentVisualElement(x => x with { Properties = });
-
-                    state = state with { ElementTreeEditPosition = null };
-
-                    return Task.CompletedTask;
+                    return prop;
                 }
+
+                UpdateCurrentVisualElement(x => x with
+                {
+                    Properties = new List<string>
+                    {
+                        from prop in x.Properties select RecalculateProp(prop,newValue)
+                    }
+                });
+
+
+                return Task.CompletedTask;
             }
         };
-
-        return inputTag;
     }
 
     Task DeleteSelectedTreeItem()
@@ -1753,12 +1738,7 @@ sealed class ApplicationView : Component<ApplicationState>
                     PositionRelative,
                     new label(PositionAbsolute, Top(-4), Left(8), FontSize10, LineHeight7, Background(White), PaddingX(4)) { "Text" },
                     
-                    new input
-                    {
-                        type="text",
-                        style={BorderNone, OutlineNone}, 
-                        value = visualElementModel.Properties.FirstOrDefault(x=>ParseProperty(x).Value.Name == Design.Text)
-                    }
+                    CreateDesignPropEditorFor_Text()
                 }
             },
             
