@@ -51,3 +51,4 @@
 /Bootstrappers/ApiInspector/Properties/PublishProfiles/FolderProfile.pubxml.user
 /Bootstrappers/ApiInspector/ApiInspector.csproj.user
 /ReactWithDotNet.VisualDesigner.Plugins.b-digital.ApiToTsExporter/obj
+/NodeJsBridge/node_modules
