@@ -2539,17 +2539,17 @@ sealed class ApplicationView : Component<ApplicationState>
 
         protected override Task OverrideStateFromPropsBeforeRender()
         {
-            if (PropertyName != state.Value)
+            if (PropertyName == state.InitialValueOfPropertyName)
             {
-                state = new State
-                {
-                    Value        = PropertyName,
-                    InitialValue = PropertyName,
-
-                };
-                
-                Client.ListenEvent<PopupItemSelect>(OnPopupItemSelected, Sender);
+                return Task.CompletedTask;
             }
+
+            state = new State
+            {
+                InitialValueOfPropertyName = PropertyName,
+            };
+                
+            Client.ListenEvent<PopupItemSelect>(OnPopupItemSelected, Sender);
 
             return Task.CompletedTask;
         }
@@ -2776,9 +2776,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
         internal record State
         {
-            public string InitialValue { get; init; }
-
-            public string Value { get; init; }
+            public string InitialValueOfPropertyName { get; init; }
         }
     }
 
