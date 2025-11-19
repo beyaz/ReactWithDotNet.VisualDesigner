@@ -1766,12 +1766,7 @@ sealed class ApplicationView : Component<ApplicationState>
             
             
             SpaceY(16),
-            new FlexRow(WidthFull, AlignItemsCenter)
-            {
-                new div { Height(1), FlexGrow(1), Background(Gray200) },
-                new span { "P R O P S", WhiteSpaceNoWrap, UserSelect(none), PaddingX(4) },
-                new div { Height(1), FlexGrow(1), Background(Gray200) }
-            },
+            CreateGroupLabel("P R O P S"),
             viewProps(new List<string>
             {
                 from p in visualElementModel.Properties
@@ -1791,13 +1786,7 @@ sealed class ApplicationView : Component<ApplicationState>
             shadowProps, ShadowPropertyView.CreatePopupHandlerView(),
 
             SpaceY(16),
-
-            new FlexRow(WidthFull, AlignItemsCenter)
-            {
-                new div { Height(1), FlexGrow(1), Background(Gray200) },
-                new span { "S T Y L E", WhiteSpaceNoWrap, UserSelect(none), PaddingX(4) },
-                new div { Height(1), FlexGrow(1), Background(Gray200) }
-            },
+            CreateGroupLabel("S T Y L E"),
             viewStyles(CurrentVisualElement.Styles),
             new FlexColumn(Flex(1, 1, 0), JustifyContentFlexEnd, AlignItemsCenter)
             {
