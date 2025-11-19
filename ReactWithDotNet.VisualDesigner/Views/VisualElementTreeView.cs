@@ -11,15 +11,19 @@ enum DragPosition
 
 delegate Task OnTreeItemMove(string treeItemPathSource, string treeItemPathTarget, DragPosition position);
 
-delegate Task OnTreeItemCopyPaste(string treeItemPathSource, string treeItemPathTarget);
+delegate Task OnTreeItemCopy(string treeItemPath);
+delegate Task OnTreeItemPaste(string treeItemPath);
 
 delegate Task OnTreeItemDelete();
 
 sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
 {
     [CustomEvent]
-    public OnTreeItemCopyPaste CopyPaste { get; init; }
-
+    public required OnTreeItemCopy Copy { get; init; }
+    
+    [CustomEvent]
+    public OnTreeItemPaste Paste { get; init; }
+    
     [CustomEvent]
     public Func<DOMRect, Task> EnterEditMode { get; init; }
 
@@ -144,25 +148,18 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
         if (e.key == "Delete")
         {
             DispatchEvent(OnDelete, []);
-            return Task.CompletedTask;
         }
-
-        if (e.key == "c")
+        else if (e.key == "c")
         {
-            state.CopiedTreeItemPath = SelectedPath;
-            return Task.CompletedTask;
+            DispatchEvent(Copy, [SelectedPath]);
         }
-
-        if (e.key == "v" && state.CopiedTreeItemPath.HasValue())
+        else if (e.key == "v")
         {
-            DispatchEvent(CopyPaste, [state.CopiedTreeItemPath, SelectedPath]);
-
-            state.CopiedTreeItemPath = null;
+            DispatchEvent(Paste, [SelectedPath]);
         }
-
-        if (e.key == "F2")
+        else if (e.key == "F2")
         {
-            DispatchEvent(EnterEditMode, [e.currentTarget.boundingClientRect]);    
+            DispatchEvent(EnterEditMode, [e.currentTarget.boundingClientRect]);
         }
         
         return Task.CompletedTask;
@@ -482,8 +479,6 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
     internal class State
     {
         public List<string> CollapsedNodes { get; init; } = [];
-
-        public string CopiedTreeItemPath { get; set; }
 
         public string CurrentDragOveredPath { get; set; }
 

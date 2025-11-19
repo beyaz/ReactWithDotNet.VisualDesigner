@@ -464,7 +464,10 @@ sealed class ApplicationView : Component<ApplicationState>
             Selection = new(),
 
             StyleItemDragDrop    = new(),
-            PropertyItemDragDrop = new()
+            
+            PropertyItemDragDrop = new(),
+            
+            CopiedVisualElementModelInYaml = state.CopiedVisualElementModelInYaml
         };
 
         if (state.ComponentRootElement is not null)
@@ -800,6 +803,7 @@ sealed class ApplicationView : Component<ApplicationState>
             Selection = new(),
 
             StyleItemDragDrop    = new(),
+            
             PropertyItemDragDrop = new()
         };
 
@@ -1413,6 +1417,43 @@ sealed class ApplicationView : Component<ApplicationState>
 
         var elementTree = new VisualElementTreeView
         {
+            Copy = treeItemPath =>
+            {
+                var sourceNode = FindTreeNodeByTreePath(state.ComponentRootElement, treeItemPath);
+                
+                state = state with
+                {
+                    CopiedVisualElementModelInYaml = SerializeToYaml(sourceNode)
+                };
+
+                return Task.CompletedTask;
+            },
+            Paste = treeItemPath =>
+            {
+                if (state.CopiedVisualElementModelInYaml.HasNoValue())
+                {
+                    return Task.CompletedTask;
+                }
+                
+                var targetNode = FindTreeNodeByTreePath(state.ComponentRootElement, treeItemPath);
+
+                var sourceNodeClone = state.CopiedVisualElementModelInYaml.AsVisualElementModel();
+
+                state = state with
+                {
+                    ComponentRootElement = Modify(state.ComponentRootElement, targetNode, x => x with
+                    {
+                        Children = x.Children.Add(sourceNodeClone)
+                    })
+                };
+                
+                state = state with
+                {
+                    CopiedVisualElementModelInYaml = null
+                };
+
+                return Task.CompletedTask;
+            },
             EnterEditMode = rect =>
             {
                 if (state.ElementTreeEditPosition is not null)
@@ -1468,23 +1509,6 @@ sealed class ApplicationView : Component<ApplicationState>
 
             OnDelete = DeleteSelectedTreeItem,
 
-            CopyPaste = (source, target) =>
-            {
-                var sourceNode = FindTreeNodeByTreePath(state.ComponentRootElement, source);
-                var targetNode = FindTreeNodeByTreePath(state.ComponentRootElement, target);
-
-                var sourceNodeClone = SerializeToYaml(sourceNode).AsVisualElementModel();
-
-                state = state with
-                {
-                    ComponentRootElement = Modify(state.ComponentRootElement, targetNode, x => x with
-                    {
-                        Children = x.Children.Add(sourceNodeClone)
-                    })
-                };
-
-                return Task.CompletedTask;
-            },
             TreeItemMove = (source, target, position) =>
             {
                 VisualElementTreeOperationMoveResponse response;

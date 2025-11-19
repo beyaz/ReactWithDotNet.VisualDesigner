@@ -58,6 +58,8 @@ public sealed record ApplicationState
     public required AttributeDragDropData PropertyItemDragDrop { get; init; }
     
     public DOMRect ElementTreeEditPosition { get; init; }
+    
+    public string CopiedVisualElementModelInYaml { get; init; }
 
     // @formatter:on
 }
