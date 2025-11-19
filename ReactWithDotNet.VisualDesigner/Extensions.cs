@@ -569,7 +569,8 @@ public static class Extensions
 
     public static Maybe<Type> TryGetHtmlElementTypeByTagName(string tag)
     {
-        if ("React.Fragment".Equals(tag, StringComparison.OrdinalIgnoreCase))
+        if ("React.Fragment".Equals(tag, StringComparison.OrdinalIgnoreCase) ||
+            "<>".Equals(tag, StringComparison.OrdinalIgnoreCase))
         {
             return typeof(Fragment);
         }
