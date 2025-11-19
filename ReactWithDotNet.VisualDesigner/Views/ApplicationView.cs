@@ -2535,6 +2535,7 @@ sealed class ApplicationView : Component<ApplicationState>
         {
             return new PopupView();
         }
+        
 
         protected override Task OverrideStateFromPropsBeforeRender()
         {
@@ -2555,6 +2556,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
         string Sender => SHADOW_PROP_PREFIX + PropertyName;
 
+        [StopPropagation]
         Task OnPopupItemSelected(PopupItemSelectArgs e)
         {
             DispatchEvent(OnChange, [PropertyName, e.Value]);
