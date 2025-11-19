@@ -644,14 +644,7 @@ sealed class ApplicationView : Component<ApplicationState>
         public required int ProjectId { get; init; }
         
         protected override Task<Result<IReadOnlyList<SuggestionItem>>> Suggestions
-        {
-            get
-            {
-                var cacheKey = $"{nameof(DesignPropEditor)}-{ProjectId}-{Name}";
-
-                return Result.From(Cache.AccessValue(cacheKey, () => GetTagSuggestions(ProjectId)));
-            }
-        }
+            => Result.From(Enumerable.Empty<SuggestionItem>().ToList().AsReadOnlyList());
     }
     
     Element CreateDesignPropEditor(string label, string designPropName, JsType jsType)
