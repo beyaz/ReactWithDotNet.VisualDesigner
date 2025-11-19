@@ -2623,6 +2623,7 @@ sealed class ApplicationView : Component<ApplicationState>
             };
         }
 
+        [StopPropagation]
         Task OnShadowPropClicked(MouseEvent e)
         {
             DispatchEvent(OnChange, [PropertyName, null]);
