@@ -654,8 +654,10 @@ sealed class ApplicationView : Component<ApplicationState>
         }
     }
     
-    Element CreateDesignPropEditorFor_Text()
+    Element CreateDesignPropEditor()
     {
+       
+            
         VisualElementModel visualElementModel = null;
 
         if (state.Selection.VisualElementTreeItemPath.HasValue())
@@ -681,7 +683,7 @@ sealed class ApplicationView : Component<ApplicationState>
             }
         }
         
-        return new DesignPropEditorFor_Text
+        var inputEditor = new DesignPropEditorFor_Text
         {
             ProjectId = state.ProjectId,
                 
@@ -713,6 +715,14 @@ sealed class ApplicationView : Component<ApplicationState>
 
                 return Task.CompletedTask;
             }
+        };
+
+        return new FlexRow(AlignItemsCenter, Gap(16), Border(1, solid, Theme.BorderColor), BorderRadius(4), PaddingX(8), Height(36))
+        {
+            PositionRelative,
+            new label(PositionAbsolute, Top(-4), Left(8), FontSize10, LineHeight7, Background(White), PaddingX(4)) { "Text" },
+
+            inputEditor
         };
     }
 
@@ -1733,13 +1743,7 @@ sealed class ApplicationView : Component<ApplicationState>
             },
             new FlexColumn(WidthFull,PaddingX(4), Gap(4))
             {
-                new FlexRow(AlignItemsCenter, Gap(16), Border(1, solid, Theme.BorderColor), BorderRadius(4), PaddingX(8), Height(36))
-                {
-                    PositionRelative,
-                    new label(PositionAbsolute, Top(-4), Left(8), FontSize10, LineHeight7, Background(White), PaddingX(4)) { "Text" },
-                    
-                    CreateDesignPropEditorFor_Text()
-                }
+                CreateDesignPropEditor
             },
             
             SpaceY(16),
