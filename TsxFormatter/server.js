@@ -43,6 +43,18 @@ app.post('/format', async (req, res) =>
 });
 
 
+function safeStringify(obj) {
+  const seen = new WeakSet();
+  return JSON.stringify(obj, (key, value) => {
+    if (typeof value === "object" && value !== null) {
+      if (seen.has(value)) return; // circular reference'i atla
+      seen.add(value);
+    }
+    return value;
+  }, 2);
+}
+  
+  
 // ------------------------
 // TSX AST endpoint
 // ------------------------
@@ -62,7 +74,7 @@ app.post('/ast', (req, res) =>
     );
 
     // AST JSON olarak döndür
-    res.status(200).json(ast);
+     res.status(200).json(JSON.parse(safeStringify(ast)));
   } catch (err) {
     res.status(500).json({ error: "AstGenerationError", details: err.message });
   }

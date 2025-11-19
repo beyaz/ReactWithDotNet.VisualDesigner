@@ -22,6 +22,10 @@ static class Prettier
     {
         await StartServerIfNeeded();
 
+        var y = await Ast("""
+                          {"code": "const [x, setX] = useState<number>(0); function foo() {}"}
+                          """);
+
         var options = new JsonSerializerOptions();
 
         var requestObject = new { code, options = prettierOptions };
@@ -35,6 +39,41 @@ static class Prettier
         try
         {
             var httpResponseMessage = await HttpClient.PostAsync("http://localhost:5009/format", jsonContent);
+
+            var responseContent = await httpResponseMessage.Content.ReadAsStringAsync();
+            
+            response = JsonSerializer.Deserialize<Response>(responseContent, options);
+        }
+        catch (Exception exception)
+        {
+            return exception;
+        }
+
+        if (response.error is not null)
+        {
+            return new FormatException(string.Join(Environment.NewLine + Environment.NewLine, code, response.error, response.details));
+        }
+
+        return response.formattedCode.TrimEnd().RemoveFromEnd(";");
+    }
+    
+    public static async Task<Result<string>> Ast(string code)
+    {
+        await StartServerIfNeeded();
+
+        var options = new JsonSerializerOptions();
+
+        var requestObject = new { code };
+
+        var jsonPayload = JsonSerializer.Serialize(requestObject, options);
+
+        var jsonContent = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+
+        Response response;
+
+        try
+        {
+            var httpResponseMessage = await HttpClient.PostAsync("http://localhost:5009/ast", jsonContent);
 
             var responseContent = await httpResponseMessage.Content.ReadAsStringAsync();
             
