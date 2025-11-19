@@ -601,6 +601,8 @@ sealed class ApplicationView : Component<ApplicationState>
                     {
                         UpdateCurrentVisualElement(x => x with { Tag = dbRecord.Id.ToString() });
 
+                        state = state with { ElementTreeEditPosition = null };
+                        
                         return Task.CompletedTask;
                     }
 
