@@ -1013,6 +1013,7 @@ sealed class ApplicationView : Component<ApplicationState>
         return Task.CompletedTask;
     }
 
+    [StopPropagation]
     Task OnShadowPropClicked(string propName, string value)
     {
         UpdateCurrentVisualElement(x => x with
@@ -2549,13 +2550,11 @@ sealed class ApplicationView : Component<ApplicationState>
                 InitialValueOfPropertyName = PropertyName,
             };
                 
-            Client.ListenEvent<PopupItemSelect>(OnPopupItemSelected, Sender);
+            Client.ListenEvent<PopupItemSelect>(OnPopupItemSelected, senderId:SHADOW_PROP_PREFIX + PropertyName);
 
             return Task.CompletedTask;
         }
-
-        string Sender => SHADOW_PROP_PREFIX + PropertyName;
-
+        
         [StopPropagation]
         Task OnPopupItemSelected(PopupItemSelectArgs e)
         {
