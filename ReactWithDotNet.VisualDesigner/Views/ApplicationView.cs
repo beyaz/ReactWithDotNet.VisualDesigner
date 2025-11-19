@@ -638,6 +638,98 @@ sealed class ApplicationView : Component<ApplicationState>
             }
         }
     }
+    
+    class DesignPropEditorFor_Text : MagicInput
+    {
+        public required int ProjectId { get; init; }
+        
+        protected override Task<Result<IReadOnlyList<SuggestionItem>>> Suggestions
+        {
+            get
+            {
+                var cacheKey = $"{nameof(DesignPropEditorFor_Text)}-{ProjectId}";
+
+                return Result.From(Cache.AccessValue(cacheKey, () => GetTagSuggestions(ProjectId)));
+            }
+        }
+    }
+    
+    async Task<Element> CreateDesignPropEditorFor_Text()
+    {
+        VisualElementModel visualElementModel = null;
+
+        if (state.Selection.VisualElementTreeItemPath.HasValue())
+        {
+            visualElementModel = FindTreeNodeByTreePath(state.ComponentRootElement, state.Selection.VisualElementTreeItemPath);
+        }
+
+        if (visualElementModel is null)
+        {
+            return null;
+        }
+
+        var inputValue = string.Empty;
+        {
+            foreach (var property in visualElementModel.Properties)
+            {
+                var maybe = TryParseProperty(property);
+                if (maybe.HasValue && maybe.Value.Name == Design.Text)
+                {
+                    inputValue = maybe.Value.Value;
+                    break;
+                }
+            }
+        }
+
+        var inputTag = new FlexRow(WidthFull)
+        {
+            PositionFixed,
+            Left(state.ElementTreeEditPosition.left),
+            Top(state.ElementTreeEditPosition.top),
+            Width(state.ElementTreeEditPosition.width),
+            Height(state.ElementTreeEditPosition.height),
+            Background(White),
+            Border(1, solid, Gray100),
+            BorderRadius(4),
+            PaddingLeft(8),
+
+            new DesignPropEditorFor_Text
+            {
+                ProjectId = state.ProjectId,
+                
+                Id    = nameof(DesignPropEditorFor_Text),
+                Name  = string.Empty,
+                Value = inputValue,
+                OnChange = (_, newValue) =>
+                {
+                    
+                    
+                    
+                    var inputValue = string.Empty;
+                    {
+                        foreach (var property in visualElementModel.Properties)
+                        {
+                            var maybe = TryParseProperty(property);
+                            if (maybe.HasValue && maybe.Value.Name == Design.Text)
+                            {
+                                inputValue = maybe.Value.Value;
+                                break;
+                            }
+                        }
+                    }
+                    
+
+                    UpdateCurrentVisualElement(x => x with { Properties = });
+
+                    state = state with { ElementTreeEditPosition = null };
+
+                    return Task.CompletedTask;
+                }
+            }
+        };
+
+        return inputTag;
+    }
 
     Task DeleteSelectedTreeItem()
     {
@@ -1648,6 +1740,28 @@ sealed class ApplicationView : Component<ApplicationState>
         {
             createTagEditor,
 
+            new FlexRow(WidthFull, AlignItemsCenter)
+            {
+                new div { Height(1), FlexGrow(1), Background(Gray200) },
+                new span { "D E S I G N", WhiteSpaceNoWrap, UserSelect(none), PaddingX(4) },
+                new div { Height(1), FlexGrow(1), Background(Gray200) }
+            },
+            new FlexColumn(WidthFull,PaddingX(4), Gap(4))
+            {
+                new FlexRow(AlignItemsCenter, Gap(16), Border(1, solid, Theme.BorderColor), BorderRadius(4), PaddingX(8), Height(36))
+                {
+                    PositionRelative,
+                    new label(PositionAbsolute, Top(-4), Left(8), FontSize10, LineHeight7, Background(White), PaddingX(4)) { "Text" },
+                    
+                    new input
+                    {
+                        type="text",
+                        style={BorderNone, OutlineNone}, 
+                        value = visualElementModel.Properties.FirstOrDefault(x=>ParseProperty(x).Value.Name == Design.Text)
+                    }
+                }
+            },
+            
             SpaceY(16),
             new FlexRow(WidthFull, AlignItemsCenter)
             {
