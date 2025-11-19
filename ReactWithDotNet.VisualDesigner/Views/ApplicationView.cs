@@ -1776,7 +1776,21 @@ sealed class ApplicationView : Component<ApplicationState>
                 new span { "P R O P S", WhiteSpaceNoWrap, UserSelect(none), PaddingX(4) },
                 new div { Height(1), FlexGrow(1), Background(Gray200) }
             },
-            viewProps(visualElementModel.Properties),
+            viewProps(new List<string>
+            {
+                from p in visualElementModel.Properties
+                let parsedProp = TryParseProperty(p)
+                let isUiManagedDesignerProp = parsedProp.HasValue && 
+                                             parsedProp.Value.Name is 
+                    Design.Text or 
+                    Design.TextPreview or
+                    Design.HideIf or 
+                    Design.ShowIf or 
+                    Design.ItemsSource or
+                    Design.ItemsSourceDesignTimeCount
+                where !isUiManagedDesignerProp
+                select p
+            }),
 
             shadowProps, ShadowPropertyView.CreatePopupHandlerView(),
 
