@@ -7,7 +7,7 @@ static class SuggestionFromTsxCode
 {
     public static async Task<Result<IReadOnlyList<string>>> GetBooleans(string tsxFilePath)
     {
-        if (tsxFilePath is null || File.Exists(tsxFilePath))
+        if (tsxFilePath is null || !File.Exists(tsxFilePath))
         {
             return new List<string>();
         }

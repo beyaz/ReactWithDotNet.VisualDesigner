@@ -69,11 +69,13 @@ static class NodeJsBridge
 
         Response response;
 
+        string responseContent;
+            
         try
         {
             var httpResponseMessage = await HttpClient.PostAsync("http://localhost:5009/ast", jsonContent);
 
-            var responseContent = await httpResponseMessage.Content.ReadAsStringAsync();
+            responseContent = await httpResponseMessage.Content.ReadAsStringAsync();
             
             response = JsonSerializer.Deserialize<Response>(responseContent, options);
         }
@@ -87,7 +89,7 @@ static class NodeJsBridge
             return new FormatException(string.Join(Environment.NewLine + Environment.NewLine, code, response.error, response.details));
         }
 
-        return response.formattedCode.TrimEnd().RemoveFromEnd(";");
+        return responseContent;
     }
 
     public static void Register(WebApplication app)

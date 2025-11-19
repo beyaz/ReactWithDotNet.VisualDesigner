@@ -649,7 +649,29 @@ sealed class ApplicationView : Component<ApplicationState>
         public required int ProjectId { get; init; }
         
         protected override Task<Result<IReadOnlyList<SuggestionItem>>> Suggestions
-            => Result.From(Enumerable.Empty<SuggestionItem>().ToList().AsReadOnlyList());
+        {
+            get
+            {
+                if (Name == Design.HideIf)
+                {
+                    const string todo = @"C:\github\hopgogo\web\enduser-ui\src\components\PasswordInput.tsx";
+
+                   var result = SuggestionFromTsxCode.GetBooleans(todo).Result;
+
+                   return Task.FromResult(Result.From((IReadOnlyList<SuggestionItem>)new List<SuggestionItem>
+                   {
+                       from x in result.Value
+                       select new SuggestionItem
+                       {
+                           isVariable = true,
+                           name       = x
+                       }
+                   }));
+                }
+                
+                return Result.From(Enumerable.Empty<SuggestionItem>().ToList().AsReadOnlyList());
+            }
+        }
     }
     
     Element CreateDesignPropEditor(string label, string designPropName, JsType jsType)
