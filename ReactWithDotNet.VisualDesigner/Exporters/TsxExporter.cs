@@ -395,7 +395,8 @@ static class TsxExporter
             {
                 tag = "React.Fragment";
             }
-            else if (tag.Equals("React.Fragment", StringComparison.OrdinalIgnoreCase) && partProps.HasNoValue())
+            else if ((tag.Equals("React.Fragment", StringComparison.OrdinalIgnoreCase) ||
+                      tag.Equals("<>", StringComparison.OrdinalIgnoreCase)) && partProps.HasNoValue())
             {
                 tag = string.Empty;
             }
