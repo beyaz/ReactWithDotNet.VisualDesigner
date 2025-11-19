@@ -22,9 +22,7 @@ static class NodeJsBridge
     {
         await StartServerIfNeeded();
 
-        var y = await Ast("""
-                          {"code": "const [x, setX] = useState<number>(0); function foo() {}"}
-                          """);
+     
 
         var options = new JsonSerializerOptions();
 
@@ -161,7 +159,7 @@ static class NodeJsBridge
     {
         public static Process NodeProcess { get; set; }
 
-        public static string ProjectPath => Path.Combine(AppContext.BaseDirectory, "HelperApps", "TsxFormatter");
+        public static string ProjectPath => Path.Combine(AppContext.BaseDirectory, "HelperApps", "NodeJsBridge");
 
         public static Task StartTask { get; set; }
     }
