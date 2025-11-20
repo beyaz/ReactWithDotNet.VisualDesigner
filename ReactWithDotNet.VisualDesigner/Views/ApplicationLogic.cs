@@ -157,9 +157,13 @@ static class ApplicationLogic
 
             pluginSuggestionItems = result.Value;
         }
+
+        var variableSuggestionsInOutputFile = await GetVariableSuggestionsInOutputFile(componentId);
         
+
         return new List<SuggestionItem>
         {
+            variableSuggestionsInOutputFile.Value ?? [],
             pluginSuggestionItems,
             
             new()
@@ -229,7 +233,9 @@ static class ApplicationLogic
                     jsType = jsType.Value,
 
                     name = propertyInfo.Name
-                }
+                },
+            
+            
         };
 
     }
