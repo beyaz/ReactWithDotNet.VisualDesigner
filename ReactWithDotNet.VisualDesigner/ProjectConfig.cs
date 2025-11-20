@@ -40,23 +40,8 @@ public sealed record ComponentConfig
     public bool SkipExport { get; init; }
     
     public string SolutionDirectory { get => field?.Trim(); init; }
-    
-    public IReadOnlyList<VariableConfig> DotNetVariables { get; init; } = [];
 
     // @formatter:on
    
-}
-
-public sealed record VariableConfig
-{
-    // @formatter:off
-    
-    public string VariableName { get => field?.Trim(); init; }
-    
-    public string DotnetTypeFullName { get => field?.Trim(); init; }
-    
-    public string DotNetAssemblyFilePath { get => field?.Trim(); init; }
-    
-    // @formatter:on
 }
 

@@ -5,7 +5,6 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.Loader;
 using System.Text;
-using Mono.Cecil;
 using ReactWithDotNet.VisualDesigner.Configuration;
 
 namespace ReactWithDotNet.VisualDesigner;
@@ -340,41 +339,6 @@ public static class Plugin
                     jsType = JsType.String,
                     value  = result.Value
                 });
-            }
-
-            
-            foreach (var variable in scope.Component.Config.DotNetVariables)
-            {
-                List<(JsType jsType, Func<PropertyDefinition, bool> matchFn)> map =
-                [
-                    (JsType.String, CecilHelper.IsString),
-                    (JsType.Number, CecilHelper.IsNumber),
-                    (JsType.Date, CecilHelper.IsDateTime),
-                    (JsType.Boolean, CecilHelper.IsBoolean),
-                    (JsType.Array, CecilHelper.IsCollection)
-                ];
-
-                foreach (var (jsType, fn) in map)
-                {
-                    var result = CecilHelper.GetPropertyPathList(variable.DotNetAssemblyFilePath, variable.DotnetTypeFullName, $"{variable.VariableName}.", fn);
-                    if (result.HasError)
-                    {
-                        continue;
-                    }
-
-                    suggestionItems.AddRange
-                    (
-                        from x in result.Value
-                        select new SuggestionItem
-                        {
-                            value = x,
-
-                            jsType = jsType,
-
-                            isVariable = true
-                        }
-                    );
-                }
             }
 
             suggestionItems.AddRange
