@@ -47,47 +47,65 @@ static class SuggestionFromTsxCode
 
         list.AddRange(CalculateVariableSuggestions(fileContent));
 
-        return list.Distinct().ToList();
+        return list.Where(x => x.Length > 1).Distinct().ToList();
     }
 
     static IReadOnlyList<string> CalculateVariableSuggestions(string tsxCode)
     {
         var suggestions = new HashSet<string>();
 
-        // Fonksiyon isimleri
-        const string functionPattern = @"(?:function\s+([A-Za-z_]\w*)|const\s+([A-Za-z_]\w*)\s*=\s*\()";
-        foreach (Match match in Regex.Matches(tsxCode, functionPattern))
+        // f u n c t i o n s
         {
-            if (match.Groups[1].Success)
+            const string pattern = @"(?:function\s+([A-Za-z_]\w*)|const\s+([A-Za-z_]\w*)\s*=\s*\()";
+            foreach (Match match in Regex.Matches(tsxCode, pattern))
+            {
+                if (match.Groups[1].Success)
+                {
+                    suggestions.Add(match.Groups[1].Value);
+                }
+
+                if (match.Groups[2].Success)
+                {
+                    suggestions.Add(match.Groups[2].Value);
+                }
+            }
+        }
+
+        // v a r i a b l e s
+        {
+            const string pattern = @"(?:let|const|var)\s+([A-Za-z_]\w*)";
+            foreach (Match match in Regex.Matches(tsxCode, pattern))
             {
                 suggestions.Add(match.Groups[1].Value);
             }
+        }
 
-            if (match.Groups[2].Success)
+        // u s e s t a t e
+        {
             {
-                suggestions.Add(match.Groups[2].Value);
+                const string pattern = @"const\s*\[\s*([A-Za-z_]\w*)\s*,\s*set[A-Za-z_]\w*\s*\]\s*=\s*useState";
+                foreach (Match match in Regex.Matches(tsxCode, pattern))
+                {
+                    suggestions.Add(match.Groups[1].Value);
+                }
+            }
+
+            {
+                const string pattern = @"const\s*\[\s*([A-Za-z_]\w*)\s*,\s*set[A-Za-z_]\w*\s*\]\s*=\s*React.useState";
+                foreach (Match match in Regex.Matches(tsxCode, pattern))
+                {
+                    suggestions.Add(match.Groups[1].Value);
+                }
             }
         }
 
-        // Variable isimleri
-        const string variablePattern = @"(?:let|const|var)\s+([A-Za-z_]\w*)";
-        foreach (Match match in Regex.Matches(tsxCode, variablePattern))
+        // a t t r i b u t e s
         {
-            suggestions.Add(match.Groups[1].Value);
-        }
-
-        // useState hook isimleri
-        const string useStatePattern = @"const\s*\[\s*([A-Za-z_]\w*)\s*,\s*set[A-Za-z_]\w*\s*\]\s*=\s*useState";
-        foreach (Match match in Regex.Matches(tsxCode, useStatePattern))
-        {
-            suggestions.Add(match.Groups[1].Value);
-        }
-
-        // Interface attribute isimleri
-        const string interfaceAttributePattern = @"\b([A-Za-z_]\w*)\s*\??\s*:\s*[\w\[\]]+";
-        foreach (Match match in Regex.Matches(tsxCode, interfaceAttributePattern))
-        {
-            suggestions.Add(match.Groups[1].Value);
+            const string pattern = @"\b([A-Za-z_]\w*)\s*\??\s*:\s*[\w\[\]]+";
+            foreach (Match match in Regex.Matches(tsxCode, pattern))
+            {
+                suggestions.Add(match.Groups[1].Value);
+            }
         }
 
         return new List<string>(suggestions);

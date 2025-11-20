@@ -230,7 +230,21 @@ abstract class MagicInput : Component<MagicInput.State>
 
             if (suggestions.Count > state.SelectedSuggestionOffset.Value)
             {
-                state = state with { Value = suggestions[state.SelectedSuggestionOffset.Value] };
+                var suggestedValue = suggestions[state.SelectedSuggestionOffset.Value];
+                
+                var currentValue = state.Value;
+
+                string value = suggestedValue;
+
+                var dotSplitNames = currentValue.Split('.', StringSplitOptions.TrimEntries);
+                if (dotSplitNames.Length > 1)
+                {
+                    dotSplitNames[^1] = suggestedValue;
+
+                    value = string.Join(".", dotSplitNames);
+                }
+                
+                state = state with { Value =  value};
 
                 DispatchEvent(OnChange, [Name, state.Value]);
             }
