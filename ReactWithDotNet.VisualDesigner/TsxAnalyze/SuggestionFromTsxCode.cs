@@ -7,14 +7,45 @@ static class SuggestionFromTsxCode
 {
     public static async Task<Result<IReadOnlyList<string>>> GetAllVariableSuggestionsInFile(string tsxFilePath)
     {
+        var list = new List<string>();
+
         if (tsxFilePath is null || !File.Exists(tsxFilePath))
         {
-            return new List<string>();
+            return list;
         }
 
         var fileContent = await File.ReadAllTextAsync(tsxFilePath);
 
-        return Result.From(CalculateVariableSuggestions(fileContent));
+        foreach (var line in fileContent.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        {
+            // is relative path in project
+            if (line.Contains('"' + "../"))
+            {
+                const string pathPattern = """
+                                           "([^"]+)"
+                                           """;
+
+                var match = Regex.Match(line, pathPattern);
+                if (match.Success)
+                {
+                    var relativePath = match.Groups[1].Value;
+
+                    var relativeFilePath = Path.Combine(tsxFilePath, relativePath + ".tsx");
+
+                    var suggestionsFromRelativeFile = await GetAllVariableSuggestionsInFile(relativeFilePath);
+                    if (suggestionsFromRelativeFile.HasError)
+                    {
+                        return suggestionsFromRelativeFile.Error;
+                    }
+
+                    list.Add(suggestionsFromRelativeFile.Value);
+                }
+            }
+        }
+
+        list.AddRange(CalculateVariableSuggestions(fileContent));
+
+        return list;
     }
 
     static IReadOnlyList<string> CalculateVariableSuggestions(string tsxCode)
