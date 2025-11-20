@@ -664,7 +664,8 @@ sealed class ApplicationView : Component<ApplicationState>
                         select new SuggestionItem
                         {
                             isVariable = true,
-                            name       = suggestion
+                            
+                            name = suggestion
                         };
                     
                     return query.AsResult();
