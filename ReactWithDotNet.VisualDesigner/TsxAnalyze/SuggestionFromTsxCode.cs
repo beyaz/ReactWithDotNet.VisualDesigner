@@ -30,7 +30,9 @@ static class SuggestionFromTsxCode
                 {
                     var relativePath = match.Groups[1].Value;
 
-                    var relativeFilePath = Path.Combine(tsxFilePath, relativePath + ".tsx");
+                    var relativeFilePath = Path.Combine(Path.GetDirectoryName(tsxFilePath)!, relativePath + ".ts");
+
+                    relativeFilePath = Path.GetFullPath(relativeFilePath);
 
                     var suggestionsFromRelativeFile = await GetAllVariableSuggestionsInFile(relativeFilePath);
                     if (suggestionsFromRelativeFile.HasError)
@@ -45,7 +47,7 @@ static class SuggestionFromTsxCode
 
         list.AddRange(CalculateVariableSuggestions(fileContent));
 
-        return list;
+        return list.Distinct().ToList();
     }
 
     static IReadOnlyList<string> CalculateVariableSuggestions(string tsxCode)
