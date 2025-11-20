@@ -648,33 +648,12 @@ sealed class ApplicationView : Component<ApplicationState>
     {
         public required int ProjectId { get; init; }
 
-        public required string OutputFilePath { get; init; }
+        public required int ComponentId { get; init; }
 
-        protected override Task<Result<IReadOnlyList<SuggestionItem>>> Suggestions
-        {
-            get
-            {
-                var cacheKey = $"{nameof(DesignPropEditor)}-{ProjectId}-{Name}";
-
-                return Cache.AccessValue(cacheKey, () =>
-                {
-                    var query =
-                        from suggestions in SuggestionFromTsxCode.GetAllVariableSuggestionsInFile(OutputFilePath)
-                        from suggestion in suggestions
-                        select new SuggestionItem
-                        {
-                            isVariable = true,
-                            
-                            name = suggestion
-                        };
-                    
-                    return query.AsResult();
-                });
-            }
-        }
+        protected override Task<Result<IReadOnlyList<SuggestionItem>>> Suggestions => GetVariableSuggestionsInOutputFile(ComponentId);
     }
 
-    async Task<Element> CreateDesignPropEditor(string label, string designPropName)
+    Element CreateDesignPropEditor(string label, string designPropName)
     {
         VisualElementModel visualElementModel = null;
 
@@ -701,11 +680,9 @@ sealed class ApplicationView : Component<ApplicationState>
             }
         }
         
-        var location = await GetComponentFileLocation(state.ComponentId, state.UserName);
-        
         var inputEditor = new DesignPropEditor
         {
-            OutputFilePath = location.Value.filePath,
+            ComponentId = state.ComponentId,
             ProjectId = state.ProjectId,
             Id    = designPropName,
             Name  = designPropName,

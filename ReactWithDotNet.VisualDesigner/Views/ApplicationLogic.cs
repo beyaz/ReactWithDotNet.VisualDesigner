@@ -114,6 +114,29 @@ static class ApplicationLogic
         return GetAllProjectsCached().Select(x => x.Name).ToList();
     }
 
+    public static Task<Result<IReadOnlyList<SuggestionItem>>> GetVariableSuggestionsInOutputFile(int componentId)
+    {
+        var cacheKey = $"{nameof(GetVariableSuggestionsInOutputFile)}-{componentId}";
+
+        return Cache.AccessValue(cacheKey, () =>
+        {
+            var query =
+            
+                from location in GetComponentFileLocation(componentId, userName:null)
+                from suggestions in SuggestionFromTsxCode.GetAllVariableSuggestionsInFile(location.filePath)
+                from suggestion in suggestions
+                select new SuggestionItem
+                {
+                    isVariable = true,
+                            
+                    name = suggestion
+                };
+
+                    
+            return query.AsResult();
+        });
+        
+    }
     public static async Task<Result<IReadOnlyList<SuggestionItem>>> GetPropSuggestions(int componentId, string selectedTag)
     {
         var  scope = new PropSuggestionScope
