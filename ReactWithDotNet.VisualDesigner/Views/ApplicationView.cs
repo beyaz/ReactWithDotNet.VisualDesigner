@@ -677,7 +677,7 @@ sealed class ApplicationView : Component<ApplicationState>
                     inputValue = maybe.Value.Value;
                     break;
                 }
-            }i
+            }
         }
         
         var inputEditor = new DesignPropEditor
