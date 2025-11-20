@@ -643,38 +643,37 @@ sealed class ApplicationView : Component<ApplicationState>
             }
         }
     }
-    
+
     class DesignPropEditor : MagicInput
     {
         public required int ProjectId { get; init; }
-        
+
+        public required string OutputFilePath { get; init; }
+
         protected override Task<Result<IReadOnlyList<SuggestionItem>>> Suggestions
         {
             get
             {
-                if (Name == Design.HideIf)
+                var cacheKey = $"{nameof(DesignPropEditor)}-{ProjectId}-{Name}";
+
+                return Cache.AccessValue(cacheKey, () =>
                 {
-                    const string todo = @"C:\github\hopgogo\web\enduser-ui\src\components\Account\UserAddresses\UserAddresses.tsx";
-
-                   var result = SuggestionFromTsxCode.GetBooleans(todo).Result;
-
-                   return Task.FromResult(Result.From((IReadOnlyList<SuggestionItem>)new List<SuggestionItem>
-                   {
-                       from x in result.Value
-                       select new SuggestionItem
-                       {
-                           isVariable = true,
-                           name       = x
-                       }
-                   }));
-                }
-                
-                return Result.From(Enumerable.Empty<SuggestionItem>().ToList().AsReadOnlyList());
+                    var query =
+                        from suggestions in SuggestionFromTsxCode.GetAllVariableSuggestionsInFile(OutputFilePath)
+                        from suggestion in suggestions
+                        select new SuggestionItem
+                        {
+                            isVariable = true,
+                            name       = suggestion
+                        };
+                    
+                    return query.AsResult();
+                });
             }
         }
     }
-    
-    Element CreateDesignPropEditor(string label, string designPropName, JsType jsType)
+
+    async Task<Element> CreateDesignPropEditor(string label, string designPropName, JsType jsType)
     {
         VisualElementModel visualElementModel = null;
 
@@ -701,8 +700,11 @@ sealed class ApplicationView : Component<ApplicationState>
             }
         }
         
+        var location = await GetComponentFileLocation(state.ComponentId, state.UserName);
+        
         var inputEditor = new DesignPropEditor
         {
+            OutputFilePath = location.Value.filePath,
             ProjectId = state.ProjectId,
             Id    = designPropName,
             Name  = designPropName,
