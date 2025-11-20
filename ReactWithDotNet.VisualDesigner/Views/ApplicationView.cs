@@ -674,7 +674,7 @@ sealed class ApplicationView : Component<ApplicationState>
         }
     }
 
-    async Task<Element> CreateDesignPropEditor(string label, string designPropName, JsType jsType)
+    async Task<Element> CreateDesignPropEditor(string label, string designPropName)
     {
         VisualElementModel visualElementModel = null;
 
@@ -1788,22 +1788,22 @@ sealed class ApplicationView : Component<ApplicationState>
                 CreateGroupLabel("c o n t e n t"),
                 new FlexColumn(WidthFull,PaddingX(4), Gap(12))
                 {
-                    CreateDesignPropEditor("Text", Design.Text, JsType.String),
-                    CreateDesignPropEditor("Text Preview", Design.TextPreview, JsType.String)
+                    CreateDesignPropEditor("Text", Design.Text),
+                    CreateDesignPropEditor("Text Preview", Design.TextPreview)
                 },
                 
                 CreateGroupLabel("v i s i b i l i t y"),
                 new FlexColumn(WidthFull,PaddingX(4), Gap(12))
                 {
-                    CreateDesignPropEditor("Show-if", Design.ShowIf, JsType.Boolean),
-                    CreateDesignPropEditor("Hide-if", Design.HideIf, JsType.Boolean),
+                    CreateDesignPropEditor("Show-if", Design.ShowIf),
+                    CreateDesignPropEditor("Hide-if", Design.HideIf),
                 },
                 
                 CreateGroupLabel("l o o p"),
                 new FlexColumn(WidthFull,PaddingX(4), Gap(12))
                 {
-                    CreateDesignPropEditor("Items Source", Design.ItemsSource, JsType.Array),
-                    CreateDesignPropEditor("Items Source Design Time Child Count", Design.ItemsSourceDesignTimeCount, JsType.Number)
+                    CreateDesignPropEditor("Items Source", Design.ItemsSource),
+                    CreateDesignPropEditor("Items Source Design Time Child Count", Design.ItemsSourceDesignTimeCount)
                 }
                 
             },
