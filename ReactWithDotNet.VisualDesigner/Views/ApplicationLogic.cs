@@ -147,7 +147,7 @@ static class ApplicationLogic
         };
 
 
-        IReadOnlyList < SuggestionItem >  pluginSuggestionItems;
+        IReadOnlyList <SuggestionItem>  pluginSuggestionItems;
         {
             var result = await Plugin.GetPropSuggestions(scope);
             if (result.HasError)
@@ -159,83 +159,45 @@ static class ApplicationLogic
         }
 
         var variableSuggestionsInOutputFile = await GetVariableSuggestionsInOutputFile(componentId);
-        
+
 
         return new List<SuggestionItem>
         {
             variableSuggestionsInOutputFile.Value ?? [],
+
             pluginSuggestionItems,
-            
-            new()
-            {
-                name = Design.Text,
-                jsType = JsType.String
-            },
-            new()
-            {
-                name = Design.TextPreview,
-            
-                jsType = JsType.String
-            },
-            new()
-            {
-                name = Design.ItemsSourceDesignTimeCount,
-            
-                jsType = JsType.Number,
-            
-                value = "3"
-            },
-            new()
-            {
-                name = Design.ItemsSource,
-            
-                jsType = JsType.Array
-            },
-            new()
-            {
-                name = Design.ShowIf,
-            
-                jsType = JsType.Boolean
-            },
-            new()
-            {
-                name = Design.HideIf,
-            
-                jsType = JsType.Boolean
-            },
-            
-            scope.TagName is null ? [] :
 
-                from htmlElementType in TryGetHtmlElementTypeByTagName(scope.TagName)
-                from propertyInfo in htmlElementType.GetProperties(BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance)
-                let jsType = propertyInfo.PropertyType.FullName switch
-                {
-                    var t when t == typeof(string).FullName  => JsType.String,
-                    var t when t == typeof(decimal).FullName => JsType.String,
+            scope.TagName is null
+                ? []
+                : from htmlElementType in TryGetHtmlElementTypeByTagName(scope.TagName)
+                  from propertyInfo in htmlElementType.GetProperties(BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance)
+                  let jsType = propertyInfo.PropertyType.FullName switch
+                  {
+                      var t when t == typeof(string).FullName  => JsType.String,
+                      var t when t == typeof(decimal).FullName => JsType.String,
 
-                    var t when t == typeof(long).FullName   => JsType.Number,
-                    var t when t == typeof(int).FullName    => JsType.Number,
-                    var t when t == typeof(short).FullName  => JsType.Number,
-                    var t when t == typeof(double).FullName => JsType.Number,
+                      var t when t == typeof(long).FullName   => JsType.Number,
+                      var t when t == typeof(int).FullName    => JsType.Number,
+                      var t when t == typeof(short).FullName  => JsType.Number,
+                      var t when t == typeof(double).FullName => JsType.Number,
 
-                    var t when t == typeof(float).FullName => JsType.Number,
+                      var t when t == typeof(float).FullName => JsType.Number,
 
-                    var t when t == typeof(bool).FullName => JsType.Boolean,
+                      var t when t == typeof(bool).FullName => JsType.Boolean,
 
-                    var t when t == typeof(DateTime).FullName => JsType.Date,
+                      var t when t == typeof(DateTime).FullName => JsType.Date,
 
-                    _ => (JsType?)null
-                }
-                where jsType.HasValue
+                      _ => (JsType?)null
+                  }
+                  where jsType.HasValue
 
-                select new SuggestionItem
-                {
-                    jsType = jsType.Value,
+                  select new SuggestionItem
+                  {
+                      jsType = jsType.Value,
 
-                    name = propertyInfo.Name
-                },
-            
-            
+                      name = propertyInfo.Name
+                  }
+
         };
 
     }
