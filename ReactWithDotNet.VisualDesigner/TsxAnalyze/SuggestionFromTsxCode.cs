@@ -13,7 +13,6 @@ static class SuggestionFromTsxCode
         {
             return list;
         }
-
         var fileContent = await File.ReadAllTextAsync(tsxFilePath);
 
         foreach (var line in fileContent.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))

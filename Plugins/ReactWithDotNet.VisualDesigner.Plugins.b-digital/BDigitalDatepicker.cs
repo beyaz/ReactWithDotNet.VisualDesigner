@@ -138,26 +138,38 @@ sealed class BDigitalDatepicker : PluginComponentBase
 
     protected override Element render()
     {
-        var textContent = string.Empty;
-        if (labelText.HasValue())
-        {
-            textContent = labelText;
-        }
-
-        if (value.HasValue())
-        {
-            textContent += " | " + value;
-        }
-
         return new div(WidthFull, PaddingTop(16), PaddingBottom(8))
         {
             Id(id), OnClick(onMouseClick),
 
             new FlexRow(AlignItemsCenter, PaddingLeft(16), PaddingRight(12), Border(1, solid, "#c0c0c0"), BorderRadius(10), Height(58), JustifyContentSpaceBetween)
             {
+                // L a b e l   o n   t o p - l e f t   b o r d e r 
+                PositionRelative,
+                new label
+                {
+                    // c o n t e n t
+                    labelText,
+                    
+                    // l a y o u t
+                    PositionAbsolute, 
+                    Top(-6), 
+                    Left(16),
+                    PaddingX(4),
+                    
+                    // t h e m e
+                    Color(rgba(0, 0, 0, 0.6)), 
+                    FontSize12,
+                    FontWeight400, 
+                    LineHeight12,
+                    LetterSpacing(0.15),
+                    FontFamily("Roboto"),
+                    Background(White)
+                },
+                
                 new div(Color(rgba(0, 0, 0, 0.54)), FontSize16, FontWeight400, FontFamily("Roboto, sans-serif"))
                 {
-                    textContent
+                    value
                 },
                 new BSymbol { symbol = "Calendar_Month", weight = "500", color = rgb(22, 160, 133)}
             }

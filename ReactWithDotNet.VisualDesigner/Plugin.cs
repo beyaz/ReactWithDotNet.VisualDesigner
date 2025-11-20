@@ -310,11 +310,6 @@ public static class Plugin
                 [
                     new()
                     {
-                        jsType = JsType.Date,
-                        value  = "new Date().getDate()"
-                    },
-                    new()
-                    {
                         jsType = JsType.Boolean,
                         value  = "true"
                     },

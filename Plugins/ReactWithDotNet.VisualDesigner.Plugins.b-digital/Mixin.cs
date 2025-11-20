@@ -136,8 +136,9 @@ static class Mixin
         {
             foreach (var item in await GetMessagingByGroupName(messagingGroupName))
             {
-                stringSuggestions.Add(item.Description);
-                stringSuggestions.Add($"${item.PropertyName}$ {item.Description}");
+                // todo: think
+                //stringSuggestions.Add(item.Description);
+                //stringSuggestions.Add($"${item.PropertyName}$ {item.Description}");
             }
         }
 

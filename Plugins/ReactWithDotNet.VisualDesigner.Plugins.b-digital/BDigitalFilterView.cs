@@ -150,32 +150,19 @@ sealed class  BDigitalFilterView: PluginComponentBase
             {
                 "Filtrele" 
             },
-            new div(WidthFull, PaddingTop(16), PaddingBottom(8))
+            
+            new BDigitalDatepicker
             {
-                new FlexRow(AlignItemsCenter, PaddingLeft(16), PaddingRight(12), Border(1, solid, "#c0c0c0"), BorderRadius(10), Height(58), JustifyContentSpaceBetween)
-                {
-                    new div(Color(rgba(0, 0, 0, 0.54)), FontSize16, FontWeight400, FontFamily("Roboto, sans-serif"))
-                    {
-                        beginDateLabel + " | " + beginDate
-                    },
-                    new BSymbol { symbol = "Calendar_Month", weight = "400", color = rgb(22, 160, 133)}
-                }
+                labelText = beginDateLabel ?? "Başlangıç Tarihi",
+                value     = beginDate
             },
-
-            new div(WidthFull, PaddingTop(16), PaddingBottom(8))
+            
+            new BDigitalDatepicker
             {
-                new FlexRow(AlignItemsCenter, PaddingLeft(16), PaddingRight(12), Border(1, solid, "#c0c0c0"), BorderRadius(10), Height(58), JustifyContentSpaceBetween)
-                {
-                    new div(Color(rgba(0, 0, 0, 0.54)), FontSize16, FontWeight400, FontFamily("Roboto, sans-serif"))
-                    {
-                        endDateLabel + " | " + endDate
-                    },
-                    
-                    new BSymbol { symbol = "Calendar_Month", weight = "400", color = rgb(22, 160, 133)}
-                    
-                }
+                labelText = endDateLabel ?? "Bitiş Tarihi",
+                value     = endDate
             },
-
+          
             children,
 
             new BButton
