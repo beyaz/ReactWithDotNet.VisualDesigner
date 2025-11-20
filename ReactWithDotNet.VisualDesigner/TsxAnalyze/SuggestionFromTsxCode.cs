@@ -21,7 +21,7 @@ static class SuggestionFromTsxCode
     {
         var suggestions = new HashSet<string>();
 
-        // Fonksiyon isimleri (function foo(...) veya const foo = (...) =>)
+        // Fonksiyon isimleri
         const string functionPattern = @"(?:function\s+([A-Za-z_]\w*)|const\s+([A-Za-z_]\w*)\s*=\s*\()";
         foreach (Match match in Regex.Matches(tsxCode, functionPattern))
         {
@@ -36,16 +36,23 @@ static class SuggestionFromTsxCode
             }
         }
 
-        // Variable isimleri (let/const/var foo = ...)
+        // Variable isimleri
         const string variablePattern = @"(?:let|const|var)\s+([A-Za-z_]\w*)";
         foreach (Match match in Regex.Matches(tsxCode, variablePattern))
         {
             suggestions.Add(match.Groups[1].Value);
         }
 
-        // useState hook isimleri (const [foo, setFoo] = useState)
+        // useState hook isimleri
         const string useStatePattern = @"const\s*\[\s*([A-Za-z_]\w*)\s*,\s*set[A-Za-z_]\w*\s*\]\s*=\s*useState";
         foreach (Match match in Regex.Matches(tsxCode, useStatePattern))
+        {
+            suggestions.Add(match.Groups[1].Value);
+        }
+
+        // Interface attribute isimleri
+        const string interfaceAttributePattern = @"\b([A-Za-z_]\w*)\s*\??\s*:\s*[\w\[\]]+";
+        foreach (Match match in Regex.Matches(tsxCode, interfaceAttributePattern))
         {
             suggestions.Add(match.Groups[1].Value);
         }
