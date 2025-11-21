@@ -95,20 +95,38 @@ sealed class BDigitalMoneyInput : PluginComponentBase
 
     protected override Element render()
     {
-        var textContent = label ?? "Tutar";
-
-        if (value.HasValue())
-        {
-            textContent += " | " + value;
-        }
-
         return new div(WidthFull, PaddingTop(16), PaddingBottom(8))
         {
             new FlexRow(AlignItemsCenter, PaddingLeftRight(16), Border(1, solid, "#c0c0c0"), BorderRadius(10), Height(58), JustifyContentSpaceBetween)
             {
+                
+                // L a b e l   o n   t o p - l e f t   b o r d e r 
+                PositionRelative,
+                new label
+                {
+                    // c o n t e n t
+                    label ?? "Tutar",
+                    
+                    // l a y o u t
+                    PositionAbsolute, 
+                    Top(-6), 
+                    Left(16),
+                    PaddingX(4),
+                    
+                    // t h e m e
+                    Color(rgba(0, 0, 0, 0.6)), 
+                    FontSize12,
+                    FontWeight400, 
+                    LineHeight12,
+                    LetterSpacing(0.15),
+                    FontFamily("Roboto"),
+                    Background(White)
+                },
+                
+                
                 new div(Color(rgba(0, 0, 0, 0.54)), FontSize16, FontWeight400, FontFamily("Roboto, sans-serif"))
                 {
-                    textContent
+                    value
                 },
 
                 new div { fec ?? "TL" }
