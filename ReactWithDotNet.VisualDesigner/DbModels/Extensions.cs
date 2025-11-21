@@ -18,18 +18,21 @@ public static class Extensions
             }
         }
 
-        public string GetNameWithDesignLocation()
+        public string NameWithDesignLocation
         {
-            var designLocation = componentEntity.Config.DesignLocation;
-
-            var name = componentEntity.Config.Name;
-
-            if (Path.GetFileNameWithoutExtension(designLocation) == "{name}")
+            get
             {
-                return designLocation.Replace("{name}",name);
-            }
+                var designLocation = componentEntity.Config.DesignLocation;
 
-            return $"{designLocation} > {name}";
+                var name = componentEntity.Config.Name;
+
+                if (Path.GetFileNameWithoutExtension(designLocation) == "{name}")
+                {
+                    return designLocation.Replace("{name}",name);
+                }
+
+                return $"{designLocation} > {name}";
+            }
         }
     }
     extension(ComponentConfig componentConfig)
