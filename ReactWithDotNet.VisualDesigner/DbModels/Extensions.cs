@@ -1,6 +1,4 @@
-﻿using System.IO;
-
-namespace ReactWithDotNet.VisualDesigner.DbModels;
+﻿namespace ReactWithDotNet.VisualDesigner.DbModels;
 
 public static class Extensions
 {
