@@ -37,6 +37,37 @@ public static class Extensions
         return list;
     }
     
+    public static (IReadOnlyList<string> props, Maybe<string> propValue) RemovePropInProps(IReadOnlyList<string> props, string propName)
+    {
+        var list = new List<string>();
+        
+        var propValue = new Maybe<string>();
+
+        var isUpdated = false;
+                    
+        foreach (var prop in props)
+        {
+            var maybe = TryParseProperty(prop);
+            if (maybe.HasValue && maybe.Value.Name == propName)
+            {
+                list.Add(propName + ": " + propValue);
+
+                isUpdated = true;
+                            
+                continue;
+            }
+
+            list.Add(prop);
+        }
+
+        if (!isUpdated)
+        {
+            list.Add(propName + ": " + propValue);
+        }
+                    
+        return list;
+    }
+    
     public static void Add<T>(this List<T> list, IEnumerable<T> items)
     {
         list.AddRange(items);
