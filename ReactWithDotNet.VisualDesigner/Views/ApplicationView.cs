@@ -691,23 +691,38 @@ sealed class ApplicationView : Component<ApplicationState>
             {
                 UpdateCurrentVisualElement(x => x with
                 {
-                    Properties = new List<string>
-                    {
-                        from prop in x.Properties select RecalculateProp(prop,name, newValue)
-                    }
+                    Properties = RecalculateProps(x.Properties,name, newValue)
                 });
 
                 return Task.CompletedTask;
 
-                static string RecalculateProp(string prop, string designPropName, string newValue)
+                static IReadOnlyList<string> RecalculateProps(IReadOnlyList<string> props, string designPropName, string newValue)
                 {
-                    var maybe = TryParseProperty(prop);
-                    if (maybe.HasValue && maybe.Value.Name == designPropName)
+                    var list = props.ToList();
+
+                    var isUpdated = false;
+                    
+                    foreach (var prop in props)
                     {
-                        return designPropName + " : " + newValue;
+                        var maybe = TryParseProperty(prop);
+                        if (maybe.HasValue && maybe.Value.Name == designPropName)
+                        {
+                            list.Add(designPropName + ": " + newValue);
+
+                            isUpdated = true;
+                            
+                            continue;
+                        }
+
+                        list.Add(prop);
                     }
 
-                    return prop;
+                    if (!isUpdated)
+                    {
+                        list.Add(designPropName + ": " + newValue);
+                    }
+                    
+                    return list;
                 }
             }
         };
