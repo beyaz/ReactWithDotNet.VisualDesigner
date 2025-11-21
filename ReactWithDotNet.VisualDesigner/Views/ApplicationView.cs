@@ -698,7 +698,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
                 static IReadOnlyList<string> RecalculateProps(IReadOnlyList<string> props, string designPropName, string newValue)
                 {
-                    var list = props.ToList();
+                    var list = new List<string>();
 
                     var isUpdated = false;
                     

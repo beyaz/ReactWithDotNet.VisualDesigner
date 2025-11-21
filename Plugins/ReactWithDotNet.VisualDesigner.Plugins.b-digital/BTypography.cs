@@ -22,7 +22,10 @@ sealed class BTypography : PluginComponentBase
     static readonly Dictionary<string, StyleModifier> ColorMap = new()
     {
         { "primary", new Style { Color("#16A085") } },
-        { "secondary", new Style { Color("#FF9500") } }
+        { "textPrimary", new Style { Color(rgba(0, 0, 0, 0.87)) } },
+        
+        { "secondary", new Style { Color("#FF9500") } },
+        { "textSecondary", new Style { Color(rgba(0, 0, 0, 0.6)) } }
     };
 
     
@@ -70,7 +73,7 @@ sealed class BTypography : PluginComponentBase
         { "overline", new Style { FontSize("0.75rem"), FontWeight400, LineHeight(2.66) ,Font("Roboto, sans-serif"),TextTransformUpperCase} }
     };
 
-    [Suggestions("primary, secondary")]
+    [Suggestions("primary , secondary , textPrimary , textSecondary")]
     [JsTypeInfo(JsType.String)]
     public string color { get; set; }
 
