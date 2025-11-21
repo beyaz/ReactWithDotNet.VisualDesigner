@@ -715,7 +715,7 @@ sealed class ApplicationView : Component<ApplicationState>
         return new FlexRow(AlignItemsFlexEnd, Gap(16), Border(1, solid, Theme.BorderColor), BorderRadius(4), PaddingX(8), Height(28))
         {
             PositionRelative,
-            new label(PositionAbsolute, Top(-4), Left(8), Opacity(0.8), FontSize10, LineHeight7, Background(White), PaddingX(4)) { label },
+            new label(PositionAbsolute, Top(-4), Left(8), Opacity(0.8), FontSize10, LineHeight7, LetterSpacing(0.7), Background(White), PaddingX(4)) { label },
 
             inputEditor
         };
@@ -1762,21 +1762,21 @@ sealed class ApplicationView : Component<ApplicationState>
             
             new FlexColumn(WidthFull)
             {
-                CreateGroupLabel("c o n t e n t"),
+                CreateGroupLabel("C o n t e n t"),
                 new FlexColumn(WidthFull,PaddingX(4), Gap(12))
                 {
-                    CreateDesignPropEditor("Text", Design.Text),
-                    CreateDesignPropEditor("Text Preview", Design.TextPreview)
+                    CreateDesignPropEditor("Content", Design.Text),
+                    CreateDesignPropEditor("Design Time Content", Design.TextPreview)
                 },
                 
-                CreateGroupLabel("v i s i b i l i t y"),
+                CreateGroupLabel("V i s i b i l i t y"),
                 new FlexColumn(WidthFull,PaddingX(4), Gap(12))
                 {
                     CreateDesignPropEditor("Show-if", Design.ShowIf),
                     CreateDesignPropEditor("Hide-if", Design.HideIf),
                 },
                 
-                CreateGroupLabel("l o o p"),
+                CreateGroupLabel("L o o p"),
                 new FlexColumn(WidthFull,PaddingX(4), Gap(12))
                 {
                     CreateDesignPropEditor("Items Source", Design.ItemsSource),
