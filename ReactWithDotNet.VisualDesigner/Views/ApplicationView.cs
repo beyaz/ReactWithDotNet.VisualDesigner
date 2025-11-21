@@ -575,7 +575,7 @@ sealed class ApplicationView : Component<ApplicationState>
                     return new div { $"ComponentNotFound.{componentId}" };
                 }
 
-                inputValue = component.GetNameWithExportFilePath();
+                inputValue = component.GetNameWithDesignLocation();
             }
         }
 

@@ -320,7 +320,7 @@ static class ApplicationLogic
                 Plugin.GetTagSuggestions(),
                 TagNameList,
                 from x in GetAllComponentsInProjectFromCache(projectId)
-                select x.GetNameWithExportFilePath()
+                select x.GetNameWithDesignLocation()
             }
             select new SuggestionItem
             {

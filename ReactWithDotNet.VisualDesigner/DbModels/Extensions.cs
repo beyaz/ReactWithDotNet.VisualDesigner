@@ -4,7 +4,7 @@ namespace ReactWithDotNet.VisualDesigner.DbModels;
 
 public static class Extensions
 {
-    public static string GetNameWithExportFilePath(this ComponentEntity componentEntity)
+    public static string GetNameWithDesignLocation(this ComponentEntity componentEntity)
     {
         var designLocation = componentEntity.Config.DesignLocation;
 
