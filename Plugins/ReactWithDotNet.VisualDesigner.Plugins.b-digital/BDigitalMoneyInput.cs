@@ -28,14 +28,7 @@ sealed class BDigitalMoneyInput : PluginComponentBase
             return AnalyzeChildren(input, AnalyzeReactNode);
         }
         
-        var (node, componentConfig) = input;
-
-
-
-
-        
-
-
+        var node = input.Node;
         
         {
             var valueProp = node.Properties.FirstOrDefault(x => x.Name == nameof(value));
