@@ -17,23 +17,6 @@ public static class Extensions
                 );
             }
         }
-
-        public string NameWithDesignLocation
-        {
-            get
-            {
-                var designLocation = componentEntity.Config.DesignLocation;
-
-                var name = componentEntity.Config.Name;
-
-                if (Path.GetFileNameWithoutExtension(designLocation) == "{name}")
-                {
-                    return designLocation.Replace("{name}",name);
-                }
-
-                return $"{designLocation} > {name}";
-            }
-        }
     }
     extension(ComponentConfig componentConfig)
     {
