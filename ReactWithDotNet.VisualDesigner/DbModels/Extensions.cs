@@ -4,20 +4,6 @@ namespace ReactWithDotNet.VisualDesigner.DbModels;
 
 public static class Extensions
 {
-    public static string GetNameWithDesignLocation(this ComponentEntity componentEntity)
-    {
-        var designLocation = componentEntity.Config.DesignLocation;
-
-        var name = componentEntity.Config.Name;
-
-        if (Path.GetFileNameWithoutExtension(designLocation) == "{name}")
-        {
-            return designLocation.Replace("{name}",name);
-        }
-
-        return $"{designLocation} > {name}";
-    }
-
     extension(ComponentEntity componentEntity)
     {
         public ComponentConfig Config
@@ -30,6 +16,20 @@ public static class Extensions
                     () => DeserializeFromYaml<ComponentConfig>(componentEntity.ConfigAsYaml)
                 );
             }
+        }
+
+        public string GetNameWithDesignLocation()
+        {
+            var designLocation = componentEntity.Config.DesignLocation;
+
+            var name = componentEntity.Config.Name;
+
+            if (Path.GetFileNameWithoutExtension(designLocation) == "{name}")
+            {
+                return designLocation.Replace("{name}",name);
+            }
+
+            return $"{designLocation} > {name}";
         }
     }
     extension(ComponentConfig componentConfig)
