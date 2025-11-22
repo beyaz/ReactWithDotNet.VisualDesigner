@@ -157,7 +157,7 @@ static class TailwindCss
 
                     var rightTailwindClass = string.Empty;
 
-                    if (right.HasValue())
+                    if (right.HasValue)
                     {
                         var cssItem = CreateFinalCssItem(cssAttributeName, right);
                         if (cssItem.HasError)

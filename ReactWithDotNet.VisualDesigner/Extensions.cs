@@ -315,7 +315,7 @@ public static class Extensions
         var projectDirectory = projectConfig.ProjectDirectory;
         
         var user = await Store.TryGetUser(component.ProjectId, userName);
-        if (user is not null && user.LocalWorkspacePath.HasValue())
+        if (user is not null && user.LocalWorkspacePath.HasValue)
         {
             projectDirectory = user.LocalWorkspacePath;
         }
@@ -347,14 +347,12 @@ public static class Extensions
     extension(string value)
     {
         public bool HasNoValue =>string.IsNullOrWhiteSpace(value);
+        
+        public bool HasValue =>!string.IsNullOrWhiteSpace(value);
     }
     
     
 
-    public static bool HasValue(this string value)
-    {
-        return !string.IsNullOrWhiteSpace(value);
-    }
 
     public static bool In<T>(this T item, params T[] list)
     {

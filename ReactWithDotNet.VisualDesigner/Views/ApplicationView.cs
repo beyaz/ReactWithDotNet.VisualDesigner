@@ -161,7 +161,7 @@ sealed class ApplicationView : Component<ApplicationState>
         // try take from db cache
         {
             var lastUsage = (await Store.GetUserByUserName(userName)).OrderByDescending(x => x.LastAccessTime).FirstOrDefault();
-            if (lastUsage is not null && lastUsage.LastStateAsYaml.HasValue())
+            if (lastUsage is not null && lastUsage.LastStateAsYaml.HasValue)
             {
                 state = DeserializeFromYaml<ApplicationState>(lastUsage.LastStateAsYaml) with
                 {
@@ -486,7 +486,7 @@ sealed class ApplicationView : Component<ApplicationState>
         // try take from db cache
         {
             var lastUsage = await Store.TryGetUser(projectId, userName);
-            if (lastUsage?.LastStateAsYaml.HasValue() is true)
+            if (lastUsage?.LastStateAsYaml.HasValue is true)
             {
                 state = DeserializeFromYaml<ApplicationState>(lastUsage.LastStateAsYaml);
 
@@ -553,7 +553,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
         VisualElementModel visualElementModel = null;
 
-        if (state.Selection.VisualElementTreeItemPath.HasValue())
+        if (state.Selection.VisualElementTreeItemPath.HasValue)
         {
             visualElementModel = FindTreeNodeByTreePath(state.ComponentRootElement, state.Selection.VisualElementTreeItemPath);
         }
@@ -657,7 +657,7 @@ sealed class ApplicationView : Component<ApplicationState>
     {
         VisualElementModel visualElementModel = null;
 
-        if (state.Selection.VisualElementTreeItemPath.HasValue())
+        if (state.Selection.VisualElementTreeItemPath.HasValue)
         {
             visualElementModel = FindTreeNodeByTreePath(state.ComponentRootElement, state.Selection.VisualElementTreeItemPath);
         }
@@ -1009,7 +1009,7 @@ sealed class ApplicationView : Component<ApplicationState>
                 return;
             }
 
-            if (result.Value.HasValue())
+            if (result.Value.HasValue)
             {
                 this.SuccessNotification(result.Value);
             }
@@ -1024,7 +1024,7 @@ sealed class ApplicationView : Component<ApplicationState>
                 return;
             }
 
-            if (result.Value.HasValue())
+            if (result.Value.HasValue)
             {
                 this.SuccessNotification(result.Value);
             }
@@ -1350,7 +1350,7 @@ sealed class ApplicationView : Component<ApplicationState>
     Element PartLeftPanel()
     {
         var removeIconInLayersTab = CreateIcon(Icon.remove, 16);
-        if (state.Selection.VisualElementTreeItemPath.HasValue())
+        if (state.Selection.VisualElementTreeItemPath.HasValue)
         {
             removeIconInLayersTab.Add(Hover(Color(Blue300), BorderColor(Blue300)), OnClick(LayersTabRemoveSelectedItemClicked));
         }
@@ -1360,7 +1360,7 @@ sealed class ApplicationView : Component<ApplicationState>
         }
 
         var addIconInLayersTab = CreateIcon(Icon.add, 16);
-        if (state.ComponentRootElement is null || state.Selection.VisualElementTreeItemPath.HasValue())
+        if (state.ComponentRootElement is null || state.Selection.VisualElementTreeItemPath.HasValue)
         {
             addIconInLayersTab.Add(Hover(Color(Blue300), BorderColor(Blue300)), OnClick(AddNewLayerClicked));
         }
@@ -1661,7 +1661,7 @@ sealed class ApplicationView : Component<ApplicationState>
     {
         VisualElementModel visualElementModel = null;
 
-        if (state.Selection.VisualElementTreeItemPath.HasValue())
+        if (state.Selection.VisualElementTreeItemPath.HasValue)
         {
             visualElementModel = FindTreeNodeByTreePath(state.ComponentRootElement, state.Selection.VisualElementTreeItemPath);
         }

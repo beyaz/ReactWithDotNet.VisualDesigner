@@ -176,7 +176,7 @@ static class HtmlImporter
 
                         foreach (var finalCssItem in styles)
                         {
-                            if (pseudo.HasValue())
+                            if (pseudo.HasValue)
                             {
                                 returnStyles.Add(pseudo + ":" + finalCssItem.Name + ": " + finalCssItem.Value);
                             }
@@ -212,7 +212,7 @@ static class HtmlImporter
 
         model = model with { Styles = ArrangeAccordingToProject(project, model.Styles) };
 
-        if (htmlNode.ChildNodes.Count == 1 && htmlNode.ChildNodes[0].NodeType == HtmlNodeType.Text && htmlNode.ChildNodes[0].InnerText.HasValue())
+        if (htmlNode.ChildNodes.Count == 1 && htmlNode.ChildNodes[0].NodeType == HtmlNodeType.Text && htmlNode.ChildNodes[0].InnerText.HasValue)
         {
             model = model with { Properties = model.Properties.Add($"{Design.Content}: '{htmlNode.ChildNodes[0].InnerText.Trim()}'") };
             model = model with { Properties = model.Properties.Add($"{Design.ContentPreview}: '{htmlNode.ChildNodes[0].InnerText.Trim()}'") };
@@ -302,9 +302,9 @@ static class HtmlImporter
 
                     if (value is null)
                     {
-                        if (top.HasValue() && top == bottom)
+                        if (top.HasValue && top == bottom)
                         {
-                            if (left.HasValue() && left == right)
+                            if (left.HasValue && left == right)
                             {
                                 if (left == top)
                                 {

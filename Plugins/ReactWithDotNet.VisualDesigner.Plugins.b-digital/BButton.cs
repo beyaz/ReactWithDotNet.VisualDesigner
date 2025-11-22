@@ -84,7 +84,7 @@ sealed class BButton : PluginComponentBase
     {
         if (variant is null)
         {
-            if (type.HasValue())
+            if (type.HasValue)
             {
                 variant = type switch
                 {

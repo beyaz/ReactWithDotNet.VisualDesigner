@@ -153,7 +153,7 @@ abstract class MagicInput : Component<MagicInput.State>
 
             if (e.key == "Enter")
             {
-                if (state.Value?.Length > 0 || (state.InitialValue.HasValue() && state.Value.HasNoValue))
+                if (state.Value?.Length > 0 || (state.InitialValue.HasValue && state.Value.HasNoValue))
                 {
                     DispatchEvent(OnChange, [Name, state.Value]);
                 }
@@ -219,7 +219,7 @@ abstract class MagicInput : Component<MagicInput.State>
 
             if (state.SelectedSuggestionOffset is null)
             {
-                if (state.Value.HasValue() && state.Value.Trim() != Value?.Trim())
+                if (state.Value.HasValue && state.Value.Trim() != Value?.Trim())
                 {
                     DispatchEvent(OnChange, [Name, state.Value]);
                 }
@@ -354,7 +354,7 @@ abstract class MagicInput : Component<MagicInput.State>
 
             var suggestionItemName = suggestionItem.Name;
 
-            if (suggestionItemName.HasValue())
+            if (suggestionItemName.HasValue)
             {
                 foreach (var word in searchTerm.nameInWords)
                 {
@@ -377,7 +377,7 @@ abstract class MagicInput : Component<MagicInput.State>
             }
 
             var suggestionItemValue = suggestionItem.Value;
-            if (suggestionItemValue.HasValue() && searchTerm.valueInWords is not null)
+            if (suggestionItemValue.HasValue && searchTerm.valueInWords is not null)
             {
                 foreach (var word in searchTerm.valueInWords)
                 {
@@ -504,14 +504,14 @@ public sealed record SuggestionItem
 
     public static implicit operator string(SuggestionItem item)
     {
-        if (item.Name.HasValue() && item.Value.HasValue())
+        if (item.Name.HasValue && item.Value.HasValue)
         {
             return $"{item.Name}: {item.Value}";
         }
 
         if (item.Name is null)
         {
-            if (item.Value.HasValue())
+            if (item.Value.HasValue)
             {
                 return item.Value;
             }

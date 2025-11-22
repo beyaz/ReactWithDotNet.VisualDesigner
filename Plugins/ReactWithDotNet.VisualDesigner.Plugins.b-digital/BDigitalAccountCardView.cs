@@ -101,12 +101,12 @@ sealed class BDigitalAccountCardView : PluginComponentBase
     protected override Element render()
     {
         var textContent = string.Empty;
-        if (cards.HasValue())
+        if (cards.HasValue)
         {
             textContent = cards;
         }
 
-        if (accounts.HasValue())
+        if (accounts.HasValue)
         {
             textContent += " | " + accounts;
         }

@@ -76,7 +76,7 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
 
     protected override Task OverrideStateFromPropsBeforeRender()
     {
-        if (SelectedPath.HasValue())
+        if (SelectedPath.HasValue)
         {
             state.CollapsedNodes.RemoveAll(path => path != SelectedPath && SelectedPath.StartsWith(path, StringComparison.OrdinalIgnoreCase));
         }

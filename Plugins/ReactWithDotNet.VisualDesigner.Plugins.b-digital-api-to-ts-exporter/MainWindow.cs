@@ -354,7 +354,7 @@ sealed class MainWindow : Component<MainWindow.State>
 
     async Task UpdateFiles()
     {
-        if (!state.SelectedApiName.HasValue())
+        if (!state.SelectedApiName.HasValue)
         {
             return;
         }

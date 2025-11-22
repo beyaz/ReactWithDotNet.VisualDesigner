@@ -149,7 +149,7 @@ static class CSharpExporter
 
         if (nodeTag is null)
         {
-            if (node.Text.HasValue())
+            if (node.Text.HasValue)
             {
                 return new List<string>
                 {
@@ -642,7 +642,7 @@ static class CSharpExporter
                                     var (success, condition, left, right) = TryParseConditionalValue(TryClearStringValue(styleAttribute.Value));
                                     if (success)
                                     {
-                                        if (left.HasValue() && right.HasValue())
+                                        if (left.HasValue && right.HasValue)
                                         {
                                             var modifierCodeForLeft = ToModifierTransformer.TryConvertToModifier(isStyleValue: true, tagName, styleAttribute.Name, left);
 
@@ -808,7 +808,7 @@ static class CSharpExporter
             {
                 var translateFunction = project.TranslationFunctionName;
                 {
-                    if (translateFunction.HasValue())
+                    if (translateFunction.HasValue)
                     {
                         return $"{{{translateFunction.Trim()}(\"{TryClearStringValue(text)}\")}}";
                     }

@@ -22,7 +22,7 @@ static class Extensions
 
         public bool HasNoContent => model.Content.HasNoValue;
         
-        public bool HasContent => model.Content.HasValue();
+        public bool HasContent => model.Content.HasValue;
 
         public bool HasNoChild => model.Children is null || model.Children.Count == 0;
         

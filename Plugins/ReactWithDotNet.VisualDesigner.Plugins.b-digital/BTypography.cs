@@ -87,7 +87,7 @@ sealed class BTypography : PluginComponentBase
     {
         var styleOverride = new Style();
 
-        if (variant.HasValue())
+        if (variant.HasValue)
         {
             if (VariantMap.TryGetValue(variant, out var value))
             {
@@ -95,7 +95,7 @@ sealed class BTypography : PluginComponentBase
             }
         }
 
-        if (color.HasValue())
+        if (color.HasValue)
         {
             if (ColorMap.TryGetValue(color, out var value))
             {

@@ -64,7 +64,7 @@ sealed class BDigitalGroupView : PluginComponentBase
 
         return new Fragment
         {
-            title.HasValue()
+            title.HasValue
                 ? new BTypography
                 {
                     variant  = "body0m",
@@ -75,7 +75,7 @@ sealed class BDigitalGroupView : PluginComponentBase
                 }
                 : null,
 
-            subTitle.HasValue()
+            subTitle.HasValue
                 ? new BTypography
                 {
                     variant  = "body2",

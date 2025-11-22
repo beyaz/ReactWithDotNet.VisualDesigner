@@ -92,12 +92,12 @@ sealed class BDigitalPhone : PluginComponentBase
     protected override Element render()
     {
         var textContent = string.Empty;
-        if (hintText.HasValue())
+        if (hintText.HasValue)
         {
             textContent = hintText;
         }
 
-        if (phoneNumber.HasValue())
+        if (phoneNumber.HasValue)
         {
             textContent += " | " + phoneNumber;
         }

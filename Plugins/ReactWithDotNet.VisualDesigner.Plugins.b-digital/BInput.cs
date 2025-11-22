@@ -130,12 +130,12 @@ sealed class BInput : PluginComponentBase
     protected override Element render()
     {
         var textContent = string.Empty;
-        if (floatingLabelText.HasValue())
+        if (floatingLabelText.HasValue)
         {
             textContent = floatingLabelText;
         }
 
-        if (value.HasValue())
+        if (value.HasValue)
         {
             textContent += " | " + value;
         }

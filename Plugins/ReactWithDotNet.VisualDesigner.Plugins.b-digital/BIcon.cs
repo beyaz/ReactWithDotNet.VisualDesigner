@@ -45,7 +45,7 @@ sealed class BIcon : PluginComponentBase
 
     double GetSize()
     {
-        if (size.HasValue())
+        if (size.HasValue)
         {
             if (double.TryParse(size, out var d))
             {

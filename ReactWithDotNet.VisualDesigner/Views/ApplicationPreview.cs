@@ -57,12 +57,12 @@ sealed class ApplicationPreview : Component
 
         var highlightedElementPath = string.Empty;
         {
-            if (appState.Selection.VisualElementTreeItemPathHover.HasValue())
+            if (appState.Selection.VisualElementTreeItemPathHover.HasValue)
             {
                 highlightedElementPath = appState.Selection.VisualElementTreeItemPathHover;
             }
 
-            if (appState.Selection.VisualElementTreeItemPath.HasValue())
+            if (appState.Selection.VisualElementTreeItemPath.HasValue)
             {
                 highlightedElementPath = appState.Selection.VisualElementTreeItemPath;
             }
@@ -421,7 +421,7 @@ sealed class ApplicationPreview : Component
                     }
                 }
 
-                if (model.HasContent || model.DesignTimeContent.HasValue())
+                if (model.HasContent || model.DesignTimeContent.HasValue)
                 {
                     foreach (var item in tryGetPropValueFromCaller(scope, model, Design.Content))
                     {
@@ -771,7 +771,7 @@ sealed class ApplicationPreview : Component
                                 }
                             }
 
-                            if (designTimeSrc.HasValue())
+                            if (designTimeSrc.HasValue)
                             {
                                 foreach (var srcValue in await calculateSrcFromValue(scope, model, designTimeSrc))
                                 {
@@ -804,7 +804,7 @@ sealed class ApplicationPreview : Component
                                 }
                             }
 
-                            if (dummySrc.HasValue())
+                            if (dummySrc.HasValue)
                             {
                                 return
                                     from _ in ReflectionHelper.SetPropertyValue(element, "src", dummySrc)

@@ -26,12 +26,12 @@ sealed class BPlateNumber : PluginComponentBase
     protected override Element render()
     {
         var textContent = string.Empty;
-        if (label.HasValue())
+        if (label.HasValue)
         {
             textContent = label;
         }
 
-        if (value.HasValue())
+        if (value.HasValue)
         {
             textContent += " | " + value;
         }

@@ -1458,7 +1458,7 @@ class CssUnitEditor : Component<CssUnitEditor.State>
             IsUnitSuggestionsVisible = false
         };
 
-        if (state.Value.HasValue())
+        if (state.Value.HasValue)
         {
             DispatchEvent(Change, [CssName + ":" + state.Value + state.Unit]);
         }

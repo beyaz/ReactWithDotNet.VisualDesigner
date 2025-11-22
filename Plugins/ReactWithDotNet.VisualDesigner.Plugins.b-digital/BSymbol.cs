@@ -64,15 +64,15 @@ sealed class BSymbol : PluginComponentBase
         {
             name = symbol,
 
-            size = size.HasValue() ? int.Parse(size) : null,
+            size = size.HasValue ? int.Parse(size) : null,
 
-            styleVariant = type.HasValue() ? Enum.Parse<MaterialSymbolVariant>(type) : MaterialSymbolVariant.outlined,
+            styleVariant = type.HasValue ? Enum.Parse<MaterialSymbolVariant>(type) : MaterialSymbolVariant.outlined,
 
             color = color,
 
-            weight = weight.HasValue() ? int.Parse(weight) : null,
+            weight = weight.HasValue ? int.Parse(weight) : null,
 
-            fill = filled.HasValue() ? filled == "true" ? 1 : 0 : null,
+            fill = filled.HasValue ? filled == "true" ? 1 : 0 : null,
             
             id = id,
             onClick = onMouseClick

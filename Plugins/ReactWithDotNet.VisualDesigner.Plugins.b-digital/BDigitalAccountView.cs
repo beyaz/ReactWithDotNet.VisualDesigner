@@ -95,12 +95,12 @@ sealed class BDigitalAccountView : PluginComponentBase
     protected override Element render()
     {
         var textContent = string.Empty;
-        if (title.HasValue())
+        if (title.HasValue)
         {
             textContent = title;
         }
 
-        if (accounts.HasValue())
+        if (accounts.HasValue)
         {
             textContent += " | " + accounts;
         }

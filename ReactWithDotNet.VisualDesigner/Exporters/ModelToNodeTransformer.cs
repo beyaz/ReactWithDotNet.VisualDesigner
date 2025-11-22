@@ -203,7 +203,7 @@ static class ModelToNodeTransformer
 
             static Result<DesignerStyleItem> EnsurePseudoIsEmpty(DesignerStyleItem item)
             {
-                if (item.Pseudo.HasValue())
+                if (item.Pseudo.HasValue)
                 {
                     return new NotSupportedException($"Pseudo styles are not supported in inline styles. {item.OriginalText}");
                 }

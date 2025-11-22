@@ -180,7 +180,7 @@ static class TsxExporter
 
         if (nodeTag is null)
         {
-            if (node.Text.HasValue())
+            if (node.Text.HasValue)
             {
                 return new List<string>
                 {
@@ -391,7 +391,7 @@ static class TsxExporter
             }
 
             // adjust tag for fragment
-            if (tag == "<>" && partProps.HasValue())
+            if (tag == "<>" && partProps.HasValue)
             {
                 tag = "React.Fragment";
             }
@@ -468,7 +468,7 @@ static class TsxExporter
             {
                 var translateFunction = project.TranslationFunctionName;
                 {
-                    if (translateFunction.HasValue())
+                    if (translateFunction.HasValue)
                     {
                         return $"{{{translateFunction.Trim()}(\"{TryClearStringValue(text)}\")}}";
                     }

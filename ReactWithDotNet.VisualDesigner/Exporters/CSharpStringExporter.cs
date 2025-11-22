@@ -200,7 +200,7 @@ static class CSharpStringExporter
 
         if (nodeTag is null)
         {
-            if (node.Text.HasValue())
+            if (node.Text.HasValue)
             {
                 return new List<string>
                 {
