@@ -501,7 +501,7 @@ abstract class MagicInput : Component<MagicInput.State>
 
 public sealed record SuggestionItem
 {
-    public string Name { get; init; }
+    public required string Name { get; init; }
     
     public string Value { get; init; }
     
