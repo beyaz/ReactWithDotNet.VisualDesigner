@@ -17,7 +17,6 @@ abstract class MagicInput : Component<MagicInput.State>
     public bool IsTextAlignCenter { get; init; }
     public bool IsTextAlignRight { get; init; }
 
-    
     public required string Name { get; init; }
 
     [CustomEvent]
@@ -28,9 +27,9 @@ abstract class MagicInput : Component<MagicInput.State>
 
     public string Placeholder { get; init; }
 
-    protected abstract Task<Result<IReadOnlyList<SuggestionItem>>> Suggestions { get; }
-    
     public string Value { get; init; }
+
+    protected abstract Task<Result<IReadOnlyList<SuggestionItem>>> Suggestions { get; }
 
     protected override Task constructor()
     {
@@ -231,7 +230,7 @@ abstract class MagicInput : Component<MagicInput.State>
             if (suggestions.Count > state.SelectedSuggestionOffset.Value)
             {
                 var suggestedValue = suggestions[state.SelectedSuggestionOffset.Value];
-                
+
                 var currentValue = state.Value;
 
                 string value = suggestedValue;
@@ -243,8 +242,8 @@ abstract class MagicInput : Component<MagicInput.State>
 
                     value = string.Join(".", dotSplitNames);
                 }
-                
-                state = state with { Value =  value};
+
+                state = state with { Value = value };
 
                 DispatchEvent(OnChange, [Name, state.Value]);
             }
@@ -272,7 +271,7 @@ abstract class MagicInput : Component<MagicInput.State>
     Task OnSuggestionItemClicked(MouseEvent e)
     {
         var selectedSuggestionOffset = int.Parse(e.target.data["INDEX"]);
-            
+
         state = state with
         {
             ShowSuggestions = false,
@@ -301,12 +300,12 @@ abstract class MagicInput : Component<MagicInput.State>
         }
 
         var parseResponse = ParseSearchTerm(state.Value);
-        
+
         state = state with
         {
             ShowSuggestions = true,
             SelectedSuggestionOffset = null,
-           FilteredSuggestions = suggestions.Value.OrderByDescending(x => GetMatchScore(x,parseResponse)).Take(5).ToList()
+            FilteredSuggestions = suggestions.Value.OrderByDescending(x => GetMatchScore(x, parseResponse)).Take(5).ToList()
         };
         return;
 
@@ -318,18 +317,18 @@ abstract class MagicInput : Component<MagicInput.State>
             }
 
             var splitters = " -.".ToCharArray();
-            
+
             var indexOfColonInSearchTerm = searchTerm.IndexOf(':');
             if (indexOfColonInSearchTerm > 0)
             {
                 var name = searchTerm[..indexOfColonInSearchTerm];
 
-                var value = searchTerm[(indexOfColonInSearchTerm+1)..];
+                var value = searchTerm[(indexOfColonInSearchTerm + 1)..];
 
                 var nameInWords = name.Split(splitters, StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
-                
+
                 var valueInWords = value.Split(splitters, StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
-                
+
                 return (isEmpty: false, nameInWords, valueInWords);
             }
             else
@@ -339,8 +338,12 @@ abstract class MagicInput : Component<MagicInput.State>
                 return (isEmpty: false, nameInWords, null);
             }
         }
-        
-        static int GetMatchScore(SuggestionItem suggestionItem, (bool isEmpty, string[] nameInWords, string[] valueInWords) searchTerm)
+
+        static int GetMatchScore
+        (
+            SuggestionItem suggestionItem,
+            (bool isEmpty, string[] nameInWords, string[] valueInWords) searchTerm
+        )
         {
             if (searchTerm.isEmpty)
             {
@@ -350,7 +353,7 @@ abstract class MagicInput : Component<MagicInput.State>
             var count = 0;
 
             var suggestionItemName = suggestionItem.Name;
-            
+
             if (suggestionItemName.HasValue())
             {
                 foreach (var word in searchTerm.nameInWords)
@@ -359,16 +362,16 @@ abstract class MagicInput : Component<MagicInput.State>
                     {
                         continue;
                     }
-                
+
                     if (suggestionItemName.Equals(word, StringComparison.OrdinalIgnoreCase))
                     {
                         count += 12;
                         continue;
                     }
-                
+
                     if (suggestionItemName.Contains(word, StringComparison.OrdinalIgnoreCase))
                     {
-                        count+=6;
+                        count += 6;
                     }
                 }
             }
@@ -388,10 +391,10 @@ abstract class MagicInput : Component<MagicInput.State>
                         count += 10;
                         continue;
                     }
-                
+
                     if (suggestionItemValue.Contains(word, StringComparison.OrdinalIgnoreCase))
                     {
-                        count+=5;
+                        count += 5;
                     }
                 }
             }
@@ -412,23 +415,18 @@ abstract class MagicInput : Component<MagicInput.State>
                             count += 10;
                             continue;
                         }
-                
+
                         if (suggestionItem.Name.Contains(word, StringComparison.OrdinalIgnoreCase))
                         {
-                            count+=5;
+                            count += 5;
                         }
                     }
                 }
             }
-           
-          
+
             return count;
         }
     }
-    
-  
-
- 
 
     Element ViewSuggestions()
     {
@@ -498,20 +496,19 @@ abstract class MagicInput : Component<MagicInput.State>
     }
 }
 
-
 public sealed record SuggestionItem
 {
     public required string Name { get; init; }
-    
+
     public string Value { get; init; }
-    
+
     public static implicit operator string(SuggestionItem item)
     {
         if (item.Name.HasValue() && item.Value.HasValue())
         {
             return $"{item.Name}: {item.Value}";
         }
-        
+
         if (item.Name is null)
         {
             if (item.Value.HasValue())
