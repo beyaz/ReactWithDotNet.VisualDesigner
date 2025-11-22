@@ -301,15 +301,15 @@ public static class Plugin
 
             suggestionItems.AddRange
             (
-                from type in AllCustomComponents
-                where type.Name.Equals(scope.TagName, StringComparison.OrdinalIgnoreCase)
-                from p in type.GetProperties()
-                from a in p.GetCustomAttributes<SuggestionsAttribute>()
-                from jsTypeInfo in p.GetCustomAttributes<JsTypeInfoAttribute>()
-                from suggestion in a.Suggestions
+                from customComponentType in AllCustomComponents
+                where customComponentType.Name.Equals(scope.TagName, StringComparison.OrdinalIgnoreCase)
+                from propertyInfo in customComponentType.GetProperties()
+                from suggestionsAttribute in propertyInfo.GetCustomAttributes<SuggestionsAttribute>()
+                from jsTypeInfo in propertyInfo.GetCustomAttributes<JsTypeInfoAttribute>()
+                from suggestion in suggestionsAttribute.Suggestions
                 select new SuggestionItem
                 {
-                    name   = p.Name,
+                    name   = propertyInfo.Name,
                     value  = suggestion,
                     jsType =  jsTypeInfo.JsType
                 }
@@ -337,11 +337,11 @@ public static class Plugin
             {
                 return new List<string>
                 {
-                    from m in allMetadata.Value
-                    where m.TagName == scope.TagName
-                    from p in m.Props
-                    where p.ValueType == jsType
-                    select p.Name
+                    from componentMeta in allMetadata.Value
+                    where componentMeta.TagName == scope.TagName
+                    from propMeta in componentMeta.Props
+                    where propMeta.ValueType == jsType
+                    select propMeta.Name
                 };
             }
         }
