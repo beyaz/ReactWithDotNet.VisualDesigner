@@ -5,9 +5,9 @@ public static class Design
     public const string PREFIX = "d-";
     
     
-    public const string Content = "d-text";
+    public const string Content = "d-content";
     
-    public const string ContentPreview = "d-text-preview";
+    public const string ContentPreview = "d-content-preview";
     
     public const string SpreadOperator = "--spreadOperator";
     
