@@ -505,8 +505,6 @@ public sealed record SuggestionItem
     
     public string value { get; init; }
     
-    public JsType jsType { get; init; }
-    
     public bool isVariable { get; init; }
 
     public static implicit operator string(SuggestionItem item)

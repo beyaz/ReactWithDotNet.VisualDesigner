@@ -182,8 +182,6 @@ static class ApplicationLogic
 
                   select new SuggestionItem
                   {
-                      jsType = jsType.Value,
-
                       name = propertyInfo.Name
                   }
 
