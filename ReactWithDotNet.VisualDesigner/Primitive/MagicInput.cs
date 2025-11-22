@@ -233,8 +233,6 @@ abstract class MagicInput : Component<MagicInput.State>
 
                 var currentValue = state.Value;
 
-                
-
                 if (suggestedValue.Value is null)
                 {
                     foreach (var parsedProperty in TryParseProperty(currentValue))
@@ -242,11 +240,11 @@ abstract class MagicInput : Component<MagicInput.State>
                         state = state with { Value = parsedProperty.Name + ": " + suggestedValue.Name };
 
                         DispatchEvent(OnChange, [Name, state.Value]);
-                    
+
                         return Task.CompletedTask;
                     }
                 }
-                
+
                 string value = suggestedValue;
                 var dotSplitNames = currentValue.Split('.', StringSplitOptions.TrimEntries);
                 if (dotSplitNames.Length > 1)
@@ -255,7 +253,6 @@ abstract class MagicInput : Component<MagicInput.State>
 
                     value = string.Join(".", dotSplitNames);
                 }
-                
 
                 state = state with { Value = value };
 
@@ -368,29 +365,28 @@ abstract class MagicInput : Component<MagicInput.State>
 
             foreach (var word in searchTerm.nameInWords)
             {
-                if (word is null)
-                {
-                    continue;
-                }
+                count += Calculate(suggestionItem.Name, word, 3);
+            }
 
-                if (suggestionItem.Name.Equals(word, StringComparison.OrdinalIgnoreCase))
+            if (searchTerm.valueInWords is not null)
+            {
+                if (suggestionItem.Value.HasValue)
                 {
-                    count += 12;
-                    continue;
+                    foreach (var word in searchTerm.valueInWords)
+                    {
+                        count += Calculate(suggestionItem.Value, word, 2);
+                    }
                 }
-                
-                if (suggestionItem.Name.StartsWith(word, StringComparison.OrdinalIgnoreCase))
+                else
                 {
-                    count += 9;
-                    continue;
-                }
-
-                if (suggestionItem.Name.Contains(word, StringComparison.OrdinalIgnoreCase))
-                {
-                    count += 6;
+                    foreach (var word in searchTerm.valueInWords)
+                    {
+                        count += Calculate(suggestionItem.Name, word, 1);
+                    }
                 }
             }
 
+            return count;
 
             static int Calculate(string suggestion, string word, int gravity)
             {
@@ -403,7 +399,7 @@ abstract class MagicInput : Component<MagicInput.State>
                 {
                     return gravity * 10;
                 }
-                        
+
                 if (suggestion.StartsWith(word, StringComparison.OrdinalIgnoreCase))
                 {
                     return gravity * 8;
@@ -413,68 +409,9 @@ abstract class MagicInput : Component<MagicInput.State>
                 {
                     return gravity * 5;
                 }
-                
+
                 return 0;
             }
-            if (searchTerm.valueInWords is not null)
-            {
-                if (suggestionItem.Value.HasValue)
-                {
-                    foreach (var word in searchTerm.valueInWords)
-                    {
-                        if (word is null)
-                        {
-                            continue;
-                        }
-
-                        if (suggestionItem.Value.Equals(word, StringComparison.OrdinalIgnoreCase))
-                        {
-                            count += 10;
-                            continue;
-                        }
-                        
-                        if (suggestionItem.Value.StartsWith(word, StringComparison.OrdinalIgnoreCase))
-                        {
-                            count += 8;
-                            continue;
-                        }
-
-                        if (suggestionItem.Value.Contains(word, StringComparison.OrdinalIgnoreCase))
-                        {
-                            count += 5;
-                        }
-                    }
-                }
-                else
-                {
-                    foreach (var word in searchTerm.valueInWords)
-                    {
-                        if (word is null)
-                        {
-                            continue;
-                        }
-
-                        if (suggestionItem.Name.Equals(word, StringComparison.OrdinalIgnoreCase))
-                        {
-                            count += 10;
-                            continue;
-                        }
-                        
-                        if (suggestionItem.Name.StartsWith(word, StringComparison.OrdinalIgnoreCase))
-                        {
-                            count += 8;
-                            continue;
-                        }
-
-                        if (suggestionItem.Name.Contains(word, StringComparison.OrdinalIgnoreCase))
-                        {
-                            count += 5;
-                        }
-                    }
-                }
-            }
-
-            return count;
         }
     }
 
