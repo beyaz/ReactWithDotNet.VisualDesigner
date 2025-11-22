@@ -371,8 +371,7 @@ abstract class MagicInput : Component<MagicInput.State>
                 }
             }
 
-            var suggestionItemValue = suggestionItem.Value;
-            if (suggestionItemValue.HasValue && searchTerm.valueInWords is not null)
+            if (suggestionItem.Value.HasValue && searchTerm.valueInWords is not null)
             {
                 foreach (var word in searchTerm.valueInWords)
                 {
@@ -381,13 +380,13 @@ abstract class MagicInput : Component<MagicInput.State>
                         continue;
                     }
 
-                    if (suggestionItemValue.Equals(word, StringComparison.OrdinalIgnoreCase))
+                    if (suggestionItem.Value.Equals(word, StringComparison.OrdinalIgnoreCase))
                     {
                         count += 10;
                         continue;
                     }
 
-                    if (suggestionItemValue.Contains(word, StringComparison.OrdinalIgnoreCase))
+                    if (suggestionItem.Value.Contains(word, StringComparison.OrdinalIgnoreCase))
                     {
                         count += 5;
                     }
