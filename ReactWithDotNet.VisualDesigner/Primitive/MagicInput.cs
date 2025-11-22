@@ -233,8 +233,21 @@ abstract class MagicInput : Component<MagicInput.State>
 
                 var currentValue = state.Value;
 
-                string value = suggestedValue;
+                
 
+                if (suggestedValue.Value is null)
+                {
+                    foreach (var parsedProperty in TryParseProperty(currentValue))
+                    {
+                        state = state with { Value = parsedProperty.Name + ": " + suggestedValue.Name };
+
+                        DispatchEvent(OnChange, [Name, state.Value]);
+                    
+                        return Task.CompletedTask;
+                    }
+                }
+                
+                string value = suggestedValue;
                 var dotSplitNames = currentValue.Split('.', StringSplitOptions.TrimEntries);
                 if (dotSplitNames.Length > 1)
                 {
@@ -242,6 +255,7 @@ abstract class MagicInput : Component<MagicInput.State>
 
                     value = string.Join(".", dotSplitNames);
                 }
+                
 
                 state = state with { Value = value };
 
@@ -364,6 +378,12 @@ abstract class MagicInput : Component<MagicInput.State>
                     count += 12;
                     continue;
                 }
+                
+                if (suggestionItem.Name.StartsWith(word, StringComparison.OrdinalIgnoreCase))
+                {
+                    count += 9;
+                    continue;
+                }
 
                 if (suggestionItem.Name.Contains(word, StringComparison.OrdinalIgnoreCase))
                 {
@@ -387,6 +407,12 @@ abstract class MagicInput : Component<MagicInput.State>
                             count += 10;
                             continue;
                         }
+                        
+                        if (suggestionItem.Value.StartsWith(word, StringComparison.OrdinalIgnoreCase))
+                        {
+                            count += 8;
+                            continue;
+                        }
 
                         if (suggestionItem.Value.Contains(word, StringComparison.OrdinalIgnoreCase))
                         {
@@ -406,6 +432,12 @@ abstract class MagicInput : Component<MagicInput.State>
                         if (suggestionItem.Name.Equals(word, StringComparison.OrdinalIgnoreCase))
                         {
                             count += 10;
+                            continue;
+                        }
+                        
+                        if (suggestionItem.Name.StartsWith(word, StringComparison.OrdinalIgnoreCase))
+                        {
+                            count += 8;
                             continue;
                         }
 
