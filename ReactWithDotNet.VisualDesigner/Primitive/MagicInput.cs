@@ -349,7 +349,7 @@ abstract class MagicInput : Component<MagicInput.State>
 
             var count = 0;
 
-            var suggestionItemName = suggestionItem.name;
+            var suggestionItemName = suggestionItem.Name;
             
             if (suggestionItemName.HasValue())
             {
@@ -373,7 +373,7 @@ abstract class MagicInput : Component<MagicInput.State>
                 }
             }
 
-            var suggestionItemValue = suggestionItem.value;
+            var suggestionItemValue = suggestionItem.Value;
             if (suggestionItemValue.HasValue() && searchTerm.valueInWords is not null)
             {
                 foreach (var word in searchTerm.valueInWords)
@@ -396,7 +396,7 @@ abstract class MagicInput : Component<MagicInput.State>
                 }
             }
 
-            if (suggestionItem.isVariable)
+            // if (suggestionItem.isVariable)
             {
                 if (searchTerm.valueInWords is not null)
                 {
@@ -407,13 +407,13 @@ abstract class MagicInput : Component<MagicInput.State>
                             continue;
                         }
 
-                        if (suggestionItem.name.Equals(word, StringComparison.OrdinalIgnoreCase))
+                        if (suggestionItem.Name.Equals(word, StringComparison.OrdinalIgnoreCase))
                         {
                             count += 10;
                             continue;
                         }
                 
-                        if (suggestionItem.name.Contains(word, StringComparison.OrdinalIgnoreCase))
+                        if (suggestionItem.Name.Contains(word, StringComparison.OrdinalIgnoreCase))
                         {
                             count+=5;
                         }
@@ -501,29 +501,27 @@ abstract class MagicInput : Component<MagicInput.State>
 
 public sealed record SuggestionItem
 {
-    public string name { get; init; }
+    public string Name { get; init; }
     
-    public string value { get; init; }
+    public string Value { get; init; }
     
-    public bool isVariable { get; init; }
-
     public static implicit operator string(SuggestionItem item)
     {
-        if (item.name.HasValue() && item.value.HasValue())
+        if (item.Name.HasValue() && item.Value.HasValue())
         {
-            return $"{item.name}: {item.value}";
+            return $"{item.Name}: {item.Value}";
         }
         
-        if (item.name is null)
+        if (item.Name is null)
         {
-            if (item.value.HasValue())
+            if (item.Value.HasValue())
             {
-                return item.value;
+                return item.Value;
             }
 
             throw new InvalidOperationException();
         }
 
-        return item.name;
+        return item.Name;
     }
 }

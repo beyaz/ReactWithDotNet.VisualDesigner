@@ -127,9 +127,7 @@ static class ApplicationLogic
                 from suggestion in suggestions
                 select new SuggestionItem
                 {
-                    isVariable = true,
-                            
-                    name = suggestion
+                    Name = suggestion
                 };
 
                     
@@ -182,7 +180,7 @@ static class ApplicationLogic
 
                   select new SuggestionItem
                   {
-                      name = propertyInfo.Name
+                      Name = propertyInfo.Name
                   }
 
         };
@@ -198,31 +196,27 @@ static class ApplicationLogic
             from name in project.Styles.Keys
             select new SuggestionItem
             {
-                name = name
+                Name = name
             },
             
             // z-index 1 to 10
             from i in Enumerable.Range(1, 10)
             select new SuggestionItem
             {
-                name = "z-index",
+                Name = "z-index",
 
-                value = i.ToString(),
-
-                isVariable = true
+                Value = i.ToString()
             },
             
             // gap and border-radius
             
             from number in new[] { 2, 4, 6, 8, 10, 12, 16, 20, 24, 28, 32, 36, 40 }
             from name in new[] { "gap", "border-radius" }
-            select new SuggestionItem()
+            select new SuggestionItem
             {
-                name = name,
+                Name = name,
 
-                value = number + "px",
-
-                isVariable = true
+                Value = number + "px"
             },
 
             // common css suggestions
@@ -230,11 +224,9 @@ static class ApplicationLogic
             from value in item.Value
             select new SuggestionItem
             {
-                name = item.Key,
+                Name = item.Key,
                 
-                value = value,
-                
-                isVariable = true
+                Value = value
             },
             
             // c o l o r s
@@ -242,33 +234,27 @@ static class ApplicationLogic
             from name in new []{"background","color"}
             select new SuggestionItem
             {
-                name = name,
+                Name = name,
                 
-                value = colorName,
-                
-                isVariable = true
+                Value = colorName
             },
             
             from colorName in project.Colors.Select(x => x.Key)
             from name in new[]{"border", "border-left", "border-right", "border-top", "border-bottom"}
             select new SuggestionItem
             {
-                name = name,
+                Name = name,
                 
-                value = $"1px solid {colorName}",
-                
-                isVariable = true
+                Value = $"1px solid {colorName}"
             },
             
             // flex-grow 1 to 12
             from i in Enumerable.Range(1, 12)
             select new SuggestionItem
             {
-                name = "flex-grow",
+                Name = "flex-grow",
 
-                value = i.ToString(),
-
-                isVariable = true
+                Value = i.ToString()
             },
             
             // r a d i u s - p a d d i n g s - m a r g i n s
@@ -284,11 +270,9 @@ static class ApplicationLogic
             }
             select new SuggestionItem
             {
-                name = name,
+                Name = name,
 
-                value = i + "px",
-
-                isVariable = true
+                Value = i + "px"
             }
         };
 
@@ -309,9 +293,7 @@ static class ApplicationLogic
             }
             select new SuggestionItem
             {
-                name = name,
-
-                isVariable = true
+                Name = name
             }
         };
     }
