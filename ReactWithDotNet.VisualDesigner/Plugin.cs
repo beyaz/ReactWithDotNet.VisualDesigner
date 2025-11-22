@@ -301,12 +301,17 @@ public static class Plugin
 
             suggestionItems.AddRange
             (
-                from x in GetPropSuggestions(scope.TagName)
+                from type in AllCustomComponents
+                where type.Name.Equals(scope.TagName, StringComparison.OrdinalIgnoreCase)
+                from p in type.GetProperties()
+                from a in p.GetCustomAttributes<SuggestionsAttribute>()
+                from jsTypeInfo in p.GetCustomAttributes<JsTypeInfoAttribute>()
+                from suggestion in a.Suggestions
                 select new SuggestionItem
                 {
-                    name   = x.name,
-                    value  = x.value,
-                    jsType = x.jsType
+                    name   = p.Name,
+                    value  = suggestion,
+                    jsType =  jsTypeInfo.JsType
                 }
             );
 
@@ -342,17 +347,6 @@ public static class Plugin
         }
     }
 
-    public static IEnumerable<(string name, string value, JsType jsType)> GetPropSuggestions(string tag)
-    {
-        return
-            from type in AllCustomComponents
-            where type.Name.Equals(tag, StringComparison.OrdinalIgnoreCase)
-            from p in type.GetProperties()
-            from a in p.GetCustomAttributes<SuggestionsAttribute>()
-            from jsTypeInfo in p.GetCustomAttributes<JsTypeInfoAttribute>()
-            from suggestion in a.Suggestions
-            select (p.Name, suggestion, jsTypeInfo.JsType);
-    }
 
     public static IReadOnlyList<string> GetTagSuggestions()
     {
