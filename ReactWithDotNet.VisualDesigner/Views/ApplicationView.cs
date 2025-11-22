@@ -1751,8 +1751,8 @@ sealed class ApplicationView : Component<ApplicationState>
                 CreateGroupLabel("C o n t e n t"),
                 new FlexColumn(WidthFull,PaddingX(4), Gap(12))
                 {
-                    CreateDesignPropEditor("Content", Design.Text),
-                    CreateDesignPropEditor("Design Time Content", Design.TextPreview)
+                    CreateDesignPropEditor("Content", Design.Content),
+                    CreateDesignPropEditor("Design Time Content", Design.ContentPreview)
                 },
                 
                 CreateGroupLabel("V i s i b i l i t y"),
@@ -1780,8 +1780,8 @@ sealed class ApplicationView : Component<ApplicationState>
                 let parsedProp = TryParseProperty(p)
                 let isUiManagedDesignerProp = parsedProp.HasValue && 
                                              parsedProp.Value.Name is 
-                    Design.Text or 
-                    Design.TextPreview or
+                    Design.Content or 
+                    Design.ContentPreview or
                     Design.HideIf or 
                     Design.ShowIf or 
                     Design.ItemsSource or

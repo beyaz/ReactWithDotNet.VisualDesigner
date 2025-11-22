@@ -181,13 +181,13 @@ sealed class ApplicationPreview : Component
                 {
                     var properties = model.Properties;
                 
-                    var output = RemovePropInProps(properties, Design.Text);
+                    var output = RemovePropInProps(properties, Design.Content);
 
                     properties = output.props;
                     
                     textPropValue = output.removedPropValue;
                 
-                    output = RemovePropInProps(properties, Design.TextPreview);
+                    output = RemovePropInProps(properties, Design.ContentPreview);
                     
                     properties = output.props;
                     
@@ -212,7 +212,7 @@ sealed class ApplicationPreview : Component
             var designTimeProps =
                 from p in model.Properties
                 from x in ParseProperty(p)
-                where Design.IsDesignTimeName(x.Name) && x.Name.NotIn(Design.Text, Design.TextPreview, Design.Name, Design.ShowIf, Design.HideIf)
+                where Design.IsDesignTimeName(x.Name) && x.Name.NotIn(Design.Content, Design.ContentPreview, Design.Name, Design.ShowIf, Design.HideIf)
                 select x;
 
             model = model with
@@ -423,7 +423,7 @@ sealed class ApplicationPreview : Component
 
                 if (model.HasText() || model.GetDesignText().HasValue())
                 {
-                    foreach (var item in tryGetPropValueFromCaller(scope, model, Design.Text))
+                    foreach (var item in tryGetPropValueFromCaller(scope, model, Design.Content))
                     {
                         return item;
                     }

@@ -341,7 +341,7 @@ static class TsxExporter
                 node = node with { Properties = node.Properties.Remove(childrenProperty) };
             }
 
-            var textProperty = node.Properties.FirstOrDefault(x => x.Name == Design.Text);
+            var textProperty = node.Properties.FirstOrDefault(x => x.Name == Design.Content);
             if (textProperty is not null)
             {
                 node = node with { Properties = node.Properties.Remove(textProperty) };

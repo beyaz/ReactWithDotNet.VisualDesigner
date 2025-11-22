@@ -214,8 +214,8 @@ static class HtmlImporter
 
         if (htmlNode.ChildNodes.Count == 1 && htmlNode.ChildNodes[0].NodeType == HtmlNodeType.Text && htmlNode.ChildNodes[0].InnerText.HasValue())
         {
-            model = model with { Properties = model.Properties.Add($"{Design.Text}: '{htmlNode.ChildNodes[0].InnerText.Trim()}'") };
-            model = model with { Properties = model.Properties.Add($"{Design.TextPreview}: '{htmlNode.ChildNodes[0].InnerText.Trim()}'") };
+            model = model with { Properties = model.Properties.Add($"{Design.Content}: '{htmlNode.ChildNodes[0].InnerText.Trim()}'") };
+            model = model with { Properties = model.Properties.Add($"{Design.ContentPreview}: '{htmlNode.ChildNodes[0].InnerText.Trim()}'") };
 
             return model;
         }

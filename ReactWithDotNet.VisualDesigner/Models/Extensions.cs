@@ -9,7 +9,7 @@ static class Extensions
         var query =
             from p in model.Properties
             from v in TryParseProperty(p)
-            where v.Name == Design.Text
+            where v.Name == Design.Content
             select v.Value;
 
         return query.FirstOrDefault();

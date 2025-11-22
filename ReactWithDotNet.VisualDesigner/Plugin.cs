@@ -361,7 +361,7 @@ public static class Plugin
                 }
                 from name in getNames(jsType, jsType switch
                 {
-                    JsType.String => [Design.Text],
+                    JsType.String => [Design.Content],
 
                     JsType.Boolean => [Design.ShowIf, Design.HideIf],
 

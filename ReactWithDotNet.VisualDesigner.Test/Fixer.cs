@@ -25,12 +25,12 @@ public class Fixer
     {
         model = model with
         {
-            Properties = ChangePropName(model.Properties, "d-text", Design.Text)
+            Properties = ChangePropName(model.Properties, "d-text", Design.Content)
         };
         
         model = model with
         {
-            Properties = ChangePropName(model.Properties, "d-text-preview", Design.TextPreview)
+            Properties = ChangePropName(model.Properties, "d-text-preview", Design.ContentPreview)
         };
 
         var children = model.Children;

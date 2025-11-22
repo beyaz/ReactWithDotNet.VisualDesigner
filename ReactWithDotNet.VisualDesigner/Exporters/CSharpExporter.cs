@@ -304,7 +304,7 @@ static class CSharpExporter
                     node = node with { Properties = node.Properties.Remove(childrenProperty) };
                 }
 
-                var textProperty = node.Properties.FirstOrDefault(x => x.Name == Design.Text);
+                var textProperty = node.Properties.FirstOrDefault(x => x.Name == Design.Content);
                 if (textProperty is not null)
                 {
                     node = node with { Properties = node.Properties.Remove(textProperty) };
@@ -512,7 +512,7 @@ static class CSharpExporter
                 node = node with { Properties = node.Properties.Remove(childrenProperty) };
             }
 
-            var textProperty = node.Properties.FirstOrDefault(x => x.Name == Design.Text);
+            var textProperty = node.Properties.FirstOrDefault(x => x.Name == Design.Content);
             if (textProperty is not null)
             {
                 node = node with { Properties = node.Properties.Remove(textProperty) };
@@ -529,7 +529,7 @@ static class CSharpExporter
                     {
                         tsPropTexts = new
                             (
-                             from reactProperty in from p in node.Properties where p.Name.NotIn(Design.Text, Design.TextPreview, Design.Src, Design.Name, "style") select p
+                             from reactProperty in from p in node.Properties where p.Name.NotIn(Design.Content, Design.ContentPreview, Design.Src, Design.Name, "style") select p
                              let propertyTsCode = convertReactPropertyToString(elementType, reactProperty)
                              select propertyTsCode
                             );
