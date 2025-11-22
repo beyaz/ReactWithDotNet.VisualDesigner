@@ -359,22 +359,13 @@ public static class Plugin
                 {
                     JsType.String, JsType.Number, JsType.Boolean, JsType.Date, JsType.Array, JsType.Function
                 }
-                from name in getNames(jsType, jsType switch
-                {
-                    JsType.String => [Design.Content],
-
-                    JsType.Boolean => [Design.ShowIf, Design.HideIf],
-
-                    JsType.Array => [Design.ItemsSource],
-
-                    _ => []
-                })
+                from name in getNames(jsType)
                 from x in suggestionItems
                 where x.jsType == jsType
                 select x with { name = name }
             };
 
-            IEnumerable<string> getNames(JsType jsType, params string[] extraNames)
+            IEnumerable<string> getNames(JsType jsType)
             {
                 return new List<string>
                 {
@@ -382,9 +373,7 @@ public static class Plugin
                     where m.TagName == scope.TagName
                     from p in m.Props
                     where p.ValueType == jsType
-                    select p.Name,
-
-                    extraNames
+                    select p.Name
                 };
             }
         }
