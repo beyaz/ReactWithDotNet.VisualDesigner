@@ -149,7 +149,7 @@ static class ApplicationLogic
 
         IReadOnlyList <SuggestionItem>  pluginSuggestionItems;
         {
-            var result = await Plugin.GetPropSuggestions(scope);
+            var result = Plugin.GetPropSuggestions(scope);
             if (result.HasError)
             {
                 return result.Error;

@@ -253,16 +253,16 @@ public static class Plugin
         return camelCase.ToString();
     }
 
-    public static async Task<Result<IReadOnlyList<SuggestionItem>>> GetPropSuggestions(PropSuggestionScope scope)
+    public static Result<IReadOnlyList<SuggestionItem>> GetPropSuggestions(PropSuggestionScope scope)
     {
         if (scope.TagName.HasNoValue())
         {
             return Result.From((IReadOnlyList<SuggestionItem>)[]);
         }
 
-        return await Cache.AccessValue($"{nameof(Plugin)}-{scope.TagName}", () => calculate(scope));
+        return Cache.AccessValue($"{nameof(Plugin)}-{scope.TagName}", () => calculate(scope));
 
-        static async Task<Result<IReadOnlyList<SuggestionItem>>> calculate(PropSuggestionScope scope)
+        static Result<IReadOnlyList<SuggestionItem>> calculate(PropSuggestionScope scope)
         {
             var suggestionItems = new List<SuggestionItem>
             {
