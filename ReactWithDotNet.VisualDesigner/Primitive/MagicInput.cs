@@ -391,6 +391,31 @@ abstract class MagicInput : Component<MagicInput.State>
                 }
             }
 
+
+            static int Calculate(string suggestion, string word, int gravity)
+            {
+                if (word is null)
+                {
+                    return 0;
+                }
+
+                if (suggestion.Equals(word, StringComparison.OrdinalIgnoreCase))
+                {
+                    return gravity * 10;
+                }
+                        
+                if (suggestion.StartsWith(word, StringComparison.OrdinalIgnoreCase))
+                {
+                    return gravity * 8;
+                }
+
+                if (suggestion.Contains(word, StringComparison.OrdinalIgnoreCase))
+                {
+                    return gravity * 5;
+                }
+                
+                return 0;
+            }
             if (searchTerm.valueInWords is not null)
             {
                 if (suggestionItem.Value.HasValue)
