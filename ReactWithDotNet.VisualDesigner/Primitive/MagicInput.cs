@@ -306,7 +306,7 @@ abstract class MagicInput : Component<MagicInput.State>
         {
             ShowSuggestions = true,
             SelectedSuggestionOffset = null,
-           FilteredSuggestions = suggestions.Value.OrderByDescending(x => hasMatch(x,parseResponse)).Take(5).ToList()
+           FilteredSuggestions = suggestions.Value.OrderByDescending(x => GetMatchScore(x,parseResponse)).Take(5).ToList()
         };
         return;
 
@@ -340,7 +340,7 @@ abstract class MagicInput : Component<MagicInput.State>
             }
         }
         
-        static int hasMatch(SuggestionItem suggestionItem, (bool isEmpty, string[] nameInWords, string[] valueInWords) searchTerm)
+        static int GetMatchScore(SuggestionItem suggestionItem, (bool isEmpty, string[] nameInWords, string[] valueInWords) searchTerm)
         {
             if (searchTerm.isEmpty)
             {
