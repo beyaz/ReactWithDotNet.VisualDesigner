@@ -347,18 +347,15 @@ public static class Plugin
         var type = AllCustomComponents.FirstOrDefault(t => t.Name.Equals(tag, StringComparison.OrdinalIgnoreCase));
         if (type is null)
         {
-            yield break;
+            return [];
         }
 
-        foreach (var item in
-                 from p in type.GetProperties()
-                 from a in p.GetCustomAttributes<SuggestionsAttribute>()
-                 from jsTypeInfo in p.GetCustomAttributes<JsTypeInfoAttribute>()
-                 from suggestion in a.Suggestions
-                 select (p.Name, suggestion, jsTypeInfo.JsType))
-        {
-            yield return item;
-        }
+        return
+            from p in type.GetProperties()
+            from a in p.GetCustomAttributes<SuggestionsAttribute>()
+            from jsTypeInfo in p.GetCustomAttributes<JsTypeInfoAttribute>()
+            from suggestion in a.Suggestions
+            select (p.Name, suggestion, jsTypeInfo.JsType);
     }
 
     public static IReadOnlyList<string> GetTagSuggestions()
