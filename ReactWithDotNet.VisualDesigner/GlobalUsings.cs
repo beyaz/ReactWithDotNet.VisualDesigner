@@ -33,6 +33,8 @@ global using static Toolbox.YamlHelper;
 global using Toolbox;
 global using ReactWithDotNet.VisualDesigner.TsxAnalyze;
 
+global using static ReactWithDotNet.VisualDesigner.PropertyDomain.ParsedPropertyFactory;
+
 
 using System.Runtime.CompilerServices;
 
