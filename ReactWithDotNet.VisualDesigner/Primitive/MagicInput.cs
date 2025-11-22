@@ -393,27 +393,24 @@ abstract class MagicInput : Component<MagicInput.State>
                 }
             }
 
-            // if (suggestionItem.isVariable)
+            if (searchTerm.valueInWords is not null)
             {
-                if (searchTerm.valueInWords is not null)
+                foreach (var word in searchTerm.valueInWords)
                 {
-                    foreach (var word in searchTerm.valueInWords)
+                    if (word is null)
                     {
-                        if (word is null)
-                        {
-                            continue;
-                        }
+                        continue;
+                    }
 
-                        if (suggestionItem.Name.Equals(word, StringComparison.OrdinalIgnoreCase))
-                        {
-                            count += 10;
-                            continue;
-                        }
+                    if (suggestionItem.Name.Equals(word, StringComparison.OrdinalIgnoreCase))
+                    {
+                        count += 10;
+                        continue;
+                    }
 
-                        if (suggestionItem.Name.Contains(word, StringComparison.OrdinalIgnoreCase))
-                        {
-                            count += 5;
-                        }
+                    if (suggestionItem.Name.Contains(word, StringComparison.OrdinalIgnoreCase))
+                    {
+                        count += 5;
                     }
                 }
             }
