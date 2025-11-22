@@ -371,8 +371,6 @@ abstract class MagicInput : Component<MagicInput.State>
                 }
             }
 
-            
-
             if (searchTerm.valueInWords is not null)
             {
                 if (suggestionItem.Value.HasValue)
@@ -396,23 +394,25 @@ abstract class MagicInput : Component<MagicInput.State>
                         }
                     }
                 }
-                
-                foreach (var word in searchTerm.valueInWords)
+                else
                 {
-                    if (word is null)
+                    foreach (var word in searchTerm.valueInWords)
                     {
-                        continue;
-                    }
+                        if (word is null)
+                        {
+                            continue;
+                        }
 
-                    if (suggestionItem.Name.Equals(word, StringComparison.OrdinalIgnoreCase))
-                    {
-                        count += 10;
-                        continue;
-                    }
+                        if (suggestionItem.Name.Equals(word, StringComparison.OrdinalIgnoreCase))
+                        {
+                            count += 10;
+                            continue;
+                        }
 
-                    if (suggestionItem.Name.Contains(word, StringComparison.OrdinalIgnoreCase))
-                    {
-                        count += 5;
+                        if (suggestionItem.Name.Contains(word, StringComparison.OrdinalIgnoreCase))
+                        {
+                            count += 5;
+                        }
                     }
                 }
             }
