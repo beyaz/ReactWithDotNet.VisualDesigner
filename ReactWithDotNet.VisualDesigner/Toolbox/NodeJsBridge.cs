@@ -4,9 +4,10 @@ using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using Microsoft.AspNetCore.Builder;
+using Newtonsoft.Json;
+using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace Toolbox;
-
 
 static class NodeJsBridge
 {
@@ -14,15 +15,52 @@ static class NodeJsBridge
 
     static readonly HttpClient HttpClient = new();
 
+    public static async Task<Result<string>> Ast(string code)
+    {
+        await StartServerIfNeeded();
+
+        var options = new JsonSerializerOptions();
+
+        var requestObject = new { code };
+
+        var jsonPayload = JsonSerializer.Serialize(requestObject, options);
+
+        var jsonContent = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+
+        Response response;
+
+        string responseContent;
+
+        try
+        {
+            var httpResponseMessage = await HttpClient.PostAsync("http://localhost:5009/ast", jsonContent);
+
+            responseContent = await httpResponseMessage.Content.ReadAsStringAsync();
+
+            response = JsonSerializer.Deserialize<Response>(responseContent, options);
+        }
+        catch (Exception exception)
+        {
+            return exception;
+        }
+
+        if (response.error is not null)
+        {
+            return new FormatException(string.Join(Environment.NewLine + Environment.NewLine, code, response.error, response.details));
+        }
+
+        return responseContent;
+    }
+
     public static async Task<Result<string>> FormatCode(string code, string prettierOptions)
     {
         await StartServerIfNeeded();
-        
+
         var options = new Dictionary<string, object>();
-        
+
         if (!string.IsNullOrWhiteSpace(prettierOptions))
         {
-            options = JsonSerializer.Deserialize<Dictionary<string, object>>(prettierOptions);
+            options = JsonConvert.DeserializeObject<Dictionary<string, object>>(prettierOptions);
         }
 
         var jsonSerializerOptions = new JsonSerializerOptions();
@@ -40,7 +78,7 @@ static class NodeJsBridge
             var httpResponseMessage = await HttpClient.PostAsync("http://localhost:5009/format", jsonContent);
 
             var responseContent = await httpResponseMessage.Content.ReadAsStringAsync();
-            
+
             response = JsonSerializer.Deserialize<Response>(responseContent, jsonSerializerOptions);
         }
         catch (Exception exception)
@@ -55,48 +93,11 @@ static class NodeJsBridge
 
         return response.formattedCode.TrimEnd().RemoveFromEnd(";");
     }
-    
-    public static async Task<Result<string>> Ast(string code)
-    {
-        await StartServerIfNeeded();
-
-        var options = new JsonSerializerOptions();
-
-        var requestObject = new { code };
-
-        var jsonPayload = JsonSerializer.Serialize(requestObject, options);
-
-        var jsonContent = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
-
-        Response response;
-
-        string responseContent;
-            
-        try
-        {
-            var httpResponseMessage = await HttpClient.PostAsync("http://localhost:5009/ast", jsonContent);
-
-            responseContent = await httpResponseMessage.Content.ReadAsStringAsync();
-            
-            response = JsonSerializer.Deserialize<Response>(responseContent, options);
-        }
-        catch (Exception exception)
-        {
-            return exception;
-        }
-
-        if (response.error is not null)
-        {
-            return new FormatException(string.Join(Environment.NewLine + Environment.NewLine, code, response.error, response.details));
-        }
-
-        return responseContent;
-    }
 
     public static void Register(WebApplication app)
     {
-       app.Lifetime.ApplicationStarted.Register(() => { StartServerAsync(); });
-       app.Lifetime.ApplicationStopping.Register(StopServer);
+        app.Lifetime.ApplicationStarted.Register(() => { StartServerAsync(); });
+        app.Lifetime.ApplicationStopping.Register(StopServer);
     }
 
     static Task StartServerAsync()
@@ -116,11 +117,11 @@ static class NodeJsBridge
             CreateNoWindow         = true
         };
 
-        data.NodeProcess = new Process { StartInfo = processInfo };
+        data.NodeProcess = new() { StartInfo = processInfo };
 
         data.NodeProcess.Start();
-        
-        File.WriteAllText(Path.Combine(AppContext.BaseDirectory, $"node.js.process.id.{data.NodeProcess.Id}.txt"),string.Empty);
+
+        File.WriteAllText(Path.Combine(AppContext.BaseDirectory, $"node.js.process.id.{data.NodeProcess.Id}.txt"), string.Empty);
 
         return Task.CompletedTask;
     }
@@ -172,7 +173,7 @@ static class NodeJsBridge
         public string details { get; init; }
 
         public string error { get; init; }
-        
+
         public string formattedCode { get; init; }
     }
 }
