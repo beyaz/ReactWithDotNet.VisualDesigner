@@ -352,27 +352,22 @@ abstract class MagicInput : Component<MagicInput.State>
 
             var count = 0;
 
-            var suggestionItemName = suggestionItem.Name;
-
-            if (suggestionItemName.HasValue)
+            foreach (var word in searchTerm.nameInWords)
             {
-                foreach (var word in searchTerm.nameInWords)
+                if (word is null)
                 {
-                    if (word is null)
-                    {
-                        continue;
-                    }
+                    continue;
+                }
 
-                    if (suggestionItemName.Equals(word, StringComparison.OrdinalIgnoreCase))
-                    {
-                        count += 12;
-                        continue;
-                    }
+                if (suggestionItem.Name.Equals(word, StringComparison.OrdinalIgnoreCase))
+                {
+                    count += 12;
+                    continue;
+                }
 
-                    if (suggestionItemName.Contains(word, StringComparison.OrdinalIgnoreCase))
-                    {
-                        count += 6;
-                    }
+                if (suggestionItem.Name.Contains(word, StringComparison.OrdinalIgnoreCase))
+                {
+                    count += 6;
                 }
             }
 
