@@ -20,17 +20,6 @@ static class Extensions
             }
         }
     }
-    
-    public static string GetText(this VisualElementModel model)
-    {
-        var query =
-            from p in model.Properties
-            from v in TryParseProperty(p)
-            where v.Name == Design.Content
-            select v.Value;
-
-        return query.FirstOrDefault();
-    }
 
     public static bool HasNoChild(this VisualElementModel model)
     {
@@ -39,12 +28,12 @@ static class Extensions
 
     public static bool HasNoText(this VisualElementModel model)
     {
-        return GetText(model).HasNoValue();
+        return model.Text.HasNoValue();
     }
 
     public static bool HasText(this VisualElementModel model)
     {
-        return GetText(model).HasValue();
+        return model.Text.HasValue();
     }
 
     public static VisualElementModel Modify(VisualElementModel root, VisualElementModel target, Func<VisualElementModel, VisualElementModel> modifyNode)

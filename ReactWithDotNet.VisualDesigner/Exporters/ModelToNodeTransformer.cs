@@ -51,7 +51,7 @@ static class ModelToNodeTransformer
             {
                 children.Add(new()
                 {
-                    Text = elementModel.GetText(),
+                    Text = elementModel.Text,
 
                     HtmlElementType = None
                 });
