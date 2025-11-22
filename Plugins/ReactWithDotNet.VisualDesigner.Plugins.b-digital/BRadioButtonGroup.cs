@@ -23,7 +23,7 @@ sealed class BRadioButtonGroup : PluginComponentBase
     
     protected override Element render()
     {
-        if (items.HasNoValue())
+        if (items.HasNoValue)
         {
             return null;
         }

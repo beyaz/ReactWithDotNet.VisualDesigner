@@ -113,7 +113,7 @@ sealed class BButton : PluginComponentBase
             ];
         }
         
-        if (variant == "contained" || color == "default" || (type is null && color is null && variant.HasNoValue()) )
+        if (variant == "contained" || color == "default" || (type is null && color is null && variant.HasNoValue) )
         {
             defaultStyle =
             [

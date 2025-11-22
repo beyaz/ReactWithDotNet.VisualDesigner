@@ -207,7 +207,7 @@ sealed class MainWindow : Component<MainWindow.State>
 
     string CalculateSelectedFilePathRelativeToProject()
     {
-        if (state.SelectedFilePath.HasNoValue())
+        if (state.SelectedFilePath.HasNoValue)
         {
             return string.Empty;
         }

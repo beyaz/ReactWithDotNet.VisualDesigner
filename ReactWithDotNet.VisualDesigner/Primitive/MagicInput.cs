@@ -153,7 +153,7 @@ abstract class MagicInput : Component<MagicInput.State>
 
             if (e.key == "Enter")
             {
-                if (state.Value?.Length > 0 || (state.InitialValue.HasValue() && state.Value.HasNoValue()))
+                if (state.Value?.Length > 0 || (state.InitialValue.HasValue() && state.Value.HasNoValue))
                 {
                     DispatchEvent(OnChange, [Name, state.Value]);
                 }
@@ -311,7 +311,7 @@ abstract class MagicInput : Component<MagicInput.State>
 
         static (bool isEmpty, string[] nameInWords, string[] valueInWords) ParseSearchTerm(string searchTerm)
         {
-            if (searchTerm.HasNoValue())
+            if (searchTerm.HasNoValue)
             {
                 return (true, null, null);
             }

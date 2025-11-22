@@ -56,7 +56,7 @@ static class TailwindCss
             designerStyleItemText = x.NewText;
         });
 
-        if (pseudo.HasNoValue() && project.Styles.TryGetValue(designerStyleItemText, out _))
+        if (pseudo.HasNoValue && project.Styles.TryGetValue(designerStyleItemText, out _))
         {
             return designerStyleItemText;
         }

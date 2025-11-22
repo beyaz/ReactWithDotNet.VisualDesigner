@@ -339,7 +339,7 @@ static class CSharpStringExporter
                     node = node with { Properties = node.Properties.Remove(contentProp) };
                 }
 
-                var hasNoBody = node.Children.Count == 0 && node.Text.HasNoValue() && childrenProperty is null && node.Properties.Count == 0;
+                var hasNoBody = node.Children.Count == 0 && node.Text.HasNoValue && childrenProperty is null && node.Properties.Count == 0;
 
                 List<string> propsAsTextList;
                 string partProps;
@@ -547,7 +547,7 @@ static class CSharpStringExporter
                 node = node with { Properties = node.Properties.Remove(contentProp) };
             }
 
-            var hasNoBody = node.Children.Count == 0 && node.Text.HasNoValue() && childrenProperty is null;
+            var hasNoBody = node.Children.Count == 0 && node.Text.HasNoValue && childrenProperty is null;
 
             string partProps;
             {

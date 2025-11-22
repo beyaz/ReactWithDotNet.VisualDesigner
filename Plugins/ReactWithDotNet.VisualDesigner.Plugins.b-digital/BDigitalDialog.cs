@@ -74,7 +74,7 @@ sealed class BDigitalDialog : PluginComponentBase
             new div(Background("white"), BorderRadius(8), Padding(16))
             {
                 // T o p   B a r
-                title.HasNoValue()
+                title.HasNoValue
                     ? null
                     : new FlexRow(JustifyContentSpaceBetween, AlignItemsCenter, PaddingY(16))
                     {
@@ -93,7 +93,7 @@ sealed class BDigitalDialog : PluginComponentBase
                             }
                     },
 
-                title.HasNoValue() ? null : SpaceY(12),
+                title.HasNoValue ? null : SpaceY(12),
 
                 children
             }

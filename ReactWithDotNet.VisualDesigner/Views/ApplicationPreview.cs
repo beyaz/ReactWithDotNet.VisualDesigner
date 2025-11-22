@@ -328,7 +328,7 @@ sealed class ApplicationPreview : Component
             {
                 if (scope.HighlightedElementPath == path && element is HtmlElement htmlElement)
                 {
-                    if (htmlElement.id.HasNoValue())
+                    if (htmlElement.id.HasNoValue)
                     {
                         return new DeveloperException("Element.Id not set yet");
                     }
@@ -338,7 +338,7 @@ sealed class ApplicationPreview : Component
 
                 if (scope.HighlightedElementPath == path && element is PluginComponentBase componentBase)
                 {
-                    if (componentBase.id.HasNoValue())
+                    if (componentBase.id.HasNoValue)
                     {
                         return new DeveloperException("Element.Id not set yet");
                     }

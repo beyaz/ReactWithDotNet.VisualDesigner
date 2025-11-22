@@ -351,9 +351,9 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
                     }
                 },
 
-                state.DragStartedTreeItemPath.HasNoValue() && isSelected ? Background(Blue100) + BorderRadius(3) : null,
+                state.DragStartedTreeItemPath.HasNoValue && isSelected ? Background(Blue100) + BorderRadius(3) : null,
 
-                state.DragStartedTreeItemPath.HasNoValue() && !isSelected ? Hover(Background(Blue50), BorderRadius(3)) : null,
+                state.DragStartedTreeItemPath.HasNoValue && !isSelected ? Hover(Background(Blue50), BorderRadius(3)) : null,
 
                 DraggableTrue,
                 OnDragStart(OnDragStarted),

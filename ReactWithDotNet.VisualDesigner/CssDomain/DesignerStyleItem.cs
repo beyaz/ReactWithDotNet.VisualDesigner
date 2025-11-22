@@ -22,7 +22,7 @@ static class DesignerStyleItemFactory
             return new ArgumentException("finalCssItems.Length cannot be zero");
         }
 
-        if (input.OriginalText.HasNoValue())
+        if (input.OriginalText.HasNoValue)
         {
             return new ArgumentException(nameof(input.OriginalText));
         }

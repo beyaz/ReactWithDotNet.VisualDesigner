@@ -310,7 +310,7 @@ static class CSharpExporter
                     node = node with { Properties = node.Properties.Remove(contentProp) };
                 }
 
-                var hasNoBody = node.Children.Count == 0 && node.Text.HasNoValue() && childrenProperty is null && node.Properties.Count == 0;
+                var hasNoBody = node.Children.Count == 0 && node.Text.HasNoValue && childrenProperty is null && node.Properties.Count == 0;
 
                 List<string> propsAsTextList;
                 string partProps;
@@ -518,7 +518,7 @@ static class CSharpExporter
                 node = node with { Properties = node.Properties.Remove(contentProp) };
             }
 
-            var hasNoBody = node.Children.Count == 0 && node.Text.HasNoValue() && childrenProperty is null;
+            var hasNoBody = node.Children.Count == 0 && node.Text.HasNoValue && childrenProperty is null;
 
             List<PropertyTsCode> tsPropTexts;
             string partProps;
@@ -662,7 +662,7 @@ static class CSharpExporter
                                     var modifierCode = ToModifierTransformer.TryConvertToModifier(isStyleValue: true, tagName, styleAttribute.Name, attributeValue);
                                     if (modifierCode.success)
                                     {
-                                        if (styleAttribute.Pseudo.HasNoValue())
+                                        if (styleAttribute.Pseudo.HasNoValue)
                                         {
                                             styleList.Add(modifierCode.modifierCode);
                                             continue;

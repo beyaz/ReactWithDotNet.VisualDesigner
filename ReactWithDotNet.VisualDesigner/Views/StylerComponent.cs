@@ -1226,7 +1226,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
 
         protected override Element render()
         {
-            if (Label.HasNoValue())
+            if (Label.HasNoValue)
             {
                 return new div();
             }
@@ -1435,7 +1435,7 @@ class CssUnitEditor : Component<CssUnitEditor.State>
     Task OnButtonClicked(MouseEvent e)
     {
         var charachter = e.target.id;
-        if (charachter.HasNoValue())
+        if (charachter.HasNoValue)
         {
             return Task.CompletedTask;
         }

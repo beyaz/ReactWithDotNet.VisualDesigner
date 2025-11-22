@@ -396,12 +396,12 @@ static class TsxExporter
                 tag = "React.Fragment";
             }
             else if ((tag.Equals("React.Fragment", StringComparison.OrdinalIgnoreCase) ||
-                      tag.Equals("<>", StringComparison.OrdinalIgnoreCase)) && partProps.HasNoValue())
+                      tag.Equals("<>", StringComparison.OrdinalIgnoreCase)) && partProps.HasNoValue)
             {
                 tag = string.Empty;
             }
 
-            if (node.Children.Count == 0 && node.Text.HasNoValue() && childrenProperty is null)
+            if (node.Children.Count == 0 && node.Text.HasNoValue && childrenProperty is null)
             {
                 return new LineCollection
                 {

@@ -315,11 +315,11 @@ sealed class ApplicationView : Component<ApplicationState>
         }
 
         var config = DeserializeFromYaml<ComponentConfig>(componentConfigAsYamlNewValue);
-        if (config.Name.HasNoValue())
+        if (config.Name.HasNoValue)
         {
             return new Exception("NameMustBeEntered");
         }
-        if (config.DesignLocation.HasNoValue())
+        if (config.DesignLocation.HasNoValue)
         {
             return new Exception("DesignLocationMustBeEnteredCorrectly");
         }
@@ -500,12 +500,12 @@ sealed class ApplicationView : Component<ApplicationState>
     async Task<Result<string>> CreateNewComponent(string componentConfigAsYamlNewValue)
     {
         var config = DeserializeFromYaml<ComponentConfig>(componentConfigAsYamlNewValue);
-        if (config.Name.HasNoValue())
+        if (config.Name.HasNoValue)
         {
             return new Exception($"{nameof(ComponentConfig.Name)} should be entered.");
         }
 
-        if (config.DesignLocation.HasNoValue())
+        if (config.DesignLocation.HasNoValue)
         {
             return new Exception($"{nameof(ComponentConfig.DesignLocation)} should be entered.");
         }
@@ -709,7 +709,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
     Task DeleteSelectedTreeItem()
     {
-        if (state.Selection.VisualElementTreeItemPath.HasNoValue())
+        if (state.Selection.VisualElementTreeItemPath.HasNoValue)
         {
             return Task.CompletedTask;
         }
@@ -744,7 +744,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
     async Task FocusToCurrentComponentInIde(MouseEvent e)
     {
-        if (state.UserName.HasNoValue())
+        if (state.UserName.HasNoValue)
         {
             this.FailNotification("UserName has no value");
             return;
@@ -1418,7 +1418,7 @@ sealed class ApplicationView : Component<ApplicationState>
             },
             Paste = treeItemPath =>
             {
-                if (state.CopiedVisualElementModelInYaml.HasNoValue())
+                if (state.CopiedVisualElementModelInYaml.HasNoValue)
                 {
                     return Task.CompletedTask;
                 }
@@ -2327,7 +2327,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
     Task TryImportHtml(string htmlText)
     {
-        if (htmlText.HasNoValue())
+        if (htmlText.HasNoValue)
         {
             return Task.CompletedTask;
         }
@@ -2381,7 +2381,7 @@ sealed class ApplicationView : Component<ApplicationState>
             return exception;
         }
 
-        if (path.HasNoValue())
+        if (path.HasNoValue)
         {
             state = state with
             {
@@ -2395,7 +2395,7 @@ sealed class ApplicationView : Component<ApplicationState>
             return Unit.Value;
         }
 
-        if (path.HasNoValue() || path == "0")
+        if (path.HasNoValue || path == "0")
         {
             state = state with { ComponentRootElement = newModel };
 
@@ -2461,7 +2461,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
         async Task<string> calculateTsxCodeOfCurrentVisualElement()
         {
-            if (state.Selection.VisualElementTreeItemPath.HasNoValue())
+            if (state.Selection.VisualElementTreeItemPath.HasNoValue)
             {
                 return "Select any component.";
             }

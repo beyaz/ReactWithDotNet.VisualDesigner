@@ -100,7 +100,7 @@ static class ApplicationLogic
         return Cache.AccessValue($"{nameof(ProjectConfig)}:{projectId}", () =>
         {
             var configAsYaml = Store.TryGetProject(projectId).GetAwaiter().GetResult()?.ConfigAsYaml;
-            if (configAsYaml.HasNoValue())
+            if (configAsYaml.HasNoValue)
             {
                 return new();
             }
@@ -424,7 +424,7 @@ static class ApplicationLogic
 
         var userName = state.UserName;
 
-        if (componentId <= 0 || userName.HasNoValue())
+        if (componentId <= 0 || userName.HasNoValue)
         {
             return Unit.Value;
         }
@@ -471,7 +471,7 @@ static class ApplicationLogic
 
         var userName = state.UserName;
 
-        if (projectId <= 0 || userName.HasNoValue())
+        if (projectId <= 0 || userName.HasNoValue)
         {
             return;
         }

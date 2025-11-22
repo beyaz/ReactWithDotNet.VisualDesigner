@@ -305,7 +305,7 @@ public static class Extensions
         var componentConfig = component.Config;
         
         var outputFilePath = componentConfig.OutputFilePath;
-        if (outputFilePath.HasNoValue())
+        if (outputFilePath.HasNoValue)
         {
             return new ConfigurationErrorsException("Config error: Please specify the OutputFile property.");
         }
@@ -344,10 +344,12 @@ public static class Extensions
         return matchFunc(value);
     }
 
-    public static bool HasNoValue(this string value)
+    extension(string value)
     {
-        return string.IsNullOrWhiteSpace(value);
+        public bool HasNoValue =>string.IsNullOrWhiteSpace(value);
     }
+    
+    
 
     public static bool HasValue(this string value)
     {

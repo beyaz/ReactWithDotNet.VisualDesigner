@@ -25,7 +25,7 @@ static class Extensions
     
     public static Maybe<ComponentEntity> TryFindComponentByComponentNameWithExportFilePath(int projectId, string designLocation)
     {
-        if (designLocation.HasNoValue())
+        if (designLocation.HasNoValue)
         {
             return None;
         }
@@ -55,7 +55,7 @@ static class Extensions
     
     public static VisualElementModel FindTreeNodeByTreePath(VisualElementModel node, string path)
     {
-        if (path.HasNoValue())
+        if (path.HasNoValue)
         {
             return null;
         }
