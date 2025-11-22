@@ -414,7 +414,7 @@ sealed class ApplicationPreview : Component
             static Maybe<string> tryCalculateText(RenderPreviewScope scope, VisualElementModel model)
             {
                 {
-                    var text = model.Text;
+                    var text = model.Content;
                     if (IsStringValue(text))
                     {
                         return TryClearStringValue(text);
@@ -428,7 +428,7 @@ sealed class ApplicationPreview : Component
                         return item;
                     }
 
-                    var text = TryClearStringValue(model.GetDesignText() ?? model.Text);
+                    var text = TryClearStringValue(model.GetDesignText() ?? model.Content);
                     if (!isUnknownValue(text))
                     {
                         return text;

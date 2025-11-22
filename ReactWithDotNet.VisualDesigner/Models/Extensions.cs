@@ -6,7 +6,7 @@ static class Extensions
 {
     extension(VisualElementModel model)
     {
-        public string Text
+        public string Content
         {
             get
             {
@@ -20,9 +20,9 @@ static class Extensions
             }
         }
 
-        public bool HasNoContent => model.Text.HasNoValue();
+        public bool HasNoContent => model.Content.HasNoValue();
         
-        public bool HasContent => model.Text.HasValue();
+        public bool HasContent => model.Content.HasValue();
 
         public bool HasNoChild => model.Children is null || model.Children.Count == 0;
     }
