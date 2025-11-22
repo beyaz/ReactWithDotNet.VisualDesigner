@@ -253,101 +253,6 @@ public static class Plugin
         return camelCase.ToString();
     }
 
-    public static Result<IReadOnlyList<SuggestionItem>> GetPropSuggestions(PropSuggestionScope scope)
-    {
-        if (scope.TagName.HasNoValue())
-        {
-            return Result.From((IReadOnlyList<SuggestionItem>)[]);
-        }
-
-        return Cache.AccessValue($"{nameof(Plugin)}-{scope.TagName}", () => calculate(scope));
-
-        static Result<IReadOnlyList<SuggestionItem>> calculate(PropSuggestionScope scope)
-        {
-            var suggestionItems = new List<SuggestionItem>
-            {
-                from x in new[]
-                {
-                    "2",
-                    "4",
-                    "8",
-                    "12",
-                    "16",
-                    "24"
-                }
-                select new SuggestionItem
-                {
-                    jsType = JsType.Number,
-
-                    value = x
-                }
-            };
-
-            suggestionItems.Add
-            (
-                [
-                    new()
-                    {
-                        jsType = JsType.Boolean,
-                        value  = "true"
-                    },
-                    new()
-                    {
-                        jsType = JsType.Boolean,
-                        value  = "false"
-                    }
-                ]
-            );
-
-            suggestionItems.AddRange
-            (
-                from customComponentType in AllCustomComponents
-                where customComponentType.Name.Equals(scope.TagName, StringComparison.OrdinalIgnoreCase)
-                from propertyInfo in customComponentType.GetProperties()
-                from suggestionsAttribute in propertyInfo.GetCustomAttributes<SuggestionsAttribute>()
-                from jsTypeInfo in propertyInfo.GetCustomAttributes<JsTypeInfoAttribute>()
-                from suggestion in suggestionsAttribute.Suggestions
-                select new SuggestionItem
-                {
-                    name   = propertyInfo.Name,
-                    value  = suggestion,
-                    jsType =  jsTypeInfo.JsType
-                }
-            );
-
-            var allMetadata = GetAllTypesMetadata().AsResult();
-            if (allMetadata.HasError)
-            {
-                return allMetadata.Error;
-            }
-
-            return new List<SuggestionItem>
-            {
-                from jsType in new[]
-                {
-                    JsType.String, JsType.Number, JsType.Boolean, JsType.Date, JsType.Array, JsType.Function
-                }
-                from name in getNames(jsType)
-                from x in suggestionItems
-                where x.jsType == jsType
-                select x with { name = name }
-            };
-
-            IEnumerable<string> getNames(JsType jsType)
-            {
-                return new List<string>
-                {
-                    from componentMeta in allMetadata.Value
-                    where componentMeta.TagName == scope.TagName
-                    from propMeta in componentMeta.Props
-                    where propMeta.ValueType == jsType
-                    select propMeta.Name
-                };
-            }
-        }
-    }
-
-
     public static IReadOnlyList<string> GetTagSuggestions()
     {
         return AllCustomComponents.Select(x => x.Name).ToList();
@@ -408,74 +313,6 @@ public static class Plugin
         return RunPluginMethods(TryGetIconForElementTreeNodes, scope, IconForElementTreeNode);
     }
 
-    static IEnumerable<Result<ComponentMeta>> GetAllTypesMetadata()
-    {
-        return from type in AllCustomComponents select createFrom(type);
-
-        static Result<ComponentMeta> createFrom(Type type)
-        {
-            var items =
-                from propertyInfo in type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly)
-                from props in createPropMetaFrom(propertyInfo)
-                select props;
-
-            return
-                from props in items.AsResult()
-                select new ComponentMeta
-                {
-                    TagName = type.Name,
-                    Props   = props.ToList()
-                };
-
-            static Result<PropMeta> createPropMetaFrom(PropertyInfo propertyInfo)
-            {
-                return
-                    from valueType in getValueType(propertyInfo)
-                    select new PropMeta
-                    {
-                        Name      = propertyInfo.Name,
-                        ValueType = valueType
-                    };
-
-                static Result<JsType> getValueType(PropertyInfo propertyInfo)
-                {
-                    var jsTypeInfoAttribute = propertyInfo.GetCustomAttribute<JsTypeInfoAttribute>();
-                    if (jsTypeInfoAttribute is not null)
-                    {
-                        return jsTypeInfoAttribute.JsType;
-                    }
-
-                    var propertyType = propertyInfo.PropertyType;
-                    if (propertyType == typeof(string))
-                    {
-                        return JsType.String;
-                    }
-
-                    if (propertyType.In(typeof(short), typeof(short?), typeof(int), typeof(int?), typeof(double), typeof(double?), typeof(long), typeof(long?)))
-                    {
-                        return JsType.Number;
-                    }
-
-                    if (propertyType.In(typeof(bool), typeof(bool?)))
-                    {
-                        return JsType.Boolean;
-                    }
-
-                    if (propertyType.In(typeof(DateTime), typeof(DateTime?)))
-                    {
-                        return JsType.Date;
-                    }
-
-                    if (propertyType == typeof(IEnumerable) || typeof(IEnumerable).IsSubclassOf(propertyType))
-                    {
-                        return JsType.Array;
-                    }
-
-                    return new NotImplementedException(propertyType.FullName);
-                }
-            }
-        }
-    }
 
     static IReadOnlyList<PluginMethod> GetPluginMethods<AttributeType>()
     {
@@ -501,20 +338,6 @@ public static class Plugin
         }
 
         return null;
-    }
-
-    record ComponentMeta
-    {
-        public IReadOnlyList<PropMeta> Props { get; init; }
-
-        public string TagName { get; init; }
-    }
-
-    record PropMeta
-    {
-        public string Name { get; init; }
-
-        public JsType ValueType { get; init; }
     }
 }
 

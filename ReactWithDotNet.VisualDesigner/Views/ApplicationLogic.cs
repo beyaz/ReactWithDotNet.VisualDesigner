@@ -147,16 +147,7 @@ static class ApplicationLogic
         };
 
 
-        IReadOnlyList <SuggestionItem>  pluginSuggestionItems;
-        {
-            var result = Plugin.GetPropSuggestions(scope);
-            if (result.HasError)
-            {
-                return result.Error;
-            }
-
-            pluginSuggestionItems = result.Value;
-        }
+      
 
         var variableSuggestionsInOutputFile = await GetVariableSuggestionsInOutputFile(componentId);
 
@@ -164,8 +155,6 @@ static class ApplicationLogic
         return new List<SuggestionItem>
         {
             variableSuggestionsInOutputFile.Value ?? [],
-
-            pluginSuggestionItems,
 
             scope.TagName is null
                 ? []
