@@ -161,9 +161,7 @@ public static class Plugin
 
     public static ScopeKey<ConfigModel> Config
         = nameof(Config);
-
-    delegate Task<Result<IReadOnlyList<string>>> GetStringSuggestionsDelegate(PropSuggestionScope scope);
-
+    
     public static IReadOnlyList<Type> AllCustomComponents
     {
         get
@@ -194,21 +192,7 @@ public static class Plugin
     {
         get { return field ??= GetPluginMethods<AfterReadConfigAttribute>(); }
     }
-
-    static IReadOnlyList<GetStringSuggestionsDelegate> GetStringSuggestionsMethods
-    {
-        get
-        {
-            return field ??= (
-                    from assembly in Plugins
-                    from type in assembly.GetTypes()
-                    from methodInfo in type.GetMethods(BindingFlags.Static | BindingFlags.Public)
-                    where methodInfo.GetCustomAttribute<GetStringSuggestionsAttribute>() is not null
-                    select (GetStringSuggestionsDelegate)Delegate.CreateDelegate(typeof(GetStringSuggestionsDelegate), methodInfo))
-                .ToList();
-        }
-    }
-
+    
     static IReadOnlyList<PluginMethod> IsImageList
     {
         get { return field ??= GetPluginMethods<IsImageAttribute>(); }
@@ -318,21 +302,6 @@ public static class Plugin
                     }
                 ]
             );
-
-
-            await foreach (var result in GetStringSuggestions(scope))
-            {
-                if (result.HasError)
-                {
-                    return result.Error;
-                }
-
-                suggestionItems.Add(new()
-                {
-                    jsType = JsType.String,
-                    value  = result.Value
-                });
-            }
 
             suggestionItems.AddRange
             (
@@ -536,16 +505,7 @@ public static class Plugin
 
         return items.ToList();
     }
-
-    static IAsyncEnumerable<Result<string>> GetStringSuggestions(PropSuggestionScope scope)
-    {
-        return
-            from method in GetStringSuggestionsMethods
-            from items in method(scope)
-            from item in items
-            select item;
-    }
-
+    
     static T RunPluginMethods<T>(IReadOnlyList<PluginMethod> pluginMethods, Scope scope, ScopeKey<T> returnKey) where T : class
     {
         foreach (var method in pluginMethods)

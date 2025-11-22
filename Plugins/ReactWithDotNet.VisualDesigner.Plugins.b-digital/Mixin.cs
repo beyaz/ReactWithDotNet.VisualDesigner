@@ -4,7 +4,6 @@ using System.Collections.Immutable;
 using System.Data;
 using Dapper;
 using Microsoft.Data.SqlClient;
-using ReactWithDotNet.VisualDesigner.DbModels;
 
 namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
@@ -124,27 +123,6 @@ static class Mixin
             return (true, $"getMessage(\"{propertyName}\")");
         }
     }
-
-    [GetStringSuggestions]
-    public static async Task<Result<IReadOnlyList<string>>> GetStringSuggestions(PropSuggestionScope scope)
-    {
-        var stringSuggestions = new List<string>();
-
-        var messagingGroupName = scope.Component.Config.Translate;
-
-        if (messagingGroupName.HasValue())
-        {
-            foreach (var item in await GetMessagingByGroupName(messagingGroupName))
-            {
-                // todo: think
-                //stringSuggestions.Add(item.Description);
-                //stringSuggestions.Add($"${item.PropertyName}$ {item.Description}");
-            }
-        }
-
-        return stringSuggestions;
-    }
-
     
     public static IReadOnlyList<string> GetUpdateStateLines(string jsVariableName, string jsValueName)
     {
