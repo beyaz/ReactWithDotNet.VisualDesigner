@@ -8,16 +8,17 @@ public class Fixer
     {
         Configuration.Extensions.Config = Configuration.Extensions.ReadConfig().Value;
 
-        const int projectId = 1;
-
-        foreach (var component in await Store.GetAllComponentsInProject(projectId))
+        foreach (var project in await Store.GetAllProjects())
         {
-            var visualElementModel = DeserializeFromYaml<VisualElementModel>(component.RootElementAsYaml);
-
-            await Store.Update(component with
+            foreach (var component in await Store.GetAllComponentsInProject(project.Id))
             {
-                RootElementAsYaml = SerializeToYaml(Fix(visualElementModel))
-            });
+                var visualElementModel = DeserializeFromYaml<VisualElementModel>(component.RootElementAsYaml);
+
+                await Store.Update(component with
+                {
+                    RootElementAsYaml = SerializeToYaml(Fix(visualElementModel))
+                });
+            }
         }
     }
 
@@ -27,7 +28,7 @@ public class Fixer
         {
             Properties = ChangePropName(model.Properties, "d-text", Design.Content)
         };
-        
+
         model = model with
         {
             Properties = ChangePropName(model.Properties, "d-text-preview", Design.ContentPreview)
