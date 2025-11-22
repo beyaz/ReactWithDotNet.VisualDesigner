@@ -174,6 +174,41 @@ sealed class ApplicationPreview : Component
                 }
             }
 
+            // try add content as child if has no child
+            if (model.HasNoChild())
+            {
+                Maybe<string> textPropValue, textPreviewValue;
+                {
+                    var properties = model.Properties;
+                
+                    var output = RemovePropInProps(properties, Design.Text);
+
+                    properties = output.props;
+                    
+                    textPropValue = output.removedPropValue;
+                
+                    output = RemovePropInProps(properties, Design.TextPreview);
+                    
+                    properties = output.props;
+                    
+                    textPreviewValue = output.removedPropValue;
+                    
+                    model = model with{ Properties = properties};
+                }
+
+                if (element is HtmlElement htmlElement)
+                {
+                    if (textPreviewValue.HasValue)
+                    {
+                        htmlElement.text = TryClearStringValue(textPreviewValue.Value);
+                    }
+                    else if (textPropValue.HasValue)
+                    {
+                        htmlElement.text = TryClearStringValue(textPropValue.Value);
+                    }
+                }
+            }
+            
             var designTimeProps =
                 from p in model.Properties
                 from x in ParseProperty(p)
