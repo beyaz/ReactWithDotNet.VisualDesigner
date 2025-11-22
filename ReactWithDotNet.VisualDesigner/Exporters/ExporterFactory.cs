@@ -62,7 +62,7 @@ static class ExporterFactory
         }
         
         return from tsCode in TsxExporter.CalculateElementTsxCode(projectId, componentConfig, visualElement)
-               from formattedTsCode in NodeJsBridge.FormatCode(tsCode, new (){ tabWidth = project.TabWidth})
+               from formattedTsCode in NodeJsBridge.FormatCode(tsCode, project.PrettierOptions)
                select formattedTsCode;
     }
 }

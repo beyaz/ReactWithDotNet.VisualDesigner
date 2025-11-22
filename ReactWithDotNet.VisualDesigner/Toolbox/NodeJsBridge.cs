@@ -7,10 +7,6 @@ using Microsoft.AspNetCore.Builder;
 
 namespace Toolbox;
 
-sealed class PrettierOptions
-{
-    public int? tabWidth { get; init; }
-}
 
 static class NodeJsBridge
 {
@@ -18,17 +14,22 @@ static class NodeJsBridge
 
     static readonly HttpClient HttpClient = new();
 
-    public static async Task<Result<string>> FormatCode(string code, PrettierOptions prettierOptions)
+    public static async Task<Result<string>> FormatCode(string code, string prettierOptions)
     {
         await StartServerIfNeeded();
+        
+        var options = new Dictionary<string, object>();
+        
+        if (!string.IsNullOrWhiteSpace(prettierOptions))
+        {
+            options = JsonSerializer.Deserialize<Dictionary<string, object>>(prettierOptions);
+        }
 
-     
+        var jsonSerializerOptions = new JsonSerializerOptions();
 
-        var options = new JsonSerializerOptions();
+        var requestObject = new { code, options };
 
-        var requestObject = new { code, options = prettierOptions };
-
-        var jsonPayload = JsonSerializer.Serialize(requestObject, options);
+        var jsonPayload = JsonSerializer.Serialize(requestObject, jsonSerializerOptions);
 
         var jsonContent = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
 
@@ -40,7 +41,7 @@ static class NodeJsBridge
 
             var responseContent = await httpResponseMessage.Content.ReadAsStringAsync();
             
-            response = JsonSerializer.Deserialize<Response>(responseContent, options);
+            response = JsonSerializer.Deserialize<Response>(responseContent, jsonSerializerOptions);
         }
         catch (Exception exception)
         {

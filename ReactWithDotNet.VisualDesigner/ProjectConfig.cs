@@ -20,7 +20,7 @@ public sealed record ProjectConfig
     
     public bool ExportAsCSharpString { get; init; }
 
-    public int TabWidth { get; init; } = 2;
+    public string PrettierOptions { get; init; }
     
     public string ProjectDirectory { get; init; }
 }

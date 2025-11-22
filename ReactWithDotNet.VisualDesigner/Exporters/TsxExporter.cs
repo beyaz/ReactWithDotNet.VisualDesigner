@@ -135,7 +135,7 @@ static class TsxExporter
             from file in GetComponentFileLocation(componentId, userName)
             from fileContentInDirectory in FileSystem.ReadAllLines(file.filePath)
             from source in CalculateElementTreeSourceCodes(project, data.Component.Config, rootVisualElement)
-            from formattedSourceLines in NodeJsBridge.FormatCode(string.Join(Environment.NewLine, source.elementTreeSourceLines), new (){ tabWidth = project.TabWidth})
+            from formattedSourceLines in NodeJsBridge.FormatCode(string.Join(Environment.NewLine, source.elementTreeSourceLines), project.PrettierOptions)
             let content = mergeImportLines(fileContentInDirectory, source.importLines)
             from fileContent in InjectRender(content, file.targetComponentName, formattedSourceLines.Split(Environment.NewLine.ToCharArray()))
             select new FileModel
