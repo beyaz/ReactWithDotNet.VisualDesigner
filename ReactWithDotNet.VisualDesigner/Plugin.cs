@@ -344,13 +344,9 @@ public static class Plugin
 
     public static IEnumerable<(string name, string value, JsType jsType)> GetPropSuggestions(string tag)
     {
-        var type = AllCustomComponents.FirstOrDefault(t => t.Name.Equals(tag, StringComparison.OrdinalIgnoreCase));
-        if (type is null)
-        {
-            return [];
-        }
-
         return
+            from type in AllCustomComponents
+            where type.Name.Equals(tag, StringComparison.OrdinalIgnoreCase)
             from p in type.GetProperties()
             from a in p.GetCustomAttributes<SuggestionsAttribute>()
             from jsTypeInfo in p.GetCustomAttributes<JsTypeInfoAttribute>()
