@@ -421,7 +421,7 @@ sealed class ApplicationPreview : Component
                     }
                 }
 
-                if (model.HasText() || model.GetDesignText().HasValue())
+                if (model.HasContent || model.GetDesignText().HasValue())
                 {
                     foreach (var item in tryGetPropValueFromCaller(scope, model, Design.Content))
                     {

@@ -19,22 +19,18 @@ static class Extensions
                 return query.FirstOrDefault();
             }
         }
+
+        public bool HasNoContent => model.Text.HasNoValue();
+        
+        public bool HasContent => model.Text.HasValue();
     }
 
     public static bool HasNoChild(this VisualElementModel model)
     {
         return model.Children is null || model.Children.Count == 0;
     }
+   
 
-    public static bool HasNoText(this VisualElementModel model)
-    {
-        return model.Text.HasNoValue();
-    }
-
-    public static bool HasText(this VisualElementModel model)
-    {
-        return model.Text.HasValue();
-    }
 
     public static VisualElementModel Modify(VisualElementModel root, VisualElementModel target, Func<VisualElementModel, VisualElementModel> modifyNode)
     {

@@ -415,7 +415,7 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
                 return new IconLink() + Size(16) + Color(Gray300);
             }
 
-            if (node.HasText())
+            if (node.HasContent)
             {
                 if (node.Tag[0] == 'h')
                 {
@@ -462,12 +462,12 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
                 return new IconFlexRow() + Size(16) + Color(Gray300);
             }
 
-            if (node.HasNoText() && styles.Count == 1 && hasHeightWithConstantValue)
+            if (node.HasNoContent && styles.Count == 1 && hasHeightWithConstantValue)
             {
                 return new IconSpaceVertical();
             }
 
-            if (node.HasNoText() && styles.Count == 1 && hasWidthWithConstantValue)
+            if (node.HasNoContent && styles.Count == 1 && hasWidthWithConstantValue)
             {
                 return new IconSpaceHorizontal();
             }

@@ -30,9 +30,9 @@ static class ModelToNodeTransformer
             properties = props.Value.ToImmutableList();
         }
 
-        var hasNoChildAndHasNoText = elementModel.Children.Count == 0 && elementModel.HasNoText();
+        var hasNoChildAndHasNoContent = elementModel.Children.Count == 0 && elementModel.HasNoContent;
 
-        if (hasNoChildAndHasNoText)
+        if (hasNoChildAndHasNoContent)
         {
             return new ReactNode
             {
@@ -47,7 +47,7 @@ static class ModelToNodeTransformer
         List<ReactNode> children = [];
         {
             // Add text content
-            if (elementModel.HasText())
+            if (elementModel.HasContent)
             {
                 children.Add(new()
                 {
