@@ -284,10 +284,8 @@ public static class Plugin
 
         static async Task<Result<IReadOnlyList<SuggestionItem>>> calculate(PropSuggestionScope scope)
         {
-            List<SuggestionItem> suggestionItems = [];
-            
-            suggestionItems.Add
-            (
+            var suggestionItems = new List<SuggestionItem>
+            {
                 from x in new[]
                 {
                     "2",
@@ -303,7 +301,7 @@ public static class Plugin
 
                     value = x
                 }
-            );
+            };
 
             suggestionItems.Add
             (
