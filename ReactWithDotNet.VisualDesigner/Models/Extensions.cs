@@ -4,6 +4,23 @@ namespace ReactWithDotNet.VisualDesigner.Models;
 
 static class Extensions
 {
+    extension(VisualElementModel model)
+    {
+        public string Text
+        {
+            get
+            {
+                var query =
+                    from p in model.Properties
+                    from v in TryParseProperty(p)
+                    where v.Name == Design.Content
+                    select v.Value;
+
+                return query.FirstOrDefault();
+            }
+        }
+    }
+    
     public static string GetText(this VisualElementModel model)
     {
         var query =
