@@ -4,7 +4,7 @@
 public class Fixer
 {
     [TestMethod]
-    public static async Task FixAll()
+    public async Task FixAll()
     {
         Configuration.Extensions.Config = Configuration.Extensions.ReadConfig().Value;
 
