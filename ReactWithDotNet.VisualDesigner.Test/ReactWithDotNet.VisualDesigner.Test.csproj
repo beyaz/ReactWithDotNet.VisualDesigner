@@ -31,7 +31,7 @@
   </ItemGroup>
 
 	<Target Name="Prettier" AfterTargets="Build">
-		<Exec Command="xcopy $(SolutionDir)TsxFormatter\*.* $(TargetDir)HelperApps\TsxFormatter\ /Y /S /E" />
+		<Exec Command="xcopy $(SolutionDir)NodeJsBridge\*.* $(TargetDir)HelperApps\NodeJsBridge\ /Y /S /E" />
 	</Target>
 
 </Project>
