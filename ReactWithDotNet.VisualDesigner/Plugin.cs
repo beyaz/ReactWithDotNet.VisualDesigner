@@ -123,10 +123,6 @@ public sealed class AfterReadConfigAttribute : Attribute
 {
 }
 
-[AttributeUsage(AttributeTargets.Method)]
-public sealed class GetStringSuggestionsAttribute : Attribute
-{
-}
 
 public sealed record PropSuggestionScope
 {
