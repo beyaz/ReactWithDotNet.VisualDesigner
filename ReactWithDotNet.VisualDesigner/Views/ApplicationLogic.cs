@@ -209,11 +209,9 @@ static class ApplicationLogic
         return new List<SuggestionItem>
         {
             from name in project.Styles.Keys
-            select new SuggestionItem()
+            select new SuggestionItem
             {
-                name = name,
-
-                isVariable = true
+                name = name
             },
             
             // z-index 1 to 10

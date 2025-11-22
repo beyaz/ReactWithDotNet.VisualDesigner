@@ -25,6 +25,21 @@ static class Extensions
         public bool HasContent => model.Content.HasValue();
 
         public bool HasNoChild => model.Children is null || model.Children.Count == 0;
+        
+        
+        public string DesignTimeContent
+        {
+            get
+            {
+                var query =
+                    from p in model.Properties
+                    from v in TryParseProperty(p)
+                    where v.Name == Design.ContentPreview
+                    select v.Value;
+
+                return query.FirstOrDefault();
+            }
+        }
     }
 
    

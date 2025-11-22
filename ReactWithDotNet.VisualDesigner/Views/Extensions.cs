@@ -72,15 +72,4 @@ static class Extensions
 
         return node;
     }
-    
-    public static string GetDesignText(this VisualElementModel model)
-    {
-        var query =
-            from p in model.Properties
-            from v in TryParseProperty(p)
-            where v.Name == Design.ContentPreview
-            select v.Value;
-
-        return query.FirstOrDefault();
-    }
 }

@@ -421,14 +421,14 @@ sealed class ApplicationPreview : Component
                     }
                 }
 
-                if (model.HasContent || model.GetDesignText().HasValue())
+                if (model.HasContent || model.DesignTimeContent.HasValue())
                 {
                     foreach (var item in tryGetPropValueFromCaller(scope, model, Design.Content))
                     {
                         return item;
                     }
 
-                    var text = TryClearStringValue(model.GetDesignText() ?? model.Content);
+                    var text = TryClearStringValue(model.DesignTimeContent ?? model.Content);
                     if (!isUnknownValue(text))
                     {
                         return text;
