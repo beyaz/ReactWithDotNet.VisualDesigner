@@ -12,7 +12,7 @@ public sealed class ExporterTest
         {
             Tag        = "div",
             Styles     = ["color: red", "background: blue",  "hover:background: yellow"],
-            Properties = ["d-text: | Abc"]
+            Properties = [$"{Design.Content}: | Abc"]
         };
 
         string[] expected =

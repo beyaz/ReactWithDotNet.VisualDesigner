@@ -25,7 +25,7 @@ public sealed class CSharpExporterTest
         {
             Tag        = "div",
             Styles     = ["color: red", "background: rgb(2,3,6)", "hover:color:blue"],
-            Properties = ["d-text: | Abc"]
+            Properties = [$"{Design.Content}: | Abc"]
         };
 
         string[] expected =
