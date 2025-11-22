@@ -436,7 +436,8 @@ public static class Extensions
             return false;
         }
 
-        return (value.StartsWith("'") && value.EndsWith("'")) || (value.StartsWith("\"") && value.EndsWith("\""));
+        return (value.StartsWith("'") && value.EndsWith("'") && value.Length > 1) || 
+               (value.StartsWith("\"") && value.EndsWith("\"") && value.Length > 1);
     }
 
     public static bool IsTrue(this Maybe<bool> maybe)
