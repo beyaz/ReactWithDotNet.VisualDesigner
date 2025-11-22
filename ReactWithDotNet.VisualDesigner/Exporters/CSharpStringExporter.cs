@@ -333,10 +333,10 @@ static class CSharpStringExporter
                     node = node with { Properties = node.Properties.Remove(childrenProperty) };
                 }
 
-                var textProperty = node.Properties.FirstOrDefault(x => x.Name == Design.Content);
-                if (textProperty is not null)
+                var contentProp = node.Properties.FirstOrDefault(x => x.Name == Design.Content);
+                if (contentProp is not null)
                 {
-                    node = node with { Properties = node.Properties.Remove(textProperty) };
+                    node = node with { Properties = node.Properties.Remove(contentProp) };
                 }
 
                 var hasNoBody = node.Children.Count == 0 && node.Text.HasNoValue() && childrenProperty is null && node.Properties.Count == 0;
@@ -541,10 +541,10 @@ static class CSharpStringExporter
                 node = node with { Properties = node.Properties.Remove(childrenProperty) };
             }
 
-            var textProperty = node.Properties.FirstOrDefault(x => x.Name == Design.Content);
-            if (textProperty is not null)
+            var contentProp = node.Properties.FirstOrDefault(x => x.Name == Design.Content);
+            if (contentProp is not null)
             {
-                node = node with { Properties = node.Properties.Remove(textProperty) };
+                node = node with { Properties = node.Properties.Remove(contentProp) };
             }
 
             var hasNoBody = node.Children.Count == 0 && node.Text.HasNoValue() && childrenProperty is null;
