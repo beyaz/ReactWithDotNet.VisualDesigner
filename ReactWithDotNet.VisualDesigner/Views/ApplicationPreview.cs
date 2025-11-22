@@ -175,7 +175,7 @@ sealed class ApplicationPreview : Component
             }
 
             // try add content as child if has no child
-            if (model.HasNoChild())
+            if (model.HasNoChild)
             {
                 Maybe<string> textPropValue, textPreviewValue;
                 {
@@ -347,7 +347,7 @@ sealed class ApplicationPreview : Component
                 }
             }
 
-            if (model.HasNoChild())
+            if (model.HasNoChild)
             {
                 return element;
             }

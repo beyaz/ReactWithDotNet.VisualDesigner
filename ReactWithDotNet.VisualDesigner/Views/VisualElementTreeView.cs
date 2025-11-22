@@ -301,7 +301,7 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
             Id(path),
             OnClick(ToggleFold)
         };
-        if (path == "0" || node.HasNoChild())
+        if (path == "0" || node.HasNoChild)
         {
             foldIcon = null;
         }
@@ -366,7 +366,7 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
             }
         };
 
-        if (node.HasNoChild())
+        if (node.HasNoChild)
         {
             return returnList;
         }

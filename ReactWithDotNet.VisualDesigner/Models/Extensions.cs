@@ -23,12 +23,11 @@ static class Extensions
         public bool HasNoContent => model.Text.HasNoValue();
         
         public bool HasContent => model.Text.HasValue();
+
+        public bool HasNoChild => model.Children is null || model.Children.Count == 0;
     }
 
-    public static bool HasNoChild(this VisualElementModel model)
-    {
-        return model.Children is null || model.Children.Count == 0;
-    }
+   
    
 
 
