@@ -2404,7 +2404,7 @@ sealed class ApplicationView : Component<ApplicationState>
                 return $"ComponentNotFound-id:{state.ComponentId}";
             }
 
-            var result = await ExporterFactory.CalculateElementSourceCode(state.ProjectId, componentEntity.Config, CurrentVisualElement);
+            var result = await ExporterFactory.CalculateElementSourceCode(state.ComponentId ,state.ProjectId, componentEntity.Config, CurrentVisualElement);
             if (result.HasError)
             {
                 return result.Error.Message;

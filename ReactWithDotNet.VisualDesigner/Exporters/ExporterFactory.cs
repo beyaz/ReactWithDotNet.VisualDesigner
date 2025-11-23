@@ -47,21 +47,21 @@ static class ExporterFactory
         
         return TsxExporter.GetComponentLineIndexPointsInTsxFile(fileContent, targetComponentName);
     }
-    public static  Task<Result<string>> CalculateElementSourceCode(int projectId, ComponentConfig componentConfig, VisualElementModel visualElement)
+    public static  Task<Result<string>> CalculateElementSourceCode(int componentId,int projectId, ComponentConfig componentConfig, VisualElementModel visualElement)
     {
         var project = GetProjectConfig(projectId);
         
         if (project.ExportAsCSharp)
         {
-            return  CSharpExporter.CalculateElementTsxCode(projectId, componentConfig, visualElement);
+            return  CSharpExporter.CalculateElementTsxCode(componentId,projectId, componentConfig, visualElement);
         }
         
         if (project.ExportAsCSharpString)
         {
-            return  CSharpStringExporter.CalculateElementTsxCode(projectId, componentConfig, visualElement);
+            return  CSharpStringExporter.CalculateElementTsxCode(componentId,projectId, componentConfig, visualElement);
         }
         
-        return from tsCode in TsxExporter.CalculateElementTsxCode(projectId, componentConfig, visualElement)
+        return from tsCode in TsxExporter.CalculateElementTsxCode(componentId,projectId, componentConfig, visualElement)
                from formattedTsCode in NodeJsBridge.FormatCode(tsCode, project.PrettierOptions)
                select formattedTsCode;
     }

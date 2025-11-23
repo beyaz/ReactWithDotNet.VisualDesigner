@@ -5,16 +5,30 @@ namespace ReactWithDotNet.VisualDesigner.Exporters;
 
 static class ModelToNodeTransformer
 {
-    public static async Task<Result<ReactNode>> ConvertVisualElementModelToReactNodeModel(ProjectConfig project, VisualElementModel elementModel)
+    public static async Task<Result<ReactNode>> ConvertVisualElementModelToReactNodeModel(int componentId,ProjectConfig project, VisualElementModel elementModel)
     {
         var htmlElementType = TryGetHtmlElementTypeByTagName(elementModel.Tag);
+
+        var variableSuggestionsInOutputFile =( await GetVariableSuggestionsInOutputFile(componentId)).Value ??[];
+
+        bool IsStyleValueLocatedAtOutputFile(string styleValue)
+        {
+            if (styleValue.StartsWith("request.") || 
+                styleValue.StartsWith("context.") || 
+                styleValue.Contains("(index)")) // todo: think better
+            {
+                return true;
+            }
+
+            return false;
+        }
 
         ImmutableList<ReactProperty> properties;
         {
             var props = project switch
             {
                 _ when project.ExportStylesAsInline || project.ExportAsCSharp || project.ExportAsCSharpString
-                    => calculatePropsForInlineStyle(project, elementModel.Properties, elementModel.Styles),
+                    => calculatePropsForInlineStyle(project, elementModel.Properties, elementModel.Styles, IsStyleValueLocatedAtOutputFile),
 
                 _ when project.ExportStylesAsTailwind
                     => calculatePropsForTailwind(project, elementModel.Properties, elementModel.Styles),
@@ -62,7 +76,7 @@ static class ModelToNodeTransformer
             {
                 ReactNode childNode;
                 {
-                    var result = await ConvertVisualElementModelToReactNodeModel(project, child);
+                    var result = await ConvertVisualElementModelToReactNodeModel(componentId,project, child);
                     if (result.HasError)
                     {
                         return result.Error;
@@ -86,7 +100,7 @@ static class ModelToNodeTransformer
             Children = children.ToImmutableList()
         };
 
-        static Result<IReadOnlyList<ReactProperty>> calculatePropsForInlineStyle(ProjectConfig project, IReadOnlyList<string> properties, IReadOnlyList<string> styles)
+        static Result<IReadOnlyList<ReactProperty>> calculatePropsForInlineStyle(ProjectConfig project, IReadOnlyList<string> properties, IReadOnlyList<string> styles, Func<string, bool> isStyleValueLocatedAtOutputFile)
         {
             var styleProp = project switch
             {
@@ -99,7 +113,7 @@ static class ModelToNodeTransformer
                         from item in CreateDesignerStyleItemFromText(project, text)
                         from finalCssItem in item.FinalCssItems
                         from finalCssItem1 in ReprocessFontWeight(finalCssItem)
-                        from value in RecalculateCssValueForOutput(finalCssItem1.Name, finalCssItem1.Value)
+                        from value in RecalculateCssValueForOutput(finalCssItem1.Name, finalCssItem1.Value, isStyleValueLocatedAtOutputFile)
                         select $"{KebabToCamelCase(finalCssItem.Name)}: {value}"
                     )
                     select (listOfStyleAttributes.Count > 0) switch
@@ -239,7 +253,7 @@ static class ModelToNodeTransformer
                 return Result.From(finalCssItem);
             }
 
-            static Result<string> RecalculateCssValueForOutput(string name, string value)
+            static Result<string> RecalculateCssValueForOutput(string name, string value, Func<string, bool> isStyleValueLocatedAtOutputFile)
             {
                 var parseResult = TryParseConditionalValue(value);
                 if (parseResult.success)
@@ -255,8 +269,8 @@ static class ModelToNodeTransformer
                     }
 
                     return
-                        from left in RecalculateCssValueForOutput(name, parseResult.left)
-                        from right in RecalculateCssValueForOutput(name, parseResult.right)
+                        from left in RecalculateCssValueForOutput(name, parseResult.left, isStyleValueLocatedAtOutputFile)
+                        from right in RecalculateCssValueForOutput(name, parseResult.right, isStyleValueLocatedAtOutputFile)
                         select $"{parseResult.condition} ? {left} : {right}";
                 }
 

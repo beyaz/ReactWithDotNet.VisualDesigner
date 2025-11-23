@@ -5,12 +5,12 @@ namespace ReactWithDotNet.VisualDesigner.Exporters;
 
 static class TsxExporter
 {
-    public static async Task<Result<string>> CalculateElementTsxCode(int projectId, ComponentConfig componentConfig, VisualElementModel visualElement)
+    public static async Task<Result<string>> CalculateElementTsxCode(int componentId, int projectId, ComponentConfig componentConfig, VisualElementModel visualElement)
     {
         var project = GetProjectConfig(projectId);
 
         return
-            from x in await CalculateElementTreeSourceCodes(project, componentConfig, visualElement)
+            from x in await CalculateElementTreeSourceCodes(componentId, project, componentConfig, visualElement)
             select string.Join(Environment.NewLine, x.elementTreeSourceLines);
     }
 
@@ -89,11 +89,11 @@ static class TsxExporter
 
     internal static
         Task<Result<(IReadOnlyList<string> elementTreeSourceLines, IReadOnlyList<string> importLines)>>
-        CalculateElementTreeSourceCodes(ProjectConfig project, ComponentConfig componentConfig, VisualElementModel rootVisualElement)
+        CalculateElementTreeSourceCodes(int componentId,ProjectConfig project, ComponentConfig componentConfig, VisualElementModel rootVisualElement)
     {
         return
             // Convert model to node
-            from rootNode in ModelToNodeTransformer.ConvertVisualElementModelToReactNodeModel(project, rootVisualElement)
+            from rootNode in ModelToNodeTransformer.ConvertVisualElementModelToReactNodeModel(componentId,project, rootVisualElement)
 
             // Analyze node
             from nodeAnalyzeOutput  in AnalyzeNode(new()
@@ -134,7 +134,7 @@ static class TsxExporter
             from rootVisualElement in GetComponentUserOrMainVersionAsync(componentId, userName)
             from file in GetComponentFileLocation(componentId, userName)
             from fileContentInDirectory in FileSystem.ReadAllLines(file.filePath)
-            from source in CalculateElementTreeSourceCodes(project, data.Component.Config, rootVisualElement)
+            from source in CalculateElementTreeSourceCodes(componentId, project, data.Component.Config, rootVisualElement)
             from formattedSourceLines in NodeJsBridge.FormatCode(string.Join(Environment.NewLine, source.elementTreeSourceLines), project.PrettierOptions)
             let content = mergeImportLines(fileContentInDirectory, source.importLines)
             from fileContent in InjectRender(content, file.targetComponentName, formattedSourceLines.Split(Environment.NewLine.ToCharArray()))
