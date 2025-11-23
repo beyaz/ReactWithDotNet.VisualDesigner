@@ -106,7 +106,7 @@ sealed class BDigitalDialog : PluginComponentBase
             {
                 htmlElement.style.Add(BorderTop(1,solid,rgba(0, 0, 0, 0.12)));
 
-                htmlElement += DisplayFlex + JustifyContentFlexEnd + Padding(8);
+                htmlElement += DisplayFlex + JustifyContentFlexEnd + Padding(8) + Gap(8);
 
                 children.Remove(htmlElement);
 
