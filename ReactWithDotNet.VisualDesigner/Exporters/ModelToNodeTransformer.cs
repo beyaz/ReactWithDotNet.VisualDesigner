@@ -5,8 +5,12 @@ namespace ReactWithDotNet.VisualDesigner.Exporters;
 
 static class ModelToNodeTransformer
 {
-    public static async Task<Result<ReactNode>> ConvertVisualElementModelToReactNodeModel(ComponentScope componentScope,int componentId,ProjectConfig project, VisualElementModel elementModel)
+    public static async Task<Result<ReactNode>> ConvertVisualElementModelToReactNodeModel(ComponentScope componentScope,int componentId2,ProjectConfig project2, VisualElementModel elementModel)
     {
+        var componentId = componentScope.ComponentId;
+        
+        var project = componentScope.ProjectConfig;
+        
         var htmlElementType = TryGetHtmlElementTypeByTagName(elementModel.Tag);
 
         bool IsStyleValueLocatedAtOutputFile(string styleValue)
