@@ -5,10 +5,8 @@ namespace ReactWithDotNet.VisualDesigner.Exporters;
 
 static class ModelToNodeTransformer
 {
-    public static async Task<Result<ReactNode>> ConvertVisualElementModelToReactNodeModel(ComponentScope componentScope,int componentId2,ProjectConfig project2, VisualElementModel elementModel)
+    public static async Task<Result<ReactNode>> ConvertVisualElementModelToReactNodeModel(ComponentScope componentScope, VisualElementModel elementModel)
     {
-        var componentId = componentScope.ComponentId;
-        
         var project = componentScope.ProjectConfig;
         
         var htmlElementType = TryGetHtmlElementTypeByTagName(elementModel.Tag);
@@ -78,7 +76,7 @@ static class ModelToNodeTransformer
             {
                 ReactNode childNode;
                 {
-                    var result = await ConvertVisualElementModelToReactNodeModel(componentScope,componentId,project, child);
+                    var result = await ConvertVisualElementModelToReactNodeModel(componentScope, child);
                     if (result.HasError)
                     {
                         return result.Error;

@@ -93,7 +93,7 @@ static class TsxExporter
     {
         return
             // Convert model to node
-            from rootNode in ModelToNodeTransformer.ConvertVisualElementModelToReactNodeModel(componentScope, componentId,project, rootVisualElement)
+            from rootNode in ModelToNodeTransformer.ConvertVisualElementModelToReactNodeModel(componentScope, rootVisualElement)
 
             // Analyze node
             from nodeAnalyzeOutput  in AnalyzeNode(new()
