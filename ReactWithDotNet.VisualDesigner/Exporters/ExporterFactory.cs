@@ -32,7 +32,7 @@ static class ExporterFactory
         
         if (project.ExportAsCSharp)
         {
-            return await CSharpExporter.ExportToFileSystem(input);
+            return await CSharpExporter.ExportToFileSystem(componentScope, input);
         }
 
         if (project.ExportAsCSharpString)

@@ -20,14 +20,14 @@ static class CSharpExporter
         var project = GetProjectConfig(projectId);
 
         return
-            from x in await CalculateElementTreeSourceCodes(componentId,project, componentConfig, visualElement)
+            from x in await CalculateElementTreeSourceCodes( componentScope,componentId,project, componentConfig, visualElement)
             select string.Join(Environment.NewLine, x.elementTreeSourceLines);        
     }
 
-    public static Task<Result<(bool HasChange,FileModel File)>> ExportToFileSystem(ExportInput input)
+    public static Task<Result<(bool HasChange,FileModel File)>> ExportToFileSystem(ComponentScope componentScope, ExportInput input)
     {
         return
-            from file in CalculateExportInfo(input)
+            from file in CalculateExportInfo(componentScope,input)
             from fileContentAtDisk in FileSystem.ReadAllText(file.Path)
             select IsEqualsIgnoreWhitespace(fileContentAtDisk, file.Content) switch
             {
@@ -99,7 +99,8 @@ static class CSharpExporter
         return new ArgumentException($"ComponentDeclarationNotFoundInFile. {targetComponentName}");
     }
 
-    internal static Task<Result<(IReadOnlyList<string> elementTreeSourceLines, IReadOnlyList<string> importLines)>> CalculateElementTreeSourceCodes(int componentId,ProjectConfig project, ComponentConfig componentConfig, VisualElementModel rootVisualElement)
+    internal static Task<Result<(IReadOnlyList<string> elementTreeSourceLines, IReadOnlyList<string> importLines)>> 
+        CalculateElementTreeSourceCodes(ComponentScope componentScope, int componentId,ProjectConfig project, ComponentConfig componentConfig, VisualElementModel rootVisualElement)
     {
         return
             // Convert model to node
@@ -115,7 +116,7 @@ static class CSharpExporter
             select (elementJsxTree, Enumerable.Empty<string>().AsReadOnlyList());
     }
 
-    static async Task<Result<FileModel>> CalculateExportInfo(ExportInput input)
+    static async Task<Result<FileModel>> CalculateExportInfo(ComponentScope componentScope,ExportInput input)
     {
         var (projectId, componentId, userName) = input;
 
@@ -126,7 +127,7 @@ static class CSharpExporter
             from rootVisualElement in GetComponentUserOrMainVersionAsync(componentId, userName)
             from file in GetComponentFileLocation(componentId, userName)
             from fileContentInDirectory in FileSystem.ReadAllLines(file.filePath)
-            from source in CalculateElementTreeSourceCodes(componentId,project, data.Component.Config, rootVisualElement)
+            from source in CalculateElementTreeSourceCodes(componentScope,componentId,project, data.Component.Config, rootVisualElement)
             from fileContent in InjectRender(fileContentInDirectory, file.targetComponentName, source.elementTreeSourceLines)
             select new FileModel
             {
