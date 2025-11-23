@@ -63,7 +63,7 @@ static class ExporterFactory
         
         return TsxExporter.GetComponentLineIndexPointsInTsxFile(fileContent, targetComponentName);
     }
-    public static  Task<Result<string>> CalculateElementSourceCode(int componentId,int projectId, ComponentConfig componentConfig, VisualElementModel visualElement)
+    public static  Task<Result<string>> CalculateElementSourceCode(ComponentScope componentScope, int componentId,int projectId, ComponentConfig componentConfig, VisualElementModel visualElement)
     {
         var project = GetProjectConfig(projectId);
         

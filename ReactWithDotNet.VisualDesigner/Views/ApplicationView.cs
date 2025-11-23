@@ -2413,16 +2413,16 @@ sealed class ApplicationView : Component<ApplicationState>
                 return $"ComponentNotFound-id:{state.ComponentId}";
             }
 
-            var exportInput = new ExportInput
+            var componentScope = new ComponentScope
             {
-                ProjectId = state.ProjectId,
+                ProjectId = componentEntity.ProjectId,
 
-                ComponentId = state.ComponentId,
+                ComponentId = componentEntity.Id,
 
-                UserName = state.UserName
+                ComponentConfig = componentEntity.Config
             };
             
-            var result = await ExporterFactory.CalculateElementSourceCode(state.ComponentId ,state.ProjectId, componentEntity.Config, CurrentVisualElement);
+            var result = await ExporterFactory.CalculateElementSourceCode(componentScope,state.ComponentId ,state.ProjectId, componentEntity.Config, CurrentVisualElement);
             if (result.HasError)
             {
                 return result.Error.Message;

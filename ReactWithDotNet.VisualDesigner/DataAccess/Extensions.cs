@@ -30,3 +30,12 @@ static class Extensions
         return x.Component.RootElementAsYaml;
     }
 }
+
+public sealed record ComponentScope
+{
+    public required int ProjectId { get; init; }
+    
+    public required int ComponentId { get; init; }
+    
+    public required ComponentConfig ComponentConfig  { get; init; }
+}
