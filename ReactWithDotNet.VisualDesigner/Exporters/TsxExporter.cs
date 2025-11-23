@@ -5,7 +5,7 @@ namespace ReactWithDotNet.VisualDesigner.Exporters;
 
 static class TsxExporter
 {
-    public static async Task<Result<string>> CalculateElementTsxCode(int componentId, int projectId, ComponentConfig componentConfig, VisualElementModel visualElement)
+    public static async Task<Result<string>> CalculateElementTsxCode(ComponentScope componentScope, int componentId, int projectId, ComponentConfig componentConfig, VisualElementModel visualElement)
     {
         var project = GetProjectConfig(projectId);
 

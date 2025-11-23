@@ -15,7 +15,7 @@ static class CSharpExporter
         public bool IsStandardAssignment { get; init; }
         public string Text { get; init; }
     }
-    public static async Task<Result<string>> CalculateElementTsxCode(int componentId,int projectId, ComponentConfig componentConfig, VisualElementModel visualElement)
+    public static async Task<Result<string>> CalculateElementTsxCode(ComponentScope componentScope,int componentId,int projectId, ComponentConfig componentConfig, VisualElementModel visualElement)
     {        
         var project = GetProjectConfig(projectId);
 

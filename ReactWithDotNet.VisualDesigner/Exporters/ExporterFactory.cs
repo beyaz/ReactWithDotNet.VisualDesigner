@@ -69,15 +69,15 @@ static class ExporterFactory
         
         if (project.ExportAsCSharp)
         {
-            return  CSharpExporter.CalculateElementTsxCode(componentId,projectId, componentConfig, visualElement);
+            return  CSharpExporter.CalculateElementTsxCode(componentScope,componentId,projectId, componentConfig, visualElement);
         }
         
         if (project.ExportAsCSharpString)
         {
-            return  CSharpStringExporter.CalculateElementTsxCode(componentId,projectId, componentConfig, visualElement);
+            return  CSharpStringExporter.CalculateElementTsxCode(componentScope,componentId,projectId, componentConfig, visualElement);
         }
         
-        return from tsCode in TsxExporter.CalculateElementTsxCode(componentId,projectId, componentConfig, visualElement)
+        return from tsCode in TsxExporter.CalculateElementTsxCode(componentScope,componentId,projectId, componentConfig, visualElement)
                from formattedTsCode in NodeJsBridge.FormatCode(tsCode, project.PrettierOptions)
                select formattedTsCode;
     }
