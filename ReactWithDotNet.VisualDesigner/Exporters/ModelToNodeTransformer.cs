@@ -98,8 +98,10 @@ static class ModelToNodeTransformer
             Children = children.ToImmutableList()
         };
 
-        static Result<IReadOnlyList<ReactProperty>> calculatePropsForInlineStyle(ComponentScope componentScope, ProjectConfig project, IReadOnlyList<string> properties, IReadOnlyList<string> styles, Func<string, bool> isStyleValueLocatedAtOutputFile)
+        static Result<IReadOnlyList<ReactProperty>> calculatePropsForInlineStyle(ComponentScope componentScope, ProjectConfig project2, IReadOnlyList<string> properties, IReadOnlyList<string> styles, Func<string, bool> isStyleValueLocatedAtOutputFile)
         {
+            var project = componentScope.ProjectConfig;
+            
             var styleProp = project switch
             {
                 { ExportStylesAsInline: true } =>
