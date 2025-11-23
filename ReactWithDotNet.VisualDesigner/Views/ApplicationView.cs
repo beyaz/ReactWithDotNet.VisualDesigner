@@ -1229,6 +1229,14 @@ sealed class ApplicationView : Component<ApplicationState>
                                 return;
                             }
 
+                            var componentScope = await GetComponentScope(state.ComponentId);
+                            if (componentScope.HasError)
+                            {
+                                this.FailNotification(componentScope.Error.Message);
+
+                                return;
+                            }
+                            
                             var exportInput = new ExportInput
                             {
                                 ProjectId = state.ProjectId,
@@ -1238,7 +1246,7 @@ sealed class ApplicationView : Component<ApplicationState>
                                 UserName = state.UserName
                             };
                             
-                            var result = await ExporterFactory.ExportToFileSystem(exportInput);
+                            var result = await ExporterFactory.ExportToFileSystem(componentScope.Value,exportInput);
                             if (result.HasError)
                             {
                                 this.FailNotification(result.Error.Message);
@@ -2413,16 +2421,13 @@ sealed class ApplicationView : Component<ApplicationState>
                 return $"ComponentNotFound-id:{state.ComponentId}";
             }
 
-            var componentScope = new ComponentScope
+            var componentScope = await GetComponentScope(state.ComponentId);
+            if (componentScope.HasError)
             {
-                ProjectId = componentEntity.ProjectId,
-
-                ComponentId = componentEntity.Id,
-
-                ComponentConfig = componentEntity.Config
-            };
+                return componentScope.Error.Message;
+            }
             
-            var result = await ExporterFactory.CalculateElementSourceCode(componentScope,state.ComponentId ,state.ProjectId, componentEntity.Config, CurrentVisualElement);
+            var result = await ExporterFactory.CalculateElementSourceCode(componentScope.Value,state.ComponentId ,state.ProjectId, componentEntity.Config, CurrentVisualElement);
             if (result.HasError)
             {
                 return result.Error.Message;

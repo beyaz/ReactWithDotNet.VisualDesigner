@@ -10,14 +10,14 @@ static class TsxExporter
         var project = GetProjectConfig(projectId);
 
         return
-            from x in await CalculateElementTreeSourceCodes(componentId, project, componentConfig, visualElement)
+            from x in await CalculateElementTreeSourceCodes(componentScope,componentId, project, componentConfig, visualElement)
             select string.Join(Environment.NewLine, x.elementTreeSourceLines);
     }
 
-    public static Task<Result<(bool HasChange,FileModel File)>> ExportToFileSystem(ExportInput input)
+    public static Task<Result<(bool HasChange,FileModel File)>> ExportToFileSystem(ComponentScope componentScope, ExportInput input)
     {
         return
-            from file in CalculateExportInfo(input)
+            from file in CalculateExportInfo(componentScope,input)
             from fileContentAtDisk in FileSystem.ReadAllText(file.Path)
             select IsEqualsIgnoreWhitespace(fileContentAtDisk, file.Content) switch
             {
@@ -89,7 +89,7 @@ static class TsxExporter
 
     internal static
         Task<Result<(IReadOnlyList<string> elementTreeSourceLines, IReadOnlyList<string> importLines)>>
-        CalculateElementTreeSourceCodes(int componentId,ProjectConfig project, ComponentConfig componentConfig, VisualElementModel rootVisualElement)
+        CalculateElementTreeSourceCodes(ComponentScope componentScope,int componentId,ProjectConfig project, ComponentConfig componentConfig, VisualElementModel rootVisualElement)
     {
         return
             // Convert model to node
@@ -122,7 +122,7 @@ static class TsxExporter
             select (elementJsxTree, nodeAnalyzeOutput.TsImportCollection.ToTsLines());
     }
 
-    static async Task<Result<FileModel>> CalculateExportInfo(ExportInput input)
+    static async Task<Result<FileModel>> CalculateExportInfo(ComponentScope componentScope, ExportInput input)
     {
         var (projectId, componentId, userName) = input;
 
@@ -134,7 +134,7 @@ static class TsxExporter
             from rootVisualElement in GetComponentUserOrMainVersionAsync(componentId, userName)
             from file in GetComponentFileLocation(componentId, userName)
             from fileContentInDirectory in FileSystem.ReadAllLines(file.filePath)
-            from source in CalculateElementTreeSourceCodes(componentId, project, data.Component.Config, rootVisualElement)
+            from source in CalculateElementTreeSourceCodes(componentScope,componentId, project, data.Component.Config, rootVisualElement)
             from formattedSourceLines in NodeJsBridge.FormatCode(string.Join(Environment.NewLine, source.elementTreeSourceLines), project.PrettierOptions)
             let content = mergeImportLines(fileContentInDirectory, source.importLines)
             from fileContent in InjectRender(content, file.targetComponentName, formattedSourceLines.Split(Environment.NewLine.ToCharArray()))

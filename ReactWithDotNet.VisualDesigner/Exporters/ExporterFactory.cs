@@ -22,7 +22,7 @@ public sealed record ExportInput
 
 static class ExporterFactory
 {
-    public static async Task<Result<(bool HasChange,FileModel File)>> ExportToFileSystem(ExportInput input)
+    public static async Task<Result<(bool HasChange,FileModel File)>> ExportToFileSystem(ComponentScope componentScope, ExportInput input)
     {
         var project = GetProjectConfig(input.ProjectId);
         if (project is null)
@@ -40,7 +40,7 @@ static class ExporterFactory
             return await CSharpStringExporter.ExportToFileSystem(input);
         }
         
-        return await TsxExporter.ExportToFileSystem(input);
+        return await TsxExporter.ExportToFileSystem(componentScope, input);
     }
 
     public static Result<SourceLinePoints> GetComponentLineIndexPointsInSourceFile(int projectId, IReadOnlyList<string> fileContent, string targetComponentName)

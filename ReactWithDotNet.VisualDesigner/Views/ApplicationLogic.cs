@@ -5,6 +5,23 @@ namespace ReactWithDotNet.VisualDesigner.Views;
 
 static class ApplicationLogic
 {
+    public static async Task<Result<ComponentScope>> GetComponentScope(int componentId)
+    {
+        var componentEntity = await Store.TryGetComponent(componentId);
+        if (componentEntity is null)
+        {
+            return new Exception($"ComponentNotFound-id:{componentId}");
+        }
+        
+        return new ComponentScope
+        {
+            ProjectId = componentEntity.ProjectId,
+
+            ComponentId = componentEntity.Id,
+
+            ComponentConfig = componentEntity.Config
+        };
+    }
     public static async Task<Result<Unit>> CommitComponent(ApplicationState state)
     {
         ComponentEntity component;
