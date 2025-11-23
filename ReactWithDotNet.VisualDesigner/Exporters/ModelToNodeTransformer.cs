@@ -1,5 +1,7 @@
-﻿using System.Collections.Immutable;
+﻿using System.Collections;
 using Newtonsoft.Json;
+using ReactWithDotNet.VisualDesigner.CssDomain;
+using System.Collections.Immutable;
 
 namespace ReactWithDotNet.VisualDesigner.Exporters;
 
@@ -111,12 +113,20 @@ static class ModelToNodeTransformer
                     from listOfStyleAttributes in ListFrom
                     (
                         from text in styles
-                        where !Design.IsDesignTimeName(ParseStyleAttribute(text).Name)
-                        from item in CreateDesignerStyleItemFromText(project, text)
-                        from finalCssItem in item.FinalCssItems
-                        from finalCssItem1 in ReprocessFontWeight(finalCssItem)
-                        from value in RecalculateCssValueForOutput(finalCssItem1.Name, finalCssItem1.Value, isStyleValueLocatedAtOutputFile)
-                        select $"{KebabToCamelCase(finalCssItem.Name)}: {value}"
+                        let styleAttribute = ParseStyleAttribute(text)
+                        where !Design.IsDesignTimeName(styleAttribute.Name)
+                        from  list in (isStyleValueLocatedAtOutputFile(styleAttribute.Value) ?
+
+                           Result.From<IEnumerable<string>>([$"{KebabToCamelCase(styleAttribute.Name)}: {styleAttribute.Value}"])
+                            :
+                            from item in CreateDesignerStyleItemFromText(project, text)
+                            from finalCssItem in item.FinalCssItems
+                            from finalCssItem1 in ReprocessFontWeight(finalCssItem)
+                            from value in RecalculateCssValueForOutput(finalCssItem1.Name, finalCssItem1.Value, isStyleValueLocatedAtOutputFile)
+                            select $"{KebabToCamelCase(finalCssItem.Name)}: {value}")
+                        
+                        from x in list select x
+                        
                     )
                     select (listOfStyleAttributes.Count > 0) switch
                     {
