@@ -27,6 +27,16 @@ static class Mixin
 
         return output;
     }
+    public static async NodeAnalyzeOutput With(this NodeAnalyzeOutput task, TsImportCollection tsImportCollection)
+    {
+        var output = await task;
+        if (!output.HasError)
+        {
+            output.Value.TsImportCollection.Add(tsImportCollection);
+        }
+
+        return output;
+    }
     
     [AfterReadConfig]
     public static Scope AfterReadConfig(Scope scope)

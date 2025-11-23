@@ -24,7 +24,7 @@ static class Extensions
     
     public static ReactNode TryFindDesignNamedNode(this ReactNode node, string designName)
     {
-        if (node.Properties.Any(p=>p.Name == Design.Name && p.Value == designName))
+        if (node.Properties.Any(p=>p.Name == Design.Name && TryClearStringValue(p.Value) == TryClearStringValue(designName)))
         {
             return node;
         }
@@ -35,6 +35,35 @@ static class Extensions
             if (namedNode is not null)
             {
                 return namedNode;
+            }
+        }
+
+        return null;
+    }
+    
+    public static Element TryFindDesignNamedElement(this Element element, string designName)
+    {
+        if (element is null)
+        {
+            return null;
+        }
+        if (element is HtmlElement htmlElement)
+        {
+            if (htmlElement.data.TryGetValue(Design.Name, out var name))
+            {
+                if (TryClearStringValue(name) == TryClearStringValue(designName))
+                {
+                    return element;
+                }
+            }
+        }
+        
+        foreach (var child in element.children)
+        {
+            var namedElement = child.TryFindDesignNamedElement(designName);
+            if (namedElement is not null)
+            {
+                return namedElement;
             }
         }
 

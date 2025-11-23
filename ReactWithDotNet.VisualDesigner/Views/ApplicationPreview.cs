@@ -214,6 +214,20 @@ sealed class ApplicationPreview : Component
                 }
             }
 
+            // try transfer design name as data attribute
+            {
+                var (props, designName) = RemovePropInProps(model.Properties, Design.Name);
+                model = model with
+                {
+                    Properties = props
+                };
+
+                if (designName.HasValue && element is HtmlElement htmlElement)
+                {
+                    htmlElement.data[Design.Name] = designName.Value;
+                }
+            }
+
             var designTimeProps =
                 from p in model.Properties
                 from x in ParseProperty(p)
