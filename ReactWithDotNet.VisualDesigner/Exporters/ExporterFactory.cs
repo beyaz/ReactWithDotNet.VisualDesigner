@@ -60,7 +60,7 @@ static class ExporterFactory
             return  CSharpStringExporter.CalculateElementTsxCode(componentScope,componentId,projectId, componentConfig, visualElement);
         }
         
-        return from tsCode in TsxExporter.CalculateElementTsxCode(componentScope,componentId,projectId, componentConfig, visualElement)
+        return from tsCode in TsxExporter.CalculateElementTsxCode(componentScope, visualElement)
                from formattedTsCode in NodeJsBridge.FormatCode(tsCode, project.PrettierOptions)
                select formattedTsCode;
     }
