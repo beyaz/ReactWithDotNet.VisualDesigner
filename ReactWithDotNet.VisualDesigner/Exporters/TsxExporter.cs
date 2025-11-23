@@ -89,8 +89,14 @@ static class TsxExporter
 
     internal static
         Task<Result<(IReadOnlyList<string> elementTreeSourceLines, IReadOnlyList<string> importLines)>>
-        CalculateElementTreeSourceCodes(ComponentScope componentScope,int componentId,ProjectConfig project, ComponentConfig componentConfig, VisualElementModel rootVisualElement)
+        CalculateElementTreeSourceCodes(ComponentScope componentScope,int componentId5,ProjectConfig project2, ComponentConfig componentConfig3, VisualElementModel rootVisualElement)
     {
+
+        var componentConfig = componentScope.ComponentConfig;
+
+        var project = componentScope.ProjectConfig;
+        
+        
         return
             // Convert model to node
             from rootNode in ModelToNodeTransformer.ConvertVisualElementModelToReactNodeModel(componentScope, rootVisualElement)
