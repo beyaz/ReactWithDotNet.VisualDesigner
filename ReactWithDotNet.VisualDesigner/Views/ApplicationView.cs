@@ -1229,7 +1229,7 @@ sealed class ApplicationView : Component<ApplicationState>
                                 return;
                             }
 
-                            var componentScope = await GetComponentScope(state.ComponentId);
+                            var componentScope = await GetComponentScope(state.ComponentId, state.UserName);
                             if (componentScope.HasError)
                             {
                                 this.FailNotification(componentScope.Error.Message);
@@ -2417,7 +2417,7 @@ sealed class ApplicationView : Component<ApplicationState>
                 return $"ComponentNotFound-id:{state.ComponentId}";
             }
 
-            var componentScope = await GetComponentScope(state.ComponentId);
+            var componentScope = await GetComponentScope(state.ComponentId, state.UserName);
             if (componentScope.HasError)
             {
                 return componentScope.Error.Message;

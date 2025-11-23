@@ -48,7 +48,7 @@ static class ExporterFactory
     }
     public static  Task<Result<string>> CalculateElementSourceCode(ComponentScope componentScope, int componentId,int projectId, ComponentConfig componentConfig, VisualElementModel visualElement)
     {
-        var project = GetProjectConfig(projectId);
+        var project = componentScope.ProjectConfig;
         
         if (project.ExportAsCSharp)
         {

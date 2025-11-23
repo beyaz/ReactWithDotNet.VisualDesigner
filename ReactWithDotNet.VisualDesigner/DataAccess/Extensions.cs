@@ -40,4 +40,7 @@ public sealed record ComponentScope
     public required ComponentConfig ComponentConfig  { get; init; }
     
     public required ProjectConfig ProjectConfig{ get; init; }
+    
+    public VisualElementModel RootVisualElement { get; init; }
+    public (string filePath, string targetComponentName) OutFile { get; set; }
 }

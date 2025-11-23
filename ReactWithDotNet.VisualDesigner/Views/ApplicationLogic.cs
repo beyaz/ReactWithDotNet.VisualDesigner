@@ -5,7 +5,7 @@ namespace ReactWithDotNet.VisualDesigner.Views;
 
 static class ApplicationLogic
 {
-    public static async Task<Result<ComponentScope>> GetComponentScope(int componentId)
+    public static async Task<Result<ComponentScope>> GetComponentScope(int componentId, string userName)
     {
         var componentEntity = await Store.TryGetComponent(componentId);
         if (componentEntity is null)
@@ -19,15 +19,22 @@ static class ApplicationLogic
             return new ArgumentNullException($"ProjectNotFound. {componentEntity.ProjectId}");
         }
         
-        return new ComponentScope
+        return await 
+        from rootVisualElement in GetComponentUserOrMainVersionAsync(componentId, userName)
+            from file in GetComponentFileLocation(componentId, userName)
+        select new ComponentScope
         {
             ProjectId = componentEntity.ProjectId,
 
             ComponentId = componentEntity.Id,
 
             ComponentConfig = componentEntity.Config,
+
+            ProjectConfig = project,
             
-            ProjectConfig = project
+            RootVisualElement = rootVisualElement,
+            
+            OutFile = file
         };
     }
     public static async Task<Result<Unit>> CommitComponent(ApplicationState state)
