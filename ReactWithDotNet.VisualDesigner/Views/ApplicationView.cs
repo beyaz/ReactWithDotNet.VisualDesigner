@@ -1238,7 +1238,6 @@ sealed class ApplicationView : Component<ApplicationState>
                             
                             var exportInput = new ExportInput
                             {
-                                UserName = state.UserName
                             };
                             
                             var result = await ExporterFactory.ExportToFileSystem(componentScope.Value,exportInput);

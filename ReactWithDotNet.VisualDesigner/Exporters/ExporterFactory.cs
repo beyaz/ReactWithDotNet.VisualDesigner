@@ -4,7 +4,7 @@ public sealed record SourceLinePoints(int LeftPaddingCount, int FirstReturnLineI
 
 public sealed record ExportInput
 {
-    public required string UserName { get; init; }
+    public string UserName { get; init; }
 }
 
 static class ExporterFactory

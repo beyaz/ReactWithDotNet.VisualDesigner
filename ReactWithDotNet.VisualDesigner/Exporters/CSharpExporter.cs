@@ -123,15 +123,12 @@ static class CSharpExporter
 
     static async Task<Result<FileModel>> CalculateExportInfo(ComponentScope componentScope,ExportInput input)
     {
-        var userName  = input.UserName;
-
-        var componentId = componentScope.ComponentId;
-
+        var rootVisualElement = componentScope.RootVisualElement;
+        
+        var file = componentScope.OutFile;
 
         return await
-            (from rootVisualElement in GetComponentUserOrMainVersionAsync(componentId, userName)
-             let file = componentScope.OutFile
-             from fileContentInDirectory in FileSystem.ReadAllLines(file.filePath)
+            (from fileContentInDirectory in FileSystem.ReadAllLines(file.filePath)
              from source in CalculateElementTreeSourceCodes(componentScope, rootVisualElement)
              from fileContent in InjectRender(fileContentInDirectory, file.targetComponentName, source.elementTreeSourceLines)
              select new FileModel
