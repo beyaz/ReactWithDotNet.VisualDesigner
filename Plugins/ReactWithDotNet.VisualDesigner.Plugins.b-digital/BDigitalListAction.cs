@@ -1,4 +1,6 @@
-﻿namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
+﻿using ReactWithDotNet.ThirdPartyLibraries.GoogleMaterialSymbols;
+
+namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
 [CustomComponent]
 sealed class BDigitalListAction : PluginComponentBase
@@ -102,11 +104,22 @@ sealed class BDigitalListAction : PluginComponentBase
                 children.Count > 0 ? children[0].children : null
             },
 
-            // rightListData
-            new FlexColumn
+            
+            new FlexRow
             {
-                children.Count > 1 ? children[1].children : null
+                // rightListData
+                new FlexColumn
+                {
+                    children.Count > 1 ? children[1].children : null
+                },
+            
+                action.HasValue && selectedCount == "0" ?
+                new FlexRowCentered(Width(64))
+                {
+                    new MaterialSymbol{ name = "more_vert" , size = 24, styleVariant = MaterialSymbolVariant.outlined}
+                } : null
             }
+           
         };
     }
 }

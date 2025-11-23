@@ -685,10 +685,15 @@ sealed class ApplicationPreview : Component
                         {
                             var designTimeChildrenCount = int.Parse(propValue);
 
-                            model = model with
+                            if (designTimeChildrenCount > 1)
                             {
-                                Children = model.Children.AddRange(from _ in Enumerable.Range(0, designTimeChildrenCount) select CloneByUsingYaml(firstChild))
-                            };
+                                model = model with
+                                {
+                                    Children = model.Children.AddRange(from _ in Enumerable.Range(0, designTimeChildrenCount - 1) select CloneByUsingYaml(firstChild))
+                                };
+                            }
+
+                           
                         }
 
                         return data with { IsProcessed = true, model = model };
