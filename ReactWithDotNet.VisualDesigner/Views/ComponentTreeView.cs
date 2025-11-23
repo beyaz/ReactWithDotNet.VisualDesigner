@@ -45,6 +45,7 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
                     new input
                     {
                         type                     = "text",
+                        placeholder = "search",
                         valueBind                = () => state.FilterText,
                         valueBindDebounceTimeout = 400,
                         valueBindDebounceHandler = OnFilterTextTypeFinished,

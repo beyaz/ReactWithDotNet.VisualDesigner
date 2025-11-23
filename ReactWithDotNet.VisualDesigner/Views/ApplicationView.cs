@@ -2065,7 +2065,17 @@ sealed class ApplicationView : Component<ApplicationState>
 
                         newValue = TryBeautifyPropertyValue(newValue);
 
-                        if (index >= 0)
+                        if (newValue.HasNoValue)
+                        {
+                            if (index >= 0)
+                            {
+                                UpdateCurrentVisualElement(x => x with
+                                {
+                                    Properties = x.Properties.RemoveAt(index)
+                                });
+                            }
+                        }
+                        else if (index >= 0)
                         {
                             UpdateCurrentVisualElement(x => x with
                             {

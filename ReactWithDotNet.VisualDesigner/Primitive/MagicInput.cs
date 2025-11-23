@@ -219,7 +219,7 @@ abstract class MagicInput : Component<MagicInput.State>
 
             if (state.SelectedSuggestionOffset is null)
             {
-                if (state.Value.HasValue && state.Value.Trim() != Value?.Trim())
+                if (state.Value?.Trim() != Value?.Trim())
                 {
                     DispatchEvent(OnChange, [Name, state.Value]);
                 }
@@ -312,6 +312,11 @@ abstract class MagicInput : Component<MagicInput.State>
 
         var parseResponse = ParseSearchTerm(state.Value);
 
+        var debug =
+            ListFrom(from suggestion in suggestions.Value 
+                     let score = GetMatchScore(suggestion, parseResponse)
+                     select ((string)suggestion, score)).OrderByDescending(x=>x.score);
+        
         state = state with
         {
             ShowSuggestions = true,
@@ -350,7 +355,7 @@ abstract class MagicInput : Component<MagicInput.State>
             }
         }
 
-        static int GetMatchScore
+        static double GetMatchScore
         (
             SuggestionItem suggestionItem,
             (bool isEmpty, string[] nameInWords, string[] valueInWords) searchTerm
@@ -361,11 +366,11 @@ abstract class MagicInput : Component<MagicInput.State>
                 return 1;
             }
 
-            var count = 0;
+            var count = 0d;
 
             foreach (var word in searchTerm.nameInWords)
             {
-                count += Calculate(suggestionItem.Name, word, 3);
+                count += Calculate(suggestionItem.Name, word, 1.3);
             }
 
             if (searchTerm.valueInWords is not null)
@@ -374,7 +379,7 @@ abstract class MagicInput : Component<MagicInput.State>
                 {
                     foreach (var word in searchTerm.valueInWords)
                     {
-                        count += Calculate(suggestionItem.Value, word, 2);
+                        count += Calculate(suggestionItem.Value, word, 1.2);
                     }
                 }
                 else
@@ -388,7 +393,7 @@ abstract class MagicInput : Component<MagicInput.State>
 
             return count;
 
-            static int Calculate(string suggestion, string word, int gravity)
+            static double Calculate(string suggestion, string word, double gravity)
             {
                 if (word is null)
                 {
