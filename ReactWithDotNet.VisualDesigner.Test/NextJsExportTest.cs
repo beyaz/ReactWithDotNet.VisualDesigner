@@ -1,6 +1,4 @@
-﻿using ReactWithDotNet.VisualDesigner.Exporters;
-
-namespace ReactWithDotNet.VisualDesigner.Test;
+﻿namespace ReactWithDotNet.VisualDesigner.Test;
 
 [TestClass]
 public sealed class NextJsExportTest
@@ -21,12 +19,13 @@ public sealed class NextJsExportTest
                 continue;
             }
 
-            var result = await TsxExporter.ExportToFileSystem(new()
+            var componentScope = await GetComponentScope(component.Id, null);
+            if (componentScope.HasError)
             {
-                ComponentId = component.Id,
-                ProjectId   = component.ProjectId,
-                UserName    = EnvironmentUserName
-            });
+                throw componentScope.Error;
+            }
+
+            var result = await TsxExporter.ExportToFileSystem(componentScope.Value);
 
             if (result.HasError)
             {

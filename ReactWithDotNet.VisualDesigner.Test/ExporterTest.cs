@@ -1,5 +1,4 @@
-﻿using ReactWithDotNet.VisualDesigner.Exporters;
-
+﻿
 namespace ReactWithDotNet.VisualDesigner.Test;
 
 [TestClass]
@@ -28,12 +27,23 @@ public sealed class ExporterTest
 
         static async Task act(VisualElementModel visualElementModel, IReadOnlyList<string> expected)
         {
-            var project = new ProjectConfig
+            
+            var componentScope = new ComponentScope
             {
-                ExportStylesAsTailwind = true
+                ProjectConfig = new ProjectConfig
+                {
+                    ExportStylesAsTailwind = true
+                },
+                ComponentId       = 0,
+                ProjectId         = 0,
+                ComponentConfig   = new ComponentConfig(),
+                OutFile           = (null,null),
+                RootVisualElement = visualElementModel
             };
+            
+            
 
-            var result = await TsxExporter.CalculateElementTreeSourceCodes(project);
+            var result = await TsxExporter.CalculateElementTreeSourceCodes(componentScope, visualElementModel);
 
             result.HasError.ShouldBeFalse();
 

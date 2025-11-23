@@ -1,23 +1,10 @@
-﻿using ReactWithDotNet.VisualDesigner.Exporters;
-
+﻿
 namespace ReactWithDotNet.VisualDesigner.Test;
 
 [TestClass]
 public sealed class CSharpExporterTest
 {
-    [TestMethod]
-    public async Task Export()
-    {
-        var result = await CSharpExporter.ExportToFileSystem(new()
-        {
-            ComponentId = 71,
-            ProjectId   = 3,
-            UserName    = "beyaz"
-        });
-        
-        
-        result.HasError.ShouldBeFalse();
-    }
+   
     [TestMethod]
     public async Task Export_as_csharp()
     {
@@ -42,14 +29,21 @@ public sealed class CSharpExporterTest
 
         static async Task act(VisualElementModel visualElementModel, IReadOnlyList<string> expected)
         {
-            var project = new ProjectConfig
+            var componentScope = new ComponentScope
             {
-                ExportAsCSharp = true
+                ProjectConfig = new ProjectConfig
+                {
+                    ExportAsCSharp = true
+                },
+                ComponentId = 0,
+                ProjectId = 0,
+                ComponentConfig = new ComponentConfig(),
+                OutFile = (null,null),
+                RootVisualElement = visualElementModel
             };
+            
 
-            var componentConfig = new ComponentConfig();
-
-            var result = await CSharpExporter.CalculateElementTreeSourceCodes(project);
+            var result = await CSharpExporter.CalculateElementTreeSourceCodes(componentScope, visualElementModel);
 
             result.HasError.ShouldBeFalse();
 
