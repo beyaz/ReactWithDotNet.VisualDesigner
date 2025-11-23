@@ -1239,10 +1239,6 @@ sealed class ApplicationView : Component<ApplicationState>
                             
                             var exportInput = new ExportInput
                             {
-                                ProjectId = state.ProjectId,
-
-                                ComponentId = state.ComponentId,
-
                                 UserName = state.UserName
                             };
                             

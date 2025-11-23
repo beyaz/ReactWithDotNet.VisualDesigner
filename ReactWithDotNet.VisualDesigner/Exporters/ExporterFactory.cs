@@ -4,32 +4,15 @@ public sealed record SourceLinePoints(int LeftPaddingCount, int FirstReturnLineI
 
 public sealed record ExportInput
 {
-    public required int ProjectId { get; init; }
-    
-    public required int ComponentId { get; init; }
-    
     public required string UserName { get; init; }
-
-    public void Deconstruct(out int projectId, out int componentId, out string userName)
-    {
-        projectId = ProjectId;
-
-        componentId = ComponentId;
-        
-        userName = UserName;
-    }
 }
 
 static class ExporterFactory
 {
     public static async Task<Result<(bool HasChange,FileModel File)>> ExportToFileSystem(ComponentScope componentScope, ExportInput input)
     {
-        var project = GetProjectConfig(input.ProjectId);
-        if (project is null)
-        {
-            return new ArgumentNullException($"ProjectNotFound. {input.ProjectId}");
-        }
-        
+        var project = componentScope.ProjectConfig;
+       
         if (project.ExportAsCSharp)
         {
             return await CSharpExporter.ExportToFileSystem(componentScope, input);
@@ -37,7 +20,7 @@ static class ExporterFactory
 
         if (project.ExportAsCSharpString)
         {
-            return await CSharpStringExporter.ExportToFileSystem(input);
+            return await CSharpStringExporter.ExportToFileSystem( componentScope,input);
         }
         
         return await TsxExporter.ExportToFileSystem(componentScope, input);

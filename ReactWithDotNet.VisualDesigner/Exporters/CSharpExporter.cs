@@ -118,9 +118,11 @@ static class CSharpExporter
 
     static async Task<Result<FileModel>> CalculateExportInfo(ComponentScope componentScope,ExportInput input)
     {
-        var (projectId, componentId, userName) = input;
+        var userName  = input.UserName;
 
-        var project = GetProjectConfig(projectId);
+        var componentId = componentScope.ComponentId;
+
+        var project = componentScope.ProjectConfig;
 
         return await
             (from data in GetComponentData(componentId, userName)

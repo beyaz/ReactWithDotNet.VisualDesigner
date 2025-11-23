@@ -124,9 +124,11 @@ static class TsxExporter
 
     static async Task<Result<FileModel>> CalculateExportInfo(ComponentScope componentScope, ExportInput input)
     {
-        var (projectId, componentId, userName) = input;
+        var userName = input.UserName;
 
-        var project = GetProjectConfig(projectId);
+        var project = componentScope.ProjectConfig;
+
+        var componentId = componentScope.ComponentId;
 
         return await
         (

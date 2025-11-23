@@ -18,10 +18,10 @@ static class CSharpStringExporter
         
     }
 
-    public static Task<Result<(bool HasChange,FileModel File)>> ExportToFileSystem(ExportInput input)
+    public static Task<Result<(bool HasChange,FileModel File)>> ExportToFileSystem(ComponentScope componentScope,ExportInput input)
     {
         return
-            from file in CalculateExportInfo(input)
+            from file in CalculateExportInfo( componentScope,input)
             from fileContentAtDisk in FileSystem.ReadAllText(file.Path)
             select IsEqualsIgnoreWhitespace(fileContentAtDisk, file.Content) switch
             {
@@ -166,11 +166,13 @@ static class CSharpStringExporter
         }
     }
 
-    static async Task<Result<FileModel>> CalculateExportInfo(ExportInput input)
+    static async Task<Result<FileModel>> CalculateExportInfo(ComponentScope componentScope,ExportInput input)
     {
-        var (projectId, componentId, userName) = input;
+        var userName = input.UserName;
 
-        var project = GetProjectConfig(projectId);
+        var project = componentScope.ProjectConfig;
+
+        var componentId = componentScope.ProjectId;
 
         return await
             (from data in GetComponentData(componentId,userName)
