@@ -1,7 +1,7 @@
-﻿using ReactWithDotNet.ThirdPartyLibraries.MonacoEditorReact;
-using ReactWithDotNet.VisualDesigner.Exporters;
-using System.Reflection;
+﻿using System.Reflection;
 using System.Text;
+using ReactWithDotNet.ThirdPartyLibraries.MonacoEditorReact;
+using ReactWithDotNet.VisualDesigner.Exporters;
 
 namespace ReactWithDotNet.VisualDesigner.Views;
 
@@ -319,6 +319,7 @@ sealed class ApplicationView : Component<ApplicationState>
         {
             return new Exception("NameMustBeEntered");
         }
+
         if (config.DesignLocation.HasNoValue)
         {
             return new Exception("DesignLocationMustBeEnteredCorrectly");
@@ -413,7 +414,6 @@ sealed class ApplicationView : Component<ApplicationState>
 
                 foreach (var parsedProperty in TryParseProperty(nameValue))
                 {
-               
                     var startIndex = nameValue.LastIndexOf(parsedProperty.Value ?? string.Empty, StringComparison.OrdinalIgnoreCase);
                     var endIndex = nameValue.Length;
 
@@ -463,10 +463,10 @@ sealed class ApplicationView : Component<ApplicationState>
 
             Selection = new(),
 
-            StyleItemDragDrop    = new(),
-            
+            StyleItemDragDrop = new(),
+
             PropertyItemDragDrop = new(),
-            
+
             CopiedVisualElementModelInYaml = state.CopiedVisualElementModelInYaml
         };
 
@@ -495,6 +495,60 @@ sealed class ApplicationView : Component<ApplicationState>
         }
 
         await InitializeStateWithFirstComponentInProject(projectId);
+    }
+
+    Element CreateDesignPropEditor(string label, string designPropName)
+    {
+        VisualElementModel visualElementModel = null;
+
+        if (state.Selection.VisualElementTreeItemPath.HasValue)
+        {
+            visualElementModel = FindTreeNodeByTreePath(state.ComponentRootElement, state.Selection.VisualElementTreeItemPath);
+        }
+
+        if (visualElementModel is null)
+        {
+            return null;
+        }
+
+        var inputValue = string.Empty;
+        {
+            foreach (var property in visualElementModel.Properties)
+            {
+                var maybe = TryParseProperty(property);
+                if (maybe.HasValue && maybe.Value.Name == designPropName)
+                {
+                    inputValue = maybe.Value.Value;
+                    break;
+                }
+            }
+        }
+
+        var inputEditor = new DesignPropEditor
+        {
+            ComponentId = state.ComponentId,
+            ProjectId   = state.ProjectId,
+            Id          = designPropName,
+            Name        = designPropName,
+            Value       = inputValue,
+            OnChange = (name, newValue) =>
+            {
+                UpdateCurrentVisualElement(x => x with
+                {
+                    Properties = InsertOrUpdatePropInProps(x.Properties, name, newValue)
+                });
+
+                return Task.CompletedTask;
+            }
+        };
+
+        return new FlexRow(AlignItemsFlexEnd, Gap(16), Border(1, solid, Theme.BorderColor), BorderRadius(4), PaddingX(8), Height(32))
+        {
+            PositionRelative,
+            new label(PositionAbsolute, Top(-4), Left(8), Opacity(0.8), FontSize10, LineHeight7, LetterSpacing(0.7), Background(White), PaddingX(4)) { label },
+
+            inputEditor
+        };
     }
 
     async Task<Result<string>> CreateNewComponent(string componentConfigAsYamlNewValue)
@@ -594,10 +648,10 @@ sealed class ApplicationView : Component<ApplicationState>
             new TagEditor
             {
                 ProjectId = state.ProjectId,
-                
-                Id          = "TagEditor",
-                Name        = string.Empty,
-                Value       = inputValue,
+
+                Id    = "TagEditor",
+                Name  = string.Empty,
+                Value = inputValue,
                 OnChange = (_, newValue) =>
                 {
                     foreach (var dbRecord in TryFindComponentByComponentNameWithExportFilePath(state.ProjectId, newValue))
@@ -605,7 +659,7 @@ sealed class ApplicationView : Component<ApplicationState>
                         UpdateCurrentVisualElement(x => x with { Tag = dbRecord.Id.ToString() });
 
                         state = state with { ElementTreeEditPosition = null };
-                        
+
                         return Task.CompletedTask;
                     }
 
@@ -627,84 +681,6 @@ sealed class ApplicationView : Component<ApplicationState>
                              """);
 
         return inputTag;
-    }
-
-    class TagEditor : MagicInput
-    {
-        public required int ProjectId { get; init; }
-        
-        protected override Task<Result<IReadOnlyList<SuggestionItem>>> Suggestions
-        {
-            get
-            {
-                var cacheKey = $"{nameof(TagEditor)}-{ProjectId}";
-
-                return Result.From(Cache.AccessValue(cacheKey, () => GetTagSuggestions(ProjectId)));
-            }
-        }
-    }
-
-    class DesignPropEditor : MagicInput
-    {
-        public required int ProjectId { get; init; }
-
-        public required int ComponentId { get; init; }
-
-        protected override Task<Result<IReadOnlyList<SuggestionItem>>> Suggestions => GetVariableSuggestionsInOutputFile(ComponentId);
-    }
-
-    Element CreateDesignPropEditor(string label, string designPropName)
-    {
-        VisualElementModel visualElementModel = null;
-
-        if (state.Selection.VisualElementTreeItemPath.HasValue)
-        {
-            visualElementModel = FindTreeNodeByTreePath(state.ComponentRootElement, state.Selection.VisualElementTreeItemPath);
-        }
-
-        if (visualElementModel is null)
-        {
-            return null;
-        }
-
-        var inputValue = string.Empty;
-        {
-            foreach (var property in visualElementModel.Properties)
-            {
-                var maybe = TryParseProperty(property);
-                if (maybe.HasValue && maybe.Value.Name == designPropName)
-                {
-                    inputValue = maybe.Value.Value;
-                    break;
-                }
-            }
-        }
-        
-        var inputEditor = new DesignPropEditor
-        {
-            ComponentId = state.ComponentId,
-            ProjectId = state.ProjectId,
-            Id    = designPropName,
-            Name  = designPropName,
-            Value = inputValue,
-            OnChange = (name, newValue) =>
-            {
-                UpdateCurrentVisualElement(x => x with
-                {
-                    Properties = InsertOrUpdatePropInProps(x.Properties,name, newValue)
-                });
-
-                return Task.CompletedTask;
-            }
-        };
-
-        return new FlexRow(AlignItemsFlexEnd, Gap(16), Border(1, solid, Theme.BorderColor), BorderRadius(4), PaddingX(8), Height(32))
-        {
-            PositionRelative,
-            new label(PositionAbsolute, Top(-4), Left(8), Opacity(0.8), FontSize10, LineHeight7, LetterSpacing(0.7), Background(White), PaddingX(4)) { label },
-
-            inputEditor
-        };
     }
 
     Task DeleteSelectedTreeItem()
@@ -749,7 +725,7 @@ sealed class ApplicationView : Component<ApplicationState>
             this.FailNotification("UserName has no value");
             return;
         }
-        
+
         var location = await GetComponentFileLocation(state.ComponentId, state.UserName);
         if (location.HasError)
         {
@@ -790,8 +766,8 @@ sealed class ApplicationView : Component<ApplicationState>
 
             Selection = new(),
 
-            StyleItemDragDrop    = new(),
-            
+            StyleItemDragDrop = new(),
+
             PropertyItemDragDrop = new()
         };
 
@@ -833,24 +809,23 @@ sealed class ApplicationView : Component<ApplicationState>
             {
                 return null;
             }
-            
+
             return PartLeftPanel() + BorderBottomLeftRadius(8);
         }
 
         Element middle()
         {
             return state.MainContentTab.In(MainContentTabs.Structure,
-                                           MainContentTabs.Output,
-                                           MainContentTabs.ProjectConfig,
-                                           MainContentTabs.ImportHtml,
-                                           MainContentTabs.ComponentConfig,
-                                           MainContentTabs.NewComponentConfig) ?
-                new(FlexGrow(1), Padding(7), OverflowXAuto)
+                MainContentTabs.Output,
+                MainContentTabs.ProjectConfig,
+                MainContentTabs.ImportHtml,
+                MainContentTabs.ComponentConfig,
+                MainContentTabs.NewComponentConfig)
+                ? new(FlexGrow(1), Padding(7), OverflowXAuto)
                 {
                     YamlEditor
                 }
-                :
-                new FlexColumn(FlexGrow(1), Padding(7), OverflowXAuto)
+                : new FlexColumn(FlexGrow(1), Padding(7), OverflowXAuto)
                 {
                     Ruler.HorizontalRuler(state.Preview.Width, state.Preview.Scale) + Width(state.Preview.Width) + MarginTop(12) + PaddingLeft(30),
                     new FlexRow(SizeFull, Width(state.Preview.Width + 33))
@@ -892,10 +867,9 @@ sealed class ApplicationView : Component<ApplicationState>
                     }
                 };
             },
-
             err => this.FailNotification(err.Message)
         );
-      
+
         return Task.CompletedTask;
     }
 
@@ -1001,7 +975,7 @@ sealed class ApplicationView : Component<ApplicationState>
                 this.FailNotification(parseResult.Error.ToString());
                 return;
             }
-            
+
             var result = await UpdateComponentConfig(state.ProjectId, state.ComponentId, state.MainContentText, state.UserName);
             if (result.HasError)
             {
@@ -1152,8 +1126,8 @@ sealed class ApplicationView : Component<ApplicationState>
             new ProjectSelectionView
             {
                 Suggestions = GetProjectNames(state),
-                ProjectName       = GetAllProjectsCached().FirstOrDefault(p => p.Id == state.ProjectId)?.Name,
-                OnChange = async (projectName) =>
+                ProjectName = GetAllProjectsCached().FirstOrDefault(p => p.Id == state.ProjectId)?.Name,
+                OnChange = async projectName =>
                 {
                     var projectEntity = GetAllProjectsCached().FirstOrDefault(x => x.Name == projectName);
                     if (projectEntity is null)
@@ -1165,7 +1139,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
                     await ChangeSelectedProject(projectEntity.Id);
                 },
-                
+
                 OnAddNewComponent = () =>
                 {
                     if (state.MainContentTab == MainContentTabs.NewComponentConfig)
@@ -1183,7 +1157,7 @@ sealed class ApplicationView : Component<ApplicationState>
                     return Task.CompletedTask;
                 }
             },
-            
+
             // A C T I O N S
 
             new FlexRowCentered
@@ -1408,7 +1382,7 @@ sealed class ApplicationView : Component<ApplicationState>
             Copy = treeItemPath =>
             {
                 var sourceNode = FindTreeNodeByTreePath(state.ComponentRootElement, treeItemPath);
-                
+
                 state = state with
                 {
                     CopiedVisualElementModelInYaml = SerializeToYaml(sourceNode)
@@ -1422,7 +1396,7 @@ sealed class ApplicationView : Component<ApplicationState>
                 {
                     return Task.CompletedTask;
                 }
-                
+
                 var targetNode = FindTreeNodeByTreePath(state.ComponentRootElement, treeItemPath);
 
                 var sourceNodeClone = state.CopiedVisualElementModelInYaml.AsVisualElementModel();
@@ -1434,7 +1408,7 @@ sealed class ApplicationView : Component<ApplicationState>
                         Children = x.Children.Add(sourceNodeClone)
                     })
                 };
-                
+
                 state = state with
                 {
                     CopiedVisualElementModelInYaml = null
@@ -1656,7 +1630,7 @@ sealed class ApplicationView : Component<ApplicationState>
             };
         }
     }
-    
+
     Element PartRightPanel()
     {
         VisualElementModel visualElementModel = null;
@@ -1701,20 +1675,18 @@ sealed class ApplicationView : Component<ApplicationState>
                     where !alreadyContainsProp(propertyInfo.Name)
                     let jsTypeInfo = propertyInfo.GetCustomAttribute<JsTypeInfoAttribute>()
                     let isStringProp = jsTypeInfo?.JsType == JsType.String
-                    
                     let suggestionItems = propertyInfo.GetCustomAttribute<SuggestionsAttribute>()?.Suggestions ?? []
-                    
                     select new ShadowPropertyView
                     {
                         PropertyName = propertyInfo.Name,
                         PropertyType = jsTypeInfo?.JsType.ToString().ToLower(),
 
-                        OnChange    = OnShadowPropClicked,
+                        OnChange = OnShadowPropClicked,
                         Suggestions = isStringProp switch
                         {
-                            true=> suggestionItems.ToList().ConvertAll(x=> '"' + x + '"'),
-                            
-                            false=>suggestionItems
+                            true => suggestionItems.ToList().ConvertAll(x => '"' + x + '"'),
+
+                            false => suggestionItems
                         }
                     };
 
@@ -1742,50 +1714,50 @@ sealed class ApplicationView : Component<ApplicationState>
                 new div { Height(1), FlexGrow(1), Background(Gray200) }
             };
         }
+
         return new FlexColumn(BorderLeft(1, dotted, "#d9d9d9"), PaddingX(2), Gap(8), OverflowYAuto, Background(White))
         {
             createTagEditor,
-            
+
             new FlexColumn(WidthFull)
             {
                 CreateGroupLabel("C o n t e n t"),
-                new FlexColumn(WidthFull,PaddingX(4), Gap(12))
+                new FlexColumn(WidthFull, PaddingX(4), Gap(12))
                 {
                     CreateDesignPropEditor("Content", Design.Content),
                     CreateDesignPropEditor("Design Time Content", Design.ContentPreview)
                 },
-                
+
                 CreateGroupLabel("V i s i b i l i t y"),
-                new FlexColumn(WidthFull,PaddingX(4), Gap(12))
+                new FlexColumn(WidthFull, PaddingX(4), Gap(12))
                 {
                     CreateDesignPropEditor("Show-if", Design.ShowIf),
                     CreateDesignPropEditor("Hide-if", Design.HideIf),
                 },
-                
+
                 CreateGroupLabel("L o o p"),
-                new FlexColumn(WidthFull,PaddingX(4), Gap(12))
+                new FlexColumn(WidthFull, PaddingX(4), Gap(12))
                 {
                     CreateDesignPropEditor("Items Source", Design.ItemsSource),
                     CreateDesignPropEditor("Items Source Design Time Child Count", Design.ItemsSourceDesignTimeCount)
                 }
-                
             },
-            
-            
+
             SpaceY(16),
             CreateGroupLabel("P R O P S"),
             viewProps(new List<string>
             {
                 from p in visualElementModel.Properties
                 let parsedProp = TryParseProperty(p)
-                let isUiManagedDesignerProp = parsedProp.HasValue && 
-                                             parsedProp.Value.Name is 
-                    Design.Content or 
-                    Design.ContentPreview or
-                    Design.HideIf or 
-                    Design.ShowIf or 
-                    Design.ItemsSource or
-                    Design.ItemsSourceDesignTimeCount
+                let isUiManagedDesignerProp
+                    = parsedProp.HasValue &&
+                      parsedProp.Value.Name is
+                          Design.Content or
+                          Design.ContentPreview or
+                          Design.HideIf or
+                          Design.ShowIf or
+                          Design.ItemsSource or
+                          Design.ItemsSourceDesignTimeCount
                 where !isUiManagedDesignerProp
                 select p
             }),
@@ -1803,9 +1775,9 @@ sealed class ApplicationView : Component<ApplicationState>
                     {
                         var existingItemIndex =
                             (from item in CurrentVisualElement.Styles.Select((text, index) => new { text, index })
-                                let styleItem = ParseStyleAttribute(item.text)
-                                where styleItem.Name == ParseStyleAttribute(newValue).Name
-                                select (int?)item.index).FirstOrDefault();
+                             let styleItem = ParseStyleAttribute(item.text)
+                             where styleItem.Name == ParseStyleAttribute(newValue).Name
+                             select (int?)item.index).FirstOrDefault();
 
                         if (existingItemIndex is null)
                         {
@@ -1850,7 +1822,7 @@ sealed class ApplicationView : Component<ApplicationState>
                                 {
                                     SelectedStyleIndex = null
                                 },
-                                PropertyItemDragDrop = new (),
+                                PropertyItemDragDrop = new(),
                                 StyleItemDragDrop = new()
                             };
 
@@ -2048,8 +2020,8 @@ sealed class ApplicationView : Component<ApplicationState>
                                 {
                                     SelectedPropertyIndex = null
                                 },
-                                
-                                PropertyItemDragDrop = new (),
+
+                                PropertyItemDragDrop = new(),
                                 StyleItemDragDrop = new()
                             };
 
@@ -2069,19 +2041,16 @@ sealed class ApplicationView : Component<ApplicationState>
                     value = props[state.Selection.SelectedPropertyIndex.Value];
                 }
 
-            
-
-                string selectedTag = FindTreeNodeByTreePath(state.ComponentRootElement, state.Selection.VisualElementTreeItemPath).Tag;
-               
+                var selectedTag = FindTreeNodeByTreePath(state.ComponentRootElement, state.Selection.VisualElementTreeItemPath).Tag;
 
                 return new PropEditor
                 {
                     ComponentId = state.ComponentId,
-                    
+
                     SelectedTag = selectedTag,
-                    
+
                     Placeholder = "Add property",
-                    
+
                     Name = (state.Selection.SelectedPropertyIndex ?? (props.Count + 1) * -1).ToString(),
 
                     Id = "PROPS-INPUT-EDITOR-" + (state.Selection.SelectedPropertyIndex ?? -1),
@@ -2269,40 +2238,6 @@ sealed class ApplicationView : Component<ApplicationState>
         }
     }
 
-    class PropEditor: MagicInput
-    {
-        public required int ComponentId { get; init; }
-        
-        public required string SelectedTag { get; init; }
-
-        protected override Task<Result<IReadOnlyList<SuggestionItem>>> Suggestions
-        {
-            get
-            {
-                var cacheKey = $"{nameof(PropEditor)}-{ComponentId}-{SelectedTag}";
-
-                return Cache.AccessValue(cacheKey, () => GetPropSuggestions(ComponentId, SelectedTag));
-            }
-        }
-        
-        
-    }
-    
-    class StyleEditor: MagicInput
-    {
-        public required int ProjectId { get; init; }
-
-        protected override Task<Result<IReadOnlyList<SuggestionItem>>> Suggestions
-        {
-            get
-            {
-                var cacheKey = $"{nameof(StyleEditor)}-{ProjectId}";
-
-                return Result.From(Cache.AccessValue(cacheKey, () => GetStyleAttributeNameSuggestions(ProjectId)));
-            }
-        }
-    }
-    
     Element PartScale()
     {
         return new ZoomComponent
@@ -2640,6 +2575,61 @@ sealed class ApplicationView : Component<ApplicationState>
         }
     }
 
+    class TagEditor : MagicInput
+    {
+        public required int ProjectId { get; init; }
+
+        protected override Task<Result<IReadOnlyList<SuggestionItem>>> Suggestions
+        {
+            get
+            {
+                var cacheKey = $"{nameof(TagEditor)}-{ProjectId}";
+
+                return Result.From(Cache.AccessValue(cacheKey, () => GetTagSuggestions(ProjectId)));
+            }
+        }
+    }
+
+    class DesignPropEditor : MagicInput
+    {
+        public required int ComponentId { get; init; }
+        public required int ProjectId { get; init; }
+
+        protected override Task<Result<IReadOnlyList<SuggestionItem>>> Suggestions => GetVariableSuggestionsInOutputFile(ComponentId);
+    }
+
+    class PropEditor : MagicInput
+    {
+        public required int ComponentId { get; init; }
+
+        public required string SelectedTag { get; init; }
+
+        protected override Task<Result<IReadOnlyList<SuggestionItem>>> Suggestions
+        {
+            get
+            {
+                var cacheKey = $"{nameof(PropEditor)}-{ComponentId}-{SelectedTag}";
+
+                return Cache.AccessValue(cacheKey, () => GetPropSuggestions(ComponentId, SelectedTag));
+            }
+        }
+    }
+
+    class StyleEditor : MagicInput
+    {
+        public required int ProjectId { get; init; }
+
+        protected override Task<Result<IReadOnlyList<SuggestionItem>>> Suggestions
+        {
+            get
+            {
+                var cacheKey = $"{nameof(StyleEditor)}-{ProjectId}";
+
+                return Result.From(Cache.AccessValue(cacheKey, () => GetStyleAttributeNameSuggestions(ProjectId)));
+            }
+        }
+    }
+
     class ShadowPropertyView : Component<ShadowPropertyView.State>
     {
         const string SHADOW_PROP_PREFIX = "SHADOW_PROP-";
@@ -2663,7 +2653,6 @@ sealed class ApplicationView : Component<ApplicationState>
         {
             return new PopupView();
         }
-        
 
         protected override Task OverrideStateFromPropsBeforeRender()
         {
@@ -2676,16 +2665,8 @@ sealed class ApplicationView : Component<ApplicationState>
             {
                 InitialValueOfPropertyName = PropertyName,
             };
-                
-            Client.ListenEvent<PopupItemSelect>(OnPopupItemSelected, senderId:SHADOW_PROP_PREFIX + PropertyName);
 
-            return Task.CompletedTask;
-        }
-        
-        [StopPropagation]
-        Task OnPopupItemSelected(PopupItemSelectArgs e)
-        {
-            DispatchEvent(OnChange, [PropertyName, e.Value]);
+            Client.ListenEvent<PopupItemSelect>(OnPopupItemSelected, senderId: SHADOW_PROP_PREFIX + PropertyName);
 
             return Task.CompletedTask;
         }
@@ -2750,6 +2731,14 @@ sealed class ApplicationView : Component<ApplicationState>
                     new IconArrowRightOrDown { IsArrowDown = true, style = { Width(16) } }
                 }
             };
+        }
+
+        [StopPropagation]
+        Task OnPopupItemSelected(PopupItemSelectArgs e)
+        {
+            DispatchEvent(OnChange, [PropertyName, e.Value]);
+
+            return Task.CompletedTask;
         }
 
         [StopPropagation]
@@ -3239,8 +3228,9 @@ sealed class ApplicationView : Component<ApplicationState>
                         }
                     }
                 },
-                !state.IsSuggestionsVisible ? null :
-                    new div(OnMouseLeave(ToggleZoomSuggestions), DisplayFlex, JustifyContentCenter, AlignItemsCenter, PositionFixed, Background(White), Border(1, solid, Gray300), BorderRadius(4), PaddingTop(4), PaddingBottom(4), Left(state.SuggestionPopupLocationX), Top(state.SuggestionPopupLocationY), ZIndex(3))
+                !state.IsSuggestionsVisible
+                    ? null
+                    : new div(OnMouseLeave(ToggleZoomSuggestions), DisplayFlex, JustifyContentCenter, AlignItemsCenter, PositionFixed, Background(White), Border(1, solid, Gray300), BorderRadius(4), PaddingTop(4), PaddingBottom(4), Left(state.SuggestionPopupLocationX), Top(state.SuggestionPopupLocationY), ZIndex(3))
                     {
                         new div
                         {
@@ -3251,7 +3241,6 @@ sealed class ApplicationView : Component<ApplicationState>
                             }
                         }
                     }
-                
             };
         }
 
