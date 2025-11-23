@@ -532,10 +532,21 @@ sealed class ApplicationView : Component<ApplicationState>
             Value       = inputValue,
             OnChange = (name, newValue) =>
             {
-                UpdateCurrentVisualElement(x => x with
+                if (newValue.HasValue)
                 {
-                    Properties = InsertOrUpdatePropInProps(x.Properties, name, newValue)
-                });
+                    UpdateCurrentVisualElement(x => x with
+                    {
+                        Properties = InsertOrUpdatePropInProps(x.Properties, name, newValue)
+                    });
+                }
+                else
+                {
+                    UpdateCurrentVisualElement(x => x with
+                    {
+                        Properties = RemovePropInProps(x.Properties, name).props
+                    });
+                }
+               
 
                 return Task.CompletedTask;
             }
