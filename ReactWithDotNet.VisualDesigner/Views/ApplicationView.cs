@@ -1631,20 +1631,17 @@ sealed class ApplicationView : Component<ApplicationState>
         }
     }
 
+    bool IsAnyVisualElementSelected => state.Selection.VisualElementTreeItemPath.HasValue;
+    
     Element PartRightPanel()
     {
-        VisualElementModel visualElementModel = null;
-
-        if (state.Selection.VisualElementTreeItemPath.HasValue)
-        {
-            visualElementModel = FindTreeNodeByTreePath(state.ComponentRootElement, state.Selection.VisualElementTreeItemPath);
-        }
-
-        if (visualElementModel is null)
+        if (!IsAnyVisualElementSelected)
         {
             return new div();
         }
-
+        
+        var visualElementModel = CurrentVisualElement;
+        
         Element shadowProps;
         {
             shadowProps = new FlexRow(WidthFull, FlexWrap, Gap(4))
