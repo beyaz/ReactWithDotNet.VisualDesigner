@@ -1,5 +1,4 @@
 ﻿using ReactWithDotNet.ThirdPartyLibraries.MonacoEditorReact;
-using ReactWithDotNet.VisualDesigner.Exporters;
 using System.Reflection;
 using System.Text;
 
@@ -2411,11 +2410,7 @@ sealed class ApplicationView : Component<ApplicationState>
                 return "Select any component.";
             }
 
-            var componentEntity = await Store.TryGetComponent(state.ComponentId);
-            if (componentEntity is null)
-            {
-                return $"ComponentNotFound-id:{state.ComponentId}";
-            }
+            
 
             var componentScope = await GetComponentScope(state.ComponentId, state.UserName);
             if (componentScope.HasError)
@@ -2423,7 +2418,7 @@ sealed class ApplicationView : Component<ApplicationState>
                 return componentScope.Error.Message;
             }
             
-            var result = await ExporterFactory.CalculateElementSourceCode(componentScope.Value,state.ComponentId ,state.ProjectId, componentEntity.Config, CurrentVisualElement);
+            var result = await ExporterFactory.CalculateElementSourceCode(componentScope.Value, CurrentVisualElement);
             if (result.HasError)
             {
                 return result.Error.Message;
