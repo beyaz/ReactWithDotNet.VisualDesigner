@@ -137,7 +137,7 @@ static class TsxExporter
         return await
         (
             from rootVisualElement in GetComponentUserOrMainVersionAsync(componentId, userName)
-            from file in GetComponentFileLocation(componentId, userName)
+            let file = componentScope.OutFile
             from fileContentInDirectory in FileSystem.ReadAllLines(file.filePath)
             from source in CalculateElementTreeSourceCodes(componentScope, rootVisualElement)
             from formattedSourceLines in NodeJsBridge.FormatCode(string.Join(Environment.NewLine, source.elementTreeSourceLines), project.PrettierOptions)

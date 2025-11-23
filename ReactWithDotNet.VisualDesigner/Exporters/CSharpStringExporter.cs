@@ -175,7 +175,7 @@ static class CSharpStringExporter
 
         return await
             (from rootVisualElement in GetComponentUserOrMainVersionAsync(componentId, userName)
-             from file in GetComponentFileLocation(componentId, userName)
+             let file = componentScope.OutFile
              from fileContentInDirectory in FileSystem.ReadAllLines(file.filePath)
              from source in CalculateElementTreeSourceCodes(componentScope, rootVisualElement)
              from fileContent in InjectRender(fileContentInDirectory, file.targetComponentName, source.elementTreeSourceLines)
