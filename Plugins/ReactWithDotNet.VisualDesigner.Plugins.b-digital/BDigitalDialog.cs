@@ -3,12 +3,15 @@
 [CustomComponent]
 sealed class BDigitalDialog : PluginComponentBase
 {
+    [Suggestions("true , false")]
     [JsTypeInfo(JsType.Boolean)]
     public string displayCloseIcon { get; set; }
 
+    [Suggestions("true , false")]
     [JsTypeInfo(JsType.Boolean)]
     public string displayOkButton { get; set; }
 
+    [Suggestions("true , false")]
     [JsTypeInfo(JsType.Boolean)]
     public string fullScreen { get; set; }
 
@@ -65,7 +68,7 @@ sealed class BDigitalDialog : PluginComponentBase
                     return response.Error;
                 }
 
-                linesCollection = new List<string>{ from x in response.Value select "{ label: null, onClick: null, element: "+x.tsx + "}"};
+                linesCollection = new List<string>{ from x in response.Value select "{ element: "+x.tsx + ", label: null, onClick: null}"};
                 
                 tsImports.Add(from x in response.Value select x.tsImports);
             }
@@ -104,6 +107,7 @@ sealed class BDigitalDialog : PluginComponentBase
             var actionsElement = new div { children }.TryFindDesignNamedElement("actions");
             if (actionsElement is HtmlElement htmlElement)
             {
+                
                 htmlElement.style.Add(BorderTop(1,solid,rgba(0, 0, 0, 0.12)));
 
                 htmlElement += DisplayFlex + JustifyContentFlexEnd + Padding(8) + Gap(8);
@@ -111,6 +115,11 @@ sealed class BDigitalDialog : PluginComponentBase
                 children.Remove(htmlElement);
 
                 bottomActionBar = htmlElement;
+                
+                if (displayOkButton?.Equals("false") is true)
+                {
+                    htmlElement += BorderTop(none);
+                }
             }
         }
 
