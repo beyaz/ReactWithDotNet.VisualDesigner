@@ -33,7 +33,7 @@ public sealed class ExporterTest
                 ExportStylesAsTailwind = true
             };
 
-            var result = await TsxExporter.CalculateElementTreeSourceCodes(project,new ComponentConfig(), visualElementModel);
+            var result = await TsxExporter.CalculateElementTreeSourceCodes(project);
 
             result.HasError.ShouldBeFalse();
 

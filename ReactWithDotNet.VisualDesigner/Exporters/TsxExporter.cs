@@ -10,7 +10,7 @@ static class TsxExporter
         var project = GetProjectConfig(projectId);
 
         return
-            from x in await CalculateElementTreeSourceCodes(componentScope,componentId, project, componentConfig, visualElement)
+            from x in await CalculateElementTreeSourceCodes(componentScope, visualElement)
             select string.Join(Environment.NewLine, x.elementTreeSourceLines);
     }
 
@@ -89,7 +89,7 @@ static class TsxExporter
 
     internal static
         Task<Result<(IReadOnlyList<string> elementTreeSourceLines, IReadOnlyList<string> importLines)>>
-        CalculateElementTreeSourceCodes(ComponentScope componentScope,int componentId5,ProjectConfig project2, ComponentConfig componentConfig3, VisualElementModel rootVisualElement)
+        CalculateElementTreeSourceCodes(ComponentScope componentScope, VisualElementModel rootVisualElement)
     {
 
         var componentConfig = componentScope.ComponentConfig;
@@ -142,7 +142,7 @@ static class TsxExporter
             from rootVisualElement in GetComponentUserOrMainVersionAsync(componentId, userName)
             from file in GetComponentFileLocation(componentId, userName)
             from fileContentInDirectory in FileSystem.ReadAllLines(file.filePath)
-            from source in CalculateElementTreeSourceCodes(componentScope,componentId, project, data.Component.Config, rootVisualElement)
+            from source in CalculateElementTreeSourceCodes(componentScope, rootVisualElement)
             from formattedSourceLines in NodeJsBridge.FormatCode(string.Join(Environment.NewLine, source.elementTreeSourceLines), project.PrettierOptions)
             let content = mergeImportLines(fileContentInDirectory, source.importLines)
             from fileContent in InjectRender(content, file.targetComponentName, formattedSourceLines.Split(Environment.NewLine.ToCharArray()))
