@@ -9,8 +9,6 @@ static class ModelToNodeTransformer
     {
         var htmlElementType = TryGetHtmlElementTypeByTagName(elementModel.Tag);
 
-        var variableSuggestionsInOutputFile =( await GetVariableSuggestionsInOutputFile(componentId)).Value ??[];
-
         bool IsStyleValueLocatedAtOutputFile(string styleValue)
         {
             if (styleValue.StartsWith("request.") || 
