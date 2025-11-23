@@ -5,12 +5,8 @@ namespace ReactWithDotNet.VisualDesigner.Exporters;
 
 static class CSharpStringExporter
 {
-    public static async Task<Result<string>> CalculateElementTsxCode(ComponentScope componentScope,int componentId, int projectId, ComponentConfig componentConfig, VisualElementModel visualElement)
+    public static async Task<Result<string>> CalculateElementTsxCode(ComponentScope componentScope, VisualElementModel visualElement)
     {
-        
-        
-        var project = GetProjectConfig(projectId);
-
         return
             from x in await CalculateElementTreeSourceCodes(componentScope, visualElement)
             select string.Join(Environment.NewLine, x.elementTreeSourceLines);
@@ -174,7 +170,6 @@ static class CSharpStringExporter
     {
         var userName = input.UserName;
 
-        var project = componentScope.ProjectConfig;
 
         var componentId = componentScope.ProjectId;
 

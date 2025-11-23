@@ -52,12 +52,12 @@ static class ExporterFactory
         
         if (project.ExportAsCSharp)
         {
-            return  CSharpExporter.CalculateElementTsxCode(componentScope,componentId,projectId, componentConfig, visualElement);
+            return  CSharpExporter.CalculateElementTsxCode(componentScope, visualElement);
         }
         
         if (project.ExportAsCSharpString)
         {
-            return  CSharpStringExporter.CalculateElementTsxCode(componentScope,componentId,projectId, componentConfig, visualElement);
+            return  CSharpStringExporter.CalculateElementTsxCode(componentScope, visualElement);
         }
         
         return from tsCode in TsxExporter.CalculateElementTsxCode(componentScope, visualElement)

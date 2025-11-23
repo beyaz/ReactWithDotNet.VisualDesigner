@@ -15,9 +15,8 @@ static class CSharpExporter
         public bool IsStandardAssignment { get; init; }
         public string Text { get; init; }
     }
-    public static async Task<Result<string>> CalculateElementTsxCode(ComponentScope componentScope,int componentId,int projectId, ComponentConfig componentConfig, VisualElementModel visualElement)
+    public static async Task<Result<string>> CalculateElementTsxCode(ComponentScope componentScope, VisualElementModel visualElement)
     {        
-        var project = GetProjectConfig(projectId);
 
         return
             from x in await CalculateElementTreeSourceCodes( componentScope, visualElement)
@@ -128,7 +127,6 @@ static class CSharpExporter
 
         var componentId = componentScope.ComponentId;
 
-        var project = componentScope.ProjectConfig;
 
         return await
             (from data in GetComponentData(componentId, userName)
