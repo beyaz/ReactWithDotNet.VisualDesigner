@@ -1640,11 +1640,9 @@ sealed class ApplicationView : Component<ApplicationState>
         }
     }
 
-    bool IsAnyVisualElementSelected => state.Selection.VisualElementTreeItemPath.HasValue;
-    
     Element PartRightPanel()
     {
-        if (!IsAnyVisualElementSelected)
+        if (CurrentVisualElement is null)
         {
             return new div();
         }
