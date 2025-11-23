@@ -187,12 +187,18 @@ static class ApplicationLogic
 
     }
 
-    public static IReadOnlyList<SuggestionItem> GetStyleAttributeNameSuggestions(int projectId)
+    public static async Task<Result<IReadOnlyList<SuggestionItem>>> GetStyleAttributeNameSuggestions(int componentId)
     {
-        var project = GetProjectConfig(projectId);
+        var component = await Store.TryGetComponent(componentId);
+            
+        var project = GetProjectConfig(component.ProjectId);
 
+        var variableSuggestionsInOutputFile = await GetVariableSuggestionsInOutputFile(componentId);
+        
         return new List<SuggestionItem>
         {
+            variableSuggestionsInOutputFile.Value ?? [],
+            
             from name in project.Styles.Keys
             select new SuggestionItem
             {

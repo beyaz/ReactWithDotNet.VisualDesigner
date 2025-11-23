@@ -1,7 +1,7 @@
-﻿using System.Reflection;
-using System.Text;
-using ReactWithDotNet.ThirdPartyLibraries.MonacoEditorReact;
+﻿using ReactWithDotNet.ThirdPartyLibraries.MonacoEditorReact;
 using ReactWithDotNet.VisualDesigner.Exporters;
+using System.Reflection;
+using System.Text;
 
 namespace ReactWithDotNet.VisualDesigner.Views;
 
@@ -1841,7 +1841,7 @@ sealed class ApplicationView : Component<ApplicationState>
                 return new StyleEditor
                 {
                     Placeholder = "Add style",
-                    ProjectId   = state.ProjectId,
+                    ComponentId   = state.ComponentId,
                     Name        = "style_editor" + styles.Count,
                     Id          = "style_editor",
                     OnChange = (_, newValue) =>
@@ -2614,15 +2614,15 @@ sealed class ApplicationView : Component<ApplicationState>
 
     class StyleEditor : MagicInput
     {
-        public required int ProjectId { get; init; }
+        public required int ComponentId { get; init; }
 
         protected override Task<Result<IReadOnlyList<SuggestionItem>>> Suggestions
         {
             get
             {
-                var cacheKey = $"{nameof(StyleEditor)}-{ProjectId}";
+                var cacheKey = $"{nameof(StyleEditor)}-{ComponentId}";
 
-                return Result.From(Cache.AccessValue(cacheKey, () => GetStyleAttributeNameSuggestions(ProjectId)));
+                return Cache.AccessValue(cacheKey, () => GetStyleAttributeNameSuggestions(ComponentId));
             }
         }
     }

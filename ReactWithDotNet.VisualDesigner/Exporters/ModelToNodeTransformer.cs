@@ -260,7 +260,9 @@ static class ModelToNodeTransformer
                         select $"{parseResult.condition} ? {left} : {right}";
                 }
 
-                if (value.StartsWith("request.") || value.StartsWith("context.")) // todo: think better
+                if (value.StartsWith("request.") || 
+                    value.StartsWith("context.") || 
+                    value.Contains("(index)")) // todo: think better
                 {
                     return value;
                 }
