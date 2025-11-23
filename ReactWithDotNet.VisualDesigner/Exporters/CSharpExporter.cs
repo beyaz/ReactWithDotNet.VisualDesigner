@@ -129,17 +129,16 @@ static class CSharpExporter
 
 
         return await
-            (from data in GetComponentData(componentId, userName)
-            from rootVisualElement in GetComponentUserOrMainVersionAsync(componentId, userName)
-            from file in GetComponentFileLocation(componentId, userName)
-            from fileContentInDirectory in FileSystem.ReadAllLines(file.filePath)
-            from source in CalculateElementTreeSourceCodes(componentScope, rootVisualElement)
-            from fileContent in InjectRender(fileContentInDirectory, file.targetComponentName, source.elementTreeSourceLines)
-            select new FileModel
-            {
-                Path    = file.filePath,
-                Content = fileContent
-            });
+            (from rootVisualElement in GetComponentUserOrMainVersionAsync(componentId, userName)
+             from file in GetComponentFileLocation(componentId, userName)
+             from fileContentInDirectory in FileSystem.ReadAllLines(file.filePath)
+             from source in CalculateElementTreeSourceCodes(componentScope, rootVisualElement)
+             from fileContent in InjectRender(fileContentInDirectory, file.targetComponentName, source.elementTreeSourceLines)
+             select new FileModel
+             {
+                 Path    = file.filePath,
+                 Content = fileContent
+             });
     }
 
     static async Task<Result<IReadOnlyList<string>>> ConvertReactNodeModelToElementTreeSourceLines(ProjectConfig project, ReactNode node, ReactNode parentNode, int indentLevel)
