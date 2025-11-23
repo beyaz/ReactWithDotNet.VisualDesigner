@@ -174,7 +174,7 @@ sealed class ApplicationPreview : Component
                 }
             }
 
-            // try add content as child if has no child
+            // try to add content as child if it has no child
             if (model.HasNoChild)
             {
                 Maybe<string> textPropValue, textPreviewValue;
