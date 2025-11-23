@@ -73,4 +73,14 @@ static class MaybeExtensions
 
         action(maybe.Value);
     }
+    
+    public static void Then<TValue>(this Maybe<TValue> maybe, Action<TValue> action)
+    {
+        if (maybe.HasNoValue)
+        {
+            return;
+        }
+
+        action(maybe.Value);
+    }
 }

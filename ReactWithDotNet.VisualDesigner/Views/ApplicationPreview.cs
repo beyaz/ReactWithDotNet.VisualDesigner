@@ -152,8 +152,7 @@ sealed class ApplicationPreview : Component
                 }
             }
 
-            
-            element ??= Plugin.TryCreateElementForPreview(new TryCreateElementForPreviewInput{ Tag = model.Tag, Id = path, OnMouseClick = scope.OnTreeItemClicked});
+            element ??= Plugin.TryCreateElementForPreview(new TryCreateElementForPreviewInput { Tag = model.Tag, Id = path, OnMouseClick = scope.OnTreeItemClicked });
 
             if (element is null)
             {
@@ -174,41 +173,47 @@ sealed class ApplicationPreview : Component
                 }
             }
 
-            // try to add content as child if it has no child
+            // Has no child maybe has content
             if (model.HasNoChild)
             {
-                Maybe<string> textPropValue, textPreviewValue;
+                // has content preview
+                if (HasProp(model.Properties, Design.ContentPreview))
                 {
-                    var properties = model.Properties;
-                
-                    var output = RemovePropInProps(properties, Design.Content);
+                    // remove content , content preview
+                    var (props, removedPropValue) = RemovePropInProps(model.Properties, Design.ContentPreview);
 
-                    properties = output.props;
-                    
-                    textPropValue = output.removedPropValue;
-                
-                    output = RemovePropInProps(properties, Design.ContentPreview);
-                    
-                    properties = output.props;
-                    
-                    textPreviewValue = output.removedPropValue;
-                    
-                    model = model with{ Properties = properties};
+                    props = RemovePropInProps(props, Design.Content).props;
+
+                    model = model with
+                    {
+                        Properties = props
+                    };
+
+                    // element.text <== content preview
+                    element.Add((HtmlTextNode)TryClearStringValue(removedPropValue.Value));
                 }
 
-                if (element is HtmlElement htmlElement)
+                // maybe content is string value
                 {
-                    if (textPreviewValue.HasValue)
+                    var props = model.Properties;
+
+                    TryGetProp(props, Design.Content).Then(prop =>
                     {
-                        htmlElement.text = TryClearStringValue(textPreviewValue.Value);
-                    }
-                    else if (textPropValue.HasValue)
+                        if (IsStringValue(prop.Value))
+                        {
+                            element.Add((HtmlTextNode)TryClearStringValue(prop.Value));
+
+                            props = RemovePropInProps(props, Design.Content).props;
+                        }
+                    });
+
+                    model = model with
                     {
-                        htmlElement.text = TryClearStringValue(textPropValue.Value);
-                    }
+                        Properties = props
+                    };
                 }
             }
-            
+
             var designTimeProps =
                 from p in model.Properties
                 from x in ParseProperty(p)
@@ -266,9 +271,9 @@ sealed class ApplicationPreview : Component
                     var name = item.Value.Name;
                     var value = item.Value.Value;
 
-                    if (name.NotIn(Design.ItemsSource, Design.ItemsSourceDesignTimeCount))
+                    if (VisualDesigner.Extensions.NotIn(name, Design.ItemsSource, Design.ItemsSourceDesignTimeCount))
                     {
-                        name = name.RemoveFromStart(Design.PREFIX);
+                        name = VisualDesigner.Extensions.RemoveFromStart(name, Design.PREFIX);
                     }
 
                     var propertyProcessScope = new PropertyProcessScope
@@ -284,7 +289,7 @@ sealed class ApplicationPreview : Component
                     {
                         return result.Error;
                     }
-                    
+
                     model = result.Value.model;
                 }
             }
@@ -515,6 +520,7 @@ sealed class ApplicationPreview : Component
                         data = data with { propValue = propRealValue };
                     }
                 }
+
                 {
                     var parseResponse = TryParseConditionalValue(data.propValue);
                     if (parseResponse.success)
@@ -681,7 +687,7 @@ sealed class ApplicationPreview : Component
 
                             model = model with
                             {
-                                Children = model.Children.AddRange(from _ in Enumerable.Range(0,designTimeChildrenCount) select CloneByUsingYaml(firstChild))
+                                Children = model.Children.AddRange(from _ in Enumerable.Range(0, designTimeChildrenCount) select CloneByUsingYaml(firstChild))
                             };
                         }
 
@@ -912,8 +918,6 @@ sealed class ApplicationPreview : Component
                         return data with { IsProcessed = true };
                     }
 
-                   
-                    
                     if (propertyInfo.PropertyType == typeof(string))
                     {
                         propertyInfo.SetValue(element, TryClearStringValue(propValue));
@@ -1248,8 +1252,6 @@ static class JsonHelper
         return currentNode;
     }
 }
-
-
 
 static class FP
 {

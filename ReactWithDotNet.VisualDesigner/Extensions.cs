@@ -3,6 +3,7 @@ using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
+using ReactWithDotNet.VisualDesigner.PropertyDomain;
 
 namespace ReactWithDotNet.VisualDesigner;
 
@@ -57,6 +58,25 @@ public static class Extensions
         }
                     
         return (list, removedPropValue);
+    }
+    
+    public static bool HasProp(IReadOnlyList<string> props, string propName)
+    {
+        return TryGetProp(props, propName).HasValue;
+    }
+    
+    public static Maybe<ParsedProperty> TryGetProp(IReadOnlyList<string> props, string propName)
+    {
+        foreach (var prop in props)
+        {
+            var maybe = TryParseProperty(prop);
+            if (maybe.HasValue && maybe.Value.Name == propName)
+            {
+                return maybe;
+            }
+        }
+
+        return None;
     }
     
     public static void Add<T>(this List<T> list, IEnumerable<T> items)
