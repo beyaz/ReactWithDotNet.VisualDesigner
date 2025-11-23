@@ -1742,10 +1742,10 @@ sealed class ApplicationView : Component<ApplicationState>
 
             SpaceY(16),
             CreateGroupLabel("P R O P S"),
-            viewProps(new List<string>
+            viewProps(new List<(string propStr, int propIndex)>
             {
-                from p in visualElementModel.Properties
-                let parsedProp = TryParseProperty(p)
+                from p in visualElementModel.Properties.Select((propStr,index)=>new {propStr, index})
+                let parsedProp = TryParseProperty(p.propStr)
                 let isUiManagedDesignerProp
                     = parsedProp.HasValue &&
                       parsedProp.Value.Name is
@@ -1756,7 +1756,7 @@ sealed class ApplicationView : Component<ApplicationState>
                           Design.ItemsSource or
                           Design.ItemsSourceDesignTimeCount
                 where !isUiManagedDesignerProp
-                select p
+                select (p.propStr , p.index)
             }),
 
             shadowProps, ShadowPropertyView.CreatePopupHandlerView(),
@@ -1997,7 +1997,7 @@ sealed class ApplicationView : Component<ApplicationState>
             }
         }
 
-        Element viewProps(IReadOnlyList<string> props)
+        Element viewProps(IReadOnlyList<(string propStr, int propIndex)> props)
         {
             return new FlexColumn(WidthFull, Gap(4))
             {
@@ -2024,7 +2024,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
                             return Task.CompletedTask;
                         }),
-                        props.Select((value, index) => attributeItem(index, value))
+                        props.Select(x => attributeItem(x.propIndex, x.propStr))
                     }
                 }
             };
@@ -2035,7 +2035,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
                 if (state.Selection.SelectedPropertyIndex >= 0)
                 {
-                    value = props[state.Selection.SelectedPropertyIndex.Value];
+                    value = CurrentVisualElement.Properties[state.Selection.SelectedPropertyIndex.Value];
                 }
 
                 var selectedTag = FindTreeNodeByTreePath(state.ComponentRootElement, state.Selection.VisualElementTreeItemPath).Tag;
@@ -2048,7 +2048,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
                     Placeholder = "Add property",
 
-                    Name = (state.Selection.SelectedPropertyIndex ?? (props.Count + 1) * -1).ToString(),
+                    Name = (state.Selection.SelectedPropertyIndex ?? (CurrentVisualElement.Properties.Count + 1) * -1).ToString(),
 
                     Id = "PROPS-INPUT-EDITOR-" + (state.Selection.SelectedPropertyIndex ?? -1),
 
