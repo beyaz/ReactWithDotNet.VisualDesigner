@@ -17,7 +17,7 @@ static class CSharpStringExporter
     public static Task<Result<(bool HasChange,FileModel File)>> ExportToFileSystem(ComponentScope componentScope,ExportInput input)
     {
         return
-            from file in CalculateExportInfo( componentScope,input)
+            from file in CalculateExportInfo( componentScope)
             from fileContentAtDisk in FileSystem.ReadAllText(file.Path)
             select IsEqualsIgnoreWhitespace(fileContentAtDisk, file.Content) switch
             {
@@ -166,7 +166,7 @@ static class CSharpStringExporter
         }
     }
 
-    static async Task<Result<FileModel>> CalculateExportInfo(ComponentScope componentScope,ExportInput input)
+    static async Task<Result<FileModel>> CalculateExportInfo(ComponentScope componentScope)
     {
 
         var rootVisualElement = componentScope.RootVisualElement;

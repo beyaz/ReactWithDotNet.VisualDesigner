@@ -12,10 +12,10 @@ static class TsxExporter
             select string.Join(Environment.NewLine, x.elementTreeSourceLines);
     }
 
-    public static Task<Result<(bool HasChange,FileModel File)>> ExportToFileSystem(ComponentScope componentScope, ExportInput input)
+    public static Task<Result<(bool HasChange,FileModel File)>> ExportToFileSystem(ComponentScope componentScope, ExportInput input6)
     {
         return
-            from file in CalculateExportInfo(componentScope,input)
+            from file in CalculateExportInfo(componentScope)
             from fileContentAtDisk in FileSystem.ReadAllText(file.Path)
             select IsEqualsIgnoreWhitespace(fileContentAtDisk, file.Content) switch
             {
@@ -126,7 +126,7 @@ static class TsxExporter
             select (elementJsxTree, nodeAnalyzeOutput.TsImportCollection.ToTsLines());
     }
 
-    static async Task<Result<FileModel>> CalculateExportInfo(ComponentScope componentScope, ExportInput input)
+    static async Task<Result<FileModel>> CalculateExportInfo(ComponentScope componentScope)
     {
 
         var project = componentScope.ProjectConfig;
