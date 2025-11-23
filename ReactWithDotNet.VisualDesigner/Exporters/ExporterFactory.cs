@@ -1,8 +1,24 @@
-﻿global using  ExportInput = (int ProjectId,int ComponentId,string UserName );
-
-namespace ReactWithDotNet.VisualDesigner.Exporters;
+﻿namespace ReactWithDotNet.VisualDesigner.Exporters;
 
 public sealed record SourceLinePoints(int LeftPaddingCount, int FirstReturnLineIndex, int FirstReturnCloseLineIndex);
+
+public sealed record ExportInput
+{
+    public required int ProjectId { get; init; }
+    
+    public required int ComponentId { get; init; }
+    
+    public required string UserName { get; init; }
+
+    public void Deconstruct(out int projectId, out int componentId, out string userName)
+    {
+        projectId = ProjectId;
+
+        componentId = ComponentId;
+        
+        userName = UserName;
+    }
+}
 
 static class ExporterFactory
 {

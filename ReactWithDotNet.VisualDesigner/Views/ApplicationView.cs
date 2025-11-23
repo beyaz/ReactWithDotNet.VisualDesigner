@@ -1229,7 +1229,16 @@ sealed class ApplicationView : Component<ApplicationState>
                                 return;
                             }
 
-                            var result = await ExporterFactory.ExportToFileSystem((state.ProjectId, state.ComponentId, state.UserName));
+                            var exportInput = new ExportInput
+                            {
+                                ProjectId = state.ProjectId,
+
+                                ComponentId = state.ComponentId,
+
+                                UserName = state.UserName
+                            };
+                            
+                            var result = await ExporterFactory.ExportToFileSystem(exportInput);
                             if (result.HasError)
                             {
                                 this.FailNotification(result.Error.Message);

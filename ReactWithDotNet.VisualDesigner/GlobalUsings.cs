@@ -34,6 +34,7 @@ global using Toolbox;
 global using ReactWithDotNet.VisualDesigner.TsxAnalyze;
 
 global using static ReactWithDotNet.VisualDesigner.PropertyDomain.ParsedPropertyFactory;
+global using  ReactWithDotNet.VisualDesigner.Exporters;
 
 
 using System.Runtime.CompilerServices;
