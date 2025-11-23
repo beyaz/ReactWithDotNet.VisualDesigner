@@ -49,7 +49,7 @@ public sealed class CSharpExporterTest
 
             var componentConfig = new ComponentConfig();
 
-            var result = await CSharpExporter.CalculateElementTreeSourceCodes(project,componentConfig, visualElementModel);
+            var result = await CSharpExporter.CalculateElementTreeSourceCodes(project);
 
             result.HasError.ShouldBeFalse();
 
