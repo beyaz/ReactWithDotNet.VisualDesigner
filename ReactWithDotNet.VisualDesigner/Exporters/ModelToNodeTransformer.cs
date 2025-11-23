@@ -26,7 +26,7 @@ static class ModelToNodeTransformer
             var props = project switch
             {
                 _ when project.ExportStylesAsInline || project.ExportAsCSharp || project.ExportAsCSharpString
-                    => calculatePropsForInlineStyle(componentScope,project, elementModel.Properties, elementModel.Styles, IsStyleValueLocatedAtOutputFile),
+                    => calculatePropsForInlineStyle(componentScope, elementModel.Properties, elementModel.Styles, IsStyleValueLocatedAtOutputFile),
 
                 _ when project.ExportStylesAsTailwind
                     => calculatePropsForTailwind(project, elementModel.Properties, elementModel.Styles),
@@ -98,7 +98,7 @@ static class ModelToNodeTransformer
             Children = children.ToImmutableList()
         };
 
-        static Result<IReadOnlyList<ReactProperty>> calculatePropsForInlineStyle(ComponentScope componentScope, ProjectConfig project2, IReadOnlyList<string> properties, IReadOnlyList<string> styles, Func<string, bool> isStyleValueLocatedAtOutputFile)
+        static Result<IReadOnlyList<ReactProperty>> calculatePropsForInlineStyle(ComponentScope componentScope, IReadOnlyList<string> properties, IReadOnlyList<string> styles, Func<string, bool> isStyleValueLocatedAtOutputFile)
         {
             var project = componentScope.ProjectConfig;
             
