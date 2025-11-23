@@ -104,7 +104,7 @@ static class CSharpExporter
     {
         return
             // Convert model to node
-            from rootNode in ModelToNodeTransformer.ConvertVisualElementModelToReactNodeModel(componentId,project, rootVisualElement)
+            from rootNode in ModelToNodeTransformer.ConvertVisualElementModelToReactNodeModel(componentScope, componentId,project, rootVisualElement)
 
             // Analyze node
             from nodeAnalyzeOutput in AnalyzeNode(new() {Node = rootNode, ComponentConfig = componentConfig})

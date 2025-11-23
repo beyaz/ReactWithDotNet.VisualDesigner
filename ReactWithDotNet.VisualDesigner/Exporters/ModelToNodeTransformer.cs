@@ -5,7 +5,7 @@ namespace ReactWithDotNet.VisualDesigner.Exporters;
 
 static class ModelToNodeTransformer
 {
-    public static async Task<Result<ReactNode>> ConvertVisualElementModelToReactNodeModel(int componentId,ProjectConfig project, VisualElementModel elementModel)
+    public static async Task<Result<ReactNode>> ConvertVisualElementModelToReactNodeModel(ComponentScope componentScope,int componentId,ProjectConfig project, VisualElementModel elementModel)
     {
         var htmlElementType = TryGetHtmlElementTypeByTagName(elementModel.Tag);
 
@@ -28,7 +28,7 @@ static class ModelToNodeTransformer
             var props = project switch
             {
                 _ when project.ExportStylesAsInline || project.ExportAsCSharp || project.ExportAsCSharpString
-                    => calculatePropsForInlineStyle(project, elementModel.Properties, elementModel.Styles, IsStyleValueLocatedAtOutputFile),
+                    => calculatePropsForInlineStyle(componentScope,project, elementModel.Properties, elementModel.Styles, IsStyleValueLocatedAtOutputFile),
 
                 _ when project.ExportStylesAsTailwind
                     => calculatePropsForTailwind(project, elementModel.Properties, elementModel.Styles),
@@ -76,7 +76,7 @@ static class ModelToNodeTransformer
             {
                 ReactNode childNode;
                 {
-                    var result = await ConvertVisualElementModelToReactNodeModel(componentId,project, child);
+                    var result = await ConvertVisualElementModelToReactNodeModel(componentScope,componentId,project, child);
                     if (result.HasError)
                     {
                         return result.Error;
@@ -100,7 +100,7 @@ static class ModelToNodeTransformer
             Children = children.ToImmutableList()
         };
 
-        static Result<IReadOnlyList<ReactProperty>> calculatePropsForInlineStyle(ProjectConfig project, IReadOnlyList<string> properties, IReadOnlyList<string> styles, Func<string, bool> isStyleValueLocatedAtOutputFile)
+        static Result<IReadOnlyList<ReactProperty>> calculatePropsForInlineStyle(ComponentScope componentScope, ProjectConfig project, IReadOnlyList<string> properties, IReadOnlyList<string> styles, Func<string, bool> isStyleValueLocatedAtOutputFile)
         {
             var styleProp = project switch
             {

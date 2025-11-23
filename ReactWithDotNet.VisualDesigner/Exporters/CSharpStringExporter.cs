@@ -12,7 +12,7 @@ static class CSharpStringExporter
         var project = GetProjectConfig(projectId);
 
         return
-            from x in await CalculateElementTreeSourceCodes(componentId,project, componentConfig, visualElement)
+            from x in await CalculateElementTreeSourceCodes(componentScope,componentId,project, componentConfig, visualElement)
             select string.Join(Environment.NewLine, x.elementTreeSourceLines);
         
         
@@ -111,11 +111,11 @@ static class CSharpStringExporter
 
     internal static
         Task<Result<(IReadOnlyList<string> elementTreeSourceLines, IReadOnlyList<string> importLines)>>
-        CalculateElementTreeSourceCodes(int componentId,ProjectConfig project, ComponentConfig componentConfig, VisualElementModel rootVisualElement)
+        CalculateElementTreeSourceCodes(ComponentScope componentScope,int componentId,ProjectConfig project, ComponentConfig componentConfig, VisualElementModel rootVisualElement)
     {
         return
             // Convert model to node
-            from rootNode in ModelToNodeTransformer.ConvertVisualElementModelToReactNodeModel(componentId, project, rootVisualElement)
+            from rootNode in ModelToNodeTransformer.ConvertVisualElementModelToReactNodeModel(componentScope,componentId, project, rootVisualElement)
 
             // Analyze node
             from nodeAnalyzeOutput in AnalyzeNode(new() {Node = rootNode, ComponentConfig = componentConfig})
@@ -179,7 +179,7 @@ static class CSharpStringExporter
             from rootVisualElement in GetComponentUserOrMainVersionAsync(componentId, userName)
             from file in GetComponentFileLocation(componentId, userName)
             from fileContentInDirectory in FileSystem.ReadAllLines(file.filePath)
-            from source in CalculateElementTreeSourceCodes(componentId, project, data.Component.Config, rootVisualElement)
+            from source in CalculateElementTreeSourceCodes(componentScope, componentId, project, data.Component.Config, rootVisualElement)
             from fileContent in InjectRender(fileContentInDirectory, file.targetComponentName, source.elementTreeSourceLines)
             select new FileModel
             {
