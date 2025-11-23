@@ -9,21 +9,21 @@ public sealed record ExportInput
 
 static class ExporterFactory
 {
-    public static async Task<Result<(bool HasChange,FileModel File)>> ExportToFileSystem(ComponentScope componentScope, ExportInput input)
+    public static async Task<Result<(bool HasChange,FileModel File)>> ExportToFileSystem(ComponentScope componentScope)
     {
         var project = componentScope.ProjectConfig;
        
         if (project.ExportAsCSharp)
         {
-            return await CSharpExporter.ExportToFileSystem(componentScope, input);
+            return await CSharpExporter.ExportToFileSystem(componentScope);
         }
 
         if (project.ExportAsCSharpString)
         {
-            return await CSharpStringExporter.ExportToFileSystem( componentScope,input);
+            return await CSharpStringExporter.ExportToFileSystem( componentScope);
         }
         
-        return await TsxExporter.ExportToFileSystem(componentScope, input);
+        return await TsxExporter.ExportToFileSystem(componentScope);
     }
 
     public static Result<SourceLinePoints> GetComponentLineIndexPointsInSourceFile(int projectId, IReadOnlyList<string> fileContent, string targetComponentName)

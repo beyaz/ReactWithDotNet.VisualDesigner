@@ -1236,11 +1236,9 @@ sealed class ApplicationView : Component<ApplicationState>
                                 return;
                             }
                             
-                            var exportInput = new ExportInput
-                            {
-                            };
+                           
                             
-                            var result = await ExporterFactory.ExportToFileSystem(componentScope.Value,exportInput);
+                            var result = await ExporterFactory.ExportToFileSystem(componentScope.Value);
                             if (result.HasError)
                             {
                                 this.FailNotification(result.Error.Message);

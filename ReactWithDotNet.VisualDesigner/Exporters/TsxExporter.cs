@@ -12,7 +12,7 @@ static class TsxExporter
             select string.Join(Environment.NewLine, x.elementTreeSourceLines);
     }
 
-    public static Task<Result<(bool HasChange,FileModel File)>> ExportToFileSystem(ComponentScope componentScope, ExportInput input6)
+    public static Task<Result<(bool HasChange,FileModel File)>> ExportToFileSystem(ComponentScope componentScope)
     {
         return
             from file in CalculateExportInfo(componentScope)

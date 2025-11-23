@@ -14,7 +14,7 @@ static class CSharpStringExporter
         
     }
 
-    public static Task<Result<(bool HasChange,FileModel File)>> ExportToFileSystem(ComponentScope componentScope,ExportInput input)
+    public static Task<Result<(bool HasChange,FileModel File)>> ExportToFileSystem(ComponentScope componentScope)
     {
         return
             from file in CalculateExportInfo( componentScope)
