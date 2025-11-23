@@ -2,11 +2,6 @@
 
 public sealed record SourceLinePoints(int LeftPaddingCount, int FirstReturnLineIndex, int FirstReturnCloseLineIndex);
 
-public sealed record ExportInput
-{
-    public string UserName { get; init; }
-}
-
 static class ExporterFactory
 {
     public static async Task<Result<(bool HasChange,FileModel File)>> ExportToFileSystem(ComponentScope componentScope)
