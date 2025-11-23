@@ -13,13 +13,21 @@ static class ApplicationLogic
             return new Exception($"ComponentNotFound-id:{componentId}");
         }
         
+        var project = GetProjectConfig(componentEntity.ProjectId);
+        if (project is null)
+        {
+            return new ArgumentNullException($"ProjectNotFound. {componentEntity.ProjectId}");
+        }
+        
         return new ComponentScope
         {
             ProjectId = componentEntity.ProjectId,
 
             ComponentId = componentEntity.Id,
 
-            ComponentConfig = componentEntity.Config
+            ComponentConfig = componentEntity.Config,
+            
+            ProjectConfig = project
         };
     }
     public static async Task<Result<Unit>> CommitComponent(ApplicationState state)

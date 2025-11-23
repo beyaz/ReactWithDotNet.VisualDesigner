@@ -38,4 +38,6 @@ public sealed record ComponentScope
     public required int ComponentId { get; init; }
     
     public required ComponentConfig ComponentConfig  { get; init; }
+    
+    public required ProjectConfig ProjectConfig{ get; init; }
 }
