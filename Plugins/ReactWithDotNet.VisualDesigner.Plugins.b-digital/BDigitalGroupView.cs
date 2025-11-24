@@ -3,18 +3,18 @@
 [CustomComponent]
 sealed class BDigitalGroupView : PluginComponentBase
 {
-    
+
     [JsTypeInfo(JsType.String)]
     public string title { get; set; }
 
     [JsTypeInfo(JsType.String)]
     public string subTitle { get; set; }
-    
-    
+
+
     [Suggestions("true , false")]
     [JsTypeInfo(JsType.Boolean)]
     public string applySideMargin { get; set; }
-    
+
     [Suggestions("true , false")]
     [JsTypeInfo(JsType.Boolean)]
     public string applyVerticalMargin { get; set; }
@@ -24,23 +24,27 @@ sealed class BDigitalGroupView : PluginComponentBase
     {
         if (input.Node.Tag != nameof(BDigitalGroupView))
         {
-            return  AnalyzeChildren(input, AnalyzeReactNode);
+            return AnalyzeChildren(input, AnalyzeReactNode);
         }
-        
-        var import = (nameof(BDigitalGroupView),"b-digital-group-view");
-        
-        return  AnalyzeChildren(input, AnalyzeReactNode).With(import);
+
+        var node = input.Node;
+
+        node = ApplyTranslateOperationOnProps(node, input.ComponentConfig, nameof(title));
+
+        var import = (nameof(BDigitalGroupView), "b-digital-group-view");
+
+        return AnalyzeChildren(input with { Node = node }, AnalyzeReactNode).With(import);
     }
-    
-    
+
+
     protected override Element render()
     {
         var _applySideMargin = applySideMargin ?? "true";
-        
+
         var _applyVerticalMargin = applyVerticalMargin ?? "true";
 
         var style = new Style();
-        
+
         if (_applySideMargin == "true" && _applyVerticalMargin == "true")
         {
             style.Add(Padding(24));
@@ -69,7 +73,7 @@ sealed class BDigitalGroupView : PluginComponentBase
                 {
                     variant  = "body0m",
                     children = { title },
-                    
+
                     id           =id,
                     onMouseClick = onMouseClick
                 }
@@ -81,7 +85,7 @@ sealed class BDigitalGroupView : PluginComponentBase
                     variant  = "body2",
                     color = textSecondary,
                     children = { subTitle },
-                    
+
                     id=id,
                     onMouseClick= onMouseClick
                 }
@@ -92,14 +96,14 @@ sealed class BDigitalGroupView : PluginComponentBase
                 children
             }
         };
-        
+
     }
 
     [TryGetIconForElementTreeNode]
     public static Scope TryGetIconForElementTreeNode(Scope scope)
     {
         var model = Plugin.VisualElementModel[scope];
-        
+
         if (model.Tag == nameof(BDigitalGroupView))
         {
             return Scope.Create(new()

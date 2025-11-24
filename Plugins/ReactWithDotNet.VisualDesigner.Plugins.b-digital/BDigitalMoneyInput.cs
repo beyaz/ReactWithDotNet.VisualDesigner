@@ -3,6 +3,7 @@
 [CustomComponent]
 sealed class BDigitalMoneyInput : PluginComponentBase
 {
+    [Suggestions("true , false")]
     [JsTypeInfo(JsType.Boolean)]
     public string currencyVisible { get; set; }
 
@@ -18,7 +19,7 @@ sealed class BDigitalMoneyInput : PluginComponentBase
     [JsTypeInfo(JsType.Number)]
     public string value { get; set; }
 
-    
+
 
     [NodeAnalyzer]
     public static NodeAnalyzeOutput AnalyzeReactNode(NodeAnalyzeInput input)
@@ -27,9 +28,11 @@ sealed class BDigitalMoneyInput : PluginComponentBase
         {
             return AnalyzeChildren(input, AnalyzeReactNode);
         }
-        
+
         var node = input.Node;
-        
+
+        node = ApplyTranslateOperationOnProps(node, input.ComponentConfig, nameof(label));
+
         {
             var valueProp = node.Properties.FirstOrDefault(x => x.Name == nameof(value));
             var handleMoneyInputChangeProp = node.Properties.FirstOrDefault(x => x.Name == nameof(handleMoneyInputChange));
@@ -72,7 +75,7 @@ sealed class BDigitalMoneyInput : PluginComponentBase
                 {
                     properties = properties.Add(new()
                     {
-                        Name  = nameof(handleMoneyInputChange),
+                        Name = nameof(handleMoneyInputChange),
                         Value = lines.ToTsCode()
                     });
                 }
@@ -82,7 +85,7 @@ sealed class BDigitalMoneyInput : PluginComponentBase
         }
 
         var import = (nameof(BDigitalMoneyInput), "b-digital-money-input");
-   
+
         return AnalyzeChildren(input with { Node = node }, AnalyzeReactNode).With(import);
     }
 
@@ -101,22 +104,22 @@ sealed class BDigitalMoneyInput : PluginComponentBase
                     label ?? "Tutar",
                     
                     // l a y o u t
-                    PositionAbsolute, 
-                    Top(-6), 
+                    PositionAbsolute,
+                    Top(-6),
                     Left(16),
                     PaddingX(4),
                     
                     // t h e m e
-                    Color(rgba(0, 0, 0, 0.6)), 
+                    Color(rgba(0, 0, 0, 0.6)),
                     FontSize12,
-                    FontWeight400, 
+                    FontWeight400,
                     LineHeight12,
                     LetterSpacing(0.15),
                     FontFamily("Roboto"),
                     Background(White)
                 },
-                
-                
+
+
                 new div(Color(rgba(0, 0, 0, 0.54)), FontSize16, FontWeight400, FontFamily("Roboto, sans-serif"))
                 {
                     value

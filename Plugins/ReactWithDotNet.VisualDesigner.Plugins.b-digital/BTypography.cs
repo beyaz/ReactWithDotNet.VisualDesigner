@@ -13,9 +13,16 @@ sealed class BTypography : PluginComponentBase
             return  AnalyzeChildren(input, AnalyzeReactNode);
         }
         
+        var node = input.Node;
+
+        node = ApplyTranslateOperationOnProps(node, input.ComponentConfig, Design.Content);
+        
+        
+        
+        
         var import = (nameof(BTypography),"b-core-typography");
         
-        return  AnalyzeChildren(input, AnalyzeReactNode).With(import);
+        return  AnalyzeChildren(input with { Node = node }, AnalyzeReactNode).With(import);
     }
     
     
