@@ -7,18 +7,6 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
 {
     // @formatter:on
 
-    protected override Element render()
-    {
-        return new Fragment
-        {
-            new div(Id(id), OnClick(onMouseClick))
-            {
-                children
-            }
-        };
-    }
-     
-
     [NodeAnalyzer]
     public static NodeAnalyzeOutput AnalyzeReactNode(NodeAnalyzeInput input)
     {
@@ -26,37 +14,32 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
         {
             return AnalyzeChildren(input, AnalyzeReactNode);
         }
-        
-        var (node, componentConfig) = input;
 
-
-
-
-
+        var node = input.Node;
 
         List<ReactProperty> finalProps = [];
 
         // sender
         {
             List<string> lines = [];
-                        
+
             var sender = new
             {
-                title = node.TryGetNodeItemAt( [0, 1, 0, 0]),
+                title = node.TryGetNodeItemAt([0, 1, 0, 0]),
 
-                item1Text  = node.TryGetNodeItemAt( [0, 1, 0, 1, 0]),
-                item1Value = node.TryGetNodeItemAt( [0, 1, 0, 1, 1]),
-                        
-                item2Text  = node.TryGetNodeItemAt( [0, 1, 0, 2, 0]),
-                item2Value = node.TryGetNodeItemAt( [0, 1, 0, 2, 1]),
-                        
-                item3Text  = node.TryGetNodeItemAt( [0, 1, 0, 3, 0]),
-                item3Value = node.TryGetNodeItemAt( [0, 1, 0, 3, 1])
+                item1Text = node.TryGetNodeItemAt([0, 1, 0, 1, 0]),
+                item1Value = node.TryGetNodeItemAt([0, 1, 0, 1, 1]),
+
+                item2Text = node.TryGetNodeItemAt([0, 1, 0, 2, 0]),
+                item2Value = node.TryGetNodeItemAt([0, 1, 0, 2, 1]),
+
+                item3Text = node.TryGetNodeItemAt([0, 1, 0, 3, 0]),
+                item3Value = node.TryGetNodeItemAt([0, 1, 0, 3, 1])
             };
-                        
+
             if (sender.title is not null)
             {
-                lines.Add($"titleText: {sender.title.Children[0].Properties[0].Value}");
+                lines.Add($"titleText: {TryGetPropValueByPropName(sender.title, Design.Content)}");
             }
 
             var item1 = getItem(sender.item1Text, sender.item1Value);
@@ -64,13 +47,13 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
             {
                 lines.Add("item1: " + item1);
             }
-                    
+
             var item2 = getItem(sender.item2Text, sender.item2Value);
             if (item2 is not null)
             {
                 lines.Add("item2: " + item2);
             }
-                    
+
             var item3 = getItem(sender.item3Text, sender.item3Value);
             if (item3 is not null)
             {
@@ -81,7 +64,7 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
             {
                 var prop = new ReactProperty
                 {
-                    Name  = "senderData",
+                    Name = "senderData",
                     Value = '{' + string.Join(",", lines) + '}'
                 };
 
@@ -91,42 +74,41 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
 
         // amount
         {
-            var transferAmount = node.TryGetNodeItemAt( [1, 1]);
+            var transferAmount = node.TryGetNodeItemAt([1, 1]);
             if (transferAmount is not null)
             {
                 finalProps.Add(new ReactProperty
                 {
-                    Name  = "transferAmount",
-                    Value =  string.Join(",", transferAmount.Children[0].Children[0].Text)
+                    Name = "transferAmount",
+                    Value = string.Join(",", transferAmount.Children[0].Children[0].Text)
                 });
 
                 finalProps.Add(new ReactProperty
                 {
-                    Name  = "transferAmountVariant",
+                    Name = "transferAmountVariant",
                     Value = string.Join(",", transferAmount.Properties[0].Value)
                 });
             }
         }
-                    
-                    
+
         // receiver
         {
             List<string> lines = [];
-                        
+
             var receiver = new
             {
-                title = node.TryGetNodeItemAt( [2, 1, 0, 0]),
+                title = node.TryGetNodeItemAt([2, 1, 0, 0]),
 
-                item1Text  = node.TryGetNodeItemAt( [2, 1, 0, 1, 0]),
-                item1Value = node.TryGetNodeItemAt( [2, 1, 0, 1, 1]),
-                        
-                item2Text  = node.TryGetNodeItemAt( [2, 1, 0, 2, 0]),
-                item2Value = node.TryGetNodeItemAt( [2, 1, 0, 2, 1]),
-                        
-                item3Text  = node.TryGetNodeItemAt( [2, 1, 0, 3, 0]),
-                item3Value = node.TryGetNodeItemAt( [2, 1, 0, 3, 1])
+                item1Text = node.TryGetNodeItemAt([2, 1, 0, 1, 0]),
+                item1Value = node.TryGetNodeItemAt([2, 1, 0, 1, 1]),
+
+                item2Text = node.TryGetNodeItemAt([2, 1, 0, 2, 0]),
+                item2Value = node.TryGetNodeItemAt([2, 1, 0, 2, 1]),
+
+                item3Text = node.TryGetNodeItemAt([2, 1, 0, 3, 0]),
+                item3Value = node.TryGetNodeItemAt([2, 1, 0, 3, 1])
             };
-                        
+
             if (receiver.title is not null)
             {
                 lines.Add($"titleText: {receiver.title.Children[0].Properties[0].Value}");
@@ -137,13 +119,13 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
             {
                 lines.Add("item1: " + item1);
             }
-                    
+
             var item2 = getItem(receiver.item2Text, receiver.item2Value);
             if (item2 is not null)
             {
                 lines.Add("item2: " + item2);
             }
-                    
+
             var item3 = getItem(receiver.item3Text, receiver.item3Value);
             if (item3 is not null)
             {
@@ -154,45 +136,42 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
             {
                 var prop = new ReactProperty
                 {
-                    Name  = "receiverData",
+                    Name = "receiverData",
                     Value = '{' + string.Join(",", lines) + '}'
                 };
 
                 finalProps.Add(prop);
             }
         }
-                    
-                    
+
         // transactionDetailLines
         {
             List<string> lines = [];
-                        
+
             var items = new
             {
-                item1Text  = node.TryGetNodeItemAt( [4, 0, 0]),
-                item1Value = node.TryGetNodeItemAt( [4, 0, 1]),
-                        
-                item2Text  = node.TryGetNodeItemAt( [4, 1, 0]),
-                item2Value = node.TryGetNodeItemAt( [4, 1, 1]),
-                        
-                item3Text  = node.TryGetNodeItemAt( [4, 2, 0]),
-                item3Value = node.TryGetNodeItemAt( [4, 2, 1])
+                item1Text = node.TryGetNodeItemAt([4, 0, 0]),
+                item1Value = node.TryGetNodeItemAt([4, 0, 1]),
+
+                item2Text = node.TryGetNodeItemAt([4, 1, 0]),
+                item2Value = node.TryGetNodeItemAt([4, 1, 1]),
+
+                item3Text = node.TryGetNodeItemAt([4, 2, 0]),
+                item3Value = node.TryGetNodeItemAt([4, 2, 1])
             };
-                        
-                       
 
             var item1 = getItem(items.item1Text, items.item1Value);
             if (item1 is not null)
             {
                 lines.Add(item1);
             }
-                    
+
             var item2 = getItem(items.item2Text, items.item2Value);
             if (item2 is not null)
             {
                 lines.Add(item2);
             }
-                    
+
             var item3 = getItem(items.item3Text, items.item3Value);
             if (item3 is not null)
             {
@@ -201,23 +180,20 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
 
             finalProps.Add(new ReactProperty
             {
-                Name  = "transactionDetailList",
+                Name = "transactionDetailList",
                 Value = '[' + string.Join(",", lines) + ']'
             });
         }
 
-                 
-                    
-        node =  node with
+        node = node with
         {
             Children = [],
             Properties = finalProps.ToImmutableList()
         };
 
-        
         return Result.From((node, new TsImportCollection
         {
-            {nameof(BDigitalTransactionConfirm),"b-digital-transaction-confirm"}
+            { nameof(BDigitalTransactionConfirm), "b-digital-transaction-confirm" }
         }));
 
         static string getItem(ReactNode textNode, ReactNode valueNode)
@@ -229,27 +205,40 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
                     return null;
                 }
 
-                var value = textNode.Children[0].Properties[0].Value;
+                var value = TryGetPropValueByPropName(textNode, Design.Content);
 
-                var valueVariant = textNode.Properties[0].Value;
+                var valueVariant = TryGetPropValueByPropName(textNode, nameof(BTypography.variant));
 
                 return '{' + "value:" + value + ", valueVariant: " + valueVariant + '}';
             }
 
             {
-                var text = textNode.Children[0].Properties[0].Value;
+                var text = TryGetPropValueByPropName(textNode, Design.Content);
 
-                 var textVariant = textNode.Properties[0].Value;
-                            
-                var value = valueNode.Children[0].Properties[0].Value;
+                var textVariant = TryGetPropValueByPropName(textNode, nameof(BTypography.variant));
 
-                var valueVariant = valueNode.Properties[0].Value;
+                var value = TryGetPropValueByPropName(valueNode, Design.Content);
 
-                return '{' + "text: " + text + ", textVariant: "+ textVariant +  ", value:" + value + ", valueVariant: " + valueVariant + '}';
+                var valueVariant = TryGetPropValueByPropName(valueNode, nameof(BTypography.variant));
+
+                return '{' + "text: " + text + ", textVariant: " + textVariant + ", value:" + value + ", valueVariant: " + valueVariant + '}';
             }
         }
-                
-       
+
+        static string TryGetPropValueByPropName(ReactNode node, string propName)
+        {
+            return FirstOrDefaultOf(from p in node.Properties where p.Name == propName select p.Value);
+        }
     }
 
+    protected override Element render()
+    {
+        return new Fragment
+        {
+            new div(Id(id), OnClick(onMouseClick))
+            {
+                children
+            }
+        };
+    }
 }
