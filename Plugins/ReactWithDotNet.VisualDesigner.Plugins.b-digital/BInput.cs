@@ -23,7 +23,7 @@ sealed class BInput : PluginComponentBase
 
     [JsTypeInfo(JsType.String)]
     public string value { get; set; }
-            
+
     [JsTypeInfo(JsType.Boolean)]
     public string disabled { get; set; }
 
@@ -34,92 +34,93 @@ sealed class BInput : PluginComponentBase
         {
             return AnalyzeChildren(input, AnalyzeReactNode);
         }
-        
-        var (node, componentConfig) = input;
-        
-        
+
+        var node = input.Node;
+
+        node = ApplyTranslateOperationOnProps(node, input.ComponentConfig, nameof(floatingLabelText));
+
+
+        var valueProp = node.Properties.FirstOrDefault(x => x.Name == nameof(value));
+        var onChangeProp = node.Properties.FirstOrDefault(x => x.Name == nameof(onChange));
+        var isRequiredProp = node.Properties.FirstOrDefault(x => x.Name == nameof(isRequired));
+        var isAutoCompleteProp = node.Properties.FirstOrDefault(x => x.Name == nameof(isAutoComplete));
+
+        if (valueProp is not null)
         {
-            var valueProp = node.Properties.FirstOrDefault(x => x.Name == nameof(value));
-            var onChangeProp = node.Properties.FirstOrDefault(x => x.Name == nameof(onChange));
-            var isRequiredProp = node.Properties.FirstOrDefault(x => x.Name == nameof(isRequired));
-            var isAutoCompleteProp = node.Properties.FirstOrDefault(x => x.Name == nameof(isAutoComplete));
+            var properties = node.Properties;
 
-            if (valueProp is not null)
-            {
-                var properties = node.Properties;
-
-                var lines = new TsLineCollection
+            var lines = new TsLineCollection
                 {
                     "(e: any, value: any) =>",
                     "{",
                     GetUpdateStateLines(valueProp.Value, "value")
-                };   
-                        
-                if (onChangeProp is not null)
+                };
+
+            if (onChangeProp is not null)
+            {
+                if (IsAlphaNumeric(onChangeProp.Value))
                 {
-                    if (IsAlphaNumeric(onChangeProp.Value))
-                    {
-                        lines.Add(onChangeProp.Value + "(e, value);");
-                    }
-                    else
-                    {
-                        lines.Add(onChangeProp.Value);
-                    }
-                }
-
-                lines.Add("}");
-
-                if (onChangeProp is not null)
-                {
-                    onChangeProp = onChangeProp with
-                    {
-                        Value = lines.ToTsCode()
-                    };
-
-                    properties = properties.SetItem(properties.FindIndex(x => x.Name == onChangeProp.Name), onChangeProp);
+                    lines.Add(onChangeProp.Value + "(e, value);");
                 }
                 else
                 {
-                    properties = properties.Add(new()
-                    {
-                        Name  = "onChange",
-                        Value = lines.ToTsCode()
-                    });
+                    lines.Add(onChangeProp.Value);
                 }
-
-                node = node with { Properties = properties };
             }
 
-            if (isRequiredProp is not null && isAutoCompleteProp is not null)
+            lines.Add("}");
+
+            if (onChangeProp is not null)
             {
-                var autoCompleteFinalValue = string.Empty;
+                onChangeProp = onChangeProp with
                 {
-                    if ("true".Equals(isAutoCompleteProp.Value, StringComparison.OrdinalIgnoreCase))
-                    {
-                        autoCompleteFinalValue = "'on'";
-                    }
-                    else if ("false".Equals(isAutoCompleteProp.Value, StringComparison.OrdinalIgnoreCase))
-                    {
-                        autoCompleteFinalValue = "'off'";
-                    }
-                    else
-                    {
-                        autoCompleteFinalValue = $"{Plugin.ConvertDotNetPathToJsPath(isAutoCompleteProp.Value)} ? \"on\" : \"off\" }}";
-                    }
-                }
-
-                node = node with
-                {
-                    Properties = node.Properties.Remove(isRequiredProp).Remove(isAutoCompleteProp).Add(new()
-                    {
-                        Name  = "valueConstraint",
-                        Value = $"{{ required: {Plugin.ConvertDotNetPathToJsPath(isRequiredProp.Value)}, autoComplete: {autoCompleteFinalValue} }}"
-                    })
+                    Value = lines.ToTsCode()
                 };
+
+                properties = properties.SetItem(properties.FindIndex(x => x.Name == onChangeProp.Name), onChangeProp);
+            }
+            else
+            {
+                properties = properties.Add(new()
+                {
+                    Name = "onChange",
+                    Value = lines.ToTsCode()
+                });
             }
 
-            node = AddContextProp(node);
+            node = node with { Properties = properties };
         }
+
+        if (isRequiredProp is not null && isAutoCompleteProp is not null)
+        {
+            var autoCompleteFinalValue = string.Empty;
+            {
+                if ("true".Equals(isAutoCompleteProp.Value, StringComparison.OrdinalIgnoreCase))
+                {
+                    autoCompleteFinalValue = "'on'";
+                }
+                else if ("false".Equals(isAutoCompleteProp.Value, StringComparison.OrdinalIgnoreCase))
+                {
+                    autoCompleteFinalValue = "'off'";
+                }
+                else
+                {
+                    autoCompleteFinalValue = $"{Plugin.ConvertDotNetPathToJsPath(isAutoCompleteProp.Value)} ? \"on\" : \"off\" }}";
+                }
+            }
+
+            node = node with
+            {
+                Properties = node.Properties.Remove(isRequiredProp).Remove(isAutoCompleteProp).Add(new()
+                {
+                    Name = "valueConstraint",
+                    Value = $"{{ required: {Plugin.ConvertDotNetPathToJsPath(isRequiredProp.Value)}, autoComplete: {autoCompleteFinalValue} }}"
+                })
+            };
+        }
+
+        node = AddContextProp(node);
+
 
         return Result.From((node, new TsImportCollection
         {

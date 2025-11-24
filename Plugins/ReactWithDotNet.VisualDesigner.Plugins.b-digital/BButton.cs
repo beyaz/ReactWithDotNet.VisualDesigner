@@ -10,29 +10,29 @@ sealed class BButton : PluginComponentBase
 
     [JsTypeInfo(JsType.String)]
     public string text { get; set; }
-    
+
     [JsTypeInfo(JsType.Boolean)]
     public string allowLabelCase { get; set; }
-    
-    
-    
+
+
+
     [Suggestions("raised , flat , contained")]
     [JsTypeInfo(JsType.String)]
     public string type { get; set; }
-    
+
     [Suggestions("primary , default")]
     [JsTypeInfo(JsType.String)]
     public string colorType { get; set; }
-    
+
     [Suggestions("contained , outlined , text")]
     [JsTypeInfo(JsType.String)]
     public string variant { get; set; }
-    
+
     [Suggestions("primary , default")]
     [JsTypeInfo(JsType.String)]
     public string color { get; set; }
-    
-    
+
+
     [Suggestions("true , false")]
     [JsTypeInfo(JsType.Boolean)]
     public string fullWidth { get; set; }
@@ -46,6 +46,8 @@ sealed class BButton : PluginComponentBase
         }
 
         var node = input.Node;
+
+        node = ApplyTranslateOperationOnProps(node, input.ComponentConfig, nameof(text));
 
         var onClickProp = node.Properties.FirstOrDefault(x => x.Name == nameof(onClick));
 
@@ -74,12 +76,12 @@ sealed class BButton : PluginComponentBase
 
 
         var import = (nameof(BButton), "b-button");
-        
+
         return AnalyzeChildren(input with { Node = node }, AnalyzeReactNode).With(import);
     }
 
     internal Style style { get; set; }
-    
+
     protected override Element render()
     {
         if (variant is null)
@@ -88,18 +90,18 @@ sealed class BButton : PluginComponentBase
             {
                 variant = type switch
                 {
-                    "raised"=>"contained",
-            
-                    not null =>type,
-            
+                    "raised" => "contained",
+
+                    not null => type,
+
                     null => "text"
                 };
             }
         }
-       
 
-        Style defaultStyle = [BorderRadius(10),  TextTransform(none)];
-        
+
+        Style defaultStyle = [BorderRadius(10), TextTransform(none)];
+
         if (color == "primary" || colorType == "primary")
         {
             defaultStyle =
@@ -112,8 +114,8 @@ sealed class BButton : PluginComponentBase
                 BorderRadius(10)
             ];
         }
-        
-        if (variant == "contained" || color == "default" || (type is null && color is null && variant.HasNoValue) )
+
+        if (variant == "contained" || color == "default" || (type is null && color is null && variant.HasNoValue))
         {
             defaultStyle =
             [
@@ -125,8 +127,8 @@ sealed class BButton : PluginComponentBase
                 BorderRadius(10)
             ];
         }
-       
-        
+
+
         return new Button
         {
             fullWidth = fullWidth == "true",

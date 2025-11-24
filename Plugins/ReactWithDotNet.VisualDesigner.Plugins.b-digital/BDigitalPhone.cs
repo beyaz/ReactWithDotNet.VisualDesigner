@@ -5,16 +5,16 @@ sealed class BDigitalPhone : PluginComponentBase
 {
     [JsTypeInfo(JsType.String)]
     public string label { get; set; }
-            
+
     [JsTypeInfo(JsType.String)]
     public string hintText { get; set; }
-            
+
     [JsTypeInfo(JsType.String)]
     public string phoneNumber { get; set; }
 
     [JsTypeInfo(JsType.Function)]
     public string handlePhoneChange { get; set; }
-    
+
 
     [NodeAnalyzer]
     public static NodeAnalyzeOutput AnalyzeReactNode(NodeAnalyzeInput input)
@@ -23,69 +23,69 @@ sealed class BDigitalPhone : PluginComponentBase
         {
             return AnalyzeChildren(input, AnalyzeReactNode);
         }
-        
-        var (node, componentConfig) = input;
+
+        var node = input.Node;
+
+        node = ApplyTranslateOperationOnProps(node, input.ComponentConfig, nameof(label));
 
 
 
 
-        
 
 
+        var phoneNumberProp = node.Properties.FirstOrDefault(x => x.Name == nameof(phoneNumber));
+        var handlePhoneChangeProp = node.Properties.FirstOrDefault(x => x.Name == nameof(handlePhoneChange));
+
+        if (phoneNumberProp is not null)
         {
-            var phoneNumberProp = node.Properties.FirstOrDefault(x => x.Name == nameof(phoneNumber));
-            var handlePhoneChangeProp = node.Properties.FirstOrDefault(x => x.Name == nameof(handlePhoneChange));
-                   
-            if (phoneNumberProp is not null)
-            {
-                var properties = node.Properties;
-                
-                var lines = new TsLineCollection
+            var properties = node.Properties;
+
+            var lines = new TsLineCollection
                 {
                     "(value: string, formattedValue: string, areaCode: string) =>",
                     "{",
                     GetUpdateStateLines(phoneNumberProp.Value, "value")
                 };
 
-                if (handlePhoneChangeProp is not null)
+            if (handlePhoneChangeProp is not null)
+            {
+                if (IsAlphaNumeric(handlePhoneChangeProp.Value))
                 {
-                    if (IsAlphaNumeric(handlePhoneChangeProp.Value))
-                    {
-                        lines.Add(handlePhoneChangeProp.Value + "(value, formattedValue, areaCode);");
-                    }
-                    else
-                    {
-                        lines.Add(handlePhoneChangeProp.Value);
-                    }
-                }
-
-                lines.Add("}");
-
-                if (handlePhoneChangeProp is not null)
-                {
-                    handlePhoneChangeProp = handlePhoneChangeProp with
-                    {
-                        Value = lines.ToTsCode()
-                    };
-
-                    properties = properties.SetItem(properties.FindIndex(x => x.Name == handlePhoneChangeProp.Name), handlePhoneChangeProp);
+                    lines.Add(handlePhoneChangeProp.Value + "(value, formattedValue, areaCode);");
                 }
                 else
                 {
-                    properties = properties.Add(new()
-                    {
-                        Name  = "handlePhoneChange",
-                        Value = lines.ToTsCode()
-                    });
+                    lines.Add(handlePhoneChangeProp.Value);
                 }
-
-                node = node with { Properties = properties };
             }
 
+            lines.Add("}");
+
+            if (handlePhoneChangeProp is not null)
+            {
+                handlePhoneChangeProp = handlePhoneChangeProp with
+                {
+                    Value = lines.ToTsCode()
+                };
+
+                properties = properties.SetItem(properties.FindIndex(x => x.Name == handlePhoneChangeProp.Name), handlePhoneChangeProp);
+            }
+            else
+            {
+                properties = properties.Add(new()
+                {
+                    Name = "handlePhoneChange",
+                    Value = lines.ToTsCode()
+                });
+            }
+
+            node = node with { Properties = properties };
         }
 
+
+
         var import = (nameof(BDigitalPhone), "b-digital-phone");
-   
+
         return AnalyzeChildren(input with { Node = node }, AnalyzeReactNode).With(import);
     }
 
