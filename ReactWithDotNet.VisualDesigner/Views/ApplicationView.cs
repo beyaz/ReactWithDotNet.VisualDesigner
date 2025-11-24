@@ -2630,7 +2630,29 @@ sealed class ApplicationView : Component<ApplicationState>
         public required int ComponentId { get; init; }
         public required int ProjectId { get; init; }
 
-        protected override Task<Result<IReadOnlyList<SuggestionItem>>> Suggestions => GetVariableSuggestionsInOutputFile(ComponentId);
+        protected override Task<Result<IReadOnlyList<SuggestionItem>>> Suggestions
+        {
+            get
+            {
+                if (Name == Design.Name)
+                {
+                    return Task.FromResult(Result.From<IReadOnlyList<SuggestionItem>>([]));
+                }
+                
+                if (Name == Design.ItemsSourceDesignTimeCount)
+                {
+                    var suggestions =
+                        from number in Enumerable.Range(2, 10)
+                        select new SuggestionItem
+                        {
+                            Name = number.ToString()
+                        };
+                    return Task.FromResult(Result.From<IReadOnlyList<SuggestionItem>>(suggestions.ToList()));
+                }
+                
+                return GetVariableSuggestionsInOutputFile(ComponentId);
+            }
+        }
     }
 
     class PropEditor : MagicInput

@@ -112,7 +112,12 @@ abstract class MagicInput : Component<MagicInput.State>
 
     Task OnBlur(FocusEvent e)
     {
-        Client.GotoMethod(500, CloseSuggestion);
+        Client.GotoMethod(200, CloseSuggestion);
+
+        if ((string.Empty + state.InitialValue).Trim() != (string.Empty + state.Value).Trim())
+        {
+            DispatchEvent(OnChange, [Name, state.Value]);
+        }
 
         return Task.CompletedTask;
     }
