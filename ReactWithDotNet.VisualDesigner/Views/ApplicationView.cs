@@ -1755,7 +1755,14 @@ sealed class ApplicationView : Component<ApplicationState>
                 {
                     CreateDesignPropEditor("Items Source", Design.ItemsSource),
                     CreateDesignPropEditor("Items Source Design Time Child Count", Design.ItemsSourceDesignTimeCount)
+                },
+                
+                CreateGroupLabel("S e c t i o n"),
+                new FlexColumn(WidthFull, PaddingX(4), Gap(12))
+                {
+                    CreateDesignPropEditor("Name", Design.Name)
                 }
+                    
             },
 
             SpaceY(16),
@@ -1772,7 +1779,8 @@ sealed class ApplicationView : Component<ApplicationState>
                           Design.HideIf or
                           Design.ShowIf or
                           Design.ItemsSource or
-                          Design.ItemsSourceDesignTimeCount
+                          Design.ItemsSourceDesignTimeCount or
+                          Design.Name
                 where !isUiManagedDesignerProp
                 select (p.propStr , p.index)
             }),
