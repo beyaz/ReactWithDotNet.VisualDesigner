@@ -19,6 +19,14 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
 
         List<ReactProperty> finalProps = [];
 
+        string TryGetPropFinalText(ReactNode reactNode, string propName)
+        {
+            var tempNode = ApplyTranslateOperationOnProps(reactNode, input.ComponentConfig, propName);
+
+            return TryGetPropValueByPropName(tempNode, propName);
+
+        }
+
         // sender
         {
             List<string> lines = [];
@@ -39,7 +47,7 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
 
             if (sender.title is not null)
             {
-                lines.Add($"titleText: {TryGetPropValueByPropName(sender.title, Design.Content)}");
+                lines.Add($"titleText: {TryGetPropFinalText(sender.title, Design.Content)}");
             }
 
             var item1 = getItem(sender.item1Text, sender.item1Value);
@@ -80,13 +88,15 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
                 finalProps.Add(new ReactProperty
                 {
                     Name = "transferAmount",
-                    Value = string.Join(",", transferAmount.Children[0].Children[0].Text)
+                    Value = TryGetPropValueByPropName(transferAmount, Design.Content)
                 });
+
+
 
                 finalProps.Add(new ReactProperty
                 {
                     Name = "transferAmountVariant",
-                    Value = string.Join(",", transferAmount.Properties[0].Value)
+                    Value = TryGetPropValueByPropName(transferAmount, nameof(BTypography.variant))
                 });
             }
         }
@@ -111,7 +121,7 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
 
             if (receiver.title is not null)
             {
-                lines.Add($"titleText: {receiver.title.Children[0].Properties[0].Value}");
+                lines.Add($"titleText: {TryGetPropFinalText(receiver.title, Design.Content)}");
             }
 
             var item1 = getItem(receiver.item1Text, receiver.item1Value);
@@ -196,8 +206,11 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
             { nameof(BDigitalTransactionConfirm), "b-digital-transaction-confirm" }
         }));
 
-        static string getItem(ReactNode textNode, ReactNode valueNode)
+        string getItem(ReactNode textNode, ReactNode valueNode)
         {
+
+            List<string> returnList = [];
+
             if (valueNode is null)
             {
                 if (textNode is null)
@@ -205,23 +218,68 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
                     return null;
                 }
 
-                var value = TryGetPropValueByPropName(textNode, Design.Content);
+
+
+                var value = TryGetPropFinalText(textNode, Design.Content);
+                if (value.HasValue)
+                {
+                    returnList.Add($"value: {value}");
+                }
 
                 var valueVariant = TryGetPropValueByPropName(textNode, nameof(BTypography.variant));
+                if (valueVariant.HasValue)
+                {
+                    returnList.Add($"valueVariant: {valueVariant}");
+                }
 
-                return '{' + "value:" + value + ", valueVariant: " + valueVariant + '}';
+                var valueColor = TryGetPropValueByPropName(textNode, nameof(BTypography.color));
+                if (valueColor.HasValue)
+                {
+                    returnList.Add($"valueColor: {valueColor}");
+                }
+
+                return '{' + string.Join(",", returnList) + '}';
             }
 
             {
-                var text = TryGetPropValueByPropName(textNode, Design.Content);
+                var text = TryGetPropFinalText(textNode, Design.Content);
+                if (text.HasValue)
+                {
+                    returnList.Add($"text: {text}");
+                }
+
 
                 var textVariant = TryGetPropValueByPropName(textNode, nameof(BTypography.variant));
+                if (textVariant.HasValue)
+                {
+                    returnList.Add($"textVariant: {textVariant}");
+                }
 
-                var value = TryGetPropValueByPropName(valueNode, Design.Content);
+                var textColor = TryGetPropValueByPropName(textNode, nameof(BTypography.color));
+                if (textColor.HasValue)
+                {
+                    returnList.Add($"textColor: {textColor}");
+                }
+
+                var value = TryGetPropFinalText(valueNode, Design.Content);
+                if (value.HasValue)
+                {
+                    returnList.Add($"value: {value}");
+                }
 
                 var valueVariant = TryGetPropValueByPropName(valueNode, nameof(BTypography.variant));
+                if (valueVariant.HasValue)
+                {
+                    returnList.Add($"valueVariant: {valueVariant}");
+                }
 
-                return '{' + "text: " + text + ", textVariant: " + textVariant + ", value:" + value + ", valueVariant: " + valueVariant + '}';
+                var valueColor = TryGetPropValueByPropName(valueNode, nameof(BTypography.color));
+                if (valueColor.HasValue)
+                {
+                    returnList.Add($"valueColor: {valueColor}");
+                }
+
+                return '{' + string.Join(",", returnList) + '}';
             }
         }
 
