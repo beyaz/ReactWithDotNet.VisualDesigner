@@ -49,30 +49,30 @@ sealed class BButton : PluginComponentBase
 
         node = ApplyTranslateOperationOnProps(node, input.ComponentConfig, nameof(text));
 
-        var onClickProp = node.Properties.FirstOrDefault(x => x.Name == nameof(onClick));
+        //var onClickProp = node.Properties.FirstOrDefault(x => x.Name == nameof(onClick));
 
-        if (onClickProp is not null && !IsAlphaNumeric(onClickProp.Value))
-        {
-            var properties = node.Properties;
+        //if (onClickProp is not null && !onClickProp.Value.TrimStart().StartsWith("("))
+        //{
+        //    var properties = node.Properties;
 
-            List<string> lines =
-            [
-                "() =>",
+        //    List<string> lines =
+        //    [
+        //        "() =>",
 
-                "{",
-                onClickProp.Value,
-                "}"
-            ];
+        //        "{",
+        //        onClickProp.Value,
+        //        "}"
+        //    ];
 
-            onClickProp = onClickProp with
-            {
-                Value = string.Join(Environment.NewLine, lines)
-            };
+        //    onClickProp = onClickProp with
+        //    {
+        //        Value = string.Join(Environment.NewLine, lines)
+        //    };
 
-            properties = properties.SetItem(properties.FindIndex(x => x.Name == onClickProp.Name), onClickProp);
+        //    properties = properties.SetItem(properties.FindIndex(x => x.Name == onClickProp.Name), onClickProp);
 
-            node = node with { Properties = properties };
-        }
+        //    node = node with { Properties = properties };
+        //}
 
 
         var import = (nameof(BButton), "b-button");

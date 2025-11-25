@@ -150,7 +150,7 @@ sealed class BDigitalDialog : PluginComponentBase
             
             partTop.Add(new BDivider{ Margin(0)});
         }
-        return new div(Background(rgba(0, 0, 0, 0.5)), Padding(24), BorderRadius(8))
+        return new div(Background(rgba(0, 0, 0, 0.4)), Margin(4), Padding(24), BorderRadius(8))
         {
             Id(id), OnClick(onMouseClick),
             
