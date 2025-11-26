@@ -1683,7 +1683,7 @@ sealed class ApplicationView : Component<ApplicationState>
                         };
                 }
 
-                var shadowProperties =
+                return 
                     from type in Plugin.AllCustomComponents
                     where type.Name == CurrentVisualElement.Tag
                     from propertyInfo in type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly)
@@ -1693,6 +1693,8 @@ sealed class ApplicationView : Component<ApplicationState>
                     let suggestionItems = propertyInfo.GetCustomAttribute<SuggestionsAttribute>()?.Suggestions ?? []
                     select new ShadowPropertyView
                     {
+                        Guid = Guid.NewGuid().ToString("N"),
+                        
                         PropertyName = propertyInfo.Name,
                         PropertyType = jsTypeInfo?.JsType.ToString().ToLower(),
 
@@ -1707,17 +1709,6 @@ sealed class ApplicationView : Component<ApplicationState>
 
 
                 
-                return from x in shadowProperties.Select((item, index) => new { item, index }) 
-                    select new ShadowPropertyView
-                    {
-                        PropertyName = x.item.PropertyName,
-                        PropertyType = x.item.PropertyType,
-
-                        OnChange = x.item.OnChange,
-                        Suggestions = x.item.Suggestions,
-                        
-                        Index = x.index
-                    };
 
                 bool alreadyContainsProp(string propName)
                 {
@@ -2703,7 +2694,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
     class ShadowPropertyView : Component<ShadowPropertyView.State>
     {
-        const string SHADOW_PROP_PREFIX = "SHADOW_PROP-";
+        string SHADOW_PROP_PREFIX => $"{Guid}-SHADOW_PROP-";
 
         delegate Task PopupItemSelect(PopupItemSelectArgs e);
 
@@ -2720,7 +2711,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
         public IReadOnlyList<string> Suggestions { get; init; }
         
-        public int Index { get; set; }
+        public string Guid { get; set; }
 
         public static Element CreatePopupHandlerView()
         {
