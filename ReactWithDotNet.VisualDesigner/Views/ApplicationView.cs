@@ -1,4 +1,5 @@
 ﻿using ReactWithDotNet.ThirdPartyLibraries.MonacoEditorReact;
+using ReactWithDotNet.VisualDesigner.Primitive;
 using System.Reflection;
 using System.Text;
 
@@ -1683,7 +1684,7 @@ sealed class ApplicationView : Component<ApplicationState>
                         };
                 }
 
-                return
+                var shadowProperties =
                     from type in Plugin.AllCustomComponents
                     where type.Name == CurrentVisualElement.Tag
                     from propertyInfo in type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly)
@@ -1703,6 +1704,20 @@ sealed class ApplicationView : Component<ApplicationState>
 
                             false => suggestionItems
                         }
+                    };
+
+
+                
+                return from x in shadowProperties.Select((item, index) => new { item, index }) 
+                    select new ShadowPropertyView
+                    {
+                        PropertyName = x.item.PropertyName,
+                        PropertyType = x.item.PropertyType,
+
+                        OnChange = x.item.OnChange,
+                        Suggestions = x.item.Suggestions,
+                        
+                        Index = x.index
                     };
 
                 bool alreadyContainsProp(string propName)
@@ -2705,6 +2720,8 @@ sealed class ApplicationView : Component<ApplicationState>
         public string PropertyType { get; init; }
 
         public IReadOnlyList<string> Suggestions { get; init; }
+        
+        public int Index { get; set; }
 
         public static Element CreatePopupHandlerView()
         {
