@@ -55,7 +55,6 @@ partial class CssHelper
             case "overflow-x":
             case "fill":
             case "stroke":
-            case "border-color":
             case "font-family":
             case "cursor":
             case "border-style":
@@ -121,6 +120,7 @@ partial class CssHelper
             case "background-color":
             case "background":
             case "color":
+            case "border-color":
             case "border-top-color":
             case "border-bottom-color":
             case "border-left-color":
