@@ -36,7 +36,7 @@ sealed class BDigitalMoneyInput : PluginComponentBase
         {
             var valueProp = node.Properties.FirstOrDefault(x => x.Name == nameof(value));
             var handleMoneyInputChangeProp = node.Properties.FirstOrDefault(x => x.Name == nameof(handleMoneyInputChange));
-            if (valueProp is not null)
+            if (valueProp is not null && !valueProp.Value.Contains("("))
             {
                 var properties = node.Properties;
 
