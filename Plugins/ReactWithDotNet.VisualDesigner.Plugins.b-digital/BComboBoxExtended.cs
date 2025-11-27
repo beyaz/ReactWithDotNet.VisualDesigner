@@ -21,8 +21,13 @@ sealed class BComboBoxExtended : PluginComponentBase
     [JsTypeInfo(JsType.Function)]
     public string onChange { get; set; }
 
+    [Suggestions("true")]
     [JsTypeInfo(JsType.Boolean)]
     public string isRequired { get; set; }
+    
+    [Suggestions("true")]
+    [JsTypeInfo(JsType.Boolean)]
+    public string multiple { get; set; }
 
 
 
@@ -44,24 +49,41 @@ sealed class BComboBoxExtended : PluginComponentBase
 
         var isRequiredProp = node.Properties.FirstOrDefault(x => x.Name == nameof(isRequired));
         var labelProp = node.Properties.FirstOrDefault(x => x.Name == nameof(label));
+        
+        var isMultiple = node.Properties.FirstOrDefault(x => x.Name == nameof(multiple))?.Value == "true";
 
         if (valueProp is not null)
         {
             var properties = node.Properties;
 
 
-            var lines = new TsLineCollection
-                {
-                    "(event: React.ChangeEvent<{}>, value: any, selectedObject?: any) =>",
-                    "{",
-                    GetUpdateStateLines(valueProp.Value, "value")
-                };
+            var lines = new TsLineCollection();
+           
+            if (isMultiple)
+            {
+                lines.Add("(event: React.ChangeEvent<{}>, values: any[], selectedObjects?: any[]) =>");
+                lines.Add("{");
+                lines.Add(GetUpdateStateLines(valueProp.Value, "values"));
+            }
+            else
+            {
+                lines.Add("(event: React.ChangeEvent<{}>, value: any, selectedObject?: any) =>");
+                lines.Add("{");
+                lines.Add(GetUpdateStateLines(valueProp.Value, "value"));
+            }
 
             if (onChangeProp is not null)
             {
                 if (IsAlphaNumeric(onChangeProp.Value))
                 {
-                    lines.Add(onChangeProp.Value + "(event, value, selectedObject);");
+                    if (isMultiple)
+                    {
+                        lines.Add(onChangeProp.Value + "(event, values, selectedObjects);");
+                    }
+                    else
+                    {
+                        lines.Add(onChangeProp.Value + "(event, value, selectedObject);");
+                    }
                 }
                 else
                 {
