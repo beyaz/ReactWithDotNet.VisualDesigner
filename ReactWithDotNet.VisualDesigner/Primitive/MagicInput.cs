@@ -242,7 +242,18 @@ abstract class MagicInput : Component<MagicInput.State>
                 {
                     foreach (var parsedProperty in TryParseProperty(currentValue))
                     {
-                        state = state with { Value = parsedProperty.Name + ": " + suggestedValue.Name };
+                        if (parsedProperty.Value?.Contains(".") is true)
+                        {
+                            var values =parsedProperty.Value.Split('.', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                            
+                            values[^1] = suggestedValue.Name;
+                            
+                            state = state with { Value = parsedProperty.Name + ": " + string.Join(".",values) };
+                        }
+                        else
+                        {
+                            state = state with { Value = parsedProperty.Name + ": " + suggestedValue.Name };
+                        }
 
                         DispatchEvent(OnChange, [Name, state.Value]);
 
