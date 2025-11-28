@@ -2711,7 +2711,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
         public IReadOnlyList<string> Suggestions { get; init; }
         
-        public string Guid { get; set; }
+        public string Guid { get; init; }
 
         public static Element CreatePopupHandlerView()
         {
@@ -2720,14 +2720,14 @@ sealed class ApplicationView : Component<ApplicationState>
 
         protected override Task OverrideStateFromPropsBeforeRender()
         {
-            if (PropertyName == state.InitialValueOfPropertyName)
+            if (Guid == state.Guid)
             {
                 return Task.CompletedTask;
             }
 
             state = new State
             {
-                InitialValueOfPropertyName = PropertyName,
+                Guid = Guid
             };
 
             Client.ListenEvent<PopupItemSelect>(OnPopupItemSelected, senderId: SHADOW_PROP_PREFIX + PropertyName);
@@ -2955,7 +2955,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
         internal record State
         {
-            public string InitialValueOfPropertyName { get; init; }
+            public string Guid { get; set; }
         }
     }
 
