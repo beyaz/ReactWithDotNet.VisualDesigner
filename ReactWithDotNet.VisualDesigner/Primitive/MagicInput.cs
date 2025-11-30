@@ -216,6 +216,60 @@ abstract class MagicInput : Component<MagicInput.State>
             }
         }
 
+        if (e.key == "Enter" && state.SelectedSuggestionOffset.HasValue && suggestions.Count > state.SelectedSuggestionOffset.Value)
+        {
+            state = state with { ShowSuggestions = false };
+
+            state = state with { IgnoreTypingFinishedEvent = true };
+
+            var suggestedValue = suggestions[state.SelectedSuggestionOffset!.Value];
+
+            var currentValue = state.Value;
+
+            if (suggestedValue.Value is null)
+            {
+                foreach (var parsedProperty in TryParseProperty(currentValue))
+                {
+                    if (parsedProperty.Value?.Contains(".") is true)
+                    {
+                        var values = parsedProperty.Value.Split('.', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+                        values[^1] = suggestedValue.Name;
+
+                        state = state with { Value = parsedProperty.Name + ": " + string.Join(".", values) };
+                    }
+                    else
+                    {
+                        state = state with { Value = parsedProperty.Name + ": " + suggestedValue.Name };
+                    }
+
+                    state = state with
+                    {
+                        SelectedSuggestionOffset = null
+                    };
+                    return Task.CompletedTask;
+                }
+            }
+
+            string value = suggestedValue;
+            var dotSplitNames = currentValue.Split('.', StringSplitOptions.TrimEntries);
+            if (dotSplitNames.Length > 1)
+            {
+                dotSplitNames[^1] = suggestedValue;
+
+                value = string.Join(".", dotSplitNames);
+            }
+
+            state = state with { Value = value };
+
+            state = state with
+            {
+                SelectedSuggestionOffset = null
+            };
+
+            return Task.CompletedTask;
+        }
+
         if (e.key == "Enter" || (e.ctrlKey && e.key is "S" or "s"))
         {
             state = state with { ShowSuggestions = false };
@@ -224,55 +278,8 @@ abstract class MagicInput : Component<MagicInput.State>
 
             if (state.SelectedSuggestionOffset is null)
             {
-                if (state.Value?.Trim() != Value?.Trim())
-                {
-                    DispatchEvent(OnChange, [Name, state.Value]);
-                }
-
-                return Task.CompletedTask;
-            }
-
-            if (suggestions.Count > state.SelectedSuggestionOffset.Value)
-            {
-                var suggestedValue = suggestions[state.SelectedSuggestionOffset.Value];
-
-                var currentValue = state.Value;
-
-                if (suggestedValue.Value is null)
-                {
-                    foreach (var parsedProperty in TryParseProperty(currentValue))
-                    {
-                        if (parsedProperty.Value?.Contains(".") is true)
-                        {
-                            var values =parsedProperty.Value.Split('.', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-                            
-                            values[^1] = suggestedValue.Name;
-                            
-                            state = state with { Value = parsedProperty.Name + ": " + string.Join(".",values) };
-                        }
-                        else
-                        {
-                            state = state with { Value = parsedProperty.Name + ": " + suggestedValue.Name };
-                        }
-
-                        DispatchEvent(OnChange, [Name, state.Value]);
-
-                        return Task.CompletedTask;
-                    }
-                }
-
-                string value = suggestedValue;
-                var dotSplitNames = currentValue.Split('.', StringSplitOptions.TrimEntries);
-                if (dotSplitNames.Length > 1)
-                {
-                    dotSplitNames[^1] = suggestedValue;
-
-                    value = string.Join(".", dotSplitNames);
-                }
-
-                state = state with { Value = value };
-
                 DispatchEvent(OnChange, [Name, state.Value]);
+                return Task.CompletedTask;
             }
         }
 
@@ -328,11 +335,11 @@ abstract class MagicInput : Component<MagicInput.State>
 
         var parseResponse = ParseSearchTerm(state.Value);
 
-        var debug =
-            ListFrom(from suggestion in suggestions.Value 
-                     let score = GetMatchScore(suggestion, parseResponse)
-                     select ((string)suggestion, score)).OrderByDescending(x=>x.score);
-        
+        //var debug =
+        //    ListFrom(from suggestion in suggestions.Value 
+        //             let score = GetMatchScore(suggestion, parseResponse)
+        //             select ((string)suggestion, score)).OrderByDescending(x=>x.score);
+
         state = state with
         {
             ShowSuggestions = true,
@@ -371,8 +378,7 @@ abstract class MagicInput : Component<MagicInput.State>
             }
         }
 
-        static double GetMatchScore
-        (
+        static double GetMatchScore(
             SuggestionItem suggestionItem,
             (bool isEmpty, string[] nameInWords, string[] valueInWords) searchTerm
         )
