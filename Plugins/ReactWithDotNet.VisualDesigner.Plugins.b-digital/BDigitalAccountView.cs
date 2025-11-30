@@ -94,23 +94,38 @@ sealed class BDigitalAccountView : PluginComponentBase
 
     protected override Element render()
     {
-        var textContent = string.Empty;
-        if (title.HasValue)
-        {
-            textContent = title;
-        }
-
-        if (accounts.HasValue)
-        {
-            textContent += " | " + accounts;
-        }
-
         return new div
         {
             Id(id), OnClick(onMouseClick),
             new FlexRow(AlignItemsCenter, Padding(16), Border(1, solid, "#c0c0c0"), BorderRadius(10), Height(83), JustifyContentSpaceBetween)
             {
-                new div(Color(rgba(0, 0, 0, 0.54)), FontSize16, FontWeight400) { textContent },
+                // L a b e l   o n   t o p - l e f t   b o r d e r 
+                PositionRelative,
+                new label
+                {
+                    // c o n t e n t
+                    title ?? "Gönderen",
+                    
+                    // l a y o u t
+                    PositionAbsolute,
+                    Top(-6),
+                    Left(16),
+                    PaddingX(4),
+                    
+                    // t h e m e
+                    Color(rgba(0, 0, 0, 0.6)),
+                    FontSize12,
+                    FontWeight400,
+                    LineHeight12,
+                    LetterSpacing(0.15),
+                    FontFamily("Roboto"),
+                    Background(White)
+                },
+
+                new div(Color(rgba(0, 0, 0, 0.54)), FontSize16, FontWeight400) 
+                { 
+                    accounts + " | "+selectedAccountIndex
+                },
 
                 new FlexRow(AlignItemsCenter, TextAlignRight, Gap(8))
                 {
