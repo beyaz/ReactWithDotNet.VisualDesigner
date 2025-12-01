@@ -890,4 +890,37 @@ public static class ResultExtensions
 
         return returnList;
     }
+    
+   
+    public static async IAsyncEnumerable<Result<A>> Where<A>(
+        this IAsyncEnumerable<Result<A>> source,
+        Func<A, bool> predicate)
+    {
+        if (source == null)
+        {
+            yield return Result.Error<A>(new ArgumentNullException(nameof(source)));
+            yield break;
+        }
+
+        if (predicate == null)
+        {
+            yield return Result.Error<A>(new ArgumentNullException(nameof(predicate)));
+            yield break;
+        }
+
+        await foreach (var result in source)
+        {
+            if (result.HasError)
+            {
+                yield return new Result<A> { Error = result.Error };
+                yield break;
+            }
+
+            if (predicate(result.Value))
+            {
+                yield return result;
+            }
+        }
+    }
+
 }
