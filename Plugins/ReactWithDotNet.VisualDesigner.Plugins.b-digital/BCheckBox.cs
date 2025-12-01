@@ -105,7 +105,7 @@ sealed class BCheckBox : PluginComponentBase
             {
                 @checked == "true" ? svgForIsCheckedTrue : svgForIsCheckedFalse
             },
-            new div { label ?? "?" },
+            new div { label },
 
             Id(id),
             OnClick(onMouseClick)
