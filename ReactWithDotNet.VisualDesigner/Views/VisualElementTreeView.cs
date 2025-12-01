@@ -333,6 +333,8 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
                 foldIcon,
 
                 beforePositionElement,
+                
+              
 
                 new FlexRow(Gap(4), AlignItemsCenter)
                 {
@@ -362,7 +364,9 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
 
                 afterPositionElement,
 
-                When(isDesignerComponent, OnDoubleClick(OnDoubleClicked))
+                When(isDesignerComponent, OnDoubleClick(OnDoubleClicked)),
+                
+                When(foldIcon is not null && !isDesignerComponent, OnDoubleClick(ToggleFold))
             }
         };
 
