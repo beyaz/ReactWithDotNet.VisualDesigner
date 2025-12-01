@@ -35,6 +35,7 @@ static class Exporter
                 serviceModelIntegrationFiles,
                 extraFilesInModel
             }
+            where file is not null
             select file;
     }
 
@@ -48,6 +49,11 @@ static class Exporter
 
     static IEnumerable<Result<FileModel>> ExportExtraTypes(Scope scope, TypeDefinition containerTypeDefinition)
     {
+        if (containerTypeDefinition is null)
+        {
+            return [];
+
+        }
         return from type in GetExtraTypes(ExternalTypes[scope], containerTypeDefinition)
                select ExportExtraType(scope, type);
 
@@ -189,7 +195,7 @@ static class Exporter
 
         var fullTypeName = $"{assemblyDefinition.Name.Name}.Models.{ApiName[scope]}Model";
 
-        return CecilHelper.GetType(assemblyDefinition, fullTypeName);
+        return CecilHelper.GetType(assemblyDefinition, fullTypeName).Value;
     }
 
     static TypeReference getReturnType(MethodDefinition methodDefinition)
