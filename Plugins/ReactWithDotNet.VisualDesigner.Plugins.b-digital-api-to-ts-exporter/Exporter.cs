@@ -57,28 +57,28 @@ static class Exporter
             {
                 from propertyDefinition in modelTypeDefinition.Properties
                 let propertyType = propertyDefinition.PropertyType
-                where IsExtraType(externalTypes, propertyType)
-                select propertyType.Resolve()
+                from extraType in  CollectExtraTypes(externalTypes, propertyType,[])
+                select extraType
             };
 
-            static bool IsExtraType(IReadOnlyList<ExternalTypeInfo> externalTypes, TypeReference typeReference)
+            static IReadOnlyList<TypeDefinition> CollectExtraTypes(IReadOnlyList<ExternalTypeInfo> externalTypes, TypeReference typeReference, IReadOnlyList<TypeDefinition> collectedTypeDefinitions)
             {
                 if (CecilHelper.IsNullableType(typeReference) || IsCollection(typeReference))
                 {
-                    return IsExtraType(externalTypes, ((GenericInstanceType)typeReference).GenericArguments[0]);
+                    return CollectExtraTypes(externalTypes, ((GenericInstanceType)typeReference).GenericArguments[0], collectedTypeDefinitions);
                 }
                 
                 foreach (var externalType in externalTypes)
                 {
                     if (externalType.DotNetFullTypeName == typeReference.FullName)
                     {
-                        return false;
+                        return [];
                     }
                 }
                 
                 if (typeReference.IsString || typeReference.IsNumber || typeReference.IsBoolean || typeReference.IsDateTime || typeReference.IsObject)
                 {
-                    return false;
+                    return [];
                 }
 
                 TypeDefinition typeDefinition;
@@ -87,12 +87,21 @@ static class Exporter
                 {
                     typeDefinition = typeReference.Resolve();
                 }
-                catch (Exception exception)
+                catch (Exception)
                 {
-                    return false;
+                    return [];
+                }
+
+                if (typeDefinition.BaseType?.FullName == "System.Object")
+                {
+                    return new List<TypeDefinition>
+                    {
+                        collectedTypeDefinitions,
+                        typeDefinition
+                    };
                 }
                 
-                return typeDefinition.BaseType?.FullName == "System.Object";
+                return collectedTypeDefinitions;
             }
 
             static bool IsCollection(TypeReference typeReference)
