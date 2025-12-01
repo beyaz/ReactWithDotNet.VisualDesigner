@@ -100,11 +100,15 @@ static class Exporter
 
                 if (typeDefinition.BaseType?.FullName == "System.Object")
                 {
-                    return new List<TypeDefinition>
+                    if (collectedTypeDefinitions.All(x => x.FullName != typeDefinition.FullName))
                     {
-                        collectedTypeDefinitions,
-                        typeDefinition
-                    };
+                        return new List<TypeDefinition>
+                        {
+                            collectedTypeDefinitions,
+                            typeDefinition
+                        };
+                    }
+                    
                 }
                 
                 return collectedTypeDefinitions;
@@ -169,6 +173,13 @@ static class Exporter
 
         var externalTypes = ExternalTypes[scope];
 
+        var modelTypeDefinitionResult = getModelTypeDefinition(scope);
+        if (modelTypeDefinitionResult.Value is null)
+        {
+            return Result.From<FileModel>(null);
+        }
+        
+
         return
             from modelTypeDefinition in getModelTypeDefinition(scope)
             from modelFilePath in getOutputTsFilePath(modelTypeDefinition)
@@ -214,6 +225,11 @@ static class Exporter
         var controllerTypeDefinition = ControllerTypeDefinition[scope];
         var modelTypeDefinition = ModelTypeDefinition[scope];
         var apiName = ApiName[scope];
+
+        if (modelTypeDefinition is null)
+        {
+            return [];
+        }
 
         return from methodGroup in GroupControllerMethods(getExportablePublicMethods(controllerTypeDefinition))
                from filePath in getOutputTsFilePath(methodGroup)

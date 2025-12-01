@@ -374,7 +374,7 @@ sealed class MainWindow : Component<MainWindow.State>
             fileModels.Add(file.Value);
         }
 
-        state.Files = fileModels;
+        state.Files = fileModels.DistinctBy(x=>x.Path).ToList();
 
         state.StatusMessage = $"Ready > {fileModels.Count} file listed.";
     }
