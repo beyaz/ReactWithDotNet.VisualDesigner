@@ -81,7 +81,16 @@ static class Exporter
                     return false;
                 }
 
-                var typeDefinition = typeReference.Resolve();
+                TypeDefinition typeDefinition;
+
+                try
+                {
+                    typeDefinition = typeReference.Resolve();
+                }
+                catch (Exception exception)
+                {
+                    return false;
+                }
                 
                 return typeDefinition.BaseType?.FullName == "System.Object";
             }
