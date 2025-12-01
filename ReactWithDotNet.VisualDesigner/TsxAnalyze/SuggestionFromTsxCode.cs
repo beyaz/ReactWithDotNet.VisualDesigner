@@ -13,6 +13,7 @@ static class SuggestionFromTsxCode
         {
             return list;
         }
+
         var fileContent = await File.ReadAllTextAsync(tsxFilePath);
 
         foreach (var line in fileContent.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
@@ -27,19 +28,25 @@ static class SuggestionFromTsxCode
                 var match = Regex.Match(line, pathPattern);
                 if (match.Success)
                 {
-                    var relativePath = match.Groups[1].Value;
+                    var relativeFolderPath = match.Groups[1].Value;
 
-                    var relativeFilePath = Path.Combine(Path.GetDirectoryName(tsxFilePath)!, relativePath + ".ts");
+                    relativeFolderPath = Path.Combine(Path.GetDirectoryName(tsxFilePath)!, relativeFolderPath);
 
-                    relativeFilePath = Path.GetFullPath(relativeFilePath);
+                    relativeFolderPath = Path.GetFullPath(relativeFolderPath);
 
-                    var suggestionsFromRelativeFile = await GetAllVariableSuggestionsInFile(relativeFilePath);
-                    if (suggestionsFromRelativeFile.HasError)
+                    if (Directory.Exists(relativeFolderPath))
                     {
-                        return suggestionsFromRelativeFile.Error;
-                    }
+                        foreach (var file in Directory.GetFiles(relativeFolderPath, "*.ts", SearchOption.AllDirectories))
+                        {
+                            var suggestionsFromRelativeFile = await GetAllVariableSuggestionsInFile(file);
+                            if (suggestionsFromRelativeFile.HasError)
+                            {
+                                return suggestionsFromRelativeFile.Error;
+                            }
 
-                    list.Add(suggestionsFromRelativeFile.Value);
+                            list.Add(suggestionsFromRelativeFile.Value);
+                        }
+                    }
                 }
             }
         }
