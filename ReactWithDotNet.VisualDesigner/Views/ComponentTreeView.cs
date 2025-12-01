@@ -165,7 +165,7 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
     {
         return Cache.AccessValue($"{nameof(ComponentTreeView)}-{nameof(GetAllNodes)}-{ProjectId}",
             () => ListFrom(from x in GetAllComponentsInProjectFromCache(ProjectId)
-                           orderby x.Config.Name descending
+                           orderby x.Config.DesignLocation
                            select CreateNode(x)));
 
         static NodeModel CreateNode(ComponentEntity x)
