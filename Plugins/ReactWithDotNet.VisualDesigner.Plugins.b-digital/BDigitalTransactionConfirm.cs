@@ -2,6 +2,26 @@
 
 namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
+class PropertyTag : PluginComponentBase
+{
+    protected override Element render()
+    {
+        return new Fragment
+        {
+            children
+        };
+    }
+}
+
+[CustomComponent]
+sealed class sender : PropertyTag;
+
+
+[CustomComponent]
+sealed class amount : PropertyTag;
+
+
+
 [CustomComponent]
 sealed class BDigitalTransactionConfirm : PluginComponentBase
 {

@@ -1,5 +1,6 @@
 ﻿namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
+
 [CustomComponent]
 sealed class BTabBar : PluginComponentBase
 {
