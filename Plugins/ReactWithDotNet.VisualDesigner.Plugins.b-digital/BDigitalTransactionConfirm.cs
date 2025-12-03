@@ -29,19 +29,19 @@ class PropertyTag_FlexRow : PluginComponentBase
 }
 
 [CustomComponent]
-sealed class sender : PropertyTag_FlexColumn;
+sealed class senderData : PropertyTag_FlexColumn;
 
 [CustomComponent]
 sealed class title : PropertyTag_FlexColumn;
 
 [CustomComponent]
-sealed class amount : PropertyTag_FlexColumn;
+sealed class transferAmount : PropertyTag_FlexColumn;
 
 [CustomComponent]
 sealed class transactionDetailList : PropertyTag_FlexColumn;
 
 [CustomComponent]
-sealed class receiver : PropertyTag_FlexColumn;
+sealed class receiverData : PropertyTag_FlexColumn;
 
 [CustomComponent]
 sealed class item1 : PropertyTag_FlexRow
@@ -66,12 +66,12 @@ sealed class item4 : PropertyTag_FlexRow
 {
     public override int Gap => 4;
 }
+
 [CustomComponent]
 sealed class item5 : PropertyTag_FlexRow
 {
     public override int Gap => 4;
 }
-
 
 [CustomComponent]
 sealed class item : PropertyTag_FlexRow;
@@ -104,7 +104,7 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
         {
             List<string> lines = [];
 
-            var senderNode = node.FindNodeByTag(nameof(b_digital.sender));
+            var senderNode = node.FindNodeByTag(nameof(senderData));
 
             var sender = new
             {
@@ -118,10 +118,10 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
 
                 item3Text  = senderNode.FindNodeByTag(nameof(b_digital.item3)).TryGetNodeItemAt([0]),
                 item3Value = senderNode.FindNodeByTag(nameof(b_digital.item3)).TryGetNodeItemAt([1]),
-                
+
                 item4Text  = senderNode.FindNodeByTag(nameof(b_digital.item4)).TryGetNodeItemAt([0]),
                 item4Value = senderNode.FindNodeByTag(nameof(b_digital.item4)).TryGetNodeItemAt([1]),
-                
+
                 item5Text  = senderNode.FindNodeByTag(nameof(b_digital.item5)).TryGetNodeItemAt([0]),
                 item5Value = senderNode.FindNodeByTag(nameof(b_digital.item5)).TryGetNodeItemAt([1]),
             };
@@ -134,7 +134,7 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
                 {
                     lines.Add($"titleText: {titleText}");
                 }
-                
+
                 var variant = TryGetPropValueByPropName(titleNode, nameof(BTypography.variant));
                 if (variant.HasValue)
                 {
@@ -165,13 +165,13 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
             {
                 lines.Add("item3: " + item3);
             }
-            
+
             var item4 = getItem(sender.item4Text, sender.item4Value);
             if (item4 is not null)
             {
                 lines.Add("item4: " + item4);
             }
-            
+
             var item5 = getItem(sender.item5Text, sender.item5Value);
             if (item5 is not null)
             {
@@ -192,7 +192,7 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
 
         // amount
         {
-            var amountNode = node.FindNodeByTag(nameof(amount));
+            var amountNode = node.FindNodeByTag(nameof(transferAmount));
 
             var transferAmountNode = amountNode.TryGetNodeItemAt([0]);
             if (transferAmountNode is not null)
@@ -206,7 +206,7 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
                         Value = transferAmount
                     });
                 }
-                
+
                 var variant = TryGetPropValueByPropName(transferAmountNode, nameof(BTypography.variant));
                 if (variant.HasValue)
                 {
@@ -231,7 +231,7 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
 
         // receiver
         {
-            var receiverNode = node.FindNodeByTag(nameof(b_digital.receiver));
+            var receiverNode = node.FindNodeByTag(nameof(receiverData));
 
             List<string> lines = [];
 
@@ -247,10 +247,10 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
 
                 item3Text  = receiverNode.FindNodeByTag(nameof(b_digital.item3)).TryGetNodeItemAt([0]),
                 item3Value = receiverNode.FindNodeByTag(nameof(b_digital.item3)).TryGetNodeItemAt([1]),
-                
+
                 item4Text  = receiverNode.FindNodeByTag(nameof(b_digital.item4)).TryGetNodeItemAt([0]),
                 item4Value = receiverNode.FindNodeByTag(nameof(b_digital.item4)).TryGetNodeItemAt([1]),
-                
+
                 item5Text  = receiverNode.FindNodeByTag(nameof(b_digital.item5)).TryGetNodeItemAt([0]),
                 item5Value = receiverNode.FindNodeByTag(nameof(b_digital.item5)).TryGetNodeItemAt([1]),
             };
@@ -263,8 +263,7 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
                 {
                     lines.Add($"titleText: {titleText}");
                 }
-                
-                
+
                 var variant = TryGetPropValueByPropName(titleNode, nameof(BTypography.variant));
                 if (variant.HasValue)
                 {
@@ -277,7 +276,7 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
                     lines.Add($"titleColorVariant: {color}");
                 }
             }
-            
+
             var item1 = getItem(receiver.item1Text, receiver.item1Value);
             if (item1 is not null)
             {
@@ -295,13 +294,13 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
             {
                 lines.Add("item3: " + item3);
             }
-            
+
             var item4 = getItem(receiver.item4Text, receiver.item4Value);
             if (item4 is not null)
             {
                 lines.Add("item4: " + item4);
             }
-            
+
             var item5 = getItem(receiver.item5Text, receiver.item5Value);
             if (item5 is not null)
             {
@@ -328,22 +327,20 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
 
             var items = new
             {
-                item1Text  = transactionDetailListNode.TryGetNodeItemAt([0]),
-                item1Value = transactionDetailListNode.TryGetNodeItemAt([1]),
+                item1Text  = transactionDetailListNode.TryGetNodeItemAt([0, 0]),
+                item1Value = transactionDetailListNode.TryGetNodeItemAt([0, 1]),
 
-                item2Text  = transactionDetailListNode.TryGetNodeItemAt([0]),
-                item2Value = transactionDetailListNode.TryGetNodeItemAt([1]),
+                item2Text  = transactionDetailListNode.TryGetNodeItemAt([1, 0]),
+                item2Value = transactionDetailListNode.TryGetNodeItemAt([1, 1]),
 
-                item3Text  = transactionDetailListNode.TryGetNodeItemAt([0]),
-                item3Value = transactionDetailListNode.TryGetNodeItemAt([1]),
-                
-                item4Text  = transactionDetailListNode.TryGetNodeItemAt([0]),
-                item4Value = transactionDetailListNode.TryGetNodeItemAt([1]),
-                
-                item5Text  = transactionDetailListNode.TryGetNodeItemAt([0]),
-                item5Value = transactionDetailListNode.TryGetNodeItemAt([1]),
-                
-           
+                item3Text  = transactionDetailListNode.TryGetNodeItemAt([2, 0]),
+                item3Value = transactionDetailListNode.TryGetNodeItemAt([2, 1]),
+
+                item4Text  = transactionDetailListNode.TryGetNodeItemAt([3, 0]),
+                item4Value = transactionDetailListNode.TryGetNodeItemAt([3, 1]),
+
+                item5Text  = transactionDetailListNode.TryGetNodeItemAt([4, 0]),
+                item5Value = transactionDetailListNode.TryGetNodeItemAt([4, 1])
             };
 
             var item1 = getItem(items.item1Text, items.item1Value);
@@ -363,13 +360,13 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
             {
                 lines.Add(item3);
             }
-            
+
             var item4 = getItem(items.item4Text, items.item4Value);
             if (item4 is not null)
             {
                 lines.Add(item4);
             }
-            
+
             var item5 = getItem(items.item5Text, items.item5Value);
             if (item5 is not null)
             {
@@ -475,9 +472,9 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
 
     protected override Element render()
     {
-        var senderElement = children.FindElementByElementType(typeof(sender));
-        var amountElement = children.FindElementByElementType(typeof(amount));
-        var receiverElement = children.FindElementByElementType(typeof(receiver));
+        var senderElement = children.FindElementByElementType(typeof(senderData));
+        var amountElement = children.FindElementByElementType(typeof(transferAmount));
+        var receiverElement = children.FindElementByElementType(typeof(receiverData));
         var transactionDetailListElement = children.FindElementByElementType(typeof(transactionDetailList));
 
         return new Fragment
