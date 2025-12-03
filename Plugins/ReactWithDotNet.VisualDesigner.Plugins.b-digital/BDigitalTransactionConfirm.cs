@@ -337,6 +337,12 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
                 item3Text  = transactionDetailListNode.TryGetNodeItemAt([0]),
                 item3Value = transactionDetailListNode.TryGetNodeItemAt([1]),
                 
+                item4Text  = transactionDetailListNode.TryGetNodeItemAt([0]),
+                item4Value = transactionDetailListNode.TryGetNodeItemAt([1]),
+                
+                item5Text  = transactionDetailListNode.TryGetNodeItemAt([0]),
+                item5Value = transactionDetailListNode.TryGetNodeItemAt([1]),
+                
            
             };
 
@@ -356,6 +362,18 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
             if (item3 is not null)
             {
                 lines.Add(item3);
+            }
+            
+            var item4 = getItem(items.item4Text, items.item4Value);
+            if (item4 is not null)
+            {
+                lines.Add(item4);
+            }
+            
+            var item5 = getItem(items.item5Text, items.item5Value);
+            if (item5 is not null)
+            {
+                lines.Add(item5);
             }
 
             finalProps.Add(new ReactProperty
