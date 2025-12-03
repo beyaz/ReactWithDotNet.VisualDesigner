@@ -1,6 +1,34 @@
-﻿using ReactWithDotNet.ThirdPartyLibraries.GoogleMaterialSymbols;
+﻿
+
+using ReactWithDotNet.ThirdPartyLibraries.GoogleMaterialSymbols;
 
 namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
+#pragma warning disable CS8981 // The type name only contains lower-cased ascii characters. Such names may become reserved for the language.
+
+
+[CustomComponent]
+sealed class leftListData : PluginComponentBase
+{
+    protected override Element render()
+    {
+        return new div
+        {
+            children
+        };
+    }
+}
+
+[CustomComponent]
+sealed class rightListData : PluginComponentBase
+{
+    protected override Element render()
+    {
+        return new div
+        {
+            children
+        };
+    }
+}
 
 [CustomComponent]
 sealed class BDigitalListAction : PluginComponentBase
@@ -35,7 +63,7 @@ sealed class BDigitalListAction : PluginComponentBase
 
         foreach (var name in new[] { "leftListData", "rightListData" })
         {
-            var listData = node.TryFindDesignNamedNode(name);
+            var listData = node.FindNodeByTag(name);
             if (listData is null)
             {
                 continue;
@@ -99,19 +127,13 @@ sealed class BDigitalListAction : PluginComponentBase
             OnClick(onMouseClick),
             
             // leftListData
-            new FlexColumn
-            {
-                children.Count > 0 ? children[0].children : null
-            },
+            children.FindElementByElementType(typeof(leftListData)),
 
             
             new FlexRow
             {
                 // rightListData
-                new FlexColumn
-                {
-                    children.Count > 1 ? children[1].children : null
-                },
+                children.FindElementByElementType(typeof(rightListData)),
             
                 action.HasValue && selectedCount == "0" ?
                 new FlexRowCentered(Width(64))

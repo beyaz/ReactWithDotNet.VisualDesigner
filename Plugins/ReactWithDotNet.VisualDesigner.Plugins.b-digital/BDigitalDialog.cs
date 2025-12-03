@@ -1,5 +1,21 @@
 ﻿namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
+#pragma warning disable CS8981 // The type name only contains lower-cased ascii characters. Such names may become reserved for the language.
+
+[CustomComponent]
+sealed class actions : PluginComponentBase
+{
+    internal bool isBorderTopNone;
+
+    protected override Element render()
+    {
+        return new FlexRow(Padding(8), Gap(8), JustifyContentFlexEnd, BorderTop(1, solid, rgba(0, 0, 0, 0.12)), isBorderTopNone ? BorderTop(none) : null)
+        {
+            children
+        };
+    }
+}
+
 [CustomComponent]
 sealed class BDigitalDialog : PluginComponentBase
 {
@@ -35,28 +51,25 @@ sealed class BDigitalDialog : PluginComponentBase
         {
             return await AnalyzeChildren(input, AnalyzeReactNode);
         }
-        
-        
-        var (node, _) = input;
+
+        var node = input.Node;
 
         TsImportCollection tsImports = new();
-        
 
-        var actions = node.TryFindDesignNamedNode("actions");
+        var actionsNode = node.FindNodeByTag(nameof(actions));
 
-        
-        if (actions is not null)
+        if (actionsNode is not null)
         {
             node = node with
             {
-                Children = node.Children.Remove(actions)
+                Children = node.Children.Remove(actionsNode)
             };
-            
+
             IReadOnlyList<string> linesCollection;
             {
                 var response = await
                 (
-                    from child in actions.Children
+                    from child in actionsNode.Children
                     from nodeAnalyzeOutput in input.AnalyzeNode(child)
                     from lines in input.ReactNodeModelToElementTreeSourceLinesConverter(nodeAnalyzeOutput.Node)
                     let childAsTsxLines = string.Join(Environment.NewLine, lines)
@@ -68,8 +81,8 @@ sealed class BDigitalDialog : PluginComponentBase
                     return response.Error;
                 }
 
-                linesCollection = new List<string>{ from x in response.Value select "{ element: "+x.tsx + ", label: null, onClick: null}"};
-                
+                linesCollection = new List<string> { from x in response.Value select "{ element: " + x.tsx + ", label: null, onClick: null}" };
+
                 tsImports.Add(from x in response.Value select x.tsImports);
             }
 
@@ -86,43 +99,31 @@ sealed class BDigitalDialog : PluginComponentBase
                 Properties = node.Properties.Add(property)
             };
         }
-        
-        
-        
 
         var import = (nameof(BDigitalDialog), "b-digital-dialog");
-   
+
         return await AnalyzeChildren(input with { Node = node }, AnalyzeReactNode).With(import).With(tsImports);
     }
 
     protected override Element render()
     {
-
-
         Element bottomActionBar = null;
-
 
         // arrange actions
         {
-            var actionsElement = new div { children }.TryFindDesignNamedElement("actions");
-            if (actionsElement is HtmlElement htmlElement)
+            var actionsElement = (actions)children.FindElementByElementType(typeof(actions));
+            if (actionsElement is not null)
             {
-                
-                htmlElement.style.Add(BorderTop(1,solid,rgba(0, 0, 0, 0.12)));
+                children.Remove(actionsElement);
 
-                htmlElement += DisplayFlex + JustifyContentFlexEnd + Padding(8) + Gap(8);
+                bottomActionBar = actionsElement;
 
-                children.Remove(htmlElement);
-
-                bottomActionBar = htmlElement;
-                
                 if (displayOkButton?.Equals("false") is true)
                 {
-                    htmlElement += BorderTop(none);
+                    actionsElement.isBorderTopNone = true;
                 }
             }
         }
-
 
         Element partTop = new div();
 
@@ -143,21 +144,22 @@ sealed class BDigitalDialog : PluginComponentBase
                             }
                         }
                     },
-                        
+
                 // t i t l e
                 new div(FontSize("1.5rem"), FontWeight400, LineHeight(1.334), LetterSpacing("0.15px")) { title }
             });
-            
-            partTop.Add(new BDivider{ Margin(0)});
+
+            partTop.Add(new BDivider { Margin(0) });
         }
+
         return new div(Background(rgba(0, 0, 0, 0.4)), Margin(4), Padding(24), BorderRadius(8))
         {
             Id(id), OnClick(onMouseClick),
-            
+
             new div(Background("white"), BorderRadius(8))
             {
                 partTop,
-                
+
                 new div(Padding(12))
                 {
                     children

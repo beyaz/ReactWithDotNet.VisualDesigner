@@ -41,34 +41,7 @@ static class Extensions
         return null;
     }
     
-    public static Element TryFindDesignNamedElement(this Element element, string designName)
-    {
-        if (element is null)
-        {
-            return null;
-        }
-        if (element is HtmlElement htmlElement)
-        {
-            if (htmlElement.data.TryGetValue(Design.Name, out var name))
-            {
-                if (TryClearStringValue(name) == TryClearStringValue(designName))
-                {
-                    return element;
-                }
-            }
-        }
-        
-        foreach (var child in element.children)
-        {
-            var namedElement = child.TryFindDesignNamedElement(designName);
-            if (namedElement is not null)
-            {
-                return namedElement;
-            }
-        }
-
-        return null;
-    }
+   
     
     public static Element FindElement(this Element element, Predicate<Element> predicate)
     {
