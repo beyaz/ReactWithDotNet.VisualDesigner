@@ -1,5 +1,4 @@
-﻿
-global using static ReactWithDotNet.VisualDesigner.Plugins.Extensions;
+﻿global using static ReactWithDotNet.VisualDesigner.Plugins.Extensions;
 
 namespace ReactWithDotNet.VisualDesigner.Plugins;
 
@@ -21,40 +20,19 @@ static class Extensions
             })
         };
     }
-    
-    public static ReactNode TryFindDesignNamedNode(this ReactNode node, string designName)
-    {
-        if (node.Properties.Any(p=>p.Name == Design.Name && TryClearStringValue(p.Value) == TryClearStringValue(designName)))
-        {
-            return node;
-        }
 
-        foreach (var child in node.Children)
-        {
-            var namedNode = child.TryFindDesignNamedNode(designName);
-            if (namedNode is not null)
-            {
-                return namedNode;
-            }
-        }
-
-        return null;
-    }
-    
-   
-    
     public static Element FindElement(this Element element, Predicate<Element> predicate)
     {
         if (element is null)
         {
             return null;
         }
-        
+
         if (predicate(element))
         {
             return element;
         }
-        
+
         foreach (var child in element.children)
         {
             var foundElement = child.FindElement(predicate);
@@ -66,13 +44,14 @@ static class Extensions
 
         return null;
     }
+
     public static Element FindElement(this ElementCollection elementCollection, Predicate<Element> predicate)
     {
         if (elementCollection is null)
         {
             return null;
         }
-        
+
         foreach (var child in elementCollection)
         {
             var foundElement = child.FindElement(predicate);
@@ -85,22 +64,43 @@ static class Extensions
         return null;
     }
 
-    
     public static Element FindElementByElementType(this ElementCollection element, Type elementType)
     {
         return element.FindElement(HasMatch);
 
         bool HasMatch(Element el)
         {
-            if (el?.GetType()  == elementType)
+            if (el?.GetType() == elementType)
             {
-                
-                    return true;
-                
+                return true;
             }
 
             return false;
         }
+    }
+
+    public static ReactNode FindNodeByTag(this ReactNode node, string tagName)
+    {
+        if (node is null)
+        {
+            return null;
+        }
+
+        if (node.Tag == tagName)
+        {
+            return node;
+        }
+
+        foreach (var childNode in node.Children)
+        {
+            var nodeMaybeFound = childNode.FindNodeByTag(tagName);
+            if (nodeMaybeFound is not null)
+            {
+                return nodeMaybeFound;
+            }
+        }
+
+        return null;
     }
 
     public static ReactNode TryGetNodeItemAt(this ReactNode node, int[] location)
@@ -116,34 +116,10 @@ static class Extensions
             {
                 return null;
             }
-                        
+
             node = node.Children[childIndex];
         }
 
         return node;
-    }
-    
-    public static ReactNode FindNodeByTag(this ReactNode node, string tagName)
-    {
-        if (node is null )
-        {
-            return null;
-        }
-        
-        if (node.Tag == tagName)
-        {
-            return node;
-        }
-        
-        foreach (var childNode in node.Children)
-        {
-            var nodeMaybeFound = childNode.FindNodeByTag(tagName);
-            if (nodeMaybeFound is not null)
-            {
-                return nodeMaybeFound;
-            }
-        }
-
-        return null;
     }
 }
