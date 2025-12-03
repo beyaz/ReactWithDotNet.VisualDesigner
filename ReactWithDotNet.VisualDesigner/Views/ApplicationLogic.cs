@@ -37,6 +37,35 @@ static class ApplicationLogic
             OutFile = file
         };
     }
+    
+    public static async Task<Result<bool>> UserHasChange(ApplicationState state)
+    {
+        ComponentEntity component;
+        ComponentWorkspace userVersion;
+        {
+            var response = await GetComponentData(state.ComponentId,state.UserName);
+            if (response.HasError)
+            {
+                return response.Error;
+            }
+
+            component   = response.Value.Component;
+            userVersion = response.Value.ComponentWorkspaceVersion.Value;
+        }
+
+        if (userVersion is null)
+        {
+            return false;
+        }
+
+        // Check if the user version is the same as the main version
+        if (component.RootElementAsYaml == SerializeToYaml(state.ComponentRootElement))
+        {
+            return false;
+        }
+
+        return true;
+    }
     public static async Task<Result<Unit>> CommitComponent(ApplicationState state)
     {
         ComponentEntity component;

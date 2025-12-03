@@ -1128,8 +1128,15 @@ sealed class ApplicationView : Component<ApplicationState>
         return Task.CompletedTask;
     }
 
-    Element PartApplicationTopPanel()
+    async Task<Element> PartApplicationTopPanel()
     {
+        var userHasChange = await UserHasChange(state);
+        if (userHasChange.HasError)
+        {
+            this.FailNotification(userHasChange.Error.Message);
+            return null;
+        }
+        
         return new FlexRow(UserSelect(none))
         {
             // P R O J E C T
@@ -1172,11 +1179,13 @@ sealed class ApplicationView : Component<ApplicationState>
 
             new FlexRowCentered
             {
-                new FlexRowCentered(Gap(16), Border(1, solid, Theme.BorderColor), BorderRadius(4), PaddingX(8), Height(36))
+                new FlexRowCentered(Gap(16), Border(1, solid, Theme.BorderColor), BorderRadius(4), PaddingX(8), Height(36), MinWidth(80))
                 {
                     PositionRelative,
                     new label(PositionAbsolute, Top(-4), Left(8), FontSize10, LineHeight7, BackgroundTheme, PaddingX(4)) { "Component" },
 
+                    
+                    userHasChange.Value ?
                     new FlexRowCentered(Hover(Color(Blue300)))
                     {
                         "Rollback",
@@ -1201,8 +1210,9 @@ sealed class ApplicationView : Component<ApplicationState>
 
                             this.SuccessNotification("OK");
                         })
-                    },
+                    }:null,
 
+                    userHasChange.Value ?
                     new FlexRowCentered(Hover(Color(Blue300)))
                     {
                         "Commit",
@@ -1225,7 +1235,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
                             this.SuccessNotification("OK");
                         })
-                    },
+                    }: null,
 
                     new FlexRowCentered(Hover(Color(Blue300)))
                     {
