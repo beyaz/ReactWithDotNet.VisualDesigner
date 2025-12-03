@@ -2965,7 +2965,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
         internal record State
         {
-            public string Guid { get; set; }
+            public string Guid { get; init; }
         }
     }
 
