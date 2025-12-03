@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+
 #pragma warning disable CS8981 // The type name only contains lower-cased ascii characters. Such names may become reserved for the language.
 
 namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
@@ -13,6 +14,7 @@ class PropertyTag_FlexColumn : PluginComponentBase
         };
     }
 }
+
 class PropertyTag_FlexRow : PluginComponentBase
 {
     public virtual int Gap => 0;
@@ -64,11 +66,15 @@ sealed class item4 : PropertyTag_FlexRow
 {
     public override int Gap => 4;
 }
+[CustomComponent]
+sealed class item5 : PropertyTag_FlexRow
+{
+    public override int Gap => 4;
+}
+
 
 [CustomComponent]
 sealed class item : PropertyTag_FlexRow;
-
-
 
 [CustomComponent]
 sealed class BDigitalTransactionConfirm : PluginComponentBase
@@ -92,7 +98,6 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
             var tempNode = ApplyTranslateOperationOnProps(reactNode, input.ComponentConfig, propName);
 
             return TryGetPropValueByPropName(tempNode, propName);
-
         }
 
         // sender
@@ -100,8 +105,7 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
             List<string> lines = [];
 
             var senderNode = node.FindNodeByTag(nameof(b_digital.sender));
-            
-                
+
             var sender = new
             {
                 title = senderNode.FindNodeByTag(nameof(title)).TryGetNodeItemAt([0]),
@@ -110,15 +114,38 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
                 item1Value = senderNode.FindNodeByTag(nameof(b_digital.item1)).TryGetNodeItemAt([1]),
 
                 item2Text  = senderNode.FindNodeByTag(nameof(b_digital.item2)).TryGetNodeItemAt([0]),
-                item2Value =senderNode.FindNodeByTag(nameof(b_digital.item2)).TryGetNodeItemAt([1]),
+                item2Value = senderNode.FindNodeByTag(nameof(b_digital.item2)).TryGetNodeItemAt([1]),
 
                 item3Text  = senderNode.FindNodeByTag(nameof(b_digital.item3)).TryGetNodeItemAt([0]),
-                item3Value = senderNode.FindNodeByTag(nameof(b_digital.item3)).TryGetNodeItemAt([1])
+                item3Value = senderNode.FindNodeByTag(nameof(b_digital.item3)).TryGetNodeItemAt([1]),
+                
+                item4Text  = senderNode.FindNodeByTag(nameof(b_digital.item4)).TryGetNodeItemAt([0]),
+                item4Value = senderNode.FindNodeByTag(nameof(b_digital.item4)).TryGetNodeItemAt([1]),
+                
+                item5Text  = senderNode.FindNodeByTag(nameof(b_digital.item5)).TryGetNodeItemAt([0]),
+                item5Value = senderNode.FindNodeByTag(nameof(b_digital.item5)).TryGetNodeItemAt([1]),
             };
 
-            if (sender.title is not null)
+            var titleNode = sender.title;
+            if (titleNode is not null)
             {
-                lines.Add($"titleText: {TryGetPropFinalText(sender.title, Design.Content)}");
+                var titleText = TryGetPropFinalText(titleNode, Design.Content);
+                if (titleText is not null)
+                {
+                    lines.Add($"titleText: {titleText}");
+                }
+                
+                var variant = TryGetPropValueByPropName(titleNode, nameof(BTypography.variant));
+                if (variant.HasValue)
+                {
+                    lines.Add($"titleTextVariant: {variant}");
+                }
+
+                var color = TryGetPropValueByPropName(titleNode, nameof(BTypography.color));
+                if (color.HasValue)
+                {
+                    lines.Add($"titleColorVariant: {color}");
+                }
             }
 
             var item1 = getItem(sender.item1Text, sender.item1Value);
@@ -138,12 +165,24 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
             {
                 lines.Add("item3: " + item3);
             }
+            
+            var item4 = getItem(sender.item4Text, sender.item4Value);
+            if (item4 is not null)
+            {
+                lines.Add("item4: " + item4);
+            }
+            
+            var item5 = getItem(sender.item5Text, sender.item5Value);
+            if (item5 is not null)
+            {
+                lines.Add("item5: " + item5);
+            }
 
             if (lines.Count > 0)
             {
                 var prop = new ReactProperty
                 {
-                    Name = "senderData",
+                    Name  = "senderData",
                     Value = '{' + string.Join(",", lines) + '}'
                 };
 
@@ -154,30 +193,46 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
         // amount
         {
             var amountNode = node.FindNodeByTag(nameof(amount));
-            
-            var transferAmount = amountNode.TryGetNodeItemAt([0]);
-            if (transferAmount is not null)
+
+            var transferAmountNode = amountNode.TryGetNodeItemAt([0]);
+            if (transferAmountNode is not null)
             {
-                finalProps.Add(new ReactProperty
+                var transferAmount = TryGetPropValueByPropName(transferAmountNode, Design.Content);
+                if (transferAmount.HasValue)
                 {
-                    Name = "transferAmount",
-                    Value = TryGetPropValueByPropName(transferAmount, Design.Content)
-                });
-
-
-
-                finalProps.Add(new ReactProperty
+                    finalProps.Add(new ReactProperty
+                    {
+                        Name  = "transferAmount",
+                        Value = transferAmount
+                    });
+                }
+                
+                var variant = TryGetPropValueByPropName(transferAmountNode, nameof(BTypography.variant));
+                if (variant.HasValue)
                 {
-                    Name = "transferAmountVariant",
-                    Value = TryGetPropValueByPropName(transferAmount, nameof(BTypography.variant))
-                });
+                    finalProps.Add(new ReactProperty
+                    {
+                        Name  = "transferAmountVariant",
+                        Value = variant
+                    });
+                }
+
+                var color = TryGetPropValueByPropName(transferAmountNode, nameof(BTypography.color));
+                if (color.HasValue)
+                {
+                    finalProps.Add(new ReactProperty
+                    {
+                        Name  = "transferAmountColorVariant",
+                        Value = color
+                    });
+                }
             }
         }
 
         // receiver
         {
             var receiverNode = node.FindNodeByTag(nameof(b_digital.receiver));
-            
+
             List<string> lines = [];
 
             var receiver = new
@@ -188,17 +243,41 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
                 item1Value = receiverNode.FindNodeByTag(nameof(b_digital.item1)).TryGetNodeItemAt([1]),
 
                 item2Text  = receiverNode.FindNodeByTag(nameof(b_digital.item2)).TryGetNodeItemAt([0]),
-                item2Value =receiverNode.FindNodeByTag(nameof(b_digital.item2)).TryGetNodeItemAt([1]),
+                item2Value = receiverNode.FindNodeByTag(nameof(b_digital.item2)).TryGetNodeItemAt([1]),
 
                 item3Text  = receiverNode.FindNodeByTag(nameof(b_digital.item3)).TryGetNodeItemAt([0]),
-                item3Value = receiverNode.FindNodeByTag(nameof(b_digital.item3)).TryGetNodeItemAt([1])
+                item3Value = receiverNode.FindNodeByTag(nameof(b_digital.item3)).TryGetNodeItemAt([1]),
+                
+                item4Text  = receiverNode.FindNodeByTag(nameof(b_digital.item4)).TryGetNodeItemAt([0]),
+                item4Value = receiverNode.FindNodeByTag(nameof(b_digital.item4)).TryGetNodeItemAt([1]),
+                
+                item5Text  = receiverNode.FindNodeByTag(nameof(b_digital.item5)).TryGetNodeItemAt([0]),
+                item5Value = receiverNode.FindNodeByTag(nameof(b_digital.item5)).TryGetNodeItemAt([1]),
             };
 
-            if (receiver.title is not null)
+            var titleNode = receiver.title;
+            if (titleNode is not null)
             {
-                lines.Add($"titleText: {TryGetPropFinalText(receiver.title, Design.Content)}");
-            }
+                var titleText = TryGetPropFinalText(titleNode, Design.Content);
+                if (titleText is not null)
+                {
+                    lines.Add($"titleText: {titleText}");
+                }
+                
+                
+                var variant = TryGetPropValueByPropName(titleNode, nameof(BTypography.variant));
+                if (variant.HasValue)
+                {
+                    lines.Add($"titleTextVariant: {variant}");
+                }
 
+                var color = TryGetPropValueByPropName(titleNode, nameof(BTypography.color));
+                if (color.HasValue)
+                {
+                    lines.Add($"titleColorVariant: {color}");
+                }
+            }
+            
             var item1 = getItem(receiver.item1Text, receiver.item1Value);
             if (item1 is not null)
             {
@@ -216,12 +295,24 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
             {
                 lines.Add("item3: " + item3);
             }
+            
+            var item4 = getItem(receiver.item4Text, receiver.item4Value);
+            if (item4 is not null)
+            {
+                lines.Add("item4: " + item4);
+            }
+            
+            var item5 = getItem(receiver.item5Text, receiver.item5Value);
+            if (item5 is not null)
+            {
+                lines.Add("item5: " + item5);
+            }
 
             if (lines.Count > 0)
             {
                 var prop = new ReactProperty
                 {
-                    Name = "receiverData",
+                    Name  = "receiverData",
                     Value = '{' + string.Join(",", lines) + '}'
                 };
 
@@ -234,17 +325,19 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
             List<string> lines = [];
 
             var transactionDetailListNode = node.FindNodeByTag(nameof(transactionDetailList));
-            
+
             var items = new
             {
-                item1Text  = transactionDetailListNode.TryGetNodeItemAt([ 0]),
-                item1Value = transactionDetailListNode.TryGetNodeItemAt([ 1]),
+                item1Text  = transactionDetailListNode.TryGetNodeItemAt([0]),
+                item1Value = transactionDetailListNode.TryGetNodeItemAt([1]),
 
-                item2Text  = transactionDetailListNode.TryGetNodeItemAt([ 0]),
-                item2Value = transactionDetailListNode.TryGetNodeItemAt([ 1]),
+                item2Text  = transactionDetailListNode.TryGetNodeItemAt([0]),
+                item2Value = transactionDetailListNode.TryGetNodeItemAt([1]),
 
                 item3Text  = transactionDetailListNode.TryGetNodeItemAt([0]),
-                item3Value = transactionDetailListNode.TryGetNodeItemAt([1])
+                item3Value = transactionDetailListNode.TryGetNodeItemAt([1]),
+                
+           
             };
 
             var item1 = getItem(items.item1Text, items.item1Value);
@@ -267,7 +360,7 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
 
             finalProps.Add(new ReactProperty
             {
-                Name = "transactionDetailList",
+                Name  = "transactionDetailList",
                 Value = '[' + string.Join(",", lines) + ']'
             });
         }
@@ -285,7 +378,6 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
 
         string getItem(ReactNode textNode, ReactNode valueNode)
         {
-
             List<string> returnList = [];
 
             if (valueNode is null)
@@ -294,8 +386,6 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
                 {
                     return null;
                 }
-
-
 
                 var value = TryGetPropFinalText(textNode, Design.Content);
                 if (value.HasValue)
@@ -324,7 +414,6 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
                 {
                     returnList.Add($"text: {text}");
                 }
-
 
                 var textVariant = TryGetPropValueByPropName(textNode, nameof(BTypography.variant));
                 if (textVariant.HasValue)
@@ -368,12 +457,11 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
 
     protected override Element render()
     {
-        
         var senderElement = children.FindElementByElementType(typeof(sender));
         var amountElement = children.FindElementByElementType(typeof(amount));
         var receiverElement = children.FindElementByElementType(typeof(receiver));
         var transactionDetailListElement = children.FindElementByElementType(typeof(transactionDetailList));
-        
+
         return new Fragment
         {
             new div(Id(id), OnClick(onMouseClick))
@@ -393,10 +481,10 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
                         {
                             Height(80),
                             Width(2),
-                            Border(1,dashed,rgba(0, 0, 0, 0.12))
+                            Border(1, dashed, rgba(0, 0, 0, 0.12))
                         }
                     },
-                    
+
                     new FlexColumn
                     {
                         Width("100%"),
@@ -409,21 +497,21 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
                             MarginLeft(16),
                             HeightFitContent,
                             BorderRadius(10),
-                            
+
                             senderElement?.children
                         }
                     }
                 },
-                
+
                 new FlexRow(AlignItemsCenter, Gap(32))
                 {
                     new svg(svg.ViewBox(0, 0, 24, 24), svg.Width(24), svg.Height(24), Fill(rgb(22, 160, 133)))
                     {
-                        new path{d="m20 12-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8z"}
+                        new path { d = "m20 12-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8z" }
                     },
                     amountElement?.children
                 },
-                
+
                 new FlexRow
                 {
                     new FlexColumn(AlignItemsCenter, MarginBottom("10%"))
@@ -432,7 +520,7 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
                         {
                             Height(80),
                             Width(2),
-                            Border(1,dashed,rgba(0, 0, 0, 0.12))
+                            Border(1, dashed, rgba(0, 0, 0, 0.12))
                         },
                         new FlexRowCentered
                         {
@@ -441,9 +529,8 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
                             Padding(6),
                             Margin(6)
                         },
-                       
                     },
-                    
+
                     new FlexColumn
                     {
                         Width("100%"),
@@ -456,12 +543,12 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
                             MarginLeft(16),
                             HeightFitContent,
                             BorderRadius(10),
-                            
+
                             receiverElement?.children
                         }
                     }
                 },
-                
+
                 new div
                 {
                     PaddingY(24), PositionRelative,
@@ -471,7 +558,7 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
                         Background(rgba(0, 0, 0, 0.12))
                     }
                 },
-                
+
                 new FlexColumn(PaddingLeft(36))
                 {
                     transactionDetailListElement?.children
