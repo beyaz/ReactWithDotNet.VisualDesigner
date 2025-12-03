@@ -1,5 +1,26 @@
 ﻿namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
+#pragma warning disable CS8981 // The type name only contains lower-cased ascii characters. Such names may become reserved for the language.
+
+
+[CustomComponent]
+sealed class BTab : PluginComponentBase
+{
+    [JsTypeInfo(JsType.String)]
+    public string text { get; set; }
+    
+    [JsTypeInfo(JsType.Number)]
+    public string value { get; set; }
+    
+    protected override Element render()
+    {
+        return new div
+        {
+            children
+        };
+    }
+}
+
 
 [CustomComponent]
 sealed class BTabBar : PluginComponentBase
@@ -76,9 +97,9 @@ sealed class BTabBar : PluginComponentBase
             
             TsImportCollection tsImports = new();
 
-            var textProperty = childNode.Properties.FirstOrDefault(p => p.Name == "data-text");
+            var textProperty = childNode.Properties.FirstOrDefault(p => p.Name == nameof(BTab.text));
 
-            var valueProperty = childNode.Properties.FirstOrDefault(p => p.Name == "data-value");
+            var valueProperty = childNode.Properties.FirstOrDefault(p => p.Name == nameof(BTab.value));
 
             string content;
 
@@ -152,10 +173,10 @@ sealed class BTabBar : PluginComponentBase
             new FlexRow(BorderBottom("1px solid rgb(189, 189, 189)"))
             {
                 from tab in children.Select((el, index) => new { el, index })
-                where ((HtmlElement)tab.el).data.ContainsKey("text")
+                where ((BTab)tab.el).text.HasValue
                 select new FlexRowCentered(MarginX(24), Height(30))
                 {
-                    TryClearStringValue(((HtmlElement)tab.el).data["text"]),
+                    TryClearStringValue(((BTab)tab.el).text),
 
                     Color("#16A085"),
 
