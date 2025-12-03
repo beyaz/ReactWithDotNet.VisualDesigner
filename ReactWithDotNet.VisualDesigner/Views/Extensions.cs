@@ -55,6 +55,10 @@ static class Extensions
     
     public static VisualElementModel FindTreeNodeByTreePath(VisualElementModel node, string path)
     {
+        if (node is null)
+        {
+            return null;
+        }
         if (path.HasNoValue)
         {
             return null;
@@ -62,6 +66,11 @@ static class Extensions
 
         foreach (var index in path.Split(',').Select(int.Parse).Skip(1))
         {
+            if (node is null)
+            {
+                return null;
+            }
+            
             if (node.Children.Count <= index)
             {
                 return null;
