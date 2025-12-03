@@ -1775,7 +1775,7 @@ sealed class ApplicationView : Component<ApplicationState>
                 CreateGroupLabel("S e c t i o n"),
                 new FlexColumn(WidthFull, PaddingX(4), Gap(12))
                 {
-                    CreateDesignPropEditor("Name", Design.Name)
+                    CreateDesignPropEditor("Part", Design.Name)
                 }
                     
             },
