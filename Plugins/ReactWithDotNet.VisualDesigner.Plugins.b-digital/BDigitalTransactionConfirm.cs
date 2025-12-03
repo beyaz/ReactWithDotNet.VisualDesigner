@@ -1,12 +1,25 @@
 ﻿using System.Collections.Immutable;
+#pragma warning disable CS8981 // The type name only contains lower-cased ascii characters. Such names may become reserved for the language.
 
 namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
-class PropertyTag : PluginComponentBase
+class PropertyTag_FlexColumn : PluginComponentBase
 {
     protected override Element render()
     {
-        return new Fragment
+        return new FlexColumn
+        {
+            children
+        };
+    }
+}
+class PropertyTag_FlexRow : PluginComponentBase
+{
+    public virtual int Gap => 0;
+
+    protected override Element render()
+    {
+        return new FlexRow(Gap(Gap), AlignItemsCenter)
         {
             children
         };
@@ -14,11 +27,46 @@ class PropertyTag : PluginComponentBase
 }
 
 [CustomComponent]
-sealed class sender : PropertyTag;
-
+sealed class sender : PropertyTag_FlexColumn;
 
 [CustomComponent]
-sealed class amount : PropertyTag;
+sealed class title : PropertyTag_FlexColumn;
+
+[CustomComponent]
+sealed class amount : PropertyTag_FlexColumn;
+
+[CustomComponent]
+sealed class transactionDetailList : PropertyTag_FlexColumn;
+
+[CustomComponent]
+sealed class receiver : PropertyTag_FlexColumn;
+
+[CustomComponent]
+sealed class item1 : PropertyTag_FlexRow
+{
+    public override int Gap => 4;
+}
+
+[CustomComponent]
+sealed class item2 : PropertyTag_FlexRow
+{
+    public override int Gap => 4;
+}
+
+[CustomComponent]
+sealed class item3 : PropertyTag_FlexRow
+{
+    public override int Gap => 4;
+}
+
+[CustomComponent]
+sealed class item4 : PropertyTag_FlexRow
+{
+    public override int Gap => 4;
+}
+
+[CustomComponent]
+sealed class item : PropertyTag_FlexRow;
 
 
 
@@ -51,18 +99,21 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
         {
             List<string> lines = [];
 
+            var senderNode = node.FindNodeByTag(nameof(b_digital.sender));
+            
+                
             var sender = new
             {
-                title = node.TryGetNodeItemAt([0, 1, 0, 0]),
+                title = senderNode.FindNodeByTag(nameof(title)).TryGetNodeItemAt([0]),
 
-                item1Text = node.TryGetNodeItemAt([0, 1, 0, 1, 0]),
-                item1Value = node.TryGetNodeItemAt([0, 1, 0, 1, 1]),
+                item1Text  = senderNode.FindNodeByTag(nameof(b_digital.item1)).TryGetNodeItemAt([0]),
+                item1Value = senderNode.FindNodeByTag(nameof(b_digital.item1)).TryGetNodeItemAt([1]),
 
-                item2Text = node.TryGetNodeItemAt([0, 1, 0, 2, 0]),
-                item2Value = node.TryGetNodeItemAt([0, 1, 0, 2, 1]),
+                item2Text  = senderNode.FindNodeByTag(nameof(b_digital.item2)).TryGetNodeItemAt([0]),
+                item2Value =senderNode.FindNodeByTag(nameof(b_digital.item2)).TryGetNodeItemAt([1]),
 
-                item3Text = node.TryGetNodeItemAt([0, 1, 0, 3, 0]),
-                item3Value = node.TryGetNodeItemAt([0, 1, 0, 3, 1])
+                item3Text  = senderNode.FindNodeByTag(nameof(b_digital.item3)).TryGetNodeItemAt([0]),
+                item3Value = senderNode.FindNodeByTag(nameof(b_digital.item3)).TryGetNodeItemAt([1])
             };
 
             if (sender.title is not null)
@@ -102,7 +153,9 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
 
         // amount
         {
-            var transferAmount = node.TryGetNodeItemAt([1, 1]);
+            var amountNode = node.FindNodeByTag(nameof(amount));
+            
+            var transferAmount = amountNode.TryGetNodeItemAt([0]);
             if (transferAmount is not null)
             {
                 finalProps.Add(new ReactProperty
@@ -123,20 +176,22 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
 
         // receiver
         {
+            var receiverNode = node.FindNodeByTag(nameof(b_digital.receiver));
+            
             List<string> lines = [];
 
             var receiver = new
             {
-                title = node.TryGetNodeItemAt([2, 1, 0, 0]),
+                title = receiverNode.FindNodeByTag(nameof(title)).TryGetNodeItemAt([0]),
 
-                item1Text = node.TryGetNodeItemAt([2, 1, 0, 1, 0]),
-                item1Value = node.TryGetNodeItemAt([2, 1, 0, 1, 1]),
+                item1Text  = receiverNode.FindNodeByTag(nameof(b_digital.item1)).TryGetNodeItemAt([0]),
+                item1Value = receiverNode.FindNodeByTag(nameof(b_digital.item1)).TryGetNodeItemAt([1]),
 
-                item2Text = node.TryGetNodeItemAt([2, 1, 0, 2, 0]),
-                item2Value = node.TryGetNodeItemAt([2, 1, 0, 2, 1]),
+                item2Text  = receiverNode.FindNodeByTag(nameof(b_digital.item2)).TryGetNodeItemAt([0]),
+                item2Value =receiverNode.FindNodeByTag(nameof(b_digital.item2)).TryGetNodeItemAt([1]),
 
-                item3Text = node.TryGetNodeItemAt([2, 1, 0, 3, 0]),
-                item3Value = node.TryGetNodeItemAt([2, 1, 0, 3, 1])
+                item3Text  = receiverNode.FindNodeByTag(nameof(b_digital.item3)).TryGetNodeItemAt([0]),
+                item3Value = receiverNode.FindNodeByTag(nameof(b_digital.item3)).TryGetNodeItemAt([1])
             };
 
             if (receiver.title is not null)
@@ -178,16 +233,18 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
         {
             List<string> lines = [];
 
+            var transactionDetailListNode = node.FindNodeByTag(nameof(transactionDetailList));
+            
             var items = new
             {
-                item1Text = node.TryGetNodeItemAt([4, 0, 0]),
-                item1Value = node.TryGetNodeItemAt([4, 0, 1]),
+                item1Text  = transactionDetailListNode.TryGetNodeItemAt([ 0]),
+                item1Value = transactionDetailListNode.TryGetNodeItemAt([ 1]),
 
-                item2Text = node.TryGetNodeItemAt([4, 1, 0]),
-                item2Value = node.TryGetNodeItemAt([4, 1, 1]),
+                item2Text  = transactionDetailListNode.TryGetNodeItemAt([ 0]),
+                item2Value = transactionDetailListNode.TryGetNodeItemAt([ 1]),
 
-                item3Text = node.TryGetNodeItemAt([4, 2, 0]),
-                item3Value = node.TryGetNodeItemAt([4, 2, 1])
+                item3Text  = transactionDetailListNode.TryGetNodeItemAt([0]),
+                item3Value = transactionDetailListNode.TryGetNodeItemAt([1])
             };
 
             var item1 = getItem(items.item1Text, items.item1Value);
@@ -311,11 +368,114 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
 
     protected override Element render()
     {
+        
+        var senderElement = children.FindElementByElementType(typeof(sender));
+        var amountElement = children.FindElementByElementType(typeof(amount));
+        var receiverElement = children.FindElementByElementType(typeof(receiver));
+        var transactionDetailListElement = children.FindElementByElementType(typeof(transactionDetailList));
+        
         return new Fragment
         {
             new div(Id(id), OnClick(onMouseClick))
             {
-                children
+                new FlexRow
+                {
+                    new FlexColumn(AlignItemsCenter, PaddingTop("10%"))
+                    {
+                        new FlexRowCentered
+                        {
+                            Background(rgb(22, 160, 133)),
+                            BorderRadius("50%"),
+                            Padding(6),
+                            Margin(6)
+                        },
+                        new div
+                        {
+                            Height(80),
+                            Width(2),
+                            Border(1,dashed,rgba(0, 0, 0, 0.12))
+                        }
+                    },
+                    
+                    new FlexColumn
+                    {
+                        Width("100%"),
+                        JustifyContentCenter,
+                        new FlexColumn
+                        {
+                            JustifyContentCenter,
+                            Background(rgb(248, 249, 250)),
+                            Padding(16),
+                            MarginLeft(16),
+                            HeightFitContent,
+                            BorderRadius(10),
+                            
+                            senderElement?.children
+                        }
+                    }
+                },
+                
+                new FlexRow(AlignItemsCenter, Gap(32))
+                {
+                    new svg(svg.ViewBox(0, 0, 24, 24), svg.Width(24), svg.Height(24), Fill(rgb(22, 160, 133)))
+                    {
+                        new path{d="m20 12-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8z"}
+                    },
+                    amountElement?.children
+                },
+                
+                new FlexRow
+                {
+                    new FlexColumn(AlignItemsCenter, MarginBottom("10%"))
+                    {
+                        new div
+                        {
+                            Height(80),
+                            Width(2),
+                            Border(1,dashed,rgba(0, 0, 0, 0.12))
+                        },
+                        new FlexRowCentered
+                        {
+                            Background(rgb(22, 160, 133)),
+                            BorderRadius("50%"),
+                            Padding(6),
+                            Margin(6)
+                        },
+                       
+                    },
+                    
+                    new FlexColumn
+                    {
+                        Width("100%"),
+                        JustifyContentCenter,
+                        new FlexColumn
+                        {
+                            JustifyContentCenter,
+                            Background(rgb(248, 249, 250)),
+                            Padding(16),
+                            MarginLeft(16),
+                            HeightFitContent,
+                            BorderRadius(10),
+                            
+                            receiverElement?.children
+                        }
+                    }
+                },
+                
+                new div
+                {
+                    PaddingY(24), PositionRelative,
+                    new div
+                    {
+                        PositionAbsolute, Left(-24), Right(-24), Height(1),
+                        Background(rgba(0, 0, 0, 0.12))
+                    }
+                },
+                
+                new FlexColumn(PaddingLeft(36))
+                {
+                    transactionDetailListElement?.children
+                }
             }
         };
     }
