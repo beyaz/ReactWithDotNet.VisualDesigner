@@ -106,7 +106,7 @@ sealed class ApplicationPreview : Component
 
         static async Task<Result<Element>> renderElement(RenderPreviewScope scope, VisualElementModel model, string path)
         {
-            Element element = null;
+            Element element;
             
             // try to create from plugins
             {
@@ -298,9 +298,9 @@ sealed class ApplicationPreview : Component
                     var name = item.Value.Name;
                     var value = item.Value.Value;
 
-                    if (VisualDesigner.Extensions.NotIn(name, Design.ItemsSource, Design.ItemsSourceDesignTimeCount))
+                    if (name.NotIn(Design.ItemsSource, Design.ItemsSourceDesignTimeCount))
                     {
-                        name = VisualDesigner.Extensions.RemoveFromStart(name, Design.PREFIX);
+                        name = name.RemoveFromStart(Design.PREFIX);
                     }
 
                     var propertyProcessScope = new PropertyProcessScope

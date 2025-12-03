@@ -529,8 +529,6 @@ static class CSharpStringExporter
         }
 
         {
-            var elementType = node.HtmlElementType;
-
             var tag = nodeTag;
 
             var childrenProperty = node.Properties.FirstOrDefault(x => x.Name == "children");
