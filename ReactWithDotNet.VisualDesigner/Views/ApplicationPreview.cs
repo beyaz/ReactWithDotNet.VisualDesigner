@@ -107,8 +107,23 @@ sealed class ApplicationPreview : Component
         static async Task<Result<Element>> renderElement(RenderPreviewScope scope, VisualElementModel model, string path)
         {
             Element element = null;
+            
+            // try to create from plugins
             {
-                TryGetHtmlElementTypeByTagName(model.Tag).HasValue(elementType => { element = (Element)Activator.CreateInstance(elementType); });
+                element = Plugin.TryCreateElementForPreview(new TryCreateElementForPreviewInput
+                {
+                    Tag          = model.Tag, 
+                    Id           = path, 
+                    OnMouseClick = scope.OnTreeItemClicked
+                });
+            }
+            
+            if (element is null)
+            {
+                TryGetHtmlElementTypeByTagName(model.Tag).HasValue(elementType =>
+                {
+                    element = (Element)Activator.CreateInstance(elementType);
+                });
             }
 
             if (element is null)
@@ -151,9 +166,7 @@ sealed class ApplicationPreview : Component
                     return (HtmlTextNode)string.Empty;
                 }
             }
-
-            element ??= Plugin.TryCreateElementForPreview(new TryCreateElementForPreviewInput { Tag = model.Tag, Id = path, OnMouseClick = scope.OnTreeItemClicked });
-
+            
             if (element is null)
             {
                 return new ArgumentException($"{model.Tag} is not resolved.");
