@@ -111,8 +111,6 @@ static class CSharpStringExporter
     {
         var componentConfig = componentScope.ComponentConfig;
 
-        var project = componentScope.ProjectConfig;
-        
         return
             // Convert model to node
             from rootNode in ModelToNodeTransformer.ConvertVisualElementModelToReactNodeModel(componentScope, rootVisualElement)
@@ -121,7 +119,7 @@ static class CSharpStringExporter
             from nodeAnalyzeOutput in AnalyzeNode(new() {Node = rootNode, ComponentConfig = componentConfig})
 
             // Convert node to tree
-            from elementTree in ConvertReactNodeModelToElementTreeSourceLines(project, nodeAnalyzeOutput.Node, null, 0)
+            from elementTree in ConvertReactNodeModelToElementTreeSourceLines(nodeAnalyzeOutput.Node, null, 0)
             
             // apply $, append , ent of file
             let elementTreeFinalVersion = appendDollarSignAtLineStartIfNeed(appendCommaEndOfLine(elementTree))
@@ -184,7 +182,7 @@ static class CSharpStringExporter
              });
     }
 
-    static async Task<Result<IReadOnlyList<string>>> ConvertReactNodeModelToElementTreeSourceLines(ProjectConfig project, ReactNode node, ReactNode parentNode, int indentLevel)
+    static async Task<Result<IReadOnlyList<string>>> ConvertReactNodeModelToElementTreeSourceLines(ReactNode node, ReactNode parentNode, int indentLevel)
     {
         var nodeTag = node.Tag;
 
@@ -222,7 +220,7 @@ static class CSharpStringExporter
 
                 IReadOnlyList<string> innerLines;
                 {
-                    var result = await ConvertReactNodeModelToElementTreeSourceLines(project, node, parentNode, indentLevel);
+                    var result = await ConvertReactNodeModelToElementTreeSourceLines(node, parentNode, indentLevel);
                     if (result.HasError)
                     {
                         return result.Error;
@@ -260,7 +258,7 @@ static class CSharpStringExporter
 
                 IReadOnlyList<string> innerLines;
                 {
-                    var result = await ConvertReactNodeModelToElementTreeSourceLines(project, node, parentNode, indentLevel);
+                    var result = await ConvertReactNodeModelToElementTreeSourceLines(node, parentNode, indentLevel);
                     if (result.HasError)
                     {
                         return result.Error;
@@ -289,7 +287,7 @@ static class CSharpStringExporter
 
                 IReadOnlyList<string> innerLines;
                 {
-                    var result = await ConvertReactNodeModelToElementTreeSourceLines(project, node, parentNode, indentLevel);
+                    var result = await ConvertReactNodeModelToElementTreeSourceLines(node, parentNode, indentLevel);
                     if (result.HasError)
                     {
                         return result.Error;
@@ -489,7 +487,7 @@ static class CSharpStringExporter
                     {
                         IReadOnlyList<string> childElementSourceLines;
                         {
-                            var result = await ConvertReactNodeModelToElementTreeSourceLines(project, child, node, indentLevel + 1);
+                            var result = await ConvertReactNodeModelToElementTreeSourceLines(child, node, indentLevel + 1);
                             if (result.HasError)
                             {
                                 return result.Error;
@@ -644,7 +642,7 @@ static class CSharpStringExporter
             {
                 IReadOnlyList<string> childElementSourceLines;
                 {
-                    var result = await ConvertReactNodeModelToElementTreeSourceLines(project, child, node, indentLevel + 1);
+                    var result = await ConvertReactNodeModelToElementTreeSourceLines(child, node, indentLevel + 1);
                     if (result.HasError)
                     {
                         return result.Error;
