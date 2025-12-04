@@ -138,7 +138,13 @@ sealed class BDigitalListAction : PluginComponentBase
                 action.HasValue && selectedCount == "0" ?
                 new FlexRowCentered(Width(64))
                 {
-                    new MaterialSymbol{ name = "more_vert" , size = 24, styleVariant = MaterialSymbolVariant.outlined}
+                    new MaterialSymbol
+                    {
+                        name = "more_vert" ,
+                        size = 24,
+                        styleVariant = MaterialSymbolVariant.outlined,
+                        color = "#16A085"
+                    }
                 } : null
             }
            
