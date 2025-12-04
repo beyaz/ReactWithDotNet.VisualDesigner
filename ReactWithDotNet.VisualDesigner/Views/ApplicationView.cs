@@ -498,6 +498,10 @@ sealed class ApplicationView : Component<ApplicationState>
 
     Element CreateDesignPropEditor(string label, string designPropName)
     {
+        return CreateDesignPropEditor((label,designPropName));
+    }
+    Element CreateDesignPropEditor(params (string label, string designPropName)[] props)
+    {
         VisualElementModel visualElementModel = null;
 
         if (state.Selection.VisualElementTreeItemPath.HasValue)
@@ -510,54 +514,63 @@ sealed class ApplicationView : Component<ApplicationState>
             return null;
         }
 
-        var inputValue = string.Empty;
+        var inputEditors = new List<DesignPropEditor>();
+        
+        foreach (var (_, designPropName) in props)
         {
-            foreach (var property in visualElementModel.Properties)
+            var inputValue = string.Empty;
             {
-                var maybe = TryParseProperty(property);
-                if (maybe.HasValue && maybe.Value.Name == designPropName)
+                foreach (var property in visualElementModel.Properties)
                 {
-                    inputValue = maybe.Value.Value;
-                    break;
+                    var maybe = TryParseProperty(property);
+                    if (maybe.HasValue && maybe.Value.Name == designPropName)
+                    {
+                        inputValue = maybe.Value.Value;
+                        break;
+                    }
                 }
             }
+
+            var inputEditor = new DesignPropEditor
+            {
+                ComponentId = state.ComponentId,
+                ProjectId   = state.ProjectId,
+                Id          = designPropName,
+                Name        = designPropName,
+                Value       = inputValue,
+                OnChange = (name, newValue) =>
+                {
+                    if (newValue.HasValue)
+                    {
+                        UpdateCurrentVisualElement(x => x with
+                        {
+                            Properties = InsertOrUpdatePropInProps(x.Properties, name, newValue)
+                        });
+                    }
+                    else
+                    {
+                        UpdateCurrentVisualElement(x => x with
+                        {
+                            Properties = RemovePropInProps(x.Properties, name).props
+                        });
+                    }
+
+                    return Task.CompletedTask;
+                }
+            };
+
+            inputEditors.Add(inputEditor);
         }
-
-        var inputEditor = new DesignPropEditor
-        {
-            ComponentId = state.ComponentId,
-            ProjectId   = state.ProjectId,
-            Id          = designPropName,
-            Name        = designPropName,
-            Value       = inputValue,
-            OnChange = (name, newValue) =>
-            {
-                if (newValue.HasValue)
-                {
-                    UpdateCurrentVisualElement(x => x with
-                    {
-                        Properties = InsertOrUpdatePropInProps(x.Properties, name, newValue)
-                    });
-                }
-                else
-                {
-                    UpdateCurrentVisualElement(x => x with
-                    {
-                        Properties = RemovePropInProps(x.Properties, name).props
-                    });
-                }
-               
-
-                return Task.CompletedTask;
-            }
-        };
 
         return new FlexRow(AlignItemsFlexEnd, Gap(16), Border(1, solid, Theme.BorderColor), BorderRadius(4), PaddingX(8), Height(32))
         {
             PositionRelative,
-            new label(PositionAbsolute, Top(-4), Left(8), Opacity(0.8), FontSize10, LineHeight7, LetterSpacing(0.7), Background(White), PaddingX(4)) { label },
+            new label(PositionAbsolute, Top(-4), Left(8), Opacity(0.8), FontSize10, LineHeight7, LetterSpacing(0.7), Background(White), PaddingX(4))
+            {
+                props[0].label
+            },
 
-            inputEditor
+            inputEditors[0]
         };
     }
 
