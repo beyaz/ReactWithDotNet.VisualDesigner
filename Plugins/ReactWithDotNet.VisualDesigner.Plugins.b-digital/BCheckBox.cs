@@ -107,7 +107,7 @@ sealed class BCheckBox : PluginComponentBase
             },
             new div { label },
 
-            Id(id),
+            Id(base.id),
             OnClick(onMouseClick)
         };
     }
