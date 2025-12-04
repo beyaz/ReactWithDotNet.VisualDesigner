@@ -1,6 +1,6 @@
-﻿using ReactWithDotNet.ThirdPartyLibraries.MonacoEditorReact;
-using System.Reflection;
+﻿using System.Reflection;
 using System.Text;
+using ReactWithDotNet.ThirdPartyLibraries.MonacoEditorReact;
 
 namespace ReactWithDotNet.VisualDesigner.Views;
 
@@ -498,10 +498,6 @@ sealed class ApplicationView : Component<ApplicationState>
 
     Element CreateDesignPropEditor(string label, string designPropName)
     {
-        return CreateDesignPropEditor((label,designPropName));
-    }
-    Element CreateDesignPropEditor(params (string label, string designPropName)[] props)
-    {
         VisualElementModel visualElementModel = null;
 
         if (state.Selection.VisualElementTreeItemPath.HasValue)
@@ -514,63 +510,56 @@ sealed class ApplicationView : Component<ApplicationState>
             return null;
         }
 
-        var inputEditors = new List<DesignPropEditor>();
-        
-        foreach (var (_, designPropName) in props)
+        var inputValue = string.Empty;
         {
-            var inputValue = string.Empty;
+            foreach (var property in visualElementModel.Properties)
             {
-                foreach (var property in visualElementModel.Properties)
+                var maybe = TryParseProperty(property);
+                if (maybe.HasValue && maybe.Value.Name == designPropName)
                 {
-                    var maybe = TryParseProperty(property);
-                    if (maybe.HasValue && maybe.Value.Name == designPropName)
-                    {
-                        inputValue = maybe.Value.Value;
-                        break;
-                    }
+                    inputValue = maybe.Value.Value;
+                    break;
                 }
             }
-
-            var inputEditor = new DesignPropEditor
-            {
-                ComponentId = state.ComponentId,
-                ProjectId   = state.ProjectId,
-                Id          = designPropName,
-                Name        = designPropName,
-                Value       = inputValue,
-                OnChange = (name, newValue) =>
-                {
-                    if (newValue.HasValue)
-                    {
-                        UpdateCurrentVisualElement(x => x with
-                        {
-                            Properties = InsertOrUpdatePropInProps(x.Properties, name, newValue)
-                        });
-                    }
-                    else
-                    {
-                        UpdateCurrentVisualElement(x => x with
-                        {
-                            Properties = RemovePropInProps(x.Properties, name).props
-                        });
-                    }
-
-                    return Task.CompletedTask;
-                }
-            };
-
-            inputEditors.Add(inputEditor);
         }
+
+        var inputEditor = new DesignPropEditor
+        {
+            ComponentId = state.ComponentId,
+            ProjectId   = state.ProjectId,
+            Id          = designPropName,
+            Name        = designPropName,
+            Value       = inputValue,
+            OnChange = (name, newValue) =>
+            {
+                if (newValue.HasValue)
+                {
+                    UpdateCurrentVisualElement(x => x with
+                    {
+                        Properties = InsertOrUpdatePropInProps(x.Properties, name, newValue)
+                    });
+                }
+                else
+                {
+                    UpdateCurrentVisualElement(x => x with
+                    {
+                        Properties = RemovePropInProps(x.Properties, name).props
+                    });
+                }
+
+                return Task.CompletedTask;
+            }
+        };
 
         return new FlexRow(AlignItemsFlexEnd, Gap(16), Border(1, solid, Theme.BorderColor), BorderRadius(4), PaddingX(8), Height(32))
         {
             PositionRelative,
             new label(PositionAbsolute, Top(-4), Left(8), Opacity(0.8), FontSize10, LineHeight7, LetterSpacing(0.7), Background(White), PaddingX(4))
             {
-                props[0].label
+                label
             },
 
-            inputEditors[0]
+            inputEditor
         };
     }
 
@@ -1149,7 +1138,7 @@ sealed class ApplicationView : Component<ApplicationState>
             this.FailNotification(userHasChange.Error.Message);
             return null;
         }
-        
+
         return new FlexRow(UserSelect(none))
         {
             // P R O J E C T
@@ -1197,58 +1186,59 @@ sealed class ApplicationView : Component<ApplicationState>
                     PositionRelative,
                     new label(PositionAbsolute, Top(-4), Left(8), FontSize10, LineHeight7, BackgroundTheme, PaddingX(4)) { "Component" },
 
-                    
-                    userHasChange.Value ?
-                    new FlexRowCentered(Hover(Color(Blue300)))
-                    {
-                        "Rollback",
-                        OnClick(async _ =>
+                    userHasChange.Value
+                        ? new FlexRowCentered(Hover(Color(Blue300)))
                         {
-                            if (state.ComponentId <= 0)
+                            "Rollback",
+                            OnClick(async _ =>
                             {
-                                this.FailNotification("Select any component.");
+                                if (state.ComponentId <= 0)
+                                {
+                                    this.FailNotification("Select any component.");
 
-                                return;
-                            }
+                                    return;
+                                }
 
-                            var result = await RollbackComponent(state);
-                            if (result.HasError)
-                            {
-                                this.FailNotification(result.Error.Message);
+                                var result = await RollbackComponent(state);
+                                if (result.HasError)
+                                {
+                                    this.FailNotification(result.Error.Message);
 
-                                return;
-                            }
+                                    return;
+                                }
 
-                            state = result.Value;
+                                state = result.Value;
 
-                            this.SuccessNotification("OK");
-                        })
-                    }:null,
+                                this.SuccessNotification("OK");
+                            })
+                        }
+                        : null,
 
-                    userHasChange.Value ?
-                    new FlexRowCentered(Hover(Color(Blue300)))
-                    {
-                        "Commit",
-                        OnClick(async _ =>
+                    userHasChange.Value
+                        ? new FlexRowCentered(Hover(Color(Blue300)))
                         {
-                            if (state.ComponentId <= 0)
+                            "Commit",
+                            OnClick(async _ =>
                             {
-                                this.FailNotification("Select any component.");
+                                if (state.ComponentId <= 0)
+                                {
+                                    this.FailNotification("Select any component.");
 
-                                return;
-                            }
+                                    return;
+                                }
 
-                            var result = await CommitComponent(state);
-                            if (result.HasError)
-                            {
-                                this.FailNotification(result.Error.Message);
+                                var result = await CommitComponent(state);
+                                if (result.HasError)
+                                {
+                                    this.FailNotification(result.Error.Message);
 
-                                return;
-                            }
+                                    return;
+                                }
 
-                            this.SuccessNotification("OK");
-                        })
-                    }: null,
+                                this.SuccessNotification("OK");
+                            })
+                        }
+                        : null,
 
                     new FlexRowCentered(Hover(Color(Blue300)))
                     {
@@ -1269,9 +1259,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
                                 return;
                             }
-                            
-                           
-                            
+
                             var result = await ExporterFactory.ExportToFileSystem(componentScope.Value);
                             if (result.HasError)
                             {
@@ -1680,9 +1668,9 @@ sealed class ApplicationView : Component<ApplicationState>
         {
             return new div();
         }
-        
+
         var visualElementModel = CurrentVisualElement;
-        
+
         Element shadowProps;
         {
             shadowProps = new FlexRow(WidthFull, FlexWrap, Gap(4))
@@ -1706,7 +1694,7 @@ sealed class ApplicationView : Component<ApplicationState>
                         };
                 }
 
-                return 
+                return
                     from type in Plugin.AllCustomComponents
                     where type.Name == CurrentVisualElement.Tag
                     from propertyInfo in type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly)
@@ -1717,7 +1705,7 @@ sealed class ApplicationView : Component<ApplicationState>
                     select new ShadowPropertyView
                     {
                         Guid = Guid.NewGuid().ToString("N"),
-                        
+
                         PropertyName = propertyInfo.Name,
                         PropertyType = jsTypeInfo?.JsType.ToString().ToLower(),
 
@@ -1729,9 +1717,6 @@ sealed class ApplicationView : Component<ApplicationState>
                             false => suggestionItems
                         }
                     };
-
-
-                
 
                 bool alreadyContainsProp(string propName)
                 {
@@ -1784,20 +1769,19 @@ sealed class ApplicationView : Component<ApplicationState>
                     CreateDesignPropEditor("Items Source", Design.ItemsSource),
                     CreateDesignPropEditor("Items Source Design Time Child Count", Design.ItemsSourceDesignTimeCount)
                 },
-                
+
                 CreateGroupLabel("S e c t i o n"),
                 new FlexColumn(WidthFull, PaddingX(4), Gap(12))
                 {
                     CreateDesignPropEditor("Part", Design.Name)
                 }
-                    
             },
 
             SpaceY(16),
             CreateGroupLabel("P R O P S"),
             viewProps(new List<(string propStr, int propIndex)>
             {
-                from p in visualElementModel.Properties.Select((propStr,index)=>new {propStr, index})
+                from p in visualElementModel.Properties.Select((propStr, index) => new { propStr, index })
                 let parsedProp = TryParseProperty(p.propStr)
                 let isUiManagedDesignerProp
                     = parsedProp.HasValue &&
@@ -1810,7 +1794,7 @@ sealed class ApplicationView : Component<ApplicationState>
                           Design.ItemsSourceDesignTimeCount or
                           Design.Name
                 where !isUiManagedDesignerProp
-                select (p.propStr , p.index)
+                select (p.propStr, p.index)
             }),
 
             shadowProps, ShadowPropertyView.CreatePopupHandlerView(),
@@ -1895,7 +1879,7 @@ sealed class ApplicationView : Component<ApplicationState>
                 return new StyleEditor
                 {
                     Placeholder = "Add style",
-                    ComponentId   = state.ComponentId,
+                    ComponentId = state.ComponentId,
                     Name        = "style_editor" + styles.Count,
                     Id          = "style_editor",
                     OnChange = (_, newValue) =>
@@ -2462,14 +2446,12 @@ sealed class ApplicationView : Component<ApplicationState>
                 return "Select any component.";
             }
 
-            
-
             var componentScope = await GetComponentScope(state.ComponentId, state.UserName);
             if (componentScope.HasError)
             {
                 return componentScope.Error.Message;
             }
-            
+
             var result = await ExporterFactory.CalculateElementSourceCode(componentScope.Value, CurrentVisualElement);
             if (result.HasError)
             {
@@ -2666,7 +2648,7 @@ sealed class ApplicationView : Component<ApplicationState>
                 {
                     return Task.FromResult(Result.From<IReadOnlyList<SuggestionItem>>([]));
                 }
-                
+
                 if (Name == Design.ItemsSourceDesignTimeCount)
                 {
                     var suggestions =
@@ -2677,7 +2659,7 @@ sealed class ApplicationView : Component<ApplicationState>
                         };
                     return Task.FromResult(Result.From<IReadOnlyList<SuggestionItem>>(suggestions.ToList()));
                 }
-                
+
                 return GetVariableSuggestionsInOutputFile(ComponentId);
             }
         }
@@ -2717,13 +2699,13 @@ sealed class ApplicationView : Component<ApplicationState>
 
     class ShadowPropertyView : Component<ShadowPropertyView.State>
     {
-        string SHADOW_PROP_PREFIX => $"{Guid}-SHADOW_PROP-";
-
         delegate Task PopupItemSelect(PopupItemSelectArgs e);
 
         delegate Task SenderMouseEnter(SenderMouseEnterArgs e);
 
         delegate Task SenderMouseLeave(SenderMouseLeaveArgs e);
+
+        public string Guid { get; init; }
 
         [CustomEvent]
         public Func<string, string, Task> OnChange { get; init; }
@@ -2733,8 +2715,7 @@ sealed class ApplicationView : Component<ApplicationState>
         public string PropertyType { get; init; }
 
         public IReadOnlyList<string> Suggestions { get; init; }
-        
-        public string Guid { get; init; }
+        string SHADOW_PROP_PREFIX => $"{Guid}-SHADOW_PROP-";
 
         public static Element CreatePopupHandlerView()
         {
