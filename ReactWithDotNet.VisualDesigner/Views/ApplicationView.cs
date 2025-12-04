@@ -551,10 +551,10 @@ sealed class ApplicationView : Component<ApplicationState>
             }
         };
 
-        return new FlexRow(AlignItemsFlexEnd, Gap(16), Border(1, solid, Theme.BorderColor), BorderRadius(4), PaddingX(8), Height(32))
+        return new FlexRow(WidthFull, AlignItemsFlexEnd, Gap(16), Border(1, solid, Theme.BorderColor), BorderRadius(4), PaddingX(8), Height(32), PaddingBottom(2))
         {
             PositionRelative,
-            new label(PositionAbsolute, Top(-4), Left(8), Opacity(0.8), FontSize10, LineHeight7, LetterSpacing(0.7), Background(White), PaddingX(4))
+            new label(PositionAbsolute, Top(-4), Left(8), FontSize10, Opacity(inputValue.HasValue ? 0.9 : 0.7), LineHeight6, LetterSpacing(1.5), Background(White), PaddingX(4))
             {
                 label
             },
@@ -1747,37 +1747,32 @@ sealed class ApplicationView : Component<ApplicationState>
         {
             createTagEditor,
 
-            new FlexColumn(WidthFull)
+            new FlexColumn(WidthFull, Gap(12),PaddingTop(8))
             {
-                CreateGroupLabel("C o n t e n t"),
                 new FlexColumn(WidthFull, PaddingX(4), Gap(12))
                 {
                     CreateDesignPropEditor("Content", Design.Content),
                     CreateDesignPropEditor("Design Time Content", Design.ContentPreview)
                 },
 
-                CreateGroupLabel("V i s i b i l i t y"),
-                new FlexColumn(WidthFull, PaddingX(4), Gap(12))
+                new FlexRow(WidthFull, PaddingX(4), Gap(8))
                 {
                     CreateDesignPropEditor("Show-if", Design.ShowIf),
                     CreateDesignPropEditor("Hide-if", Design.HideIf),
                 },
 
-                CreateGroupLabel("L o o p"),
-                new FlexColumn(WidthFull, PaddingX(4), Gap(12))
+                new FlexRow(WidthFull, PaddingX(4), Gap(8))
                 {
-                    CreateDesignPropEditor("Items Source", Design.ItemsSource),
-                    CreateDesignPropEditor("Items Source Design Time Child Count", Design.ItemsSourceDesignTimeCount)
+                    CreateDesignPropEditor("Loop Items Source", Design.ItemsSource),
+                    CreateDesignPropEditor("Design Time Child Count", Design.ItemsSourceDesignTimeCount)
                 },
 
-                CreateGroupLabel("S e c t i o n"),
                 new FlexColumn(WidthFull, PaddingX(4), Gap(12))
                 {
                     CreateDesignPropEditor("Part", Design.Name)
                 }
             },
 
-            SpaceY(16),
             CreateGroupLabel("P R O P S"),
             viewProps(new List<(string propStr, int propIndex)>
             {
