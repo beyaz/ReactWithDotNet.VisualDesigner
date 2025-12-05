@@ -10,7 +10,7 @@ sealed class BButton : PluginComponentBase
 
     [JsTypeInfo(JsType.String)]
     public string text { get; set; }
-
+   
     [JsTypeInfo(JsType.Boolean)]
     public string allowLabelCase { get; set; }
 
@@ -115,7 +115,8 @@ sealed class BButton : PluginComponentBase
             ];
         }
 
-        if (variant == "contained" || color == "default" || (type is null && color is null && variant.HasNoValue))
+        if (variant == "contained" || color == "default" ||
+            (type is null && color is null && variant.HasNoValue))
         {
             defaultStyle =
             [
@@ -125,6 +126,19 @@ sealed class BButton : PluginComponentBase
                 BackgroundColor("#d5d5d5"),
                 Color("black"),
                 BorderRadius(10)
+            ];
+        }
+
+        if (color=="primary" && variant == "text")
+        {
+            defaultStyle =
+            [
+                DisplayFlexRowCentered,
+                TextTransform(none),
+                FontWeightBold,
+                Color("#16A085"),
+                BorderRadius(10),
+                LetterSpacing(0.4)
             ];
         }
 

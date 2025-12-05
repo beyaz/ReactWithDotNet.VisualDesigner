@@ -4,6 +4,9 @@
 sealed class BInput : PluginComponentBase
 {
     [JsTypeInfo(JsType.String)]
+    public string errorText { get; set; }
+    
+    [JsTypeInfo(JsType.String)]
     public string floatingLabelText { get; set; }
 
     [JsTypeInfo(JsType.String)]
