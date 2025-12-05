@@ -1546,6 +1546,15 @@ sealed class ApplicationView : Component<ApplicationState>
         {
             ProjectId        = state.ProjectId,
             ComponentId      = state.ComponentId,
+            FilterText = state.ComponentTreeViewFilterText,
+            FilterTextChanged = [SkipRender] (x) =>
+            {
+                state = state with { ComponentTreeViewFilterText = x };
+                
+                SetUserLastState(state);
+                
+                return Task.CompletedTask;
+            },
             SelectionChanged = ChangeSelectedComponent
         } + When(state.LeftTab != LeftTabs.Components, DisplayNone);
 

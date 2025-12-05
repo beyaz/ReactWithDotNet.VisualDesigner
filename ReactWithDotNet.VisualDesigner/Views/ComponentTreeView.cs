@@ -13,6 +13,11 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
     [CustomEvent]
     public ComponentSelectionChanged SelectionChanged { get; init; }
 
+    public string FilterText { get; init; }
+    
+    [CustomEvent]
+    public Func<string,Task> FilterTextChanged { get; init; }
+
     protected override Task constructor()
     {
         return InitializeState();
@@ -191,7 +196,7 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
 
             CollapsedNodes = [],
 
-            FilterText = state?.FilterText
+            FilterText = state?.FilterText ?? FilterText
         };
 
         CalculateRootNode();
@@ -201,7 +206,12 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
 
     Task OnClearFilterTextClicked(MouseEvent e)
     {
-        state = state with { FilterText = null };
+        state = state with
+        {
+            FilterText = null
+        };
+
+        DispatchEvent(FilterTextChanged, [null]);
 
         return Task.CompletedTask;
     }
@@ -209,6 +219,9 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
     Task OnFilterTextTypeFinished()
     {
         CalculateRootNode();
+        
+        DispatchEvent(FilterTextChanged, [state.FilterText]);
+        
         return Task.CompletedTask;
     }
 

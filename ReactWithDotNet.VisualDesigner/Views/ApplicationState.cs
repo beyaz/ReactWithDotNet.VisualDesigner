@@ -60,6 +60,8 @@ public sealed record ApplicationState
     public DOMRect ElementTreeEditPosition { get; init; }
     
     public string CopiedVisualElementModelInYaml { get; init; }
+    
+    public string ComponentTreeViewFilterText { get; init; }
 
     // @formatter:on
 }
