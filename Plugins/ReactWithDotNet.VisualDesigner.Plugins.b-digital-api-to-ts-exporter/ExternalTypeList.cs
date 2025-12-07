@@ -21,6 +21,12 @@ public class ExternalTypeList
         },
         new()
         {
+            DotNetFullTypeName = "BOA.InternetBanking.Common.Models.BaseModel",
+            LocalName          = "BaseModel",
+            Source             = "b-digital-internet-banking"
+        },
+        new()
+        {
             DotNetFullTypeName = "BOA.InternetBanking.Common.Models.BaseFinancialModel",
             LocalName          = "BaseFinancialModel",
             Source             = "b-digital-internet-banking"
