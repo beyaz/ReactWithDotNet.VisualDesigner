@@ -106,10 +106,16 @@ static class Exporter
                 {
                     if (collectedTypeDefinitions.All(x => x.FullName != typeDefinition.FullName))
                     {
+                                
                         return new List<TypeDefinition>
                         {
                             collectedTypeDefinitions,
-                            typeDefinition
+                            typeDefinition,
+                            
+                            from propertyDefinition in typeDefinition.Properties
+                            let propertyType = propertyDefinition.PropertyType
+                            from extraType in  CollectExtraTypes(externalTypes, propertyType,[])
+                            select extraType
                         };
                     }
                     
