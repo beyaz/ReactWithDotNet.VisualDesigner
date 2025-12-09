@@ -1216,68 +1216,89 @@ sealed class ApplicationView : Component<ApplicationState>
                         : null,
 
                     userHasChange.Value
-                        ? new FlexRowCentered(Hover(Color(Blue300)))
+                        ? 
+                        new Tooltip
                         {
-                            "Commit",
-                            OnClick(async _ =>
+                            arrow = true,
+                            title = "Save Changes to Database",
+                            children=
                             {
-                                if (state.ComponentId <= 0)
+                                new FlexRowCentered(Hover(Color(Blue300)))
                                 {
-                                    this.FailNotification("Select any component.");
+                                    "Commit",
+                                    OnClick(async _ =>
+                                    {
+                                        if (state.ComponentId <= 0)
+                                        {
+                                            this.FailNotification("Select any component.");
 
-                                    return;
+                                            return;
+                                        }
+
+                                        var result = await CommitComponent(state);
+                                        if (result.HasError)
+                                        {
+                                            this.FailNotification(result.Error.Message);
+
+                                            return;
+                                        }
+
+                                        this.SuccessNotification("OK");
+                                    })
                                 }
-
-                                var result = await CommitComponent(state);
-                                if (result.HasError)
-                                {
-                                    this.FailNotification(result.Error.Message);
-
-                                    return;
-                                }
-
-                                this.SuccessNotification("OK");
-                            })
+                            }
                         }
+                        
                         : null,
 
-                    new FlexRowCentered(Hover(Color(Blue300)))
+                    
+                    
+                    new Tooltip
                     {
-                        "Export",
-                        OnClick(async _ =>
+                        arrow = true,
+                        title = "Export to Local File (specified in component config)",
+                        children=
                         {
-                            if (state.ComponentId <= 0)
+                            new FlexRowCentered(Hover(Color(Blue300)))
                             {
-                                this.FailNotification("Select any component.");
+                                "Export",
+                                OnClick(async _ =>
+                                {
+                                    if (state.ComponentId <= 0)
+                                    {
+                                        this.FailNotification("Select any component.");
 
-                                return;
-                            }
+                                        return;
+                                    }
 
-                            var componentScope = await GetComponentScope(state.ComponentId, state.UserName);
-                            if (componentScope.HasError)
-                            {
-                                this.FailNotification(componentScope.Error.Message);
+                                    var componentScope = await GetComponentScope(state.ComponentId, state.UserName);
+                                    if (componentScope.HasError)
+                                    {
+                                        this.FailNotification(componentScope.Error.Message);
 
-                                return;
-                            }
+                                        return;
+                                    }
 
-                            var result = await ExporterFactory.ExportToFileSystem(componentScope.Value);
-                            if (result.HasError)
-                            {
-                                this.FailNotification(result.Error.Message);
-                                return;
-                            }
+                                    var result = await ExporterFactory.ExportToFileSystem(componentScope.Value);
+                                    if (result.HasError)
+                                    {
+                                        this.FailNotification(result.Error.Message);
+                                        return;
+                                    }
 
-                            if (result.Value.HasChange)
-                            {
-                                this.SuccessNotification("File updated.");
+                                    if (result.Value.HasChange)
+                                    {
+                                        this.SuccessNotification("File updated.");
+                                    }
+                                    else
+                                    {
+                                        this.SuccessNotification("File already same.");
+                                    }
+                                })
                             }
-                            else
-                            {
-                                this.SuccessNotification("File already same.");
-                            }
-                        })
-                    }
+                        }
+                    },
+                        
                 }
             },
 
