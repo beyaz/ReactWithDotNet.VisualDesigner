@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using System.Text;
 using ReactWithDotNet.ThirdPartyLibraries.MonacoEditorReact;
+using ReactWithDotNet.ThirdPartyLibraries.MUI.Material;
 
 namespace ReactWithDotNet.VisualDesigner.Views;
 
@@ -1281,7 +1282,19 @@ sealed class ApplicationView : Component<ApplicationState>
             },
 
             // F O C U S
-            new IconFocus() + Color(Gray500) + Hover(Color(Blue300)) + OnClick(FocusToCurrentComponentInIde),
+            new Tooltip
+            {
+                arrow = true,
+                title = "Open in IDE",
+                children=
+                {
+                    new FlexRowCentered
+                    {
+                        new IconFocus() + Color(Gray500) + Hover(Color(Blue300)) + OnClick(FocusToCurrentComponentInIde)
+                    }
+                }
+            },
+            
 
             // V I E W
             new FlexRowCentered(Border(1, solid, Theme.BorderColor), BorderRadius(4), Height(36))
