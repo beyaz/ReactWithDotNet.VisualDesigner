@@ -48,14 +48,23 @@ static class TsModelCreator
 
             IsEnum = typeDefinition.IsEnum,
 
-            BaseType = (typeDefinition.BaseType.FullName == typeof(object).FullName) switch
+            BaseType = typeDefinition.BaseType switch
             {
-                true => new()
+                var baseType when baseType is null || 
+                                  baseType.FullName == typeof(object).FullName ||
+                                  baseType.FullName == typeof(Enum).FullName
+                => new()
                 {
                     Name    = string.Empty,
                     Imports = []
                 },
-                false => GetTSType(externalTypes, typeDefinition.BaseType,isExportingForModelFile, apiName)
+                var baseType when (baseType.FullName == typeof(Enum).FullName)
+                    => new()
+                    {
+                        Name    = string.Empty,
+                        Imports = []
+                    },
+                _ => GetTSType(externalTypes, typeDefinition.BaseType,isExportingForModelFile, apiName)
             },
 
             Fields = fields.ToList()
