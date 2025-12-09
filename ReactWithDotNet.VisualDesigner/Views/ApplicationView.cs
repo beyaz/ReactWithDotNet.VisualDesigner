@@ -1309,42 +1309,68 @@ sealed class ApplicationView : Component<ApplicationState>
                         "Design",
                         OnClick(OnMainContentTabHeaderClicked),
                         Id((int)MainContentTabs.Design),
-                        When(state.MainContentTab == MainContentTabs.Design, BorderRadius(4), Border(1, solid, Theme.BorderColor))
+                        When(state.MainContentTab == MainContentTabs.Design, SelectedButtonStyle())
                     },
-                    new FlexRowCentered(Padding(4), Border(1, solid, transparent))
+                  
+                    new Tooltip
                     {
-                        "Structure",
-                        OnClick(OnMainContentTabHeaderClicked),
-                        Id((int)MainContentTabs.Structure),
-                        When(state.MainContentTab == MainContentTabs.Structure, BorderRadius(4), Border(1, solid, Theme.BorderColor))
+                        arrow = true,
+                        title = "Structure of Element Tree",
+                        children=
+                        {
+                            new FlexRowCentered(Padding(4), Border(1, solid, transparent))
+                            {
+                                "Structure",
+                                OnClick(OnMainContentTabHeaderClicked),
+                                Id((int)MainContentTabs.Structure),
+                                When(state.MainContentTab == MainContentTabs.Structure, SelectedButtonStyle())
+                            }
+                        }
                     },
                     new FlexRowCentered(Padding(4), Border(1, solid, transparent))
                     {
                         "Output",
                         OnClick(OnMainContentTabHeaderClicked),
                         Id((int)MainContentTabs.Output),
-                        When(state.MainContentTab == MainContentTabs.Output, BorderRadius(4), Border(1, solid, Theme.BorderColor))
+                        When(state.MainContentTab == MainContentTabs.Output, SelectedButtonStyle())
                     },
                     new FlexRowCentered(Padding(4), Border(1, solid, transparent))
                     {
                         "Import Html",
                         OnClick(OnMainContentTabHeaderClicked),
                         Id((int)MainContentTabs.ImportHtml),
-                        When(state.MainContentTab == MainContentTabs.ImportHtml, BorderRadius(4), Border(1, solid, Theme.BorderColor))
+                        When(state.MainContentTab == MainContentTabs.ImportHtml, SelectedButtonStyle())
                     },
-                    new FlexRowCentered(Padding(4), Border(1, solid, transparent))
+                    new Tooltip
                     {
-                        "Config",
-                        OnClick(OnMainContentTabHeaderClicked),
-                        Id((int)MainContentTabs.ComponentConfig),
-                        When(state.MainContentTab.In(MainContentTabs.ComponentConfig, MainContentTabs.NewComponentConfig), BorderRadius(4), Border(1, solid, Theme.BorderColor))
+                        arrow = true,
+                        title = "Component Config",
+                        children=
+                        {
+                            new FlexRowCentered(Padding(4), Border(1, solid, transparent))
+                            {
+                                "Config",
+                                OnClick(OnMainContentTabHeaderClicked),
+                                Id((int)MainContentTabs.ComponentConfig),
+                                When(state.MainContentTab.In(MainContentTabs.ComponentConfig, MainContentTabs.NewComponentConfig), SelectedButtonStyle())
+                            }
+                        }
                     },
-                    new FlexRowCentered(Padding(4), Border(1, solid, transparent))
+                    
+                    new Tooltip
                     {
-                        "Project",
-                        OnClick(OnMainContentTabHeaderClicked),
-                        Id((int)MainContentTabs.ProjectConfig),
-                        When(state.MainContentTab == MainContentTabs.ProjectConfig, BorderRadius(4), Border(1, solid, Theme.BorderColor))
+                        arrow = true,
+                        title = "Project Config",
+                        children=
+                        {
+                            new FlexRowCentered(Padding(4), Border(1, solid, transparent))
+                            {
+                                "Project",
+                                OnClick(OnMainContentTabHeaderClicked),
+                                Id((int)MainContentTabs.ProjectConfig),
+                                When(state.MainContentTab == MainContentTabs.ProjectConfig, BorderRadius(4), Border(1, solid, Theme.BorderColor))
+                            }
+                        }
                     }
                 }
             },
@@ -1363,6 +1389,11 @@ sealed class ApplicationView : Component<ApplicationState>
                 Padding(8, 32)
             }
         };
+
+        StyleModifier[] SelectedButtonStyle()
+        {
+            return [BorderRadius(4), Border(1, solid, Theme.BorderColor), Background(Gray100)];
+        }
     }
 
     Element PartLeftPanel()
