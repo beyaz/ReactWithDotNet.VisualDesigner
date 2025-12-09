@@ -87,6 +87,8 @@ static class Exporter
                     return [];
                 }
 
+                
+                
                 TypeDefinition typeDefinition;
 
                 try
@@ -98,7 +100,9 @@ static class Exporter
                     return [];
                 }
 
-                if (typeDefinition.BaseType?.FullName == "System.Object")
+                var needToExport = typeDefinition.IsEnum || typeDefinition.BaseType?.FullName == "System.Object";
+
+                if (needToExport)
                 {
                     if (collectedTypeDefinitions.All(x => x.FullName != typeDefinition.FullName))
                     {
