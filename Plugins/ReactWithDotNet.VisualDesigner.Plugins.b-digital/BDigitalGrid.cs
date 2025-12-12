@@ -26,12 +26,15 @@ sealed class BDigitalGrid : PluginComponentBase
     [JsTypeInfo(JsType.String)]
     public string justifyContent { get; set; }
 
+    [Suggestions("12 , 10 , 8 , 6 , 4 , 2")]
     [JsTypeInfo(JsType.Number)]
     public string lg { get; set; }
 
+    [Suggestions("12 , 10 , 8 , 6 , 4 , 2")]
     [JsTypeInfo(JsType.Number)]
     public string md { get; set; }
 
+    [Suggestions("12 , 10 , 8 , 6 , 4 , 2")]
     [JsTypeInfo(JsType.Number)]
     public string sm { get; set; }
 
@@ -39,9 +42,11 @@ sealed class BDigitalGrid : PluginComponentBase
     [JsTypeInfo(JsType.Number)]
     public string spacing { get; set; }
 
+    [Suggestions("12 , 10 , 8 , 6 , 4 , 2")]
     [JsTypeInfo(JsType.Number)]
     public string xl { get; set; }
 
+    [Suggestions("12 , 10 , 8 , 6 , 4 , 2")]
     [JsTypeInfo(JsType.Number)]
     public string xs { get; set; }
 
@@ -91,7 +96,7 @@ sealed class BDigitalGrid : PluginComponentBase
         {
             foreach (var p in node.Properties)
             {
-                foreach (var property in ReactWithDotNet.VisualDesigner.PropertyDomain.ParsedPropertyFactory.TryParseProperty(p))
+                foreach (var property in PropertyDomain.ParsedPropertyFactory.TryParseProperty(p))
                 {
                     if (property.Name == "direction")
                     {
