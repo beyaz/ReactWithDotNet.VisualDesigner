@@ -5,6 +5,7 @@ namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 [CustomComponent]
 sealed class BChip : PluginComponentBase
 {
+    [Suggestions("default , primary , secondary")]
     [JsTypeInfo(JsType.String)]
     public string color { get; set; }
 
@@ -14,7 +15,7 @@ sealed class BChip : PluginComponentBase
     [JsTypeInfo(JsType.Function)]
     public string onClick { get; set; }
 
-    [Suggestions("default, filled , outlined")]
+    [Suggestions("default, outlined")]
     [JsTypeInfo(JsType.String)]
     public string variant { get; set; }
 
@@ -26,7 +27,7 @@ sealed class BChip : PluginComponentBase
             return AnalyzeChildren(input, AnalyzeReactNode);
         }
         
-        var (node, componentConfig) = input;
+        var node = input.Node;
         
         
         if (node.Tag == nameof(BChip))
@@ -73,15 +74,31 @@ sealed class BChip : PluginComponentBase
 
     protected override Element render()
     {
-        return new div(BorderRadius(16))
+        Style extraStyle = [];
+        switch (color)
         {
-            new Chip
+            case "default":
+                extraStyle = [ variant =="default" ?  Background("#e0e0e0") : null, Color(rgba(0, 0, 0, 0.87))];
+                break;
+            case "primary":
+                extraStyle = [variant =="default" ? Background("#16A085"): null, Color("#fff")];
+                break;
+            case "secondary":
+                extraStyle = [variant =="default" ? Background("#FF9500"): null, Color(rgba(0, 0, 0, 0.87))];
+                break;
+        }
+
+        return  new Chip
             {
-                color   = color,
+                
                 label   = label,
-                variant = variant
-            },
-            Id(id), OnClick(onMouseClick)
-        };
+                variant = variant,
+                style =
+                {
+                    extraStyle
+                },
+                id = id,
+                onClick = onMouseClick
+            };
     }
 }
