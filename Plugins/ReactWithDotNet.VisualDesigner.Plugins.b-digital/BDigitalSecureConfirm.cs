@@ -3,16 +3,17 @@
 [CustomComponent]
 sealed class BDigitalSecureConfirm : PluginComponentBase
 {
-    [JsTypeInfo(JsType.String)]
-    public string smsPassword { get; set; }
+    [JsTypeInfo(JsType.Function)]
+    public string handleSmsPasswordSend { get; set; }
+
+    [JsTypeInfo(JsType.Boolean)]
+    public string isPreDataLoaded { get; set; }
 
     [JsTypeInfo(JsType.String)]
     public string messageInfo { get; set; }
-    
-    [JsTypeInfo(JsType.Boolean)]
-    public string isPreDataLoaded { get; set; }
-    
-     
+
+    [JsTypeInfo(JsType.String)]
+    public string smsPassword { get; set; }
 
     [NodeAnalyzer]
     public static NodeAnalyzeOutput AnalyzeReactNode(NodeAnalyzeInput input)
@@ -21,45 +22,82 @@ sealed class BDigitalSecureConfirm : PluginComponentBase
         {
             return AnalyzeChildren(input, AnalyzeReactNode);
         }
+
+        var node = input.Node;
+
+        var smsPasswordProp = node.Properties.FirstOrDefault(x => x.Name == nameof(smsPassword));
         
-        var (node, componentConfig) = input;
+        var handleSmsPasswordSendProp = node.Properties.FirstOrDefault(x => x.Name == nameof(handleSmsPasswordSend));
 
-
-
-
-        
-
-
+        if (smsPasswordProp is not null)
         {
-            var smsPasswordProp = node.Properties.FirstOrDefault(x => x.Name == nameof(smsPassword));
+            var properties = node.Properties;
 
-            if (smsPasswordProp is not null)
+            var lines = new TsLineCollection
             {
-                var properties = node.Properties;
-                
-                var lines = new TsLineCollection
-                {
-                    "(value: string) =>",
-                    "{",
-                    GetUpdateStateLines(smsPasswordProp.Value, "value"),
-                    
-                    "}"
-                };
-                
-                
+                "(value: string) =>",
+                "{",
+                GetUpdateStateLines(smsPasswordProp.Value, "value"),
+            };
 
-                properties = properties.Remove(smsPasswordProp).Add(new()
+            if (handleSmsPasswordSendProp is not null)
+            {
+                if (handleSmsPasswordSendProp.Value.Contains("("))
                 {
-                    Name  = "handleSmsPasswordSend",
-                    Value = lines.ToTsCode()
-                });
-
-                node = node with { Properties = properties };
+                    lines.Add(handleSmsPasswordSendProp.Value);
+                }
+                else
+                {
+                    lines.Add(handleSmsPasswordSendProp.Value +"(value);");
+                }
+                
+                handleSmsPasswordSendProp = null;
             }
+            
+            lines.Add("}");
+
+            properties = properties.Remove(smsPasswordProp).Add(new()
+            {
+                Name  = "handleSmsPasswordSend",
+                Value = lines.ToTsCode()
+            });
+
+            node = node with { Properties = properties };
+        }
+
+        if (handleSmsPasswordSendProp is not null)
+        {
+            var lines = new TsLineCollection
+            {
+                "(value: string) =>",
+                "{",
+            };
+            
+            if (handleSmsPasswordSendProp.Value.Contains("("))
+            {
+                lines.Add(handleSmsPasswordSendProp.Value);
+            }
+            else
+            {
+                lines.Add(handleSmsPasswordSendProp.Value +"(value);");
+            }
+            
+            lines.Add("}");
+
+            handleSmsPasswordSendProp = handleSmsPasswordSendProp with
+            {
+                Value = lines.ToTsCode()
+            };
+            
+
+            node = node with
+            {
+                Properties = node.Properties.SetItem( node.Properties.IndexOf(handleSmsPasswordSendProp),   handleSmsPasswordSendProp)
+            };
         }
 
         var import = (nameof(BDigitalSecureConfirm), "b-digital-secure-confirm");
-   
+
         return AnalyzeChildren(input with { Node = node }, AnalyzeReactNode).With(import);
     }
 
