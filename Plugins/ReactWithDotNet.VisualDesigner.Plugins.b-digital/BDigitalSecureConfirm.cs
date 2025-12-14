@@ -26,73 +26,86 @@ sealed class BDigitalSecureConfirm : PluginComponentBase
         var node = input.Node;
 
         var smsPasswordProp = node.Properties.FirstOrDefault(x => x.Name == nameof(smsPassword));
-        
-        var handleSmsPasswordSendProp = node.Properties.FirstOrDefault(x => x.Name == nameof(handleSmsPasswordSend));
-
         if (smsPasswordProp is not null)
         {
-            var properties = node.Properties;
-
+            node = node with
+            {
+                Properties = node.Properties.Remove(smsPasswordProp)
+            };
+        }
+        
+        var handleSmsPasswordSendProp = node.Properties.FirstOrDefault(x => x.Name == nameof(handleSmsPasswordSend));
+        int? handleSmsPasswordSendPropIndex = handleSmsPasswordSendProp switch
+        {
+            null=>null,
+            _=>node.Properties.IndexOf(handleSmsPasswordSendProp)
+        };
+        
+        if (smsPasswordProp is not null)
+        {
             var lines = new TsLineCollection
             {
                 "(value: string) =>",
                 "{",
                 GetUpdateStateLines(smsPasswordProp.Value, "value"),
+                
+                handleSmsPasswordSendProp?.Value switch
+                {
+                    null =>null,
+                    
+                    var x when x.Contains("(") => x + ";",
+
+                    var x => x + "(value);"
+                },
+                "}"
             };
 
-            if (handleSmsPasswordSendProp is not null)
+            if (handleSmsPasswordSendPropIndex.HasValue)
             {
-                if (handleSmsPasswordSendProp.Value.Contains("("))
+                node = node with
                 {
-                    lines.Add(handleSmsPasswordSendProp.Value);
-                }
-                else
+                    Properties = node.Properties.SetItem(handleSmsPasswordSendPropIndex.Value, handleSmsPasswordSendProp with
+                    {
+                        Value = lines.ToTsCode()
+                    })
+                };
+            }
+            else
+            {
+                node = node with
                 {
-                    lines.Add(handleSmsPasswordSendProp.Value +"(value);");
-                }
-                
-                handleSmsPasswordSendProp = null;
+                    Properties = node.Properties.Add(new()
+                    {
+                        Name  = "handleSmsPasswordSend",
+                        Value = lines.ToTsCode()
+                    })
+                };
             }
             
-            lines.Add("}");
-
-            properties = properties.Remove(smsPasswordProp).Add(new()
-            {
-                Name  = "handleSmsPasswordSend",
-                Value = lines.ToTsCode()
-            });
-
-            node = node with { Properties = properties };
+            handleSmsPasswordSendProp = null;
         }
 
         if (handleSmsPasswordSendProp is not null)
         {
-            var lines = new TsLineCollection
-            {
-                "(value: string) =>",
-                "{",
-            };
-            
-            if (handleSmsPasswordSendProp.Value.Contains("("))
-            {
-                lines.Add(handleSmsPasswordSendProp.Value);
-            }
-            else
-            {
-                lines.Add(handleSmsPasswordSendProp.Value +"(value);");
-            }
-            
-            lines.Add("}");
-
             handleSmsPasswordSendProp = handleSmsPasswordSendProp with
             {
-                Value = lines.ToTsCode()
+                Value = new TsLineCollection
+                {
+                    "(value: string) =>",
+                    "{",
+                    handleSmsPasswordSendProp.Value switch
+                    {
+                        var x when x.Contains("(") => x + ";",
+
+                        var x => x + "(value);"
+                    },
+                    "}"
+                }.ToTsCode()
             };
-            
 
             node = node with
             {
-                Properties = node.Properties.SetItem( node.Properties.IndexOf(handleSmsPasswordSendProp),   handleSmsPasswordSendProp)
+                Properties = node.Properties.SetItem(handleSmsPasswordSendPropIndex.Value, handleSmsPasswordSendProp)
             };
         }
 
