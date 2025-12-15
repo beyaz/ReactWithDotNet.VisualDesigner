@@ -36,10 +36,7 @@ static class VisualElementTreeOperation
         {
             return new VisualElementTreeOperationMoveResponse
             {
-                NewRoot = sourceNode with
-                {
-                    Children = sourceNode.Children.Append(root).ToList()
-                },
+                NewRoot = sourceNode,
                 Selection = new() { VisualElementTreeItemPath = "0" }
             };
         }
