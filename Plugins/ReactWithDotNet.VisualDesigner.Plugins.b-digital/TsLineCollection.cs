@@ -10,6 +10,11 @@ sealed class TsLineCollection: List<string>
     
     public void Add(IReadOnlyList<string> lines)
     {
+        if (lines is null)
+        {
+            return;
+        }
+        
         AddRange(lines);
     }
 

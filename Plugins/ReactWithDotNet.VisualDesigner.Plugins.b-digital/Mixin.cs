@@ -159,6 +159,11 @@ static class Mixin
             ];
         }
 
+        if (result.noNeedToUpdateAnything)
+        {
+            return null;
+        }
+
         return
         [
             $"  {jsVariableName} = {jsValueName};"
@@ -218,7 +223,8 @@ static class Mixin
     static (
         bool isUpdateContainerState,
         bool isUpdateState, 
-        string stateName) 
+        string stateName,
+        bool noNeedToUpdateAnything) 
         CalculateUpdateStateLines(string jsVariableName)
     {
         var propertyPath = jsVariableName.Split('.', StringSplitOptions.RemoveEmptyEntries);
@@ -226,17 +232,22 @@ static class Mixin
         {
             var stateName = propertyPath[0];
 
-            return (isUpdateContainerState: true, isUpdateState: false,  stateName);
+            return (isUpdateContainerState: true, isUpdateState: false,  stateName, noNeedToUpdateAnything: false);
         }
         
         if (propertyPath.Length == 1)
         {
+            if (IsStringValue(propertyPath[0]))
+            {
+                return (isUpdateContainerState: false, isUpdateState: false,  null, noNeedToUpdateAnything: true);
+            }
+            
             var stateName = propertyPath[0];
 
-            return (isUpdateContainerState: false, isUpdateState: true,  stateName);
+            return (isUpdateContainerState: false, isUpdateState: true,  stateName, noNeedToUpdateAnything: false);
         }
 
-        return (isUpdateContainerState: false, isUpdateState: false,  null);
+        return (isUpdateContainerState: false, isUpdateState: false,  null, noNeedToUpdateAnything: false);
     }
     
 
