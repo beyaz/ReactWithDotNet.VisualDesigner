@@ -42,64 +42,42 @@ sealed class BInput : PluginComponentBase
 
         node = ApplyTranslateOperationOnProps(node, input.ComponentConfig, nameof(floatingLabelText));
 
-        var valueProp = node.Properties.FirstOrDefault(x => x.Name == nameof(value));
-        var onChangeProp = node.Properties.FirstOrDefault(x => x.Name == nameof(onChange));
-        var isRequiredProp = node.Properties.FirstOrDefault(x => x.Name == nameof(isRequired));
-        var isAutoCompleteProp = node.Properties.FirstOrDefault(x => x.Name == nameof(isAutoComplete));
+        TsLineCollection lines = [];
 
+        var valueProp = node.Properties.FirstOrDefault(x => x.Name == nameof(value));
         if (valueProp is not null)
         {
-            var properties = node.Properties;
-
-            var lines = new TsLineCollection
-            {
-                GetUpdateStateLines(valueProp.Value, "value")
-            };
-
-            if (onChangeProp is not null)
-            {
-                if (IsAlphaNumeric(onChangeProp.Value))
-                {
-                    lines.Add(onChangeProp.Value + "(e, value);");
-                }
-                else
-                {
-                    lines.Add(onChangeProp.Value);
-                }
-            }
-
-            if (lines.Count > 0)
-            {
-                lines = new TsLineCollection
-                {
-                    "(e: any, value: any) =>",
-                    "{",
-                    lines,
-                    "}"
-                };
-
-                if (onChangeProp is not null)
-                {
-                    onChangeProp = onChangeProp with
-                    {
-                        Value = lines.ToTsCode()
-                    };
-
-                    properties = properties.SetItem(properties.FindIndex(x => x.Name == onChangeProp.Name), onChangeProp);
-                }
-                else
-                {
-                    properties = properties.Add(new()
-                    {
-                        Name  = nameof(onChange),
-                        Value = lines.ToTsCode()
-                    });
-                }
-            }
-
-            node = node with { Properties = properties };
+            lines.Add(GetUpdateStateLines(valueProp.Value, "value"));
         }
 
+        var onChangeProp = node.Properties.FirstOrDefault(x => x.Name == nameof(onChange));
+        if (onChangeProp is not null)
+        {
+            if (IsAlphaNumeric(onChangeProp.Value))
+            {
+                lines.Add(onChangeProp.Value + "(e, value);");
+            }
+            else
+            {
+                lines.Add(onChangeProp.Value);
+            }
+        }
+
+        if (lines.Count > 0)
+        {
+            lines = new TsLineCollection
+            {
+                "(e: any, value: any) =>",
+                "{",
+                lines,
+                "}"
+            };
+
+            node = node.UpdateProp(nameof(onChange), lines);
+        }
+
+        var isRequiredProp = node.Properties.FirstOrDefault(x => x.Name == nameof(isRequired));
+        var isAutoCompleteProp = node.Properties.FirstOrDefault(x => x.Name == nameof(isAutoComplete));
         if (isRequiredProp is not null && isAutoCompleteProp is not null)
         {
             var autoCompleteFinalValue = string.Empty;
@@ -141,7 +119,7 @@ sealed class BInput : PluginComponentBase
         return new div(PaddingTop(16), PaddingBottom(8))
         {
             Id(id), OnClick(onMouseClick),
-            
+
             new FlexRow(AlignItemsCenter, PaddingLeftRight(16), Border(1, solid, "#c0c0c0"), BorderRadius(10), Height(58), JustifyContentSpaceBetween)
             {
                 // L a b e l   o n   t o p - l e f t   b o r d e r 
@@ -150,13 +128,13 @@ sealed class BInput : PluginComponentBase
                 {
                     // c o n t e n t
                     floatingLabelText,
-                    
+
                     // l a y o u t
                     PositionAbsolute,
                     Top(-6),
                     Left(16),
                     PaddingX(4),
-                    
+
                     // t h e m e
                     Color(rgba(0, 0, 0, 0.6)),
                     FontSize12,
@@ -166,7 +144,7 @@ sealed class BInput : PluginComponentBase
                     FontFamily("Roboto"),
                     Background(White)
                 },
-                
+
                 new div(Color(rgba(0, 0, 0, 0.54)), FontSize16, FontWeight400, FontFamily("Roboto, sans-serif"))
                 {
                     value

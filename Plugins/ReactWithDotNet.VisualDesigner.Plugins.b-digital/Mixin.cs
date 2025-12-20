@@ -290,4 +290,34 @@ static class Mixin
             return returnList;
         }
     }
+    
+    public static ReactNode UpdateProp(this ReactNode node, string propName, TsLineCollection lines)
+    {
+        var prop = node.Properties.FirstOrDefault(x => x.Name == propName);
+
+        if (prop is null)
+        {
+            return node with
+            {
+                Properties = node.Properties.Add(new()
+                {
+                    Name  = propName,
+                    Value = lines.ToTsCode()
+                })
+            };
+        }
+
+                
+        prop = prop with
+        {
+            Value = lines.ToTsCode()
+        };
+
+        return node with
+        {
+            Properties = node.Properties.SetItem(node.Properties.FindIndex(x => x.Name == prop.Name), prop)
+        };
+                
+
+    }
 }

@@ -23,61 +23,43 @@ sealed class BCheckBox : PluginComponentBase
             return AnalyzeChildren(input, AnalyzeReactNode);
         }
         
-        var (node, componentConfig) = input;
+        var node = input.Node;
+        
+
+ 
+
+        TsLineCollection lines = [];
         
         var checkedProp = node.Properties.FirstOrDefault(x => x.Name == nameof(@checked));
-        var onCheckProp = node.Properties.FirstOrDefault(x => x.Name == nameof(onCheck));
-
         if (checkedProp is not null)
         {
-            var properties = node.Properties;
-
-            var requestAssignmentLine = string.Empty;
-            if (checkedProp.Value.StartsWith("request.", StringComparison.OrdinalIgnoreCase))
+            lines.Add(GetUpdateStateLines(checkedProp.Value, "isChecked"));
+        }
+        
+        var onCheckProp = node.Properties.FirstOrDefault(x => x.Name == nameof(onCheck));
+        if (onCheckProp is not null)
+        {
+            if (IsAlphaNumeric(onCheckProp.Value))
             {
-                requestAssignmentLine = $"  updateRequest(r => {{ r.{checkedProp.Value.RemoveFromStart("request.")} = checked; }});";
-            }
-
-            List<string> lines =
-            [
-                "(e: any, checked: boolean) =>",
-                "{",
-                requestAssignmentLine
-            ];
-
-            if (onCheckProp is not null)
-            {
-                if (IsAlphaNumeric(onCheckProp.Value))
-                {
-                    lines.Add(onCheckProp.Value + "(e, checked);");
-                }
-                else
-                {
-                    lines.Add(onCheckProp.Value);
-                }
-            }
-
-            lines.Add("}");
-
-            if (onCheckProp is not null)
-            {
-                onCheckProp = onCheckProp with
-                {
-                    Value = string.Join(Environment.NewLine, lines)
-                };
-
-                properties = properties.SetItem(properties.FindIndex(x => x.Name == onCheckProp.Name), onCheckProp);
+                lines.Add(onCheckProp.Value + "(e, isChecked);");
             }
             else
             {
-                properties = properties.Add(new()
-                {
-                    Name  = "onCheck",
-                    Value = string.Join(Environment.NewLine, lines)
-                });
+                lines.Add(onCheckProp.Value);
             }
+        }
+        
+        if (lines.Count > 0)
+        {
+            lines = new TsLineCollection
+            {
+                "(e: any, isChecked: boolean) =>",
+                "{",
+                lines,
+                "}"
+            };
 
-            node = node with { Properties = properties };
+            node = node.UpdateProp(nameof(onCheck), lines);
         }
 
         node = AddContextProp(node);
