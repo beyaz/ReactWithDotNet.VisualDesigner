@@ -38,6 +38,8 @@ public sealed record ComponentConfig
     public string Translate { get => field?.Trim(); init; }
 
     public bool SkipExport { get; init; }
+    
+    public bool Inline  { get; init; }
 
     // @formatter:on
    

@@ -327,6 +327,8 @@ static class TsxExporter
         {
             var elementType = node.HtmlElementType;
 
+            var inline = false;
+            
             var tag = nodeTag;
             if (int.TryParse(nodeTag, out var componentId))
             {
@@ -337,6 +339,16 @@ static class TsxExporter
                 }
 
                 tag = component.Config.Name;
+
+                inline = component.Config.Inline;
+            }
+
+            if (inline)
+            {
+                return new LineCollection
+                {
+                    $"{indent(indentLevel)}{{{tag}()}}"
+                };
             }
 
             var childrenProperty = node.Properties.FirstOrDefault(x => x.Name == "children");
