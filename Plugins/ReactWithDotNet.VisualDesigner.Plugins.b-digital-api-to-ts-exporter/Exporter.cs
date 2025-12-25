@@ -511,7 +511,7 @@ static class Exporter
 
             string getOutputFilePath(string webProjectPath)
             {
-                return Path.Combine(webProjectPath, "ClientApp", "types", ApiName[scope], $"{methodDefinition.Name}.ts");
+                return Path.Combine(webProjectPath, "ClientApp", "types", ApiName[scope].ToLowerFirstCharInvariant(), $"{methodDefinition.Name}.ts");
             }
         }
     }
