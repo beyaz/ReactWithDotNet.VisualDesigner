@@ -5,37 +5,37 @@ namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 [CustomComponent]
 sealed class BButton : PluginComponentBase
 {
-    [JsTypeInfo(JsType.Function)]
-    public string onClick { get; set; }
-
-    [JsTypeInfo(JsType.String)]
-    public string text { get; set; }
-   
+    [Suggestions("true , false")]
     [JsTypeInfo(JsType.Boolean)]
     public string allowLabelCase { get; set; }
-
-
-
-    [Suggestions("raised , flat , contained")]
-    [JsTypeInfo(JsType.String)]
-    public string type { get; set; }
-
-    [Suggestions("primary , default")]
-    [JsTypeInfo(JsType.String)]
-    public string colorType { get; set; }
-
-    [Suggestions("contained , outlined , text")]
-    [JsTypeInfo(JsType.String)]
-    public string variant { get; set; }
 
     [Suggestions("primary , default")]
     [JsTypeInfo(JsType.String)]
     public string color { get; set; }
 
+    [Suggestions("primary , default")]
+    [JsTypeInfo(JsType.String)]
+    public string colorType { get; set; }
 
     [Suggestions("true , false")]
     [JsTypeInfo(JsType.Boolean)]
     public string fullWidth { get; set; }
+
+    [JsTypeInfo(JsType.Function)]
+    public string onClick { get; set; }
+
+    [JsTypeInfo(JsType.String)]
+    public string text { get; set; }
+
+    [Suggestions("raised , flat , contained")]
+    [JsTypeInfo(JsType.String)]
+    public string type { get; set; }
+
+    [Suggestions("contained , outlined , text")]
+    [JsTypeInfo(JsType.String)]
+    public string variant { get; set; }
+
+    internal Style style { get; set; }
 
     [NodeAnalyzer]
     public static NodeAnalyzeOutput AnalyzeReactNode(NodeAnalyzeInput input)
@@ -49,38 +49,10 @@ sealed class BButton : PluginComponentBase
 
         node = ApplyTranslateOperationOnProps(node, input.ComponentConfig, nameof(text));
 
-        //var onClickProp = node.Properties.FirstOrDefault(x => x.Name == nameof(onClick));
-
-        //if (onClickProp is not null && !onClickProp.Value.TrimStart().StartsWith("("))
-        //{
-        //    var properties = node.Properties;
-
-        //    List<string> lines =
-        //    [
-        //        "() =>",
-
-        //        "{",
-        //        onClickProp.Value,
-        //        "}"
-        //    ];
-
-        //    onClickProp = onClickProp with
-        //    {
-        //        Value = string.Join(Environment.NewLine, lines)
-        //    };
-
-        //    properties = properties.SetItem(properties.FindIndex(x => x.Name == onClickProp.Name), onClickProp);
-
-        //    node = node with { Properties = properties };
-        //}
-
-
         var import = (nameof(BButton), "b-button");
 
         return AnalyzeChildren(input with { Node = node }, AnalyzeReactNode).With(import);
     }
-
-    internal Style style { get; set; }
 
     protected override Element render()
     {
@@ -98,7 +70,6 @@ sealed class BButton : PluginComponentBase
                 };
             }
         }
-
 
         Style defaultStyle = [BorderRadius(10), TextTransform(none)];
 
@@ -129,7 +100,7 @@ sealed class BButton : PluginComponentBase
             ];
         }
 
-        if (color=="primary" && variant == "text")
+        if (color == "primary" && variant == "text")
         {
             defaultStyle =
             [
@@ -141,7 +112,6 @@ sealed class BButton : PluginComponentBase
                 LetterSpacing(0.4)
             ];
         }
-
 
         return new Button
         {
@@ -157,9 +127,8 @@ sealed class BButton : PluginComponentBase
 
             children =
             {
-                new div { text } , children
+                new div { text }, children
             }
         };
-
     }
 }
