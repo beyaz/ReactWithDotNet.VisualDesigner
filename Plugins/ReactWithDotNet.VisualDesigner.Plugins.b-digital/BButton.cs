@@ -31,7 +31,7 @@ sealed class BButton : PluginComponentBase
 
     [Suggestions("center , left , right")]
     [JsTypeInfo(JsType.String)]
-    public string textPosition { get; set; 
+    public string textPosition { get; set; }
 
 
          
@@ -62,24 +62,9 @@ sealed class BButton : PluginComponentBase
 
     protected override Element render()
     {
-        if (variant is null)
-        {
-            if (type.HasValue)
-            {
-                variant = type switch
-                {
-                    "raised" => "contained",
-
-                    not null => type,
-
-                    null => "text"
-                };
-            }
-        }
-
         Style defaultStyle = [BorderRadius(10), TextTransform(none)];
 
-        if (color == "primary" || colorType == "primary")
+        if (colorType == "primary")
         {
             defaultStyle =
             [
@@ -92,8 +77,8 @@ sealed class BButton : PluginComponentBase
             ];
         }
 
-        if (variant == "contained" || color == "default" ||
-            (type is null && color is null && variant.HasNoValue))
+        if (type == "contained" || colorType == "default" ||
+            (type is null && colorType is null))
         {
             defaultStyle =
             [
@@ -106,7 +91,7 @@ sealed class BButton : PluginComponentBase
             ];
         }
 
-        if (color == "primary" && variant == "text")
+        if (colorType == "primary" && type == "text")
         {
             defaultStyle =
             [
@@ -125,7 +110,9 @@ sealed class BButton : PluginComponentBase
 
             style = { defaultStyle, style },
 
-            variant = variant,
+            variant = type,
+            
+            color = colorType,
 
             id = id,
 
