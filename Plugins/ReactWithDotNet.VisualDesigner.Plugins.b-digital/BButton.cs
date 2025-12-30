@@ -9,11 +9,9 @@ sealed class BButton : PluginComponentBase
     [JsTypeInfo(JsType.Boolean)]
     public string allowLabelCase { get; set; }
 
-    [Suggestions("primary , default")]
-    [JsTypeInfo(JsType.String)]
-    public string color { get; set; }
+  
 
-    [Suggestions("primary , default")]
+    [Suggestions("default , primary , secondary")]
     [JsTypeInfo(JsType.String)]
     public string colorType { get; set; }
 
@@ -27,13 +25,21 @@ sealed class BButton : PluginComponentBase
     [JsTypeInfo(JsType.String)]
     public string text { get; set; }
 
-    [Suggestions("raised , flat , contained")]
+    [Suggestions("contained , text , fab , icon")]
     [JsTypeInfo(JsType.String)]
     public string type { get; set; }
 
-    [Suggestions("contained , outlined , text")]
+    [Suggestions("center , left , right")]
     [JsTypeInfo(JsType.String)]
-    public string variant { get; set; }
+    public string textPosition { get; set; 
+
+
+         
+    [Suggestions("small , medium , large")]
+    [JsTypeInfo(JsType.String)]
+    public string buttonSize { get; set; }
+
+   
 
     internal Style style { get; set; }
 
