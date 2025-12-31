@@ -31,13 +31,13 @@ sealed class MainWindow : Component<MainWindow.State>
     {
         state = new()
         {
-            ApiNames      = [],
-            Files         = [],
+            ApiNames = [],
+            Files = [],
             StatusMessage = "Loading..."
         };
-        
-        Client.GotoMethod(InitializeForm,TimeSpan.FromMilliseconds(500));
-        
+
+        Client.GotoMethod(InitializeForm, TimeSpan.FromMilliseconds(500));
+
         return Task.CompletedTask;
     }
 
@@ -155,9 +155,9 @@ sealed class MainWindow : Component<MainWindow.State>
                                         },
                                         !state.IsExportingAllFiles ? null :
                                             new LoadingIcon(Width(20), Height(20))
-                                        
+
                                     }
-                                
+
                             },
                             new div(Height(40), FontWeight600, DisplayFlex, JustifyContentCenter, AlignItemsCenter, Width("50%"), Gap(8))
                             {
@@ -170,9 +170,9 @@ sealed class MainWindow : Component<MainWindow.State>
                                         },
                                         !state.IsExportingSelectedFile ? null :
                                             new LoadingIcon(Width(20), Height(20))
-                                        
+
                                     }
-                                
+
                             }
                         },
                         new div(DisplayFlex, FlexDirectionColumn, FlexGrow(1))
@@ -291,6 +291,8 @@ sealed class MainWindow : Component<MainWindow.State>
         }
 
         state.StatusMessage = $"Success > {count} file exported.";
+
+        StateCache = state;
     }
 
     Task OnExportAllClicked(MouseEvent e)
@@ -374,7 +376,7 @@ sealed class MainWindow : Component<MainWindow.State>
             fileModels.Add(file.Value);
         }
 
-        state.Files = fileModels.DistinctBy(x=>x.Path).ToList();
+        state.Files = fileModels.DistinctBy(x => x.Path).ToList();
 
         state.StatusMessage = $"Ready > {fileModels.Count} file listed.";
     }
@@ -407,8 +409,8 @@ class TsFileViewer : PluginComponentBase
     {
         return new Editor
         {
-            width           = "100%",
-            value           = Value,
+            width = "100%",
+            value = Value,
             defaultLanguage = "typescript",
             options =
             {
@@ -481,8 +483,8 @@ static class ExporterPlugin
         Element element = input.Tag switch
         {
             nameof(TsFileViewer) => new TsFileViewer { id = input.Id, onMouseClick = input.OnMouseClick },
-            nameof(LoadingIcon)  => new LoadingIcon { id  = input.Id, onMouseClick = input.OnMouseClick },
-            _                    => null
+            nameof(LoadingIcon) => new LoadingIcon { id = input.Id, onMouseClick = input.OnMouseClick },
+            _ => null
         };
 
         if (element is not null)
