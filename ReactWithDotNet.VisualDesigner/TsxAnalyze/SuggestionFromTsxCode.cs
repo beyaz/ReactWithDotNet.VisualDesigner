@@ -47,6 +47,16 @@ static class SuggestionFromTsxCode
                             list.Add(suggestionsFromRelativeFile.Value);
                         }
                     }
+                    else if (File.Exists(relativeFolderPath + ".ts"))
+                    {
+                        var suggestionsFromRelativeFile = await GetAllVariableSuggestionsInFile(relativeFolderPath+".ts");
+                        if (suggestionsFromRelativeFile.HasError)
+                        {
+                            return suggestionsFromRelativeFile.Error;
+                        }
+
+                        list.Add(suggestionsFromRelativeFile.Value);
+                    }
                 }
             }
         }

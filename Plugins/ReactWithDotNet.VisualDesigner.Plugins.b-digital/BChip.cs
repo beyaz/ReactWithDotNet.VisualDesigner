@@ -78,13 +78,13 @@ sealed class BChip : PluginComponentBase
         switch (color)
         {
             case "default":
-                extraStyle = [ variant =="default" ?  Background("#e0e0e0") : null, Color(rgba(0, 0, 0, 0.87))];
+                extraStyle = [ variant is "default" or null ?  Background("#e0e0e0") : null, Color(rgba(0, 0, 0, 0.87))];
                 break;
             case "primary":
-                extraStyle = [variant =="default" ? Background("#16A085"): null, Color("#fff")];
+                extraStyle = [variant is "default" or null ? Background("#16A085"): null, Color("#fff")];
                 break;
             case "secondary":
-                extraStyle = [variant =="default" ? Background("#FF9500"): null, Color(rgba(0, 0, 0, 0.87))];
+                extraStyle = [variant is "default" or null ? Background("#FF9500"): null, Color(rgba(0, 0, 0, 0.87))];
                 break;
         }
 
