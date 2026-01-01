@@ -29,8 +29,9 @@ sealed class BComboBoxExtended : PluginComponentBase
     [JsTypeInfo(JsType.Boolean)]
     public string multiple { get; set; }
 
-
-
+    [Suggestions("true")]
+    [JsTypeInfo(JsType.Boolean)]
+    public string disabled { get; set; }
 
     [NodeAnalyzer]
     public static NodeAnalyzeOutput AnalyzeReactNode(NodeAnalyzeInput input)
