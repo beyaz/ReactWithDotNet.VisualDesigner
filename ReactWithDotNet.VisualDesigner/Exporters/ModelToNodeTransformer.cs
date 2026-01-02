@@ -1,78 +1,15 @@
-﻿using Newtonsoft.Json;
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
+using Newtonsoft.Json;
 
 namespace ReactWithDotNet.VisualDesigner.Exporters;
 
 static class ModelToNodeTransformer
 {
-
-    static class CssValueClassifier
-    {
-        static readonly HashSet<string> CssFunctionNames = new(StringComparer.OrdinalIgnoreCase)
-        {
-            // Matematik fonksiyonları
-            "abs","acos","asin","atan","atan2","cos","exp","floor","hypot","log","mod","pow","round","sin","sqrt","tan",
-
-            // Hesaplama ve clamping
-            "calc","min","max","clamp",
-
-            // Renk fonksiyonları
-            "rgb","rgba","hsl","hsla","hwb","lab","lch","color","color-mix","color-contrast","device-cmyk",
-
-            // Gradient & image
-            "linear-gradient","repeating-linear-gradient","radial-gradient","repeating-radial-gradient",
-            "conic-gradient","repeating-conic-gradient","image-set","cross-fade","url","drop-shadow",
-
-            // Şekil fonksiyonları
-            "circle","ellipse","inset","polygon","fit-content","attr","counter","counters",
-
-            // Transform fonksiyonları
-            "translate","translateX","translateY","translateZ","translate3d",
-            "rotate","rotateX","rotateY","rotateZ","rotate3d",
-            "scale","scaleX","scaleY","scaleZ","scale3d",
-            "skew","skewX","skewY","matrix","matrix3d","perspective",
-
-            // Animasyon / timing
-            "cubic-bezier","ease",
-
-            // Çevresel & değişken
-            "var","env"
-        };
-        
-        
-        public static bool IsStyleValueLocatedAtOutputFile(string styleValue)
-        {
-            if (styleValue.StartsWith("request.") || 
-                styleValue.StartsWith("context.") || 
-                styleValue.Contains("(index)")) // todo: think better
-            {
-                return true;
-            }
-
-            var leftIndex = styleValue.IndexOf("(", StringComparison.OrdinalIgnoreCase);
-            if (leftIndex > 0)
-            {
-                var functionName= styleValue.Substring(0, leftIndex).Trim();
-                if (CssFunctionNames.Contains(functionName))
-                {
-                    return false;
-                }
-
-                return true;
-            }
-
-            return false;
-        }
-    }
-
-   
     public static async Task<Result<ReactNode>> ConvertVisualElementModelToReactNodeModel(ComponentScope componentScope, VisualElementModel elementModel)
     {
         var project = componentScope.ProjectConfig;
-        
-        var htmlElementType = TryGetHtmlElementTypeByTagName(elementModel.Tag);
 
-       
+        var htmlElementType = TryGetHtmlElementTypeByTagName(elementModel.Tag);
 
         ImmutableList<ReactProperty> properties;
         {
@@ -154,28 +91,24 @@ static class ModelToNodeTransformer
         static Result<IReadOnlyList<ReactProperty>> calculatePropsForInlineStyle(ComponentScope componentScope, IReadOnlyList<string> properties, IReadOnlyList<string> styles, Func<string, bool> isStyleValueLocatedAtOutputFile)
         {
             var project = componentScope.ProjectConfig;
-            
+
             var styleProp = project switch
             {
                 { ExportStylesAsInline: true } =>
-
                     from listOfStyleAttributes in ListFrom
                     (
                         from text in styles
                         let styleAttribute = ParseStyleAttribute(text)
                         where !Design.IsDesignTimeName(styleAttribute.Name)
-                        from  list in (isStyleValueLocatedAtOutputFile(styleAttribute.Value) ?
-
-                           Result.From<IEnumerable<string>>([$"{KebabToCamelCase(styleAttribute.Name)}: {styleAttribute.Value}"])
-                            :
-                            from item in CreateDesignerStyleItemFromText(project, text)
-                            from finalCssItem in item.FinalCssItems
-                            from finalCssItem1 in ReprocessFontWeight(finalCssItem)
-                            from value in RecalculateCssValueForOutput(finalCssItem1.Name, finalCssItem1.Value, isStyleValueLocatedAtOutputFile)
-                            select $"{KebabToCamelCase(finalCssItem.Name)}: {value}")
-                        
-                        from x in list select x
-                        
+                        from list in isStyleValueLocatedAtOutputFile(styleAttribute.Value)
+                            ? Result.From<IEnumerable<string>>([$"{KebabToCamelCase(styleAttribute.Name)}: {styleAttribute.Value}"])
+                            : from item in CreateDesignerStyleItemFromText(project, text)
+                              from finalCssItem in item.FinalCssItems
+                              from finalCssItem1 in ReprocessFontWeight(finalCssItem)
+                              from value in RecalculateCssValueForOutput(finalCssItem1.Name, finalCssItem1.Value, isStyleValueLocatedAtOutputFile)
+                              select $"{KebabToCamelCase(finalCssItem.Name)}: {value}"
+                        from x in list
+                        select x
                     )
                     select (listOfStyleAttributes.Count > 0) switch
                     {
@@ -188,7 +121,6 @@ static class ModelToNodeTransformer
                     },
 
                 { ExportAsCSharp: true } =>
-
                     from listOfStyleAttributes in ListFrom
                     (
                         from text in styles
@@ -213,7 +145,6 @@ static class ModelToNodeTransformer
                     )
                     select (listOfStyleAttributes.Count > 0) switch
                     {
-
                         true => new ReactProperty
                         {
                             Name  = "style",
@@ -223,7 +154,6 @@ static class ModelToNodeTransformer
                     },
 
                 { ExportAsCSharpString: true } =>
-
                     from listOFinalCssItems in ListFrom
                     (
                         from text in styles
@@ -257,8 +187,7 @@ static class ModelToNodeTransformer
                     },
                 _ => Result.Error<ReactProperty>(new($"Project config Error. Specify {nameof(ProjectConfig.ExportAsCSharp)} or {nameof(ProjectConfig.ExportAsCSharpString)} or {nameof(ProjectConfig.ExportStylesAsInline)}"))
             };
-            
-            
+
             return ListFrom
             (
                 from property in properties
@@ -268,12 +197,10 @@ static class ModelToNodeTransformer
                     Name  = parsedProperty.Name,
                     Value = parsedProperty.Value
                 },
-                
-                from reactPropertyResult in ListFrom(styleProp) 
+                from reactPropertyResult in ListFrom(styleProp)
                 from reactProperty in reactPropertyResult
-                where reactProperty is not null 
+                where reactProperty is not null
                 select reactProperty
-
             );
 
             static Result<DesignerStyleItem> EnsurePseudoIsEmpty(DesignerStyleItem item)
@@ -407,6 +334,64 @@ static class ModelToNodeTransformer
             }
 
             return props;
+        }
+    }
+
+    static class CssValueClassifier
+    {
+        static readonly HashSet<string> CssFunctionNames = new(StringComparer.OrdinalIgnoreCase)
+        {
+            // Matematik fonksiyonları
+            "abs", "acos", "asin", "atan", "atan2", "cos", "exp", "floor", "hypot", "log", "mod", "pow", "round", "sin", "sqrt", "tan",
+
+            // Hesaplama ve clamping
+            "calc", "min", "max", "clamp",
+
+            // Renk fonksiyonları
+            "rgb", "rgba", "hsl", "hsla", "hwb", "lab", "lch", "color", "color-mix", "color-contrast", "device-cmyk",
+
+            // Gradient & image
+            "linear-gradient", "repeating-linear-gradient", "radial-gradient", "repeating-radial-gradient",
+            "conic-gradient", "repeating-conic-gradient", "image-set", "cross-fade", "url", "drop-shadow",
+
+            // Şekil fonksiyonları
+            "circle", "ellipse", "inset", "polygon", "fit-content", "attr", "counter", "counters",
+
+            // Transform fonksiyonları
+            "translate", "translateX", "translateY", "translateZ", "translate3d",
+            "rotate", "rotateX", "rotateY", "rotateZ", "rotate3d",
+            "scale", "scaleX", "scaleY", "scaleZ", "scale3d",
+            "skew", "skewX", "skewY", "matrix", "matrix3d", "perspective",
+
+            // Animasyon / timing
+            "cubic-bezier", "ease",
+
+            // Çevresel & değişken
+            "var", "env"
+        };
+
+        public static bool IsStyleValueLocatedAtOutputFile(string styleValue)
+        {
+            if (styleValue.StartsWith("request.") ||
+                styleValue.StartsWith("context.") ||
+                styleValue.Contains("(index)")) // todo: think better
+            {
+                return true;
+            }
+
+            var leftIndex = styleValue.IndexOf("(", StringComparison.OrdinalIgnoreCase);
+            if (leftIndex > 0)
+            {
+                var functionName = styleValue.Substring(0, leftIndex).Trim();
+                if (CssFunctionNames.Contains(functionName))
+                {
+                    return false;
+                }
+
+                return true;
+            }
+
+            return false;
         }
     }
 }
