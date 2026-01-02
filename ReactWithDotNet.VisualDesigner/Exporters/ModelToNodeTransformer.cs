@@ -5,13 +5,42 @@ namespace ReactWithDotNet.VisualDesigner.Exporters;
 
 static class ModelToNodeTransformer
 {
-    public static async Task<Result<ReactNode>> ConvertVisualElementModelToReactNodeModel(ComponentScope componentScope, VisualElementModel elementModel)
-    {
-        var project = componentScope.ProjectConfig;
-        
-        var htmlElementType = TryGetHtmlElementTypeByTagName(elementModel.Tag);
 
-        bool IsStyleValueLocatedAtOutputFile(string styleValue)
+    static class CssValueClassifier
+    {
+        static readonly HashSet<string> CssFunctionNames = new(StringComparer.OrdinalIgnoreCase)
+        {
+            // Matematik fonksiyonları
+            "abs","acos","asin","atan","atan2","cos","exp","floor","hypot","log","mod","pow","round","sin","sqrt","tan",
+
+            // Hesaplama ve clamping
+            "calc","min","max","clamp",
+
+            // Renk fonksiyonları
+            "rgb","rgba","hsl","hsla","hwb","lab","lch","color","color-mix","color-contrast","device-cmyk",
+
+            // Gradient & image
+            "linear-gradient","repeating-linear-gradient","radial-gradient","repeating-radial-gradient",
+            "conic-gradient","repeating-conic-gradient","image-set","cross-fade","url","drop-shadow",
+
+            // Şekil fonksiyonları
+            "circle","ellipse","inset","polygon","fit-content","attr","counter","counters",
+
+            // Transform fonksiyonları
+            "translate","translateX","translateY","translateZ","translate3d",
+            "rotate","rotateX","rotateY","rotateZ","rotate3d",
+            "scale","scaleX","scaleY","scaleZ","scale3d",
+            "skew","skewX","skewY","matrix","matrix3d","perspective",
+
+            // Animasyon / timing
+            "cubic-bezier","ease",
+
+            // Çevresel & değişken
+            "var","env"
+        };
+        
+        
+        public static bool IsStyleValueLocatedAtOutputFile(string styleValue)
         {
             if (styleValue.StartsWith("request.") || 
                 styleValue.StartsWith("context.") || 
@@ -20,15 +49,37 @@ static class ModelToNodeTransformer
                 return true;
             }
 
+            var leftIndex = styleValue.IndexOf("(", StringComparison.OrdinalIgnoreCase);
+            if (leftIndex > 0)
+            {
+                var functionName= styleValue.Substring(0, leftIndex).Trim();
+                if (CssFunctionNames.Contains(functionName))
+                {
+                    return false;
+                }
+
+                return true;
+            }
+
             return false;
         }
+    }
+
+   
+    public static async Task<Result<ReactNode>> ConvertVisualElementModelToReactNodeModel(ComponentScope componentScope, VisualElementModel elementModel)
+    {
+        var project = componentScope.ProjectConfig;
+        
+        var htmlElementType = TryGetHtmlElementTypeByTagName(elementModel.Tag);
+
+       
 
         ImmutableList<ReactProperty> properties;
         {
             var props = project switch
             {
                 _ when project.ExportStylesAsInline || project.ExportAsCSharp || project.ExportAsCSharpString
-                    => calculatePropsForInlineStyle(componentScope, elementModel.Properties, elementModel.Styles, IsStyleValueLocatedAtOutputFile),
+                    => calculatePropsForInlineStyle(componentScope, elementModel.Properties, elementModel.Styles, CssValueClassifier.IsStyleValueLocatedAtOutputFile),
 
                 _ when project.ExportStylesAsTailwind
                     => calculatePropsForTailwind(project, elementModel.Properties, elementModel.Styles),
