@@ -47,13 +47,14 @@ sealed class BComboBoxExtended : PluginComponentBase
 
         var valueProp = node.Properties.FirstOrDefault(x => x.Name == nameof(value));
         var onChangeProp = node.Properties.FirstOrDefault(x => x.Name == nameof(onChange));
+        var isOnChangePropFunctionAssignment = onChangeProp is not null && onChangeProp.Value.Contains(" => ");
 
         var isRequiredProp = node.Properties.FirstOrDefault(x => x.Name == nameof(isRequired));
         var labelProp = node.Properties.FirstOrDefault(x => x.Name == nameof(label));
         
         var isMultiple = node.Properties.FirstOrDefault(x => x.Name == nameof(multiple))?.Value == "true";
 
-        if (valueProp is not null)
+        if (valueProp is not null && !isOnChangePropFunctionAssignment)
         {
             var properties = node.Properties;
 
