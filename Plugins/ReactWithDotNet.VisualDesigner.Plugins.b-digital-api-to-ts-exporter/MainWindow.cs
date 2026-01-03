@@ -9,7 +9,7 @@ namespace BDigitalFrameworkApiToTsExporter;
 [Route(Routes.MainWindow)]
 sealed class MainWindow : Component<MainWindow.State>
 {
-    static string StateCacheFilePath => Path.Combine(Path.GetTempPath(), "BDigitalFrameworkApiToTsExporter.state.json");
+    static string StateCacheFilePath => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BDigitalFrameworkApiToTsExporter.state.json");
 
     static State StateCache
     {
