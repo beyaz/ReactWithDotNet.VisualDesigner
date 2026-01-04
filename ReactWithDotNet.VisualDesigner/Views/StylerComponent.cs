@@ -274,6 +274,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                         new("min-content")
                     ]
                 },
+                
                 new()
                 {
                     Label = "height",
@@ -306,6 +307,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                         new("100px")
                     ]
                 },
+                
                 new()
                 {
                     Label = "min-h",
@@ -318,6 +320,19 @@ sealed class StylerComponent : Component<StylerComponent.State>
                     [
                         new("50px"),
                         new("100px")
+                    ]
+                },
+                
+                new()
+                {
+                    Label = "box-sizing",
+
+                    TargetCssName = "box-sizing",
+
+                    Suggestions =
+                    [
+                        new("border-box"),
+                        new("content-box")
                     ]
                 }
             ]
