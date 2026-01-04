@@ -3365,19 +3365,19 @@ sealed class ApplicationView : Component<ApplicationState>
                         }
                     }
                 },
-                !state.IsSuggestionsVisible
-                    ? null
-                    : new div(OnMouseLeave(ToggleZoomSuggestions), DisplayFlex, JustifyContentCenter, AlignItemsCenter, PositionFixed, Background(White), Border(1, solid, Gray300), BorderRadius(4), PaddingTop(4), PaddingBottom(4), Left(state.SuggestionPopupLocationX), Top(state.SuggestionPopupLocationY), ZIndex(3))
+                !state.IsSuggestionsVisible ? null :
+                    new div(OnMouseLeave(ToggleZoomSuggestions), DisplayFlex, JustifyContentCenter, AlignItemsCenter, PositionFixed, Background(White), Border(1, solid, Gray300), BorderRadius(4), PaddingTop(4), PaddingBottom(4), Left(state.SuggestionPopupLocationX), Top(state.SuggestionPopupLocationY), ZIndex(3))
                     {
                         new div
                         {
                             from item in new[] { "%25", "%50", "%75", "%100", "%125" }
-                            select new div(Id(item), OnClick(OnSuggestionItemClicked), DisplayFlex, JustifyContentCenter, AlignItemsCenter, Padding(6, 12), BorderRadius(4), Hover(Background(Gray100)))
+                            select new div(Id(item), OnClick(OnSuggestionItemClicked), DisplayFlex, JustifyContentCenter, AlignItemsCenter, Padding(6, 12), BorderRadius(4), Hover(Background(Blue50)), "%"+state.Scale == item ? Background(Gray200) : Background(White))
                             {
                                 item
                             }
                         }
                     }
+                
             };
         }
 

@@ -47,11 +47,11 @@ sealed class ProjectSelectionView : Component<ProjectSelectionView.State>
                     new div
                     {
                         from item in Suggestions
-                        select new div(Id(item), OnClick(OnSuggestionItemClicked), DisplayFlex, JustifyContentCenter, AlignItemsCenter, Padding(6, 12), BorderRadius(4), Hover(Background(Gray100)))
+                        select new div(Id(item), OnClick(OnSuggestionItemClicked), DisplayFlex, JustifyContentCenter, AlignItemsCenter, Padding(6, 12), BorderRadius(4), Hover(Background(Blue50)), item == ProjectName ? Background(Gray200) : Background(White))
                         {
                             item
                         }
-                    }
+                    } 
                 }
             
         };
