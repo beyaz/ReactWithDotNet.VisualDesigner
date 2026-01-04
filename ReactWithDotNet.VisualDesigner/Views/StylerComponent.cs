@@ -308,27 +308,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
             [
                 new()
                 {
-                    Label         = "columns",
-                    TargetCssName = "grid-template-columns",
-                    Suggestions =
-                    [
-                        new("1fr","1fr"), 
-                        new("2fr","1fr 1fr"),
-                        new("3fr","1fr 1fr 1fr"),
-                        new("4fr","1fr 1fr 1fr 1fr"),
-                        new("5fr","1fr 1fr 1fr 1fr 1fr"),
-                        new("6fr","1fr 1fr 1fr 1fr 1fr 1fr"),
-                        new("7fr","1fr 1fr 1fr 1fr 1fr 1fr 1fr"),
-                        new("8fr","1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr"), 
-                        new("9fr","1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr"),
-                        new("10fr","1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr"),
-                        new("11fr","1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr"),
-                        new("12fr","1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr")
-                    ]
-                },
-                new()
-                {
-                    Label         = "rows",
+                    Label         = "t-rows",
                     TargetCssName = "grid-template-rows",
                     Suggestions =
                     [
@@ -349,6 +329,27 @@ sealed class StylerComponent : Component<StylerComponent.State>
                 },
                 new()
                 {
+                    Label         = "t-columns",
+                    TargetCssName = "grid-template-columns",
+                    Suggestions =
+                    [
+                        new("1fr","1fr"), 
+                        new("2fr","1fr 1fr"),
+                        new("3fr","1fr 1fr 1fr"),
+                        new("4fr","1fr 1fr 1fr 1fr"),
+                        new("5fr","1fr 1fr 1fr 1fr 1fr"),
+                        new("6fr","1fr 1fr 1fr 1fr 1fr 1fr"),
+                        new("7fr","1fr 1fr 1fr 1fr 1fr 1fr 1fr"),
+                        new("8fr","1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr"), 
+                        new("9fr","1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr"),
+                        new("10fr","1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr"),
+                        new("11fr","1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr"),
+                        new("12fr","1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr")
+                    ]
+                },
+                
+                new()
+                {
                     Label = "gap",
 
                     TargetCssName = "gap",
@@ -363,6 +364,33 @@ sealed class StylerComponent : Component<StylerComponent.State>
                         new("24px")
                     ]
                 },
+                
+                
+               
+                
+                new()
+                {
+                    Label         = "row",
+                    
+                    TargetCssName = "grid-row",
+                    
+                    IsGridItemEditorEnabled = true,
+                    
+                    Suggestions = []
+                },
+                
+                new()
+                {
+                    Label         = "column",
+                    
+                    IsGridItemEditorEnabled = true,
+
+                    
+                    TargetCssName = "grid-column",
+                    
+                    Suggestions = []
+                },
+                
                 new()
                 {
                     Label         = "align",
@@ -376,10 +404,9 @@ sealed class StylerComponent : Component<StylerComponent.State>
                         new("end"),
                         new("stretch")
                     ]
-                }
+                },
             ]
         },
-
 
         new()
         {
@@ -557,6 +584,93 @@ sealed class StylerComponent : Component<StylerComponent.State>
             ]
         },
 
+        new()
+        {
+            Label = "Size",
+
+            SubGroups =
+            [
+                new()
+                {
+                    Label = "width",
+
+                    TargetCssName = "width",
+
+                    IsCssUnitEnabled = true,
+
+                    Suggestions =
+                    [
+                        new("100%"),
+                        new("50%"),
+                        new("fit-content"),
+                        new("max-content"),
+                        new("min-content")
+                    ]
+                },
+          
+                new()
+                {
+                    Label = "height",
+
+                    TargetCssName = "height",
+
+                    IsCssUnitEnabled = true,
+
+                    Suggestions =
+                    [
+                        new("100%"),
+                        new("50%"),
+                        new("fit-content"),
+                        new("max-content"),
+                        new("min-content")
+                    ]
+                },
+
+                new()
+                {
+                    Label = "min-w",
+
+                    TargetCssName = "min-width",
+
+                    IsCssUnitEnabled = true,
+
+                    Suggestions =
+                    [
+                        new("50px"),
+                        new("100px")
+                    ]
+                },
+          
+                new()
+                {
+                    Label = "min-h",
+
+                    TargetCssName = "min-height",
+
+                    IsCssUnitEnabled = true,
+
+                    Suggestions =
+                    [
+                        new("50px"),
+                        new("100px")
+                    ]
+                },
+          
+                new()
+                {
+                    Label = "box-sizing",
+
+                    TargetCssName = "box-sizing",
+
+                    Suggestions =
+                    [
+                        new("border-box"),
+                        new("content-box")
+                    ]
+                }
+            ]
+        },
+        
         new()
         {
             Label = "P",
@@ -820,9 +934,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                 }
             ]
         },
-
-      
-
+        
         new()
         {
             Label = "Bg",
@@ -1019,12 +1131,6 @@ sealed class StylerComponent : Component<StylerComponent.State>
                 {
                     new GroupItem
                     {
-                        Label=TryGetGroupLabelAt(7),
-                        SelectionChange=OnGroupItemChanged,
-                        IsSelected=IsSelectedGroup(7)
-                    },
-                    new GroupItem
-                    {
                         Label=TryGetGroupLabelAt(8),
                         SelectionChange=OnGroupItemChanged,
                         IsSelected=IsSelectedGroup(8)
@@ -1034,6 +1140,12 @@ sealed class StylerComponent : Component<StylerComponent.State>
                         Label=TryGetGroupLabelAt(9),
                         SelectionChange=OnGroupItemChanged,
                         IsSelected=IsSelectedGroup(9)
+                    },
+                    new GroupItem
+                    {
+                        Label=TryGetGroupLabelAt(10),
+                        SelectionChange=OnGroupItemChanged,
+                        IsSelected=IsSelectedGroup(10)
                     }
                 },
                 new div(PositionAbsolute, Left(-9), Top(0), DisplayFlex, Bottom(0), JustifyContentSpaceAround, FlexDirectionColumn, Width(7))
@@ -1067,9 +1179,9 @@ sealed class StylerComponent : Component<StylerComponent.State>
                     },
                     new GroupItem
                     {
-                        Label=TryGetGroupLabelAt(6),
+                        Label=TryGetGroupLabelAt(7),
                         SelectionChange=OnGroupItemChanged,
-                        IsSelected=IsSelectedGroup(6)
+                        IsSelected=IsSelectedGroup(7)
                     }
                 },
                 new div(WidthFull, HeightFull, Border(1, solid, Gray200), BorderRadius(4), PositionRelative, Background(White))
@@ -1166,6 +1278,16 @@ sealed class StylerComponent : Component<StylerComponent.State>
                                 new div(DisplayFlex, AlignItemsCenter, JustifyContentCenter)
                                 {
                                     new CssUnitEditor
+                                    {
+                                        Change=OnCssItemClicked,
+                                        CssName=ActiveSubGroup.TargetCssName
+                                    }
+                                }
+                            ,
+                            !ActiveSubGroup.IsGridItemEditorEnabled ? null :
+                                new div(DisplayFlex, AlignItemsCenter, JustifyContentCenter)
+                                {
+                                    new GridItemEditor
                                     {
                                         Change=OnCssItemClicked,
                                         CssName=ActiveSubGroup.TargetCssName
@@ -1420,6 +1542,9 @@ sealed class StylerComponent : Component<StylerComponent.State>
     record SubGroupItemModel
     {
         public bool IsCssUnitEnabled { get; init; }
+        
+        public bool IsGridItemEditorEnabled { get; init; }
+        
         public required string Label { get; init; }
 
         public required IReadOnlyList<Option> Suggestions { get; init; }
@@ -1472,6 +1597,9 @@ sealed class StylerComponent : Component<StylerComponent.State>
             return new(value);
         }
     }
+    
+    
+
 }
 
 class CssUnitEditor : Component<CssUnitEditor.State>
@@ -1584,5 +1712,97 @@ class CssUnitEditor : Component<CssUnitEditor.State>
         public double SuggestionPopupLocationY { get; init; }
         public string Unit { get; init; } = "px";
         public string Value { get; init; }
+    }
+}
+
+
+
+
+    
+class GridItemEditor : Component<GridItemEditor.State>
+{
+    [CustomEvent]
+    public Func<string, Task> Change { get; init; }
+
+    public string CssName { get; init; }
+
+    protected override Element render()
+    {
+        return new div(DisplayFlex, AlignItemsCenter, JustifyContentCenter, Padding(16), WidthFull, HeightFull)
+        {
+            new div(Border(1, solid, Gray200), BorderRadius(8), WidthFull, HeightFull, PositionRelative)
+            {
+                new div(PositionAbsolute, Left(0), Right(0), Top(-12), DisplayFlex, JustifyContentSpaceAround)
+                {
+                    new div(OnMouseEnter(OnStartModeEnter), PaddingLeft(8), PaddingRight(8), BackgroundColor(White), BorderRadius(4))
+                    {
+                        "Start"
+                    },
+                    new div(OnMouseEnter(OnSpanModeEnter), Border(1, solid, Gray200), BorderRadius(4), PaddingLeft(8), PaddingRight(8), BackgroundColor(White))
+                    {
+                        "Span"
+                    }
+                },
+                new div(DisplayFlex, JustifyContentCenter, AlignItemsCenter, WidthFull, HeightFull, Gap(16), FlexWrap, Padding(24))
+                {
+                    from item in new []{1,2,3,4,5,6,7,8,9,10,11}
+                    select new div(OnClick(_ => OnItemClicked(item)), Padding(4), Border(1, solid, Gray200))
+                }
+            }
+        };
+    }
+
+    Task OnStartModeEnter(MouseEvent e)
+    {
+        state = state with
+        {
+            IsInSpanSelection = false
+        };
+
+        return Task.CompletedTask;
+    }
+    
+    Task OnSpanModeEnter(MouseEvent e)
+    {
+        state = state with
+        {
+            IsInSpanSelection = true
+        };
+
+        return Task.CompletedTask;
+    }
+    
+    Task OnItemClicked(int value)
+    {
+        if (state.IsInSpanSelection)
+        {
+            state = state with
+            {
+                ValueForSpan = value
+            };
+        }
+        else
+        {
+            state = state with
+            {
+                ValueForStart = value
+            };
+        }
+
+        if (state.ValueForStart > 0 && state.ValueForSpan > 0)
+        {
+            DispatchEvent(Change,[$"{CssName}: {state.ValueForStart} / span {state.ValueForSpan}"]);
+        }
+
+        return Task.CompletedTask;
+    }
+    
+    internal record State
+    {
+        public bool IsInSpanSelection { get; init; }
+        
+        public int? ValueForStart { get; init; }
+        
+        public int? ValueForSpan { get; init; }
     }
 }
