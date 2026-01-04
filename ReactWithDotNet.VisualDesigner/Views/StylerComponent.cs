@@ -247,6 +247,56 @@ sealed class StylerComponent : Component<StylerComponent.State>
                         new("wrap-reverse"),
                         new("nowrap")
                     ]
+                },
+                
+                new()
+                {
+                    Label = "flex",
+
+                    TargetCssName = "flex",
+
+                    Suggestions =
+                    [
+                        new("1"),
+                        new("0 1 auto"),
+                        new("none")
+                    ]
+                },
+                
+                new()
+                {
+                    Label         = "align self",
+                    
+                    TargetCssName = "align-self",
+                    
+                    Suggestions =
+                    [
+                        new("auto"),
+                        new("flex-start"),
+                        new("center"),
+                        new("flex-end"),
+                        new("stretch")
+                    ]
+                },
+                
+                new()
+                {
+                    Label         = "order",
+                    
+                    TargetCssName = "order",
+                    
+                    Suggestions =
+                    [
+                       
+                        new("0"),
+                        new("1"),
+                        new("2"),
+                        new("3"),
+                        new("-1"),
+                        new("-2"),
+                        new("-3"),
+                       
+                    ]
                 }
             ]
         },
