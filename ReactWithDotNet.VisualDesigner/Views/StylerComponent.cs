@@ -303,90 +303,83 @@ sealed class StylerComponent : Component<StylerComponent.State>
 
         new()
         {
-            Label = "Size",
-
+            Label = "Grid",
             SubGroups =
             [
                 new()
                 {
-                    Label = "width",
+                    Label         = "columns",
+                    TargetCssName = "grid-template-columns",
+                    Suggestions =
+                    [
+                        new("1fr","1fr"), 
+                        new("2fr","1fr 1fr"),
+                        new("3fr","1fr 1fr 1fr"),
+                        new("4fr","1fr 1fr 1fr 1fr"),
+                        new("5fr","1fr 1fr 1fr 1fr 1fr"),
+                        new("6fr","1fr 1fr 1fr 1fr 1fr 1fr"),
+                        new("7fr","1fr 1fr 1fr 1fr 1fr 1fr 1fr"),
+                        new("8fr","1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr"), 
+                        new("9fr","1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr"),
+                        new("10fr","1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr"),
+                        new("11fr","1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr"),
+                        new("12fr","1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr")
+                    ]
+                },
+                new()
+                {
+                    Label         = "rows",
+                    TargetCssName = "grid-template-rows",
+                    Suggestions =
+                    [
+                        new("1fr","1fr"), 
+                        new("2fr","1fr 1fr"),
+                        new("3fr","1fr 1fr 1fr"),
+                        new("4fr","1fr 1fr 1fr 1fr"),
+                        new("5fr","1fr 1fr 1fr 1fr 1fr"),
+                        new("6fr","1fr 1fr 1fr 1fr 1fr 1fr"),
+                        new("7fr","1fr 1fr 1fr 1fr 1fr 1fr 1fr"),
+                        new("8fr","1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr"), 
+                        new("9fr","1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr"),
+                        new("10fr","1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr"),
+                        new("11fr","1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr"),
+                        new("12fr","1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr")
+                        
+                    ]
+                },
+                new()
+                {
+                    Label = "gap",
 
-                    TargetCssName = "width",
+                    TargetCssName = "gap",
 
                     IsCssUnitEnabled = true,
 
                     Suggestions =
                     [
-                        new("100%"),
-                        new("50%"),
-                        new("fit-content"),
-                        new("max-content"),
-                        new("min-content")
+                        new("4px"),
+                        new("8px"),
+                        new("16px"),
+                        new("24px")
                     ]
                 },
-                
                 new()
                 {
-                    Label = "height",
-
-                    TargetCssName = "height",
-
-                    IsCssUnitEnabled = true,
-
+                    Label         = "align",
+                    
+                    TargetCssName = "align-items",
+                    
                     Suggestions =
                     [
-                        new("100%"),
-                        new("50%"),
-                        new("fit-content"),
-                        new("max-content"),
-                        new("min-content")
-                    ]
-                },
-
-                new()
-                {
-                    Label = "min-w",
-
-                    TargetCssName = "min-width",
-
-                    IsCssUnitEnabled = true,
-
-                    Suggestions =
-                    [
-                        new("50px"),
-                        new("100px")
-                    ]
-                },
-                
-                new()
-                {
-                    Label = "min-h",
-
-                    TargetCssName = "min-height",
-
-                    IsCssUnitEnabled = true,
-
-                    Suggestions =
-                    [
-                        new("50px"),
-                        new("100px")
-                    ]
-                },
-                
-                new()
-                {
-                    Label = "box-sizing",
-
-                    TargetCssName = "box-sizing",
-
-                    Suggestions =
-                    [
-                        new("border-box"),
-                        new("content-box")
+                        new("start"),
+                        new("center"),
+                        new("end"),
+                        new("stretch")
                     ]
                 }
             ]
         },
+
 
         new()
         {
@@ -1071,6 +1064,12 @@ sealed class StylerComponent : Component<StylerComponent.State>
                         Label=TryGetGroupLabelAt(6),
                         SelectionChange=OnGroupItemChanged,
                         IsSelected=IsSelectedGroup(6)
+                    },
+                    new GroupItem
+                    {
+                        Label=TryGetGroupLabelAt(6),
+                        SelectionChange=OnGroupItemChanged,
+                        IsSelected=IsSelectedGroup(6)
                     }
                 },
                 new div(WidthFull, HeightFull, Border(1, solid, Gray200), BorderRadius(4), PositionRelative, Background(White))
@@ -1450,6 +1449,13 @@ sealed class StylerComponent : Component<StylerComponent.State>
     {
         public Option()
         {
+            
+        }
+        
+        public Option(string label, string value)
+        {
+            Label = label;
+            Value = value;
         }
 
         public Option(string value)
@@ -1460,6 +1466,11 @@ sealed class StylerComponent : Component<StylerComponent.State>
         public string Label { get; init; }
 
         public string Value { get; init; }
+        
+        public static implicit operator Option(string value)
+        {
+            return new(value);
+        }
     }
 }
 
