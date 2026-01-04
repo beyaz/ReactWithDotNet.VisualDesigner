@@ -149,30 +149,30 @@ sealed class MainWindow : Component<MainWindow.State>
                                 state.Files.Count == 0 ? null :
                                     new div(OnClick(OnExportAllClicked), Padding(4, 8), Border(1, solid, Gray300), BorderRadius(4), Hover(BackgroundColor(Gray100)), BoxShadow("0 1px 3px rgba(0,0,0,0.2)"), DisplayFlex, Gap(8), AlignItemsCenter)
                                     {
-                                        new div
+                                        new div(WhiteSpace("nowrap"))
                                         {
                                             "Export All"
                                         },
                                         !state.IsExportingAllFiles ? null :
                                             new LoadingIcon(Width(20), Height(20))
-
+                                        
                                     }
-
+                                
                             },
                             new div(Height(40), FontWeight600, DisplayFlex, JustifyContentCenter, AlignItemsCenter, Width("50%"), Gap(8))
                             {
                                 state.SelectedFilePath is  null ? null :
                                     new div(OnClick(OnExportClicked), Padding(4, 8), Border(1, solid, Gray300), BorderRadius(4), Hover(BackgroundColor(Gray100)), BoxShadow("0 1px 3px rgba(0,0,0,0.2)"), DisplayFlex, Gap(8), AlignItemsCenter)
                                     {
-                                        new div
+                                        new div(WhiteSpace("nowrap"))
                                         {
                                             "Export Selected File"
                                         },
                                         !state.IsExportingSelectedFile ? null :
                                             new LoadingIcon(Width(20), Height(20))
-
+                                        
                                     }
-
+                                
                             }
                         },
                         new div(DisplayFlex, FlexDirectionColumn, FlexGrow(1))
