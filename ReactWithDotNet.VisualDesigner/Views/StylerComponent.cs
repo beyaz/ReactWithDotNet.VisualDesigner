@@ -534,7 +534,33 @@ sealed class StylerComponent : Component<StylerComponent.State>
                         new("White"),
                         new("Gray")
                     ]
+                },
+                
+                new()
+                {
+                    Label         = "transform",
+                    TargetCssName = "text-transform",
+                    Suggestions =
+                    [
+                        new("none"),
+                        new("uppercase"),
+                        new("lowercase"),
+                        new("capitalize")
+                    ]
+                },
+                
+                new()
+                {
+                    Label         = "user select",
+                    TargetCssName = "user-select",
+                    Suggestions =
+                    [
+                        new("auto"),
+                        new("none"),
+                        new("text")
+                    ]
                 }
+
             ]
         },
 
@@ -858,10 +884,27 @@ sealed class StylerComponent : Component<StylerComponent.State>
 
         new()
         {
-            Label = "Effects",
+            Label = "Others",
 
             SubGroups =
             [
+                new()
+                {
+                    Label = "cursor",
+
+                    TargetCssName = "cursor",
+
+                    Suggestions =
+                    [
+                        new("default"),
+                        new("pointer"),
+                        new("wait"),
+                        new("text"),
+                        new("move"),
+                        new("not-allowed"),
+                        new("crosshair")
+                    ]
+                },
                 new()
                 {
                     Label = "opacity",
@@ -918,16 +961,8 @@ sealed class StylerComponent : Component<StylerComponent.State>
                         new("blur(5px)"),
                         new("grayscale(100%)")
                     ]
-                }
-            ]
-        },
-
-        new()
-        {
-            Label = "Other",
-
-            SubGroups =
-            [
+                },
+                
                 new()
                 {
                     Label = "object fit",
@@ -943,23 +978,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                     ]
                 },
 
-                new()
-                {
-                    Label = "cursor",
-
-                    TargetCssName = "cursor",
-
-                    Suggestions =
-                    [
-                        new("default"),
-                        new("pointer"),
-                        new("wait"),
-                        new("text"),
-                        new("move"),
-                        new("not-allowed"),
-                        new("crosshair")
-                    ]
-                }
+              
             ]
         }
     ];
@@ -1353,10 +1372,10 @@ sealed class StylerComponent : Component<StylerComponent.State>
                 return string.Empty;
             }
 
-            return new div(OnMouseEnter(OnSubGroupItemMouseEnter), Id(Label), BorderRadius(4), DisplayFlex, JustifyContentCenter, AlignItemsCenter, WidthFitContent, HeightFitContent, TextAlignCenter, Padding(4), LineHeight16, Background(White), DisplayFlex, Gap(3), IsSelected ? Background(Gray200) : Background(White), Border(1, solid, Gray300), FlexWrap, FontSize13)
+            return new div(OnMouseEnter(OnSubGroupItemMouseEnter), Id(Label), BorderRadius(4), DisplayFlex, JustifyContentCenter, AlignItemsCenter, WidthFitContent, HeightFitContent, TextAlignCenter, Padding(4), LineHeight16, Background(White), DisplayFlex, Gap(4), IsSelected ? Background(Gray200) : Background(White), Border(1, solid, Gray300), FlexWrap, FontSize13)
             {
                 from item in GetChars()
-                select new div(WidthFitContent, HeightFitContent, LineHeight7, FontSize14)
+                select new div(WidthFitContent, HeightFitContent, LineHeight7, FontSize14) 
                 {
                     item , ArrangeSizeForTopBottomLeftRight
                 }
