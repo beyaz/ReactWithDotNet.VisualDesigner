@@ -545,7 +545,7 @@ public static class Extensions
     /// </summary>
     public static string RemoveFromEnd(this string data, string value)
     {
-        return RemoveFromEnd(data, value, StringComparison.OrdinalIgnoreCase);
+        return data.RemoveFromEnd(value, StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>
@@ -566,7 +566,7 @@ public static class Extensions
     /// </summary>
     public static string RemoveFromStart(this string data, string value)
     {
-        return RemoveFromStart(data, value, StringComparison.OrdinalIgnoreCase);
+        return data.RemoveFromStart(value, StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>
