@@ -1443,7 +1443,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                 from item in GetChars()
                 select new div(WidthFitContent, HeightFitContent, LineHeight7)
                 {
-                    item
+                    item , ArrangeSizeForTopBottomLeftRight
                 }
             };
         }
@@ -1494,7 +1494,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
         }
 
         protected override Element render()
-        {
+        { 
             if (Label is null)
             {
                 return string.Empty;
