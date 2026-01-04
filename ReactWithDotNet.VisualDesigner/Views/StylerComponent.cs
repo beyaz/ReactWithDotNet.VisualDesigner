@@ -1790,7 +1790,8 @@ class GridItemEditor : Component<GridItemEditor.State>
         {
             state = state with
             {
-                ValueForStart = value
+                ValueForStart = value,
+                
             };
         }
 
