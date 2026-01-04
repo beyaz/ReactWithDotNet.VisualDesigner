@@ -1728,17 +1728,17 @@ class GridItemEditor : Component<GridItemEditor.State>
 
     protected override Element render()
     {
-        return new div(DisplayFlex, AlignItemsCenter, JustifyContentCenter, Padding(16), WidthFull, HeightFull)
+        return new div(DisplayFlex, AlignItemsCenter, JustifyContentCenter, WidthFull, HeightFull, PaddingTop(16), PaddingBottom(16), PaddingLeft(8), PaddingRight(8))
         {
             new div(Border(1, solid, Gray200), BorderRadius(8), WidthFull, HeightFull, PositionRelative)
             {
                 new div(PositionAbsolute, Left(0), Right(0), Top(-12), DisplayFlex, JustifyContentSpaceAround)
                 {
-                    new div(OnMouseEnter(OnStartModeEnter), PaddingLeft(8), PaddingRight(8), BackgroundColor(White), BorderRadius(4))
+                    new div(OnMouseEnter(OnStartModeEnter), PaddingLeft(8), PaddingRight(8), BorderRadius(4), Border(1, solid, Gray200), Hover(Border(1, solid, Gray300)), Hover(BackgroundColor(Gray100)), state.IsInSpanSelection ? Background(White) : Background(Gray200))
                     {
                         "Start"
                     },
-                    new div(OnMouseEnter(OnSpanModeEnter), Border(1, solid, Gray200), BorderRadius(4), PaddingLeft(8), PaddingRight(8), BackgroundColor(White))
+                    new div(OnMouseEnter(OnSpanModeEnter), PaddingLeft(8), PaddingRight(8), BorderRadius(4), Border(1, solid, Gray200), Hover(Border(1, solid, Gray300)), Hover(BackgroundColor(Gray100)), state.IsInSpanSelection ? Background(Gray200) : Background(White))
                     {
                         "Span"
                     }
@@ -1746,7 +1746,10 @@ class GridItemEditor : Component<GridItemEditor.State>
                 new div(DisplayFlex, JustifyContentCenter, AlignItemsCenter, WidthFull, HeightFull, Gap(16), FlexWrap, Padding(24))
                 {
                     from item in new []{1,2,3,4,5,6,7,8,9,10,11}
-                    select new div(OnClick(_ => OnItemClicked(item)), Padding(4), Border(1, solid, Gray200))
+                    select new div(OnClick(OnItemClicked), Id(item + ""), Padding(2, 4), Border(1, solid, Gray200), BorderRadius(4), MinWidth(30), TextAlignCenter, Hover(Border(1, solid, Gray300)), Hover(BackgroundColor(Gray100)))
+                    {
+                        item
+                    }
                 }
             }
         };
@@ -1772,15 +1775,17 @@ class GridItemEditor : Component<GridItemEditor.State>
         return Task.CompletedTask;
     }
     
-    Task OnItemClicked(int value)
+    Task OnItemClicked(MouseEvent e)
     {
+        var value = int.Parse(e.target.id);
+        
         if (state.IsInSpanSelection)
-        {
+        { 
             state = state with
             {
                 ValueForSpan = value
             };
-        }
+        }    
         else
         {
             state = state with
