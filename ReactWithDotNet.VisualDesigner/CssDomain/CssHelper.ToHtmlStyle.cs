@@ -4,9 +4,16 @@ partial class CssHelper
 {
     static Result<FinalCssItem> ToHtmlStyle(ProjectConfig project, string name, string value)
     {
-        ArgumentNullException.ThrowIfNull(name);
-
-        ArgumentException.ThrowIfNullOrWhiteSpace(value);
+        if (name.HasNoValue)
+        {
+            throw new ArgumentNullException(nameof(name));
+        }
+        
+        if (value.HasNoValue)
+        {
+            throw new ArgumentNullException(nameof(value));
+        }
+        
 
         switch (name)
         {
