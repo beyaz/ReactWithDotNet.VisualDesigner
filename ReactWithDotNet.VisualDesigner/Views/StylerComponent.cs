@@ -1443,7 +1443,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                 from item in GetChars()
                 select new div(WidthFitContent, HeightFitContent, LineHeight7)
                 {
-                    item , ArrangeSizeForTopBottomLeftRight
+                    item, ArrangeSizeForTopBottomLeftRight
                 }
             };
         }
@@ -1494,7 +1494,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
         }
 
         protected override Element render()
-        { 
+        {
             if (Label is null)
             {
                 return string.Empty;
@@ -1798,7 +1798,7 @@ class GridItemEditor : Component<GridItemEditor.State>
     internal record State
     {
         public string CssName { get; init; }
-        
+
         public bool IsInSpanSelection { get; init; }
 
         public int? ValueForSpan { get; init; }
