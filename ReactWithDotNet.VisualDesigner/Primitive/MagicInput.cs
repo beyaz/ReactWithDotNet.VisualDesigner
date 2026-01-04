@@ -334,12 +334,7 @@ abstract class MagicInput : Component<MagicInput.State>
         }
 
         var parseResponse = ParseSearchTerm(state.Value);
-
-        //var debug =
-        //    ListFrom(from suggestion in suggestions.Value 
-        //             let score = GetMatchScore(suggestion, parseResponse)
-        //             select ((string)suggestion, score)).OrderByDescending(x=>x.score);
-
+        
         state = state with
         {
             ShowSuggestions = true,
