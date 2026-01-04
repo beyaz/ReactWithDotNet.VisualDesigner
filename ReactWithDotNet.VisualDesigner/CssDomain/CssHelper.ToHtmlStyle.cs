@@ -6,12 +6,12 @@ partial class CssHelper
     {
         if (name.HasNoValue)
         {
-            throw new ArgumentNullException(nameof(name));
+            return new ArgumentNullException(nameof(name));
         }
         
         if (value.HasNoValue)
         {
-            throw new ArgumentNullException(nameof(value));
+            return new ArgumentNullException(nameof(value));
         }
         
 
