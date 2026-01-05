@@ -10,6 +10,10 @@ sealed class BasePage : PluginComponentBase
     [JsTypeInfo(JsType.Boolean)]
     public string isWide { get; set; }
     
+    [Suggestions("true , false")]
+    [JsTypeInfo(JsType.Boolean)]
+    public string needMobileApproval { get; set; }
+    
     [JsTypeInfo(JsType.Function)]
     public string handleBackClick { get; set; }
 
