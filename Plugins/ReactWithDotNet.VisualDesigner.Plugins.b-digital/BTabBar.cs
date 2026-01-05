@@ -123,6 +123,9 @@ sealed class BTabBar : PluginComponentBase
                 }
 
                 content = response.Value.tsx;
+
+                // clear inlined helper function
+                content = content.Trim().RemoveFromStart("{").RemoveFromEnd("}");
                 
                 tsImports.Add(response.Value.tsImports);
             }

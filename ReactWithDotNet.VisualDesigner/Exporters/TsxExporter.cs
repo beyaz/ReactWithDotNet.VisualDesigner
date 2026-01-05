@@ -286,6 +286,19 @@ static class TsxExporter
                     innerLines = result.Value;
                 }
 
+                // try clear inline component
+                {
+                    // False: {condition && {HelperFunc()} }
+                    // True:  {condition &&  HelperFunc()  }
+                    (await TryGetComponentByTag(node.Tag)).HasValue(cmp =>
+                    {
+                        if (cmp.Config.Inline && innerLines.Count == 1)
+                        {
+                            innerLines = [innerLines[0].Trim().RemoveFromStart("{").RemoveFromEnd("}")];
+                        }
+                    });
+                }
+                
                 lines.AddRange(innerLines);
 
                 indentLevel--;
