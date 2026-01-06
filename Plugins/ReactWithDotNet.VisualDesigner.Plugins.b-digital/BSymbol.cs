@@ -60,6 +60,8 @@ sealed class BSymbol : PluginComponentBase
 
     protected override Element render()
     {
+        GEtPro
+        
         return new MaterialSymbol
         {
             name = symbol,

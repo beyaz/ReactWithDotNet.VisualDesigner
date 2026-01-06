@@ -5,73 +5,12 @@ namespace ReactWithDotNet.VisualDesigner.Views;
 
 static class ApplicationLogic
 {
-    public static async Task<Result<ComponentScope>> GetComponentScope(int componentId, string userName)
-    {
-        var componentEntity = await Store.TryGetComponent(componentId);
-        if (componentEntity is null)
-        {
-            return new Exception($"ComponentNotFound-id:{componentId}");
-        }
-        
-        var project = GetProjectConfig(componentEntity.ProjectId);
-        if (project is null)
-        {
-            return new ArgumentNullException($"ProjectNotFound. {componentEntity.ProjectId}");
-        }
-        
-        return await 
-        from rootVisualElement in GetComponentUserOrMainVersionAsync(componentId, userName)
-            from file in GetComponentFileLocation(componentId, userName)
-        select new ComponentScope
-        {
-            ProjectId = componentEntity.ProjectId,
-
-            ComponentId = componentEntity.Id,
-
-            ComponentConfig = componentEntity.Config,
-
-            ProjectConfig = project,
-            
-            RootVisualElement = rootVisualElement,
-            
-            OutFile = file
-        };
-    }
-    
-    public static async Task<Result<bool>> UserHasChange(ApplicationState state)
-    {
-        ComponentEntity component;
-        ComponentWorkspace userVersion;
-        {
-            var response = await GetComponentData(state.ComponentId,state.UserName);
-            if (response.HasError)
-            {
-                return response.Error;
-            }
-
-            component   = response.Value.Component;
-            userVersion = response.Value.ComponentWorkspaceVersion.Value;
-        }
-
-        if (userVersion is null)
-        {
-            return false;
-        }
-
-        // Check if the user version is the same as the main version
-        if (component.RootElementAsYaml == SerializeToYaml(state.ComponentRootElement))
-        {
-            return false;
-        }
-
-        return true;
-    }
     public static async Task<Result<Unit>> CommitComponent(ApplicationState state)
     {
         ComponentEntity component;
         ComponentWorkspace userVersion;
         {
-            var response = await GetComponentData(state.ComponentId,state.UserName);
+            var response = await GetComponentData(state.ComponentId, state.UserName);
             if (response.HasError)
             {
                 return response.Error;
@@ -128,7 +67,7 @@ static class ApplicationLogic
     public static IReadOnlyList<ProjectEntity> GetAllProjectsCached()
     {
         return Cache.AccessValue(nameof(GetAllProjectsCached),
-                                 () => Store.GetAllProjects().GetAwaiter().GetResult().ToList());
+            () => Store.GetAllProjects().GetAwaiter().GetResult().ToList());
     }
 
     public static string GetComponentDisplayText(int projectId, int componentId)
@@ -138,7 +77,7 @@ static class ApplicationLogic
         var componentEntity = componentEntities.FirstOrDefault(x => x.Id == componentId);
 
         var componentConfig = componentEntity.Config;
-        
+
         var directoryName = componentConfig.DesignLocation.Split("/").TakeLast(2).FirstOrDefault();
 
         return directoryName + "/" + GetComponentName(projectId, componentId);
@@ -149,9 +88,42 @@ static class ApplicationLogic
         return GetAllComponentsInProjectFromCache(projectId).FirstOrDefault(x => x.Id == componentId)?.Config.Name;
     }
 
+    public static async Task<Result<ComponentScope>> GetComponentScope(int componentId, string userName)
+    {
+        var componentEntity = await Store.TryGetComponent(componentId);
+        if (componentEntity is null)
+        {
+            return new Exception($"ComponentNotFound-id:{componentId}");
+        }
+
+        var project = GetProjectConfig(componentEntity.ProjectId);
+        if (project is null)
+        {
+            return new ArgumentNullException($"ProjectNotFound. {componentEntity.ProjectId}");
+        }
+
+        return await
+            from rootVisualElement in GetComponentUserOrMainVersionAsync(componentId, userName)
+            from file in GetComponentFileLocation(componentId, userName)
+            select new ComponentScope
+            {
+                ProjectId = componentEntity.ProjectId,
+
+                ComponentId = componentEntity.Id,
+
+                ComponentConfig = componentEntity.Config,
+
+                ProjectConfig = project,
+
+                RootVisualElement = rootVisualElement,
+
+                OutFile = file
+            };
+    }
+
     public static async Task<Result<VisualElementModel>> GetComponentUserOrMainVersionAsync(int componentId, string userName)
     {
-        return 
+        return
             from x in await GetComponentData(componentId, userName)
             select DeserializeFromYaml<VisualElementModel>(GetRootElementAsYaml(x));
     }
@@ -175,41 +147,16 @@ static class ApplicationLogic
         return GetAllProjectsCached().Select(x => x.Name).ToList();
     }
 
-    public static Task<Result<IReadOnlyList<SuggestionItem>>> GetVariableSuggestionsInOutputFile(int componentId)
-    {
-        var cacheKey = $"{nameof(GetVariableSuggestionsInOutputFile)}-{componentId}";
-
-        return Cache.AccessValue(cacheKey, () =>
-        {
-            var query =
-            
-                from location in GetComponentFileLocation(componentId, userName:null)
-                from suggestions in SuggestionFromTsxCode.GetAllVariableSuggestionsInFile(location.filePath)
-                from suggestion in suggestions
-                select new SuggestionItem
-                {
-                    Name = suggestion
-                };
-
-                    
-            return query.AsResult();
-        });
-        
-    }
     public static async Task<Result<IReadOnlyList<SuggestionItem>>> GetPropSuggestions(int componentId, string selectedTag)
     {
-        var  scope = new PropSuggestionScope
+        var scope = new PropSuggestionScope
         {
             Component         = await Store.TryGetComponent(componentId),
             SelectedComponent = await TryGetComponentByTag(selectedTag),
             TagName           = await GetTagText(selectedTag)
         };
 
-
-      
-
         var variableSuggestionsInOutputFile = await GetVariableSuggestionsInOutputFile(componentId);
-
 
         return new List<SuggestionItem>
         {
@@ -238,34 +185,31 @@ static class ApplicationLogic
                       _ => (JsType?)null
                   }
                   where jsType.HasValue
-
                   select new SuggestionItem
                   {
                       Name = propertyInfo.Name
                   }
-
         };
-
     }
 
     public static async Task<Result<IReadOnlyList<SuggestionItem>>> GetStyleAttributeNameSuggestions(int componentId)
     {
         var component = await Store.TryGetComponent(componentId);
-            
+
         var project = GetProjectConfig(component.ProjectId);
 
         var variableSuggestionsInOutputFile = await GetVariableSuggestionsInOutputFile(componentId);
-        
+
         return new List<SuggestionItem>
         {
             variableSuggestionsInOutputFile.Value ?? [],
-            
+
             from name in project.Styles.Keys
             select new SuggestionItem
             {
                 Name = name
             },
-            
+
             // z-index 1 to 10
             from i in Enumerable.Range(1, 10)
             select new SuggestionItem
@@ -274,9 +218,9 @@ static class ApplicationLogic
 
                 Value = i.ToString()
             },
-            
+
             // gap and border-radius
-            
+
             from number in new[] { 2, 4, 6, 8, 10, 12, 16, 20, 24, 28, 32, 36, 40 }
             from name in new[] { "gap", "border-radius" }
             select new SuggestionItem
@@ -292,29 +236,29 @@ static class ApplicationLogic
             select new SuggestionItem
             {
                 Name = item.Key,
-                
+
                 Value = value
             },
-            
+
             // c o l o r s
             from colorName in project.Colors.Select(x => x.Key)
-            from name in new []{"background","color"}
+            from name in new[] { "background", "color" }
             select new SuggestionItem
             {
                 Name = name,
-                
+
                 Value = colorName
             },
-            
+
             from colorName in project.Colors.Select(x => x.Key)
-            from name in new[]{"border", "border-left", "border-right", "border-top", "border-bottom"}
+            from name in new[] { "border", "border-left", "border-right", "border-top", "border-bottom" }
             select new SuggestionItem
             {
                 Name = name,
-                
+
                 Value = $"1px solid {colorName}"
             },
-            
+
             // flex-grow 1 to 12
             from i in Enumerable.Range(1, 12)
             select new SuggestionItem
@@ -323,16 +267,16 @@ static class ApplicationLogic
 
                 Value = i.ToString()
             },
-            
+
             // r a d i u s - p a d d i n g s - m a r g i n s
             from i in Enumerable.Range(1, 48)
-            where i%4 == 0
+            where i % 4 == 0
             from name in new[]
             {
                 "border-radius", "border-top-left-radius", "border-top-right-radius", "border-bottom-left-radius", "border-bottom-right-radius",
-                
+
                 "padding", "padding-left", "padding-right", "padding-top", "padding-bottom",
-                
+
                 "margin", "margin-left", "margin-right", "margin-top", "margin-bottom"
             }
             select new SuggestionItem
@@ -342,9 +286,6 @@ static class ApplicationLogic
                 Value = i + "px"
             }
         };
-
-
-        
     }
 
     public static IReadOnlyList<SuggestionItem> GetTagSuggestions(int projectId)
@@ -383,6 +324,25 @@ static class ApplicationLogic
         }
 
         return None;
+    }
+
+    public static Task<Result<IReadOnlyList<SuggestionItem>>> GetVariableSuggestionsInOutputFile(int componentId)
+    {
+        var cacheKey = $"{nameof(GetVariableSuggestionsInOutputFile)}-{componentId}";
+
+        return Cache.AccessValue(cacheKey, () =>
+        {
+            var query =
+                from location in GetComponentFileLocation(componentId, userName: null)
+                from suggestions in SuggestionFromTsxCode.GetAllVariableSuggestionsInFile(location.filePath)
+                from suggestion in suggestions
+                select new SuggestionItem
+                {
+                    Name = suggestion
+                };
+
+            return query.AsResult();
+        });
     }
 
     public static async Task<Result<ApplicationState>> RollbackComponent(ApplicationState state)
@@ -477,7 +437,7 @@ static class ApplicationLogic
             foreach (var componentId in TryParseInt32(tag))
             {
                 Maybe<ComponentEntity> returnValue = await Store.TryGetComponent(componentId);
-                
+
                 return returnValue;
             }
 
@@ -565,5 +525,34 @@ static class ApplicationLogic
             LastAccessTime  = DateTime.Now,
             LastStateAsYaml = SerializeToYaml(state)
         });
+    }
+
+    public static async Task<Result<bool>> UserHasChange(ApplicationState state)
+    {
+        ComponentEntity component;
+        ComponentWorkspace userVersion;
+        {
+            var response = await GetComponentData(state.ComponentId, state.UserName);
+            if (response.HasError)
+            {
+                return response.Error;
+            }
+
+            component   = response.Value.Component;
+            userVersion = response.Value.ComponentWorkspaceVersion.Value;
+        }
+
+        if (userVersion is null)
+        {
+            return false;
+        }
+
+        // Check if the user version is the same as the main version
+        if (component.RootElementAsYaml == SerializeToYaml(state.ComponentRootElement))
+        {
+            return false;
+        }
+
+        return true;
     }
 }
