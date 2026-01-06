@@ -66,12 +66,12 @@ public static class Extensions
         var list = ListFrom
         (
             from prop in props
-            let parsed = TryParseProperty(prop)
+            let parsedProperty = TryParseProperty(prop)
             select new
             {
-                Raw      = prop,
-                IsTarget = parsed.HasValue && parsed.Value.Name == propName,
-                Parsed   = parsed
+                Raw            = prop,
+                IsTarget       = parsedProperty.HasValue && parsedProperty.Value.Name == propName,
+                ParsedProperty = parsedProperty
             }
         );
 
@@ -86,7 +86,7 @@ public static class Extensions
         (
             from x in list
             where x.IsTarget
-            select x.Parsed.Value.Value
+            select x.ParsedProperty.Value.Value
         );
                     
         return (remainingProps, removedValues);
