@@ -317,7 +317,23 @@ public static class Extensions
     {
         return items.FirstOrDefault();
     }
-    
+
+    public static Maybe<string> TryResolveColorInProject(int projectId, string maybeNamedColor)
+    {
+        if (maybeNamedColor.HasNoValue)
+        {
+            return None;
+        }
+        
+        var projectConfig = GetProjectConfig(projectId);
+
+        if (projectConfig.Colors.TryGetValue(maybeNamedColor, out var value))
+        {
+            return value;
+        }
+
+        return None;
+    }
     public static async Task<Result<(string filePath, string targetComponentName)>> GetComponentFileLocation(int componentId, string userName)
     {
         var component = await Store.TryGetComponent(componentId);

@@ -60,8 +60,6 @@ sealed class BSymbol : PluginComponentBase
 
     protected override Element render()
     {
-        GEtPro
-        
         return new MaterialSymbol
         {
             name = symbol,
@@ -70,13 +68,13 @@ sealed class BSymbol : PluginComponentBase
 
             styleVariant = type.HasValue ? Enum.Parse<MaterialSymbolVariant>(type) : MaterialSymbolVariant.outlined,
 
-            color = color,
+            color = TryResolveColorInProject(color),
 
             weight = weight.HasValue ? int.Parse(weight) : null,
 
             fill = filled.HasValue ? filled == "true" ? 1 : 0 : null,
             
-            id = id,
+            id      = id,
             onClick = onMouseClick
         };
     }

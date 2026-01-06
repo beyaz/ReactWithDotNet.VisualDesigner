@@ -15,6 +15,20 @@ record MessagingRecord
 
 static class Mixin
 {
+    internal static int ProjectId = 1;
+    
+    public static string TryResolveColorInProject(string maybeNamedColor)
+    {
+        foreach (var realColor in ReactWithDotNet.VisualDesigner.Extensions.TryResolveColorInProject(ProjectId, maybeNamedColor))
+        {
+            return realColor;
+        }
+
+        return maybeNamedColor;
+    }
+    
+   
+    
     public const string textSecondary = "rgba(0, 0, 0, 0.6)";
     
     public static async NodeAnalyzeOutput With(this NodeAnalyzeOutput task, (string name, string package) tsImport)
@@ -320,4 +334,6 @@ static class Mixin
                 
 
     }
+    
+    
 }
