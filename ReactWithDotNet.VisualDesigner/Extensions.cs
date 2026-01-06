@@ -568,8 +568,7 @@ public static class Extensions
 
     public static (IReadOnlyList<string> props, Maybe<string> removedPropValue) RemovePropInProps(IReadOnlyList<string> props, string propName)
     {
-        var list = ListFrom
-        (
+        var projected =
             from prop in props
             let parsedProperty = TryParseProperty(prop)
             select new
@@ -577,20 +576,16 @@ public static class Extensions
                 Raw            = prop,
                 IsTarget       = parsedProperty.HasValue && parsedProperty.Value.Name == propName,
                 ParsedProperty = parsedProperty
-            }
-        );
+            };
 
-        var remainingProps = ListFrom
+        var (removedList, remainingProps) = projected.Partition
         (
-            from x in list where !x.IsTarget select x.Raw
+            x => x.IsTarget,
+            x => x.ParsedProperty.Value.Value,
+            x => x.Raw
         );
 
-        Maybe<string> removedValue = FirstOrDefaultOf
-        (
-            from x in list where x.IsTarget select x.ParsedProperty.Value.Value
-        );
-
-        return (remainingProps, removedValue);
+        return (remainingProps, removedList.FirstOrDefault());
     }
 
     public static Result<T> Try<T>(Func<T> func)
