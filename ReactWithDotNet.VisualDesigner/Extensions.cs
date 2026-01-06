@@ -1,9 +1,10 @@
-﻿using System.Configuration;
+﻿using ReactWithDotNet.VisualDesigner.PropertyDomain;
+using System.Configuration;
 using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
-using ReactWithDotNet.VisualDesigner.PropertyDomain;
+using Toolbox;
 
 namespace ReactWithDotNet.VisualDesigner;
 
@@ -60,26 +61,35 @@ public static class Extensions
         return (list, removedPropValue);
     }
     
-    public static (IReadOnlyList<string> props, Maybe<string> removedPropValue) RemovePropInProps2(IReadOnlyList<string> props, string propName)
+    public static (IReadOnlyList<string> props, IReadOnlyList<string> removedPropValues) RemovePropInProps2(IReadOnlyList<string> props, string propName)
     {
-        var list = new List<string>();
-        
-        var removedPropValue = new Maybe<string>();
-
-        foreach (var prop in props)
-        {
-            var maybe = TryParseProperty(prop);
-            if (maybe.HasValue && maybe.Value.Name == propName)
+        var list = ListFrom
+        (
+            from prop in props
+            let parsed = TryParseProperty(prop)
+            select new
             {
-                removedPropValue = maybe.Value.Value;
-                            
-                continue;
+                Raw      = prop,
+                IsTarget = parsed.HasValue && parsed.Value.Name == propName,
+                Parsed   = parsed
             }
+        );
 
-            list.Add(prop);
-        }
+        var remainingProps = ListFrom
+        (
+            from x in list
+            where !x.IsTarget
+            select x.Raw
+        );
+
+        var removedValues = ListFrom
+        (
+            from x in list
+            where x.IsTarget
+            select x.Parsed.Value.Value
+        );
                     
-        return (list, removedPropValue);
+        return (remainingProps, removedValues);
     }
     
     public static bool HasProp(IReadOnlyList<string> props, string propName)
