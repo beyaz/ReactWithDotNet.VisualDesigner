@@ -4,7 +4,6 @@ using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
-using Toolbox;
 
 namespace ReactWithDotNet.VisualDesigner;
 
@@ -41,28 +40,6 @@ public static class Extensions
     
     public static (IReadOnlyList<string> props, Maybe<string> removedPropValue) RemovePropInProps(IReadOnlyList<string> props, string propName)
     {
-        var list = new List<string>();
-        
-        var removedPropValue = new Maybe<string>();
-
-        foreach (var prop in props)
-        {
-            var maybe = TryParseProperty(prop);
-            if (maybe.HasValue && maybe.Value.Name == propName)
-            {
-                removedPropValue = maybe.Value.Value;
-                            
-                continue;
-            }
-
-            list.Add(prop);
-        }
-                    
-        return (list, removedPropValue);
-    }
-    
-    public static (IReadOnlyList<string> props, IReadOnlyList<string> removedPropValues) RemovePropInProps2(IReadOnlyList<string> props, string propName)
-    {
         var list = ListFrom
         (
             from prop in props
@@ -77,19 +54,15 @@ public static class Extensions
 
         var remainingProps = ListFrom
         (
-            from x in list
-            where !x.IsTarget
-            select x.Raw
+            from x in list where !x.IsTarget select x.Raw
         );
 
-        var removedValues = ListFrom
+        Maybe<string> removedValue = FirstOrDefaultOf
         (
-            from x in list
-            where x.IsTarget
-            select x.ParsedProperty.Value.Value
+            from x in list where x.IsTarget select x.ParsedProperty.Value.Value
         );
                     
-        return (remainingProps, removedValues);
+        return (remainingProps, removedValue);
     }
     
     public static bool HasProp(IReadOnlyList<string> props, string propName)
