@@ -22,9 +22,9 @@ static class Extensions
 
     public static string GetRootElementAsYaml((ComponentEntity Component, Maybe<ComponentWorkspace> ComponentWorkspaceVersion) x)
     {
-        if (x.ComponentWorkspaceVersion.HasValue)
+        foreach (var workspace in x.ComponentWorkspaceVersion)
         {
-            return x.ComponentWorkspaceVersion.Value.RootElementAsYaml;
+            return workspace.RootElementAsYaml;
         }
 
         return x.Component.RootElementAsYaml;
