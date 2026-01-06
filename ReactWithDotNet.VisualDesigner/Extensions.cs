@@ -1,116 +1,14 @@
-﻿using ReactWithDotNet.VisualDesigner.PropertyDomain;
-using System.Configuration;
+﻿using System.Configuration;
 using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
+using ReactWithDotNet.VisualDesigner.PropertyDomain;
 
 namespace ReactWithDotNet.VisualDesigner;
 
 public static class Extensions
 {
-    public static IReadOnlyList<string> InsertOrUpdatePropInProps(IReadOnlyList<string> props, string propName, string propValue)
-    {
-        var list = new List<string>();
-
-        var isUpdated = false;
-                    
-        foreach (var prop in props)
-        {
-            var maybe = TryParseProperty(prop);
-            if (maybe.HasValue && maybe.Value.Name == propName)
-            {
-                list.Add(propName + ": " + propValue);
-
-                isUpdated = true;
-                            
-                continue;
-            }
-
-            list.Add(prop);
-        }
-
-        if (!isUpdated)
-        {
-            list.Add(propName + ": " + propValue);
-        }
-                    
-        return list;
-    }
-    
-    public static (IReadOnlyList<string> props, Maybe<string> removedPropValue) RemovePropInProps(IReadOnlyList<string> props, string propName)
-    {
-        var list = ListFrom
-        (
-            from prop in props
-            let parsedProperty = TryParseProperty(prop)
-            select new
-            {
-                Raw            = prop,
-                IsTarget       = parsedProperty.HasValue && parsedProperty.Value.Name == propName,
-                ParsedProperty = parsedProperty
-            }
-        );
-
-        var remainingProps = ListFrom
-        (
-            from x in list where !x.IsTarget select x.Raw
-        );
-
-        Maybe<string> removedValue = FirstOrDefaultOf
-        (
-            from x in list where x.IsTarget select x.ParsedProperty.Value.Value
-        );
-                    
-        return (remainingProps, removedValue);
-    }
-    
-    public static (IReadOnlyList<TLeft> Left, IReadOnlyList<TRight> Right) Partition<TSource, TLeft, TRight>
-    (
-            this IEnumerable<TSource> source,
-            Func<TSource, bool> predicate,
-            Func<TSource, TLeft> leftSelector,
-            Func<TSource, TRight> rightSelector
-            )
-    {
-        var left  = new List<TLeft>();
-        var right = new List<TRight>();
-
-        foreach (var item in source)
-        {
-            if (predicate(item))
-                left.Add(leftSelector(item));
-            else
-                right.Add(rightSelector(item));
-        }
-
-        return (left, right);
-    }
-    
-    public static bool HasProp(IReadOnlyList<string> props, string propName)
-    {
-        return TryGetProp(props, propName).HasValue;
-    }
-    
-    public static Maybe<ParsedProperty> TryGetProp(IReadOnlyList<string> props, string propName)
-    {
-        foreach (var prop in props)
-        {
-            var maybe = TryParseProperty(prop);
-            if (maybe.HasValue && maybe.Value.Name == propName)
-            {
-                return maybe;
-            }
-        }
-
-        return None;
-    }
-    
-    public static void Add<T>(this List<T> list, IEnumerable<T> items)
-    {
-        list.AddRange(items);
-    }
-    
     public static readonly CachedObjectMap Cache = new() { Timeout = TimeSpan.FromMinutes(5) };
 
     public static readonly CultureInfo CultureInfo_en_US = new("en-US");
@@ -221,6 +119,11 @@ public static class Extensions
         "#text"
     ];
 
+    public static void Add<T>(this List<T> list, IEnumerable<T> items)
+    {
+        list.AddRange(items);
+    }
+
     public static string AsPixel(this double value)
     {
         return value.ToString(CultureInfo_en_US) + "px";
@@ -229,47 +132,6 @@ public static class Extensions
     public static IReadOnlyList<T> AsReadOnlyList<T>(this IEnumerable<T> source)
     {
         return source as IReadOnlyList<T> ?? source.ToList();
-    }
-    
-    public static Result<IReadOnlyList<T>> ListFrom<T>(IEnumerable<Result<T>> source)
-    {
-        var list = new List<T>();
-        foreach (var result in source)
-        {
-            if (result.HasError)
-            {
-                return result.Error;
-            }
-
-            list.Add(result.Value);
-        }
-        
-        return list;
-    }
-    
-    public static IReadOnlyList<T> ListFrom<T>(T source)
-    {
-        return new List<T> { source };
-    }
-    
-    public static Result<IReadOnlyList<T>> ListFrom<T>(params IEnumerable<Result<T>>[] sources)
-    {
-        var list = new List<T>();
-        
-        foreach (var source in sources)
-        {
-            foreach (var result in source)
-            {
-                if (result.HasError)
-                {
-                    return result.Error;
-                }
-
-                list.Add(result.Value);
-            }
-        }
-        
-        return list;
     }
 
     public static double CalculateTextWidth(string text)
@@ -345,50 +207,34 @@ public static class Extensions
         return items.FirstOrDefault();
     }
 
-    public static Maybe<string> TryResolveColorInProject(int projectId, string maybeNamedColor)
-    {
-        if (maybeNamedColor.HasNoValue)
-        {
-            return None;
-        }
-        
-        var projectConfig = GetProjectConfig(projectId);
-
-        if (projectConfig.Colors.TryGetValue(maybeNamedColor, out var value))
-        {
-            return value;
-        }
-
-        return None;
-    }
     public static async Task<Result<(string filePath, string targetComponentName)>> GetComponentFileLocation(int componentId, string userName)
     {
         var component = await Store.TryGetComponent(componentId);
 
         var componentConfig = component.Config;
-        
+
         var outputFilePath = componentConfig.OutputFilePath;
         if (outputFilePath.HasNoValue)
         {
             return new ConfigurationErrorsException("Config error: Please specify the OutputFile property.");
         }
-        
+
         var projectConfig = GetProjectConfig(component.ProjectId);
 
         var projectDirectory = projectConfig.ProjectDirectory;
-        
+
         var user = await Store.TryGetUser(component.ProjectId, userName);
         if (user is not null && user.LocalWorkspacePath.HasValue)
         {
             projectDirectory = user.LocalWorkspacePath;
         }
 
-        outputFilePath = outputFilePath.Replace("{projectDirectory}", projectDirectory,StringComparison.OrdinalIgnoreCase);
-        
-        outputFilePath = outputFilePath.Replace("{designLocation}", componentConfig.ResolvedDesignLocation,StringComparison.OrdinalIgnoreCase);
+        outputFilePath = outputFilePath.Replace("{projectDirectory}", projectDirectory, StringComparison.OrdinalIgnoreCase);
+
+        outputFilePath = outputFilePath.Replace("{designLocation}", componentConfig.ResolvedDesignLocation, StringComparison.OrdinalIgnoreCase);
 
         outputFilePath = string.Join(Path.DirectorySeparatorChar, outputFilePath.Split(['/', Path.DirectorySeparatorChar], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
-        
+
         return (outputFilePath, componentConfig.Name);
     }
 
@@ -407,19 +253,43 @@ public static class Extensions
         return matchFunc(value);
     }
 
-    extension(string value)
+    public static bool HasProp(IReadOnlyList<string> props, string propName)
     {
-        public bool HasNoValue =>string.IsNullOrWhiteSpace(value);
-        
-        public bool HasValue =>!string.IsNullOrWhiteSpace(value);
+        return TryGetProp(props, propName).HasValue;
     }
-    
-    
-
 
     public static bool In<T>(this T item, params T[] list)
     {
         return list.Contains(item);
+    }
+
+    public static IReadOnlyList<string> InsertOrUpdatePropInProps(IReadOnlyList<string> props, string propName, string propValue)
+    {
+        var list = new List<string>();
+
+        var isUpdated = false;
+
+        foreach (var prop in props)
+        {
+            var maybe = TryParseProperty(prop);
+            if (maybe.HasValue && maybe.Value.Name == propName)
+            {
+                list.Add(propName + ": " + propValue);
+
+                isUpdated = true;
+
+                continue;
+            }
+
+            list.Add(prop);
+        }
+
+        if (!isUpdated)
+        {
+            list.Add(propName + ": " + propValue);
+        }
+
+        return list;
     }
 
     public static bool IsAlphaNumeric(string input)
@@ -499,7 +369,7 @@ public static class Extensions
             return false;
         }
 
-        return (value.StartsWith("'") && value.EndsWith("'") && value.Length > 1) || 
+        return (value.StartsWith("'") && value.EndsWith("'") && value.Length > 1) ||
                (value.StartsWith("\"") && value.EndsWith("\"") && value.Length > 1);
     }
 
@@ -541,11 +411,51 @@ public static class Extensions
         return camelCase.ToString();
     }
 
+    public static Result<IReadOnlyList<T>> ListFrom<T>(IEnumerable<Result<T>> source)
+    {
+        var list = new List<T>();
+        foreach (var result in source)
+        {
+            if (result.HasError)
+            {
+                return result.Error;
+            }
+
+            list.Add(result.Value);
+        }
+
+        return list;
+    }
+
+    public static IReadOnlyList<T> ListFrom<T>(T source)
+    {
+        return new List<T> { source };
+    }
+
+    public static Result<IReadOnlyList<T>> ListFrom<T>(params IEnumerable<Result<T>>[] sources)
+    {
+        var list = new List<T>();
+
+        foreach (var source in sources)
+        {
+            foreach (var result in source)
+            {
+                if (result.HasError)
+                {
+                    return result.Error;
+                }
+
+                list.Add(result.Value);
+            }
+        }
+
+        return list;
+    }
+
     public static List<T> ListFrom<T>(IEnumerable<T> enumerable)
     {
         return enumerable.ToList();
     }
-
 
     public static IReadOnlyDictionary<string, string> MapFrom((string key, string value)[] items)
     {
@@ -555,6 +465,32 @@ public static class Extensions
     public static bool NotIn<T>(this T item, params T[] list)
     {
         return !list.Contains(item);
+    }
+
+    public static (IReadOnlyList<TLeft> Left, IReadOnlyList<TRight> Right) Partition<TSource, TLeft, TRight>
+    (
+        this IEnumerable<TSource> source,
+        Func<TSource, bool> predicate,
+        Func<TSource, TLeft> leftSelector,
+        Func<TSource, TRight> rightSelector
+    )
+    {
+        var left = new List<TLeft>();
+        var right = new List<TRight>();
+
+        foreach (var item in source)
+        {
+            if (predicate(item))
+            {
+                left.Add(leftSelector(item));
+            }
+            else
+            {
+                right.Add(rightSelector(item));
+            }
+        }
+
+        return (left, right);
     }
 
     public static void RefreshComponentPreview(this Client client)
@@ -630,6 +566,33 @@ public static class Extensions
         return data;
     }
 
+    public static (IReadOnlyList<string> props, Maybe<string> removedPropValue) RemovePropInProps(IReadOnlyList<string> props, string propName)
+    {
+        var list = ListFrom
+        (
+            from prop in props
+            let parsedProperty = TryParseProperty(prop)
+            select new
+            {
+                Raw            = prop,
+                IsTarget       = parsedProperty.HasValue && parsedProperty.Value.Name == propName,
+                ParsedProperty = parsedProperty
+            }
+        );
+
+        var remainingProps = ListFrom
+        (
+            from x in list where !x.IsTarget select x.Raw
+        );
+
+        Maybe<string> removedValue = FirstOrDefaultOf
+        (
+            from x in list where x.IsTarget select x.ParsedProperty.Value.Value
+        );
+
+        return (remainingProps, removedValue);
+    }
+
     public static Result<T> Try<T>(Func<T> func)
     {
         try
@@ -689,8 +652,22 @@ public static class Extensions
         {
             return typeof(Fragment);
         }
-        
+
         return typeof(svg).Assembly.GetType(nameof(ReactWithDotNet) + "." + tag, false, false);
+    }
+
+    public static Maybe<ParsedProperty> TryGetProp(IReadOnlyList<string> props, string propName)
+    {
+        foreach (var prop in props)
+        {
+            var maybe = TryParseProperty(prop);
+            if (maybe.HasValue && maybe.Value.Name == propName)
+            {
+                return maybe;
+            }
+        }
+
+        return None;
     }
 
     public static Maybe<(string width, string style, string color)> TryParseBorderCss(string text)
@@ -739,5 +716,29 @@ public static class Extensions
         }
 
         return None;
+    }
+
+    public static Maybe<string> TryResolveColorInProject(int projectId, string maybeNamedColor)
+    {
+        if (maybeNamedColor.HasNoValue)
+        {
+            return None;
+        }
+
+        var projectConfig = GetProjectConfig(projectId);
+
+        if (projectConfig.Colors.TryGetValue(maybeNamedColor, out var value))
+        {
+            return value;
+        }
+
+        return None;
+    }
+
+    extension(string value)
+    {
+        public bool HasNoValue => string.IsNullOrWhiteSpace(value);
+
+        public bool HasValue => !string.IsNullOrWhiteSpace(value);
     }
 }
