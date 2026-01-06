@@ -60,6 +60,28 @@ public static class Extensions
         return (list, removedPropValue);
     }
     
+    public static (IReadOnlyList<string> props, Maybe<string> removedPropValue) RemovePropInProps2(IReadOnlyList<string> props, string propName)
+    {
+        var list = new List<string>();
+        
+        var removedPropValue = new Maybe<string>();
+
+        foreach (var prop in props)
+        {
+            var maybe = TryParseProperty(prop);
+            if (maybe.HasValue && maybe.Value.Name == propName)
+            {
+                removedPropValue = maybe.Value.Value;
+                            
+                continue;
+            }
+
+            list.Add(prop);
+        }
+                    
+        return (list, removedPropValue);
+    }
+    
     public static bool HasProp(IReadOnlyList<string> props, string propName)
     {
         return TryGetProp(props, propName).HasValue;
