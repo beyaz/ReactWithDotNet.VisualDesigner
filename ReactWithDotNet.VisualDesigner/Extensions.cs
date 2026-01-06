@@ -65,6 +65,28 @@ public static class Extensions
         return (remainingProps, removedValue);
     }
     
+    public static (IReadOnlyList<TLeft> Left, IReadOnlyList<TRight> Right) Partition<TSource, TLeft, TRight>
+    (
+            this IEnumerable<TSource> source,
+            Func<TSource, bool> predicate,
+            Func<TSource, TLeft> leftSelector,
+            Func<TSource, TRight> rightSelector
+            )
+    {
+        var left  = new List<TLeft>();
+        var right = new List<TRight>();
+
+        foreach (var item in source)
+        {
+            if (predicate(item))
+                left.Add(leftSelector(item));
+            else
+                right.Add(rightSelector(item));
+        }
+
+        return (left, right);
+    }
+    
     public static bool HasProp(IReadOnlyList<string> props, string propName)
     {
         return TryGetProp(props, propName).HasValue;
