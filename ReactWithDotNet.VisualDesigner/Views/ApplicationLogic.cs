@@ -532,10 +532,7 @@ static class ApplicationLogic
         return from x in await GetComponentData(state.ComponentId, state.UserName)
                let component = x.Component
                let userVersion = x.ComponentWorkspaceVersion.Value
-               select userVersion switch
-               {
-                   null => false,
-                   _    => component.RootElementAsYaml != SerializeToYaml(state.ComponentRootElement)
-               };
+               select userVersion is not null &&
+                      component.RootElementAsYaml != SerializeToYaml(state.ComponentRootElement);
     }
 }
