@@ -350,8 +350,8 @@ static class Exporter
                 from webProjectPath in getWebProjectFolderPath(projectDirectory)
                 select (methodGroup.FolderName == "Shared") switch
                 {
-                    true  => Path.Combine(webProjectPath, "ClientApp", "views", apiName, $"use{methodGroup.FolderName}.ts"),
-                    false => Path.Combine(webProjectPath, "ClientApp", "views", apiName, methodGroup.FolderName, $"use{methodGroup.FolderName}.ts")
+                    true  => Path.Combine(webProjectPath, "ClientApp", "views", apiName.ToLowerFirstCharInvariant(), $"use{methodGroup.FolderName}.ts"),
+                    false => Path.Combine(webProjectPath, "ClientApp", "views", apiName.ToLowerFirstCharInvariant(), methodGroup.FolderName, $"use{methodGroup.FolderName}.ts")
                 };
         }
 
