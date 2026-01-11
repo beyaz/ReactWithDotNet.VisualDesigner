@@ -9,7 +9,9 @@ sealed class BButton : PluginComponentBase
     [JsTypeInfo(JsType.Boolean)]
     public string allowLabelCase { get; set; }
 
-  
+    [Suggestions("true , false")]
+    [JsTypeInfo(JsType.Boolean)]
+    public string isVisible { get; set; }
 
     [Suggestions("default , primary , secondary")]
     [JsTypeInfo(JsType.String)]
