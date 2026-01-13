@@ -42,9 +42,14 @@ sealed class BInput : PluginComponentBase
 
         node = ApplyTranslateOperationOnProps(node, input.ComponentConfig, nameof(floatingLabelText));
 
-        var onChangeProp = node.Properties.FirstOrDefault(x => x.Name == nameof(onChange));
 
-        var isOnChangePropFunctionAssignment = onChangeProp is not null && onChangeProp.Value.Contains(" => ");
+        var isOnChangePropFunctionAssignment = HasAny
+        (
+            from property in node.Properties
+            where property.Name == nameof(onChange) && property.Value.Contains(" => ")
+            select property
+        );
+            
 
         if (!isOnChangePropFunctionAssignment)
         {
