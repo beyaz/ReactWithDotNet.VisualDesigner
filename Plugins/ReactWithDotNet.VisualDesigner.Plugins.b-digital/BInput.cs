@@ -66,9 +66,7 @@ sealed class BInput : PluginComponentBase
             node = lines.HasLine ? node.UpdateProp(nameof(onChange), new()
             {
                 "(e: any, value: any) =>",
-                "{",
-                lines,
-                "}"
+                "{", lines, "}"
             }) : node;
         }
 
