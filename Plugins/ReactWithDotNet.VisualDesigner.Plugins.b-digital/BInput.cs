@@ -42,14 +42,13 @@ sealed class BInput : PluginComponentBase
 
         node = ApplyTranslateOperationOnProps(node, input.ComponentConfig, nameof(floatingLabelText));
 
-        
         var onChangeProp = node.Properties.FirstOrDefault(x => x.Name == nameof(onChange));
-        
+
         var isOnChangePropFunctionAssignment = onChangeProp is not null && onChangeProp.Value.Contains(" => ");
 
         if (!isOnChangePropFunctionAssignment)
         {
-            TsLineCollection lines = new TsLineCollection()
+            var lines = new TsLineCollection
             {
                 // v a l u e
                 from property in node.Properties
@@ -63,20 +62,14 @@ sealed class BInput : PluginComponentBase
                 let value = property.Value
                 select IsAlphaNumeric(value) ? value + "(e, value);" : value
             };
-            
-            if (lines.Count > 0)
+
+            node = lines.HasLine ? node.UpdateProp(nameof(onChange), new()
             {
-                lines = new TsLineCollection
-                {
-                    "(e: any, value: any) =>",
-                    "{",
-                    lines,
-                    "}"
-                };
-
-                node = node.UpdateProp(nameof(onChange), lines);
-            }
-
+                "(e: any, value: any) =>",
+                "{",
+                lines,
+                "}"
+            }) : node;
         }
 
         var isRequiredProp = node.Properties.FirstOrDefault(x => x.Name == nameof(isRequired));
