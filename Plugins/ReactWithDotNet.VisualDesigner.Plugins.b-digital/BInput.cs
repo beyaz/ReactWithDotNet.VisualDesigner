@@ -49,15 +49,15 @@ sealed class BInput : PluginComponentBase
 
         if (!isOnChangePropFunctionAssignment)
         {
-            TsLineCollection lines = [];
-
-            var valueProp = node.Properties.FirstOrDefault(x => x.Name == nameof(value));
-            if (valueProp is not null)
+            TsLineCollection lines = new TsLineCollection()
             {
-                lines.Add(GetUpdateStateLines(valueProp.Value, "value"));
-            }
-
-
+                // v a l u e
+                from property in node.Properties
+                where property.Name == nameof(value)
+                from line in GetUpdateStateLines(property.Value, "value")
+                select line
+            };
+            
             if (onChangeProp is not null)
             {
                 if (IsAlphaNumeric(onChangeProp.Value))
