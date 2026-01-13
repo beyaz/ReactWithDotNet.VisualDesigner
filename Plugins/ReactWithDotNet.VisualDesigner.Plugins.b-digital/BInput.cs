@@ -72,7 +72,7 @@ sealed class BInput : PluginComponentBase
         var isAutoCompleteProp = node.Properties.FirstOrDefault(x => x.Name == nameof(isAutoComplete));
         if (isRequiredProp is not null && isAutoCompleteProp is not null)
         {
-            var autoCompleteFinalValue = string.Empty;
+            string autoCompleteFinalValue;
             {
                 if ("true".Equals(isAutoCompleteProp.Value, StringComparison.OrdinalIgnoreCase))
                 {
