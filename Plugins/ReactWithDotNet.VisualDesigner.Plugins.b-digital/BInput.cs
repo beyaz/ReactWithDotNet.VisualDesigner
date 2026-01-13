@@ -42,7 +42,6 @@ sealed class BInput : PluginComponentBase
 
         node = ApplyTranslateOperationOnProps(node, input.ComponentConfig, nameof(floatingLabelText));
 
-
         var isOnChangePropFunctionAssignment = node.Properties.HasFunctionAssignment(nameof(onChange));
         if (!isOnChangePropFunctionAssignment)
         {
@@ -72,21 +71,14 @@ sealed class BInput : PluginComponentBase
         var isAutoCompleteProp = node.Properties.FirstOrDefault(x => x.Name == nameof(isAutoComplete));
         if (isRequiredProp is not null && isAutoCompleteProp is not null)
         {
-            string autoCompleteFinalValue;
+            var autoCompleteFinalValue = isAutoCompleteProp.Value switch
             {
-                if ("true".Equals(isAutoCompleteProp.Value, StringComparison.OrdinalIgnoreCase))
-                {
-                    autoCompleteFinalValue = "'on'";
-                }
-                else if ("false".Equals(isAutoCompleteProp.Value, StringComparison.OrdinalIgnoreCase))
-                {
-                    autoCompleteFinalValue = "'off'";
-                }
-                else
-                {
-                    autoCompleteFinalValue = $"{Plugin.ConvertDotNetPathToJsPath(isAutoCompleteProp.Value)} ? \"on\" : \"off\" }}";
-                }
-            }
+                var value when "true".Equals(value, StringComparison.OrdinalIgnoreCase) => "'on'",
+
+                var value when "false".Equals(value, StringComparison.OrdinalIgnoreCase) => "'off'",
+
+                _ => $"{Plugin.ConvertDotNetPathToJsPath(isAutoCompleteProp.Value)} ? \"on\" : \"off\""
+            };
 
             node = node with
             {
