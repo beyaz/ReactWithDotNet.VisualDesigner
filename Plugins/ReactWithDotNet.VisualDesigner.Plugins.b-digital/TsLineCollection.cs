@@ -22,4 +22,6 @@ sealed class TsLineCollection: List<string>
     {
         return string.Join(Environment.NewLine, from line in this where line is not null select line);
     }
+
+    public bool HasLine => this.Count(x => x.HasValue) > 0;
 }
