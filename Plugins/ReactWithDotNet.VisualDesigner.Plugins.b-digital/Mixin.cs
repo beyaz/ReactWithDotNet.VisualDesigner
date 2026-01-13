@@ -334,6 +334,16 @@ static class Mixin
                 
 
     }
-    
+
+    internal static bool HasFunctionAssignment(this IEnumerable<ReactProperty> props, string propName)
+    {
+        return 
+            (
+                from property in props
+                where property.Name == propName && property.Value.Contains(" => ")
+                select property
+            )
+            .Any();
+    }
     
 }
