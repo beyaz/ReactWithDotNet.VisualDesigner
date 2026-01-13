@@ -55,21 +55,15 @@ sealed class BInput : PluginComponentBase
                 from property in node.Properties
                 where property.Name == nameof(value)
                 from line in GetUpdateStateLines(property.Value, "value")
-                select line
+                select line,
+
+                // o n c h a n g e
+                from property in node.Properties
+                where property.Name == nameof(onChange)
+                let value = property.Value
+                select IsAlphaNumeric(value) ? value + "(e, value);" : value
             };
             
-            if (onChangeProp is not null)
-            {
-                if (IsAlphaNumeric(onChangeProp.Value))
-                {
-                    lines.Add(onChangeProp.Value + "(e, value);");
-                }
-                else
-                {
-                    lines.Add(onChangeProp.Value);
-                }
-            }
-
             if (lines.Count > 0)
             {
                 lines = new TsLineCollection
