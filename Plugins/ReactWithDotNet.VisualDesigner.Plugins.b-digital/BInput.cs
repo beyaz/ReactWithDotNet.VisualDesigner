@@ -42,38 +42,47 @@ sealed class BInput : PluginComponentBase
 
         node = ApplyTranslateOperationOnProps(node, input.ComponentConfig, nameof(floatingLabelText));
 
-        TsLineCollection lines = [];
-
-        var valueProp = node.Properties.FirstOrDefault(x => x.Name == nameof(value));
-        if (valueProp is not null)
-        {
-            lines.Add(GetUpdateStateLines(valueProp.Value, "value"));
-        }
-
+        
         var onChangeProp = node.Properties.FirstOrDefault(x => x.Name == nameof(onChange));
-        if (onChangeProp is not null)
-        {
-            if (IsAlphaNumeric(onChangeProp.Value))
-            {
-                lines.Add(onChangeProp.Value + "(e, value);");
-            }
-            else
-            {
-                lines.Add(onChangeProp.Value);
-            }
-        }
+        
+        var isOnChangePropFunctionAssignment = onChangeProp is not null && onChangeProp.Value.Contains(" => ");
 
-        if (lines.Count > 0)
+        if (!isOnChangePropFunctionAssignment)
         {
-            lines = new TsLineCollection
-            {
-                "(e: any, value: any) =>",
-                "{",
-                lines,
-                "}"
-            };
+            TsLineCollection lines = [];
 
-            node = node.UpdateProp(nameof(onChange), lines);
+            var valueProp = node.Properties.FirstOrDefault(x => x.Name == nameof(value));
+            if (valueProp is not null)
+            {
+                lines.Add(GetUpdateStateLines(valueProp.Value, "value"));
+            }
+
+
+            if (onChangeProp is not null)
+            {
+                if (IsAlphaNumeric(onChangeProp.Value))
+                {
+                    lines.Add(onChangeProp.Value + "(e, value);");
+                }
+                else
+                {
+                    lines.Add(onChangeProp.Value);
+                }
+            }
+
+            if (lines.Count > 0)
+            {
+                lines = new TsLineCollection
+                {
+                    "(e: any, value: any) =>",
+                    "{",
+                    lines,
+                    "}"
+                };
+
+                node = node.UpdateProp(nameof(onChange), lines);
+            }
+
         }
 
         var isRequiredProp = node.Properties.FirstOrDefault(x => x.Name == nameof(isRequired));
