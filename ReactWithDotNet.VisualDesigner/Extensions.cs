@@ -9,6 +9,15 @@ namespace ReactWithDotNet.VisualDesigner;
 
 public static class Extensions
 {
+    public static bool EqualsOrdinalIgnoreCase(this string a, string b)
+    {
+        if (a is null)
+        {
+            return b is null;
+        }
+        return a.Equals(b, StringComparison.OrdinalIgnoreCase);
+    }
+    
     public static readonly CachedObjectMap Cache = new() { Timeout = TimeSpan.FromMinutes(5) };
 
     public static readonly CultureInfo CultureInfo_en_US = new("en-US");

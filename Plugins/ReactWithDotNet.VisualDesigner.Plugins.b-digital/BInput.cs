@@ -77,9 +77,9 @@ sealed class BInput : PluginComponentBase
 
                 autoComplete = isAutoCompleteProp.Value switch
                 {
-                    var value when "true".Equals(value, StringComparison.OrdinalIgnoreCase) => "'on'",
+                    var value when "true".EqualsOrdinalIgnoreCase(value) => "'on'",
 
-                    var value when "false".Equals(value, StringComparison.OrdinalIgnoreCase) => "'off'",
+                    var value when "false".EqualsOrdinalIgnoreCase(value) => "'off'",
 
                     _ => $"{Plugin.ConvertDotNetPathToJsPath(isAutoCompleteProp.Value)} ? \"on\" : \"off\""
                 }
