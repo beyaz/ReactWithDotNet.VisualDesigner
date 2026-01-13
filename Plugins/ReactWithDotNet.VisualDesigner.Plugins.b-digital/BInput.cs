@@ -71,21 +71,26 @@ sealed class BInput : PluginComponentBase
         var isAutoCompleteProp = node.Properties.FirstOrDefault(x => x.Name == nameof(isAutoComplete));
         if (isRequiredProp is not null && isAutoCompleteProp is not null)
         {
-            var autoCompleteFinalValue = isAutoCompleteProp.Value switch
+            var newValue = new
             {
-                var value when "true".Equals(value, StringComparison.OrdinalIgnoreCase) => "'on'",
+                required = Plugin.ConvertDotNetPathToJsPath(isRequiredProp.Value),
 
-                var value when "false".Equals(value, StringComparison.OrdinalIgnoreCase) => "'off'",
+                autoComplete = isAutoCompleteProp.Value switch
+                {
+                    var value when "true".Equals(value, StringComparison.OrdinalIgnoreCase) => "'on'",
 
-                _ => $"{Plugin.ConvertDotNetPathToJsPath(isAutoCompleteProp.Value)} ? \"on\" : \"off\""
+                    var value when "false".Equals(value, StringComparison.OrdinalIgnoreCase) => "'off'",
+
+                    _ => $"{Plugin.ConvertDotNetPathToJsPath(isAutoCompleteProp.Value)} ? \"on\" : \"off\""
+                }
             };
-
+            
             node = node with
             {
                 Properties = node.Properties.Remove(isRequiredProp).Remove(isAutoCompleteProp).Add(new()
                 {
                     Name  = "valueConstraint",
-                    Value = $"{{ required: {Plugin.ConvertDotNetPathToJsPath(isRequiredProp.Value)}, autoComplete: {autoCompleteFinalValue} }}"
+                    Value = $"{{ required: {newValue.required}, autoComplete: {newValue.autoComplete} }}"
                 })
             };
         }
