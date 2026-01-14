@@ -3,6 +3,7 @@
 [CustomComponent]
 sealed class BInput : PluginComponentBase
 {
+    [Suggestions("true")]
     [JsTypeInfo(JsType.Boolean)]
     public string disabled { get; set; }
 

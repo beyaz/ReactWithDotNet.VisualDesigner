@@ -3,6 +3,10 @@
 [CustomComponent]
 sealed class BCheckBox : PluginComponentBase
 {
+    [Suggestions("true")]
+    [JsTypeInfo(JsType.Boolean)]
+    public string disabled { get; set; }
+    
     [JsTypeInfo(JsType.Boolean)]
     public string @checked { get; set; }
 
