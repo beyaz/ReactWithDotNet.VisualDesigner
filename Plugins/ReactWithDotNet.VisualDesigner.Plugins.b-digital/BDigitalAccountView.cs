@@ -3,12 +3,12 @@
 [CustomComponent]
 sealed class BDigitalAccountView : PluginComponentBase
 {
+    [JsTypeInfo(JsType.Array)]
+    public string accounts { get; set; }
+
     [Suggestions("true")]
     [JsTypeInfo(JsType.Boolean)]
     public string disabled { get; set; }
-    
-    [JsTypeInfo(JsType.Array)]
-    public string accounts { get; set; }
 
     [JsTypeInfo(JsType.Function)]
     public string onSelectedAccountIndexChange { get; set; }
@@ -18,7 +18,6 @@ sealed class BDigitalAccountView : PluginComponentBase
 
     [JsTypeInfo(JsType.String)]
     public string title { get; set; }
-    
 
     [NodeAnalyzer]
     public static NodeAnalyzeOutput AnalyzeReactNode(NodeAnalyzeInput input)
@@ -27,17 +26,9 @@ sealed class BDigitalAccountView : PluginComponentBase
         {
             return AnalyzeChildren(input, AnalyzeReactNode);
         }
-        
-        var (node, componentConfig) = input;
 
+        var node = input.Node;
 
-
-
-        
-
-
-        
-        
         {
             var selectedAccountIndexProp = node.Properties.FirstOrDefault(x => x.Name == nameof(selectedAccountIndex));
             var onSelectedAccountIndexChangeProp = node.Properties.FirstOrDefault(x => x.Name == nameof(onSelectedAccountIndexChange));
@@ -46,8 +37,6 @@ sealed class BDigitalAccountView : PluginComponentBase
             {
                 var properties = node.Properties;
 
-               
-                
                 var lines = new TsLineCollection
                 {
                     "(selectedAccountIndex: number) =>",
@@ -92,7 +81,7 @@ sealed class BDigitalAccountView : PluginComponentBase
         }
 
         var import = (nameof(BDigitalAccountView), "b-digital-account-view");
-   
+
         return AnalyzeChildren(input with { Node = node }, AnalyzeReactNode).With(import);
     }
 
@@ -109,13 +98,13 @@ sealed class BDigitalAccountView : PluginComponentBase
                 {
                     // c o n t e n t
                     title ?? "Gönderen",
-                    
+
                     // l a y o u t
                     PositionAbsolute,
                     Top(-6),
                     Left(16),
                     PaddingX(4),
-                    
+
                     // t h e m e
                     Color(rgba(0, 0, 0, 0.6)),
                     FontSize12,
@@ -126,9 +115,9 @@ sealed class BDigitalAccountView : PluginComponentBase
                     Background(White)
                 },
 
-                new div(Color(rgba(0, 0, 0, 0.54)), FontSize16, FontWeight400) 
-                { 
-                    accounts + " | "+selectedAccountIndex
+                new div(Color(rgba(0, 0, 0, 0.54)), FontSize16, FontWeight400)
+                {
+                    accounts + " | " + selectedAccountIndex
                 },
 
                 new FlexRow(AlignItemsCenter, TextAlignRight, Gap(8))
