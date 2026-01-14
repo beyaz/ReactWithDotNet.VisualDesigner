@@ -3,6 +3,10 @@
 [CustomComponent]
 sealed class BDigitalAccountView : PluginComponentBase
 {
+    [Suggestions("true")]
+    [JsTypeInfo(JsType.Boolean)]
+    public string disabled { get; set; }
+    
     [JsTypeInfo(JsType.Array)]
     public string accounts { get; set; }
 
