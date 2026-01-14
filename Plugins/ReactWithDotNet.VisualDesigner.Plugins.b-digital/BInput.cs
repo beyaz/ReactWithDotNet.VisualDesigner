@@ -43,8 +43,7 @@ sealed class BInput : PluginComponentBase
 
         node = ApplyTranslateOperationOnProps(node, input.ComponentConfig, nameof(floatingLabelText));
 
-        var isOnChangePropFunctionAssignment = node.Properties.HasFunctionAssignment(nameof(onChange));
-        if (!isOnChangePropFunctionAssignment)
+        if (!node.Properties.HasFunctionAssignment(nameof(onChange)))
         {
             var onChangeFunctionBody = new TsLineCollection
             {
