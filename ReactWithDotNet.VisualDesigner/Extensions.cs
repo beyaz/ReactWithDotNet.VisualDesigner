@@ -744,5 +744,8 @@ public static class Extensions
         {
             return double.TryParse(value, CultureInfo_en_US, out _);
         }
+        
+        public bool CanParseWithDouble=> double.TryParse(value, CultureInfo_en_US, out _);
+        
     }
 }

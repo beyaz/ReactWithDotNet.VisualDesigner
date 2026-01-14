@@ -35,7 +35,7 @@ sealed class BDigitalAccountView : PluginComponentBase
             {
                 // u p d a t e   s o u r c e
                 from property in node.Properties
-                where property.Name == nameof(selectedAccountIndex) && property.Value.IsDouble()
+                where property.Name == nameof(selectedAccountIndex) && !property.Value.CanParseWithDouble
                 from line in GetUpdateStateLines(property.Value, "selectedAccountIndex")
                 select line,
 
