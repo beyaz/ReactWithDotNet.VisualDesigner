@@ -321,11 +321,6 @@ public static class Extensions
         return value.StartsWith("{") && value.EndsWith("}");
     }
 
-    public static bool IsDouble(this string value)
-    {
-        return double.TryParse(value, CultureInfo_en_US, out _);
-    }
-
     public static bool IsEqualsIgnoreWhitespace(string a, string b)
     {
         return ignore_whitespace_characters(a) == ignore_whitespace_characters(b);
@@ -744,5 +739,10 @@ public static class Extensions
         public bool HasNoValue => string.IsNullOrWhiteSpace(value);
 
         public bool HasValue => !string.IsNullOrWhiteSpace(value);
+
+        public bool IsDouble()
+        {
+            return double.TryParse(value, CultureInfo_en_US, out _);
+        }
     }
 }
