@@ -47,13 +47,13 @@ sealed class BInput : PluginComponentBase
         {
             var onChangeFunctionBody = new TsLineCollection
             {
-                // v a l u e
+                // u p d a t e   s o u r c e
                 from property in node.Properties
                 where property.Name == nameof(value)
                 from line in GetUpdateStateLines(property.Value, "value")
                 select line,
 
-                // o n c h a n g e
+                // e v e n t   h a n d l e r
                 from property in node.Properties
                 where property.Name == nameof(onChange)
                 let value = property.Value

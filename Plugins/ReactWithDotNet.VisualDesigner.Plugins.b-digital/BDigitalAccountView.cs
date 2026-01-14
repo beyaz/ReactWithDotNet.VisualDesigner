@@ -29,55 +29,28 @@ sealed class BDigitalAccountView : PluginComponentBase
 
         var node = input.Node;
 
+        if (!node.Properties.HasFunctionAssignment(nameof(onSelectedAccountIndexChange)))
         {
-            var selectedAccountIndexProp = node.Properties.FirstOrDefault(x => x.Name == nameof(selectedAccountIndex));
-            var onSelectedAccountIndexChangeProp = node.Properties.FirstOrDefault(x => x.Name == nameof(onSelectedAccountIndexChange));
-
-            if (selectedAccountIndexProp is not null)
+            var onChangeFunctionBody = new TsLineCollection
             {
-                var properties = node.Properties;
+                // u p d a t e   s o u r c e
+                from property in node.Properties
+                where property.Name == nameof(selectedAccountIndex)
+                from line in GetUpdateStateLines(property.Value, "selectedAccountIndex")
+                select line,
 
-                var lines = new TsLineCollection
-                {
-                    "(selectedAccountIndex: number) =>",
-                    "{",
-                    GetUpdateStateLines(selectedAccountIndexProp.Value, "selectedAccountIndex")
-                };
+                // e v e n t   h a n d l e r
+                from property in node.Properties
+                where property.Name == nameof(onSelectedAccountIndexChange)
+                let value = property.Value
+                select IsAlphaNumeric(value) ? value + "(selectedAccountIndex);" : value
+            };
 
-                if (onSelectedAccountIndexChangeProp is not null)
-                {
-                    if (IsAlphaNumeric(onSelectedAccountIndexChangeProp.Value))
-                    {
-                        lines.Add(onSelectedAccountIndexChangeProp.Value + "(selectedAccountIndex);");
-                    }
-                    else
-                    {
-                        lines.Add(onSelectedAccountIndexChangeProp.Value);
-                    }
-                }
-
-                lines.Add("}");
-
-                if (onSelectedAccountIndexChangeProp is not null)
-                {
-                    onSelectedAccountIndexChangeProp = onSelectedAccountIndexChangeProp with
-                    {
-                        Value = lines.ToTsCode()
-                    };
-
-                    properties = properties.SetItem(properties.FindIndex(x => x.Name == onSelectedAccountIndexChangeProp.Name), onSelectedAccountIndexChangeProp);
-                }
-                else
-                {
-                    properties = properties.Add(new()
-                    {
-                        Name  = nameof(onSelectedAccountIndexChange),
-                        Value = lines.ToTsCode()
-                    });
-                }
-
-                node = node with { Properties = properties };
-            }
+            node = onChangeFunctionBody.HasLine ? node.UpdateProp(nameof(onSelectedAccountIndexChange), new()
+            {
+                "(selectedAccountIndex: number) =>",
+                "{", onChangeFunctionBody, "}"
+            }) : node;
         }
 
         var import = (nameof(BDigitalAccountView), "b-digital-account-view");
