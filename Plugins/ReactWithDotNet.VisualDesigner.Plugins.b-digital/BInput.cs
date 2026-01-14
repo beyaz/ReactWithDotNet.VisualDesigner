@@ -46,7 +46,7 @@ sealed class BInput : PluginComponentBase
         var isOnChangePropFunctionAssignment = node.Properties.HasFunctionAssignment(nameof(onChange));
         if (!isOnChangePropFunctionAssignment)
         {
-            var lines = new TsLineCollection
+            var onChangeFunctionBody = new TsLineCollection
             {
                 // v a l u e
                 from property in node.Properties
@@ -61,10 +61,10 @@ sealed class BInput : PluginComponentBase
                 select IsAlphaNumeric(value) ? value + "(e, value);" : value
             };
 
-            node = lines.HasLine ? node.UpdateProp(nameof(onChange), new()
+            node = onChangeFunctionBody.HasLine ? node.UpdateProp(nameof(onChange), new()
             {
                 "(e: any, value: any) =>",
-                "{", lines, "}"
+                "{", onChangeFunctionBody, "}"
             }) : node;
         }
 
