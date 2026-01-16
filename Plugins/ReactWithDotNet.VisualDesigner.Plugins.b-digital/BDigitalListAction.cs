@@ -121,39 +121,78 @@ sealed class BDigitalListAction : PluginComponentBase
 
     protected override Element render()
     {
-        var moreIcon = action.HasValue && selectedCount == "0"
-            ? new FlexRowCentered(Width(64))
+        var iconName = lineIcon switch
+        {
+            "ChevronRight" => "chevron_right",
+            
+            null => "more_vert",
+            
+            _   => lineIcon
+        };
+        
+        
+        var moreIcon = action.HasValue && selectedCount == "0" || lineIcon.HasValue
+            ? new FlexRowCentered(Width(24))
             {
                 new MaterialSymbol
                 {
-                    name         = "more_vert",
+                    name         =  iconName,
                     size         = 24,
                     styleVariant = MaterialSymbolVariant.outlined,
                     color        = "#16A085"
                 }
             }
             : null;
+        
+        
 
         var leftListDataContainer = children.FindElementByElementType(typeof(leftListData));
         
         var rightListDataContainer = children.FindElementByElementType(typeof(rightListData));
         
-        return new FlexRow(JustifyContentSpaceBetween)
+        return new Fragment
         {
-            Id(id),
-            OnClick(onMouseClick),
-            
-            leftListDataContainer,
-
-            
-            new FlexRow
+            new FlexRow(IsNotMobile(DisplayNone), JustifyContentSpaceBetween, AlignItemsCenter)
             {
-                rightListDataContainer,
+                Id(id),
+                OnClick(onMouseClick),
             
-                moreIcon
-                
-            }
+                new FlexColumn(AlignItemsFlexStart)
+                {
+                    leftListDataContainer?.children,
+                    
+                    rightListDataContainer?.children
+                }
+                ,
+            
+                new FlexRowCentered(Size(64))
+                {
+                    moreIcon
+                }
            
+            },
+
+            new FlexRow(IsMobile(DisplayNone), AlignItemsCenter, JustifyContentSpaceBetween)
+            {
+                Id(id),
+                OnClick(onMouseClick),
+
+                new FlexColumn(JustifyContentFlexStart)
+                {
+                    leftListDataContainer?.children
+                },
+
+                new FlexRow(Gap(8))
+                {
+                    new FlexColumn(AlignItemsFlexEnd)
+                    {
+                        rightListDataContainer?.children,
+                    },
+
+                    moreIcon
+                }
+
+            }
         };
     }
 }

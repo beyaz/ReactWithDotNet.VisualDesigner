@@ -15,6 +15,25 @@ record MessagingRecord
 
 static class Mixin
 {
+    public static StyleModifier IsNotMobile(params StyleModifier[] styleModifiers)
+    {
+        return WhenMediaMinWidth(600, styleModifiers);
+    }
+    public static StyleModifier IsMobile(params StyleModifier[] styleModifiers)
+    {
+        return WhenMediaMaxWidth(600, styleModifiers);
+    }
+    
+    public static StyleModifier IsTablet(params StyleModifier[] styleModifiers)
+    {
+        return MediaQuery("(min-width: 600px) and (max-width: 959.95px)", styleModifiers);
+    }
+    
+    public static StyleModifier isDesktop(params StyleModifier[] styleModifiers)
+    {
+        return MediaQuery("(min-width: 960px)", styleModifiers);
+    }
+    
     internal static int ProjectId = 1;
     
     public static string TryResolveColorInProject(string maybeNamedColor)
