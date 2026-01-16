@@ -134,7 +134,13 @@ sealed class BDigitalListAction : PluginComponentBase
             
             _   => lineIcon
         };
-        
+
+        var iconColor = lineIconColor switch
+        {
+            "context.theme.palette.primary.main" => "#16A085",
+            
+            _ => lineIconColor
+        };
         
         var moreIcon = action.HasValue && selectedCount == "0" || lineIcon.HasValue
             ? new FlexRowCentered(Width(24))
@@ -144,7 +150,7 @@ sealed class BDigitalListAction : PluginComponentBase
                     name         =  iconName,
                     size         = 24,
                     styleVariant = MaterialSymbolVariant.outlined,
-                    color        = "#16A085"
+                    color        = iconColor
                 }
             }
             : null;
