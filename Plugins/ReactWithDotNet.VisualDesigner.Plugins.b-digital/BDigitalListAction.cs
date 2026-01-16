@@ -121,31 +121,37 @@ sealed class BDigitalListAction : PluginComponentBase
 
     protected override Element render()
     {
+        var moreIcon = action.HasValue && selectedCount == "0"
+            ? new FlexRowCentered(Width(64))
+            {
+                new MaterialSymbol
+                {
+                    name         = "more_vert",
+                    size         = 24,
+                    styleVariant = MaterialSymbolVariant.outlined,
+                    color        = "#16A085"
+                }
+            }
+            : null;
+
+        var leftListDataContainer = children.FindElementByElementType(typeof(leftListData));
+        
+        var rightListDataContainer = children.FindElementByElementType(typeof(rightListData));
+        
         return new FlexRow(JustifyContentSpaceBetween)
         {
             Id(id),
             OnClick(onMouseClick),
             
-            // leftListData
-            children.FindElementByElementType(typeof(leftListData)),
+            leftListDataContainer,
 
             
             new FlexRow
             {
-                // rightListData
-                children.FindElementByElementType(typeof(rightListData)),
+                rightListDataContainer,
             
-                action.HasValue && selectedCount == "0" ?
-                new FlexRowCentered(Width(64))
-                {
-                    new MaterialSymbol
-                    {
-                        name = "more_vert" ,
-                        size = 24,
-                        styleVariant = MaterialSymbolVariant.outlined,
-                        color = "#16A085"
-                    }
-                } : null
+                moreIcon
+                
             }
            
         };
