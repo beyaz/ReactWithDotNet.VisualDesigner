@@ -38,6 +38,11 @@ sealed class BDigitalListAction : PluginComponentBase
 
     [JsTypeInfo(JsType.String)]
     public string lineIcon { get; set; }
+    
+    
+    [JsTypeInfo(JsType.String)]
+    public string lineIconColor { get; set; }
+    
 
     [JsTypeInfo(JsType.Function)]
     public string onLineClick { get; set; }
