@@ -96,6 +96,9 @@ sealed class BTabBar : PluginComponentBase
             List<string> lineList = [];
             
             TsImportCollection tsImports = new();
+            
+            childNode = ApplyTranslateOperationOnProps(childNode, input.ComponentConfig,nameof(BTab.text));
+            
 
             var textProperty = childNode.Properties.FirstOrDefault(p => p.Name == nameof(BTab.text));
 

@@ -93,13 +93,6 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
 
         List<ReactProperty> finalProps = [];
 
-        string TryGetPropFinalText(ReactNode reactNode, string propName)
-        {
-            var tempNode = ApplyTranslateOperationOnProps(reactNode, input.ComponentConfig, propName);
-
-            return TryGetPropValueByPropName(tempNode, propName);
-        }
-
         // sender
         {
             List<string> lines = [];
@@ -390,6 +383,13 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
         {
             { nameof(BDigitalTransactionConfirm), "b-digital-transaction-confirm" }
         }));
+
+        string TryGetPropFinalText(ReactNode reactNode, string propName)
+        {
+            var tempNode = ApplyTranslateOperationOnProps(reactNode, input.ComponentConfig, propName);
+
+            return TryGetPropValueByPropName(tempNode, propName);
+        }
 
         string getItem(ReactNode textNode, ReactNode valueNode)
         {
