@@ -1,4 +1,6 @@
-﻿namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
+﻿using static System.Net.Mime.MediaTypeNames;
+
+namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
 [CustomComponent]
 sealed class BCheckBox : PluginComponentBase
@@ -28,6 +30,8 @@ sealed class BCheckBox : PluginComponentBase
         }
         
         var node = input.Node;
+        
+        node = ApplyTranslateOperationOnProps(node, input.ComponentConfig, nameof(label));
         
         var onCheckProp = node.Properties.FirstOrDefault(x => x.Name == nameof(onCheck));
 

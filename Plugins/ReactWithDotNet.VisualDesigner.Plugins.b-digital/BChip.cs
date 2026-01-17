@@ -29,6 +29,9 @@ sealed class BChip : PluginComponentBase
         
         var node = input.Node;
         
+        
+        node = ApplyTranslateOperationOnProps(node, input.ComponentConfig, nameof(label));
+        
         node = AddContextProp(node);
 
         var import = (nameof(BChip), "b-chip");
