@@ -99,8 +99,7 @@ static class TsxExporter
             // Convert model to node
             from rootNode in ModelToNodeTransformer.ConvertVisualElementModelToReactNodeModel(componentScope, rootVisualElement)
 
-            // Analyze node
-            from nodeAnalyzeOutput  in AnalyzeNode(new()
+            let nodeAnalyzeInput = new NodeAnalyzeInput
             {
                 Node = rootNode, 
                 
@@ -117,7 +116,10 @@ static class TsxExporter
                     
                     ReactNodeModelToElementTreeSourceLinesConverter =x=>ConvertReactNodeModelToElementTreeSourceLines(project, x, null, 2)
                 })
-            })
+            }
+            
+            // Analyze node
+            from nodeAnalyzeOutput  in AnalyzeNode(nodeAnalyzeInput)
 
             // Convert node to JSX tree
             from elementJsxTree in ConvertReactNodeModelToElementTreeSourceLines(project, nodeAnalyzeOutput.Node, null, 2)
