@@ -82,9 +82,9 @@ sealed class ProjectSelectionView : Component<ProjectSelectionView.State>
     {
         var rect = e.target.boundingClientRect;
 
-        state = state with
+        state = new State
         {
-            IsSuggestionsVisible = !state.IsSuggestionsVisible,
+            IsSuggestionsVisible     = !state.IsSuggestionsVisible,
             SuggestionPopupLocationX = rect.left-100,
             SuggestionPopupLocationY = rect.top + rect.height + 8
         };

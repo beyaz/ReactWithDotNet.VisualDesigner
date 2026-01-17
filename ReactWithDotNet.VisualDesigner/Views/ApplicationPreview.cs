@@ -1315,14 +1315,15 @@ public sealed record Pipe<Tin, Tout> : IEnumerable<Func<Tin, Task<Result<Tout>>>
 
     public void Add(Func<Tin, Tout> value)
     {
-        var fn = (Tin x) =>
+        _items.Add(fn);
+        return;
+
+        Task<Result<Tout>> fn(Tin x)
         {
             Result<Tout> result = value(x);
 
             return Task.FromResult(result);
-        };
-
-        _items.Add(fn);
+        }
     }
 
     public void Add(Func<Tin, Task<Result<Tout>>> value)

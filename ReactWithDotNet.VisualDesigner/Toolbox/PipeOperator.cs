@@ -1,4 +1,4 @@
-﻿namespace Toolbox;
+﻿// namespace Toolbox;
 
 //public static class PipeOperator
 //{
