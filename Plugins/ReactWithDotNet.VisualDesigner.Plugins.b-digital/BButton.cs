@@ -66,6 +66,7 @@ sealed class BButton : PluginComponentBase
     {
         Style defaultStyle = [BorderRadius(10), TextTransform(none)];
 
+        
         if (colorType == "primary")
         {
             defaultStyle =
@@ -75,7 +76,8 @@ sealed class BButton : PluginComponentBase
                 FontWeightBold,
                 BackgroundColor("#16A085"),
                 Color("white"),
-                BorderRadius(10)
+                BorderRadius(10),
+                BoxShadow("0px 3px 1px -2px rgba(0,0,0,0.2),0px 2px 2px 0px rgba(0,0,0,0.14),0px 1px 5px 0px rgba(0,0,0,0.12)")
             ];
         }
 

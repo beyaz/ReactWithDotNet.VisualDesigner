@@ -18,6 +18,11 @@ sealed partial class BDigitalEmptyPage : PluginComponentBase
         {
             return  AnalyzeChildren(input, AnalyzeReactNode);
         }
+
+        input = input with
+        {
+            Node = ApplyTranslateOperationOnProps(input.Node, input.ComponentConfig, nameof(description))
+        };
         
         var import = (nameof(BDigitalEmptyPage),"b-digital-empty-page");
         

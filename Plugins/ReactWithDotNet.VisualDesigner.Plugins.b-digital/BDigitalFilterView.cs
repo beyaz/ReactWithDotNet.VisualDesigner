@@ -48,7 +48,8 @@ sealed class  BDigitalFilterView: PluginComponentBase
         var node = input.Node;
 
 
-
+        node = ApplyTranslateOperationOnProps(node, input.ComponentConfig, nameof(beginDateLabel));
+        node = ApplyTranslateOperationOnProps(node, input.ComponentConfig, nameof(endDateLabel));
 
         
 
