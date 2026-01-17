@@ -235,7 +235,7 @@ static class HtmlImporter
 
         static bool skipWordWrap(KeyValuePair<string, string> htmlStyleAttribute)
         {
-            if (htmlStyleAttribute.Key == "word-wrap" && htmlStyleAttribute.Value == "break-word")
+            if (htmlStyleAttribute is { Key: "word-wrap", Value: "break-word" })
             {
                 return false;
             }
@@ -245,7 +245,7 @@ static class HtmlImporter
 
         static bool skipJustifyContentFlexStart(KeyValuePair<string, string> htmlStyleAttribute)
         {
-            if (htmlStyleAttribute.Key == "justify-content" && htmlStyleAttribute.Value == "flex-start")
+            if (htmlStyleAttribute is { Key: "justify-content", Value: "flex-start" })
             {
                 return false;
             }

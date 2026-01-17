@@ -381,14 +381,14 @@ sealed class ApplicationView : Component<ApplicationState>
             {
                 Tag = parent.Tag switch
                 {
-                    var x when x == nameof(tr) => nameof(td),
+                    nameof(tr) => nameof(td),
 
                     var x when x == nameof(tbody) || x == nameof(thead) || x == nameof(tfoot) => nameof(tr),
 
-                    var x when x == nameof(table) && parent.Children.Any(c => c.Tag == nameof(tr))    => nameof(tr),
-                    var x when x == nameof(table) && parent.Children.All(c => c.Tag != nameof(thead)) => nameof(thead),
-                    var x when x == nameof(table) && parent.Children.All(c => c.Tag != nameof(tbody)) => nameof(tbody),
-                    var x when x == nameof(table) && parent.Children.All(c => c.Tag != nameof(tfoot)) => nameof(tfoot),
+                    nameof(table) when parent.Children.Any(c => c.Tag == nameof(tr))    => nameof(tr),
+                    nameof(table) when parent.Children.All(c => c.Tag != nameof(thead)) => nameof(thead),
+                    nameof(table) when parent.Children.All(c => c.Tag != nameof(tbody)) => nameof(tbody),
+                    nameof(table) when parent.Children.All(c => c.Tag != nameof(tfoot)) => nameof(tfoot),
 
                     _ => nameof(div)
                 }
