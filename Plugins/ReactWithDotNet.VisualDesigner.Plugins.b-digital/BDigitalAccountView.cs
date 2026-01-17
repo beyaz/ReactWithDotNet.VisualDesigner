@@ -26,6 +26,8 @@ sealed class BDigitalAccountView : PluginComponentBase
         {
             return AnalyzeChildren(input, AnalyzeReactNode);
         }
+        
+        input = ApplyTranslateOperationOnProps(input, nameof(title));
 
         var node = input.Node;
 

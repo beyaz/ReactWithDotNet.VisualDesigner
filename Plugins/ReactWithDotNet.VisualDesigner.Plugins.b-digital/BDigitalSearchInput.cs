@@ -25,6 +25,9 @@ sealed class BDigitalSearchInput : PluginComponentBase
             return AnalyzeChildren(input, AnalyzeReactNode);
         }
         
+        input = ApplyTranslateOperationOnProps(input, nameof(hintText));
+        
+        
         var (node, componentConfig) = input;
 
 
@@ -33,8 +36,6 @@ sealed class BDigitalSearchInput : PluginComponentBase
         
 
 
-
-        node = ApplyTranslateOperationOnProps(node, componentConfig, nameof(hintText));
 
         
         

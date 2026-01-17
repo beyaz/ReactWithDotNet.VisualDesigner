@@ -27,6 +27,9 @@ sealed class BDigitalAccountCardView : PluginComponentBase
             return AnalyzeChildren(input, AnalyzeReactNode);
         }
         
+      
+        
+        
         var (node, componentConfig) = input;
 
 

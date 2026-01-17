@@ -25,9 +25,10 @@ sealed class BasePage : PluginComponentBase
             return  AnalyzeChildren(input, AnalyzeReactNode);
         }
         
+        input = ApplyTranslateOperationOnProps(input, nameof(pageTitle));
+        
         var node = input.Node;
 
-        node = ApplyTranslateOperationOnProps(node, input.ComponentConfig, nameof(pageTitle));
 
         var import = (nameof(BasePage),"b-digital-framework");
         

@@ -51,6 +51,8 @@ sealed class BDigitalDialog : PluginComponentBase
         {
             return await AnalyzeChildren(input, AnalyzeReactNode);
         }
+        
+        input = ApplyTranslateOperationOnProps(input, nameof(title));
 
         var node = input.Node;
 

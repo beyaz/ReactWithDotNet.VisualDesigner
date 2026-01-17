@@ -29,9 +29,12 @@ sealed class BCheckBox : PluginComponentBase
             return AnalyzeChildren(input, AnalyzeReactNode);
         }
         
+        
+        input = ApplyTranslateOperationOnProps(input, nameof(label));
+        
+        
         var node = input.Node;
         
-        node = ApplyTranslateOperationOnProps(node, input.ComponentConfig, nameof(label));
         
         var onCheckProp = node.Properties.FirstOrDefault(x => x.Name == nameof(onCheck));
 

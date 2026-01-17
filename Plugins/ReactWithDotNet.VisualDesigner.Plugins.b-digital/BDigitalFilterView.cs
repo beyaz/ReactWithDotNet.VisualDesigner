@@ -45,11 +45,11 @@ sealed class  BDigitalFilterView: PluginComponentBase
             return AnalyzeChildren(input, AnalyzeReactNode);
         }
 
+        input = ApplyTranslateOperationOnProps(input, nameof(beginDateLabel), nameof(endDateLabel));
+        
         var node = input.Node;
 
 
-        node = ApplyTranslateOperationOnProps(node, input.ComponentConfig, nameof(beginDateLabel));
-        node = ApplyTranslateOperationOnProps(node, input.ComponentConfig, nameof(endDateLabel));
 
         
 

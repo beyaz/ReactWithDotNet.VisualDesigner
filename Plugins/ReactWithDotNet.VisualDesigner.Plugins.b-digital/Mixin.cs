@@ -125,6 +125,14 @@ static class Mixin
         return (node, tsImportCollection);
     }
 
+    public static NodeAnalyzeInput ApplyTranslateOperationOnProps(NodeAnalyzeInput input, params string[] propNames)
+    {
+        return input = input with
+        {
+            Node = ApplyTranslateOperationOnProps(input.Node, input.ComponentConfig, propNames)
+        };
+    }
+    
     public static ReactNode ApplyTranslateOperationOnProps(ReactNode node, ComponentConfig componentConfig, params string[] propNames)
     {
         return node with

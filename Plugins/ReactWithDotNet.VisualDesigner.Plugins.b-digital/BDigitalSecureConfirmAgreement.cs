@@ -22,10 +22,12 @@ sealed class BDigitalSecureConfirmAgreement : PluginComponentBase
         {
             return AnalyzeChildren(input, AnalyzeReactNode);
         }
+        
+        input = ApplyTranslateOperationOnProps(input, nameof(approveText), nameof(description));
+        
 
         var node = input.Node;
 
-        node = ApplyTranslateOperationOnProps(node, input.ComponentConfig, nameof(approveText));
 
         var import = (nameof(BDigitalSecureConfirmAgreement), "b-digital-secure-confirm-agreement");
 

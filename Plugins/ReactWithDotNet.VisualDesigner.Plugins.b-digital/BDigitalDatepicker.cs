@@ -39,9 +39,11 @@ sealed class BDigitalDatepicker : PluginComponentBase
             return AnalyzeChildren(input, AnalyzeReactNode);
         }
         
+        input = ApplyTranslateOperationOnProps(input, nameof(labelText), nameof(placeholder));
+        
         var (node, componentConfig) = input;
         
-        node = ApplyTranslateOperationOnProps(node, componentConfig, nameof(labelText));
+      
 
         var valueProp = node.Properties.FirstOrDefault(x => x.Name == nameof(value));
         var isRequiredProp = node.Properties.FirstOrDefault(x => x.Name == nameof(isRequired));

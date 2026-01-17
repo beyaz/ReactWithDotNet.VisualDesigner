@@ -17,6 +17,9 @@ sealed class BDigitalPlateNumber : PluginComponentBase
             return  AnalyzeChildren(input, AnalyzeReactNode);
         }
         
+        input = ApplyTranslateOperationOnProps(input, nameof(label));
+        
+        
         var import = (nameof(BDigitalPlateNumber),"b-plate-number");
         
         return  AnalyzeChildren(input, AnalyzeReactNode).With(import);

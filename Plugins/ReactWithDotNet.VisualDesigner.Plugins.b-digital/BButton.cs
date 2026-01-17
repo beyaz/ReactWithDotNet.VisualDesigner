@@ -52,10 +52,13 @@ sealed class BButton : PluginComponentBase
         {
             return AnalyzeChildren(input, AnalyzeReactNode);
         }
+        
+        
+        input = ApplyTranslateOperationOnProps(input, nameof(text));
+        
 
         var node = input.Node;
 
-        node = ApplyTranslateOperationOnProps(node, input.ComponentConfig, nameof(text));
 
         var import = (nameof(BButton), "b-button");
 

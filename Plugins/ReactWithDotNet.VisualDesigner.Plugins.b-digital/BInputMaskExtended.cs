@@ -41,6 +41,9 @@ sealed class BInputMaskExtended : PluginComponentBase
             return AnalyzeChildren(input, AnalyzeReactNode);
         }
         
+        input                       = ApplyTranslateOperationOnProps(input, nameof(floatingLabelText), nameof(helperText));
+        
+        
         var (node, componentConfig) = input;
         
         

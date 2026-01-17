@@ -27,10 +27,13 @@ sealed class BChip : PluginComponentBase
             return AnalyzeChildren(input, AnalyzeReactNode);
         }
         
+        
+        input = ApplyTranslateOperationOnProps(input, nameof(label));
+        
+        
         var node = input.Node;
         
         
-        node = ApplyTranslateOperationOnProps(node, input.ComponentConfig, nameof(label));
         
         node = AddContextProp(node);
 

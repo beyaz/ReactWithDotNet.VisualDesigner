@@ -24,14 +24,11 @@ sealed class BDigitalPhone : PluginComponentBase
             return AnalyzeChildren(input, AnalyzeReactNode);
         }
 
+        input = ApplyTranslateOperationOnProps(input, nameof(label), nameof(hintText));
+        
+        
         var node = input.Node;
-
-        node = ApplyTranslateOperationOnProps(node, input.ComponentConfig, nameof(label));
-
-
-
-
-
+        
 
         var phoneNumberProp = node.Properties.FirstOrDefault(x => x.Name == nameof(phoneNumber));
         var handlePhoneChangeProp = node.Properties.FirstOrDefault(x => x.Name == nameof(handlePhoneChange));

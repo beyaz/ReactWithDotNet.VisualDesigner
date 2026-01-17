@@ -37,11 +37,12 @@ sealed class BDigitalFileInput : PluginComponentBase
             return AnalyzeChildren(input, AnalyzeReactNode);
         }
         
+        input = ApplyTranslateOperationOnProps(input, nameof(labelText), nameof(maxFileSizeText));
+        
         var node = input.Node;
         
         
        
-        node = ApplyTranslateOperationOnProps(node, input.ComponentConfig, nameof(labelText), nameof(maxFileSizeText));
        
         var isRequiredProp = node.Properties.FirstOrDefault(x => x.Name == nameof(isRequired));
         

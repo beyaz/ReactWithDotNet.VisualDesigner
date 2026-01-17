@@ -53,9 +53,10 @@ sealed class BInputNumericExtended : PluginComponentBase
             return AnalyzeChildren(input, AnalyzeReactNode);
         }
 
+        input = ApplyTranslateOperationOnProps(input, nameof(floatingLabelText), nameof(errorText),nameof(helperText), nameof(hintText));
+        
         var node = input.Node;
 
-        node = ApplyTranslateOperationOnProps(node, input.ComponentConfig, nameof(floatingLabelText));
 
 
         var valueProp = node.Properties.FirstOrDefault(x => x.Name == nameof(value));

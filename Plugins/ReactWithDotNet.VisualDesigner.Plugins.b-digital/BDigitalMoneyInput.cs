@@ -28,10 +28,11 @@ sealed class BDigitalMoneyInput : PluginComponentBase
         {
             return AnalyzeChildren(input, AnalyzeReactNode);
         }
+        
+        input = ApplyTranslateOperationOnProps(input, nameof(label));
 
         var node = input.Node;
 
-        node = ApplyTranslateOperationOnProps(node, input.ComponentConfig, nameof(label));
 
         {
             var valueProp = node.Properties.FirstOrDefault(x => x.Name == nameof(value));

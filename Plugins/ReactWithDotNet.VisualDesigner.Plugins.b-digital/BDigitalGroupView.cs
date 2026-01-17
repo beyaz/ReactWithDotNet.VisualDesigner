@@ -26,11 +26,12 @@ sealed class BDigitalGroupView : PluginComponentBase
         {
             return AnalyzeChildren(input, AnalyzeReactNode);
         }
+        
+        input = ApplyTranslateOperationOnProps(input, nameof(title));
 
         var node = input.Node;
 
-        node = ApplyTranslateOperationOnProps(node, input.ComponentConfig, nameof(title));
-
+        
         var import = (nameof(BDigitalGroupView), "b-digital-group-view");
 
         return AnalyzeChildren(input with { Node = node }, AnalyzeReactNode).With(import);

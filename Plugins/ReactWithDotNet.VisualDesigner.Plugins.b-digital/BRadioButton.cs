@@ -23,10 +23,12 @@ sealed class BRadioButton : PluginComponentBase
         {
             return AnalyzeChildren(input, AnalyzeReactNode);
         }
+        
+        input = ApplyTranslateOperationOnProps(input, nameof(label));
+        
 
         var node = input.Node;
 
-        node = ApplyTranslateOperationOnProps(node, input.ComponentConfig, nameof(label));
 
         return Result.From((node, new TsImportCollection
         {
