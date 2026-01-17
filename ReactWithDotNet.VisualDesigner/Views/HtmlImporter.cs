@@ -212,7 +212,7 @@ static class HtmlImporter
 
         model = model with { Styles = ArrangeAccordingToProject(project, model.Styles) };
 
-        if (htmlNode.ChildNodes.Count == 1 && htmlNode.ChildNodes[0].NodeType == HtmlNodeType.Text && htmlNode.ChildNodes[0].InnerText.HasValue)
+        if (htmlNode.ChildNodes is [{ NodeType: HtmlNodeType.Text, InnerText.HasValue: true }])
         {
             model = model with { Properties = model.Properties.Add($"{Design.Content}: '{htmlNode.ChildNodes[0].InnerText.Trim()}'") };
             model = model with { Properties = model.Properties.Add($"{Design.ContentPreview}: '{htmlNode.ChildNodes[0].InnerText.Trim()}'") };
