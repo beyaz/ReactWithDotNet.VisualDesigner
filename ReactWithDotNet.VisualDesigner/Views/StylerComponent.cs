@@ -1641,15 +1641,15 @@ class CssUnitEditor : Component<CssUnitEditor.State>
 
     Task OnButtonClicked(MouseEvent e)
     {
-        var charachter = e.target.id;
-        if (charachter.HasNoValue)
+        var character = e.target.id;
+        if (character.HasNoValue)
         {
             return Task.CompletedTask;
         }
 
         state = state with
         {
-            Value = state.Value + charachter
+            Value = state.Value + character
         };
 
         DispatchEvent(Change, [CssName + ":" + state.Value + state.Unit]);
