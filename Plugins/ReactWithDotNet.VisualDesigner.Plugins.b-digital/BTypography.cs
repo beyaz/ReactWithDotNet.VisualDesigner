@@ -10,6 +10,26 @@ sealed class BTypography : PluginComponentBase
     [NodeAnalyzer]
     public static NodeAnalyzeOutput AnalyzeReactNode(NodeAnalyzeInput input)
     {
+        if (input.Node.Tag is null)
+        {
+            if (IsStringValue(input.Node.Text))
+            {
+                var result = ApplyTranslateOperation(input.ComponentConfig.Translate, input.Node.Text);
+                if (result.hasAnyChange)
+                {
+                    var node = input.Node with
+                    {
+                        Text = result.value
+                    };
+                    var imports = new ReactWithDotNet.VisualDesigner.TsImportCollection();
+
+                    (ReactWithDotNet.VisualDesigner.Exporters.ReactNode Node, ReactWithDotNet.VisualDesigner.TsImportCollection TsImportCollection) output = (node, imports);
+
+                    return Task.FromResult(Result.From(output));
+                }
+            }
+        }
+        
         if (input.Node.Tag != nameof(BTypography))
         {
             return  AnalyzeChildren(input, AnalyzeReactNode);
