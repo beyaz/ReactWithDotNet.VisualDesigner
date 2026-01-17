@@ -159,20 +159,22 @@ static class Mixin
             };
         }
 
-        static (bool hasAnyChange, string value) ApplyTranslateOperation(string translate, string label)
+        
+    }
+    
+    public static (bool hasAnyChange, string value) ApplyTranslateOperation(string translate, string label)
+    {
+        var messagingRecords = GetMessagingByGroupName(translate).GetAwaiter().GetResult();
+
+        var labelRawValue = TryClearStringValue(label);
+
+        var propertyName = FirstOrDefaultOf(from m in messagingRecords where m.Description.Trim() == labelRawValue.Trim() select m.PropertyName);
+        if (propertyName is null)
         {
-            var messagingRecords = GetMessagingByGroupName(translate).GetAwaiter().GetResult();
-
-            var labelRawValue = TryClearStringValue(label);
-
-            var propertyName = FirstOrDefaultOf(from m in messagingRecords where m.Description.Trim() == labelRawValue.Trim() select m.PropertyName);
-            if (propertyName is null)
-            {
-                return (false, label);
-            }
-
-            return (true, $"getMessage(\"{propertyName}\")");
+            return (false, label);
         }
+
+        return (true, $"getMessage(\"{propertyName}\")");
     }
     
     public static IReadOnlyList<string> GetUpdateStateLines(string jsVariableName, string jsValueName)

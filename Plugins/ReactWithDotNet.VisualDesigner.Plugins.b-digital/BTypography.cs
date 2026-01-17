@@ -5,6 +5,8 @@ namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 [CustomComponent]
 sealed class BTypography : PluginComponentBase
 {
+    
+    
     [NodeAnalyzer]
     public static NodeAnalyzeOutput AnalyzeReactNode(NodeAnalyzeInput input)
     {
@@ -15,16 +17,9 @@ sealed class BTypography : PluginComponentBase
         
         input = ApplyTranslateOperationOnProps(input, Design.Content);
         
-        
-        var node = input.Node;
-
-        
-        
-        
-        
         var import = (nameof(BTypography),"b-core-typography");
         
-        return  AnalyzeChildren(input with { Node = node }, AnalyzeReactNode).With(import);
+        return  AnalyzeChildren(input, AnalyzeReactNode).With(import);
     }
     
     
