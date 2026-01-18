@@ -215,11 +215,18 @@ static class TsModelCreator
     
     static bool IsJsonIgnored(PropertyDefinition propertyDefinition)
     {
-        return propertyDefinition.CustomAttributes.Any(x => 
-            x.AttributeType.Name.Contains("JsonIgnore", StringComparison.OrdinalIgnoreCase)||
-            x.AttributeType.Name.Contains("TsIgnore", StringComparison.OrdinalIgnoreCase));
+        if (propertyDefinition.CustomAttributes.Any(x=>x.NameLike("TsInclude")))
+        {
+            return false;
+        }
+        
+        return propertyDefinition.CustomAttributes.Any(x => x.NameLike("JsonIgnore") || x.NameLike("TsIgnore"));
     }
-
+    
+    static bool NameLike(this CustomAttribute customAttribute, string name)
+    {
+        return customAttribute.AttributeType.Name.Contains(name, StringComparison.OrdinalIgnoreCase);
+    }
 
     public static string GetExtraClassFileName(TypeReference typeReference, string apiName)
     {
