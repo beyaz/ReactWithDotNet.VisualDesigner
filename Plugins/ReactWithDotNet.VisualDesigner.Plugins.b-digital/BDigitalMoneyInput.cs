@@ -19,7 +19,8 @@ sealed class BDigitalMoneyInput : PluginComponentBase
     [JsTypeInfo(JsType.Number)]
     public string value { get; set; }
 
-
+    [JsTypeInfo(JsType.String)]
+    public string errorText { get; set; }
 
     [NodeAnalyzer]
     public static NodeAnalyzeOutput AnalyzeReactNode(NodeAnalyzeInput input)
@@ -29,14 +30,14 @@ sealed class BDigitalMoneyInput : PluginComponentBase
             return AnalyzeChildren(input, AnalyzeReactNode);
         }
         
-        input = ApplyTranslateOperationOnProps(input, nameof(label));
+        input = ApplyTranslateOperationOnProps(input, nameof(label), nameof(errorText));
 
         var node = input.Node;
-
-
         {
             var valueProp = node.Properties.FirstOrDefault(x => x.Name == nameof(value));
+            
             var handleMoneyInputChangeProp = node.Properties.FirstOrDefault(x => x.Name == nameof(handleMoneyInputChange));
+            
             if (valueProp is not null && !valueProp.Value.Contains("("))
             {
                 var properties = node.Properties;
@@ -72,7 +73,7 @@ sealed class BDigitalMoneyInput : PluginComponentBase
 
                     properties = properties.SetItem(properties.FindIndex(x => x.Name == handleMoneyInputChangeProp.Name), handleMoneyInputChangeProp);
                 }
-                else
+                else 
                 {
                     properties = properties.Add(new()
                     {
