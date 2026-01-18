@@ -14,6 +14,16 @@ sealed class BDigitalSecureConfirmAgreement : PluginComponentBase
 
     [JsTypeInfo(JsType.String)]
     public string approveText { get; set; }
+    
+    [JsTypeInfo(JsType.Array)]
+    public string documents { get; set; }
+    
+        
+    [JsTypeInfo(JsType.Number)]
+    public string duration { get; set; }
+    
+    [JsTypeInfo(JsType.Function)]
+    public string setAgreementDocument { get; set; }
 
     [NodeAnalyzer]
     public static NodeAnalyzeOutput AnalyzeReactNode(NodeAnalyzeInput input)
