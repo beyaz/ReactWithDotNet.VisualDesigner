@@ -1,6 +1,6 @@
-﻿using System.Collections.Immutable;
+﻿using Mono.Cecil;
+using System.Collections.Immutable;
 using System.IO;
-using Mono.Cecil;
 
 namespace BDigitalFrameworkApiToTsExporter;
 
@@ -69,7 +69,7 @@ static class Exporter
 
             static IReadOnlyList<TypeDefinition> CollectExtraTypes(IReadOnlyList<ExternalTypeInfo> externalTypes, TypeReference typeReference, IReadOnlyList<TypeDefinition> collectedTypeDefinitions)
             {
-                if (CecilHelper.IsNullableType(typeReference) || IsCollection(typeReference))
+                if (CecilHelper.IsNullableType(typeReference) || typeReference.IsCollectionType)
                 {
                     return CollectExtraTypes(externalTypes, ((GenericInstanceType)typeReference).GenericArguments[0], collectedTypeDefinitions);
                 }
@@ -124,17 +124,7 @@ static class Exporter
                 return collectedTypeDefinitions;
             }
 
-            static bool IsCollection(TypeReference typeReference)
-            {
-                var names = new List<string>()
-                {
-                    "System.Collections.Generic.List`1",
-                    "System.Collections.Generic.IReadOnlyList`1",
-                    "System.Collections.Immutable.ImmutableList`1"
-                };
-
-                return names.Any(name => typeReference.FullName.StartsWith(name, StringComparison.OrdinalIgnoreCase));
-            }
+            
         }
 
         static Result<FileModel> ExportExtraType(Scope scope, TypeDefinition extraTypeDefinition)

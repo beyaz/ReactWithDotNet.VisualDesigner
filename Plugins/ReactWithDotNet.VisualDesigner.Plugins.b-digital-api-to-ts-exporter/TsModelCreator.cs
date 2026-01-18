@@ -69,6 +69,21 @@ static class TsModelCreator
 
             Fields = fields.ToList()
         };
+        
+        static bool IsJsonIgnored(PropertyDefinition propertyDefinition)
+        {
+            if (HasCustomAttributeNameLike("TsInclude"))
+            {
+                return false;
+            }
+        
+            return HasCustomAttributeNameLike("JsonIgnore") || HasCustomAttributeNameLike("TsIgnore");
+        
+            bool HasCustomAttributeNameLike(string attributeName)
+            {
+                return propertyDefinition.CustomAttributes.Any(x => x.AttributeType.Name.Contains(attributeName, StringComparison.OrdinalIgnoreCase));
+            }
+        }
     }
 
     static TsTypeReference GetTSType(IReadOnlyList<ExternalTypeInfo> externalTypes, TypeReference typeReference, bool isExportingForModelFile, string apiName)
@@ -127,15 +142,9 @@ static class TsModelCreator
         if (typeReference.IsGenericInstance)
         {
             var genericInstanceType = (GenericInstanceType)typeReference;
-
-            var isArrayType =
-                genericInstanceType.GenericArguments.Count == 1 &&
-                (
-                    typeReference.Name == "Collection`1" ||
-                    typeReference.Name == "List`1" ||
-                    typeReference.Name == "IReadOnlyCollection`1" ||
-                    typeReference.Name == "IReadOnlyList`1"
-                );
+            
+            var isArrayType = genericInstanceType.GenericArguments.Count == 1 && 
+                              genericInstanceType.ElementType.IsCollectionType;
 
             if (isArrayType)
             {
@@ -213,20 +222,7 @@ static class TsModelCreator
         return propertyDefinition.Name.Contains(".");
     }
     
-    static bool IsJsonIgnored(PropertyDefinition propertyDefinition)
-    {
-        if (propertyDefinition.CustomAttributes.Any(x=>x.NameLike("TsInclude")))
-        {
-            return false;
-        }
-        
-        return propertyDefinition.CustomAttributes.Any(x => x.NameLike("JsonIgnore") || x.NameLike("TsIgnore"));
-    }
     
-    static bool NameLike(this CustomAttribute customAttribute, string name)
-    {
-        return customAttribute.AttributeType.Name.Contains(name, StringComparison.OrdinalIgnoreCase);
-    }
 
     public static string GetExtraClassFileName(TypeReference typeReference, string apiName)
     {

@@ -1,11 +1,35 @@
-﻿using System.Reflection;
+﻿using System.Collections.Immutable;
+using System.Collections.ObjectModel;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using Mono.Cecil;
 
 namespace BDigitalFrameworkApiToTsExporter;
 
+
+
+
 static class CecilHelper
 {
+    extension(TypeReference typeReference)
+    {
+        public bool IsCollectionType
+        {
+            get
+            {
+                var names = new List<string>
+                {
+                    typeof(Collection<>).FullName,
+                    typeof(IReadOnlyCollection<>).FullName,
+                    typeof(List<>).FullName,
+                    typeof(IReadOnlyList<>).FullName,
+                    typeof(ImmutableList<>).FullName
+                };
+
+                return names.Any(name => typeReference.FullName.StartsWith(name, StringComparison.OrdinalIgnoreCase));
+            }
+        }
+    }
     public static Result<TypeDefinition> GetType(AssemblyDefinition assemblyDefinition, string fullTypeName)
     {
         var query = from module in assemblyDefinition.Modules
