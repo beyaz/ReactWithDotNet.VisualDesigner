@@ -8,6 +8,9 @@ sealed class BDigitalMoneyInput : PluginComponentBase
     public string currencyVisible { get; set; }
 
     [JsTypeInfo(JsType.String)]
+    public string errorText { get; set; }
+
+    [JsTypeInfo(JsType.String)]
     public string fec { get; set; }
 
     [JsTypeInfo(JsType.Function)]
@@ -19,9 +22,6 @@ sealed class BDigitalMoneyInput : PluginComponentBase
     [JsTypeInfo(JsType.Number)]
     public string value { get; set; }
 
-    [JsTypeInfo(JsType.String)]
-    public string errorText { get; set; }
-
     [NodeAnalyzer]
     public static NodeAnalyzeOutput AnalyzeReactNode(NodeAnalyzeInput input)
     {
@@ -29,61 +29,48 @@ sealed class BDigitalMoneyInput : PluginComponentBase
         {
             return AnalyzeChildren(input, AnalyzeReactNode);
         }
-        
+
         input = ApplyTranslateOperationOnProps(input, nameof(label), nameof(errorText));
 
         var node = input.Node;
-        {
-            var valueProp = node.Properties.FirstOrDefault(x => x.Name == nameof(value));
-            
-            var handleMoneyInputChangeProp = node.Properties.FirstOrDefault(x => x.Name == nameof(handleMoneyInputChange));
-            
-            if (valueProp is not null && !valueProp.Value.Contains("("))
-            {
-                var properties = node.Properties;
 
-                var lines = new TsLineCollection
+        if (!node.Properties.HasFunctionAssignment(nameof(handleMoneyInputChange)))
+        {
+            var onChangeFunctionBody = new TsLineCollection
+            {
+                // u p d a t e   s o u r c e
+                from property in node.Properties
+                where property.Name == nameof(value)
+                from line in GetUpdateStateLines(property.Value, "value")
+                select line,
+
+                // e v e n t   h a n d l e r
+                from property in node.Properties
+                where property.Name == nameof(handleMoneyInputChange)
+                let value = property.Value
+                select IsAlphaNumeric(value) ? value + "(value);" : value
+            };
+
+            node = onChangeFunctionBody.HasLine
+                ? node.UpdateProp(nameof(handleMoneyInputChange), new()
                 {
                     "(value: number) =>",
-                    "{",
-                    GetUpdateStateLines(valueProp.Value, "value")
+                    "{", onChangeFunctionBody, "}"
+                })
+                : node;
+        }
 
-                };
-
-                if (handleMoneyInputChangeProp is not null)
+        var errorTextProp = node.Properties.FirstOrDefault(x => x.Name == nameof(errorText));
+        if (errorTextProp is not null)
+        {
+            node = node with
+            {
+                Properties = node.Properties.Remove(errorTextProp).Add(new()
                 {
-                    if (IsAlphaNumeric(handleMoneyInputChangeProp.Value))
-                    {
-                        lines.Add(handleMoneyInputChangeProp.Value + "(value);");
-                    }
-                    else
-                    {
-                        lines.Add(handleMoneyInputChangeProp.Value);
-                    }
-                }
-
-                lines.Add("}");
-
-                if (handleMoneyInputChangeProp is not null)
-                {
-                    handleMoneyInputChangeProp = handleMoneyInputChangeProp with
-                    {
-                        Value = lines.ToTsCode()
-                    };
-
-                    properties = properties.SetItem(properties.FindIndex(x => x.Name == handleMoneyInputChangeProp.Name), handleMoneyInputChangeProp);
-                }
-                else 
-                {
-                    properties = properties.Add(new()
-                    {
-                        Name = nameof(handleMoneyInputChange),
-                        Value = lines.ToTsCode()
-                    });
-                }
-
-                node = node with { Properties = properties };
-            }
+                    Name  = "inputProps",
+                    Value = $"{{ errorText: {errorTextProp.Value} }}"
+                })
+            };
         }
 
         var import = (nameof(BDigitalMoneyInput), "b-digital-money-input");
@@ -97,20 +84,19 @@ sealed class BDigitalMoneyInput : PluginComponentBase
         {
             new FlexRow(AlignItemsCenter, PaddingLeftRight(16), Border(1, solid, "#c0c0c0"), BorderRadius(10), Height(58), JustifyContentSpaceBetween)
             {
-                
                 // L a b e l   o n   t o p - l e f t   b o r d e r 
                 PositionRelative,
                 new label
                 {
                     // c o n t e n t
                     label ?? "Tutar",
-                    
+
                     // l a y o u t
                     PositionAbsolute,
                     Top(-6),
                     Left(16),
                     PaddingX(4),
-                    
+
                     // t h e m e
                     Color(rgba(0, 0, 0, 0.6)),
                     FontSize12,
@@ -121,7 +107,6 @@ sealed class BDigitalMoneyInput : PluginComponentBase
                     Background(White)
                 },
 
-
                 new div(Color(rgba(0, 0, 0, 0.54)), FontSize16, FontWeight400, FontFamily("Roboto, sans-serif"))
                 {
                     value
@@ -131,7 +116,9 @@ sealed class BDigitalMoneyInput : PluginComponentBase
             },
             new FlexRow(JustifyContentSpaceBetween, FontSize12, PaddingLeftRight(14), Color(rgb(158, 158, 158)), LineHeight15)
             {
-                //new div{ helperText},
+                Color(rgb(211, 47, 47)),
+
+                new div { errorText },
                 //new div{ maxLength }
             },
 
