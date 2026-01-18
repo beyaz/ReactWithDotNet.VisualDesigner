@@ -34,9 +34,19 @@ static class SuggestionFromTsxCode
 
                     relativeFolderPath = Path.GetFullPath(relativeFolderPath);
 
-                    if (Directory.Exists(relativeFolderPath))
+                    if (File.Exists(relativeFolderPath + ".ts"))
                     {
-                        foreach (var file in Directory.GetFiles(relativeFolderPath, "*.ts", SearchOption.AllDirectories))
+                        var suggestionsFromRelativeFile = await GetAllVariableSuggestionsInFile(relativeFolderPath+".ts");
+                        if (suggestionsFromRelativeFile.HasError)
+                        {
+                            return suggestionsFromRelativeFile.Error;
+                        }
+
+                        list.Add(suggestionsFromRelativeFile.Value);
+                    }
+                    else if (Directory.Exists(relativeFolderPath))
+                    {
+                        foreach (var file in Directory.GetFiles(relativeFolderPath, "*.ts", SearchOption.TopDirectoryOnly))
                         {
                             var suggestionsFromRelativeFile = await GetAllVariableSuggestionsInFile(file);
                             if (suggestionsFromRelativeFile.HasError)
@@ -46,16 +56,6 @@ static class SuggestionFromTsxCode
 
                             list.Add(suggestionsFromRelativeFile.Value);
                         }
-                    }
-                    else if (File.Exists(relativeFolderPath + ".ts"))
-                    {
-                        var suggestionsFromRelativeFile = await GetAllVariableSuggestionsInFile(relativeFolderPath+".ts");
-                        if (suggestionsFromRelativeFile.HasError)
-                        {
-                            return suggestionsFromRelativeFile.Error;
-                        }
-
-                        list.Add(suggestionsFromRelativeFile.Value);
                     }
                 }
             }
