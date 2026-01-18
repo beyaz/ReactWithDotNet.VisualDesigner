@@ -54,6 +54,12 @@ public class ExternalTypeList
             DotNetFullTypeName = "BOA.InternetBanking.Common.TextValue",
             LocalName          = "TextValuePair as TextValue",
             Source             = "b-digital-internet-banking"
-        }
+        },
+        new()
+        {
+            DotNetFullTypeName = "BOA.InternetBanking.Common.SecureConfirmAgreementData",
+            LocalName          = "SecureConfirmAgreementData",
+            Source             = "b-digital-internet-banking"
+        },
     ];
 }
