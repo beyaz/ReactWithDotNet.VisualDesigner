@@ -126,8 +126,14 @@ static class Exporter
 
             static bool IsCollection(TypeReference typeReference)
             {
-                return typeReference.FullName.StartsWith("System.Collections.Generic.List`1", StringComparison.OrdinalIgnoreCase) ||
-                       typeReference.FullName.StartsWith("System.Collections.Generic.IReadOnlyList`1", StringComparison.OrdinalIgnoreCase);
+                var names = new List<string>()
+                {
+                    "System.Collections.Generic.List`1",
+                    "System.Collections.Generic.IReadOnlyList`1",
+                    "System.Collections.Immutable.ImmutableList`1"
+                };
+
+                return names.Any(name => typeReference.FullName.StartsWith(name, StringComparison.OrdinalIgnoreCase));
             }
         }
 
