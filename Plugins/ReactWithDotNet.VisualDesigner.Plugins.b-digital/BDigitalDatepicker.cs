@@ -40,13 +40,7 @@ sealed class BDigitalDatepicker : PluginComponentBase
 
         input = ApplyTranslateOperationOnProps(input, nameof(labelText), nameof(placeholder));
 
-        var node = input.Node;
-
-        node = Transform_onDateChange(node);
-
-        node = Transform_placeholder(node);
-
-        node = Transform_isRequired(node);
+        var node = Run(input.Node, Transform_onDateChange, Transform_placeholder, Transform_isRequired);
 
         return Result.From((node, new TsImportCollection
         {
@@ -113,11 +107,13 @@ sealed class BDigitalDatepicker : PluginComponentBase
                     select IsAlphaNumeric(value) ? value + "(value);" : value
                 };
 
-                node = onChangeFunctionBody.HasLine ? node.UpdateProp(nameof(onDateChange), new()
-                {
-                    "(value: Date) =>",
-                    "{", onChangeFunctionBody, "}"
-                }) : node;
+                node = onChangeFunctionBody.HasLine
+                    ? node.UpdateProp(nameof(onDateChange), new()
+                    {
+                        "(value: Date) =>",
+                        "{", onChangeFunctionBody, "}"
+                    })
+                    : node;
             }
 
             return node;
