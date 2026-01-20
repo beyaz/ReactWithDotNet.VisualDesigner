@@ -73,24 +73,19 @@ sealed class BDigitalDatepicker : PluginComponentBase
         var placeholderProp = node.Properties.FirstOrDefault(x => x.Name == nameof(placeholder));
         if (placeholderProp is not null)
         {
-            string placeholderFinalValue;
+            var inputProps = new
             {
-                if (IsStringValue(placeholderProp.Value))
-                {
-                    placeholderFinalValue = placeholderProp.Value;
-                }
-                else
-                {
-                    placeholderFinalValue = $"{Plugin.ConvertDotNetPathToJsPath(placeholderProp.Value)}";
-                }
-            }
-
+                placeholder = IsStringValue(placeholderProp.Value)
+                    ? placeholderProp.Value
+                    : $"{Plugin.ConvertDotNetPathToJsPath(placeholderProp.Value)}"
+            };
+            
             node = node with
             {
                 Properties = node.Properties.Remove(placeholderProp).Add(new()
                 {
                     Name  = "inputProps",
-                    Value = $"{{ placeholder: {placeholderFinalValue} }}"
+                    Value = $"{{ placeholder: {inputProps.placeholder} }}"
                 })
             };
         }
