@@ -30,7 +30,6 @@ sealed class BDigitalDatepicker : PluginComponentBase
     [JsTypeInfo(JsType.Date)]
     public string value { get; set; }
 
-    
     [NodeAnalyzer]
     public static NodeAnalyzeOutput AnalyzeReactNode(NodeAnalyzeInput input)
     {
@@ -38,13 +37,11 @@ sealed class BDigitalDatepicker : PluginComponentBase
         {
             return AnalyzeChildren(input, AnalyzeReactNode);
         }
-        
+
         input = ApplyTranslateOperationOnProps(input, nameof(labelText), nameof(placeholder));
-        
+
         var node = input.Node;
 
-        var isRequiredProp = node.Properties.FirstOrDefault(x => x.Name == nameof(isRequired));
-       
         if (!node.Properties.HasFunctionAssignment(nameof(onDateChange)))
         {
             var onChangeFunctionBody = new TsLineCollection
@@ -75,7 +72,7 @@ sealed class BDigitalDatepicker : PluginComponentBase
             {
                 placeholder = IsStringValue(prop.Value) ? prop.Value : $"{Plugin.ConvertDotNetPathToJsPath(prop.Value)}"
             };
-            
+
             return n with
             {
                 Properties = n.Properties.Remove(prop).Add(new()
@@ -86,17 +83,19 @@ sealed class BDigitalDatepicker : PluginComponentBase
             };
         });
 
-        if (isRequiredProp is not null)
+        node = node.TransformIfHasProperty(nameof(isRequired), (n, prop) =>
         {
-            node = node with
+            var required = Plugin.ConvertDotNetPathToJsPath(prop.Value);
+
+            return n with
             {
-                Properties = node.Properties.Remove(isRequiredProp).Add(new()
+                Properties = n.Properties.Remove(prop).Add(new()
                 {
                     Name  = "valueConstraint",
-                    Value = $"{{ required: {Plugin.ConvertDotNetPathToJsPath(isRequiredProp.Value)} }}"
+                    Value = $"{{ required: {required} }}"
                 })
             };
-        }
+        });
 
         return Result.From((node, new TsImportCollection
         {
@@ -118,29 +117,29 @@ sealed class BDigitalDatepicker : PluginComponentBase
                 {
                     // c o n t e n t
                     labelText,
-                    
+
                     // l a y o u t
-                    PositionAbsolute, 
-                    Top(-6), 
+                    PositionAbsolute,
+                    Top(-6),
                     Left(16),
                     PaddingX(4),
-                    
+
                     // t h e m e
-                    Color(rgba(0, 0, 0, 0.6)), 
+                    Color(rgba(0, 0, 0, 0.6)),
                     FontSize12,
-                    FontWeight400, 
+                    FontWeight400,
                     LineHeight12,
                     LetterSpacing(0.15),
                     FontFamily("Roboto"),
                     Background(White)
                 },
-                
+
                 new div(Color(rgba(0, 0, 0, 0.54)), FontSize16, FontWeight400, FontFamily("Roboto, sans-serif"))
                 {
                     value
                 },
-                new BSymbol { symbol = "Calendar_Month", weight = "500", color = rgb(22, 160, 133)}
+                new BSymbol { symbol = "Calendar_Month", weight = "500", color = rgb(22, 160, 133) }
             }
-        }; 
+        };
     }
 }
