@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Linq;
 
 namespace ReactWithDotNet.VisualDesigner.Views;
 
@@ -149,20 +150,12 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
 
         bool hasMatch(NodeModel node)
         {
-            if (node.Label?.Contains(state.FilterText ?? string.Empty, StringComparison.OrdinalIgnoreCase) is true)
+            if (node.Label?.ContainsIgnoreCase(state.FilterText) is true)
             {
                 return true;
             }
 
-            foreach (var path in node.Names)
-            {
-                if (path.Contains(state.FilterText ?? string.Empty, StringComparison.OrdinalIgnoreCase))
-                {
-                    return true;
-                }
-            }
-
-            return false;
+            return HasAny(from x in node.Names where x.ContainsIgnoreCase(state.FilterText) select x);
         }
     }
 

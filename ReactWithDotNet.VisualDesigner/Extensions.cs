@@ -300,6 +300,18 @@ public static class Extensions
 
         return list;
     }
+    
+    public static bool ContainsIgnoreCase(this string text, string searchTerm)
+    {
+        text ??= string.Empty;
+        
+        searchTerm ??= string.Empty;
+        
+
+        return text.Contains(searchTerm, StringComparison.InvariantCultureIgnoreCase) || 
+               text.Contains(searchTerm, StringComparison.CurrentCultureIgnoreCase)||
+               text.Contains(searchTerm, StringComparison.OrdinalIgnoreCase);
+    }
 
     public static bool IsAlphaNumeric(string input)
     {
