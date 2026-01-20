@@ -388,3 +388,5 @@ static class Mixin
     }
     
 }
+
+delegate ReactNode TransformNode(ReactNode node);
