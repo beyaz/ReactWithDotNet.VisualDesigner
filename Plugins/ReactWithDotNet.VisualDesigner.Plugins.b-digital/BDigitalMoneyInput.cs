@@ -51,13 +51,11 @@ sealed class BDigitalMoneyInput : PluginComponentBase
                 select IsAlphaNumeric(value) ? value + "(value);" : value
             };
 
-            node = onChangeFunctionBody.HasLine
-                ? node.UpdateProp(nameof(handleMoneyInputChange), new()
-                {
-                    "(value: number) =>",
-                    "{", onChangeFunctionBody, "}"
-                })
-                : node;
+            node = onChangeFunctionBody.HasLine ? node.UpdateProp(nameof(handleMoneyInputChange), new()
+            {
+                "(value: number) =>",
+                "{", onChangeFunctionBody, "}"
+            }) : node;
         }
 
         var errorTextProp = node.Properties.FirstOrDefault(x => x.Name == nameof(errorText));
@@ -118,7 +116,7 @@ sealed class BDigitalMoneyInput : PluginComponentBase
             {
                 Color(rgb(211, 47, 47)),
 
-                new div { errorText },
+                new div { errorText }
                 //new div{ maxLength }
             },
 

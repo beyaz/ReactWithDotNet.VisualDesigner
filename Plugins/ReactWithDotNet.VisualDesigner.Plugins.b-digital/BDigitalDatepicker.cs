@@ -41,64 +41,39 @@ sealed class BDigitalDatepicker : PluginComponentBase
         
         input = ApplyTranslateOperationOnProps(input, nameof(labelText), nameof(placeholder));
         
-        var (node, componentConfig) = input;
-        
-      
+        var node = input.Node;
 
-        var valueProp = node.Properties.FirstOrDefault(x => x.Name == nameof(value));
         var isRequiredProp = node.Properties.FirstOrDefault(x => x.Name == nameof(isRequired));
-        var onDateChangeProp = node.Properties.FirstOrDefault(x => x.Name == nameof(onDateChange));
-        if (valueProp is not null)
+       
+        if (!node.Properties.HasFunctionAssignment(nameof(onDateChange)))
         {
-            var properties = node.Properties;
-            
-            var lines = new TsLineCollection
+            var onChangeFunctionBody = new TsLineCollection
+            {
+                // u p d a t e   s o u r c e
+                from property in node.Properties
+                where property.Name == nameof(value)
+                from line in GetUpdateStateLines(property.Value, "value")
+                select line,
+
+                // e v e n t   h a n d l e r
+                from property in node.Properties
+                where property.Name == nameof(onDateChange)
+                let value = property.Value
+                select IsAlphaNumeric(value) ? value + "(value);" : value
+            };
+
+            node = onChangeFunctionBody.HasLine ? node.UpdateProp(nameof(onDateChange), new()
             {
                 "(value: Date) =>",
-                "{",
-                GetUpdateStateLines(valueProp.Value, "value")
-            };
-            
-
-            if (onDateChangeProp is not null)
-            {
-                if (IsAlphaNumeric(onDateChangeProp.Value))
-                {
-                    lines.Add(onDateChangeProp.Value + "(value);");
-                }
-                else
-                {
-                    lines.Add(onDateChangeProp.Value);
-                }
-            }
-
-            lines.Add("}");
-
-            if (onDateChangeProp is not null)
-            {
-                onDateChangeProp = onDateChangeProp with
-                {
-                    Value = lines.ToTsCode()
-                };
-
-                properties = properties.SetItem(properties.FindIndex(x => x.Name == onDateChangeProp.Name), onDateChangeProp);
-            }
-            else
-            {
-                properties = properties.Add(new()
-                {
-                    Name  = nameof(onDateChange),
-                    Value = lines.ToTsCode()
-                });
-            }
-
-            node = node with { Properties = properties };
+                "{", onChangeFunctionBody, "}"
+            }) : node;
         }
 
+        
         var placeholderProp = node.Properties.FirstOrDefault(x => x.Name == nameof(placeholder));
         if (placeholderProp is not null)
         {
-            var placeholderFinalValue = string.Empty;
+            string placeholderFinalValue;
             {
                 if (IsStringValue(placeholderProp.Value))
                 {
