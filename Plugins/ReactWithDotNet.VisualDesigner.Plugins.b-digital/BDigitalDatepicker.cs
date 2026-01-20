@@ -40,16 +40,23 @@ sealed class BDigitalDatepicker : PluginComponentBase
 
         input = ApplyTranslateOperationOnProps(input, nameof(labelText), nameof(placeholder));
 
-        var node = Run(input.Node, Transform_onDateChange, Transform_placeholder, Transform_isRequired);
+        var node = Run(input.Node,
+        [
+            Transform_onDateChange,
+            Transform_placeholder,
+            Transform_isRequired
+        ]);
 
-        return Result.From((node, new TsImportCollection
+        var importCollection = new TsImportCollection
         {
             { nameof(BDigitalDatepicker), "b-digital-datepicker" }
-        }));
+        };
+
+        return Result.From((node, importCollection));
 
         static ReactNode Transform_placeholder(ReactNode node)
         {
-            node = node.TransformIfHasProperty(nameof(placeholder), (n, prop) =>
+            return node.TransformIfHasProperty(nameof(placeholder), (n, prop) =>
             {
                 var inputProps = new
                 {
@@ -65,13 +72,11 @@ sealed class BDigitalDatepicker : PluginComponentBase
                     })
                 };
             });
-
-            return node;
         }
 
         static ReactNode Transform_isRequired(ReactNode node)
         {
-            node = node.TransformIfHasProperty(nameof(isRequired), (n, prop) =>
+            return node.TransformIfHasProperty(nameof(isRequired), (n, prop) =>
             {
                 var required = Plugin.ConvertDotNetPathToJsPath(prop.Value);
 
@@ -84,39 +89,38 @@ sealed class BDigitalDatepicker : PluginComponentBase
                     })
                 };
             });
-
-            return node;
         }
 
         static ReactNode Transform_onDateChange(ReactNode node)
         {
-            if (!node.Properties.HasFunctionAssignment(nameof(onDateChange)))
+            if (node.Properties.HasFunctionAssignment(nameof(onDateChange)))
             {
-                var onChangeFunctionBody = new TsLineCollection
-                {
-                    // u p d a t e   s o u r c e
-                    from property in node.Properties
-                    where property.Name == nameof(value)
-                    from line in GetUpdateStateLines(property.Value, "value")
-                    select line,
+                return node;
+            }
 
-                    // e v e n t   h a n d l e r
-                    from property in node.Properties
-                    where property.Name == nameof(onDateChange)
-                    let value = property.Value
-                    select IsAlphaNumeric(value) ? value + "(value);" : value
-                };
+            var onChangeFunctionBody = new TsLineCollection
+            {
+                // u p d a t e   s o u r c e
+                from property in node.Properties
+                where property.Name == nameof(value)
+                from line in GetUpdateStateLines(property.Value, "value")
+                select line,
 
-                node = onChangeFunctionBody.HasLine
+                // e v e n t   h a n d l e r
+                from property in node.Properties
+                where property.Name == nameof(onDateChange)
+                let value = property.Value
+                select IsAlphaNumeric(value) ? value + "(value);" : value
+            };
+
+            return
+                onChangeFunctionBody.HasLine
                     ? node.UpdateProp(nameof(onDateChange), new()
                     {
                         "(value: Date) =>",
                         "{", onChangeFunctionBody, "}"
                     })
                     : node;
-            }
-
-            return node;
         }
     }
 

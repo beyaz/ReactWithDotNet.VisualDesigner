@@ -387,7 +387,7 @@ static class Mixin
             .Any();
     }
 
-    internal static ReactNode Run(ReactNode node, params TransformNode[] transforms)
+    internal static ReactNode Run(ReactNode node, IReadOnlyList<TransformNode> transforms)
     {
         foreach (var fn in transforms)
         {
