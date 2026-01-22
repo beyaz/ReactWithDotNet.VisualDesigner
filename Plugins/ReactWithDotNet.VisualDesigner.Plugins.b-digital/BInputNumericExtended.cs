@@ -59,66 +59,47 @@ sealed class BInputNumericExtended : PluginComponentBase
 
 
 
-        var valueProp = node.Properties.FirstOrDefault(x => x.Name == nameof(value));
-        var onChangeProp = node.Properties.FirstOrDefault(x => x.Name == nameof(onChange));
-        var isRequiredProp = node.Properties.FirstOrDefault(x => x.Name == nameof(isRequired));
+ 
 
-        if (valueProp is not null)
+        if (!node.Properties.HasFunctionAssignment(nameof(onChange)))
         {
-            var properties = node.Properties;
-
-            var lines = new TsLineCollection
+            var onChangeFunctionBody = new TsLineCollection
             {
-                "(e: any, value: any) =>",
-                "{",
-                GetUpdateStateLines(valueProp.Value, "value")
+                // u p d a t e   s o u r c e
+                from property in node.Properties
+                where property.Name == nameof(value)
+                from line in GetUpdateStateLines(property.Value, "value")
+                select line,
+
+                // e v e n t   h a n d l e r
+                from property in node.Properties
+                where property.Name == nameof(onChange)
+                let value = property.Value
+                select IsAlphaNumeric(value) ? value + "(e, value);" : value
             };
 
-            if (onChangeProp is not null)
+            node = onChangeFunctionBody.HasLine ? node.UpdateProp(nameof(onChange), new()
             {
-                if (IsAlphaNumeric(onChangeProp.Value))
-                {
-                    lines.Add(onChangeProp.Value + "(e, value);");
-                }
-                else
-                {
-                    lines.Add(onChangeProp.Value);
-                }
-            }
-
-            lines.Add("}");
-
-            if (onChangeProp is not null)
-            {
-                onChangeProp = onChangeProp with
-                {
-                    Value = lines.ToTsCode()
-                };
-
-                properties = properties.SetItem(properties.FindIndex(x => x.Name == onChangeProp.Name), onChangeProp);
-            }
-            else
-            {
-                properties = properties.Add(new()
-                {
-                    Name = "onChange",
-                    Value = lines.ToTsCode()
-                });
-            }
-
-            node = node with { Properties = properties };
+                "(e: any, value: any) =>",
+                "{", onChangeFunctionBody, "}"
+            }) : node;
         }
-
+        
+      
+        var isRequiredProp = node.Properties.FirstOrDefault(x => x.Name == nameof(isRequired));
         if (isRequiredProp is not null)
         {
+            var newValue = new
+            {
+                required = Plugin.ConvertDotNetPathToJsPath(isRequiredProp.Value)
+            };
             
-
             node = node with
             {
                 Properties = node.Properties.Remove(isRequiredProp).Add(new()
                 {
-                    Name = "valueConstraint",
-                    Value = $"{{ required: {Plugin.ConvertDotNetPathToJsPath(isRequiredProp.Value)} }}"
+                    Name  = "valueConstraint",
+                    Value = $"{{ required: {newValue.required} }}"
                 })
             };
         }
