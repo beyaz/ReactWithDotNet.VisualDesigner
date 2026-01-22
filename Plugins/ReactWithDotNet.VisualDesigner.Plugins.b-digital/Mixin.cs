@@ -216,7 +216,7 @@ static class Mixin
 
         if (result.noNeedToUpdateAnything)
         {
-            return null;
+            return [];
         }
 
         return
