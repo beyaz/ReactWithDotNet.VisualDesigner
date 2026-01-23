@@ -6,37 +6,36 @@ sealed class BComboBoxExtended : PluginComponentBase
     [JsTypeInfo(JsType.Array)]
     public string dataSource { get; set; }
 
-    [JsTypeInfo(JsType.String)]
-    public string label { get; set; }
-
-    [JsTypeInfo(JsType.String)]
-    public string displayMemberPath { get; set; }
-
-    [JsTypeInfo(JsType.String)]
-    public string valueMemberPath { get; set; }
-
-    [JsTypeInfo(JsType.String)]
-    public string value { get; set; }
-
-    [JsTypeInfo(JsType.Function)]
-    public string onChange { get; set; }
-
     [Suggestions("true")]
     [JsTypeInfo(JsType.Boolean)]
-    public string isRequired { get; set; }
-    
-    [Suggestions("true")]
-    [JsTypeInfo(JsType.Boolean)]
-    public string multiple { get; set; }
+    public string disableClearable { get; set; }
 
     [Suggestions("true")]
     [JsTypeInfo(JsType.Boolean)]
     public string disabled { get; set; }
-    
+
+    [JsTypeInfo(JsType.String)]
+    public string displayMemberPath { get; set; }
+
     [Suggestions("true")]
     [JsTypeInfo(JsType.Boolean)]
-    public string disableClearable { get; set; }
-    
+    public string isRequired { get; set; }
+
+    [JsTypeInfo(JsType.String)]
+    public string label { get; set; }
+
+    [Suggestions("true")]
+    [JsTypeInfo(JsType.Boolean)]
+    public string multiple { get; set; }
+
+    [JsTypeInfo(JsType.Function)]
+    public string onChange { get; set; }
+
+    [JsTypeInfo(JsType.String)]
+    public string value { get; set; }
+
+    [JsTypeInfo(JsType.String)]
+    public string valueMemberPath { get; set; }
 
     [NodeAnalyzer]
     public static NodeAnalyzeOutput AnalyzeReactNode(NodeAnalyzeInput input)
@@ -47,25 +46,21 @@ sealed class BComboBoxExtended : PluginComponentBase
         }
 
         input = ApplyTranslateOperationOnProps(input, nameof(label));
-        
-        var node = input.Node;
 
+        var node = input.Node;
 
         var valueProp = node.Properties.FirstOrDefault(x => x.Name == nameof(value));
         var onChangeProp = node.Properties.FirstOrDefault(x => x.Name == nameof(onChange));
         var isOnChangePropFunctionAssignment = onChangeProp is not null && onChangeProp.Value.Contains(" => ");
 
-      
-        
         var isMultiple = node.Properties.FirstOrDefault(x => x.Name == nameof(multiple))?.Value == "true";
 
         if (valueProp is not null && !isOnChangePropFunctionAssignment)
         {
             var properties = node.Properties;
 
-
             var lines = new TsLineCollection();
-           
+
             if (isMultiple)
             {
                 lines.Add("(event: React.ChangeEvent<{}>, values: any[], selectedObjects?: any[]) =>");
@@ -113,7 +108,7 @@ sealed class BComboBoxExtended : PluginComponentBase
             {
                 properties = properties.Add(new()
                 {
-                    Name = nameof(onChange),
+                    Name  = nameof(onChange),
                     Value = lines.ToTsCode()
                 });
             }
@@ -121,34 +116,9 @@ sealed class BComboBoxExtended : PluginComponentBase
             node = node with { Properties = properties };
         }
 
-        var isRequiredProp = node.Properties.FirstOrDefault(x => x.Name == nameof(isRequired));
-        var labelProp = node.Properties.FirstOrDefault(x => x.Name == nameof(label));
-        if (isRequiredProp is not null && labelProp is not null)
-        {
-            var inputProps = new
-            {
-                floatingLabelText = labelProp.Value,
-
-                required = Plugin.ConvertDotNetPathToJsPath(isRequiredProp.Value)
-            };
-
-            node = node with
-            {
-                Properties = node.Properties.Remove(isRequiredProp).Remove(labelProp).Add(new()
-                {
-                    Name = "inputProps",
-                    Value = $$"""
-                              {
-                                  floatingLabelText: {{inputProps.floatingLabelText}},
-                                  valueConstraint: { required: {{inputProps.required}} }
-                              }
-                              """
-                })
-            };
-        }
-
-
-
+        node = Run(node, [
+            Transforms.InputProps
+        ]);
 
         var import = (nameof(BComboBoxExtended), "b-combo-box-extended");
 
@@ -169,13 +139,13 @@ sealed class BComboBoxExtended : PluginComponentBase
                 {
                     // c o n t e n t
                     label,
-                    
+
                     // l a y o u t
                     PositionAbsolute,
                     Top(-6),
                     Left(16),
                     PaddingX(4),
-                    
+
                     // t h e m e
                     Color(rgba(0, 0, 0, 0.6)),
                     FontSize12,
@@ -207,4 +177,37 @@ sealed class BComboBoxExtended : PluginComponentBase
         };
     }
 
+    static class Transforms
+    {
+        internal static ReactNode InputProps(ReactNode node)
+        {
+            var isRequiredProp = node.Properties.FirstOrDefault(x => x.Name == nameof(isRequired));
+            var labelProp = node.Properties.FirstOrDefault(x => x.Name == nameof(label));
+            if (isRequiredProp is not null && labelProp is not null)
+            {
+                var inputProps = new
+                {
+                    floatingLabelText = labelProp.Value,
+
+                    required = Plugin.ConvertDotNetPathToJsPath(isRequiredProp.Value)
+                };
+
+                return node with
+                {
+                    Properties = node.Properties.Remove(isRequiredProp).Remove(labelProp).Add(new()
+                    {
+                        Name = "inputProps",
+                        Value = $$"""
+                                  {
+                                      floatingLabelText: {{inputProps.floatingLabelText}},
+                                      valueConstraint: { required: {{inputProps.required}} }
+                                  }
+                                  """
+                    })
+                };
+            }
+
+            return node;
+        }
+    }
 }
