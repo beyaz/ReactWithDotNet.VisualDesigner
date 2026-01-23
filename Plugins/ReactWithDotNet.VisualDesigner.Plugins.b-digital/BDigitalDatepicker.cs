@@ -42,9 +42,9 @@ sealed class BDigitalDatepicker : PluginComponentBase
 
         var node = Run(input.Node,
         [
-            Transform_onDateChange,
-            Transform_placeholder,
-            Transform_isRequired
+            Transformers.OnChange,
+            Transformers.InputProps,
+            Transformers.ValueConstraint
         ]);
 
         var importCollection = new TsImportCollection
@@ -53,75 +53,6 @@ sealed class BDigitalDatepicker : PluginComponentBase
         };
 
         return Result.From((node, importCollection));
-
-        static ReactNode Transform_placeholder(ReactNode node)
-        {
-            return node.TransformIfHasProperty(nameof(placeholder), (n, prop) =>
-            {
-                var inputProps = new
-                {
-                    placeholder = IsStringValue(prop.Value) ? prop.Value : $"{Plugin.ConvertDotNetPathToJsPath(prop.Value)}"
-                };
-
-                return n with
-                {
-                    Properties = n.Properties.Remove(prop).Add(new()
-                    {
-                        Name  = "inputProps",
-                        Value = $"{{ placeholder: {inputProps.placeholder} }}"
-                    })
-                };
-            });
-        }
-
-        static ReactNode Transform_isRequired(ReactNode node)
-        {
-            return node.TransformIfHasProperty(nameof(isRequired), (n, prop) =>
-            {
-                var required = Plugin.ConvertDotNetPathToJsPath(prop.Value);
-
-                return n with
-                {
-                    Properties = n.Properties.Remove(prop).Add(new()
-                    {
-                        Name  = "valueConstraint",
-                        Value = $"{{ required: {required} }}"
-                    })
-                };
-            });
-        }
-
-        static ReactNode Transform_onDateChange(ReactNode node)
-        {
-            if (node.Properties.HasFunctionAssignment(nameof(onDateChange)))
-            {
-                return node;
-            }
-
-            var onChangeFunctionBody = new TsLineCollection
-            {
-                // u p d a t e   s o u r c e
-                from property in node.Properties
-                where property.Name == nameof(value)
-                from line in GetUpdateStateLines(property.Value, "value")
-                select line,
-
-                // e v e n t   h a n d l e r
-                from property in node.Properties
-                where property.Name == nameof(onDateChange)
-                let value = property.Value
-                select IsAlphaNumeric(value) ? value + "(value);" : value
-            };
-
-            return
-                onChangeFunctionBody.HasLine
-                    ? node.UpdateProp(nameof(onDateChange), new()
-                    {
-                        "(value: Date) =>",
-                        "{", onChangeFunctionBody, "}"
-                    })
-                    : node;
-        }
     }
 
     protected override Element render()
@@ -162,5 +93,77 @@ sealed class BDigitalDatepicker : PluginComponentBase
                 new BSymbol { symbol = "Calendar_Month", weight = "500", color = rgb(22, 160, 133) }
             }
         };
+    }
+
+    static class Transformers
+    {
+        internal static ReactNode InputProps(ReactNode node)
+        {
+            return node.TransformIfHasProperty(nameof(placeholder), (n, prop) =>
+            {
+                var inputProps = new
+                {
+                    placeholder = IsStringValue(prop.Value) ? prop.Value : $"{Plugin.ConvertDotNetPathToJsPath(prop.Value)}"
+                };
+
+                return n with
+                {
+                    Properties = n.Properties.Remove(prop).Add(new()
+                    {
+                        Name  = "inputProps",
+                        Value = $"{{ placeholder: {inputProps.placeholder} }}"
+                    })
+                };
+            });
+        }
+
+        internal static ReactNode OnChange(ReactNode node)
+        {
+            if (node.Properties.HasFunctionAssignment(nameof(onDateChange)))
+            {
+                return node;
+            }
+
+            var onChangeFunctionBody = new TsLineCollection
+            {
+                // u p d a t e   s o u r c e
+                from property in node.Properties
+                where property.Name == nameof(value)
+                from line in GetUpdateStateLines(property.Value, "value")
+                select line,
+
+                // e v e n t   h a n d l e r
+                from property in node.Properties
+                where property.Name == nameof(onDateChange)
+                let value = property.Value
+                select IsAlphaNumeric(value) ? value + "(value);" : value
+            };
+
+            return
+                onChangeFunctionBody.HasLine
+                    ? node.UpdateProp(nameof(onDateChange), new()
+                    {
+                        "(value: Date) =>",
+                        "{", onChangeFunctionBody, "}"
+                    })
+                    : node;
+        }
+
+        internal static ReactNode ValueConstraint(ReactNode node)
+        {
+            return node.TransformIfHasProperty(nameof(isRequired), (n, prop) =>
+            {
+                var required = Plugin.ConvertDotNetPathToJsPath(prop.Value);
+
+                return n with
+                {
+                    Properties = n.Properties.Remove(prop).Add(new()
+                    {
+                        Name  = "valueConstraint",
+                        Value = $"{{ required: {required} }}"
+                    })
+                };
+            });
+        }
     }
 }
