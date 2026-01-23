@@ -161,6 +161,29 @@ sealed class BComboBoxExtended : PluginComponentBase
             }
 
             return node;
+            
+            
+            static string BuildInputProps((string floatingLabelText, string required) input)
+            {
+                var lines = new List<string>();
+
+                if (input.floatingLabelText is not null)
+                {
+                    lines.Add($"floatingLabelText: {input.floatingLabelText}");
+                }
+
+                if (input.required is not null)
+                {
+                    lines.Add($"valueConstraint: {{ required: {input.required} }}");
+                }
+
+                if (lines.Count == 0)
+                {
+                    return null;
+                }
+
+                return string.Join("," + Environment.NewLine + "  ", lines);
+            }
         }
 
         internal static ReactNode OnChange(ReactNode node)
@@ -235,26 +258,5 @@ sealed class BComboBoxExtended : PluginComponentBase
             return node;
         }
 
-        static string BuildInputProps((string floatingLabelText, string required) input)
-        {
-            var lines = new List<string>();
-
-            if (input.floatingLabelText is not null)
-            {
-                lines.Add($"floatingLabelText: {input.floatingLabelText}");
-            }
-
-            if (input.required is not null)
-            {
-                lines.Add($"valueConstraint: {{ required: {input.required} }}");
-            }
-
-            if (lines.Count == 0)
-            {
-                return null;
-            }
-
-            return string.Join("," + Environment.NewLine + "  ", lines);
-        }
     }
 }
