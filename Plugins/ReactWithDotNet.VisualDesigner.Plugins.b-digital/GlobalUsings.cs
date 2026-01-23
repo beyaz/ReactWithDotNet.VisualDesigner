@@ -10,3 +10,4 @@ global using static ReactWithDotNet.Tailwind;
 global using static ReactWithDotNet.Mixin;
 global using static ReactWithDotNet.VisualDesigner.DbModels.Extensions;
 global using ReactWithDotNet.VisualDesigner.Exporters;
+global using static Toolbox.MaybeExtensions;

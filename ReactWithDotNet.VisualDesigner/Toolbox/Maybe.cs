@@ -60,7 +60,7 @@ public sealed class NoneObject
     }
 }
 
-static class MaybeExtensions
+public static class MaybeExtensions
 {
     public static NoneObject None => NoneObject.Instance;
 
