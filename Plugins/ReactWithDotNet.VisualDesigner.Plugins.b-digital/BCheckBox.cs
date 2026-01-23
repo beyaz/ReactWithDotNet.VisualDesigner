@@ -1,6 +1,4 @@
-﻿using static System.Net.Mime.MediaTypeNames;
-
-namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
+﻿namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
 [CustomComponent]
 sealed class BCheckBox : PluginComponentBase
@@ -35,47 +33,30 @@ sealed class BCheckBox : PluginComponentBase
         
         var node = input.Node;
         
-        
-        var onCheckProp = node.Properties.FirstOrDefault(x => x.Name == nameof(onCheck));
-
-        var isOnCheckPropFunctionAssignment = onCheckProp is not null && onCheckProp.Value.Contains(" => ");
-        if (!isOnCheckPropFunctionAssignment)
+        if (!node.Properties.HasFunctionAssignment(nameof(onCheck)))
         {
-            TsLineCollection lines = [];
-        
-            var checkedProp = node.Properties.FirstOrDefault(x => x.Name == nameof(@checked));
-            if (checkedProp is not null)
+            var onChangeFunctionBody = new TsLineCollection
             {
-                lines.Add(GetUpdateStateLines(checkedProp.Value, "isChecked"));
-            }
-     
-            if (onCheckProp is not null)
-            {
-                if (IsAlphaNumeric(onCheckProp.Value))
-                {
-                    lines.Add(onCheckProp.Value + "(e, isChecked);");
-                }
-                else
-                {
-                    lines.Add(onCheckProp.Value);
-                }
-            }
-        
-            if (lines.Count > 0)
-            {
-                lines = new TsLineCollection
-                {
-                    "(e: any, isChecked: boolean) =>",
-                    "{",
-                    lines,
-                    "}"
-                };
+                // u p d a t e   s o u r c e
+                from property in node.Properties
+                where property.Name == nameof(@checked)
+                from line in GetUpdateStateLines(property.Value, "isChecked")
+                select line,
 
-                node = node.UpdateProp(nameof(onCheck), lines);
-            }
+                // e v e n t   h a n d l e r
+                from property in node.Properties
+                where property.Name == nameof(onCheck)
+                let value = property.Value
+                select IsAlphaNumeric(value) ? value + "(e, isChecked);" : value
+            };
+
+            node = onChangeFunctionBody.HasLine ? node.UpdateProp(nameof(onCheck), new()
+            {
+                "(e: any, isChecked: boolean) =>",
+                "{", onChangeFunctionBody, "}"
+            }) : node;
         }
         
-       
 
         node = AddContextProp(node);
 
