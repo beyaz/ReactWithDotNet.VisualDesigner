@@ -117,16 +117,22 @@ sealed class BComboBoxExtended : PluginComponentBase
         {
             var isRequiredProp = node.Properties.FirstOrDefault(x => x.Name == nameof(isRequired));
             var labelProp = node.Properties.FirstOrDefault(x => x.Name == nameof(label));
-            
-            if (isRequiredProp is not null && labelProp is not null)
+
+            string floatingLabelText = null;
+            if (labelProp is not null)
             {
-                var inputProps = new
-                {
-                    floatingLabelText = labelProp.Value,
-
-                    required = Plugin.ConvertDotNetPathToJsPath(isRequiredProp.Value)
-                };
-
+                floatingLabelText = labelProp.Value;
+            }
+            
+            string required=null;
+            if (isRequiredProp is not null)
+            {
+                required = Plugin.ConvertDotNetPathToJsPath(isRequiredProp.Value);
+            }
+            
+            
+            if (floatingLabelText is not null && required is not null)
+            {
                 return node with
                 {
                     Properties = node.Properties.Remove(isRequiredProp).Remove(labelProp).Add(new()
@@ -134,8 +140,8 @@ sealed class BComboBoxExtended : PluginComponentBase
                         Name = "inputProps",
                         Value = $$"""
                                   {
-                                      floatingLabelText: {{inputProps.floatingLabelText}},
-                                      valueConstraint: { required: {{inputProps.required}} }
+                                      floatingLabelText: {{floatingLabelText}},
+                                      valueConstraint: { required: {{required}} }
                                   }
                                   """
                     })
