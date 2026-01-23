@@ -55,8 +55,7 @@ sealed class BComboBoxExtended : PluginComponentBase
         var onChangeProp = node.Properties.FirstOrDefault(x => x.Name == nameof(onChange));
         var isOnChangePropFunctionAssignment = onChangeProp is not null && onChangeProp.Value.Contains(" => ");
 
-        var isRequiredProp = node.Properties.FirstOrDefault(x => x.Name == nameof(isRequired));
-        var labelProp = node.Properties.FirstOrDefault(x => x.Name == nameof(label));
+      
         
         var isMultiple = node.Properties.FirstOrDefault(x => x.Name == nameof(multiple))?.Value == "true";
 
@@ -122,8 +121,16 @@ sealed class BComboBoxExtended : PluginComponentBase
             node = node with { Properties = properties };
         }
 
+        var isRequiredProp = node.Properties.FirstOrDefault(x => x.Name == nameof(isRequired));
+        var labelProp = node.Properties.FirstOrDefault(x => x.Name == nameof(label));
         if (isRequiredProp is not null && labelProp is not null)
         {
+            var inputProps = new
+            {
+                floatingLabelText = labelProp.Value,
+
+                required = Plugin.ConvertDotNetPathToJsPath(isRequiredProp.Value)
+            };
 
             node = node with
             {
@@ -131,11 +138,11 @@ sealed class BComboBoxExtended : PluginComponentBase
                 {
                     Name = "inputProps",
                     Value = $$"""
-                                  {
-                                      floatingLabelText: {{labelProp.Value}},
-                                      valueConstraint: { required: {{Plugin.ConvertDotNetPathToJsPath(isRequiredProp.Value)}} }
-                                  }
-                                  """
+                              {
+                                  floatingLabelText: {{inputProps.floatingLabelText}},
+                                  valueConstraint: { required: {{inputProps.required}} }
+                              }
+                              """
                 })
             };
         }
