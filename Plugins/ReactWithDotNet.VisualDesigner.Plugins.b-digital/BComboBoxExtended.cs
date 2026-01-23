@@ -116,28 +116,31 @@ sealed class BComboBoxExtended : PluginComponentBase
         internal static ReactNode InputProps(ReactNode node)
         {
             string floatingLabelText = null;
-            var labelProp = node.Properties.FirstOrDefault(x => x.Name == nameof(label));
-            if (labelProp is not null)
             {
-                floatingLabelText = labelProp.Value;
-                
-                node = node with
+                var labelProp = node.Properties.FirstOrDefault(x => x.Name == nameof(label));
+                if (labelProp is not null)
                 {
-                    Properties = node.Properties.Remove(labelProp)
-                };
+                    floatingLabelText = labelProp.Value;
+
+                    node = node with
+                    {
+                        Properties = node.Properties.Remove(labelProp)
+                    };
+                }
             }
-            
-            
-            string required=null;
-            var isRequiredProp = node.Properties.FirstOrDefault(x => x.Name == nameof(isRequired));
-            if (isRequiredProp is not null)
+
+            string required = null;
             {
-                required = Plugin.ConvertDotNetPathToJsPath(isRequiredProp.Value);
-                
-                node = node with
+                var isRequiredProp = node.Properties.FirstOrDefault(x => x.Name == nameof(isRequired));
+                if (isRequiredProp is not null)
                 {
-                    Properties = node.Properties.Remove(isRequiredProp)
-                };
+                    required = Plugin.ConvertDotNetPathToJsPath(isRequiredProp.Value);
+
+                    node = node with
+                    {
+                        Properties = node.Properties.Remove(isRequiredProp)
+                    };
+                }
             }
 
             var inputPropsValue = BuildInputProps((floatingLabelText, required));
@@ -156,30 +159,8 @@ sealed class BComboBoxExtended : PluginComponentBase
                     })
                 };
             }
-            
+
             return node;
-        }
-
-        static string BuildInputProps((string floatingLabelText, string required) input)
-        {
-            var lines = new List<string>();
-            
-            if (input.floatingLabelText is not null)
-            {
-                lines.Add($"floatingLabelText: {input.floatingLabelText}");
-            }
-            
-            if (input.required is not null)
-            {
-                lines.Add($"valueConstraint: {{ required: {input.required} }}");
-            }
-
-            if (lines.Count == 0)
-            {
-                return null;
-            }
-
-            return string.Join("," + Environment.NewLine+"  ", lines);
         }
 
         internal static ReactNode OnChange(ReactNode node)
@@ -252,6 +233,28 @@ sealed class BComboBoxExtended : PluginComponentBase
             }
 
             return node;
+        }
+
+        static string BuildInputProps((string floatingLabelText, string required) input)
+        {
+            var lines = new List<string>();
+
+            if (input.floatingLabelText is not null)
+            {
+                lines.Add($"floatingLabelText: {input.floatingLabelText}");
+            }
+
+            if (input.required is not null)
+            {
+                lines.Add($"valueConstraint: {{ required: {input.required} }}");
+            }
+
+            if (lines.Count == 0)
+            {
+                return null;
+            }
+
+            return string.Join("," + Environment.NewLine + "  ", lines);
         }
     }
 }
