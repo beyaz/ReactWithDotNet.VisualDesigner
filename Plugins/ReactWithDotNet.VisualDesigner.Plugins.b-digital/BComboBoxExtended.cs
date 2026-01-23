@@ -115,40 +115,71 @@ sealed class BComboBoxExtended : PluginComponentBase
     {
         internal static ReactNode InputProps(ReactNode node)
         {
-            var isRequiredProp = node.Properties.FirstOrDefault(x => x.Name == nameof(isRequired));
-            var labelProp = node.Properties.FirstOrDefault(x => x.Name == nameof(label));
-
             string floatingLabelText = null;
+            var labelProp = node.Properties.FirstOrDefault(x => x.Name == nameof(label));
             if (labelProp is not null)
             {
                 floatingLabelText = labelProp.Value;
+                
+                node = node with
+                {
+                    Properties = node.Properties.Remove(labelProp)
+                };
             }
             
+            
             string required=null;
+            var isRequiredProp = node.Properties.FirstOrDefault(x => x.Name == nameof(isRequired));
             if (isRequiredProp is not null)
             {
                 required = Plugin.ConvertDotNetPathToJsPath(isRequiredProp.Value);
+                
+                node = node with
+                {
+                    Properties = node.Properties.Remove(isRequiredProp)
+                };
             }
-            
-            
-            if (floatingLabelText is not null && required is not null)
+
+            var inputPropsValue = BuildInputProps((floatingLabelText, required));
+            if (inputPropsValue is not null)
             {
                 return node with
                 {
-                    Properties = node.Properties.Remove(isRequiredProp).Remove(labelProp).Add(new()
+                    Properties = node.Properties.Add(new()
                     {
                         Name = "inputProps",
                         Value = $$"""
                                   {
-                                      floatingLabelText: {{floatingLabelText}},
-                                      valueConstraint: { required: {{required}} }
+                                    {{inputPropsValue}}
                                   }
                                   """
                     })
                 };
             }
-
+            
             return node;
+        }
+
+        static string BuildInputProps((string floatingLabelText, string required) input)
+        {
+            var lines = new List<string>();
+            
+            if (input.floatingLabelText is not null)
+            {
+                lines.Add($"floatingLabelText: {input.floatingLabelText}");
+            }
+            
+            if (input.required is not null)
+            {
+                lines.Add($"valueConstraint: {{ required: {input.required} }}");
+            }
+
+            if (lines.Count == 0)
+            {
+                return null;
+            }
+
+            return string.Join("," + Environment.NewLine+"  ", lines);
         }
 
         internal static ReactNode OnChange(ReactNode node)
