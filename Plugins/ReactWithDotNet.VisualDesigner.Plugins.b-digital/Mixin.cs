@@ -387,14 +387,14 @@ static class Mixin
             .Any();
     }
 
-    internal static ReactNode Run(ReactNode node, IReadOnlyList<TransformNode> transforms)
+    internal static T Run<T>(T data, IReadOnlyList<Func<T,T>> converters)
     {
-        foreach (var fn in transforms)
+        foreach (var fn in converters)
         {
-            node = fn(node);
+            data = fn(data);
         }
 
-        return node;
+        return data;
     }
 }
 

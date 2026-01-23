@@ -42,9 +42,9 @@ sealed class BDigitalDatepicker : PluginComponentBase
 
         var node = Run(input.Node,
         [
-            Transformers.OnChange,
-            Transformers.InputProps,
-            Transformers.ValueConstraint
+            Transforms.OnChange,
+            Transforms.InputProps,
+            Transforms.ValueConstraint
         ]);
 
         var importCollection = new TsImportCollection
@@ -95,7 +95,7 @@ sealed class BDigitalDatepicker : PluginComponentBase
         };
     }
 
-    static class Transformers
+    static class Transforms
     {
         internal static ReactNode InputProps(ReactNode node)
         {
