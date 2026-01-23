@@ -117,6 +117,7 @@ sealed class BComboBoxExtended : PluginComponentBase
         {
             var isRequiredProp = node.Properties.FirstOrDefault(x => x.Name == nameof(isRequired));
             var labelProp = node.Properties.FirstOrDefault(x => x.Name == nameof(label));
+            
             if (isRequiredProp is not null && labelProp is not null)
             {
                 var inputProps = new
