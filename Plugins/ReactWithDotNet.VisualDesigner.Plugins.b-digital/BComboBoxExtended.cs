@@ -49,74 +49,8 @@ sealed class BComboBoxExtended : PluginComponentBase
 
         var node = input.Node;
 
-        var valueProp = node.Properties.FirstOrDefault(x => x.Name == nameof(value));
-        var onChangeProp = node.Properties.FirstOrDefault(x => x.Name == nameof(onChange));
-        var isOnChangePropFunctionAssignment = onChangeProp is not null && onChangeProp.Value.Contains(" => ");
-
-        var isMultiple = node.Properties.FirstOrDefault(x => x.Name == nameof(multiple))?.Value == "true";
-
-        if (valueProp is not null && !isOnChangePropFunctionAssignment)
-        {
-            var properties = node.Properties;
-
-            var lines = new TsLineCollection();
-
-            if (isMultiple)
-            {
-                lines.Add("(event: React.ChangeEvent<{}>, values: any[], selectedObjects?: any[]) =>");
-                lines.Add("{");
-                lines.Add(GetUpdateStateLines(valueProp.Value, "values"));
-            }
-            else
-            {
-                lines.Add("(event: React.ChangeEvent<{}>, value: any, selectedObject?: any) =>");
-                lines.Add("{");
-                lines.Add(GetUpdateStateLines(valueProp.Value, "value"));
-            }
-
-            if (onChangeProp is not null)
-            {
-                if (IsAlphaNumeric(onChangeProp.Value))
-                {
-                    if (isMultiple)
-                    {
-                        lines.Add(onChangeProp.Value + "(event, values, selectedObjects);");
-                    }
-                    else
-                    {
-                        lines.Add(onChangeProp.Value + "(event, value, selectedObject);");
-                    }
-                }
-                else
-                {
-                    lines.Add(onChangeProp.Value);
-                }
-            }
-
-            lines.Add("}");
-
-            if (onChangeProp is not null)
-            {
-                onChangeProp = onChangeProp with
-                {
-                    Value = lines.ToTsCode()
-                };
-
-                properties = properties.SetItem(properties.FindIndex(x => x.Name == onChangeProp.Name), onChangeProp);
-            }
-            else
-            {
-                properties = properties.Add(new()
-                {
-                    Name  = nameof(onChange),
-                    Value = lines.ToTsCode()
-                });
-            }
-
-            node = node with { Properties = properties };
-        }
-
         node = Run(node, [
+            Transforms.OnChange,
             Transforms.InputProps
         ]);
 
@@ -205,6 +139,78 @@ sealed class BComboBoxExtended : PluginComponentBase
                                   """
                     })
                 };
+            }
+
+            return node;
+        }
+
+        internal static ReactNode OnChange(ReactNode node)
+        {
+            var valueProp = node.Properties.FirstOrDefault(x => x.Name == nameof(value));
+            var onChangeProp = node.Properties.FirstOrDefault(x => x.Name == nameof(onChange));
+            var isOnChangePropFunctionAssignment = onChangeProp is not null && onChangeProp.Value.Contains(" => ");
+
+            var isMultiple = node.Properties.FirstOrDefault(x => x.Name == nameof(multiple))?.Value == "true";
+
+            if (valueProp is not null && !isOnChangePropFunctionAssignment)
+            {
+                var properties = node.Properties;
+
+                var lines = new TsLineCollection();
+
+                if (isMultiple)
+                {
+                    lines.Add("(event: React.ChangeEvent<{}>, values: any[], selectedObjects?: any[]) =>");
+                    lines.Add("{");
+                    lines.Add(GetUpdateStateLines(valueProp.Value, "values"));
+                }
+                else
+                {
+                    lines.Add("(event: React.ChangeEvent<{}>, value: any, selectedObject?: any) =>");
+                    lines.Add("{");
+                    lines.Add(GetUpdateStateLines(valueProp.Value, "value"));
+                }
+
+                if (onChangeProp is not null)
+                {
+                    if (IsAlphaNumeric(onChangeProp.Value))
+                    {
+                        if (isMultiple)
+                        {
+                            lines.Add(onChangeProp.Value + "(event, values, selectedObjects);");
+                        }
+                        else
+                        {
+                            lines.Add(onChangeProp.Value + "(event, value, selectedObject);");
+                        }
+                    }
+                    else
+                    {
+                        lines.Add(onChangeProp.Value);
+                    }
+                }
+
+                lines.Add("}");
+
+                if (onChangeProp is not null)
+                {
+                    onChangeProp = onChangeProp with
+                    {
+                        Value = lines.ToTsCode()
+                    };
+
+                    properties = properties.SetItem(properties.FindIndex(x => x.Name == onChangeProp.Name), onChangeProp);
+                }
+                else
+                {
+                    properties = properties.Add(new()
+                    {
+                        Name  = nameof(onChange),
+                        Value = lines.ToTsCode()
+                    });
+                }
+
+                node = node with { Properties = properties };
             }
 
             return node;
