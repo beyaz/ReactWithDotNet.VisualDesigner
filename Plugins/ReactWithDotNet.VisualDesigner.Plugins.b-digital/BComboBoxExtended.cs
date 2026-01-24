@@ -119,13 +119,18 @@ sealed class BComboBoxExtended : PluginComponentBase
             (
                 label : node.FindPropByName(nameof(label))?.Value,
 
-                isRequired : Plugin.ConvertDotNetPathToJsPath(node.FindPropByName(nameof(isRequired))?.Value),
+                isRequired: node.FindPropByName(nameof(isRequired))?.Value switch
+                {
+                    { } x => IsStringValue(x) ? x : Plugin.ConvertDotNetPathToJsPath(x),
+                    
+                    null=> null
+                },
                 
                 placeholder: node.FindPropByName("placeholder")?.Value switch
                 {
                     { } x => IsStringValue(x) ? x : Plugin.ConvertDotNetPathToJsPath(x),
                     
-                    _=> null
+                    null=> null
                 }
             );
             
