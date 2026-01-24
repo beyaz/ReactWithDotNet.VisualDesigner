@@ -125,7 +125,7 @@ sealed class BComboBoxExtended : PluginComponentBase
 
             return BuildInputProps((labelValue, isRequiredValue)).Map
             (
-                HasValue: body => node.InsertProp(new()
+                Some: body => node.InsertProp(new()
                 {
                     Name = "inputProps",
                     Value = $$"""
@@ -135,7 +135,7 @@ sealed class BComboBoxExtended : PluginComponentBase
                               """
                 }),
                 
-                NoValue: () => node
+                None: () => node
             );
                 
              

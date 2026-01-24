@@ -84,13 +84,13 @@ public static class MaybeExtensions
         action(maybe.Value);
     }
     
-    public static B Map<A,B>(this Maybe<A> maybe, Func<A,B> HasValue, Func<B> NoValue)
+    public static B Map<A,B>(this Maybe<A> maybe, Func<A,B> Some, Func<B> @None)
     {
         if (maybe.HasValue)
         {
-            return HasValue(maybe.Value);
+            return Some(maybe.Value);
         }
 
-        return NoValue();
+        return None();
     }
 }
