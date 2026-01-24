@@ -125,7 +125,7 @@ sealed class BComboBoxExtended : PluginComponentBase
                 {
                     { } x => IsStringValue(x) ? x : Plugin.ConvertDotNetPathToJsPath(x),
                     
-                    //_=> null
+                    _=> null
                 }
             );
             
