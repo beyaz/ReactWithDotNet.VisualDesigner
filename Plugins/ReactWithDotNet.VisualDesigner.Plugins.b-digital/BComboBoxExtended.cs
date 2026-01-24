@@ -115,40 +115,30 @@ sealed class BComboBoxExtended : PluginComponentBase
     {
         internal static ReactNode InputProps(ReactNode node)
         {
-            
+            var labelValue = node.FindPropByName(nameof(label))?.Value;
 
-            return 
-                from label in node.FindPropByName(nameof(label))?.Value
-                
-                from isRequiredPropValue in node.FindPropByName(nameof(isRequired))?.Value
-                
-                from isRequired in Plugin.ConvertDotNetPathToJsPath(isRequiredPropValue)
-                
-                from inputPropsValue in BuildInputProps((label, isRequired))
-                
-                select (inputPropsValue is null) switch
-                {
-                    true => node.RemoveProps(nameof(label), nameof(isRequired)).ReactNode,
-                    
-                    false=> node with
-                    {
-                        Properties = node.Properties.Add(new()
-                        {
-                            Name = "inputProps",
-                            Value = $$"""
-                                      {
-                                        {{inputPropsValue}}
-                                      }
-                                      """
-                        })
-                    }
-                };
-            
-          
-                
+            var isRequiredValue = node.FindPropByName(nameof(isRequired))?.Value;
 
-            
-            
+            isRequiredValue = Plugin.ConvertDotNetPathToJsPath(isRequiredValue);
+
+            node = node.RemoveProps(nameof(label), nameof(isRequired)).ReactNode;
+
+            var inputPropsValue = BuildInputProps((labelValue, isRequiredValue));
+            if (inputPropsValue is null)
+            {
+                return node;
+            }
+
+            return node.InsertProp(new()
+            {
+                Name = "inputProps",
+                Value = $$"""
+                          {
+                            {{inputPropsValue}}
+                          }
+                          """
+            });
+
             static string BuildInputProps((string floatingLabelText, string required) input)
             {
                 var lines = new List<string>();
@@ -243,6 +233,5 @@ sealed class BComboBoxExtended : PluginComponentBase
 
             return node;
         }
-
     }
 }
