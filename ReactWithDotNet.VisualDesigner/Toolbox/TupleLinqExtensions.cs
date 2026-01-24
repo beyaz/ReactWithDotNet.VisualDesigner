@@ -12,7 +12,10 @@ public static class TupleLinqExtensions
     }
 
     // select
-    public static TResult Select<T, TResult>(this T source, Func<T, TResult> selector)
+   
+    public static TResult Select<T1, T2, TResult>(
+        this (T1, T2) source,
+        Func<(T1, T2), TResult> selector)
     {
         return selector(source);
     }
