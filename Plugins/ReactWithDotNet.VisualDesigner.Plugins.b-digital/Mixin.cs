@@ -16,7 +16,7 @@ record MessagingRecord
 static class Mixin
 {
     
-    public static Maybe<string> BuildInputProps((string floatingLabelText, string required, string placeholder) input)
+    public static string BuildInputProps((string floatingLabelText, string required, string placeholder) input)
     {
         var lines = new List<string>();
 

@@ -115,32 +115,33 @@ sealed class BComboBoxExtended : PluginComponentBase
     {
         internal static ReactNode InputProps(ReactNode node)
         {
-            var props = 
+            var props =
             (
-                label : node.FindPropByName(nameof(label))?.Value,
-
+                label: node.FindPropByName(nameof(label))?.Value,
+                
                 isRequired: node.FindPropByName(nameof(isRequired))?.Value switch
                 {
                     { } x => IsStringValue(x) ? x : Plugin.ConvertDotNetPathToJsPath(x),
-                    
-                    null=> null
+
+                    null => null
                 },
                 
                 placeholder: node.FindPropByName("placeholder")?.Value switch
                 {
                     { } x => IsStringValue(x) ? x : Plugin.ConvertDotNetPathToJsPath(x),
-                    
-                    null=> null
+
+                    null => null
                 }
             );
-            
+
             node = node.RemoveProps(nameof(label), nameof(isRequired)).ReactNode;
 
-            return BuildInputProps(props).Map
-            (
-                body => node.Insert_inputProps(body),
-                node
-            );
+            return BuildInputProps(props) switch
+            {
+                { } body => node.Insert_inputProps(body),
+
+                null => null
+            };
         }
 
         internal static ReactNode OnChange(ReactNode node)
