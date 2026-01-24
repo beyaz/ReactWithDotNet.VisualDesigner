@@ -123,23 +123,25 @@ sealed class BComboBoxExtended : PluginComponentBase
 
             node = node.RemoveProps(nameof(label), nameof(isRequired)).ReactNode;
 
-            var inputPropsValue = BuildInputProps((labelValue, isRequiredValue));
-            if (inputPropsValue is null)
-            {
-                return node;
-            }
-
-            return node.InsertProp(new()
-            {
-                Name = "inputProps",
-                Value = $$"""
-                          {
-                            {{inputPropsValue}}
-                          }
-                          """
-            });
-
-            static string BuildInputProps((string floatingLabelText, string required) input)
+            return BuildInputProps((labelValue, isRequiredValue)).Map
+            (
+                HasValue: body => node.InsertProp(new()
+                {
+                    Name = "inputProps",
+                    Value = $$"""
+                              {
+                                {{body}}
+                              }
+                              """
+                }),
+                
+                NoValue: () => node
+            );
+                
+             
+            
+            
+            static Maybe<string> BuildInputProps((string floatingLabelText, string required) input)
             {
                 var lines = new List<string>();
 
