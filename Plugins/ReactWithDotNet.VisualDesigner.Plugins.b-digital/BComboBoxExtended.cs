@@ -123,11 +123,12 @@ sealed class BComboBoxExtended : PluginComponentBase
 
                 isRequired : Plugin.ConvertDotNetPathToJsPath(node.FindPropByName(nameof(isRequired))?.Value),
                 
-                placeholder: node.FindPropByName2("placeholder").Map
-                (
-                    prop=>IsStringValue(prop.Value) ? prop.Value : Plugin.ConvertDotNetPathToJsPath(prop.Value),
-                    (string)null
-                )
+                placeholder: node.FindPropByName("placeholder") switch
+                {
+                    { } prop => IsStringValue(prop.Value) ? prop.Value : Plugin.ConvertDotNetPathToJsPath(prop.Value),
+                    
+                    _=> null
+                }
             );
             
             node = node.RemoveProps(nameof(label), nameof(isRequired)).ReactNode;
