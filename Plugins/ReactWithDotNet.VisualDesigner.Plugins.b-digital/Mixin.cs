@@ -16,10 +16,15 @@ record MessagingRecord
 static class Mixin
 {
     
-    public static Maybe<string> BuildInputProps((string floatingLabelText, string required) input)
+    public static Maybe<string> BuildInputProps((string floatingLabelText, string required, string placeholder) input)
     {
         var lines = new List<string>();
 
+        if (input.placeholder is not null)
+        {
+            lines.Add($"placeholder: {input.placeholder}");
+        }
+        
         if (input.floatingLabelText is not null)
         {
             lines.Add($"floatingLabelText: {input.floatingLabelText}");
