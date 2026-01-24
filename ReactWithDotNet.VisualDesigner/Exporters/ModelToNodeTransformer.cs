@@ -415,3 +415,46 @@ public record ReactProperty
 
     public required string Value { get; init; }
 }
+
+public static class ReactNodeExtensions
+{
+    public static (ReactNode reactNode, Maybe<ReactProperty> removedProperty) RemoveProp(this ReactNode node, string propName)
+    {
+        var prop = node.Properties.FirstOrDefault(p => p.Name == propName);
+        if (prop is null)
+        {
+            return (node, None);
+        }
+
+        node = node with
+        {
+            Properties = node.Properties.Remove(prop)
+        };
+        
+        return (node, prop);
+    }
+    public static ReactNode  InsertProp(this ReactNode node, ReactProperty reactProperty)
+    {
+        return node with
+        {
+            Properties = node.Properties.Add(reactProperty)
+        };
+    }
+    
+    public static (ReactNode ReactNode, IReadOnlyList<ReactProperty> RemovedPropertyList) RemoveProps(this ReactNode node, params IReadOnlyList<string> propNames)
+    {
+        var removedPropertyList = (from p in node.Properties where propNames.Contains(p.Name) select p).ToList();
+
+        var newNode = node with
+        {
+            Properties = (from p in node.Properties where !propNames.Contains(p.Name) select p).ToImmutableList()
+        };
+        
+        return (newNode, removedPropertyList);
+    }
+    
+    public static ReactProperty  FindPropByName(this ReactNode node, string propName)
+    {
+        return node.Properties.FirstOrDefault(p => p.Name == propName);
+    }
+}

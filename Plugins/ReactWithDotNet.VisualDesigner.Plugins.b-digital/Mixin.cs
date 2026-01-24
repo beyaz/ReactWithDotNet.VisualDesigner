@@ -397,21 +397,7 @@ static class Mixin
         return data;
     }
     
-    public static (ReactNode reactNode, Maybe<ReactProperty> removedProperty) RemoveProp(this ReactNode node, string propName)
-    {
-        var prop = node.Properties.FirstOrDefault(p => p.Name == propName);
-        if (prop is null)
-        {
-            return (node, None);
-        }
-
-        node = node with
-        {
-            Properties = node.Properties.Remove(prop)
-        };
-        
-        return (node, prop);
-    }
+   
 }
 
 delegate ReactNode TransformNode(ReactNode node);
