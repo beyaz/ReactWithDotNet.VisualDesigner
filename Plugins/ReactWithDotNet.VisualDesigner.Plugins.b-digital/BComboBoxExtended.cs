@@ -115,8 +115,6 @@ sealed class BComboBoxExtended : PluginComponentBase
     {
         internal static ReactNode InputProps(ReactNode node)
         {
-            
-            
             var props = 
             (
                 label : node.FindPropByName(nameof(label))?.Value,
@@ -127,7 +125,7 @@ sealed class BComboBoxExtended : PluginComponentBase
                 {
                     { } x => IsStringValue(x) ? x : Plugin.ConvertDotNetPathToJsPath(x),
                     
-                    _=> null
+                    //_=> null
                 }
             );
             
