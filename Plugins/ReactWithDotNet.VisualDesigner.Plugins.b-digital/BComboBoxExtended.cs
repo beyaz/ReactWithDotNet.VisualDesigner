@@ -235,3 +235,4 @@ sealed class BComboBoxExtended : PluginComponentBase
         }
     }
 }
+
