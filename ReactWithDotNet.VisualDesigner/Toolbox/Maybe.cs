@@ -93,4 +93,14 @@ public static class MaybeExtensions
 
         return None();
     }
+    
+    public static B Map<A,B>(this Maybe<A> maybe, Func<A,B> Some, B b)
+    {
+        if (maybe.HasValue)
+        {
+            return Some(maybe.Value);
+        }
+
+        return b;
+    }
 }
