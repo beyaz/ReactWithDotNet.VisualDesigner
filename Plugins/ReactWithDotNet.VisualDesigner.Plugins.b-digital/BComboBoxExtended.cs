@@ -129,6 +129,12 @@ sealed class BComboBoxExtended : PluginComponentBase
                 }
             }
 
+            var q = from x in node.RemoveProp(nameof(label))
+                from y in x.reactNode.RemoveProp(nameof(isRequired))
+                select x.reactNode;
+            
+                
+
             string required = null;
             {
                 var isRequiredProp = node.Properties.FirstOrDefault(x => x.Name == nameof(isRequired));
