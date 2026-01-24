@@ -118,15 +118,17 @@ sealed class BComboBoxExtended : PluginComponentBase
             
 
             return 
-                from labelProp in node.FindPropByName(nameof(label))
+                from label in node.FindPropByName(nameof(label))?.Value
                 
-                from isRequiredProp in node.FindPropByName(nameof(isRequired))
+                from isRequiredPropValue in node.FindPropByName(nameof(isRequired))?.Value
                 
-                let inputPropsValue = BuildInputProps((labelProp?.Value, Plugin.ConvertDotNetPathToJsPath(isRequiredProp?.Value)))
+                from isRequired in Plugin.ConvertDotNetPathToJsPath(isRequiredPropValue)
+                
+                from inputPropsValue in BuildInputProps((label, isRequired))
                 
                 select (inputPropsValue is null) switch
                 {
-                    true => from x in node.RemoveProps(nameof(label), nameof(isRequired)) select x.ReactNode,
+                    true => node.RemoveProps(nameof(label), nameof(isRequired)).ReactNode,
                     
                     false=> node with
                     {
