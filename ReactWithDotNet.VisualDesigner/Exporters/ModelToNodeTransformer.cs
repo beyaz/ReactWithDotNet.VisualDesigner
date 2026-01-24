@@ -457,4 +457,9 @@ public static class ReactNodeExtensions
     {
         return node.Properties.FirstOrDefault(p => p.Name == propName);
     }
+    
+    public static Maybe<ReactProperty> FindPropByName2(this ReactNode node, string propName)
+    {
+        return node.Properties.FirstOrDefault(p => p.Name == propName);
+    }
 }
