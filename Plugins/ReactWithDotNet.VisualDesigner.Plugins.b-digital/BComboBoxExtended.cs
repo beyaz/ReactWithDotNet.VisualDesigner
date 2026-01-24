@@ -115,58 +115,36 @@ sealed class BComboBoxExtended : PluginComponentBase
     {
         internal static ReactNode InputProps(ReactNode node)
         {
-            string floatingLabelText = null;
-            {
-                var labelProp = node.Properties.FirstOrDefault(x => x.Name == nameof(label));
-                if (labelProp is not null)
-                {
-                    floatingLabelText = labelProp.Value;
-
-                    node = node with
-                    {
-                        Properties = node.Properties.Remove(labelProp)
-                    };
-                }
-            }
-
-            var q = from x in node.RemoveProp(nameof(label))
-                from y in x.reactNode.RemoveProp(nameof(isRequired))
-                select x.reactNode;
             
+
+            return 
+                from labelProp in node.Properties.FirstOrDefault(p=>p.Name == nameof(label))
+                
+                from isRequiredProp in node.Properties.FirstOrDefault(p=>p.Name == nameof(isRequired))
+                
+                let inputPropsValue = BuildInputProps((labelProp?.Value, Plugin.ConvertDotNetPathToJsPath(isRequiredProp?.Value)))
+                
+                select (inputPropsValue is null) switch
+                {
+                    true => from x in node.RemoveProp(nameof(label)) select x.reactNode,
+                    
+                    false=> node with
+                    {
+                        Properties = node.Properties.Add(new()
+                        {
+                            Name = "inputProps",
+                            Value = $$"""
+                                      {
+                                        {{inputPropsValue}}
+                                      }
+                                      """
+                        })
+                    }
+                };
+            
+          
                 
 
-            string required = null;
-            {
-                var isRequiredProp = node.Properties.FirstOrDefault(x => x.Name == nameof(isRequired));
-                if (isRequiredProp is not null)
-                {
-                    required = Plugin.ConvertDotNetPathToJsPath(isRequiredProp.Value);
-
-                    node = node with
-                    {
-                        Properties = node.Properties.Remove(isRequiredProp)
-                    };
-                }
-            }
-
-            var inputPropsValue = BuildInputProps((floatingLabelText, required));
-            if (inputPropsValue is not null)
-            {
-                return node with
-                {
-                    Properties = node.Properties.Add(new()
-                    {
-                        Name = "inputProps",
-                        Value = $$"""
-                                  {
-                                    {{inputPropsValue}}
-                                  }
-                                  """
-                    })
-                };
-            }
-
-            return node;
             
             
             static string BuildInputProps((string floatingLabelText, string required) input)
