@@ -141,14 +141,11 @@ sealed class BDigitalDatepicker : PluginComponentBase
                 select IsAlphaNumeric(value) ? value + "(value);" : value
             };
 
-            return
-                onChangeFunctionBody.HasLine
-                    ? node.UpdateProp(nameof(onDateChange), new()
+            return !onChangeFunctionBody.HasLine ? node: node.UpdateProp(nameof(onDateChange), new()
                     {
                         "(value: Date) =>",
                         "{", onChangeFunctionBody, "}"
-                    })
-                    : node;
+                    });
         }
 
         internal static ReactNode ValueConstraint(ReactNode node)
