@@ -14,6 +14,10 @@ sealed class BDigitalPhone : PluginComponentBase
 
     [JsTypeInfo(JsType.Function)]
     public string handlePhoneChange { get; set; }
+    
+    [Suggestions("true, ___any_text___")]
+    [JsTypeInfo(JsType.String)]
+    public string required { get; set; }
 
 
     [NodeAnalyzer]

@@ -21,7 +21,7 @@ sealed class BComboBoxExtended : PluginComponentBase
     [JsTypeInfo(JsType.Boolean)]
     public string isRequired { get; set; }
     
-    [Suggestions("true, \"___any_text___\"")]
+    [Suggestions("true, ___any_text___")]
     [JsTypeInfo(JsType.String)]
     public string required { get; set; }
 
