@@ -27,6 +27,10 @@ sealed class BComboBoxExtended : PluginComponentBase
 
     [JsTypeInfo(JsType.String)]
     public string label { get; set; }
+    
+    [JsTypeInfo(JsType.String)]
+    public string floatingLabelText { get; set; }
+    
 
     [Suggestions("true")]
     [JsTypeInfo(JsType.Boolean)]
@@ -49,7 +53,7 @@ sealed class BComboBoxExtended : PluginComponentBase
             return AnalyzeChildren(input, AnalyzeReactNode);
         }
 
-        input = ApplyTranslateOperationOnProps(input, nameof(label), nameof(required));
+        input = ApplyTranslateOperationOnProps(input, nameof(floatingLabelText), nameof(required));
 
         var node = input.Node;
 
@@ -76,7 +80,7 @@ sealed class BComboBoxExtended : PluginComponentBase
                 new label
                 {
                     // c o n t e n t
-                    label,
+                    floatingLabelText,
 
                     // l a y o u t
                     PositionAbsolute,

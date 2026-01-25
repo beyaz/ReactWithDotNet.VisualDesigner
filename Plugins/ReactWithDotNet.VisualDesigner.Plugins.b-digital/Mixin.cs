@@ -17,11 +17,9 @@ static class Mixin
 {
     internal static ReactNode Transform_inputProps(ReactNode node)
     {
-        
-        
-        var props =
+        var input =
         (
-            label: node.FindPropByName("label")?.Value,
+            floatingLabelText: node.FindPropByName("floatingLabelText")?.Value,
                 
             required: node.FindPropByName("required")?.Value switch
             {
@@ -38,54 +36,46 @@ static class Mixin
             }
         );
 
-        node = node.RemoveProps("label", "required").ReactNode;
+        node = node.RemoveProps("floatingLabelText", "required","placeholder").ReactNode;
 
-        return BuildInputProps(props) switch
-        {
-            { } body => Insert_inputProps(node,body),
-
-            null => null
-        };
         
-         static string BuildInputProps((string floatingLabelText, string required, string placeholder) input)
-        {
-            var lines = new List<string>();
+        var lines = new List<string>();
 
-            if (input.placeholder is not null)
-            {
-                lines.Add($"placeholder: {input.placeholder}");
-            }
+        if (input.placeholder is not null)
+        {
+            lines.Add($"placeholder: {input.placeholder}");
+        }
         
-            if (input.floatingLabelText is not null)
-            {
-                lines.Add($"floatingLabelText: {input.floatingLabelText}");
-            }
-
-            if (input.required is not null)
-            {
-                lines.Add($"valueConstraint: {{ required: {input.required} }}");
-            }
-
-            if (lines.Count == 0)
-            {
-                return null;
-            }
-
-            return string.Join("," + Environment.NewLine + "  ", lines);
-        }
-    
-         static ReactNode Insert_inputProps( ReactNode reactNode, string body)
+        if (input.floatingLabelText is not null)
         {
-            return reactNode.InsertProp(new()
-            {
-                Name = "inputProps",
-                Value = $$"""
-                          {
-                            {{body}}
-                          }
-                          """
-            });
+            lines.Add($"floatingLabelText: {input.floatingLabelText}");
         }
+
+        if (input.required is not null)
+        {
+            lines.Add($"valueConstraint: {{ required: {input.required} }}");
+        }
+
+        if (lines.Count == 0)
+        {
+            return node;
+        }
+
+        var body = string.Join("," + Environment.NewLine + "  ", lines);
+        
+        return node.InsertProp(new()
+        {
+            Name = "inputProps",
+            Value = $$"""
+                      {
+                        {{body}}
+                      }
+                      """
+        });
+        
+        
+       
+         
     }
     
     

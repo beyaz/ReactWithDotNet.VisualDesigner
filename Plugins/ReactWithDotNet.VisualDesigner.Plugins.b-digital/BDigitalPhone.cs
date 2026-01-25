@@ -4,7 +4,7 @@
 sealed class BDigitalPhone : PluginComponentBase
 {
     [JsTypeInfo(JsType.String)]
-    public string label { get; set; }
+    public string floatingLabelText { get; set; }
 
     [JsTypeInfo(JsType.String)]
     public string hintText { get; set; }
@@ -28,13 +28,14 @@ sealed class BDigitalPhone : PluginComponentBase
             return AnalyzeChildren(input, AnalyzeReactNode);
         }
 
-        input = ApplyTranslateOperationOnProps(input, nameof(label), nameof(hintText));
+        input = ApplyTranslateOperationOnProps(input, nameof(floatingLabelText), nameof(hintText));
         
         
         var node = input.Node;
 
         node = Run(node, [
-            Transforms.OnChange
+            Transforms.OnChange,
+            Transform_inputProps
         ]);
 
 
