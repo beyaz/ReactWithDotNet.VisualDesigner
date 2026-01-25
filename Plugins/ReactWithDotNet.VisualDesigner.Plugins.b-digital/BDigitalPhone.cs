@@ -4,7 +4,7 @@
 sealed class BDigitalPhone : PluginComponentBase
 {
     [JsTypeInfo(JsType.String)]
-    public string floatingLabelText { get; set; }
+    public string label { get; set; }
 
     [JsTypeInfo(JsType.String)]
     public string hintText { get; set; }
@@ -28,7 +28,7 @@ sealed class BDigitalPhone : PluginComponentBase
             return AnalyzeChildren(input, AnalyzeReactNode);
         }
 
-        input = ApplyTranslateOperationOnProps(input, nameof(floatingLabelText), nameof(hintText));
+        input = ApplyTranslateOperationOnProps(input, nameof(label), nameof(hintText));
         
         
         var node = input.Node;
@@ -46,25 +46,45 @@ sealed class BDigitalPhone : PluginComponentBase
 
     protected override Element render()
     {
-        var textContent = string.Empty;
-        if (hintText.HasValue)
-        {
-            textContent = hintText;
-        }
-
-        if (phoneNumber.HasValue)
-        {
-            textContent += " | " + phoneNumber;
-        }
-
         return new div(PaddingTop(16), PaddingBottom(8))
         {
+            Id(id), OnClick(onMouseClick),
+
             new FlexRow(AlignItemsCenter, PaddingLeftRight(16), Border(1, solid, "#c0c0c0"), BorderRadius(10), Height(58), JustifyContentSpaceBetween)
             {
-                new div(Color(rgba(0, 0, 0, 0.54)), FontSize16, FontWeight400, FontFamily("Roboto, sans-serif")) { textContent },
+                // L a b e l   o n   t o p - l e f t   b o r d e r 
+                PositionRelative,
+                new label
+                {
+                    // c o n t e n t
+                    label,
 
-                Id(id), OnClick(onMouseClick)
-            }
+                    // l a y o u t
+                    PositionAbsolute,
+                    Top(-6),
+                    Left(16),
+                    PaddingX(4),
+
+                    // t h e m e
+                    Color(rgba(0, 0, 0, 0.6)),
+                    FontSize12,
+                    FontWeight400,
+                    LineHeight12,
+                    LetterSpacing(0.15),
+                    FontFamily("Roboto"),
+                    Background(White)
+                },
+
+                new div(Color(rgba(0, 0, 0, 0.54)), FontSize16, FontWeight400, FontFamily("Roboto, sans-serif"))
+                {
+                    phoneNumber
+                }
+            },
+            //new FlexRow(JustifyContentSpaceBetween, FontSize12, PaddingLeftRight(14), Color(rgb(158, 158, 158)), LineHeight15)
+            //{
+            //    new div { helperText },
+            //    new div { maxLength }
+            //}
         };
     }
     
