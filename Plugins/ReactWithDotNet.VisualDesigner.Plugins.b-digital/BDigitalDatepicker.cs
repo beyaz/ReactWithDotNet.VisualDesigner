@@ -11,6 +11,8 @@ sealed class BDigitalDatepicker : PluginComponentBase
 
     [JsTypeInfo(JsType.Boolean)]
     public string isRequired { get; set; }
+    
+   
 
     [JsTypeInfo(JsType.String)]
     public string labelText { get; set; }

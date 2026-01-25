@@ -21,6 +21,10 @@ sealed class BInput : PluginComponentBase
 
     [JsTypeInfo(JsType.Boolean)]
     public string isRequired { get; set; }
+    
+    [Suggestions("true, \"___any_text___\"")]
+    [JsTypeInfo(JsType.String)]
+    public string required { get; set; }
 
     [JsTypeInfo(JsType.Number)]
     public string maxLength { get; set; }

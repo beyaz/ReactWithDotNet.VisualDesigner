@@ -20,6 +20,10 @@ sealed class BComboBoxExtended : PluginComponentBase
     [Suggestions("true")]
     [JsTypeInfo(JsType.Boolean)]
     public string isRequired { get; set; }
+    
+    [Suggestions("true, \"___any_text___\"")]
+    [JsTypeInfo(JsType.String)]
+    public string required { get; set; }
 
     [JsTypeInfo(JsType.String)]
     public string label { get; set; }
@@ -45,7 +49,7 @@ sealed class BComboBoxExtended : PluginComponentBase
             return AnalyzeChildren(input, AnalyzeReactNode);
         }
 
-        input = ApplyTranslateOperationOnProps(input, nameof(label));
+        input = ApplyTranslateOperationOnProps(input, nameof(label), nameof(required));
 
         var node = input.Node;
 
@@ -119,10 +123,12 @@ sealed class BComboBoxExtended : PluginComponentBase
             (
                 label: node.FindPropByName(nameof(label))?.Value,
                 
-                isRequired: node.FindPropByName(nameof(isRequired))?.Value switch
+                required: node.FindPropByName(nameof(required))?.Value switch
                 {
-                    { } x => IsStringValue(x) ? x : Plugin.ConvertDotNetPathToJsPath(x),
-
+                    { } x when x is "true" => "true",
+                    
+                    { } x when  IsStringValue(x) || x.StartsWith("getMessage(") =>  $"{{ message: {x} }}",
+                    
                     null => null
                 },
                 
@@ -134,7 +140,7 @@ sealed class BComboBoxExtended : PluginComponentBase
                 }
             );
 
-            node = node.RemoveProps(nameof(label), nameof(isRequired)).ReactNode;
+            node = node.RemoveProps(nameof(label), nameof(required)).ReactNode;
 
             return BuildInputProps(props) switch
             {
