@@ -55,7 +55,7 @@ sealed class BComboBoxExtended : PluginComponentBase
 
         node = Run(node, [
             Transforms.OnChange,
-            Transforms.InputProps
+            Transform_inputProps
         ]);
 
         var import = (nameof(BComboBoxExtended), "b-combo-box-extended");
@@ -117,36 +117,7 @@ sealed class BComboBoxExtended : PluginComponentBase
 
     static class Transforms
     {
-        internal static ReactNode InputProps(ReactNode node)
-        {
-            var props =
-            (
-                label: node.FindPropByName(nameof(label))?.Value,
-                
-                required: node.FindPropByName(nameof(required))?.Value switch
-                {
-                    { } x => x is "true" ? x : $"{{ message: {x} }}",
-
-                    null => null
-                },
-                
-                placeholder: node.FindPropByName("placeholder")?.Value switch
-                {
-                    { } x => IsStringValue(x) ? x : Plugin.ConvertDotNetPathToJsPath(x),
-
-                    null => null
-                }
-            );
-
-            node = node.RemoveProps(nameof(label), nameof(required)).ReactNode;
-
-            return BuildInputProps(props) switch
-            {
-                { } body => node.Insert_inputProps(body),
-
-                null => null
-            };
-        }
+        
 
         internal static ReactNode OnChange(ReactNode node)
         {

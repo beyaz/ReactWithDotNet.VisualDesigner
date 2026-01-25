@@ -15,6 +15,38 @@ record MessagingRecord
 
 static class Mixin
 {
+    internal static ReactNode Transform_inputProps(ReactNode node)
+    {
+        
+        
+        var props =
+        (
+            label: node.FindPropByName("label")?.Value,
+                
+            required: node.FindPropByName("required")?.Value switch
+            {
+                { } x => x is "true" ? x : $"{{ message: {x} }}",
+
+                null => null
+            },
+                
+            placeholder: node.FindPropByName("placeholder")?.Value switch
+            {
+                { } x => IsStringValue(x) ? x : Plugin.ConvertDotNetPathToJsPath(x),
+
+                null => null
+            }
+        );
+
+        node = node.RemoveProps("label", "required").ReactNode;
+
+        return BuildInputProps(props) switch
+        {
+            { } body => node.Insert_inputProps(body),
+
+            null => null
+        };
+    }
     
     public static string BuildInputProps((string floatingLabelText, string required, string placeholder) input)
     {
