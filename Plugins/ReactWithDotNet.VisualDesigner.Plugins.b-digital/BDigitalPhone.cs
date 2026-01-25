@@ -28,57 +28,10 @@ sealed class BDigitalPhone : PluginComponentBase
         
         
         var node = input.Node;
-        
 
-        var phoneNumberProp = node.Properties.FirstOrDefault(x => x.Name == nameof(phoneNumber));
-        var handlePhoneChangeProp = node.Properties.FirstOrDefault(x => x.Name == nameof(handlePhoneChange));
-
-        if (phoneNumberProp is not null)
-        {
-            var properties = node.Properties;
-
-            var lines = new TsLineCollection
-                {
-                    "(value: string, formattedValue: string, areaCode: string) =>",
-                    "{",
-                    GetUpdateStateLines(phoneNumberProp.Value, "value")
-                };
-
-            if (handlePhoneChangeProp is not null)
-            {
-                if (IsAlphaNumeric(handlePhoneChangeProp.Value))
-                {
-                    lines.Add(handlePhoneChangeProp.Value + "(value, formattedValue, areaCode);");
-                }
-                else
-                {
-                    lines.Add(handlePhoneChangeProp.Value);
-                }
-            }
-
-            lines.Add("}");
-
-            if (handlePhoneChangeProp is not null)
-            {
-                handlePhoneChangeProp = handlePhoneChangeProp with
-                {
-                    Value = lines.ToTsCode()
-                };
-
-                properties = properties.SetItem(properties.FindIndex(x => x.Name == handlePhoneChangeProp.Name), handlePhoneChangeProp);
-            }
-            else
-            {
-                properties = properties.Add(new()
-                {
-                    Name = "handlePhoneChange",
-                    Value = lines.ToTsCode()
-                });
-            }
-
-            node = node with { Properties = properties };
-        }
-
+        node = Run(node, [
+            Transforms.OnChange
+        ]);
 
 
         var import = (nameof(BDigitalPhone), "b-digital-phone");
@@ -108,5 +61,66 @@ sealed class BDigitalPhone : PluginComponentBase
                 Id(id), OnClick(onMouseClick)
             }
         };
+    }
+    
+    
+    static class Transforms
+    {
+      
+
+        internal static ReactNode OnChange(ReactNode node)
+        {
+           
+            var phoneNumberProp = node.Properties.FirstOrDefault(x => x.Name == nameof(phoneNumber));
+            var handlePhoneChangeProp = node.Properties.FirstOrDefault(x => x.Name == nameof(handlePhoneChange));
+
+            if (phoneNumberProp is not null)
+            {
+                var properties = node.Properties;
+
+                var lines = new TsLineCollection
+                {
+                    "(value: string, formattedValue: string, areaCode: string) =>",
+                    "{",
+                    GetUpdateStateLines(phoneNumberProp.Value, "value")
+                };
+
+                if (handlePhoneChangeProp is not null)
+                {
+                    if (IsAlphaNumeric(handlePhoneChangeProp.Value))
+                    {
+                        lines.Add(handlePhoneChangeProp.Value + "(value, formattedValue, areaCode);");
+                    }
+                    else
+                    {
+                        lines.Add(handlePhoneChangeProp.Value);
+                    }
+                }
+
+                lines.Add("}");
+
+                if (handlePhoneChangeProp is not null)
+                {
+                    handlePhoneChangeProp = handlePhoneChangeProp with
+                    {
+                        Value = lines.ToTsCode()
+                    };
+
+                    properties = properties.SetItem(properties.FindIndex(x => x.Name == handlePhoneChangeProp.Name), handlePhoneChangeProp);
+                }
+                else
+                {
+                    properties = properties.Add(new()
+                    {
+                        Name  = "handlePhoneChange",
+                        Value = lines.ToTsCode()
+                    });
+                }
+
+                node = node with { Properties = properties };
+            }
+            
+            return node;
+        }
     }
 }
