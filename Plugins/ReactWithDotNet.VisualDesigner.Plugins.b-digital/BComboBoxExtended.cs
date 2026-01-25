@@ -125,10 +125,8 @@ sealed class BComboBoxExtended : PluginComponentBase
                 
                 required: node.FindPropByName(nameof(required))?.Value switch
                 {
-                    { } x when x is "true" => "true",
-                    
-                    { } x when  IsStringValue(x) || x.StartsWith("getMessage(") =>  $"{{ message: {x} }}",
-                    
+                    { } x => x is "true" ? x : $"{{ message: {x} }}",
+
                     null => null
                 },
                 
