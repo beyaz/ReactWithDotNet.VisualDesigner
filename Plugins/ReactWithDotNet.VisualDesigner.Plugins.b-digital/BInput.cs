@@ -35,22 +35,15 @@ sealed class BInput : PluginComponentBase
     [JsTypeInfo(JsType.String)]
     public string value { get; set; }
 
-    [NodeAnalyzer]
-    public static NodeAnalyzeOutput AnalyzeReactNode(NodeAnalyzeInput input)
+    static class Transforms
     {
-        if (input.Node.Tag != nameof(BInput))
+        internal static ReactNode OnChange(ReactNode node)
         {
-            return AnalyzeChildren(input, AnalyzeReactNode);
-        }
-        
-        input = ApplyTranslateOperationOnProps(input, nameof(floatingLabelText), nameof(errorText), nameof(helperText));
-        
-
-        var node = input.Node;
-
-
-        if (!node.Properties.HasFunctionAssignment(nameof(onChange)))
-        {
+            if (node.Properties.HasFunctionAssignment(nameof(onChange)))
+            {
+                return node;
+            }
+            
             var onChangeFunctionBody = new TsLineCollection
             {
                 // u p d a t e   s o u r c e
@@ -66,42 +59,64 @@ sealed class BInput : PluginComponentBase
                 select IsAlphaNumeric(value) ? value + "(e, value);" : value
             };
 
-            node = onChangeFunctionBody.HasLine ? node.UpdateProp(nameof(onChange), new()
+            return !onChangeFunctionBody.HasLine? node : node.UpdateProp(nameof(onChange), new()
             {
                 "(e: any, value: any) =>",
                 "{", onChangeFunctionBody, "}"
-            }) : node;
+            });
         }
-
-        var isRequiredProp = node.Properties.FirstOrDefault(x => x.Name == nameof(isRequired));
-        var isAutoCompleteProp = node.Properties.FirstOrDefault(x => x.Name == nameof(isAutoComplete));
-        if (isRequiredProp is not null && isAutoCompleteProp is not null)
+        
+        internal static ReactNode ValueConstraint(ReactNode node)
         {
-            var newValue = new
+            var isRequiredProp = node.Properties.FirstOrDefault(x => x.Name == nameof(isRequired));
+            var isAutoCompleteProp = node.Properties.FirstOrDefault(x => x.Name == nameof(isAutoComplete));
+            if (isRequiredProp is not null && isAutoCompleteProp is not null)
             {
-                required = Plugin.ConvertDotNetPathToJsPath(isRequiredProp.Value),
-
-                autoComplete = isAutoCompleteProp.Value switch
+                var newValue = new
                 {
-                    var value when "true".EqualsOrdinalIgnoreCase(value) => "'on'",
+                    required = Plugin.ConvertDotNetPathToJsPath(isRequiredProp.Value),
 
-                    var value when "false".EqualsOrdinalIgnoreCase(value) => "'off'",
+                    autoComplete = isAutoCompleteProp.Value switch
+                    {
+                        var value when "true".EqualsOrdinalIgnoreCase(value) => "'on'",
 
-                    _ => $"{Plugin.ConvertDotNetPathToJsPath(isAutoCompleteProp.Value)} ? \"on\" : \"off\""
-                }
-            };
+                        var value when "false".EqualsOrdinalIgnoreCase(value) => "'off'",
+
+                        _ => $"{Plugin.ConvertDotNetPathToJsPath(isAutoCompleteProp.Value)} ? \"on\" : \"off\""
+                    }
+                };
             
-            node = node with
-            {
-                Properties = node.Properties.Remove(isRequiredProp).Remove(isAutoCompleteProp).Add(new()
+                node = node with
                 {
-                    Name  = "valueConstraint",
-                    Value = $"{{ required: {newValue.required}, autoComplete: {newValue.autoComplete} }}"
-                })
-            };
-        }
+                    Properties = node.Properties.Remove(isRequiredProp).Remove(isAutoCompleteProp).Add(new()
+                    {
+                        Name  = "valueConstraint",
+                        Value = $"{{ required: {newValue.required}, autoComplete: {newValue.autoComplete} }}"
+                    })
+                };
+            }
 
-        node = AddContextProp(node);
+            return node;
+        }
+    }
+
+    [NodeAnalyzer]
+    public static NodeAnalyzeOutput AnalyzeReactNode(NodeAnalyzeInput input)
+    {
+        if (input.Node.Tag != nameof(BInput))
+        {
+            return AnalyzeChildren(input, AnalyzeReactNode);
+        }
+        
+        input = ApplyTranslateOperationOnProps(input, nameof(floatingLabelText), nameof(errorText), nameof(helperText));
+        
+        var node = input.Node;
+        
+        node = Run(node, [
+            Transforms.OnChange,
+            Transforms.ValueConstraint,
+            AddContextProp
+        ]);
 
         return Result.From((node, new TsImportCollection
         {
