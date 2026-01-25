@@ -42,51 +42,53 @@ static class Mixin
 
         return BuildInputProps(props) switch
         {
-            { } body => node.Insert_inputProps(body),
+            { } body => Insert_inputProps(node,body),
 
             null => null
         };
-    }
-    
-    public static string BuildInputProps((string floatingLabelText, string required, string placeholder) input)
-    {
-        var lines = new List<string>();
-
-        if (input.placeholder is not null)
-        {
-            lines.Add($"placeholder: {input.placeholder}");
-        }
         
-        if (input.floatingLabelText is not null)
+         static string BuildInputProps((string floatingLabelText, string required, string placeholder) input)
         {
-            lines.Add($"floatingLabelText: {input.floatingLabelText}");
-        }
+            var lines = new List<string>();
 
-        if (input.required is not null)
+            if (input.placeholder is not null)
+            {
+                lines.Add($"placeholder: {input.placeholder}");
+            }
+        
+            if (input.floatingLabelText is not null)
+            {
+                lines.Add($"floatingLabelText: {input.floatingLabelText}");
+            }
+
+            if (input.required is not null)
+            {
+                lines.Add($"valueConstraint: {{ required: {input.required} }}");
+            }
+
+            if (lines.Count == 0)
+            {
+                return null;
+            }
+
+            return string.Join("," + Environment.NewLine + "  ", lines);
+        }
+    
+         static ReactNode Insert_inputProps( ReactNode reactNode, string body)
         {
-            lines.Add($"valueConstraint: {{ required: {input.required} }}");
+            return reactNode.InsertProp(new()
+            {
+                Name = "inputProps",
+                Value = $$"""
+                          {
+                            {{body}}
+                          }
+                          """
+            });
         }
-
-        if (lines.Count == 0)
-        {
-            return null;
-        }
-
-        return string.Join("," + Environment.NewLine + "  ", lines);
     }
     
-    public static ReactNode Insert_inputProps(this ReactNode reactNode, string body)
-    {
-        return reactNode.InsertProp(new()
-        {
-            Name = "inputProps",
-            Value = $$"""
-                      {
-                        {{body}}
-                      }
-                      """
-        });
-    }
+    
     
     public static ReactNode Insert_valueConstraint(this ReactNode reactNode, string body)
     {
