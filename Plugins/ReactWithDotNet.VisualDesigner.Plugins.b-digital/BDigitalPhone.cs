@@ -70,57 +70,31 @@ sealed class BDigitalPhone : PluginComponentBase
 
         internal static ReactNode OnChange(ReactNode node)
         {
-           
-            var phoneNumberProp = node.Properties.FirstOrDefault(x => x.Name == nameof(phoneNumber));
-            var handlePhoneChangeProp = node.Properties.FirstOrDefault(x => x.Name == nameof(handlePhoneChange));
-
-            if (phoneNumberProp is not null)
+            if (node.Properties.HasFunctionAssignment(nameof(handlePhoneChange)))
             {
-                var properties = node.Properties;
-
-                var lines = new TsLineCollection
-                {
-                    "(value: string, formattedValue: string, areaCode: string) =>",
-                    "{",
-                    GetUpdateStateLines(phoneNumberProp.Value, "value")
-                };
-
-                if (handlePhoneChangeProp is not null)
-                {
-                    if (IsAlphaNumeric(handlePhoneChangeProp.Value))
-                    {
-                        lines.Add(handlePhoneChangeProp.Value + "(value, formattedValue, areaCode);");
-                    }
-                    else
-                    {
-                        lines.Add(handlePhoneChangeProp.Value);
-                    }
-                }
-
-                lines.Add("}");
-
-                if (handlePhoneChangeProp is not null)
-                {
-                    handlePhoneChangeProp = handlePhoneChangeProp with
-                    {
-                        Value = lines.ToTsCode()
-                    };
-
-                    properties = properties.SetItem(properties.FindIndex(x => x.Name == handlePhoneChangeProp.Name), handlePhoneChangeProp);
-                }
-                else
-                {
-                    properties = properties.Add(new()
-                    {
-                        Name  = "handlePhoneChange",
-                        Value = lines.ToTsCode()
-                    });
-                }
-
-                node = node with { Properties = properties };
+                return node;
             }
-            
-            return node;
+
+            var onChangeFunctionBody = new TsLineCollection
+            {
+                // u p d a t e   s o u r c e
+                from property in node.Properties
+                where property.Name == nameof(phoneNumber)
+                from line in GetUpdateStateLines(property.Value, "value")
+                select line,
+
+                // e v e n t   h a n d l e r
+                from property in node.Properties
+                where property.Name == nameof(handlePhoneChange)
+                let value = property.Value
+                select IsAlphaNumeric(value) ? value + "(value, formattedValue, areaCode);" : value
+            };
+
+            return !onChangeFunctionBody.HasLine ? node: node.UpdateProp(nameof(handlePhoneChange), new()
+            {
+                "(value: string, formattedValue: string, areaCode: string) =>",
+                "{", onChangeFunctionBody, "}"
+            });
         }
     }
 }
