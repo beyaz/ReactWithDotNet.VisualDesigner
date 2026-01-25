@@ -56,6 +56,19 @@ static class Mixin
         });
     }
     
+    public static ReactNode Insert_valueConstraint(this ReactNode reactNode, string body)
+    {
+        return reactNode.InsertProp(new()
+        {
+            Name = "valueConstraint",
+            Value = $$"""
+                      {
+                        {{body}}
+                      }
+                      """
+        });
+    }
+    
     public static ReactNode TransformIfHasProperty(
         this ReactNode node,
         string name,

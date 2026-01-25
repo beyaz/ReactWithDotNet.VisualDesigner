@@ -18,13 +18,17 @@ sealed class BInput : PluginComponentBase
 
     [JsTypeInfo(JsType.Boolean)]
     public string isAutoComplete { get; set; }
+    
+    [Suggestions("true , \"___any_text___\"")]
+    [JsTypeInfo(JsType.String)]
+    public string required { get; set; }
 
     [JsTypeInfo(JsType.Boolean)]
     public string isRequired { get; set; }
     
-    [Suggestions("true, \"___any_text___\"")]
+    [Suggestions("on , off ")]
     [JsTypeInfo(JsType.String)]
-    public string required { get; set; }
+    public string autoComplete { get; set; }
 
     [JsTypeInfo(JsType.Number)]
     public string maxLength { get; set; }
@@ -68,32 +72,21 @@ sealed class BInput : PluginComponentBase
         
         internal static ReactNode ValueConstraint(ReactNode node)
         {
-            var isRequiredProp = node.Properties.FirstOrDefault(x => x.Name == nameof(isRequired));
-            var isAutoCompleteProp = node.Properties.FirstOrDefault(x => x.Name == nameof(isAutoComplete));
-            if (isRequiredProp is not null && isAutoCompleteProp is not null)
+            var newValue = new
             {
-                var newValue = new
+                required = node.FindPropByName(nameof(required))?.Value switch
                 {
-                    required = Plugin.ConvertDotNetPathToJsPath(isRequiredProp.Value),
+                    { } x => x is "true" ? x : $"{{ message: {x} }}",
 
-                    autoComplete = isAutoCompleteProp.Value switch
-                    {
-                        var value when "true".EqualsOrdinalIgnoreCase(value) => "'on'",
+                    null => null
+                }
+            };
 
-                        var value when "false".EqualsOrdinalIgnoreCase(value) => "'off'",
-
-                        _ => $"{Plugin.ConvertDotNetPathToJsPath(isAutoCompleteProp.Value)} ? \"on\" : \"off\""
-                    }
-                };
-            
-                node = node with
-                {
-                    Properties = node.Properties.Remove(isRequiredProp).Remove(isAutoCompleteProp).Add(new()
-                    {
-                        Name  = "valueConstraint",
-                        Value = $"{{ required: {newValue.required}, autoComplete: {newValue.autoComplete} }}"
-                    })
-                };
+            if (newValue.required.HasValue)
+            {
+                node = node.Insert_valueConstraint($"{{ required: {newValue.required} }}");
+                
+                node = node.RemoveProp(nameof(required)).reactNode;
             }
 
             return node;
