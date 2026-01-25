@@ -84,7 +84,7 @@ sealed class BInput : PluginComponentBase
 
             if (newValue.required.HasValue)
             {
-                node = node.Insert_valueConstraint($"{{ required: {newValue.required} }}");
+                node = node.Insert_valueConstraint($"required: {newValue.required}");
                 
                 node = node.RemoveProp(nameof(required)).reactNode;
             }
