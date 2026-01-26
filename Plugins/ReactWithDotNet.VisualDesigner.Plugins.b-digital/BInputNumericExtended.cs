@@ -3,30 +3,22 @@
 [CustomComponent]
 sealed class BInputNumericExtended : PluginComponentBase
 {
+    [JsTypeInfo(JsType.Boolean)]
+    public string disabled { get; set; }
+
     [JsTypeInfo(JsType.String)]
     public string errorText { get; set; }
-    
+
     [JsTypeInfo(JsType.String)]
     public string floatingLabelText { get; set; }
 
+    [Suggestions("F , M, D")]
+    [JsTypeInfo(JsType.String)]
+    public string format { get; set; }
+
     [JsTypeInfo(JsType.String)]
     public string helperText { get; set; }
-    
-    [JsTypeInfo(JsType.Boolean)]
-    public string isRequired { get; set; }
 
-    [JsTypeInfo(JsType.Number)]
-    public string maxLength { get; set; }
-
-    [JsTypeInfo(JsType.Function)]
-    public string onChange { get; set; }
-
-    [JsTypeInfo(JsType.String)]
-    public string value { get; set; }
-
-    [JsTypeInfo(JsType.Boolean)]
-    public string disabled { get; set; }
-    
     [JsTypeInfo(JsType.String)]
     public string hintText { get; set; }
 
@@ -34,17 +26,24 @@ sealed class BInputNumericExtended : PluginComponentBase
     [JsTypeInfo(JsType.String)]
     public string inputAlign { get; set; }
 
-    [Suggestions("F , M, D")]
-    [JsTypeInfo(JsType.String)]
-    public string format { get; set; }
-    
     [JsTypeInfo(JsType.Number)]
-    public string minValue { get; set; }
-    
+    public string maxLength { get; set; }
+
     [JsTypeInfo(JsType.Number)]
     public string maxValue { get; set; }
-    
-   
+
+    [JsTypeInfo(JsType.Number)]
+    public string minValue { get; set; }
+
+    [JsTypeInfo(JsType.Function)]
+    public string onChange { get; set; }
+
+    [JsTypeInfo(JsType.Boolean)]
+    public string required { get; set; }
+
+    [JsTypeInfo(JsType.String)]
+    public string value { get; set; }
+
     [NodeAnalyzer]
     public static NodeAnalyzeOutput AnalyzeReactNode(NodeAnalyzeInput input)
     {
@@ -53,16 +52,85 @@ sealed class BInputNumericExtended : PluginComponentBase
             return AnalyzeChildren(input, AnalyzeReactNode);
         }
 
-        input = ApplyTranslateOperationOnProps(input, nameof(floatingLabelText), nameof(errorText),nameof(helperText), nameof(hintText));
-        
+        input = ApplyTranslateOperationOnProps(input, nameof(floatingLabelText), nameof(errorText), nameof(helperText), nameof(hintText), nameof(required));
+
         var node = input.Node;
 
+        node = Run(node, [
+            Transforms.OnChange,
+            Transforms.ValueConstraint,
+            AddContextProp
+        ]);
 
-
- 
-
-        if (!node.Properties.HasFunctionAssignment(nameof(onChange)))
+        return Result.From((node, new TsImportCollection
         {
+            { nameof(BInputNumericExtended), "b-input-numeric-extended" }
+        }));
+    }
+
+    protected override Element render()
+    {
+        return new div(PaddingTop(16), PaddingBottom(8))
+        {
+            Id(id), OnClick(onMouseClick),
+
+            new FlexRow(AlignItemsCenter, PaddingLeftRight(16), Border(1, solid, "#c0c0c0"), BorderRadius(10), Height(58))
+            {
+                // L a b e l   o n   t o p - l e f t   b o r d e r 
+                PositionRelative,
+                new label
+                {
+                    // c o n t e n t
+                    floatingLabelText,
+
+                    // l a y o u t
+                    PositionAbsolute,
+                    Top(-6),
+                    Left(16),
+                    PaddingX(4),
+
+                    // t h e m e
+                    Color(rgba(0, 0, 0, 0.6)),
+                    FontSize12,
+                    FontWeight400,
+                    LineHeight12,
+                    LetterSpacing(0.15),
+                    FontFamily("Roboto"),
+                    Background(White)
+                },
+                new div(Color(rgba(0, 0, 0, 0.54)), FontSize16, FontWeight400, FontFamily("Roboto, sans-serif"))
+                {
+                    value
+                },
+
+                inputAlign switch
+                {
+                    "left" => JustifyContentFlexStart,
+
+                    "right" => JustifyContentFlexEnd,
+
+                    "center" => JustifyContentCenter,
+
+                    _ => JustifyContentFlexEnd
+                }
+            },
+            new FlexRow(JustifyContentSpaceBetween, FontSize12, PaddingLeftRight(14), Color(rgb(158, 158, 158)), LineHeight15)
+            {
+                new div { helperText },
+                new div { maxLength }
+            }
+        };
+    }
+
+    static class Transforms
+    {
+        internal static ReactNode OnChange(ReactNode node)
+        {
+            if (node.Properties.HasFunctionAssignment(nameof(onChange)))
+            {
+                return node;
+            }
+
             var onChangeFunctionBody = new TsLineCollection
             {
                 // u p d a t e   s o u r c e
@@ -78,91 +146,35 @@ sealed class BInputNumericExtended : PluginComponentBase
                 select IsAlphaNumeric(value) ? value + "(e, value);" : value
             };
 
-            node = onChangeFunctionBody.HasLine ? node.UpdateProp(nameof(onChange), new()
-            {
-                "(e: any, value: any) =>",
-                "{", onChangeFunctionBody, "}"
-            }) : node;
+            return !onChangeFunctionBody.HasLine
+                ? node
+                : node.UpdateProp(nameof(onChange), new()
+                {
+                    "(e: any, value: any) =>",
+                    "{", onChangeFunctionBody, "}"
+                });
         }
-        
-      
-        var isRequiredProp = node.Properties.FirstOrDefault(x => x.Name == nameof(isRequired));
-        if (isRequiredProp is not null)
+
+        internal static ReactNode ValueConstraint(ReactNode node)
         {
             var newValue = new
             {
-                required = Plugin.ConvertDotNetPathToJsPath(isRequiredProp.Value)
-            };
-            
-            node = node with
-            {
-                Properties = node.Properties.Remove(isRequiredProp).Add(new()
+                required = node.FindPropByName(nameof(required))?.Value switch
                 {
-                    Name  = "valueConstraint",
-                    Value = $"{{ required: {newValue.required} }}"
-                })
-            };
-        }
+                    { } x => x is "true" ? x : $"{{ message: {x} }}",
 
-        node = AddContextProp(node);
-        
-        return Result.From((node, new TsImportCollection
-        {
-            {nameof(BInputNumericExtended),"b-input-numeric-extended"}
-        }));
-    }
-
-    protected override Element render()
-    {
-        return new div(PaddingTop(16), PaddingBottom(8))
-        {
-            Id(id), OnClick(onMouseClick),
-            
-            new FlexRow(AlignItemsCenter, PaddingLeftRight(16), Border(1, solid, "#c0c0c0"), BorderRadius(10), Height(58))
-            {
-                // L a b e l   o n   t o p - l e f t   b o r d e r 
-                PositionRelative,
-                new label
-                {
-                    // c o n t e n t
-                    floatingLabelText,
-                    
-                    // l a y o u t
-                    PositionAbsolute,
-                    Top(-6),
-                    Left(16),
-                    PaddingX(4),
-                    
-                    // t h e m e
-                    Color(rgba(0, 0, 0, 0.6)),
-                    FontSize12,
-                    FontWeight400,
-                    LineHeight12,
-                    LetterSpacing(0.15),
-                    FontFamily("Roboto"),
-                    Background(White)
-                },
-                new div(Color(rgba(0, 0, 0, 0.54)), FontSize16, FontWeight400, FontFamily("Roboto, sans-serif"))
-                {
-                    value
-                },
-                
-                inputAlign switch
-                {
-                    "left"=> JustifyContentFlexStart,
-                    
-                    "right"=> JustifyContentFlexEnd,
-                    
-                    "center"=> JustifyContentCenter,
-                    
-                    _=> JustifyContentFlexEnd
+                    null => null
                 }
-            },
-            new FlexRow(JustifyContentSpaceBetween, FontSize12, PaddingLeftRight(14), Color(rgb(158, 158, 158)), LineHeight15)
+            };
+
+            if (newValue.required.HasValue)
             {
-                new div { helperText },
-                new div { maxLength }
+                node = node.Insert_valueConstraint($"required: {newValue.required}");
+
+                node = node.RemoveProp(nameof(required)).reactNode;
             }
-        };
+
+            return node;
+        }
     }
 }
