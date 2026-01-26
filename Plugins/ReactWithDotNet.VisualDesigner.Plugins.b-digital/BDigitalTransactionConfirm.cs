@@ -574,7 +574,7 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
                     }
                 },
 
-                new FlexColumn(PaddingLeft(36))
+                new FlexColumn(PaddingLeft(36),PaddingBottom(24))
                 {
                     transactionDetailListElement?.children
                 }
