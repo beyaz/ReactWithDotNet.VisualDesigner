@@ -38,7 +38,7 @@ sealed class BInputNumericExtended : PluginComponentBase
     [JsTypeInfo(JsType.Function)]
     public string onChange { get; set; }
 
-    [JsTypeInfo(JsType.Boolean)]
+    [JsTypeInfo(JsType.String)]
     public string required { get; set; }
 
     [JsTypeInfo(JsType.String)]
