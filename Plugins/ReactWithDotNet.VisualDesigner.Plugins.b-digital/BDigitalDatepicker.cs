@@ -12,7 +12,9 @@ sealed class BDigitalDatepicker : PluginComponentBase
     [JsTypeInfo(JsType.Boolean)]
     public string isRequired { get; set; }
     
-   
+    [Suggestions("true, ___any_text___")]
+    [JsTypeInfo(JsType.String)]
+    public string required { get; set; }
 
     [JsTypeInfo(JsType.String)]
     public string labelText { get; set; }
@@ -150,19 +152,24 @@ sealed class BDigitalDatepicker : PluginComponentBase
 
         internal static ReactNode ValueConstraint(ReactNode node)
         {
-            return node.TransformIfHasProperty(nameof(isRequired), (n, prop) =>
+            var newValue = new
             {
-                var required = Plugin.ConvertDotNetPathToJsPath(prop.Value);
-
-                return n with
+                required = node.FindPropByName(nameof(required))?.Value switch
                 {
-                    Properties = n.Properties.Remove(prop).Add(new()
-                    {
-                        Name  = "valueConstraint",
-                        Value = $"{{ required: {required} }}"
-                    })
-                };
-            });
+                    { } x => x is "true" ? x : $"{{ message: {x} }}",
+
+                    null => null
+                }
+            };
+
+            if (newValue.required.HasValue)
+            {
+                node = node.Insert_valueConstraint($"required: {newValue.required}");
+
+                node = node.RemoveProp(nameof(required)).reactNode;
+            }
+
+            return node;
         }
     }
 }
