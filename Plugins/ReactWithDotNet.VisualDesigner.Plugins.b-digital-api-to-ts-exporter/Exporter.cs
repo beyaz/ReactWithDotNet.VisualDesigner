@@ -347,7 +347,7 @@ static class Exporter
                 select (methodGroup.FolderName == "Shared") switch
                 {
                     true  => Path.Combine(webProjectPath, "ClientApp", "views", apiName.ToLowerFirstCharInvariant(), $"use{methodGroup.FolderName}.ts"),
-                    false => Path.Combine(webProjectPath, "ClientApp", "views", apiName.ToLowerFirstCharInvariant(), methodGroup.FolderName, $"use{methodGroup.FolderName}.ts")
+                    false => Path.Combine(webProjectPath, "ClientApp", "views", apiName.ToLowerFirstCharInvariant(), methodGroup.FolderName.ToLowerFirstCharInvariant(), $"use{methodGroup.FolderName}.ts")
                 };
         }
 
