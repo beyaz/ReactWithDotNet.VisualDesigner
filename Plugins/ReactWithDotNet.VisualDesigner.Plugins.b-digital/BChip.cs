@@ -26,19 +26,15 @@ sealed class BChip : PluginComponentBase
         {
             return AnalyzeChildren(input, AnalyzeReactNode);
         }
-        
-        
+
         input = ApplyTranslateOperationOnProps(input, nameof(label));
-        
-        
+
         var node = input.Node;
-        
-        
-        
+
         node = AddContextProp(node);
 
         var import = (nameof(BChip), "b-chip");
-        
+
         return AnalyzeChildren(input with { Node = node }, AnalyzeReactNode).With(import);
     }
 
@@ -48,27 +44,26 @@ sealed class BChip : PluginComponentBase
         switch (color)
         {
             case "default":
-                extraStyle = [ variant is "default" or null ?  Background("#e0e0e0") : null, Color(rgba(0, 0, 0, 0.87))];
+                extraStyle = [variant is "default" or null ? Background("#e0e0e0") : null, Color(rgba(0, 0, 0, 0.87))];
                 break;
             case "primary":
-                extraStyle = [variant is "default" or null ? Background("#16A085"): null, Color("#fff")];
+                extraStyle = [variant is "default" or null ? Background("#16A085") : null, Color("#fff")];
                 break;
             case "secondary":
-                extraStyle = [variant is "default" or null ? Background("#FF9500"): null, Color(rgba(0, 0, 0, 0.87))];
+                extraStyle = [variant is "default" or null ? Background("#FF9500") : null, Color(rgba(0, 0, 0, 0.87))];
                 break;
         }
 
-        return  new Chip
+        return new Chip
+        {
+            label   = label,
+            variant = variant,
+            style =
             {
-                
-                label   = label,
-                variant = variant,
-                style =
-                {
-                    extraStyle
-                },
-                id = id,
-                onClick = onMouseClick
-            };
+                extraStyle
+            },
+            id      = id,
+            onClick = onMouseClick
+        };
     }
 }

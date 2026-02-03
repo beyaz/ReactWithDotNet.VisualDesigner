@@ -34,27 +34,10 @@ sealed class  BDigitalFilterView: PluginComponentBase
     public string endMaxDate { get; set; }
 
     
-    
-        
-
-    [NodeAnalyzer]
-    public static NodeAnalyzeOutput AnalyzeReactNode(NodeAnalyzeInput input)
+    static class Transforms
     {
-        if (input.Node.Tag != nameof(BDigitalFilterView))
-        {
-            return AnalyzeChildren(input, AnalyzeReactNode);
-        }
-
-        input = ApplyTranslateOperationOnProps(input, nameof(beginDateLabel), nameof(endDateLabel));
-        
-        var node = input.Node;
-
-
-
-        
-
-
-        {
+        internal static ReactNode OnChange(ReactNode node)
+         {
             var beginDateProp = node.Properties.FirstOrDefault(x => x.Name == nameof(beginDate));
             var endDateProp = node.Properties.FirstOrDefault(x => x.Name == nameof(endDate));
             var setFilterProp = node.Properties.FirstOrDefault(x => x.Name == nameof(setFilter));
@@ -134,7 +117,33 @@ sealed class  BDigitalFilterView: PluginComponentBase
 
                 node = node with { Properties = properties };
             }
+
+            return node;
+         }
+    }
+        
+
+    [NodeAnalyzer]
+    public static NodeAnalyzeOutput AnalyzeReactNode(NodeAnalyzeInput input)
+    {
+        if (input.Node.Tag != nameof(BDigitalFilterView))
+        {
+            return AnalyzeChildren(input, AnalyzeReactNode);
         }
+
+        input = ApplyTranslateOperationOnProps(input, nameof(beginDateLabel), nameof(endDateLabel));
+        
+        var node = input.Node;
+
+        node = Run(node, [
+            Transforms.OnChange
+        ]);
+
+
+        
+
+
+       
 
         var import = (nameof(BDigitalFilterView), "b-digital-filter-view");
    

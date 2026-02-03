@@ -29,6 +29,28 @@ sealed class BDigitalFileInput : PluginComponentBase
     [JsTypeInfo(JsType.Boolean)]
     public string isRequired { get; set; }
 
+    static class Transforms
+    {
+        internal static ReactNode OnChange(ReactNode node)
+        {
+            var isRequiredProp = node.Properties.FirstOrDefault(x => x.Name == nameof(isRequired));
+        
+            if (isRequiredProp is not null)
+            {
+                node = node with
+                {
+                    Properties = node.Properties.Remove(isRequiredProp).Add(new()
+                    {
+                        Name  = "valueConstraint",
+                        Value = $$"""{ required: {{Plugin.ConvertDotNetPathToJsPath(isRequiredProp.Value)}} }"""
+                    })
+                };
+            }
+
+            return node;
+        }
+    }
+
     [NodeAnalyzer]
     public static NodeAnalyzeOutput AnalyzeReactNode(NodeAnalyzeInput input)
     {
@@ -44,19 +66,9 @@ sealed class BDigitalFileInput : PluginComponentBase
         
        
        
-        var isRequiredProp = node.Properties.FirstOrDefault(x => x.Name == nameof(isRequired));
-        
-        if (isRequiredProp is not null)
-        {
-            node = node with
-            {
-                Properties = node.Properties.Remove(isRequiredProp).Add(new()
-                {
-                    Name = "valueConstraint",
-                    Value = $$"""{ required: {{Plugin.ConvertDotNetPathToJsPath(isRequiredProp.Value)}} }"""
-                })
-            };
-        }
+        node = Run(node, [
+            Transforms.OnChange
+        ]);
 
         
         return Result.From((node, new TsImportCollection

@@ -31,33 +31,45 @@ sealed class BDigitalAccountView : PluginComponentBase
 
         var node = input.Node;
 
-        if (!node.Properties.HasFunctionAssignment(nameof(onSelectedAccountIndexChange)))
-        {
-            var onChangeFunctionBody = new TsLineCollection
-            {
-                // u p d a t e   s o u r c e
-                from property in node.Properties
-                where property.Name == nameof(selectedAccountIndex) && !property.Value.CanParseWithDouble
-                from line in GetUpdateStateLines(property.Value, "selectedAccountIndex")
-                select line,
-
-                // e v e n t   h a n d l e r
-                from property in node.Properties
-                where property.Name == nameof(onSelectedAccountIndexChange)
-                let value = property.Value
-                select IsAlphaNumeric(value) ? value + "(selectedAccountIndex);" : value
-            };
-
-            node = onChangeFunctionBody.HasLine ? node.UpdateProp(nameof(onSelectedAccountIndexChange), new()
-            {
-                "(selectedAccountIndex: number) =>",
-                "{", onChangeFunctionBody, "}"
-            }) : node;
-        }
+        node = Run(node, [
+            Transforms.OnChange
+        ]);
 
         var import = (nameof(BDigitalAccountView), "b-digital-account-view");
 
         return AnalyzeChildren(input with { Node = node }, AnalyzeReactNode).With(import);
+    }
+
+    static class Transforms
+    {
+        internal static ReactNode OnChange(ReactNode node)
+        {
+            if (!node.Properties.HasFunctionAssignment(nameof(onSelectedAccountIndexChange)))
+            {
+                var onChangeFunctionBody = new TsLineCollection
+                {
+                    // u p d a t e   s o u r c e
+                    from property in node.Properties
+                    where property.Name == nameof(selectedAccountIndex) && !property.Value.CanParseWithDouble
+                    from line in GetUpdateStateLines(property.Value, "selectedAccountIndex")
+                    select line,
+
+                    // e v e n t   h a n d l e r
+                    from property in node.Properties
+                    where property.Name == nameof(onSelectedAccountIndexChange)
+                    let value = property.Value
+                    select IsAlphaNumeric(value) ? value + "(selectedAccountIndex);" : value
+                };
+
+                node = onChangeFunctionBody.HasLine ? node.UpdateProp(nameof(onSelectedAccountIndexChange), new()
+                {
+                    "(selectedAccountIndex: number) =>",
+                    "{", onChangeFunctionBody, "}"
+                }) : node;
+            }
+
+            return node;
+        }
     }
 
     protected override Element render()
