@@ -93,17 +93,7 @@ static class Mixin
         });
     }
     
-    public static ReactNode TransformIfHasProperty(
-        this ReactNode node,
-        string name,
-        Func<ReactNode, ReactProperty, ReactNode> then)
-    {
-        var prop = node.Properties.FirstOrDefault(p => p.Name == name);
-
-        return prop is null
-            ? node
-            : then(node, prop);
-    }
+    
     
     public static StyleModifier IsNotMobile(params StyleModifier[] styleModifiers)
     {

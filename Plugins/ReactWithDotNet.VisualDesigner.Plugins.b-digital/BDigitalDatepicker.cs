@@ -47,7 +47,7 @@ sealed class BDigitalDatepicker : PluginComponentBase
         var node = Run(input.Node,
         [
             Transforms.OnChange,
-            Transforms.InputProps,
+            Transform_inputProps,
             Transforms.ValueConstraint
         ]);
 
@@ -101,26 +101,6 @@ sealed class BDigitalDatepicker : PluginComponentBase
 
     static class Transforms
     {
-        internal static ReactNode InputProps(ReactNode node)
-        {
-            return node.TransformIfHasProperty(nameof(placeholder), (n, prop) =>
-            {
-                var inputProps = new
-                {
-                    placeholder = IsStringValue(prop.Value) ? prop.Value : $"{Plugin.ConvertDotNetPathToJsPath(prop.Value)}"
-                };
-
-                return n with
-                {
-                    Properties = n.Properties.Remove(prop).Add(new()
-                    {
-                        Name  = "inputProps",
-                        Value = $"{{ placeholder: {inputProps.placeholder} }}"
-                    })
-                };
-            });
-        }
-
         internal static ReactNode OnChange(ReactNode node)
         {
             if (node.Properties.HasFunctionAssignment(nameof(onDateChange)))
