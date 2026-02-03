@@ -146,13 +146,16 @@ sealed class BInputNumericExtended : PluginComponentBase
                 select IsAlphaNumeric(value) ? value + "(e, value);" : value
             };
 
-            return !onChangeFunctionBody.HasLine
-                ? node
-                : node.UpdateProp(nameof(onChange), new()
+            if (onChangeFunctionBody.HasLine)
+            {
+                return node.UpdateProp(nameof(onChange), new()
                 {
                     "(e: any, value: any) =>",
                     "{", onChangeFunctionBody, "}"
                 });
+            }
+
+            return node;
         }
 
         internal static ReactNode ValueConstraint(ReactNode node)

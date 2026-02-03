@@ -37,56 +37,35 @@ sealed class BInputMaskExtended : PluginComponentBase
     {
         internal static ReactNode OnChange(ReactNode node)
         {
-            var valueProp = node.Properties.FirstOrDefault(x => x.Name == nameof(value));
-            var onChangeProp = node.Properties.FirstOrDefault(x => x.Name == nameof(onChange));
-            var isRequiredProp = node.Properties.FirstOrDefault(x => x.Name == nameof(isRequired));
-            var isAutoCompleteProp = node.Properties.FirstOrDefault(x => x.Name == nameof(isAutoComplete));
-
-            if (valueProp is not null)
+            if (node.Properties.HasFunctionAssignment(nameof(onChange)))
             {
-                var properties = node.Properties;
-
-                List<string> lines =
-                [
-                    "(e: any, value: any) =>",
-                    "{",
-                    $"  updateRequest(r => {{ r.{valueProp.Value.RemoveFromStart("request.")} = value; }});"
-                ];
-
-                if (onChangeProp is not null)
-                {
-                    if (IsAlphaNumeric(onChangeProp.Value))
-                    {
-                        lines.Add(onChangeProp.Value + "(e, value);");
-                    }
-                    else
-                    {
-                        lines.Add(onChangeProp.Value);
-                    }
-                }
-
-                lines.Add("}");
-
-                if (onChangeProp is not null)
-                {
-                    onChangeProp = onChangeProp with
-                    {
-                        Value = string.Join(Environment.NewLine, lines)
-                    };
-
-                    properties = properties.SetItem(properties.FindIndex(x => x.Name == onChangeProp.Name), onChangeProp);
-                }
-                else
-                {
-                    properties = properties.Add(new()
-                    {
-                        Name  = "onChange",
-                        Value = string.Join(Environment.NewLine, lines)
-                    });
-                }
-
-                node = node with { Properties = properties };
+                return node;
             }
+
+            var onChangeFunctionBody = new TsLineCollection
+            {
+                // u p d a t e   s o u r c e
+                from property in node.Properties
+                where property.Name == nameof(value)
+                from line in GetUpdateStateLines(property.Value, "value")
+                select line,
+
+                // e v e n t   h a n d l e r
+                from property in node.Properties
+                where property.Name == nameof(onChange)
+                let value = property.Value
+                select IsAlphaNumeric(value) ? value + "(e, value);" : value
+            };
+
+            if (onChangeFunctionBody.HasLine)
+            {
+                return node.UpdateProp(nameof(onChange), new()
+                {
+                    "(e: any, value: any) =>",
+                    "{", onChangeFunctionBody, "}"
+                });
+            }
+
             return node;
         }
         
