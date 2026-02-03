@@ -22,6 +22,57 @@ sealed class BDigitalMoneyInput : PluginComponentBase
     [JsTypeInfo(JsType.Number)]
     public string value { get; set; }
 
+    static class Transforms
+    {
+        internal static ReactNode OnChange(ReactNode node)
+        {
+            if (!node.Properties.HasFunctionAssignment(nameof(handleMoneyInputChange)))
+            {
+                var onChangeFunctionBody = new TsLineCollection
+                {
+                    // u p d a t e   s o u r c e
+                    from property in node.Properties
+                    where property.Name == nameof(value)
+                    from line in GetUpdateStateLines(property.Value, "value")
+                    select line,
+
+                    // e v e n t   h a n d l e r
+                    from property in node.Properties
+                    where property.Name == nameof(handleMoneyInputChange)
+                    let value = property.Value
+                    select IsAlphaNumeric(value) ? value + "(value);" : value
+                };
+
+                node = onChangeFunctionBody.HasLine ? node.UpdateProp(nameof(handleMoneyInputChange), new()
+                {
+                    "(value: number) =>",
+                    "{", onChangeFunctionBody, "}"
+                }) : node;
+            }
+
+            return node;
+        }
+        
+        internal static ReactNode inputProps(ReactNode node)
+        {
+            var errorTextProp = node.Properties.FirstOrDefault(x => x.Name == nameof(errorText));
+            if (errorTextProp is not null)
+            {
+                node = node with
+                {
+                    Properties = node.Properties.Remove(errorTextProp).Add(new()
+                    {
+                        Name  = "inputProps",
+                        Value = $"{{ errorText: {errorTextProp.Value} }}"
+                    })
+                };
+            }
+
+            return node;
+        }
+    }
+
+    
     [NodeAnalyzer]
     public static NodeAnalyzeOutput AnalyzeReactNode(NodeAnalyzeInput input)
     {
@@ -34,42 +85,13 @@ sealed class BDigitalMoneyInput : PluginComponentBase
 
         var node = input.Node;
 
-        if (!node.Properties.HasFunctionAssignment(nameof(handleMoneyInputChange)))
-        {
-            var onChangeFunctionBody = new TsLineCollection
-            {
-                // u p d a t e   s o u r c e
-                from property in node.Properties
-                where property.Name == nameof(value)
-                from line in GetUpdateStateLines(property.Value, "value")
-                select line,
+       
 
-                // e v e n t   h a n d l e r
-                from property in node.Properties
-                where property.Name == nameof(handleMoneyInputChange)
-                let value = property.Value
-                select IsAlphaNumeric(value) ? value + "(value);" : value
-            };
+        node = Run(node, [
+            Transforms.OnChange,
+            Transforms.inputProps
+        ]);
 
-            node = onChangeFunctionBody.HasLine ? node.UpdateProp(nameof(handleMoneyInputChange), new()
-            {
-                "(value: number) =>",
-                "{", onChangeFunctionBody, "}"
-            }) : node;
-        }
-
-        var errorTextProp = node.Properties.FirstOrDefault(x => x.Name == nameof(errorText));
-        if (errorTextProp is not null)
-        {
-            node = node with
-            {
-                Properties = node.Properties.Remove(errorTextProp).Add(new()
-                {
-                    Name  = "inputProps",
-                    Value = $"{{ errorText: {errorTextProp.Value} }}"
-                })
-            };
-        }
 
         var import = (nameof(BDigitalMoneyInput), "b-digital-money-input");
 
