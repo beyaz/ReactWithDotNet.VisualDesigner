@@ -32,7 +32,101 @@ sealed class BInputMaskExtended : PluginComponentBase
             
     [JsTypeInfo(JsType.Boolean)]
     public string disabled { get; set; }
-            
+
+    static class Transforms
+    {
+        internal static ReactNode OnChange(ReactNode node)
+        {
+            var valueProp = node.Properties.FirstOrDefault(x => x.Name == nameof(value));
+            var onChangeProp = node.Properties.FirstOrDefault(x => x.Name == nameof(onChange));
+            var isRequiredProp = node.Properties.FirstOrDefault(x => x.Name == nameof(isRequired));
+            var isAutoCompleteProp = node.Properties.FirstOrDefault(x => x.Name == nameof(isAutoComplete));
+
+            if (valueProp is not null)
+            {
+                var properties = node.Properties;
+
+                List<string> lines =
+                [
+                    "(e: any, value: any) =>",
+                    "{",
+                    $"  updateRequest(r => {{ r.{valueProp.Value.RemoveFromStart("request.")} = value; }});"
+                ];
+
+                if (onChangeProp is not null)
+                {
+                    if (IsAlphaNumeric(onChangeProp.Value))
+                    {
+                        lines.Add(onChangeProp.Value + "(e, value);");
+                    }
+                    else
+                    {
+                        lines.Add(onChangeProp.Value);
+                    }
+                }
+
+                lines.Add("}");
+
+                if (onChangeProp is not null)
+                {
+                    onChangeProp = onChangeProp with
+                    {
+                        Value = string.Join(Environment.NewLine, lines)
+                    };
+
+                    properties = properties.SetItem(properties.FindIndex(x => x.Name == onChangeProp.Name), onChangeProp);
+                }
+                else
+                {
+                    properties = properties.Add(new()
+                    {
+                        Name  = "onChange",
+                        Value = string.Join(Environment.NewLine, lines)
+                    });
+                }
+
+                node = node with { Properties = properties };
+            }
+            return node;
+        }
+        
+        internal static ReactNode ValueConstraint(ReactNode node)
+        {
+            var valueProp = node.Properties.FirstOrDefault(x => x.Name == nameof(value));
+            var onChangeProp = node.Properties.FirstOrDefault(x => x.Name == nameof(onChange));
+            var isRequiredProp = node.Properties.FirstOrDefault(x => x.Name == nameof(isRequired));
+            var isAutoCompleteProp = node.Properties.FirstOrDefault(x => x.Name == nameof(isAutoComplete));
+
+            if (isRequiredProp is not null && isAutoCompleteProp is not null)
+            {
+                var autoCompleteFinalValue = string.Empty;
+                {
+                    if ("true".Equals(isAutoCompleteProp.Value, StringComparison.OrdinalIgnoreCase))
+                    {
+                        autoCompleteFinalValue = "'on'";
+                    }
+                    else if ("false".Equals(isAutoCompleteProp.Value, StringComparison.OrdinalIgnoreCase))
+                    {
+                        autoCompleteFinalValue = "'off'";
+                    }
+                    else
+                    {
+                        autoCompleteFinalValue = $"{Plugin.ConvertDotNetPathToJsPath(isAutoCompleteProp.Value)} ? \"on\" : \"off\" }}";
+                    }
+                }
+
+                node = node with
+                {
+                    Properties = node.Properties.Remove(isRequiredProp).Remove(isAutoCompleteProp).Add(new()
+                    {
+                        Name  = "valueConstraint",
+                        Value = $"{{ required: {Plugin.ConvertDotNetPathToJsPath(isRequiredProp.Value)}, autoComplete: {autoCompleteFinalValue} }}"
+                    })
+                };
+            }
+            return node;
+        }
+    }
     [NodeAnalyzer]
     public static NodeAnalyzeOutput AnalyzeReactNode(NodeAnalyzeInput input)
     {
@@ -42,91 +136,15 @@ sealed class BInputMaskExtended : PluginComponentBase
         }
         
         input                       = ApplyTranslateOperationOnProps(input, nameof(floatingLabelText), nameof(helperText));
+
+
+        var node = input.Node;
         
-        
-        var (node, componentConfig) = input;
-        
-        
-        var valueProp = node.Properties.FirstOrDefault(x => x.Name == nameof(value));
-        var onChangeProp = node.Properties.FirstOrDefault(x => x.Name == nameof(onChange));
-        var isRequiredProp = node.Properties.FirstOrDefault(x => x.Name == nameof(isRequired));
-        var isAutoCompleteProp = node.Properties.FirstOrDefault(x => x.Name == nameof(isAutoComplete));
-
-        if (valueProp is not null)
-        {
-            var properties = node.Properties;
-
-            List<string> lines =
-            [
-                "(e: any, value: any) =>",
-                "{",
-                $"  updateRequest(r => {{ r.{valueProp.Value.RemoveFromStart("request.")} = value; }});"
-            ];
-
-            if (onChangeProp is not null)
-            {
-                if (IsAlphaNumeric(onChangeProp.Value))
-                {
-                    lines.Add(onChangeProp.Value + "(e, value);");
-                }
-                else
-                {
-                    lines.Add(onChangeProp.Value);
-                }
-            }
-
-            lines.Add("}");
-
-            if (onChangeProp is not null)
-            {
-                onChangeProp = onChangeProp with
-                {
-                    Value = string.Join(Environment.NewLine, lines)
-                };
-
-                properties = properties.SetItem(properties.FindIndex(x => x.Name == onChangeProp.Name), onChangeProp);
-            }
-            else
-            {
-                properties = properties.Add(new()
-                {
-                    Name  = "onChange",
-                    Value = string.Join(Environment.NewLine, lines)
-                });
-            }
-
-            node = node with { Properties = properties };
-        }
-
-        if (isRequiredProp is not null && isAutoCompleteProp is not null)
-        {
-            var autoCompleteFinalValue = string.Empty;
-            {
-                if ("true".Equals(isAutoCompleteProp.Value, StringComparison.OrdinalIgnoreCase))
-                {
-                    autoCompleteFinalValue = "'on'";
-                }
-                else if ("false".Equals(isAutoCompleteProp.Value, StringComparison.OrdinalIgnoreCase))
-                {
-                    autoCompleteFinalValue = "'off'";
-                }
-                else
-                {
-                    autoCompleteFinalValue = $"{Plugin.ConvertDotNetPathToJsPath(isAutoCompleteProp.Value)} ? \"on\" : \"off\" }}";
-                }
-            }
-
-            node = node with
-            {
-                Properties = node.Properties.Remove(isRequiredProp).Remove(isAutoCompleteProp).Add(new()
-                {
-                    Name  = "valueConstraint",
-                    Value = $"{{ required: {Plugin.ConvertDotNetPathToJsPath(isRequiredProp.Value)}, autoComplete: {autoCompleteFinalValue} }}"
-                })
-            };
-        }
-
-        node = AddContextProp(node);
+        node = Run(node, [
+            Transforms.OnChange,
+            Transforms.ValueConstraint,
+            AddContextProp
+        ]);
 
         return Result.From((node, new TsImportCollection
         {
