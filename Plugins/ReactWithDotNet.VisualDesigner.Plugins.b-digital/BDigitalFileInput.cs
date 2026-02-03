@@ -1,55 +1,31 @@
 ﻿using ReactWithDotNet.ThirdPartyLibraries.GoogleMaterialSymbols;
-using ReactWithDotNet.ThirdPartyLibraries.MUI.Material;
 
 namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
 [CustomComponent]
 sealed class BDigitalFileInput : PluginComponentBase
 {
+    [JsTypeInfo(JsType.Array)]
+    public string initialFiles { get; set; }
+
     [JsTypeInfo(JsType.String)]
     public string labelText { get; set; }
 
-    [JsTypeInfo(JsType.Function)]
-    public string onAddedBase64 { get; set; }
-    
-    [JsTypeInfo(JsType.Function)]
-    public string onDeleted { get; set; }
-    
     [JsTypeInfo(JsType.String)]
     public string maxFileSizeText { get; set; }
-    
-    [JsTypeInfo(JsType.Array)]
-    public string initialFiles { get; set; }
+
+    [JsTypeInfo(JsType.Function)]
+    public string onAddedBase64 { get; set; }
+
+    [JsTypeInfo(JsType.Function)]
+    public string onDeleted { get; set; }
+
+    [JsTypeInfo(JsType.String)]
+    public string required { get; set; }
 
     [Suggestions("base64")]
     [JsTypeInfo(JsType.String)]
     public string returnFormat { get; set; }
-    
-    [Suggestions("true")]
-    [JsTypeInfo(JsType.Boolean)]
-    public string isRequired { get; set; }
-
-    static class Transforms
-    {
-        internal static ReactNode OnChange(ReactNode node)
-        {
-            var isRequiredProp = node.Properties.FirstOrDefault(x => x.Name == nameof(isRequired));
-        
-            if (isRequiredProp is not null)
-            {
-                node = node with
-                {
-                    Properties = node.Properties.Remove(isRequiredProp).Add(new()
-                    {
-                        Name  = "valueConstraint",
-                        Value = $$"""{ required: {{Plugin.ConvertDotNetPathToJsPath(isRequiredProp.Value)}} }"""
-                    })
-                };
-            }
-
-            return node;
-        }
-    }
 
     [NodeAnalyzer]
     public static NodeAnalyzeOutput AnalyzeReactNode(NodeAnalyzeInput input)
@@ -58,19 +34,15 @@ sealed class BDigitalFileInput : PluginComponentBase
         {
             return AnalyzeChildren(input, AnalyzeReactNode);
         }
-        
+
         input = ApplyTranslateOperationOnProps(input, nameof(labelText), nameof(maxFileSizeText));
-        
+
         var node = input.Node;
-        
-        
-       
-       
+
         node = Run(node, [
-            Transforms.OnChange
+            Transforms.ValueConstraint
         ]);
 
-        
         return Result.From((node, new TsImportCollection
         {
             { nameof(BDigitalFileInput), "b-digital-file-input" }
@@ -79,18 +51,45 @@ sealed class BDigitalFileInput : PluginComponentBase
 
     protected override Element render()
     {
-        return new FlexRowCentered(BorderRadius(10), Border(1,solid, "#16A085"), Gap(4), WidthFitContent, PaddingX(15), PaddingY(5))
+        return new FlexRowCentered(BorderRadius(10), Border(1, solid, "#16A085"), Gap(4), WidthFitContent, PaddingX(15), PaddingY(5))
         {
             new MaterialSymbol
             {
-                name = "upload_file",
-                size = 24,
+                name  = "upload_file",
+                size  = 24,
                 color = "#16A085"
             },
             labelText,
             FontSize14, FontWeight500, Color("#16A085"),
-            
+
             Id(id), OnClick(onMouseClick)
         };
+    }
+
+    static class Transforms
+    {
+        internal static ReactNode ValueConstraint(ReactNode node)
+        {
+            var newValue = new
+            {
+                required = node.FindPropByName(nameof(required))?.Value switch
+                {
+                    { } x and ("true" or "false") => x,
+
+                    { } x => $"{{ message: {x} }}",
+
+                    null => null
+                }
+            };
+
+            if (newValue.required.HasValue)
+            {
+                node = node.Insert_valueConstraint($"required: {newValue.required}");
+
+                node = node.RemoveProp(nameof(required)).reactNode;
+            }
+
+            return node;
+        }
     }
 }
