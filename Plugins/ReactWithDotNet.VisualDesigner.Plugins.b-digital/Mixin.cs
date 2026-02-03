@@ -207,7 +207,7 @@ static class Mixin
 
     public static NodeAnalyzeInput ApplyTranslateOperationOnProps(NodeAnalyzeInput input, params string[] propNames)
     {
-        return input = input with
+        return input with
         {
             Node = ApplyTranslateOperationOnProps(input.Node, input.ComponentConfig, propNames)
         };

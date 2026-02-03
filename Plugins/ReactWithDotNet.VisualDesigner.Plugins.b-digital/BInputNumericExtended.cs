@@ -164,7 +164,10 @@ sealed class BInputNumericExtended : PluginComponentBase
             {
                 required = node.FindPropByName(nameof(required))?.Value switch
                 {
-                    { } x => x is "true" ? x : $"{{ message: {x} }}",
+                    { } x and ("true" or "false") => x,
+                    
+                    
+                    { } x => $"{{ message: {x} }}",
 
                     null => null
                 }
