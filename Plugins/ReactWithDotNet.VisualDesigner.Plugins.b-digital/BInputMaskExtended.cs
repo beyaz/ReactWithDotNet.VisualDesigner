@@ -4,20 +4,21 @@
 sealed class BInputMaskExtended : PluginComponentBase
 {
     [JsTypeInfo(JsType.String)]
+    public string autoComplete { get; set; }
+
+    [JsTypeInfo(JsType.Boolean)]
+    public string disabled { get; set; }
+
+    [JsTypeInfo(JsType.String)]
     public string floatingLabelText { get; set; }
 
     [JsTypeInfo(JsType.String)]
     public string helperText { get; set; }
 
-    [JsTypeInfo(JsType.Boolean)]
-    public string isAutoComplete { get; set; }
 
     [JsTypeInfo(JsType.Boolean)]
     public string isReadonly { get; set; }
-
-    [JsTypeInfo(JsType.Boolean)]
-    public string isRequired { get; set; }
-
+    
     [JsTypeInfo(JsType.Array)]
     public string mask { get; set; }
 
@@ -28,10 +29,63 @@ sealed class BInputMaskExtended : PluginComponentBase
     public string onChange { get; set; }
 
     [JsTypeInfo(JsType.String)]
+    public string required { get; set; }
+
+    [JsTypeInfo(JsType.String)]
     public string value { get; set; }
-            
-    [JsTypeInfo(JsType.Boolean)]
-    public string disabled { get; set; }
+
+    [NodeAnalyzer]
+    public static NodeAnalyzeOutput AnalyzeReactNode(NodeAnalyzeInput input)
+    {
+        if (input.Node.Tag != nameof(BInputMaskExtended))
+        {
+            return AnalyzeChildren(input, AnalyzeReactNode);
+        }
+
+        input = ApplyTranslateOperationOnProps(input, nameof(floatingLabelText), nameof(helperText));
+
+        var node = input.Node;
+
+        node = Run(node, [
+            Transforms.OnChange,
+            Transforms.ValueConstraint,
+            AddContextProp
+        ]);
+
+        return Result.From((node, new TsImportCollection
+        {
+            { nameof(BInputMaskExtended), "b-input-mask-extended" }
+        }));
+    }
+
+    protected override Element render()
+    {
+        var textContent = string.Empty;
+        if (floatingLabelText.HasValue)
+        {
+            textContent = floatingLabelText;
+        }
+
+        if (value.HasValue)
+        {
+            textContent += " | " + value;
+        }
+
+        return new div(PaddingTop(16), PaddingBottom(8))
+        {
+            new FlexRow(AlignItemsCenter, PaddingLeftRight(16), Border(1, solid, "#c0c0c0"), BorderRadius(10), Height(58), JustifyContentSpaceBetween)
+            {
+                new div(Color(rgba(0, 0, 0, 0.54)), FontSize16, FontWeight400, FontFamily("Roboto, sans-serif")) { textContent },
+
+                Id(id), OnClick(onMouseClick)
+            },
+            new FlexRow(JustifyContentSpaceBetween, FontSize12, PaddingLeftRight(14), Color(rgb(158, 158, 158)), LineHeight15)
+            {
+                new div { helperText },
+                new div { maxLength }
+            }
+        };
+    }
 
     static class Transforms
     {
@@ -68,95 +122,52 @@ sealed class BInputMaskExtended : PluginComponentBase
 
             return node;
         }
-        
+
         internal static ReactNode ValueConstraint(ReactNode node)
         {
-            var valueProp = node.Properties.FirstOrDefault(x => x.Name == nameof(value));
-            var onChangeProp = node.Properties.FirstOrDefault(x => x.Name == nameof(onChange));
-            var isRequiredProp = node.Properties.FirstOrDefault(x => x.Name == nameof(isRequired));
-            var isAutoCompleteProp = node.Properties.FirstOrDefault(x => x.Name == nameof(isAutoComplete));
-
-            if (isRequiredProp is not null && isAutoCompleteProp is not null)
+            var newValue = new
             {
-                var autoCompleteFinalValue = string.Empty;
+                required = node.FindPropByName(nameof(required))?.Value switch
                 {
-                    if ("true".Equals(isAutoCompleteProp.Value, StringComparison.OrdinalIgnoreCase))
-                    {
-                        autoCompleteFinalValue = "'on'";
-                    }
-                    else if ("false".Equals(isAutoCompleteProp.Value, StringComparison.OrdinalIgnoreCase))
-                    {
-                        autoCompleteFinalValue = "'off'";
-                    }
-                    else
-                    {
-                        autoCompleteFinalValue = $"{Plugin.ConvertDotNetPathToJsPath(isAutoCompleteProp.Value)} ? \"on\" : \"off\" }}";
-                    }
-                }
+                    { } x => x is "true" ? x : $"{{ message: {x} }}",
 
-                node = node with
+                    null => null
+                },
+
+                autoComplete = node.FindPropByName(nameof(autoComplete))?.Value switch
                 {
-                    Properties = node.Properties.Remove(isRequiredProp).Remove(isAutoCompleteProp).Add(new()
-                    {
-                        Name  = "valueConstraint",
-                        Value = $"{{ required: {Plugin.ConvertDotNetPathToJsPath(isRequiredProp.Value)}, autoComplete: {autoCompleteFinalValue} }}"
-                    })
-                };
+                    "true" => "'on'",
+
+                    "false" => "'off'",
+
+                    { } x => $"{Plugin.ConvertDotNetPathToJsPath(x)} ? 'on' : 'off'",
+
+                    null => null
+                }
+            };
+
+            var lines = new List<string>();
+
+            if (newValue.required.HasValue)
+            {
+                lines.Add($"required: {newValue.required}");
+
+                node = node.RemoveProp(nameof(required)).reactNode;
             }
+
+            if (newValue.autoComplete.HasValue)
+            {
+                lines.Add($"autoComplete: {newValue.autoComplete}");
+
+                node = node.RemoveProp(nameof(autoComplete)).reactNode;
+            }
+
+            if (lines.Count > 0)
+            {
+                node = node.Insert_valueConstraint(string.Join(",", lines));
+            }
+
             return node;
         }
-    }
-    [NodeAnalyzer]
-    public static NodeAnalyzeOutput AnalyzeReactNode(NodeAnalyzeInput input)
-    {
-        if (input.Node.Tag != nameof(BInputMaskExtended))
-        {
-            return AnalyzeChildren(input, AnalyzeReactNode);
-        }
-        
-        input                       = ApplyTranslateOperationOnProps(input, nameof(floatingLabelText), nameof(helperText));
-
-
-        var node = input.Node;
-        
-        node = Run(node, [
-            Transforms.OnChange,
-            Transforms.ValueConstraint,
-            AddContextProp
-        ]);
-
-        return Result.From((node, new TsImportCollection
-        {
-            {nameof(BInputMaskExtended),"b-input-mask-extended"}
-        }));
-    }
-
-    protected override Element render()
-    {
-        var textContent = string.Empty;
-        if (floatingLabelText.HasValue)
-        {
-            textContent = floatingLabelText;
-        }
-
-        if (value.HasValue)
-        {
-            textContent += " | " + value;
-        }
-
-        return new div(PaddingTop(16), PaddingBottom(8))
-        {
-            new FlexRow(AlignItemsCenter, PaddingLeftRight(16), Border(1, solid, "#c0c0c0"), BorderRadius(10), Height(58), JustifyContentSpaceBetween)
-            {
-                new div(Color(rgba(0, 0, 0, 0.54)), FontSize16, FontWeight400, FontFamily("Roboto, sans-serif")) { textContent },
-
-                Id(id), OnClick(onMouseClick)
-            },
-            new FlexRow(JustifyContentSpaceBetween, FontSize12, PaddingLeftRight(14), Color(rgb(158, 158, 158)), LineHeight15)
-            {
-                new div { helperText },
-                new div { maxLength }
-            }
-        };
     }
 }
