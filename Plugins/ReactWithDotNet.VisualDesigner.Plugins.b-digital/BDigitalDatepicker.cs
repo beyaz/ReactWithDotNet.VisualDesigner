@@ -8,11 +8,7 @@ sealed class BDigitalDatepicker : PluginComponentBase
 
     [JsTypeInfo(JsType.String)]
     public string format { get; set; }
-
-    [JsTypeInfo(JsType.Boolean)]
-    public string isRequired { get; set; }
     
-    [Suggestions("true, ___any_text___")]
     [JsTypeInfo(JsType.String)]
     public string required { get; set; }
 

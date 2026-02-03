@@ -17,11 +17,6 @@ sealed class BComboBoxExtended : PluginComponentBase
     [JsTypeInfo(JsType.String)]
     public string displayMemberPath { get; set; }
 
-    [Suggestions("true")]
-    [JsTypeInfo(JsType.Boolean)]
-    public string isRequired { get; set; }
-    
-    [Suggestions("true, ___any_text___")]
     [JsTypeInfo(JsType.String)]
     public string required { get; set; }
 
