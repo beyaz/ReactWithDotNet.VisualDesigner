@@ -3,12 +3,12 @@
 [CustomComponent]
 sealed class BCheckBox : PluginComponentBase
 {
+    [JsTypeInfo(JsType.Boolean)]
+    public string @checked { get; set; }
+
     [Suggestions("true")]
     [JsTypeInfo(JsType.Boolean)]
     public string disabled { get; set; }
-    
-    [JsTypeInfo(JsType.Boolean)]
-    public string @checked { get; set; }
 
     [JsTypeInfo(JsType.String)]
     public new string id { get; set; }
@@ -26,43 +26,19 @@ sealed class BCheckBox : PluginComponentBase
         {
             return AnalyzeChildren(input, AnalyzeReactNode);
         }
-        
-        
+
         input = ApplyTranslateOperationOnProps(input, nameof(label));
-        
-        
+
         var node = input.Node;
-        
-        if (!node.Properties.HasFunctionAssignment(nameof(onCheck)))
-        {
-            var onChangeFunctionBody = new TsLineCollection
-            {
-                // u p d a t e   s o u r c e
-                from property in node.Properties
-                where property.Name == nameof(@checked)
-                from line in GetUpdateStateLines(property.Value, "isChecked")
-                select line,
 
-                // e v e n t   h a n d l e r
-                from property in node.Properties
-                where property.Name == nameof(onCheck)
-                let value = property.Value
-                select IsAlphaNumeric(value) ? value + "(e, isChecked);" : value
-            };
-
-            node = onChangeFunctionBody.HasLine ? node.UpdateProp(nameof(onCheck), new()
-            {
-                "(e: any, isChecked: boolean) =>",
-                "{", onChangeFunctionBody, "}"
-            }) : node;
-        }
-        
-
-        node = AddContextProp(node);
+        node = Run(node, [
+            Transforms.OnChange,
+            AddContextProp
+        ]);
 
         var import = (nameof(BCheckBox), "b-check-box");
-        
-        return AnalyzeChildren(input with{Node = node}, AnalyzeReactNode).With(import);
+
+        return AnalyzeChildren(input with { Node = node }, AnalyzeReactNode).With(import);
     }
 
     protected override Element render()
@@ -88,5 +64,37 @@ sealed class BCheckBox : PluginComponentBase
             Id(base.id),
             OnClick(onMouseClick)
         };
+    }
+
+    static class Transforms
+    {
+        internal static ReactNode OnChange(ReactNode node)
+        {
+            if (!node.Properties.HasFunctionAssignment(nameof(onCheck)))
+            {
+                var onChangeFunctionBody = new TsLineCollection
+                {
+                    // u p d a t e   s o u r c e
+                    from property in node.Properties
+                    where property.Name == nameof(@checked)
+                    from line in GetUpdateStateLines(property.Value, "isChecked")
+                    select line,
+
+                    // e v e n t   h a n d l e r
+                    from property in node.Properties
+                    where property.Name == nameof(onCheck)
+                    let value = property.Value
+                    select IsAlphaNumeric(value) ? value + "(e, isChecked);" : value
+                };
+
+                node = onChangeFunctionBody.HasLine ? node.UpdateProp(nameof(onCheck), new()
+                {
+                    "(e: any, isChecked: boolean) =>",
+                    "{", onChangeFunctionBody, "}"
+                }) : node;
+            }
+
+            return node;
+        }
     }
 }
