@@ -36,7 +36,7 @@ static class SuggestionFromTsxCode
 
                     if (File.Exists(relativeFolderPath + ".ts"))
                     {
-                        var suggestionsFromRelativeFile = await GetAllVariableSuggestionsInFile(relativeFolderPath+".ts");
+                        var suggestionsFromRelativeFile = await GetAllVariableSuggestionsInFile(relativeFolderPath + ".ts");
                         if (suggestionsFromRelativeFile.HasError)
                         {
                             return suggestionsFromRelativeFile.Error;
@@ -70,57 +70,33 @@ static class SuggestionFromTsxCode
     {
         var suggestions = new HashSet<string>();
 
-        // f u n c t i o n s
+        var patterns = new[]
         {
-            const string pattern = @"(?:function\s+([A-Za-z_]\w*)|const\s+([A-Za-z_]\w*)\s*=\s*\()";
-            foreach (Match match in Regex.Matches(tsxCode, pattern))
-            {
-                if (match.Groups[1].Success)
-                {
-                    suggestions.Add(match.Groups[1].Value);
-                }
+            // f u n c t i o n s
+            new { Regex = @"function\s+([A-Za-z_]\w*)", GroupIndex = 1 },
 
-                if (match.Groups[2].Success)
-                {
-                    suggestions.Add(match.Groups[2].Value);
-                }
-            }
-        }
+            new { Regex = @"const\s+([A-Za-z_]\w*)\s*=\s*\(", GroupIndex = 1 },
 
-        // v a r i a b l e s
+            // v a r i a b l e s
+            new { Regex = @"(?:let|const|var)\s+([A-Za-z_]\w*)", GroupIndex = 1 },
+
+            // u s e s t a t e
+            new { Regex = @"const\s*\[\s*([A-Za-z_]\w*)\s*,\s*set[A-Za-z_]\w*\s*\]\s*=\s*useState", GroupIndex = 1 },
+
+            new { Regex = @"const\s*\[\s*([A-Za-z_]\w*)\s*,\s*set[A-Za-z_]\w*\s*\]\s*=\s*React.useState", GroupIndex = 1 },
+
+            // a t t r i b u t e s
+            new { Regex = @"\b([A-Za-z_]\w*)\s*\??\s*:\s*[\w\[\]]+", GroupIndex = 1 }
+        };
+
+        foreach (var pattern in patterns)
         {
-            const string pattern = @"(?:let|const|var)\s+([A-Za-z_]\w*)";
-            foreach (Match match in Regex.Matches(tsxCode, pattern))
+            foreach (Match match in Regex.Matches(tsxCode, pattern.Regex))
             {
-                suggestions.Add(match.Groups[1].Value);
-            }
-        }
-
-        // u s e s t a t e
-        {
-            {
-                const string pattern = @"const\s*\[\s*([A-Za-z_]\w*)\s*,\s*set[A-Za-z_]\w*\s*\]\s*=\s*useState";
-                foreach (Match match in Regex.Matches(tsxCode, pattern))
+                if (match.Groups.Count > pattern.GroupIndex && match.Groups[pattern.GroupIndex].Success)
                 {
-                    suggestions.Add(match.Groups[1].Value);
+                    suggestions.Add(match.Groups[pattern.GroupIndex].Value);
                 }
-            }
-
-            {
-                const string pattern = @"const\s*\[\s*([A-Za-z_]\w*)\s*,\s*set[A-Za-z_]\w*\s*\]\s*=\s*React.useState";
-                foreach (Match match in Regex.Matches(tsxCode, pattern))
-                {
-                    suggestions.Add(match.Groups[1].Value);
-                }
-            }
-        }
-
-        // a t t r i b u t e s
-        {
-            const string pattern = @"\b([A-Za-z_]\w*)\s*\??\s*:\s*[\w\[\]]+";
-            foreach (Match match in Regex.Matches(tsxCode, pattern))
-            {
-                suggestions.Add(match.Groups[1].Value);
             }
         }
 
