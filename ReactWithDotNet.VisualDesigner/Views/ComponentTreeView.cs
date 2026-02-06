@@ -1,5 +1,4 @@
-﻿using System.Collections.Immutable;
-using System.IO;
+﻿using System.IO;
 
 namespace ReactWithDotNet.VisualDesigner.Views;
 
@@ -151,16 +150,31 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
 
     NodeModel CalculateRootNode()
     {
-        return CalculateRootNodeFrom(GetAllNodes().Where(hasMatch));
+        return CalculateRootNodeFrom(from node in GetAllNodes() where HasMatch(node) select node);
 
-        bool hasMatch(NodeModel node)
+        bool HasMatch(NodeModel node)
         {
             if (node.Label?.ContainsIgnoreCase(state.FilterText) is true)
             {
                 return true;
             }
 
-            return HasAny(from x in node.Names where x.ContainsIgnoreCase(state.FilterText) select x);
+            if (HasAny(from x in node.Names where x.ContainsIgnoreCase(state.FilterText) select x))
+            {
+                return true;
+            }
+
+            if (node.ComponentConfig?.Name.ContainsIgnoreCase(state.FilterText) is true)
+            {
+                return true;
+            }
+
+            if (node.ComponentConfig?.OutputFilePath.ContainsIgnoreCase(state.FilterText) is true)
+            {
+                return true;
+            }
+
+            return false;
         }
     }
 
@@ -179,9 +193,10 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
 
             return new NodeModel
             {
-                ComponentId    = x.Id,
-                Names          = names.ToImmutableList().Add(x.Config.Name),
-                DesignLocation = x.Config.DesignLocation
+                ComponentId     = x.Id,
+                Names           = names,
+                DesignLocation  = x.Config.DesignLocation,
+                ComponentConfig = x.Config
             };
         }
     }
@@ -343,6 +358,8 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
         public IReadOnlyList<string> Names { get; init; } = [];
 
         public string Path { get; init; }
+
+        public ComponentConfig ComponentConfig { get; init; }
 
         public bool HasNoChild()
         {
