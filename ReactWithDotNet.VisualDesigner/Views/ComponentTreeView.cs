@@ -1,5 +1,5 @@
-﻿using System.IO;
-using System.Linq;
+﻿using System.Collections.Immutable;
+using System.IO;
 
 namespace ReactWithDotNet.VisualDesigner.Views;
 
@@ -172,10 +172,12 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
 
             var names = designLocation.Split(['/', Path.DirectorySeparatorChar], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
+            
+            
             return new NodeModel
             {
                 ComponentId    = x.Id,
-                Names          = names,
+                Names          = names.ToImmutableList().Add(x.Config.Name),
                 DesignLocation = x.Config.DesignLocation
             };
         }
