@@ -15,7 +15,9 @@ static class SuggestionFromTsxCode
         }
 
         var fileContent = await File.ReadAllTextAsync(tsxFilePath);
-
+        
+        List<string> collectedFiles = [];
+        
         foreach (var line in fileContent.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
         {
             // is relative path in project
@@ -36,29 +38,28 @@ static class SuggestionFromTsxCode
 
                     if (File.Exists(relativeFolderPath + ".ts"))
                     {
-                        var suggestionsFromRelativeFile = await GetAllVariableSuggestionsInFile(relativeFolderPath + ".ts");
-                        if (suggestionsFromRelativeFile.HasError)
-                        {
-                            return suggestionsFromRelativeFile.Error;
-                        }
-
-                        list.Add(suggestionsFromRelativeFile.Value);
+                        collectedFiles.Add(relativeFolderPath + ".ts");
                     }
                     else if (Directory.Exists(relativeFolderPath))
                     {
                         foreach (var file in Directory.GetFiles(relativeFolderPath, "*.ts", SearchOption.TopDirectoryOnly))
                         {
-                            var suggestionsFromRelativeFile = await GetAllVariableSuggestionsInFile(file);
-                            if (suggestionsFromRelativeFile.HasError)
-                            {
-                                return suggestionsFromRelativeFile.Error;
-                            }
-
-                            list.Add(suggestionsFromRelativeFile.Value);
+                            collectedFiles.Add(file);
                         }
                     }
                 }
             }
+        }
+
+        foreach (var file in collectedFiles)
+        {
+            var suggestionsFromRelativeFile = await GetAllVariableSuggestionsInFile(file);
+            if (suggestionsFromRelativeFile.HasError)
+            {
+                return suggestionsFromRelativeFile.Error;
+            }
+
+            list.Add(suggestionsFromRelativeFile.Value);
         }
 
         list.AddRange(CalculateVariableSuggestions(fileContent));
