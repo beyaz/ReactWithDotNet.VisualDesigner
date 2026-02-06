@@ -9,15 +9,15 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
 {
     public required int ComponentId { get; init; }
 
+    public string FilterText { get; init; }
+
+    [CustomEvent]
+    public Func<string, Task> FilterTextChanged { get; init; }
+
     public int ProjectId { get; init; }
 
     [CustomEvent]
     public ComponentSelectionChanged SelectionChanged { get; init; }
-
-    public string FilterText { get; init; }
-    
-    [CustomEvent]
-    public Func<string,Task> FilterTextChanged { get; init; }
 
     protected override Task constructor()
     {
@@ -51,7 +51,7 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
                     new input
                     {
                         type                     = "text",
-                        placeholder = "search",
+                        placeholder              = "search",
                         valueBind                = () => state.FilterText,
                         valueBindDebounceTimeout = 400,
                         valueBindDebounceHandler = OnFilterTextTypeFinished,
@@ -106,7 +106,12 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
                 parent = parent.Children.First(x => x.Label == name);
             }
 
-            parent.Children.Add(node with { Label = node.Names.Last(), Path = $"{parent.Path}_{parent.Children.Count}" });
+            parent.Children.Add(node with
+            {
+                Label = node.Names.Last(),
+
+                Path = $"{parent.Path}_{parent.Children.Count}"
+            });
         }
 
         static void openPath(NodeModel rootNode, string componentName)
@@ -172,8 +177,6 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
 
             var names = designLocation.Split(['/', Path.DirectorySeparatorChar], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
-            
-            
             return new NodeModel
             {
                 ComponentId    = x.Id,
@@ -214,9 +217,9 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
     Task OnFilterTextTypeFinished()
     {
         CalculateRootNode();
-        
+
         DispatchEvent(FilterTextChanged, [state.FilterText]);
-        
+
         return Task.CompletedTask;
     }
 
@@ -264,7 +267,7 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
     IReadOnlyList<Element> ToVisual(NodeModel node, int indent)
     {
         const int paddingLength = 18;
-        
+
         var foldIcon = new FlexRowCentered(Size(16), PositionAbsolute, Top(4), Left(indent * paddingLength - 12), Hover(BorderRadius(36), Background(Gray50)))
         {
             new IconArrowRightOrDown { IsArrowDown = !state.CollapsedNodes.Contains(node.Path) },
@@ -276,7 +279,7 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
         {
             foldIcon = null;
         }
-        
+
         var returnList = new List<Element>
         {
             new FlexRow(PaddingLeft(indent * paddingLength), Id(node.Path), OnClick(OnTreeItemClicked))
