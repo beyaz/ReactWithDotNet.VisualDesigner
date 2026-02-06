@@ -15,43 +15,8 @@ static class SuggestionFromTsxCode
         }
 
         var fileContent = await File.ReadAllTextAsync(tsxFilePath);
-        
-        List<string> collectedFiles = [];
-        
-        foreach (var line in fileContent.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
-        {
-            // is relative path in project
-            if (line.Contains('"' + "../"))
-            {
-                const string pathPattern = """
-                                           "([^"]+)"
-                                           """;
 
-                var match = Regex.Match(line, pathPattern);
-                if (match.Success)
-                {
-                    var relativeFolderPath = match.Groups[1].Value;
-
-                    relativeFolderPath = Path.Combine(Path.GetDirectoryName(tsxFilePath)!, relativeFolderPath);
-
-                    relativeFolderPath = Path.GetFullPath(relativeFolderPath);
-
-                    if (File.Exists(relativeFolderPath + ".ts"))
-                    {
-                        collectedFiles.Add(relativeFolderPath + ".ts");
-                    }
-                    else if (Directory.Exists(relativeFolderPath))
-                    {
-                        foreach (var file in Directory.GetFiles(relativeFolderPath, "*.ts", SearchOption.TopDirectoryOnly))
-                        {
-                            collectedFiles.Add(file);
-                        }
-                    }
-                }
-            }
-        }
-
-        foreach (var file in collectedFiles)
+        foreach (var file in CollectRelatedFilePaths(tsxFilePath, fileContent))
         {
             var suggestionsFromRelativeFile = await GetAllVariableSuggestionsInFile(file);
             if (suggestionsFromRelativeFile.HasError)
@@ -65,6 +30,46 @@ static class SuggestionFromTsxCode
         list.AddRange(CalculateVariableSuggestions(fileContent));
 
         return list.Where(x => x.Length > 1).Distinct().ToList();
+
+        static IReadOnlyList<string> CollectRelatedFilePaths(string tsxFilePath, string fileContent)
+        {
+            List<string> collectedFiles = [];
+
+            foreach (var line in fileContent.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+            {
+                // is relative path in project
+                if (line.Contains('"' + "../"))
+                {
+                    const string pathPattern = """
+                                               "([^"]+)"
+                                               """;
+
+                    var match = Regex.Match(line, pathPattern);
+                    if (match.Success)
+                    {
+                        var relativeFolderPath = match.Groups[1].Value;
+
+                        relativeFolderPath = Path.Combine(Path.GetDirectoryName(tsxFilePath)!, relativeFolderPath);
+
+                        relativeFolderPath = Path.GetFullPath(relativeFolderPath);
+
+                        if (File.Exists(relativeFolderPath + ".ts"))
+                        {
+                            collectedFiles.Add(relativeFolderPath + ".ts");
+                        }
+                        else if (Directory.Exists(relativeFolderPath))
+                        {
+                            foreach (var file in Directory.GetFiles(relativeFolderPath, "*.ts", SearchOption.TopDirectoryOnly))
+                            {
+                                collectedFiles.Add(file);
+                            }
+                        }
+                    }
+                }
+            }
+
+            return collectedFiles;
+        }
     }
 
     static IReadOnlyList<string> CalculateVariableSuggestions(string tsxCode)
