@@ -210,11 +210,10 @@ static class TsxExporter
                 
                 parentNode = parentNode with { Properties = parentNode.Properties.Remove(itemsSource) };
 
-                lines.Add($"{indent(indentLevel)}{{{ClearConnectedValue(itemsSource.Value)}.map(({itemName}, {indexName}) => {{");
+                lines.Add($"{indent(indentLevel)}{{{ClearConnectedValue(itemsSource.Value)}.map(({itemName}, {indexName}) => (");
                 indentLevel++;
 
-                lines.Add(indent(indentLevel) + "return (");
-                indentLevel++;
+              
 
                 IReadOnlyList<string> innerLines;
                 {
@@ -251,11 +250,10 @@ static class TsxExporter
                     }
                 }
 
-                indentLevel--;
-                lines.Add(indent(indentLevel) + ");");
+               
 
                 indentLevel--;
-                lines.Add(indent(indentLevel) + "})}");
+                lines.Add(indent(indentLevel) + "))}");
 
                 return lines;
             }
