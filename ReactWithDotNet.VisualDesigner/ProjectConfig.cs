@@ -40,6 +40,8 @@ public sealed record ComponentConfig
     public bool SkipExport { get; init; }
     
     public bool Inline  { get; init; }
+    
+    public string SpacingSystem { get; init; }
 
     // @formatter:on
    
