@@ -24,6 +24,10 @@ sealed class BDigitalSecureConfirmAgreement : PluginComponentBase
     
     [JsTypeInfo(JsType.Function)]
     public string setAgreementDocument { get; set; }
+    
+    [Suggestions("NextType.None , NextType.Page , NextType.Save")]
+    [JsTypeInfo(JsType.String)]
+    public string actionType { get; set; }
 
     [NodeAnalyzer]
     public static NodeAnalyzeOutput AnalyzeReactNode(NodeAnalyzeInput input)
