@@ -16,8 +16,6 @@ static class ModelToNodeTransformer
         ];
         static readonly Dictionary<string, string> Map = new(StringComparer.OrdinalIgnoreCase)
         {
-            { "0px", "0" },
-                    
             { "4px", "0.5" },
             { "8px", "1" },
             { "12px", "1.5" },
