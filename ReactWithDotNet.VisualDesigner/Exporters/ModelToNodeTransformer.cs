@@ -5,6 +5,71 @@ namespace ReactWithDotNet.VisualDesigner.Exporters;
 
 static class ModelToNodeTransformer
 {
+    
+    static class SpacingSystem
+    {
+        static readonly string[] ValidCssPropNames =
+        [
+            "gap",
+            "margin", "margin-top", "margin-bottom", "margin-right", "margin-left",
+            "padding", "padding-top", "padding-bottom", "padding-right", "padding-left"
+        ];
+        static readonly Dictionary<string, string> Map = new(StringComparer.OrdinalIgnoreCase)
+        {
+            { "0px", "0" },
+                    
+            { "4px", "0.5" },
+            { "8px", "1" },
+            { "12px", "1.5" },
+            { "16px", "2" },
+            { "24px", "3" },
+            { "32px",  "4" },
+            { "36px",  "4.5" },
+            { "40px",  "5" },
+            { "48px",  "6" },
+            { "56px",  "7" },
+            { "64px",  "8" },
+            { "72px",  "9" },
+            { "80px",  "10" },
+                    
+            { "-4px", "-0.5" },
+            { "-8px", "-1" },
+            { "-12px", "-1.5" },
+            { "-16px", "-2" },
+            { "-24px", "-3" },
+            { "-32px",  "-4" },
+            { "-36px",  "-4.5" },
+            { "-40px",  "-5" },
+            { "-48px",  "-6" },
+            { "-56px",  "-7" },
+            { "-64px",  "-8" },
+            { "-72px",  "-9" },
+            { "-80px",  "-10" },
+
+        };
+        public static Result<FinalCssItem> ReprocessSpacingSystem(string spacingSystem, FinalCssItem finalCssItem)
+        {
+            if (spacingSystem is null)
+            {
+                return Result.From(finalCssItem);
+            }
+
+            if (!finalCssItem.Name.In(ValidCssPropNames))
+            {
+                return Result.From(finalCssItem);
+            }
+
+      
+
+            if (Map.TryGetValue(finalCssItem.Value, out var spacing))
+            {
+                return CreateFinalCssItem(finalCssItem.Name, $"{spacingSystem}({spacing})");
+            }
+
+            return Result.From(finalCssItem);
+        }
+    }
+    
     public static async Task<Result<ReactNode>> ConvertVisualElementModelToReactNodeModel(ComponentScope componentScope, VisualElementModel elementModel)
     {
         var project = componentScope.ProjectConfig;
@@ -104,7 +169,7 @@ static class ModelToNodeTransformer
                             ? Result.From<IEnumerable<string>>([$"{KebabToCamelCase(styleAttribute.Name)}: {styleAttribute.Value}"])
                             : from item in CreateDesignerStyleItemFromText(project, text)
                               from finalCssItem in item.FinalCssItems
-                              from finalCssItem1 in ReprocessFontWeight(finalCssItem)
+                              from finalCssItem1 in RunSequential(finalCssItem, [ReprocessFontWeight, x=>SpacingSystem.ReprocessSpacingSystem(componentScope.ComponentConfig.SpacingSystem, x)])
                               from value in RecalculateCssValueForOutput(finalCssItem1.Name, finalCssItem1.Value, isStyleValueLocatedAtOutputFile)
                               select $"{KebabToCamelCase(finalCssItem.Name)}: {value}"
                         from x in list
@@ -213,6 +278,22 @@ static class ModelToNodeTransformer
                 return Result.From(item);
             }
 
+            static Result<T> RunSequential<T>(T value, Func<T, Result<T>>[] transformFunc)
+            {
+                Result<T> result = value;
+
+                foreach (var func in transformFunc)
+                {
+                    result = func(result.Value);
+                    if (result.HasError)
+                    {
+                        return result;
+                    }
+                }
+                
+                return result;
+            }
+            
             static Result<FinalCssItem> ReprocessFontWeight(FinalCssItem finalCssItem)
             {
                 if (finalCssItem.Name != "font-weight")
@@ -240,6 +321,8 @@ static class ModelToNodeTransformer
 
                 return Result.From(finalCssItem);
             }
+            
+           
 
             static Result<string> RecalculateCssValueForOutput(string name, string value, Func<string, bool> isStyleValueLocatedAtOutputFile)
             {
