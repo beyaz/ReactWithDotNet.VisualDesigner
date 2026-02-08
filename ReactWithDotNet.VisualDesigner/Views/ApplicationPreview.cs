@@ -357,8 +357,9 @@ sealed class ApplicationPreview : Component
             }
 
             // try to highlight
+            if (scope.HighlightedElementPath == path)
             {
-                if (scope.HighlightedElementPath == path && element is HtmlElement htmlElement)
+                if (element is HtmlElement htmlElement)
                 {
                     if (htmlElement.id.HasNoValue)
                     {
@@ -367,8 +368,7 @@ sealed class ApplicationPreview : Component
 
                     scope.Client.RunJavascript(getJsCodeToHighlightElement(htmlElement.id));
                 }
-
-                if (scope.HighlightedElementPath == path && element is PluginComponentBase componentBase)
+                else if (element is PluginComponentBase componentBase)
                 {
                     if (componentBase.id.HasNoValue)
                     {
@@ -376,6 +376,10 @@ sealed class ApplicationPreview : Component
                     }
 
                     scope.Client.RunJavascript(getJsCodeToHighlightElement(componentBase.id));
+                }
+                else
+                {
+                    ;
                 }
             }
 
