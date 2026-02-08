@@ -379,7 +379,6 @@ sealed class ApplicationPreview : Component
                 }
                 else
                 {
-                    ;
                 }
             }
 
