@@ -157,6 +157,8 @@ static class ModelToNodeTransformer
         {
             var project = componentScope.ProjectConfig;
 
+            var spacingSystem = componentScope.ComponentConfig.SpacingSystem ?? project.SpacingSystem;
+            
             var styleProp = project switch
             {
                 { ExportStylesAsInline: true } =>
@@ -169,7 +171,7 @@ static class ModelToNodeTransformer
                             ? Result.From<IEnumerable<string>>([$"{KebabToCamelCase(styleAttribute.Name)}: {styleAttribute.Value}"])
                             : from item in CreateDesignerStyleItemFromText(project, text)
                               from finalCssItem in item.FinalCssItems
-                              from finalCssItem1 in RunSequential(finalCssItem, [ReprocessFontWeight, x=>SpacingSystem.ReprocessSpacingSystem(componentScope.ComponentConfig.SpacingSystem, x)])
+                              from finalCssItem1 in RunSequential(finalCssItem, [ReprocessFontWeight, x=> SpacingSystem.ReprocessSpacingSystem(spacingSystem, x)])
                               from value in RecalculateCssValueForOutput(finalCssItem1.Name, finalCssItem1.Value, isStyleValueLocatedAtOutputFile)
                               select $"{KebabToCamelCase(finalCssItem.Name)}: {value}"
                         from x in list

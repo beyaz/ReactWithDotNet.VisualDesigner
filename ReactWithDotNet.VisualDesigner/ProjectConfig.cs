@@ -23,6 +23,8 @@ public sealed record ProjectConfig
     public string PrettierOptions { get; init; }
     
     public string ProjectDirectory { get; init; }
+    
+    public string SpacingSystem { get; init; }
 }
 
 public sealed record ComponentConfig
