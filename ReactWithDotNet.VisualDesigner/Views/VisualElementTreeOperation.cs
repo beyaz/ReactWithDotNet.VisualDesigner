@@ -26,8 +26,8 @@ static class VisualElementTreeOperation
             return new VisualElementTreeOperationMoveResponse { NewRoot = root };
         }
 
-        var sourcePath = source.Split(',');
-        var targetPath = target.Split(',');
+        var sourcePath = source.Split('_');
+        var targetPath = target.Split('_');
 
         var sourceNode = getNode(root, sourcePath);
 
