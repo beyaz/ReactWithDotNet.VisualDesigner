@@ -237,7 +237,7 @@ static class Exporter
             return [];
         }
 
-        return from methodGroup in GroupControllerMethods(getExportablePublicMethods(controllerTypeDefinition))
+        return from methodGroup in GroupControllerMethods(ApiName[scope], getExportablePublicMethods(controllerTypeDefinition))
                from filePath in getOutputTsFilePath(methodGroup)
                select new FileModel
                {
@@ -395,7 +395,7 @@ static class Exporter
                 "import {",
             ];
 
-            var methods = (from methodGroup in GroupControllerMethods(getExportablePublicMethods(controllerTypeDefinition))
+            var methods = (from methodGroup in GroupControllerMethods(ApiName[scope],getExportablePublicMethods(controllerTypeDefinition))
                            from method in methodGroup.ControllerMethods
                            select method).ToImmutableList();
 
@@ -525,7 +525,7 @@ static class Exporter
         return directory;
     }
 
-    static IReadOnlyList<MethodGroup> GroupControllerMethods(IReadOnlyList<MethodDefinition> controllerMethods)
+    static IReadOnlyList<MethodGroup> GroupControllerMethods(string apiName,IReadOnlyList<MethodDefinition> controllerMethods)
     {
         var returnList = new List<MethodGroup>();
 
@@ -533,13 +533,13 @@ static class Exporter
 
         (string FolderName, Func<MethodDefinition, bool> IsMethodMatchFolderFunc)[] splitters =
         [
-            ("Start", x => IsStartMethod(x, "")),
-            ("Start1", x => IsStartMethod(x, "1")),
-            ("Start2", x => IsStartMethod(x, "2")),
-            ("Start3", x => IsStartMethod(x, "3")),
-            ("Start4", x => IsStartMethod(x, "4")),
-            ("Start5", x => IsStartMethod(x, "5")),
-            ("Confirm", IsInConfirmMethod),
+            ("Start",  isStartMethod("")),
+            ("Start1", isStartMethod("1")),
+            ("Start2", isStartMethod("2")),
+            ("Start3", isStartMethod("3")),
+            ("Start4", isStartMethod("4")),
+            ("Start5", isStartMethod("5")),
+            ("Confirm", x=>IsInConfirmMethod(apiName,x))
         ];
 
         foreach (var (folderName, matchFunc) in splitters)
@@ -579,30 +579,41 @@ static class Exporter
 
         return returnList;
 
-        static bool IsInConfirmMethod(MethodDefinition methodDefinition)
+        Func<MethodDefinition, bool> isStartMethod(string number)
         {
-            var methodName = methodDefinition.Name;
-
-            if (methodName.Contains("Execute") ||
-                methodName.Contains("ConfirmPreData"))
-            {
-                return true;
-            }
-
-            return false;
+            return x => IsStartMethod(apiName, x, number);
         }
 
-        static bool IsStartMethod(MethodDefinition methodDefinition, string startNumber)
+        static bool IsInConfirmMethod(string apiName, MethodDefinition methodDefinition)
+        {
+            var methodName = methodDefinition.Name;
+            
+            string[] options =
+            [
+                $"{apiName}Execute",
+                $"{apiName}ConfirmPreData",
+                
+                "Execute",
+                "ConfirmPreData"
+            ];
+            
+            return options.Contains(methodName);
+        }
+
+        static bool IsStartMethod(string apiName, MethodDefinition methodDefinition, string startNumber)
         {
             var methodName = methodDefinition.Name;
 
-            if (methodName.Contains($"Start{startNumber}PreData") ||
-                methodName.Contains($"Start{startNumber}PostData"))
-            {
-                return true;
-            }
-
-            return false;
+            string[] options =
+            [
+                $"{apiName}Start{startNumber}PreData",
+                $"{apiName}Start{startNumber}PostData",
+                
+                $"Start{startNumber}PreData",
+                $"Start{startNumber}PostData"
+            ];
+            
+            return options.Contains(methodName);
         }
     }
 
