@@ -399,7 +399,7 @@ sealed class ApplicationPreview : Component
 
                     var childScope = scope;
 
-                    var childPath = $"{path},{i}";
+                    var childPath = $"{path}_{i}";
                     {
                         // children: props.children
                         if (childModel.Properties.Any(x => x == Design.IsImportedChild))
@@ -521,10 +521,19 @@ sealed class ApplicationPreview : Component
                                   """);
 
                 jsCode.AppendLine("ReactWithDotNet.OnDocumentReady(() => {");
-                jsCode.AppendLine($"  const element = document.getElementById('{id}');");
-                jsCode.AppendLine("  if(element)");
+                jsCode.AppendLine($"  const elements = document.querySelectorAll(\"[id='{id}']\");");
+                jsCode.AppendLine("  for (const element of elements)");
                 jsCode.AppendLine("  {");
-                jsCode.AppendLine("     scrollIfNeededThenCall(element, () => ReactWithDotNetHighlightElement(element));");
+                jsCode.AppendLine("    if(element)");
+                jsCode.AppendLine("    {");
+                jsCode.AppendLine("       const rect = element.getBoundingClientRect();");
+                jsCode.AppendLine("       if(rect.width === 0 && rect.height === 0)");
+                jsCode.AppendLine("       {");
+                jsCode.AppendLine("         continue;");
+                jsCode.AppendLine("       }");
+                jsCode.AppendLine("       scrollIfNeededThenCall(element, () => ReactWithDotNetHighlightElement(element));");
+                jsCode.AppendLine("       break;");
+                jsCode.AppendLine("    }");
                 jsCode.AppendLine("  }");
                 jsCode.AppendLine("});");
 

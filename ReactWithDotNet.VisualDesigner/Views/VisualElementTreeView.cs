@@ -384,7 +384,7 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
         {
             var child = node.Children[i];
 
-            returnList.AddRange(await ToVisual(child, indent + 1, $"{path},{i}"));
+            returnList.AddRange(await ToVisual(child, indent + 1, $"{path}_{i}"));
         }
 
         return returnList;
