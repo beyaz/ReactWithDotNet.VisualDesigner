@@ -99,7 +99,7 @@ sealed class BInput : PluginComponentBase
             return AnalyzeChildren(input, AnalyzeReactNode);
         }
         
-        input = ApplyTranslateOperationOnProps(input, nameof(floatingLabelText), nameof(errorText), nameof(helperText), nameof(required));
+        input = ApplyTranslateOperationOnProps(input, nameof(floatingLabelText), nameof(errorText), nameof(helperText), nameof(required), nameof(value));
         
         var node = input.Node;
         

@@ -244,6 +244,11 @@ static class Mixin
     
     public static (bool hasAnyChange, string value) ApplyTranslateOperation(string translate, string label)
     {
+        if (!IsStringValue(label))
+        {
+            return (false, label);
+        }
+        
         var messagingRecords = GetMessagingByGroupName(translate).GetAwaiter().GetResult();
 
         var labelRawValue = TryClearStringValue(label);
