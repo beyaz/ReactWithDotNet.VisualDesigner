@@ -703,7 +703,7 @@ sealed class ApplicationView : Component<ApplicationState>
             return Task.CompletedTask;
         }
 
-        var intArray = state.Selection.VisualElementTreeItemPath.Split(',');
+        var intArray = state.Selection.VisualElementTreeItemPath.Split('_');
         if (intArray.Length == 1)
         {
             state = state with { ComponentRootElement = null };
