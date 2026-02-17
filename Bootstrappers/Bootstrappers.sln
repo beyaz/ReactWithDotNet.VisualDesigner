@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApiInspector", "ApiInspecto
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BOACard-Entity-Generator", "BOACard-Entity-Generator\BOACard-Entity-Generator.csproj", "{435C4AE7-5C16-BA54-F54B-3342B003EBAC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BOA-OneDesigner", "BOA-OneDesigner\BOA-OneDesigner.csproj", "{72986833-3A80-69EE-A2EE-4A3477E9D08B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{435C4AE7-5C16-BA54-F54B-3342B003EBAC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{435C4AE7-5C16-BA54-F54B-3342B003EBAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{435C4AE7-5C16-BA54-F54B-3342B003EBAC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{72986833-3A80-69EE-A2EE-4A3477E9D08B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{72986833-3A80-69EE-A2EE-4A3477E9D08B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{72986833-3A80-69EE-A2EE-4A3477E9D08B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{72986833-3A80-69EE-A2EE-4A3477E9D08B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
