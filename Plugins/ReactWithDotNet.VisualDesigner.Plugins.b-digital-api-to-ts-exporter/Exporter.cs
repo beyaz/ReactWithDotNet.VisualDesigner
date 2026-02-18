@@ -382,12 +382,6 @@ static class Exporter
 
         IReadOnlyList<string> getFileContent()
         {
-            List<string> lines =
-            [
-                "import { BaseClientRequest, BaseClientResponse, useExecuter } from \"b-digital-framework\";",
-                "import {",
-            ];
-
             var methods =
             (
                 from methodGroup in GroupControllerMethods(ApiName[scope], getExportablePublicMethods(controllerTypeDefinition))
@@ -395,21 +389,32 @@ static class Exporter
                 select method
             ).ToImmutableList();
 
-            var inputOutputTypes
-                = from methodDefinition in methods
-                  from typeName in new[]
-                  {
-                      methodDefinition.Parameters[0].ParameterType.Name,
-                      getReturnType(methodDefinition).Name
-                  }
-                  where typeName != "BaseClientRequest"
-                  select Tab + typeName;
+            List<string> importInputOutputTypes;
+            {
+                var inputOutputTypes
+                    = from methodDefinition in methods
+                      from typeName in new[]
+                      {
+                          methodDefinition.Parameters[0].ParameterType.Name,
+                          getReturnType(methodDefinition).Name
+                      }
+                      where typeName != "BaseClientRequest"
+                      select Tab + typeName;
 
-            lines.AddRange(inputOutputTypes.AppendBetween(","));
+                importInputOutputTypes = new List<string>
+                {
+                    "import {",
+                    inputOutputTypes.AppendBetween(","),
+                    "} from \"../types\";"
+                };
+            }
 
-            lines.Add("} from \"../types\";");
-
-            lines.Add(string.Empty);
+            var lines = new List<string>
+            {
+                "import { BaseClientRequest, BaseClientResponse, useExecuter } from \"b-digital-framework\";",
+                importInputOutputTypes,
+                string.Empty
+            };
 
             var basePath = getSolutionName(projectDirectory).RemoveFromStart("BOA.InternetBanking.").ToLower();
 
