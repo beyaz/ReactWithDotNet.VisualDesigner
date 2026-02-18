@@ -246,7 +246,7 @@ static class Exporter
                 false => "../../../"
             };
 
-            LineCollection lines =
+            List<string> lines =
             [
                 "import { useStore } from \"b-digital-framework\";",
                 string.Empty,
@@ -382,7 +382,7 @@ static class Exporter
 
         IReadOnlyList<string> getFileContent()
         {
-            LineCollection lines =
+            List<string> lines =
             [
                 "import { BaseClientRequest, BaseClientResponse, useExecuter } from \"b-digital-framework\";",
                 "import {",
