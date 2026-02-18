@@ -1,6 +1,6 @@
-﻿using Mono.Cecil;
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 using System.IO;
+using Mono.Cecil;
 
 namespace BDigitalFrameworkApiToTsExporter;
 
@@ -52,8 +52,8 @@ static class Exporter
         if (containerTypeDefinition is null)
         {
             return [];
-
         }
+
         return from type in GetExtraTypes(ExternalTypes[scope], containerTypeDefinition)
                select ExportExtraType(scope, type);
 
@@ -63,7 +63,7 @@ static class Exporter
             {
                 from propertyDefinition in modelTypeDefinition.Properties
                 let propertyType = propertyDefinition.PropertyType
-                from extraType in  CollectExtraTypes(externalTypes, propertyType,[])
+                from extraType in CollectExtraTypes(externalTypes, propertyType, [])
                 select extraType
             };
 
@@ -73,7 +73,7 @@ static class Exporter
                 {
                     return CollectExtraTypes(externalTypes, ((GenericInstanceType)typeReference).GenericArguments[0], collectedTypeDefinitions);
                 }
-                
+
                 foreach (var externalType in externalTypes)
                 {
                     if (externalType.DotNetFullTypeName == typeReference.FullName)
@@ -81,14 +81,12 @@ static class Exporter
                         return [];
                     }
                 }
-                
+
                 if (typeReference.IsString || typeReference.IsNumber || typeReference.IsBoolean || typeReference.IsDateTime || typeReference.IsObject)
                 {
                     return [];
                 }
 
-                
-                
                 TypeDefinition typeDefinition;
 
                 try
@@ -106,25 +104,21 @@ static class Exporter
                 {
                     if (collectedTypeDefinitions.All(x => x.FullName != typeDefinition.FullName))
                     {
-                                
                         return new List<TypeDefinition>
                         {
                             collectedTypeDefinitions,
                             typeDefinition,
-                            
+
                             from propertyDefinition in typeDefinition.Properties
                             let propertyType = propertyDefinition.PropertyType
-                            from extraType in  CollectExtraTypes(externalTypes, propertyType,[])
+                            from extraType in CollectExtraTypes(externalTypes, propertyType, [])
                             select extraType
                         };
                     }
-                    
                 }
-                
+
                 return collectedTypeDefinitions;
             }
-
-            
         }
 
         static Result<FileModel> ExportExtraType(Scope scope, TypeDefinition extraTypeDefinition)
@@ -184,7 +178,6 @@ static class Exporter
         {
             return Result.From<FileModel>(null);
         }
-        
 
         return
             from modelTypeDefinition in getModelTypeDefinition(scope)
@@ -395,9 +388,12 @@ static class Exporter
                 "import {",
             ];
 
-            var methods = (from methodGroup in GroupControllerMethods(ApiName[scope],getExportablePublicMethods(controllerTypeDefinition))
-                           from method in methodGroup.ControllerMethods
-                           select method).ToImmutableList();
+            var methods =
+            (
+                from methodGroup in GroupControllerMethods(ApiName[scope], getExportablePublicMethods(controllerTypeDefinition))
+                from method in methodGroup.ControllerMethods
+                select method
+            ).ToImmutableList();
 
             var inputOutputTypes
                 = from methodDefinition in methods
@@ -525,7 +521,7 @@ static class Exporter
         return directory;
     }
 
-    static IReadOnlyList<MethodGroup> GroupControllerMethods(string apiName,IReadOnlyList<MethodDefinition> controllerMethods)
+    static IReadOnlyList<MethodGroup> GroupControllerMethods(string apiName, IReadOnlyList<MethodDefinition> controllerMethods)
     {
         var returnList = new List<MethodGroup>();
 
@@ -533,13 +529,13 @@ static class Exporter
 
         (string FolderName, Func<MethodDefinition, bool> IsMethodMatchFolderFunc)[] splitters =
         [
-            ("Start",  isStartMethod("")),
+            ("Start", isStartMethod("")),
             ("Start1", isStartMethod("1")),
             ("Start2", isStartMethod("2")),
             ("Start3", isStartMethod("3")),
             ("Start4", isStartMethod("4")),
             ("Start5", isStartMethod("5")),
-            ("Confirm", x=>IsInConfirmMethod(apiName,x))
+            ("Confirm", x => IsInConfirmMethod(apiName, x))
         ];
 
         foreach (var (folderName, matchFunc) in splitters)
@@ -587,16 +583,16 @@ static class Exporter
         static bool IsInConfirmMethod(string apiName, MethodDefinition methodDefinition)
         {
             var methodName = methodDefinition.Name;
-            
+
             string[] options =
             [
                 $"{apiName}Execute",
                 $"{apiName}ConfirmPreData",
-                
+
                 "Execute",
                 "ConfirmPreData"
             ];
-            
+
             return options.Contains(methodName);
         }
 
@@ -608,11 +604,11 @@ static class Exporter
             [
                 $"{apiName}Start{startNumber}PreData",
                 $"{apiName}Start{startNumber}PostData",
-                
+
                 $"Start{startNumber}PreData",
                 $"Start{startNumber}PostData"
             ];
-            
+
             return options.Contains(methodName);
         }
     }
@@ -631,6 +627,6 @@ static class Exporter
     class MethodGroup
     {
         public IReadOnlyList<MethodDefinition> ControllerMethods { get; set; }
-        public string FolderName { get; set; }
+        public string FolderName { get; init; }
     }
 }
