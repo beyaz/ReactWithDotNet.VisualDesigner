@@ -1,6 +1,6 @@
-﻿using System.Collections.Immutable;
+﻿using Mono.Cecil;
+using System.Collections.Immutable;
 using System.IO;
-using Mono.Cecil;
 
 namespace BDigitalFrameworkApiToTsExporter;
 
@@ -246,40 +246,39 @@ static class Exporter
                 false => "../../../"
             };
 
-            //List<string> importInputOutputTypes;
-            //{
-            //    var inputOutputTypes
-            //        = from methodDefinition in methodGroup.ControllerMethods
-            //          from typeName in new[]
-            //          {
-            //              methodDefinition.Parameters[0].ParameterType.Name,
-            //              getReturnType(methodDefinition).Name
-            //          }
-            //          where typeName != "BaseClientRequest"
-            //          select Tab + typeName;
 
-            //    importInputOutputTypes = new List<string>
-            //    {
-            //        "import {",
-            //        inputOutputTypes.AppendBetween(","),
-            //        $"}} from \"{directoryPath}/types\";"
-            //    };
-            //}
+
+            Func<MethodDefinition, string> getReturnTypeName = x => getReturnType(x).Name;
             
-            List<string> lines =
-            [
+            
+            List<string> outputTypes;
+            {
+                var inputOutputTypes
+                    = methodGroup.ControllerMethods.Select(x=>Tab + getReturnTypeName(x));
+
+                outputTypes = new List<string>
+                {
+                    "import {",
+                    inputOutputTypes.AppendBetween(","),
+                    $"}} from \"{directoryPath}types\";"
+                };
+            }
+
+            List<string> lines = new List<string>
+            {
                 "import { useStore } from \"b-digital-framework\";",
                 string.Empty,
                 $"import {{ use{ApiName[scope]}Service }} from \"{directoryPath}services/use{ApiName[scope]}Service\";",
                 string.Empty,
                 $"import {{ {ApiName[scope]}Model }} from \"{directoryPath}models/{ApiName[scope]}Model\";",
+                outputTypes,
                 string.Empty,
                 $"export const use{methodGroup.FolderName} = () => {{",
                 string.Empty,
                 Tab + "const store = useStore();",
                 string.Empty,
                 Tab + $"const service = use{ApiName[scope]}Service();"
-            ];
+            };
 
             foreach (var methodDefinition in methodGroup.ControllerMethods)
             {
