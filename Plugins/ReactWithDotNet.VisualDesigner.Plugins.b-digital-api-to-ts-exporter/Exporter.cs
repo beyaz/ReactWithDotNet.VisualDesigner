@@ -313,7 +313,7 @@ static class Exporter
                 lines.Add(Tab + Tab + $"const response = await service.{GetTsVariableName(methodDefinition.Name)}.send(request, abortController.signal);");
                 lines.Add(Tab + Tab + "if(!response.success) {");
                 lines.Add(Tab + Tab + Tab + "store.setMessage({ content: response.result.errorMessage });");
-                lines.Add(Tab + Tab + Tab + "return false;");
+                lines.Add(Tab + Tab + Tab + "return response;");
                 lines.Add(Tab + Tab + "}");
 
                 lines.Add(string.Empty);
@@ -326,7 +326,7 @@ static class Exporter
 
                 lines.Add(string.Empty);
 
-                lines.Add(Tab + Tab + "return true");
+                lines.Add(Tab + Tab + "return response");
 
                 lines.Add(Tab + "};");
             }
