@@ -246,6 +246,26 @@ static class Exporter
                 false => "../../../"
             };
 
+            //List<string> importInputOutputTypes;
+            //{
+            //    var inputOutputTypes
+            //        = from methodDefinition in methodGroup.ControllerMethods
+            //          from typeName in new[]
+            //          {
+            //              methodDefinition.Parameters[0].ParameterType.Name,
+            //              getReturnType(methodDefinition).Name
+            //          }
+            //          where typeName != "BaseClientRequest"
+            //          select Tab + typeName;
+
+            //    importInputOutputTypes = new List<string>
+            //    {
+            //        "import {",
+            //        inputOutputTypes.AppendBetween(","),
+            //        $"}} from \"{directoryPath}/types\";"
+            //    };
+            //}
+            
             List<string> lines =
             [
                 "import { useStore } from \"b-digital-framework\";",
