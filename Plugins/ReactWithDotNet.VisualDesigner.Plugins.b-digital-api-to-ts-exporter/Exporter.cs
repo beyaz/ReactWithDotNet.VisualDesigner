@@ -246,11 +246,6 @@ static class Exporter
                 false => "../../../"
             };
 
-
-
-            Func<MethodDefinition, string> getReturnTypeName = x => getReturnType(x).Name;
-            
-            
             List<string> outputTypes;
             {
                 var inputOutputTypes
@@ -284,7 +279,7 @@ static class Exporter
             {
                 lines.Add(string.Empty);
 
-                lines.Add(Tab + $"const {GetTsVariableName(methodDefinition.Name)} = async (model: {modelTypeDefinition.Name}) : Promise<boolean> => {{");
+                lines.Add(Tab + $"const {GetTsVariableName(methodDefinition.Name)} = async (model: {modelTypeDefinition.Name}) : Promise<{getReturnTypeName(methodDefinition)}> => {{");
 
                 lines.Add(string.Empty);
                 lines.Add(Tab + Tab + "const abortController = new AbortController();");
@@ -350,6 +345,8 @@ static class Exporter
             lines.Add("}");
 
             return lines;
+
+            string getReturnTypeName(MethodDefinition x) => getReturnType(x).Name;
         }
 
         Result<string> getOutputTsFilePath(MethodGroup methodGroup)
