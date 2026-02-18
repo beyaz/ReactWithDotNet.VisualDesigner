@@ -58,7 +58,7 @@ sealed class BDigitalSwitch : PluginComponentBase
         {
             new FlexRow(Gap(8), WidthFitContent)
             {
-                new Switch(),
+                new Switch{ disabled = true },
             
                 new div { label },
 
