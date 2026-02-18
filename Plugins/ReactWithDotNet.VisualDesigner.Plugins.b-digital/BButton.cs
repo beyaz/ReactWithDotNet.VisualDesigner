@@ -27,7 +27,7 @@ sealed class BButton : PluginComponentBase
     [JsTypeInfo(JsType.String)]
     public string text { get; set; }
 
-    [Suggestions("contained , text , fab , icon")]
+    [Suggestions("contained , outlined , text , fab , icon, ")]
     [JsTypeInfo(JsType.String)]
     public string type { get; set; }
 
@@ -106,6 +106,20 @@ sealed class BButton : PluginComponentBase
                 TextTransform(none),
                 FontWeightBold,
                 Color("#16A085"),
+                BorderRadius(10),
+                LetterSpacing(0.4)
+            ];
+        }
+        
+        if (colorType == "primary" && type == "outlined")
+        {
+            defaultStyle =
+            [
+                DisplayFlexRowCentered,
+                TextTransform(none),
+                FontWeightBold,
+                Color("#16A085"),
+                Border("1px solid rgba(22, 160, 133, 0.5)"),
                 BorderRadius(10),
                 LetterSpacing(0.4)
             ];
