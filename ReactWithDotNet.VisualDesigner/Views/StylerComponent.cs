@@ -1638,6 +1638,23 @@ class CssUnitEditor : Component<CssUnitEditor.State>
                 }
         };
     }
+    
+    protected override Task OverrideStateFromPropsBeforeRender()
+    {
+        if (CssName != state.CssName)
+        {
+            state = state with
+            {
+                CssName = CssName,
+                
+                Value = null,
+                
+                Unit = "px"
+            };
+        }
+        
+        return Task.CompletedTask;
+    }
 
     Task OnButtonClicked(MouseEvent e)
     {
@@ -1652,7 +1669,7 @@ class CssUnitEditor : Component<CssUnitEditor.State>
             Value = state.Value + character
         };
 
-        DispatchEvent(Change, [CssName + ":" + state.Value + state.Unit]);
+        DispatchEvent(Change, [state.CssName + ":" + state.Value + state.Unit]);
 
         return Task.CompletedTask;
     }
@@ -1667,7 +1684,7 @@ class CssUnitEditor : Component<CssUnitEditor.State>
 
         if (state.Value.HasValue)
         {
-            DispatchEvent(Change, [CssName + ":" + state.Value + state.Unit]);
+            DispatchEvent(Change, [state.CssName + ":" + state.Value + state.Unit]);
         }
 
         return Task.CompletedTask;
@@ -1694,8 +1711,12 @@ class CssUnitEditor : Component<CssUnitEditor.State>
         public double SuggestionPopupLocationX { get; init; }
 
         public double SuggestionPopupLocationY { get; init; }
+        
         public string Unit { get; init; } = "px";
+        
         public string Value { get; init; }
+        
+        public required string CssName { get; init; }
     }
 }
 
