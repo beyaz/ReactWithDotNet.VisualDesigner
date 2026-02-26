@@ -61,7 +61,7 @@ static class Exporter
         {
             return new List<TypeDefinition>
             {
-                from propertyDefinition in modelTypeDefinition.Properties
+                from propertyDefinition in modelTypeDefinition.Properties where propertyDefinition.IsExportable
                 let propertyType = propertyDefinition.PropertyType
                 from extraType in CollectExtraTypes(externalTypes, propertyType, [])
                 select extraType

@@ -72,4 +72,61 @@ static class Extensions
         public bool IsObject
             => typeReference.FullName == typeof(object).FullName;
     }
+
+    extension(PropertyDefinition propertyDefinition)
+    {
+        internal bool IsExportable
+        {
+            get
+            {
+                if (propertyDefinition.IsImplicitDefinition)
+                {
+                    return false;
+                }
+
+                if (propertyDefinition.IsJsonIgnored)
+                {
+                    return false;
+                }
+                
+                return true;
+            }
+        }
+
+        internal  bool IsImplicitDefinition
+        {
+            get
+            {
+                if (propertyDefinition.PropertyType.FullName == "System.Runtime.Serialization.ExtensionDataObject")
+                {
+                    return true;
+                }
+
+                if (propertyDefinition.Name == "EqualityContract")
+                {
+                    return true;
+                }
+
+                return propertyDefinition.Name.Contains(".");
+            }
+        }
+        
+        internal bool IsJsonIgnored
+        {
+            get
+            {
+                if (HasCustomAttributeNameLike("TsInclude"))
+                {
+                    return false;
+                }
+        
+                return HasCustomAttributeNameLike("JsonIgnore") || HasCustomAttributeNameLike("TsIgnore");
+        
+                bool HasCustomAttributeNameLike(string attributeName)
+                {
+                    return propertyDefinition.CustomAttributes.Any(x => x.AttributeType.Name.Contains(attributeName, StringComparison.OrdinalIgnoreCase));
+                }
+            }
+        }
+    }
 }

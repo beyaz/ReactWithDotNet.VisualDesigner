@@ -31,8 +31,7 @@ static class TsModelCreator
             fields =
                 from propertyDefinition in typeDefinition.Properties
                 where propertyDefinition.SetMethod is not null
-                where !IsImplicitDefinition(propertyDefinition)
-                where !IsJsonIgnored(propertyDefinition)
+                where propertyDefinition.IsExportable
                 select new TsFieldDefinition
                 {
                     Name          = GetTsVariableName(propertyDefinition.Name),
@@ -70,20 +69,7 @@ static class TsModelCreator
             Fields = fields.ToList()
         };
         
-        static bool IsJsonIgnored(PropertyDefinition propertyDefinition)
-        {
-            if (HasCustomAttributeNameLike("TsInclude"))
-            {
-                return false;
-            }
         
-            return HasCustomAttributeNameLike("JsonIgnore") || HasCustomAttributeNameLike("TsIgnore");
-        
-            bool HasCustomAttributeNameLike(string attributeName)
-            {
-                return propertyDefinition.CustomAttributes.Any(x => x.AttributeType.Name.Contains(attributeName, StringComparison.OrdinalIgnoreCase));
-            }
-        }
     }
 
     static TsTypeReference GetTSType(IReadOnlyList<ExternalTypeInfo> externalTypes, TypeReference typeReference, bool isExportingForModelFile, string apiName)
@@ -207,20 +193,6 @@ static class TsModelCreator
         }
     }
 
-    static bool IsImplicitDefinition(PropertyDefinition propertyDefinition)
-    {
-        if (propertyDefinition.PropertyType.FullName == "System.Runtime.Serialization.ExtensionDataObject")
-        {
-            return true;
-        }
-
-        if (propertyDefinition.Name == "EqualityContract")
-        {
-            return true;
-        }
-
-        return propertyDefinition.Name.Contains(".");
-    }
     
     
 
