@@ -110,6 +110,7 @@ static class Exporter
                             typeDefinition,
 
                             from propertyDefinition in typeDefinition.Properties
+                            where propertyDefinition.IsExportable
                             let propertyType = propertyDefinition.PropertyType
                             from extraType in CollectExtraTypes(externalTypes, propertyType, [])
                             select extraType
