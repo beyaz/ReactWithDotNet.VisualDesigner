@@ -48,36 +48,38 @@ abstract class MagicInput : Component<MagicInput.State>
 
     protected override Element render()
     {
+        Element inputElement = new input
+        {
+            type                     = "text",
+            valueBind                = () => state.Value,
+            valueBindDebounceTimeout = 300,
+            valueBindDebounceHandler = OnTypingFinished,
+            onKeyDown                = OnKeyDown,
+            onClick                  = OnInputClicked,
+            placeholder              = Placeholder,
+            onFocus                  = OnFocused,
+            onBlur                   = OnBlur,
+            id                       = Id,
+            autoComplete             = "off",
+            spellCheck               = "false",
+            style =
+            {
+                OutlineNone,
+                BorderNone,
+                Appearance(none),
+                PaddingTopBottom(4),
+                Color(rgb(0, 6, 36)),
+                Height(24),
+                FitContent ? Width(CalculateTextWidth(state.Value)) : FlexGrow(1),
+                Background(transparent),
+                EditorFont(),
+            },
+            autoFocus = AutoFocus
+        };
+        
         return new FlexColumn(!FitContent ? WidthFull : null)
         {
-            new input
-            {
-                type                     = "text",
-                valueBind                = () => state.Value,
-                valueBindDebounceTimeout = 300,
-                valueBindDebounceHandler = OnTypingFinished,
-                onKeyDown                = OnKeyDown,
-                onClick                  = OnInputClicked,
-                placeholder              = Placeholder,
-                onFocus                  = OnFocused,
-                onBlur                   = OnBlur,
-                id                       = Id,
-                autoComplete             = "off",
-                spellCheck               = "false",
-                style =
-                {
-                    OutlineNone,
-                    BorderNone,
-                    Appearance(none),
-                    PaddingTopBottom(4),
-                    Color(rgb(0, 6, 36)),
-                    Height(24),
-                    FitContent ? Width(CalculateTextWidth(state.Value)) : FlexGrow(1),
-                    Background(transparent),
-                    EditorFont(),
-                },
-                autoFocus = AutoFocus
-            },
+            inputElement,
             ViewSuggestions
         };
     }
