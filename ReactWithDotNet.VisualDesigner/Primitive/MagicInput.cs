@@ -13,9 +13,7 @@ abstract class MagicInput : Component<MagicInput.State>
     public bool FitContent { get; init; }
     public string Id { get; set; }
 
-    public bool IsBold { get; init; }
-    public bool IsTextAlignCenter { get; init; }
-    public bool IsTextAlignRight { get; init; }
+   
 
     public required string Name { get; init; }
 
@@ -77,9 +75,6 @@ abstract class MagicInput : Component<MagicInput.State>
                     FitContent ? Width(CalculateTextWidth(state.Value)) : FlexGrow(1),
                     Background(transparent),
                     EditorFont(),
-                    IsBold ? FontWeight600 : null,
-                    IsTextAlignRight ? TextAlignRight : null,
-                    IsTextAlignCenter ? TextAlignCenter : null
                 },
                 autoFocus = AutoFocus
             },
@@ -457,13 +452,9 @@ abstract class MagicInput : Component<MagicInput.State>
             new FlexColumn(PositionAbsolute, Gap(4), MinWidth(200), Top(4), HeightAuto, Background(White), BoxShadow(0, 6, 6, 0, rgba(22, 45, 61, .06)), Padding(5), BorderRadius(5))
             {
                 Zindex4,
-                IsTextAlignRight ? Right(0) : null,
-                IsTextAlignCenter ? Right(none) : null,
-
                 suggestions.Take(7).Select(ToOption)
             },
 
-            IsTextAlignCenter ? AlignItemsCenter : null
         };
 
         Element ToOption(SuggestionItem text, int index)
