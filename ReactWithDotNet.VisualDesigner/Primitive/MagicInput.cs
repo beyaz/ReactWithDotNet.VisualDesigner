@@ -334,7 +334,7 @@ abstract class MagicInput : Component<MagicInput.State>
         }
 
         var parseResponse = ParseSearchTerm(state.Value);
-        
+
         state = state with
         {
             ShowSuggestions = true,
