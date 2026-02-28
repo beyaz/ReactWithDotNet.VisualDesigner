@@ -247,16 +247,7 @@ abstract class MagicInput : Component<MagicInput.State>
                 }
             }
 
-            string value = suggestedValue;
-            var dotSplitNames = currentValue.Split('.', StringSplitOptions.TrimEntries);
-            if (dotSplitNames.Length > 1)
-            {
-                dotSplitNames[^1] = suggestedValue;
-
-                value = string.Join(".", dotSplitNames);
-            }
-
-            state = state with { Value = value };
+            state = state with { Value = InsertSuggestedValue(e.currentTarget.value, suggestedValue, e.currentTarget.selectionStart) };
 
             state = state with
             {
@@ -264,6 +255,32 @@ abstract class MagicInput : Component<MagicInput.State>
             };
 
             return Task.CompletedTask;
+
+            static string InsertSuggestedValue(string currentValue, string suggestedValue, int? selectionStart)
+            {
+                if (!selectionStart.HasValue)
+                {
+                    return suggestedValue;
+                }
+
+                var startPoint = selectionStart.Value;
+                while (startPoint > 0)
+                {
+                    if (currentValue[startPoint] == '.' || currentValue[startPoint] == ' ')
+                    {
+                        break;
+                    }
+
+                    startPoint--;
+                }
+
+                if (startPoint <= 0)
+                {
+                    return suggestedValue;
+                }
+
+                return currentValue[..startPoint] + suggestedValue + currentValue[selectionStart.Value..];
+            }
         }
 
         if (e.key == "Enter" || (e.ctrlKey && e.key is "S" or "s"))
