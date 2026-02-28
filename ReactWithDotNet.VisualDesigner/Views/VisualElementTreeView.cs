@@ -226,15 +226,24 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
     Task FoldChildren(MouseEvent e)
     {
         var nodePath = e.currentTarget.id;
+        
+        var visualElementModel = FindTreeNodeByTreePath(Model, nodePath);
 
-        if (state.CollapsedNodes.Contains(nodePath))
+        for (var i = 0; i < visualElementModel.Children.Count; i++)
         {
-            state.CollapsedNodes.Remove(nodePath);
+            state.CollapsedNodes.Remove($"{nodePath}_{i}");
+            state.CollapsedNodes.Add($"{nodePath}_{i}");
         }
-        else
-        {
-            state.CollapsedNodes.Add(nodePath);
-        }
+
+        return Task.CompletedTask;
+    }
+    
+    [StopPropagation]
+    Task UnfoldChildren(MouseEvent e)
+    {
+        var nodePath = e.currentTarget.id;
+        
+        state.CollapsedNodes.RemoveAll(x=>x == nodePath || x.StartsWith($"{nodePath}_"));
 
         return Task.CompletedTask;
     }
@@ -325,7 +334,9 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
                                  + Size(24) 
                                  + Color(Gray300) 
                                  + Hover(Color(Gray400)) 
-                                 + Active(Color(Gray600));
+                                 + Active(Color(Gray600))
+                                 + Id(path)
+                                 + OnClick(UnfoldChildren);
             
         if (!isSelected)
         {
