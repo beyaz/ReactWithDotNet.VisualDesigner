@@ -92,13 +92,17 @@ abstract class MagicInput : Component<MagicInput.State>
             Client.RunJavascript
             (
                 $$"""
-                  function autoResize(textarea, maxHeight = 120) 
+                  function autoResize(textareaElement, maxHeight = 120) 
                   {
-                    textarea.style.height = "32px";
-                    const newHeight = Math.min(textarea.scrollHeight, maxHeight);
-                    textarea.style.height = newHeight + "px";
+                    textareaElement.style.height = "32px";
+                    
+                    const newHeight = Math.min(textareaElement.scrollHeight, maxHeight);
+                    
+                    textareaElement.style.height = newHeight + "px";
                   }
+                  
                   document.getElementById('{{Id}}').addEventListener('input', autoResize);
+                  
                   autoResize(document.getElementById('{{Id}}'));
                   """
             );
