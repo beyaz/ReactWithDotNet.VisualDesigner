@@ -307,10 +307,17 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
         }
 
         Element eyeIcon = node.HideInDesigner ? new IconEyeClose() : new IconEyeOpen();
+        eyeIcon += Color(Gray300) + Hover(Color(Gray400));
+            
         if (!isSelected && !node.HideInDesigner)
         {
             eyeIcon = null;
         }
+
+        var foldChildrenIcon = new IconFold() + Size(24) + Color(Gray300) + Hover(Color(Gray400));
+
+        var unfoldChildrenIcon = new IconUnfold() + Size(24) + Color(Gray300) + Hover(Color(Gray400));
+
 
         var isDesignerComponent = TryReadTagAsDesignerComponentId(node).Any();
 
