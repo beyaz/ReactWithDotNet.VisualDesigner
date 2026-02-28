@@ -553,7 +553,7 @@ sealed class ApplicationView : Component<ApplicationState>
             }
         };
 
-        return new FlexRow(WidthFull, AlignItemsFlexEnd, Gap(16), Border(1, solid, Theme.BorderColor), BorderRadius(4), PaddingX(8), Height(32), PaddingBottom(2))
+        return new FlexRow(WidthFull, AlignItemsFlexEnd, Gap(16), Border(1, solid, Theme.BorderColor), BorderRadius(4), PaddingX(8), MinHeight(32), PaddingBottom(2))
         {
             PositionRelative,
             new label(PositionAbsolute, Top(-4), Left(8), FontSize10, Opacity(inputValue.HasValue ? 0.9 : 0.7), LineHeight6, LetterSpacing(1.5), Background(White), PaddingX(4))

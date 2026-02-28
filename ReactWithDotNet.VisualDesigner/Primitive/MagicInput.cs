@@ -51,10 +51,10 @@ abstract class MagicInput : Component<MagicInput.State>
                 Appearance(none),
                 PaddingTopBottom(4),
                 Color(rgb(0, 6, 36)),
-                Height(24),
                 FlexGrow(1),
                 Background(transparent),
-                EditorFont()
+                EditorFont(),
+                Height(24)
             }
         };
 
@@ -78,12 +78,30 @@ abstract class MagicInput : Component<MagicInput.State>
                     Appearance(none),
                     PaddingTopBottom(4),
                     Color(rgb(0, 6, 36)),
-                    HeightAuto, MaxHeight(300),
                     FlexGrow(1),
                     Background(transparent),
-                    EditorFont()
+                    EditorFont(),
+                    
+                    MaxHeight(120),
+                    WordBreakWord,
+                    WhiteSpaceNormal,
+                    Resize(none)
                 }
             };
+            
+            Client.RunJavascript
+            (
+                $$"""
+                  function autoResize(textarea, maxHeight = 120) 
+                  {
+                    textarea.style.height = "32px";
+                    const newHeight = Math.min(textarea.scrollHeight, maxHeight);
+                    textarea.style.height = newHeight + "px";
+                  }
+                  document.getElementById('{{Id}}').addEventListener('input', autoResize);
+                  autoResize(document.getElementById('{{Id}}'));
+                  """
+            );
         }
 
         return new FlexColumn(WidthFull)
