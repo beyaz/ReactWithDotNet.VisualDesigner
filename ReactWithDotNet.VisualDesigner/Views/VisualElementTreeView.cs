@@ -52,28 +52,6 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
     [CustomEvent]
     public OnTreeItemMove TreeItemMove { get; init; }
 
-    protected override Task constructor()
-    {
-        List<string> collapsedNodesDefaultValue = [];
-        {
-            var childrenCount = Model?.Children?.Count ?? 0;
-            if (childrenCount > 0)
-            {
-                for (var i = 0; i < childrenCount; i++)
-                {
-                    collapsedNodesDefaultValue.Add($"0,{i}");
-                }
-            }
-        }
-
-        state = new()
-        {
-            CollapsedNodes = collapsedNodesDefaultValue
-        };
-
-        return Task.CompletedTask;
-    }
-
     protected override Task OverrideStateFromPropsBeforeRender()
     {
         if (SelectedPath.HasValue)
@@ -244,6 +222,23 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
         return Task.CompletedTask;
     }
 
+    [StopPropagation]
+    Task FoldChildren(MouseEvent e)
+    {
+        var nodePath = e.currentTarget.id;
+
+        if (state.CollapsedNodes.Contains(nodePath))
+        {
+            state.CollapsedNodes.Remove(nodePath);
+        }
+        else
+        {
+            state.CollapsedNodes.Add(nodePath);
+        }
+
+        return Task.CompletedTask;
+    }
+    
     async Task<IReadOnlyList<Element>> ToVisual(VisualElementModel node, int indent, string path)
     {
         var isSelected = SelectedPath == path;
@@ -322,7 +317,9 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
                                + Size(24) 
                                + Color(Gray300) 
                                + Hover(Color(Gray400)) 
-                               + Active(Color(Gray600));
+                               + Active(Color(Gray600))
+                               + Id(path)
+                               + OnClick(FoldChildren);
 
         var unfoldChildrenIcon = new IconUnfold() 
                                  + Size(24) 
