@@ -558,7 +558,7 @@ sealed class IconUnfold : PureComponent
 {
     protected override Element render()
     {
-        return new svg(Fill(none), ViewBox(0, 0, 24, 24),  Size("1em"), Fill("currentcolor"))
+        return new svg(Fill(none), ViewBox(0, 0, 24, 24),  svg.Size(24), Fill("currentcolor"))
         {
             new path
             {
@@ -575,7 +575,7 @@ sealed class IconFold : PureComponent
 {
     protected override Element render()
     {
-        return new svg(Fill(none), ViewBox(0, 0, 24, 24), Role("img"), Size("1em"), Fill("currentcolor"))
+        return new svg(Fill(none), ViewBox(0, 0, 24, 24), Role("img"), svg.Size(24), Fill("currentcolor"))
         {
             new path
             {

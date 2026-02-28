@@ -61,12 +61,13 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
                             Focus(OutlineNone)
                         }
                     },
-                    When(state.FilterText?.Length > 0,
+                    When
+                    (
+                        state.FilterText?.Length > 0,
                         () => new IconClose() +
-                              Size(20) +
-                              Color(Gray300) +
-                              Hover(Color(Gray400)) +
-                              OnClick(OnClearFilterTextClicked))
+                              Size(24) + Color(Gray300) + Hover(Color(Gray400)) +
+                              OnClick(OnClearFilterTextClicked)
+                              )
                 },
                 new div(WidthFull, BorderBottom(1, dotted, "#d9d9d9"))
             },
