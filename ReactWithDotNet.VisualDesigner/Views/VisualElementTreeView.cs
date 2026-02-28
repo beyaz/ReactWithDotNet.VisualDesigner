@@ -309,7 +309,6 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
         Element eyeIcon = node.HideInDesigner ? new IconEyeClose() : new IconEyeOpen();
         eyeIcon += Color(Gray300);
         eyeIcon += Hover(Color(Gray400));
-        eyeIcon += Active(Color(Gray600));
         eyeIcon += Width(16) + Height(16);
         eyeIcon += When(isSelected, OnClick(Toggle_HideInDesigner));
             
