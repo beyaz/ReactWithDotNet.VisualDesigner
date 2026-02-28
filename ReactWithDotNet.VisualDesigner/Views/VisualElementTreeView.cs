@@ -314,10 +314,24 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
             eyeIcon = null;
         }
 
-        var foldChildrenIcon = new IconFold() + Size(24) + Color(Gray300) + Hover(Color(Gray400));
+        
+        var foldChildrenIcon = new IconFold() 
+                               + Size(24) 
+                               + Color(Gray300) 
+                               + Hover(Color(Gray400)) 
+                               + Active(Color(Gray600));
 
-        var unfoldChildrenIcon = new IconUnfold() + Size(24) + Color(Gray300) + Hover(Color(Gray400));
-
+        var unfoldChildrenIcon = new IconUnfold() 
+                                 + Size(24) 
+                                 + Color(Gray300) 
+                                 + Hover(Color(Gray400)) 
+                                 + Active(Color(Gray600));
+            
+        if (!isSelected)
+        {
+            foldChildrenIcon   = null;
+            unfoldChildrenIcon = null;
+        }
 
         var isDesignerComponent = TryReadTagAsDesignerComponentId(node).Any();
 
@@ -356,6 +370,10 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
                     new FlexRow(FlexGrow(1), Gap(4), AlignItemsCenter, JustifyContentFlexEnd, PaddingRight(8))
                     {
                         nameText is null ? null : new div(FontSize12) { nameText },
+                        
+                        foldChildrenIcon,
+                        unfoldChildrenIcon,
+                        
                         eyeIcon + Width(16) + Height(16) + When(isSelected, OnClick(Toggle_HideInDesigner))
                     }
                 },
