@@ -551,3 +551,39 @@ public sealed class IconPanel : PureComponent
         };
     }
 }
+
+
+
+sealed class IconUnfold : PureComponent
+{
+    protected override Element render()
+    {
+        return new svg(Fill(none), ViewBox(0, 0, 24, 24),  Size("1em"), Fill("currentcolor"))
+        {
+            new path
+            {
+                fillRule = "evenodd",
+                clipRule = "evenodd",
+                d        = "M9.3 10.76a.75.75 0 11-1.1-1.02l3.25-3.5a.75.75 0 011.1 0l3.25 3.5a.75.75 0 11-1.1 1.02L12 7.852 9.3 10.76zm0 2.48a.75.75 0 10-1.1 1.02l3.25 3.5a.75.75 0 001.1 0l3.25-3.5a.75.75 0 10-1.1-1.02L12 16.148 9.3 13.24z",
+                fill     = "currentColor"
+            }
+        };
+    }
+}
+
+sealed class IconFold : PureComponent
+{
+    protected override Element render()
+    {
+        return new svg(Fill(none), ViewBox(0, 0, 24, 24), Role("img"), Size("1em"), Fill("currentcolor"))
+        {
+            new path
+            {
+                fillRule = "evenodd",
+                clipRule = "evenodd",
+                d        = "M9.3 6.24a.75.75 0 00-1.1 1.02l3.25 3.5a.75.75 0 001.1 0l3.25-3.5a.75.75 0 10-1.1-1.02L12 9.148 9.3 6.24zm0 11.52a.75.75 0 11-1.1-1.02l3.25-3.5a.75.75 0 011.1 0l3.25 3.5a.75.75 0 11-1.1 1.02L12 14.852 9.3 17.76z",
+                fill     = "currentColor"
+            }
+        };
+    }
+}
