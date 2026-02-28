@@ -8,6 +8,8 @@ abstract class MagicInput : Component<MagicInput.State>
 
     public required string Name { get; init; }
 
+    public bool IsTextArea { get; init; }
+
     [CustomEvent]
     public InputChangeHandler OnChange { get; init; }
 
@@ -55,6 +57,34 @@ abstract class MagicInput : Component<MagicInput.State>
                 EditorFont()
             }
         };
+
+        if (IsTextArea)
+        {
+            inputElement = new textarea
+            {
+                valueBind                = () => state.Value,
+                valueBindDebounceTimeout = 300,
+                valueBindDebounceHandler = OnTypingFinished,
+                onKeyDown                = OnKeyDown,
+                onClick                  = OnInputClicked,
+                placeholder              = Placeholder,
+                onBlur                   = OnBlur,
+                id                       = Id,
+                spellCheck               = "false",
+                style =
+                {
+                    OutlineNone,
+                    BorderNone,
+                    Appearance(none),
+                    PaddingTopBottom(4),
+                    Color(rgb(0, 6, 36)),
+                    HeightAuto, MaxHeight(300),
+                    FlexGrow(1),
+                    Background(transparent),
+                    EditorFont()
+                }
+            };
+        }
 
         return new FlexColumn(WidthFull)
         {

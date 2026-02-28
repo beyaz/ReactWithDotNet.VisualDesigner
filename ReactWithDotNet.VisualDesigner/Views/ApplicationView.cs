@@ -526,6 +526,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
         var inputEditor = new DesignPropEditor
         {
+            IsTextArea = designPropName == Design.Content,
             ComponentId = state.ComponentId,
             ProjectId   = state.ProjectId,
             Id          = designPropName,
