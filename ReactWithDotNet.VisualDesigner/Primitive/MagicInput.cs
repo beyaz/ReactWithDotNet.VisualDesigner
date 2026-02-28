@@ -11,9 +11,8 @@ abstract class MagicInput : Component<MagicInput.State>
     public bool AutoFocus { get; init; }
 
     public bool FitContent { get; init; }
-    public string Id { get; set; }
 
-   
+    public string Id { get; set; }
 
     public required string Name { get; init; }
 
@@ -72,11 +71,11 @@ abstract class MagicInput : Component<MagicInput.State>
                 Height(24),
                 FitContent ? Width(CalculateTextWidth(state.Value)) : FlexGrow(1),
                 Background(transparent),
-                EditorFont(),
+                EditorFont()
             },
             autoFocus = AutoFocus
         };
-        
+
         return new FlexColumn(!FitContent ? WidthFull : null)
         {
             inputElement,
@@ -455,8 +454,7 @@ abstract class MagicInput : Component<MagicInput.State>
             {
                 Zindex4,
                 suggestions.Take(7).Select(ToOption)
-            },
-
+            }
         };
 
         Element ToOption(SuggestionItem text, int index)
