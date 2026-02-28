@@ -2,32 +2,20 @@
 
 delegate Task InputChangeHandler(string senderName, string newValue);
 
-
-delegate Task InputPasteHandler(string text);
-
 abstract class MagicInput : Component<MagicInput.State>
 {
-
-    public string Id { get; set; }
+    public string Id { get; init; }
 
     public required string Name { get; init; }
 
     [CustomEvent]
     public InputChangeHandler OnChange { get; init; }
 
-
     public string Placeholder { get; init; }
 
     public string Value { get; init; }
 
     protected abstract Task<Result<IReadOnlyList<SuggestionItem>>> Suggestions { get; }
-
-    protected override Task constructor()
-    {
-        InitializeState();
-
-        return Task.CompletedTask;
-    }
 
     protected override Task OverrideStateFromPropsBeforeRender()
     {
@@ -65,7 +53,7 @@ abstract class MagicInput : Component<MagicInput.State>
                 FlexGrow(1),
                 Background(transparent),
                 EditorFont()
-            },
+            }
         };
 
         return new FlexColumn(WidthFull)
@@ -109,7 +97,6 @@ abstract class MagicInput : Component<MagicInput.State>
 
         return Task.CompletedTask;
     }
-
 
     [StopPropagation]
     Task OnInputClicked(MouseEvent e)
@@ -233,11 +220,11 @@ abstract class MagicInput : Component<MagicInput.State>
             }
 
             var insertResponse = InsertSuggestedValue(e.currentTarget.value, suggestedValue, e.currentTarget.selectionStart);
-            
+
             state = state with
             {
                 SelectedSuggestionOffset = null,
-                
+
                 Value = insertResponse.finalText
             };
 
@@ -246,11 +233,11 @@ abstract class MagicInput : Component<MagicInput.State>
                 Client.RunJavascript
                 (
                     $"""
-                    document.getElementById('{Id}').setSelectionRange({insertResponse.selectionStart}, {insertResponse.selectionStart});
-                    """
+                     document.getElementById('{Id}').setSelectionRange({insertResponse.selectionStart}, {insertResponse.selectionStart});
+                     """
                 );
             }
-            
+
             return Task.CompletedTask;
 
             static (string finalText, int? selectionStart) InsertSuggestedValue(string currentValue, string suggestedValue, int? selectionStart)
@@ -262,7 +249,7 @@ abstract class MagicInput : Component<MagicInput.State>
 
                 var startPoint = selectionStart.Value;
                 startPoint--;
-                
+
                 while (startPoint > 0)
                 {
                     if (currentValue[startPoint] == '.' || currentValue[startPoint] == ' ')
@@ -281,9 +268,9 @@ abstract class MagicInput : Component<MagicInput.State>
                 }
 
                 var firstPart = currentValue[..startPoint] + suggestedValue;
-                
+
                 var finalText = firstPart + currentValue[selectionStart.Value..];
-                
+
                 return (finalText, firstPart.Length);
             }
         }
