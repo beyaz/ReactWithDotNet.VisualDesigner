@@ -83,106 +83,6 @@ abstract class MagicInput : Component<MagicInput.State>
         };
     }
 
-    static List<SuggestionItem> FilterSuggestions(IReadOnlyList<SuggestionItem> suggestions, string searchTerm)
-    {
-        var parseResponse = ParseSearchTerm(searchTerm);
-
-        return suggestions.OrderByDescending(x => GetMatchScore(x, parseResponse)).Take(5).ToList();
-
-        static (bool isEmpty, string[] nameInWords, string[] valueInWords) ParseSearchTerm(string searchTerm)
-        {
-            if (searchTerm.HasNoValue)
-            {
-                return (true, null, null);
-            }
-
-            var splitters = " -.".ToCharArray();
-
-            var indexOfColonInSearchTerm = searchTerm.IndexOf(':');
-            if (indexOfColonInSearchTerm > 0)
-            {
-                var name = searchTerm[..indexOfColonInSearchTerm];
-
-                var value = searchTerm[(indexOfColonInSearchTerm + 1)..];
-
-                var nameInWords = name.Split(splitters, StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
-
-                var valueInWords = value.Split(splitters, StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
-
-                return (isEmpty: false, nameInWords, valueInWords);
-            }
-            else
-            {
-                var nameInWords = searchTerm.Split(splitters, StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
-
-                return (isEmpty: false, nameInWords, null);
-            }
-        }
-
-        static double GetMatchScore(
-            SuggestionItem suggestionItem,
-            (bool isEmpty, string[] nameInWords, string[] valueInWords) searchTerm
-        )
-        {
-            if (searchTerm.isEmpty)
-            {
-                return 1;
-            }
-
-            var count = 0d;
-
-            foreach (var word in searchTerm.nameInWords)
-            {
-                count += Calculate(suggestionItem.Name, word, 1.3);
-            }
-
-            if (searchTerm.valueInWords is not null)
-            {
-                if (suggestionItem.Value.HasValue)
-                {
-                    foreach (var word in searchTerm.valueInWords)
-                    {
-                        count += Calculate(suggestionItem.Value, word, 1.2);
-                    }
-                }
-                else
-                {
-                    foreach (var word in searchTerm.valueInWords)
-                    {
-                        count += Calculate(suggestionItem.Name, word, 1);
-                    }
-                }
-            }
-
-            return count;
-
-            static double Calculate(string suggestion, string word, double gravity)
-            {
-                if (word is null)
-                {
-                    return 0;
-                }
-
-                if (suggestion.Equals(word, StringComparison.OrdinalIgnoreCase))
-                {
-                    return gravity * 10;
-                }
-
-                if (suggestion.StartsWith(word, StringComparison.OrdinalIgnoreCase))
-                {
-                    return gravity * 8;
-                }
-
-                if (suggestion.Contains(word, StringComparison.OrdinalIgnoreCase))
-                {
-                    return gravity * 5;
-                }
-
-                return 0;
-            }
-        }
-    }
-
     Task CloseSuggestion()
     {
         state = state with { ShowSuggestions = false };
@@ -433,7 +333,7 @@ abstract class MagicInput : Component<MagicInput.State>
         {
             ShowSuggestions = true,
             SelectedSuggestionOffset = null,
-            FilteredSuggestions = FilterSuggestions(suggestions.Value, state.Value)
+            FilteredSuggestions = SuggestionHelper.FilterSuggestions(suggestions.Value, state.Value)
         };
     }
 
@@ -524,5 +424,108 @@ public sealed record SuggestionItem
         }
 
         return item.Name;
+    }
+}
+
+static class SuggestionHelper
+{
+    internal static List<SuggestionItem> FilterSuggestions(IReadOnlyList<SuggestionItem> suggestions, string searchTerm)
+    {
+        var parseResponse = ParseSearchTerm(searchTerm);
+
+        return suggestions.OrderByDescending(x => GetMatchScore(x, parseResponse)).Take(5).ToList();
+
+        static (bool isEmpty, string[] nameInWords, string[] valueInWords) ParseSearchTerm(string searchTerm)
+        {
+            if (searchTerm.HasNoValue)
+            {
+                return (true, null, null);
+            }
+
+            var splitters = " -.".ToCharArray();
+
+            var indexOfColonInSearchTerm = searchTerm.IndexOf(':');
+            if (indexOfColonInSearchTerm > 0)
+            {
+                var name = searchTerm[..indexOfColonInSearchTerm];
+
+                var value = searchTerm[(indexOfColonInSearchTerm + 1)..];
+
+                var nameInWords = name.Split(splitters, StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+
+                var valueInWords = value.Split(splitters, StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+
+                return (isEmpty: false, nameInWords, valueInWords);
+            }
+            else
+            {
+                var nameInWords = searchTerm.Split(splitters, StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+
+                return (isEmpty: false, nameInWords, null);
+            }
+        }
+
+        static double GetMatchScore(
+            SuggestionItem suggestionItem,
+            (bool isEmpty, string[] nameInWords, string[] valueInWords) searchTerm
+        )
+        {
+            if (searchTerm.isEmpty)
+            {
+                return 1;
+            }
+
+            var count = 0d;
+
+            foreach (var word in searchTerm.nameInWords)
+            {
+                count += Calculate(suggestionItem.Name, word, 1.3);
+            }
+
+            if (searchTerm.valueInWords is not null)
+            {
+                if (suggestionItem.Value.HasValue)
+                {
+                    foreach (var word in searchTerm.valueInWords)
+                    {
+                        count += Calculate(suggestionItem.Value, word, 1.2);
+                    }
+                }
+                else
+                {
+                    foreach (var word in searchTerm.valueInWords)
+                    {
+                        count += Calculate(suggestionItem.Name, word, 1);
+                    }
+                }
+            }
+
+            return count;
+
+            static double Calculate(string suggestion, string word, double gravity)
+            {
+                if (word is null)
+                {
+                    return 0;
+                }
+
+                if (suggestion.Equals(word, StringComparison.OrdinalIgnoreCase))
+                {
+                    return gravity * 10;
+                }
+
+                if (suggestion.StartsWith(word, StringComparison.OrdinalIgnoreCase))
+                {
+                    return gravity * 8;
+                }
+
+                if (suggestion.Contains(word, StringComparison.OrdinalIgnoreCase))
+                {
+                    return gravity * 5;
+                }
+
+                return 0;
+            }
+        }
     }
 }
