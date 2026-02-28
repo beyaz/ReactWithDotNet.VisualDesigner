@@ -2,15 +2,11 @@
 
 delegate Task InputChangeHandler(string senderName, string newValue);
 
-delegate Task InputFocusHandler(string senderName);
 
 delegate Task InputPasteHandler(string text);
 
 abstract class MagicInput : Component<MagicInput.State>
 {
-    public bool AutoFocus { get; init; }
-
-    public bool FitContent { get; init; }
 
     public string Id { get; set; }
 
@@ -19,8 +15,6 @@ abstract class MagicInput : Component<MagicInput.State>
     [CustomEvent]
     public InputChangeHandler OnChange { get; init; }
 
-    [CustomEvent]
-    public InputFocusHandler OnFocus { get; init; }
 
     public string Placeholder { get; init; }
 
@@ -56,7 +50,6 @@ abstract class MagicInput : Component<MagicInput.State>
             onKeyDown                = OnKeyDown,
             onClick                  = OnInputClicked,
             placeholder              = Placeholder,
-            onFocus                  = OnFocused,
             onBlur                   = OnBlur,
             id                       = Id,
             autoComplete             = "off",
@@ -69,14 +62,13 @@ abstract class MagicInput : Component<MagicInput.State>
                 PaddingTopBottom(4),
                 Color(rgb(0, 6, 36)),
                 Height(24),
-                FitContent ? Width(CalculateTextWidth(state.Value)) : FlexGrow(1),
+                FlexGrow(1),
                 Background(transparent),
                 EditorFont()
             },
-            autoFocus = AutoFocus
         };
 
-        return new FlexColumn(!FitContent ? WidthFull : null)
+        return new FlexColumn(WidthFull)
         {
             inputElement,
             ViewSuggestions
@@ -118,13 +110,6 @@ abstract class MagicInput : Component<MagicInput.State>
         return Task.CompletedTask;
     }
 
-    [StopPropagation]
-    Task OnFocused(FocusEvent e)
-    {
-        DispatchEvent(OnFocus, [Name]);
-
-        return Task.CompletedTask;
-    }
 
     [StopPropagation]
     Task OnInputClicked(MouseEvent e)
