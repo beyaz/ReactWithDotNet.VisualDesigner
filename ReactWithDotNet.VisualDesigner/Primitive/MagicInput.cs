@@ -247,23 +247,37 @@ abstract class MagicInput : Component<MagicInput.State>
                 }
             }
 
-            state = state with { Value = InsertSuggestedValue(e.currentTarget.value, suggestedValue, e.currentTarget.selectionStart) };
-
+            var insertResponse = InsertSuggestedValue(e.currentTarget.value, suggestedValue, e.currentTarget.selectionStart);
+            
             state = state with
             {
-                SelectedSuggestionOffset = null
+                SelectedSuggestionOffset = null,
+                
+                Value = insertResponse.finalText
             };
 
+            if (insertResponse.selectionStart.HasValue)
+            {
+                Client.RunJavascript
+                (
+                    $"""
+                    document.getElementById('{Id}').setSelectionRange({insertResponse.selectionStart}, {insertResponse.selectionStart});
+                    """
+                );
+            }
+            
             return Task.CompletedTask;
 
-            static string InsertSuggestedValue(string currentValue, string suggestedValue, int? selectionStart)
+            static (string finalText, int? selectionStart) InsertSuggestedValue(string currentValue, string suggestedValue, int? selectionStart)
             {
                 if (!selectionStart.HasValue)
                 {
-                    return suggestedValue;
+                    return (suggestedValue, null);
                 }
 
                 var startPoint = selectionStart.Value;
+                startPoint--;
+                
                 while (startPoint > 0)
                 {
                     if (currentValue[startPoint] == '.' || currentValue[startPoint] == ' ')
@@ -274,12 +288,18 @@ abstract class MagicInput : Component<MagicInput.State>
                     startPoint--;
                 }
 
+                startPoint++;
+
                 if (startPoint <= 0)
                 {
-                    return suggestedValue;
+                    return (suggestedValue, null);
                 }
 
-                return currentValue[..startPoint] + suggestedValue + currentValue[selectionStart.Value..];
+                var firstPart = currentValue[..startPoint] + suggestedValue;
+                
+                var finalText = firstPart + currentValue[selectionStart.Value..];
+                
+                return (finalText, firstPart.Length);
             }
         }
 
