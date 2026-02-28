@@ -307,7 +307,11 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
         }
 
         Element eyeIcon = node.HideInDesigner ? new IconEyeClose() : new IconEyeOpen();
-        eyeIcon += Color(Gray300) + Hover(Color(Gray400));
+        eyeIcon += Color(Gray300);
+        eyeIcon += Hover(Color(Gray400));
+        eyeIcon += Active(Color(Gray600));
+        eyeIcon += Width(16) + Height(16);
+        eyeIcon += When(isSelected, OnClick(Toggle_HideInDesigner));
             
         if (!isSelected && !node.HideInDesigner)
         {
@@ -342,6 +346,7 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
                 nameText = TryClearStringValue(name);
             }
         }
+        var partNameView = nameText is null ? null : new div(FontSize12) { nameText };
 
         var returnList = new List<Element>
         {
@@ -369,12 +374,11 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
 
                     new FlexRow(FlexGrow(1), Gap(4), AlignItemsCenter, JustifyContentFlexEnd, PaddingRight(8))
                     {
-                        nameText is null ? null : new div(FontSize12) { nameText },
+                        partNameView,
                         
                         foldChildrenIcon,
                         unfoldChildrenIcon,
-                        
-                        eyeIcon + Width(16) + Height(16) + When(isSelected, OnClick(Toggle_HideInDesigner))
+                        eyeIcon
                     }
                 },
 
