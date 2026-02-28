@@ -339,14 +339,19 @@ sealed class VisualElementTreeView : Component<VisualElementTreeView.State>
 
         var isDesignerComponent = TryReadTagAsDesignerComponentId(node).Any();
 
-        string nameText = null;
+       
+        Element partNameView;
         {
-            foreach (var name in from p in node.Properties from pair in TryParseProperty(p) where pair.Name == Design.Name select pair.Value)
+            string nameText = null;
             {
-                nameText = TryClearStringValue(name);
+                foreach (var name in from p in node.Properties from pair in TryParseProperty(p) where pair.Name == Design.Name select pair.Value)
+                {
+                    nameText = TryClearStringValue(name);
+                }
             }
+            
+            partNameView = nameText is null ? null : new div(FontSize12, Color(Gray300)) { nameText };
         }
-        var partNameView = nameText is null ? null : new div(FontSize12) { nameText };
 
         var returnList = new List<Element>
         {
