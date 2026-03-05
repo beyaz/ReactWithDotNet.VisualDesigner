@@ -82,76 +82,64 @@ static class TsModelCreator
             return GetTSType(externalTypes, ((GenericInstanceType)typeReference).GenericArguments[0], isExportingForModelFile, apiName);
         }
 
-        if (typeReference.IsString)
+        return TryGetPrimitive(typeReference)
+               ?? TryGetArray(typeReference)
+               ?? CreateComplex(typeReference);
+
+        static TsTypeReference TryGetPrimitive(TypeReference t)
         {
-            return new()
+            return t switch
             {
-                Name    = "string",
-                Imports = []
+                _ when t.IsString   => Create("string"),
+                _ when t.IsNumber   => Create("number"),
+                _ when t.IsDateTime => Create("Date"),
+                _ when t.IsBoolean  => Create("boolean"),
+                _ when t.IsObject   => Create("any"),
+                _                   => null
             };
-        }
 
-        if (typeReference.IsNumber)
-        {
-            return new()
+            static TsTypeReference Create(string name)
             {
-                Name    = "number",
-                Imports = []
-            };
-        }
-
-        if (typeReference.IsDateTime)
-        {
-            return new()
-            {
-                Name    = "Date",
-                Imports = []
-            };
-        }
-
-        if (typeReference.IsBoolean)
-        {
-            return new()
-            {
-                Name    = "boolean",
-                Imports = []
-            };
-        }
-
-        if (typeReference.IsObject)
-        {
-            return new()
-            {
-                Name    = "any",
-                Imports = []
-            };
-        }
-
-        if (typeReference.IsGenericInstance)
-        {
-            var genericInstanceType = (GenericInstanceType)typeReference;
-
-            var isArrayType = genericInstanceType.GenericArguments.Count == 1 &&
-                              genericInstanceType.ElementType.IsCollectionType;
-
-            if (isArrayType)
-            {
-                var arrayType = genericInstanceType.GenericArguments[0];
-
-                var tsTypeReference = GetTSType(externalTypes, arrayType, isExportingForModelFile, apiName);
-
-                return tsTypeReference with
+                return new()
                 {
-                    Name = tsTypeReference.Name + "[]"
+                    Name    = name,
+                    Imports = []
                 };
             }
         }
 
-        return new()
+        TsTypeReference TryGetArray(TypeReference t)
         {
-            Name    = typeReference.Name,
-            Imports = GetImports(externalTypes, typeReference, isExportingForModelFile, apiName).ToList()
-        };
+            if (t is not GenericInstanceType g)
+            {
+                return null;
+            }
+
+            var isArray =
+                g.GenericArguments.Count == 1 &&
+                g.ElementType.IsCollectionType;
+
+            if (!isArray)
+            {
+                return null;
+            }
+
+            var element = GetTSType(externalTypes, g.GenericArguments[0], isExportingForModelFile, apiName);
+
+            return element with
+            {
+                Name = element.Name + "[]"
+            };
+        }
+
+        TsTypeReference CreateComplex(TypeReference t)
+        {
+            return new()
+            {
+                Name    = t.Name,
+                Imports = GetImports(externalTypes, t, isExportingForModelFile, apiName).ToList()
+            };
+        }
 
         static IEnumerable<TsImportInfo> GetImports(IReadOnlyList<ExternalTypeInfo> externalTypes, TypeReference typeReference, bool isExportingForModelFile, string apiName)
         {
