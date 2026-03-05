@@ -92,7 +92,6 @@ static class TsModelCreator
         }
 
         if (typeReference.IsNumber)
-
         {
             return new()
             {
