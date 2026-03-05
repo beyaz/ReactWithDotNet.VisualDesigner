@@ -5,6 +5,13 @@ namespace BDigitalFrameworkApiToTsExporter;
 
 static class Extensions
 {
+    internal static C Exec<A,B,C>(A a, Func<A,B> method_a_b, Func<B,C> method_b_c )
+    {
+        var b = method_a_b(a);
+
+        return method_b_c(b);
+    }
+    
     internal static B ExecUntilNotNull<A,B>(A a,Func<A,B>[] methods)
     {
         foreach (var func in methods)

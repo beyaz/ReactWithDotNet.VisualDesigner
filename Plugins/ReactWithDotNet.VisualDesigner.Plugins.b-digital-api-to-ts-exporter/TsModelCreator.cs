@@ -77,13 +77,18 @@ static class TsModelCreator
 
     static TsTypeReference GetTSType(IReadOnlyList<ExternalTypeInfo> externalTypes, TypeReference typeReference, bool isExportingForModelFile, string apiName)
     {
-        typeReference = UnwrapNullable(typeReference);
-
-        return ExecUntilNotNull(typeReference, [
-            TryGetPrimitive,
-            TryGetArray,
-            CreateComplex
-        ]);
+        return Exec
+        (
+            typeReference,
+            
+            UnwrapNullable,
+            x => ExecUntilNotNull(x,
+            [
+                TryGetPrimitive,
+                TryGetArray,
+                CreateComplex
+            ])
+        );
 
         static TypeReference UnwrapNullable(TypeReference t)
         {
