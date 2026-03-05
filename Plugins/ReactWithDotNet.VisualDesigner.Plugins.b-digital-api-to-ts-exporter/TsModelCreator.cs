@@ -36,7 +36,7 @@ static class TsModelCreator
                 {
                     Name          = GetTsVariableName(propertyDefinition.Name),
                     IsNullable    = CecilHelper.IsNullableProperty(propertyDefinition),
-                    Type          = GetTSType(externalTypes, propertyDefinition.PropertyType, isExportingForModelFile, apiName),
+                    Type          = GetTSType(externalTypes, apiName, isExportingForModelFile, propertyDefinition.PropertyType),
                     ConstantValue = string.Empty
                 };
         }
@@ -63,7 +63,7 @@ static class TsModelCreator
                         Name    = string.Empty,
                         Imports = []
                     },
-                _ => GetTSType(externalTypes, typeDefinition.BaseType, isExportingForModelFile, apiName)
+                _ => GetTSType(externalTypes, apiName, isExportingForModelFile, typeDefinition.BaseType)
             },
 
             Fields = fields.ToList()
@@ -75,7 +75,7 @@ static class TsModelCreator
         return typeReference.Name.RemoveFromStart(apiName, StringComparison.OrdinalIgnoreCase).RemoveFromEnd("Contract");
     }
 
-    static TsTypeReference GetTSType(IReadOnlyList<ExternalTypeInfo> externalTypes, TypeReference typeReference, bool isExportingForModelFile, string apiName)
+    static TsTypeReference GetTSType(IReadOnlyList<ExternalTypeInfo> externalTypes, string apiName, bool isExportingForModelFile,TypeReference typeReference)
     {
         return Exec
         (
@@ -135,7 +135,7 @@ static class TsModelCreator
                 return null;
             }
 
-            var element = GetTSType(externalTypes, g.GenericArguments[0], isExportingForModelFile, apiName);
+            var element = GetTSType(externalTypes, apiName, isExportingForModelFile, g.GenericArguments[0]);
 
             return element with
             {
