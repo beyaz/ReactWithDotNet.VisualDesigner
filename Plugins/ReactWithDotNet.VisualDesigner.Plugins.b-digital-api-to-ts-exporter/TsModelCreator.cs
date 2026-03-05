@@ -77,16 +77,20 @@ static class TsModelCreator
 
     static TsTypeReference GetTSType(IReadOnlyList<ExternalTypeInfo> externalTypes, TypeReference typeReference, bool isExportingForModelFile, string apiName)
     {
-        if (CecilHelper.IsNullableType(typeReference))
-        {
-            return GetTSType(externalTypes, ((GenericInstanceType)typeReference).GenericArguments[0], isExportingForModelFile, apiName);
-        }
+        typeReference = UnwrapNullable(typeReference);
 
         return ExecUntilNotNull(typeReference, [
             TryGetPrimitive,
             TryGetArray,
             CreateComplex
         ]);
+
+        static TypeReference UnwrapNullable(TypeReference t)
+        {
+            return CecilHelper.IsNullableType(t)
+                ? UnwrapNullable(((GenericInstanceType)t).GenericArguments[0])
+                : t;
+        }
 
         static TsTypeReference TryGetPrimitive(TypeReference t)
         {
