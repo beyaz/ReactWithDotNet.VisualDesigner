@@ -30,18 +30,17 @@ sealed class BAlert : PluginComponentBase
 
     protected override Element render()
     {
-        return new div
+        return  new Alert
         {
-            Id(id), OnClick(onMouseClick),
-
-            new Alert
-            {
-                severity = severity,
+            severity = severity,
                 
-                variant  = variant,
+            variant  = variant,
 
-                children = { children }
-            }
+            children = { children },
+                
+            id = id,
+            
+            onClick = onMouseClick
         };
     }
 }
