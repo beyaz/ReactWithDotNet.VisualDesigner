@@ -82,9 +82,11 @@ static class TsModelCreator
             return GetTSType(externalTypes, ((GenericInstanceType)typeReference).GenericArguments[0], isExportingForModelFile, apiName);
         }
 
-        return TryGetPrimitive(typeReference)
-               ?? TryGetArray(typeReference)
-               ?? CreateComplex(typeReference);
+        return ExecUntilNotNull(typeReference, [
+            TryGetPrimitive,
+            TryGetArray,
+            CreateComplex
+        ]);
 
         static TsTypeReference TryGetPrimitive(TypeReference t)
         {

@@ -5,6 +5,35 @@ namespace BDigitalFrameworkApiToTsExporter;
 
 static class Extensions
 {
+    internal static B ExecUntilNotNull<A,B>(A a,Func<A,B>[] methods)
+    {
+        foreach (var func in methods)
+        {
+            var result = func(a);
+            if (result is not null)
+            {
+                return result;
+            }
+        }
+
+        return default;
+    }
+    
+    internal static C ExecUntilNotNull<A,B,C>(A a,B b, Func<A,B, C>[] methods)
+    {
+        foreach (var func in methods)
+        {
+            var result = func(a,b);
+            if (result is not null)
+            {
+                return result;
+            }
+        }
+
+        return default;
+    }
+
+    
     static readonly CamelCasePropertyNamesContractResolver CamelCasePropertyNamesContractResolver = new();
 
     public static void Add<T>(this List<T> collection, IEnumerable<T> items) => collection.AddRange(items);
