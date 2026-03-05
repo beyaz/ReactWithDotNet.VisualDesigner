@@ -7,7 +7,7 @@ static class TsModelCreator
     public static TsTypeDefinition CreateFrom(IReadOnlyList<ExternalTypeInfo> externalTypes, TypeDefinition typeDefinition, string apiName)
     {
         var isExportingForModelFile = typeDefinition.Name.EndsWith("Model");
-        
+
         IEnumerable<TsFieldDefinition> fields;
         if (typeDefinition.IsEnum)
         {
@@ -36,7 +36,7 @@ static class TsModelCreator
                 {
                     Name          = GetTsVariableName(propertyDefinition.Name),
                     IsNullable    = CecilHelper.IsNullableProperty(propertyDefinition),
-                    Type          = GetTSType(externalTypes, propertyDefinition.PropertyType,isExportingForModelFile,apiName),
+                    Type          = GetTSType(externalTypes, propertyDefinition.PropertyType, isExportingForModelFile, apiName),
                     ConstantValue = string.Empty
                 };
         }
@@ -49,34 +49,37 @@ static class TsModelCreator
 
             BaseType = typeDefinition.BaseType switch
             {
-                var baseType when baseType is null || 
+                var baseType when baseType is null ||
                                   baseType.FullName == typeof(object).FullName ||
                                   baseType.FullName == typeof(Enum).FullName
-                => new()
-                {
-                    Name    = string.Empty,
-                    Imports = []
-                },
-                var baseType when (baseType.FullName == typeof(Enum).FullName)
                     => new()
                     {
                         Name    = string.Empty,
                         Imports = []
                     },
-                _ => GetTSType(externalTypes, typeDefinition.BaseType,isExportingForModelFile, apiName)
+                var baseType when baseType.FullName == typeof(Enum).FullName
+                    => new()
+                    {
+                        Name    = string.Empty,
+                        Imports = []
+                    },
+                _ => GetTSType(externalTypes, typeDefinition.BaseType, isExportingForModelFile, apiName)
             },
 
             Fields = fields.ToList()
         };
-        
-        
+    }
+
+    public static string GetExtraClassFileName(TypeReference typeReference, string apiName)
+    {
+        return typeReference.Name.RemoveFromStart(apiName, StringComparison.OrdinalIgnoreCase).RemoveFromEnd("Contract");
     }
 
     static TsTypeReference GetTSType(IReadOnlyList<ExternalTypeInfo> externalTypes, TypeReference typeReference, bool isExportingForModelFile, string apiName)
     {
         if (CecilHelper.IsNullableType(typeReference))
         {
-            return GetTSType(externalTypes, ((GenericInstanceType)typeReference).GenericArguments[0], isExportingForModelFile,apiName);
+            return GetTSType(externalTypes, ((GenericInstanceType)typeReference).GenericArguments[0], isExportingForModelFile, apiName);
         }
 
         if (typeReference.IsString)
@@ -128,8 +131,8 @@ static class TsModelCreator
         if (typeReference.IsGenericInstance)
         {
             var genericInstanceType = (GenericInstanceType)typeReference;
-            
-            var isArrayType = genericInstanceType.GenericArguments.Count == 1 && 
+
+            var isArrayType = genericInstanceType.GenericArguments.Count == 1 &&
                               genericInstanceType.ElementType.IsCollectionType;
 
             if (isArrayType)
@@ -148,7 +151,7 @@ static class TsModelCreator
         return new()
         {
             Name    = typeReference.Name,
-            Imports = GetImports(externalTypes, typeReference, isExportingForModelFile,apiName).ToList()
+            Imports = GetImports(externalTypes, typeReference, isExportingForModelFile, apiName).ToList()
         };
 
         static IEnumerable<TsImportInfo> GetImports(IReadOnlyList<ExternalTypeInfo> externalTypes, TypeReference typeReference, bool isExportingForModelFile, string apiName)
@@ -173,7 +176,7 @@ static class TsModelCreator
             {
                 return
                 [
-                    new TsImportInfo
+                    new()
                     {
                         LocalName = typeReference.Name,
                         Source    = "../types"
@@ -183,23 +186,12 @@ static class TsModelCreator
 
             return
             [
-                new TsImportInfo
+                new()
                 {
                     LocalName = typeReference.Name,
                     Source    = $"./{GetExtraClassFileName(typeReference, apiName)}"
                 }
             ];
-
         }
     }
-
-    
-    
-
-    public static string GetExtraClassFileName(TypeReference typeReference, string apiName)
-    {
-        return typeReference.Name.RemoveFromStart(apiName, StringComparison.OrdinalIgnoreCase).RemoveFromEnd("Contract");
-    }
-    
 }
-
