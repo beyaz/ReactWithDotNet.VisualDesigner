@@ -1,6 +1,6 @@
-﻿using Mono.Cecil;
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 using System.IO;
+using Mono.Cecil;
 
 namespace BDigitalFrameworkApiToTsExporter;
 
@@ -12,14 +12,14 @@ static class Exporter
     {
         return
             from scope in Scope.Create(new()
-                                {
-                                    { ProjectDirectory, projectDirectory },
-                                    { ExternalTypes, ExternalTypeList.Value },
-                                    { ApiName, apiName }
-                                })
-                               .With(Assembly, ReadAPIAssembly(projectDirectory))
-                               .With(ModelTypeDefinition, getModelTypeDefinition)
-                               .With(ControllerTypeDefinition, getControllerTypeDefinition)
+                {
+                    { ProjectDirectory, projectDirectory },
+                    { ExternalTypes, ExternalTypeList.Value },
+                    { ApiName, apiName }
+                })
+                .With(Assembly, ReadAPIAssembly(projectDirectory))
+                .With(ModelTypeDefinition, getModelTypeDefinition)
+                .With(ControllerTypeDefinition, getControllerTypeDefinition)
             from modelTypeDefinition in getModelTypeDefinition(scope)
             from controllerTypeDefinition in getControllerTypeDefinition(scope)
             from modelFile in getModelFile(scope)
@@ -54,14 +54,16 @@ static class Exporter
             return [];
         }
 
-        return from type in GetExtraTypes(ExternalTypes[scope], containerTypeDefinition)
-               select ExportExtraType(scope, type);
+        return
+            from type in GetExtraTypes(ExternalTypes[scope], containerTypeDefinition)
+            select ExportExtraType(scope, type);
 
         static IReadOnlyList<TypeDefinition> GetExtraTypes(IReadOnlyList<ExternalTypeInfo> externalTypes, TypeDefinition modelTypeDefinition)
         {
             return new List<TypeDefinition>
             {
-                from propertyDefinition in modelTypeDefinition.Properties where propertyDefinition.IsExportable
+                from propertyDefinition in modelTypeDefinition.Properties
+                where propertyDefinition.IsExportable
                 let propertyType = propertyDefinition.PropertyType
                 from extraType in CollectExtraTypes(externalTypes, propertyType, [])
                 select extraType
@@ -69,15 +71,15 @@ static class Exporter
 
             static IReadOnlyList<TypeDefinition> CollectExtraTypes(IReadOnlyList<ExternalTypeInfo> externalTypes, TypeReference typeReference, IReadOnlyList<TypeDefinition> collectedTypeDefinitions)
             {
-
-                Exec
+                return Exec
                 (
                     typeReference,
-                    
                     UnwrapNullableOrCollection,
-
-                    tryToHandleAsExternalType
-                    
+                    x => ExecUntilNotNull(x, [
+                        tryToHandleAsExternalType,
+                        tryToHandleAsPrimitiveJsType,
+                        defaultHandle
+                    ])
                 );
 
                 IReadOnlyList<TypeDefinition> tryToHandleAsExternalType(TypeReference x)
@@ -92,54 +94,52 @@ static class Exporter
 
                     return null;
                 }
-                
-                typeReference = UnwrapNullableOrCollection(typeReference);
 
-                foreach (var externalType in externalTypes)
+                IReadOnlyList<TypeDefinition> tryToHandleAsPrimitiveJsType(TypeReference x)
                 {
-                    if (externalType.DotNetFullTypeName == typeReference.FullName)
+                    if (x.IsString || x.IsNumber || x.IsBoolean || x.IsDateTime || x.IsObject)
                     {
                         return [];
                     }
+
+                    return null;
                 }
 
-                if (typeReference.IsString || typeReference.IsNumber || typeReference.IsBoolean || typeReference.IsDateTime || typeReference.IsObject)
+                IReadOnlyList<TypeDefinition> defaultHandle(TypeReference t)
                 {
-                    return [];
-                }
+                    TypeDefinition typeDefinition;
 
-                TypeDefinition typeDefinition;
-
-                try
-                {
-                    typeDefinition = typeReference.Resolve();
-                }
-                catch (Exception)
-                {
-                    return [];
-                }
-
-                var needToExport = typeDefinition.IsEnum || typeDefinition.BaseType?.FullName == "System.Object";
-
-                if (needToExport)
-                {
-                    if (collectedTypeDefinitions.All(x => x.FullName != typeDefinition.FullName))
+                    try
                     {
-                        return new List<TypeDefinition>
-                        {
-                            collectedTypeDefinitions,
-                            typeDefinition,
-
-                            from propertyDefinition in typeDefinition.Properties
-                            where propertyDefinition.IsExportable
-                            let propertyType = propertyDefinition.PropertyType
-                            from extraType in CollectExtraTypes(externalTypes, propertyType, [])
-                            select extraType
-                        };
+                        typeDefinition = t.Resolve();
                     }
-                }
+                    catch (Exception)
+                    {
+                        return [];
+                    }
 
-                return collectedTypeDefinitions;
+                    var needToExport = typeDefinition.IsEnum || typeDefinition.BaseType?.FullName == "System.Object";
+
+                    if (needToExport)
+                    {
+                        if (collectedTypeDefinitions.All(x => x.FullName != typeDefinition.FullName))
+                        {
+                            return new List<TypeDefinition>
+                            {
+                                collectedTypeDefinitions,
+                                typeDefinition,
+
+                                from propertyDefinition in typeDefinition.Properties
+                                where propertyDefinition.IsExportable
+                                let propertyType = propertyDefinition.PropertyType
+                                from extraType in CollectExtraTypes(externalTypes, propertyType, [])
+                                select extraType
+                            };
+                        }
+                    }
+
+                    return collectedTypeDefinitions;
+                }
 
                 static TypeReference UnwrapNullableOrCollection(TypeReference t)
                 {
@@ -259,13 +259,14 @@ static class Exporter
             return [];
         }
 
-        return from methodGroup in GroupControllerMethods(ApiName[scope], getExportablePublicMethods(controllerTypeDefinition))
-               from filePath in getOutputTsFilePath(methodGroup)
-               select new FileModel
-               {
-                   Path    = filePath,
-                   Content = string.Join(Environment.NewLine, getFileContent(methodGroup))
-               };
+        return
+            from methodGroup in GroupControllerMethods(ApiName[scope], getExportablePublicMethods(controllerTypeDefinition))
+            from filePath in getOutputTsFilePath(methodGroup)
+            select new FileModel
+            {
+                Path    = filePath,
+                Content = string.Join(Environment.NewLine, getFileContent(methodGroup))
+            };
 
         IReadOnlyList<string> getFileContent(MethodGroup methodGroup)
         {
@@ -278,9 +279,9 @@ static class Exporter
             List<string> outputTypes;
             {
                 var inputOutputTypes
-                    = methodGroup.ControllerMethods.Select(x=>Tab + getReturnTypeName(x));
+                    = methodGroup.ControllerMethods.Select(x => Tab + getReturnTypeName(x));
 
-                outputTypes = new List<string>
+                outputTypes = new()
                 {
                     "import {",
                     inputOutputTypes.AppendBetween(","),
@@ -288,7 +289,7 @@ static class Exporter
                 };
             }
 
-            List<string> lines = new List<string>
+            var lines = new List<string>
             {
                 "import { useStore } from \"b-digital-framework\";",
                 string.Empty,
@@ -318,9 +319,10 @@ static class Exporter
                     lines.Add(string.Empty);
 
                     var mappingLines = ListFrom
-                    (from property in getMappingPropertyList(modelTypeDefinition, methodDefinition.Parameters[0].ParameterType.Resolve())
-                     let name = GetTsVariableName(property.Name)
-                     select Tab + Tab + Tab + $"{name}: model.{name}"
+                    (
+                        from property in getMappingPropertyList(modelTypeDefinition, methodDefinition.Parameters[0].ParameterType.Resolve())
+                        let name = GetTsVariableName(property.Name)
+                        select Tab + Tab + Tab + $"{name}: model.{name}"
                     );
 
                     if (mappingLines.Count > 0)
@@ -347,9 +349,10 @@ static class Exporter
 
                 lines.Add(string.Empty);
 
-                var responseMapping = from property in getMappingPropertyList(modelTypeDefinition, getReturnType(methodDefinition).Resolve())
-                                      let name = GetTsVariableName(property.Name)
-                                      select Tab + Tab + $"model.{name} = response.{name};";
+                var responseMapping =
+                    from property in getMappingPropertyList(modelTypeDefinition, getReturnType(methodDefinition).Resolve())
+                    let name = GetTsVariableName(property.Name)
+                    select Tab + Tab + $"model.{name} = response.{name};";
 
                 lines.AddRange(responseMapping.AppendBetween(Environment.NewLine));
 
@@ -363,8 +366,9 @@ static class Exporter
             lines.Add(string.Empty);
             lines.Add(Tab + "return {");
 
-            var serviceNames = from m in methodGroup.ControllerMethods
-                               select GetTsVariableName(m.Name);
+            var serviceNames =
+                from m in methodGroup.ControllerMethods
+                select GetTsVariableName(m.Name);
             lines.AddRange
             (
                 (from serviceName in serviceNames select Tab + Tab + serviceName).AppendBetween("," + Environment.NewLine)
@@ -375,7 +379,10 @@ static class Exporter
 
             return lines;
 
-            string getReturnTypeName(MethodDefinition x) => getReturnType(x).Name;
+            string getReturnTypeName(MethodDefinition x)
+            {
+                return getReturnType(x).Name;
+            }
         }
 
         Result<string> getOutputTsFilePath(MethodGroup methodGroup)
@@ -437,16 +444,17 @@ static class Exporter
             List<string> importInputOutputTypes;
             {
                 var inputOutputTypes
-                    = from methodDefinition in methods
-                      from typeName in new[]
-                      {
-                          methodDefinition.Parameters[0].ParameterType.Name,
-                          getReturnType(methodDefinition).Name
-                      }
-                      where typeName != "BaseClientRequest"
-                      select Tab + typeName;
+                    =
+                    from methodDefinition in methods
+                    from typeName in new[]
+                    {
+                        methodDefinition.Parameters[0].ParameterType.Name,
+                        getReturnType(methodDefinition).Name
+                    }
+                    where typeName != "BaseClientRequest"
+                    select Tab + typeName;
 
-                importInputOutputTypes = new List<string>
+                importInputOutputTypes = new()
                 {
                     "import {",
                     inputOutputTypes.AppendBetween(","),
@@ -477,8 +485,9 @@ static class Exporter
             lines.Add(string.Empty);
             lines.Add(Tab + "return {");
 
-            var serviceNames = from m in methods
-                               select GetTsVariableName(m.Name);
+            var serviceNames =
+                from m in methods
+                select GetTsVariableName(m.Name);
             lines.AddRange
             (
                 (from serviceName in serviceNames select Tab + Tab + serviceName).AppendBetween("," + Environment.NewLine)
@@ -592,7 +601,7 @@ static class Exporter
         {
             if (methodDefinitions.Count(matchFunc) > 0)
             {
-                returnList.Add(new MethodGroup
+                returnList.Add(new()
                 {
                     FolderName = folderName,
 
@@ -605,7 +614,7 @@ static class Exporter
 
         if (methodDefinitions.Count > 0)
         {
-            returnList.Add(new MethodGroup
+            returnList.Add(new()
             {
                 FolderName = "Shared",
 
