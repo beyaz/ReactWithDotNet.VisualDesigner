@@ -69,10 +69,7 @@ static class Exporter
 
             static IReadOnlyList<TypeDefinition> CollectExtraTypes(IReadOnlyList<ExternalTypeInfo> externalTypes, TypeReference typeReference, IReadOnlyList<TypeDefinition> collectedTypeDefinitions)
             {
-                if (CecilHelper.IsNullableType(typeReference) || typeReference.IsCollectionType)
-                {
-                    return CollectExtraTypes(externalTypes, ((GenericInstanceType)typeReference).GenericArguments[0], collectedTypeDefinitions);
-                }
+                typeReference = UnwrapNullableOrCollection(typeReference);
 
                 foreach (var externalType in externalTypes)
                 {
@@ -119,6 +116,13 @@ static class Exporter
                 }
 
                 return collectedTypeDefinitions;
+
+                static TypeReference UnwrapNullableOrCollection(TypeReference t)
+                {
+                    return CecilHelper.IsNullableType(t)
+                        ? UnwrapNullableOrCollection(((GenericInstanceType)t).GenericArguments[0])
+                        : t;
+                }
             }
         }
 
