@@ -95,7 +95,7 @@ static class Exporter
                     return null;
                 }
 
-                IReadOnlyList<TypeDefinition> tryToHandleAsPrimitiveJsType(TypeReference x)
+                static IReadOnlyList<TypeDefinition> tryToHandleAsPrimitiveJsType(TypeReference x)
                 {
                     if (x.IsString || x.IsNumber || x.IsBoolean || x.IsDateTime || x.IsObject)
                     {
