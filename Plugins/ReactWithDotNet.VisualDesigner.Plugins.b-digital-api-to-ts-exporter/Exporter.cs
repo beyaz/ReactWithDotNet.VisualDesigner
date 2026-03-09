@@ -69,6 +69,30 @@ static class Exporter
 
             static IReadOnlyList<TypeDefinition> CollectExtraTypes(IReadOnlyList<ExternalTypeInfo> externalTypes, TypeReference typeReference, IReadOnlyList<TypeDefinition> collectedTypeDefinitions)
             {
+
+                Exec
+                (
+                    typeReference,
+                    
+                    UnwrapNullableOrCollection,
+
+                    tryToHandleAsExternalType
+                    
+                );
+
+                IReadOnlyList<TypeDefinition> tryToHandleAsExternalType(TypeReference x)
+                {
+                    foreach (var externalType in externalTypes)
+                    {
+                        if (externalType.DotNetFullTypeName == x.FullName)
+                        {
+                            return [];
+                        }
+                    }
+
+                    return null;
+                }
+                
                 typeReference = UnwrapNullableOrCollection(typeReference);
 
                 foreach (var externalType in externalTypes)
