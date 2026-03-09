@@ -69,7 +69,9 @@ static class Exporter
                 select extraType
             };
 
-            static IReadOnlyList<TypeDefinition> CollectExtraTypes(IReadOnlyList<ExternalTypeInfo> externalTypes, TypeReference typeReference, IReadOnlyList<TypeDefinition> collectedTypeDefinitions)
+            static IReadOnlyList<TypeDefinition> CollectExtraTypes(IReadOnlyList<ExternalTypeInfo> externalTypes,
+                TypeReference typeReference,
+                IReadOnlyList<TypeDefinition> collectedTypeDefinitions)
             {
                 return Exec
                 (
