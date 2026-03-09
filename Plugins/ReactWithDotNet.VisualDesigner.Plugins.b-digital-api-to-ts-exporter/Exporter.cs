@@ -78,13 +78,13 @@ static class Exporter
                     typeReference,
                     UnwrapNullableOrCollection,
                     x => ExecUntilNotNull(x, [
-                        tryToHandleAsExternalType,
+                        y => tryToHandleAsExternalType(externalTypes, y),
                         tryToHandleAsPrimitiveJsType,
-                        defaultHandle
+                        y => defaultHandle(externalTypes, collectedTypeDefinitions, y)
                     ])
                 );
 
-                IReadOnlyList<TypeDefinition> tryToHandleAsExternalType(TypeReference x)
+                static IReadOnlyList<TypeDefinition> tryToHandleAsExternalType(IReadOnlyList<ExternalTypeInfo> externalTypes, TypeReference x)
                 {
                     foreach (var externalType in externalTypes)
                     {
@@ -107,7 +107,7 @@ static class Exporter
                     return null;
                 }
 
-                IReadOnlyList<TypeDefinition> defaultHandle(TypeReference t)
+                static IReadOnlyList<TypeDefinition> defaultHandle(IReadOnlyList<ExternalTypeInfo> externalTypes, IReadOnlyList<TypeDefinition> collectedTypeDefinitions, TypeReference t)
                 {
                     TypeDefinition typeDefinition;
 
