@@ -41,6 +41,12 @@ sealed class BInput : PluginComponentBase
     {
         internal static ReactNode OnChange(ReactNode node)
         {
+            // value is cons string
+            if (HasAny(from property in node.Properties where property.Name == nameof(value) && property.Value.StartsWith("getMessage(\"") select property))
+            {
+                return node;
+            }
+            
             if (node.Properties.HasFunctionAssignment(nameof(onChange)))
             {
                 return node;

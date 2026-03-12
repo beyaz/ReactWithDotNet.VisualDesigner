@@ -732,6 +732,31 @@ sealed class ApplicationView : Component<ApplicationState>
         return Task.CompletedTask;
     }
 
+    async Task<string> GetTooltipForOpenInIde()
+    {
+        var locationInfo = string.Empty;
+        {
+            if (state.UserName.HasValue)
+            {
+                var location = await GetComponentFileLocation(state.ComponentId, state.UserName);
+                if (!location.HasError)
+                {
+                    var pathParts = location.Value.filePath.Split('\\', '/');
+                    if (pathParts.Length > 3)
+                    {
+                        locationInfo = " ( ..." + System.IO.Path.DirectorySeparatorChar + string.Join(System.IO.Path.DirectorySeparatorChar.ToString(), pathParts.TakeLast(3)) + " )";
+                    }
+                    else
+                    {
+                        locationInfo = " ( " + location.Value.filePath + " )";
+                    }
+                }
+            }
+        }
+        
+        return "Open in IDE" + locationInfo;
+    }
+    
     async Task FocusToCurrentComponentInIde(MouseEvent e)
     {
         if (state.UserName.HasNoValue)
@@ -1307,7 +1332,7 @@ sealed class ApplicationView : Component<ApplicationState>
             new Tooltip
             {
                 arrow = true,
-                title = "Open in IDE",
+                title = await GetTooltipForOpenInIde(),
                 children=
                 {
                     new FlexRowCentered
