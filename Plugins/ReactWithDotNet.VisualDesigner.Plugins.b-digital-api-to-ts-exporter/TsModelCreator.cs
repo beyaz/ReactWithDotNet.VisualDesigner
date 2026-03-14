@@ -57,12 +57,7 @@ static class TsModelCreator
                         Name    = string.Empty,
                         Imports = []
                     },
-                var baseType when baseType.FullName == typeof(Enum).FullName
-                    => new()
-                    {
-                        Name    = string.Empty,
-                        Imports = []
-                    },
+               
                 _ => GetTSType(externalTypes, apiName, isExportingForModelFile, typeDefinition.BaseType)
             },
 
