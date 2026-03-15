@@ -115,6 +115,7 @@ static class CecilHelper
 
     extension(TypeReference typeReference)
     {
+         
         public bool IsNullable => typeReference.Name == "Nullable`1" && typeReference.IsGenericInstance;
 
         public bool IsCollectionType
