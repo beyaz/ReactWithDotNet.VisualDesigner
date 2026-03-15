@@ -35,7 +35,7 @@ static class TsModelCreator
                 select new TsFieldDefinition
                 {
                     Name          = GetTsVariableName(propertyDefinition.Name),
-                    IsNullable    = CecilHelper.IsNullableProperty(propertyDefinition),
+                    IsNullable    = propertyDefinition.IsNullable,
                     Type          = GetTSType(externalTypes, apiName, isExportingForModelFile, propertyDefinition.PropertyType),
                     ConstantValue = string.Empty
                 };
