@@ -1,89 +1,11 @@
-﻿using Mono.Cecil;
-using Newtonsoft.Json.Serialization;
+﻿global using static ReactWithDotNet.VisualDesigner.CSharpTypeExportingToTypeScript.Extensions;
 
-namespace BDigitalFrameworkApiToTsExporter;
+using Mono.Cecil;
+
+namespace ReactWithDotNet.VisualDesigner.CSharpTypeExportingToTypeScript;
 
 static class Extensions
 {
-    static readonly CamelCasePropertyNamesContractResolver CamelCasePropertyNamesContractResolver = new();
-
-    public static void Add<T>(this List<T> collection, IEnumerable<T> items)
-    {
-        collection.AddRange(items);
-    }
-
-    public static IEnumerable<string> AppendBetween(this IEnumerable<string> enumerable, string suffix)
-    {
-        var list = enumerable.ToList();
-
-        for (var i = 0; i < list.Count - 1; i++)
-        {
-            list[i] += suffix;
-        }
-
-        return list;
-    }
-
-    public static string GetTsVariableName(string propertyNameInCSharp)
-    {
-        return CamelCasePropertyNamesContractResolver.GetResolvedPropertyName(propertyNameInCSharp);
-    }
-
-    public static string RemoveFromStart(this string source, string value)
-    {
-        if (source.StartsWith(value))
-        {
-            return source.Substring(value.Length);
-        }
-
-        return source;
-    }
-
-    public static string ToLowerFirstCharInvariant(this string input)
-    {
-        if (string.IsNullOrEmpty(input))
-        {
-            return input;
-        }
-
-        return char.ToLowerInvariant(input[0]) + input.Substring(1);
-    }
-
-    internal static C Exec<A, B, C>(A a, Func<A, B> method_a_b, Func<B, C> method_b_c)
-    {
-        var b = method_a_b(a);
-
-        return method_b_c(b);
-    }
-
-    internal static B ExecUntilNotNull<A, B>(A a, Func<A, B>[] methods)
-    {
-        foreach (var func in methods)
-        {
-            var result = func(a);
-            if (result is not null)
-            {
-                return result;
-            }
-        }
-
-        return default;
-    }
-
-    internal static C ExecUntilNotNull<A, B, C>(A a, B b, Func<A, B, C>[] methods)
-    {
-        foreach (var func in methods)
-        {
-            var result = func(a, b);
-            if (result is not null)
-            {
-                return result;
-            }
-        }
-
-        return default;
-    }
-
     extension(TypeReference typeReference)
     {
         public bool IsString
