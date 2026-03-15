@@ -87,7 +87,7 @@ static class TsModelCreator
 
         static TypeReference UnwrapNullable(TypeReference t)
         {
-            return CecilHelper.IsNullableType(t)
+            return t.IsNullable
                 ? UnwrapNullable(((GenericInstanceType)t).GenericArguments[0])
                 : t;
         }

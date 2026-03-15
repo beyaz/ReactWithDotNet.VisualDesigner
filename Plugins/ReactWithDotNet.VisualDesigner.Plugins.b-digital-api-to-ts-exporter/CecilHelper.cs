@@ -6,46 +6,24 @@ using Mono.Cecil;
 
 namespace BDigitalFrameworkApiToTsExporter;
 
-
-
-
 static class CecilHelper
 {
-    extension(TypeReference typeReference)
-    {
-        public bool IsCollectionType
-        {
-            get
-            {
-                var names = new List<string>
-                {
-                    typeof(Collection<>).FullName,
-                    typeof(IReadOnlyCollection<>).FullName,
-                    typeof(List<>).FullName,
-                    typeof(IReadOnlyList<>).FullName,
-                    typeof(ImmutableList<>).FullName
-                };
-
-                return names.Any(name => typeReference.FullName.StartsWith(name, StringComparison.OrdinalIgnoreCase));
-            }
-        }
-    }
     public static Result<TypeDefinition> GetType(AssemblyDefinition assemblyDefinition, string fullTypeName)
     {
-        var query = from module in assemblyDefinition.Modules
-                    from type in module.Types
-                    where type.FullName == fullTypeName
-                    select type;
-        
+        var query =
+            from module in assemblyDefinition.Modules
+            from type in module.Types
+            where type.FullName == fullTypeName
+            select type;
+
         foreach (var typeDefinition in query)
         {
             return typeDefinition;
         }
-        
+
         return new MissingMemberException(fullTypeName);
     }
-    
-   
+
     public static bool IsNullableProperty(PropertyDefinition propertyDefinition)
     {
         // is value type
@@ -124,19 +102,36 @@ static class CecilHelper
         }
     }
 
-    public static bool IsNullableType(TypeReference typeReference)
-    {
-        return typeReference.Name == "Nullable`1" && typeReference.IsGenericInstance;
-    }
+
 
     public static Result<AssemblyDefinition> ReadAssemblyDefinition(string assemblyFilePath)
     {
         const string secondarySearchDirectoryPath = @"d:\boa\server\bin";
 
         var cacheKey = $"{nameof(ReadAssemblyDefinition)}-{assemblyFilePath}";
-        
+
         return Cache.AccessValue(cacheKey, () => CecilAssemblyReader.ReadAssembly(assemblyFilePath, secondarySearchDirectoryPath));
     }
-    
-    
+
+    extension(TypeReference typeReference)
+    {
+        public bool IsNullable => typeReference.Name == "Nullable`1" && typeReference.IsGenericInstance;
+
+        public bool IsCollectionType
+        {
+            get
+            {
+                var names = new List<string>
+                {
+                    typeof(Collection<>).FullName,
+                    typeof(IReadOnlyCollection<>).FullName,
+                    typeof(List<>).FullName,
+                    typeof(IReadOnlyList<>).FullName,
+                    typeof(ImmutableList<>).FullName
+                };
+
+                return names.Any(name => typeReference.FullName.StartsWith(name, StringComparison.OrdinalIgnoreCase));
+            }
+        }
+    }
 }
