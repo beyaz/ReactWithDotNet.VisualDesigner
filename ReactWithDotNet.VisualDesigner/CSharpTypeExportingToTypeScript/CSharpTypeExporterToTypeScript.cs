@@ -1,4 +1,5 @@
 ﻿using Mono.Cecil;
+using static ReactWithDotNet.VisualDesigner.CSharpTypeExportingToTypeScript.Extensions;
 
 namespace ReactWithDotNet.VisualDesigner.CSharpTypeExportingToTypeScript;
 
@@ -85,7 +86,7 @@ static class CSharpTypeExporterToTypeScript
                 {
                     Name          = propertyDefinition.Name,
                     IsNullable    = propertyDefinition.IsNullable,
-                    Type          = GetTSType(externalTypes, apiName, isExportingForModelFile, propertyDefinition.PropertyType),
+                    Type          = GetTSType(propertyDefinition.PropertyType),
                     ConstantValue = string.Empty
                 };
         }
@@ -101,20 +102,16 @@ static class CSharpTypeExporterToTypeScript
                 var baseType when baseType is null ||
                                   baseType.FullName == typeof(object).FullName ||
                                   baseType.FullName == typeof(Enum).FullName
-                    => new()
-                    {
-                        Name    = string.Empty,
-                        Imports = []
-                    },
+                    => string.Empty,
                
-                _ => GetTSType(externalTypes, apiName, isExportingForModelFile, typeDefinition.BaseType)
+                _ => GetTSType(typeDefinition.BaseType)
             },
 
             Fields = fields.ToList()
         };
     }
     
-    static TsTypeReference GetTSType(IReadOnlyList<ExternalTypeInfo> externalTypes, string apiName, bool isExportingForModelFile,TypeReference typeReference)
+    static string GetTSType(TypeReference typeReference)
     {
         return Exec
         (
@@ -136,29 +133,22 @@ static class CSharpTypeExporterToTypeScript
                 : t;
         }
 
-        static TsTypeReference TryGetPrimitive(TypeReference t)
+        static string TryGetPrimitive(TypeReference t)
         {
             return t switch
             {
-                _ when t.IsString   => Create("string"),
-                _ when t.IsNumber   => Create("number"),
-                _ when t.IsDateTime => Create("Date"),
-                _ when t.IsBoolean  => Create("boolean"),
-                _ when t.IsObject   => Create("any"),
+                _ when t.IsString   => "string",
+                _ when t.IsNumber   => "number",
+                _ when t.IsDateTime => "Date",
+                _ when t.IsBoolean  => "boolean",
+                _ when t.IsObject   => "any",
                 _                   => null
             };
 
-            static TsTypeReference Create(string name)
-            {
-                return new()
-                {
-                    Name    = name,
-                    Imports = []
-                };
-            }
+            
         }
 
-        TsTypeReference TryGetArray(TypeReference t)
+        static string TryGetArray(TypeReference t)
         {
             if (t is not GenericInstanceType g)
             {
@@ -174,62 +164,14 @@ static class CSharpTypeExporterToTypeScript
                 return null;
             }
 
-            var element = GetTSType(externalTypes, apiName, isExportingForModelFile, g.GenericArguments[0]);
+            var element = GetTSType(g.GenericArguments[0]);
 
-            return element with
-            {
-                Name = element.Name + "[]"
-            };
+            return element + "[]";
         }
 
-        TsTypeReference CreateComplex(TypeReference t)
+        static string CreateComplex(TypeReference t)
         {
-            return new()
-            {
-                Name    = t.Name,
-                Imports = GetImports(externalTypes, t, isExportingForModelFile, apiName).ToList()
-            };
-        }
-
-        static IEnumerable<TsImportInfo> GetImports(IReadOnlyList<ExternalTypeInfo> externalTypes, TypeReference typeReference, bool isExportingForModelFile, string apiName)
-        {
-            var list = new List<TsImportInfo>
-            {
-                from externalType in externalTypes
-                where externalType.DotNetFullTypeName == typeReference.FullName
-                select new TsImportInfo
-                {
-                    LocalName = externalType.LocalName,
-                    Source    = externalType.Source
-                }
-            };
-
-            if (list.Count > 0)
-            {
-                return list;
-            }
-
-            if (isExportingForModelFile)
-            {
-                return
-                [
-                    new()
-                    {
-                        LocalName = typeReference.Name,
-                        Source    = "../types"
-                    }
-                ];
-            }
-
-            return
-            [
-                new()
-                {
-                    LocalName = typeReference.Name,
-                    Source    = $"./{GetExtraClassFileName(typeReference, apiName)}"
-                }
-            ];
+            return t.Name;
         }
     }
-
 }
