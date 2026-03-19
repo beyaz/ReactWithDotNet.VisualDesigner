@@ -8,22 +8,38 @@ class Program
 {
     static DTE2 GetActiveVisualStudioInstance()
     {
-        DTE2 dte = null;
+        List<string> progIdList = ["VisualStudio.DTE.18.0", "VisualStudio.DTE.17.0"];
 
-        // Aşağıdaki örnek Visual Studio 2022 içindir, ihtiyaç halinde versiyonu değiştir
-        var progId = "VisualStudio.DTE.17.0";
+        return ExecUntilNotNull(progIdList, tryGetDteByProgId);
 
-        try
+        static DTE2 tryGetDteByProgId(string progId)
         {
-            var runningObject = Marshal.GetActiveObject(progId);
-            dte = runningObject as DTE2;
-        }
-        catch (COMException)
-        {
-            // Visual Studio bulunamadı
+            try
+            {
+                var runningObject = Marshal.GetActiveObject(progId);
+                return runningObject as DTE2;
+            }
+            catch (COMException)
+            {
+                // Visual Studio bulunamadı
+            }
+
+            return null;
         }
 
-        return dte;
+        static B ExecUntilNotNull<A, B>(IReadOnlyList<A> items, Func<A, B> func) where B : class
+        {
+            foreach (var item in items)
+            {
+                var b = func(item);
+                if (b is not null)
+                {
+                    return b;
+                }
+            }
+
+            return null;
+        }
     }
 
     static void Main(string[] args)
