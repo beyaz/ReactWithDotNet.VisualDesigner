@@ -145,7 +145,7 @@ static class Exporter
 
                 static TypeReference UnwrapNullableOrCollection(TypeReference t)
                 {
-                    return CecilHelper.IsNullableType(t)
+                    return t.IsNullable
                         ? UnwrapNullableOrCollection(((GenericInstanceType)t).GenericArguments[0])
                         : t;
                 }

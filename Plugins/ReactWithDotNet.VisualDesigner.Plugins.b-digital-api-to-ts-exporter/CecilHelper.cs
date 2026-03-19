@@ -1,132 +1,23 @@
-﻿using System.Collections.Immutable;
-using System.Collections.ObjectModel;
-using System.Reflection;
-using System.Runtime.CompilerServices;
-using Mono.Cecil;
+﻿using Mono.Cecil;
 
 namespace BDigitalFrameworkApiToTsExporter;
 
-
-
-
 static class CecilHelper
 {
-    extension(TypeReference typeReference)
-    {
-        public bool IsCollectionType
-        {
-            get
-            {
-                var names = new List<string>
-                {
-                    typeof(Collection<>).FullName,
-                    typeof(IReadOnlyCollection<>).FullName,
-                    typeof(List<>).FullName,
-                    typeof(IReadOnlyList<>).FullName,
-                    typeof(ImmutableList<>).FullName
-                };
-
-                return names.Any(name => typeReference.FullName.StartsWith(name, StringComparison.OrdinalIgnoreCase));
-            }
-        }
-    }
     public static Result<TypeDefinition> GetType(AssemblyDefinition assemblyDefinition, string fullTypeName)
     {
-        var query = from module in assemblyDefinition.Modules
-                    from type in module.Types
-                    where type.FullName == fullTypeName
-                    select type;
-        
+        var query =
+            from module in assemblyDefinition.Modules
+            from type in module.Types
+            where type.FullName == fullTypeName
+            select type;
+
         foreach (var typeDefinition in query)
         {
             return typeDefinition;
         }
-        
+
         return new MissingMemberException(fullTypeName);
-    }
-    
-   
-    public static bool IsNullableProperty(PropertyDefinition propertyDefinition)
-    {
-        // is value type
-        if (isSystemNullable(propertyDefinition.PropertyType))
-        {
-            return true;
-        }
-
-        if (hasNullableAttribute(propertyDefinition, NullabilityState.Nullable))
-        {
-            return true;
-        }
-
-        if (hasNullableContextAttribute(propertyDefinition, NullabilityState.Nullable))
-        {
-            if (propertyDefinition.PropertyType.IsValueType)
-            {
-                return false;
-            }
-
-            if (hasNullableAttribute(propertyDefinition, NullabilityState.NotNull))
-            {
-                return false;
-            }
-
-            return true;
-        }
-
-        return false;
-
-        static bool isSystemNullable(TypeReference typeReference)
-        {
-            return typeReference is GenericInstanceType git && git.ElementType.FullName == "System.Nullable`1";
-        }
-
-        static bool hasNullableAttribute(PropertyDefinition propertyDefinition, NullabilityState state)
-        {
-            // Reference type nullability (C# 8)
-            var nullableAttribute = propertyDefinition.CustomAttributes.FirstOrDefault(a => a.AttributeType.FullName == typeof(NullableAttribute).FullName);
-            if (nullableAttribute is null)
-            {
-                return false;
-            }
-
-            // 2:nullable 1:nonnullable 0: oblivious
-            var argument = nullableAttribute.ConstructorArguments[0];
-            if (argument.Type.FullName == "System.Byte")
-            {
-                return (byte)argument.Value == (byte)state;
-            }
-
-            if (argument.Type.FullName == "System.Byte[]")
-            {
-                return ((CustomAttributeArgument[])argument.Value)[0].Value is byte b && b == (byte)state;
-            }
-
-            return false;
-        }
-
-        static bool hasNullableContextAttribute(PropertyDefinition propertyDefinition, NullabilityState state)
-        {
-            // NullableContextAttribute class / module seviyesinde olabilir
-            var nullableContext = propertyDefinition.DeclaringType.CustomAttributes
-                                      .FirstOrDefault(a => a.AttributeType.FullName == typeof(NullableContextAttribute).FullName)
-                                  ?? propertyDefinition.Module.CustomAttributes
-                                      .FirstOrDefault(a => a.AttributeType.FullName == typeof(NullableContextAttribute).FullName);
-
-            if (nullableContext == null)
-            {
-                return false;
-            }
-
-            var argument = (byte)nullableContext.ConstructorArguments[0].Value;
-
-            return argument == (byte)state;
-        }
-    }
-
-    public static bool IsNullableType(TypeReference typeReference)
-    {
-        return typeReference.Name == "Nullable`1" && typeReference.IsGenericInstance;
     }
 
     public static Result<AssemblyDefinition> ReadAssemblyDefinition(string assemblyFilePath)
@@ -134,9 +25,7 @@ static class CecilHelper
         const string secondarySearchDirectoryPath = @"d:\boa\server\bin";
 
         var cacheKey = $"{nameof(ReadAssemblyDefinition)}-{assemblyFilePath}";
-        
+
         return Cache.AccessValue(cacheKey, () => CecilAssemblyReader.ReadAssembly(assemblyFilePath, secondarySearchDirectoryPath));
     }
-    
-    
 }
