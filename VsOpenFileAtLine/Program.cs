@@ -10,7 +10,7 @@ class Program
     {
         List<string> progIdList = ["VisualStudio.DTE.18.0", "VisualStudio.DTE.17.0"];
 
-        return ExecUntilNotNull(progIdList, tryGetDteByProgId);
+        return TryFindNotNull(progIdList, tryGetDteByProgId);
 
         static DTE2 tryGetDteByProgId(string progId)
         {
@@ -27,7 +27,7 @@ class Program
             return null;
         }
 
-        static B ExecUntilNotNull<A, B>(IReadOnlyList<A> items, Func<A, B> func) where B : class
+        static B TryFindNotNull<A, B>(IReadOnlyList<A> items, Func<A, B> func) where B : class
         {
             foreach (var item in items)
             {
@@ -67,7 +67,7 @@ class Program
 
             if (dte == null)
             {
-                Console.WriteLine("Açık Visual Studio örneği bulunamadı.");
+                Console.WriteLine("'Visual Studio' instance not found.");
                 return;
             }
 
