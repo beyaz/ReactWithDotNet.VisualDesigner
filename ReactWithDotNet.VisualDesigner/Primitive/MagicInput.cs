@@ -312,6 +312,11 @@ abstract class MagicInput : Component<MagicInput.State>
                     startPoint--;
                 }
 
+                if (startPoint == 0)
+                {
+                    return (suggestedValue, null);
+                }
+                
                 startPoint++;
 
                 if (startPoint <= 0)
