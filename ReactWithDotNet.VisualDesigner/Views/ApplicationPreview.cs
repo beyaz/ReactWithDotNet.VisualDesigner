@@ -1,10 +1,11 @@
-﻿using System.Collections;
+﻿using ReactWithDotNet.ThirdPartyLibraries.MUI.Material;
+using ReactWithDotNet.VisualDesigner.PropertyDomain;
+using System.Collections;
 using System.IO;
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using ReactWithDotNet.VisualDesigner.PropertyDomain;
 
 namespace ReactWithDotNet.VisualDesigner.Views;
 
@@ -166,10 +167,18 @@ sealed class ApplicationPreview : Component
                     return (HtmlTextNode)string.Empty;
                 }
             }
-            
+
             if (element is null)
             {
-                return new ArgumentException($"{model.Tag} is not resolved.");
+                var type = tryFindTypeInMuiLibrary(model.Tag);
+                if (type is not null)
+                {
+                    element = (Element)Activator.CreateInstance(type);
+                }
+                else
+                {
+                    return new ArgumentException($"{model.Tag} is not resolved.");
+                }
             }
 
             {
@@ -445,6 +454,13 @@ sealed class ApplicationPreview : Component
             }
 
             return element;
+
+            static Type tryFindTypeInMuiLibrary(string tag)
+            {
+                var fullTypeName = $"{typeof(CircularProgress).Namespace}.{tag}";
+                
+                return typeof(div).Assembly.GetType(fullTypeName);
+            }
 
             static Maybe<string> tryCalculateText(RenderPreviewScope scope, VisualElementModel model)
             {
@@ -993,6 +1009,16 @@ sealed class ApplicationPreview : Component
                     if (propertyInfo.PropertyType == typeof(int) || propertyInfo.PropertyType == typeof(int?))
                     {
                         if (int.TryParse(TryClearStringValue(propValue), out var result))
+                        {
+                            propertyInfo.SetValue(element, result);
+                        }
+
+                        return data with { IsProcessed = true };
+                    }
+                    
+                    if (propertyInfo.PropertyType == typeof(double) || propertyInfo.PropertyType == typeof(double?))
+                    {
+                        if (double.TryParse(TryClearStringValue(propValue), out var result))
                         {
                             propertyInfo.SetValue(element, result);
                         }
