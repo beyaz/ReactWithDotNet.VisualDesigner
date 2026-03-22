@@ -175,12 +175,13 @@ sealed class ApplicationPreview : Component
                 {
                     element = (Element)Activator.CreateInstance(type);
                 }
-                else
-                {
-                    return new ArgumentException($"{model.Tag} is not resolved.");
-                }
             }
 
+            if (element is null)
+            {
+                return new ArgumentException($"{model.Tag} is not resolved.");
+            }
+            
             {
                 if (element is HtmlElement htmlElement)
                 {
