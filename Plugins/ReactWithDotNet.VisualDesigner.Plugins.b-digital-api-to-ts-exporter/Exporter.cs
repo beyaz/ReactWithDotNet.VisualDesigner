@@ -76,7 +76,7 @@ static class Exporter
                 return Exec
                 (
                     typeReference,
-                    UnwrapNullableOrCollection,
+                    UnwrapGenericTypes,
                     x => ExecUntilNotNull(x, [
                         y => tryToHandleAsExternalType(externalTypes, y),
                         tryToHandleAsPrimitiveJsType,
@@ -143,11 +143,18 @@ static class Exporter
                     return collectedTypeDefinitions;
                 }
 
-                static TypeReference UnwrapNullableOrCollection(TypeReference t)
+                static TypeReference UnwrapGenericTypes(TypeReference typeReference)
                 {
-                    return t.IsNullable
-                        ? UnwrapNullableOrCollection(((GenericInstanceType)t).GenericArguments[0])
-                        : t;
+                    while (true)
+                    {
+                        if (typeReference is GenericInstanceType genericInstanceType && genericInstanceType.GenericArguments.Count == 1)
+                        {
+                            typeReference = genericInstanceType.GenericArguments[0];
+                            continue;
+                        }
+
+                        return typeReference;
+                    }
                 }
             }
         }
