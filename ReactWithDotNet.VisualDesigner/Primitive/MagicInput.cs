@@ -508,7 +508,7 @@ static class SuggestionHelper
                 return (true, null, null);
             }
 
-            var splitters = " -.".ToCharArray();
+            var splitters = " -.,".ToCharArray();
 
             var indexOfColonInSearchTerm = searchTerm.IndexOf(':');
             if (indexOfColonInSearchTerm > 0)
