@@ -269,7 +269,7 @@ static class Exporter
         }
 
         return
-            from methodGroup in GroupControllerMethods(ApiName[scope], getExportablePublicMethods(controllerTypeDefinition))
+            from methodGroup in GroupControllerMethods(apiName, getExportablePublicMethods(controllerTypeDefinition))
             from filePath in getOutputTsFilePath(methodGroup)
             select new FileModel
             {
@@ -294,7 +294,7 @@ static class Exporter
                 {
                     "import {",
                     inputOutputTypes.AppendBetween(","),
-                    $"}} from \"{directoryPath}types\";"
+                    $"}} from \"{directoryPath}types/{apiName.ToLowerFirstCharInvariant()}\";"
                 };
             }
 
@@ -467,7 +467,7 @@ static class Exporter
                 {
                     "import {",
                     inputOutputTypes.AppendBetween(","),
-                    "} from \"../types\";"
+                    $"}} from \"../types/{ApiName[scope].ToLowerFirstCharInvariant()}\";"
                 };
             }
 

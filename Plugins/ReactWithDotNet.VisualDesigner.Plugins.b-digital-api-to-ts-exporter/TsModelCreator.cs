@@ -172,7 +172,7 @@ static class TsModelCreator
                     new()
                     {
                         LocalName = typeReference.Name,
-                        Source    = "../types"
+                        Source    = $"../types/{apiName.ToLowerFirstCharInvariant()}"
                     }
                 ];
             }
@@ -182,7 +182,7 @@ static class TsModelCreator
                 new()
                 {
                     LocalName = typeReference.Name,
-                    Source    = $"./{GetExtraClassFileName(typeReference, apiName)}"
+                    Source    = $"./{GetExtraClassFileName(typeReference, apiName.ToLowerFirstCharInvariant())}"
                 }
             ];
         }
