@@ -356,7 +356,7 @@ static class Mixin
         CalculateUpdateStateLines(string jsVariableName)
     {
         var propertyPath = jsVariableName.Split('.', StringSplitOptions.RemoveEmptyEntries);
-        if (propertyPath.Length == 2)
+        if (propertyPath.Length >= 2)
         {
             var stateName = propertyPath[0];
 
