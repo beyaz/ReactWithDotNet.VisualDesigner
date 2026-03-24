@@ -131,21 +131,28 @@ sealed class BDigitalDialog : PluginComponentBase
 
         if (title.HasValue)
         {
+            Element closeIcon;
+            {
+                closeIcon = new FlexRowCentered(Padding(12))
+                {
+                    new svg(ViewBox(0, 0, 24, 24), svg.Width(24), svg.Height(24), Color(rgba(0, 0, 0, 0.54)))
+                    {
+                        new path
+                        {
+                            d = "M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
+                        }
+                    }
+                };
+
+                if (displayCloseIcon == "false" || displayOkButton == "false")
+                {
+                    closeIcon = null;
+                }
+            }
+            
             partTop.Add(new FlexRow(AlignItemsCenter, PaddingY(12), PaddingX(16))
             {
-                // c l o s e   i c o n
-                displayCloseIcon == "false" || displayOkButton == "false"
-                    ? null
-                    : new FlexRowCentered(Padding(12))
-                    {
-                        new svg(ViewBox(0, 0, 24, 24), svg.Width(24), svg.Height(24), Color(rgba(0, 0, 0, 0.54)))
-                        {
-                            new path
-                            {
-                                d = "M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
-                            }
-                        }
-                    },
+                closeIcon,
 
                 // t i t l e
                 new div(FontSize("1.5rem"), FontWeight400, LineHeight(1.334), LetterSpacing("0.15px")) { title }
