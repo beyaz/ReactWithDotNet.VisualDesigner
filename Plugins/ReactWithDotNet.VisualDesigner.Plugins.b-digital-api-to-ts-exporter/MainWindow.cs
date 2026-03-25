@@ -31,8 +31,8 @@ sealed class MainWindow : Component<MainWindow.State>
     {
         state = new()
         {
-            ApiNames = [],
-            Files = [],
+            ApiNames      = [],
+            Files         = [],
             StatusMessage = "Loading..."
         };
 
@@ -40,59 +40,6 @@ sealed class MainWindow : Component<MainWindow.State>
 
         return Task.CompletedTask;
     }
-
-    async Task InitializeForm()
-    {
-        var cachedState = StateCache;
-
-        if (cachedState is  null)
-        {
-            state = new()
-            {
-                AssemblyFilePath = @"D:\workgit\BOA.InternetBanking.Payments\API\BOA.InternetBanking.Payments.API\bin\Debug\net8.0\BOA.InternetBanking.Payments.API.dll"
-            };
-            
-            await OnAssemblyFilePathChanged();
-
-            await OnApiSelected("Religious");
-            
-            ClearStatus(state);
-            
-            return;
-            
-        }
-       
-        state = JsonConvert.DeserializeObject<State>(JsonConvert.SerializeObject(cachedState));
-
-        await OnAssemblyFilePathChanged();
-
-        if (state.SelectedApiName.HasValue)
-        {
-            await OnApiSelected(state.SelectedApiName);
-        }
-
-        if (state.SelectedFilePath is not null)
-        {
-            await OnFileSelected(state.SelectedFilePath);
-        }
-
-        StateCache = state;
-
-        ClearStatus(state);
-        
-        return;
-
-        static void ClearStatus(State state)
-        {
-            state.StatusMessage ??= "Ready";
-
-            state.IsExportingAllFiles = false;
-
-            state.IsExportingSelectedFile = false;
-        }
-    }
-    
-    
 
     protected override Element render()
     {
@@ -106,7 +53,7 @@ sealed class MainWindow : Component<MainWindow.State>
                     {
                         "AssemblyFilePath"
                     },
-                    new input(input.Type("text"), input.ValueBind(()=> state.AssemblyFilePath), input.ValueBindDebounceTimeout(1000), input.ValueBindDebounceHandler(OnAssemblyFilePathChanged), WidthFull, Border(1, solid, Gray300), BorderRadius(4), PaddingLeft(4), OutlineNone, PaddingTop(4), PaddingBottom(4))
+                    new input(input.Type("text"), input.ValueBind(() => state.AssemblyFilePath), input.ValueBindDebounceTimeout(1000), input.ValueBindDebounceHandler(OnAssemblyFilePathChanged), WidthFull, Border(1, solid, Gray300), BorderRadius(4), PaddingLeft(4), OutlineNone, PaddingTop(4), PaddingBottom(4))
                 },
                 new div(WidthFull, DisplayFlex, Flex(1, 1, 0))
                 {
@@ -143,7 +90,7 @@ sealed class MainWindow : Component<MainWindow.State>
                         new div(Flex(1, 1, 0), Padding(8), DisplayFlex, FlexDirectionColumn, Gap(16), OverflowAuto)
                         {
                             from item in state.Files
-                            select new div(Id(item.Path), OnClick(OnFileSelected), Border(1, solid, Gray300), BorderRadius(4), DisplayFlex, JustifyContentCenter, AlignItemsCenter, state.SelectedFilePath== item.Path ? BackgroundColor(Gray100) : BackgroundColor(White), Hover(BorderColor(Gray500)), BoxShadow("0 1px 3px rgba(0,0,0,0.2)"))
+                            select new div(Id(item.Path), OnClick(OnFileSelected), Border(1, solid, Gray300), BorderRadius(4), DisplayFlex, JustifyContentCenter, AlignItemsCenter, state.SelectedFilePath == item.Path ? BackgroundColor(Gray100) : BackgroundColor(White), Hover(BorderColor(Gray500)), BoxShadow("0 1px 3px rgba(0,0,0,0.2)"))
                             {
                                 new div(Padding(4))
                                 {
@@ -158,33 +105,29 @@ sealed class MainWindow : Component<MainWindow.State>
                         {
                             new div(Height(40), FontWeight600, DisplayFlex, JustifyContentCenter, AlignItemsCenter, Width("50%"))
                             {
-                                state.Files.Count == 0 ? null :
-                                    new div(OnClick(OnExportAllClicked), Padding(4, 8), Border(1, solid, Gray300), BorderRadius(4), Hover(BackgroundColor(Gray100)), BoxShadow("0 1px 3px rgba(0,0,0,0.2)"), DisplayFlex, Gap(8), AlignItemsCenter)
+                                state.Files.Count == 0
+                                    ? null
+                                    : new div(OnClick(OnExportAllClicked), Padding(4, 8), Border(1, solid, Gray300), BorderRadius(4), Hover(BackgroundColor(Gray100)), BoxShadow("0 1px 3px rgba(0,0,0,0.2)"), DisplayFlex, Gap(8), AlignItemsCenter)
                                     {
                                         new div(WhiteSpace("nowrap"))
                                         {
                                             "Export All"
                                         },
-                                        !state.IsExportingAllFiles ? null :
-                                            new LoadingIcon(Width(20), Height(20))
-                                        
+                                        !state.IsExportingAllFiles ? null : new LoadingIcon(Width(20), Height(20))
                                     }
-                                
                             },
                             new div(Height(40), FontWeight600, DisplayFlex, JustifyContentCenter, AlignItemsCenter, Width("50%"), Gap(8))
                             {
-                                state.SelectedFilePath is  null ? null :
-                                    new div(OnClick(OnExportClicked), Padding(4, 8), Border(1, solid, Gray300), BorderRadius(4), Hover(BackgroundColor(Gray100)), BoxShadow("0 1px 3px rgba(0,0,0,0.2)"), DisplayFlex, Gap(8), AlignItemsCenter)
+                                state.SelectedFilePath is null
+                                    ? null
+                                    : new div(OnClick(OnExportClicked), Padding(4, 8), Border(1, solid, Gray300), BorderRadius(4), Hover(BackgroundColor(Gray100)), BoxShadow("0 1px 3px rgba(0,0,0,0.2)"), DisplayFlex, Gap(8), AlignItemsCenter)
                                     {
                                         new div(WhiteSpace("nowrap"))
                                         {
                                             "Export Selected File"
                                         },
-                                        !state.IsExportingSelectedFile ? null :
-                                            new LoadingIcon(Width(20), Height(20))
-                                        
+                                        !state.IsExportingSelectedFile ? null : new LoadingIcon(Width(20), Height(20))
                                     }
-                                
                             }
                         },
                         new div(DisplayFlex, FlexDirectionColumn, FlexGrow(1))
@@ -232,6 +175,60 @@ sealed class MainWindow : Component<MainWindow.State>
     string GetSelectedFileContent()
     {
         return state.Files.FirstOrDefault(x => x.Path == state.SelectedFilePath)?.Content ?? string.Empty;
+    }
+
+    async Task InitializeForm()
+    {
+        var cachedState = StateCache;
+
+        if (cachedState is null)
+        {
+            state = new()
+            {
+                AssemblyFilePath = @"D:\workgit\BOA.InternetBanking.Payments\API\BOA.InternetBanking.Payments.API\bin\Debug\net8.0\BOA.InternetBanking.Payments.API.dll"
+            };
+
+            await OnAssemblyFilePathChanged();
+
+            await OnApiSelected("Religious");
+
+            ClearStatus(state);
+
+            return;
+        }
+
+        state = JsonConvert.DeserializeObject<State>(JsonConvert.SerializeObject(cachedState));
+
+        var selectedApiName = state.SelectedApiName;
+
+        var selectedFilePath = state.SelectedFilePath;
+
+        await OnAssemblyFilePathChanged();
+
+        if (selectedApiName.HasValue)
+        {
+            await OnApiSelected(selectedApiName);
+        }
+
+        if (selectedFilePath is not null)
+        {
+            await OnFileSelected(selectedFilePath);
+        }
+
+        StateCache = state;
+
+        ClearStatus(state);
+
+        return;
+
+        static void ClearStatus(State state)
+        {
+            state.StatusMessage ??= "Ready";
+
+            state.IsExportingAllFiles = false;
+
+            state.IsExportingSelectedFile = false;
+        }
     }
 
     Task OnApiSelected(MouseEvent e)
@@ -421,8 +418,8 @@ class TsFileViewer : PluginComponentBase
     {
         return new Editor
         {
-            width = "100%",
-            value = Value,
+            width           = "100%",
+            value           = Value,
             defaultLanguage = "typescript",
             options =
             {
@@ -495,8 +492,8 @@ static class ExporterPlugin
         Element element = input.Tag switch
         {
             nameof(TsFileViewer) => new TsFileViewer { id = input.Id, onMouseClick = input.OnMouseClick },
-            nameof(LoadingIcon) => new LoadingIcon { id = input.Id, onMouseClick = input.OnMouseClick },
-            _ => null
+            nameof(LoadingIcon)  => new LoadingIcon { id  = input.Id, onMouseClick = input.OnMouseClick },
+            _                    => null
         };
 
         if (element is not null)
