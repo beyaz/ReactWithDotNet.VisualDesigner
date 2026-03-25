@@ -66,7 +66,7 @@ sealed class MainWindow : Component<MainWindow.State>
 
         await OnAssemblyFilePathChanged();
 
-        if (state.ApiNames.Count > 0)
+        if (state.SelectedApiName.HasValue)
         {
             await OnApiSelected(state.SelectedApiName);
         }
