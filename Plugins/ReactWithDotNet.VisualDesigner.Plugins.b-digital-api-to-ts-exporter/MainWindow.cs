@@ -36,7 +36,7 @@ sealed class MainWindow : Component<MainWindow.State>
             StatusMessage = "Loading..."
         };
 
-        Client.GotoMethod(InitializeForm, TimeSpan.FromMilliseconds(500));
+        Client.GotoMethod(InitializeForm, TimeSpan.FromMilliseconds(50));
 
         return Task.CompletedTask;
     }
@@ -45,42 +45,54 @@ sealed class MainWindow : Component<MainWindow.State>
     {
         var cachedState = StateCache;
 
-        state = new()
+        if (cachedState is  null)
         {
-            AssemblyFilePath = @"D:\workgit\BOA.InternetBanking.Payments\API\BOA.InternetBanking.Payments.API\bin\Debug\net8.0\BOA.InternetBanking.Payments.API.dll"
-        };
+            state = new()
+            {
+                AssemblyFilePath = @"D:\workgit\BOA.InternetBanking.Payments\API\BOA.InternetBanking.Payments.API\bin\Debug\net8.0\BOA.InternetBanking.Payments.API.dll"
+            };
+            
+            await OnAssemblyFilePathChanged();
 
-        if (cachedState is not null)
-        {
-            state = JsonConvert.DeserializeObject<State>(JsonConvert.SerializeObject(cachedState));
+            await OnApiSelected("Religious");
+            
+            ClearStatus(state);
+            
+            return;
+            
         }
+       
+        state = JsonConvert.DeserializeObject<State>(JsonConvert.SerializeObject(cachedState));
 
         await OnAssemblyFilePathChanged();
 
         if (state.ApiNames.Count > 0)
         {
-            await OnApiSelected(cachedState?.SelectedApiName ?? "Religious");
+            await OnApiSelected(state.SelectedApiName);
         }
 
-
-        if (cachedState?.SelectedFilePath is not null)
+        if (state.SelectedFilePath is not null)
         {
-            await OnFileSelected(cachedState.SelectedFilePath);
+            await OnFileSelected(state.SelectedFilePath);
         }
 
-        if (cachedState is not null)
+        StateCache = state;
+
+        ClearStatus(state);
+        
+        return;
+
+        static void ClearStatus(State state)
         {
-            StateCache = cachedState;
+            state.StatusMessage ??= "Ready";
+
+            state.IsExportingAllFiles = false;
+
+            state.IsExportingSelectedFile = false;
         }
-
-        // clear status
-
-        state.StatusMessage ??= "Ready";
-
-        state.IsExportingAllFiles = false;
-
-        state.IsExportingSelectedFile = false;
     }
+    
+    
 
     protected override Element render()
     {
