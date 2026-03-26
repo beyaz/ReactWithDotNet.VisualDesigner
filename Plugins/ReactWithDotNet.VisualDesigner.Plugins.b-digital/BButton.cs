@@ -5,6 +5,10 @@ namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 [CustomComponent]
 sealed class BButton : PluginComponentBase
 {
+    [Suggestions("true")]
+    [JsTypeInfo(JsType.Boolean)]
+    public string disabled { get; set; }
+    
     [Suggestions("true , false")]
     [JsTypeInfo(JsType.Boolean)]
     public string allowLabelCase { get; set; }
