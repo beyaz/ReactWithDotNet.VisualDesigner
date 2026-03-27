@@ -562,6 +562,19 @@ static class Exporter
 
             if (methodDefinition.Parameters[0].ParameterType.Name != "BaseClientRequest")
             {
+                if (getReturnType(methodDefinition).FullName.In(from x in externalTypes select x.DotNetFullTypeName))
+                {
+                    return
+                        from webProjectPath in getWebProjectFolderPath(projectDirectory)
+                        let requestTypeDefinition = methodDefinition.Parameters[0].ParameterType.Resolve()
+                        let tsRequest = TsModelCreator.CreateFrom(externalTypes, requestTypeDefinition, ApiName[scope])
+                        select new FileModel
+                        {
+                            Path    = getOutputFilePath(webProjectPath),
+                            Content = TsOutput.LinesToString(TsOutput.GetTsCode(tsRequest))
+                        };
+                }
+                
                 
                 return
                     from webProjectPath in getWebProjectFolderPath(projectDirectory)
