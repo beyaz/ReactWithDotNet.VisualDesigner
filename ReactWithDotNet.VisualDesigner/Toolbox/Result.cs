@@ -1,5 +1,8 @@
-﻿namespace Toolbox;
+﻿using System.Diagnostics;
 
+namespace Toolbox;
+
+[DebuggerDisplay("Value: {Value} HasError: {HasError} ")]
 public sealed class Result<TValue>
 {
     // @formatter:off

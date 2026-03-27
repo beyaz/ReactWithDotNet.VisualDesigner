@@ -1,8 +1,10 @@
-﻿using System.IO;
+﻿using System.Diagnostics;
+using System.IO;
 using System.Text;
 
 namespace Toolbox;
 
+[DebuggerDisplay("Path: {Path} Content: {Content} ")]
 public sealed record FileModel
 {
     public required string Content { get; init; }
