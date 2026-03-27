@@ -210,7 +210,7 @@ sealed class MainWindow : Component<MainWindow.State>
             await OnApiSelected(selectedApiName);
         }
 
-        if (selectedFilePath is not null)
+        if (selectedApiName.HasValue && selectedFilePath is not null)
         {
             await OnFileSelected(selectedFilePath);
         }
