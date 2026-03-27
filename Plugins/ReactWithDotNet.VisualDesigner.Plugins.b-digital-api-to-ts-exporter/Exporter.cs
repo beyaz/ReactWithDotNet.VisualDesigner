@@ -54,6 +54,11 @@ static class Exporter
             return [];
         }
 
+        if (containerTypeDefinition.FullName.In(from x in ExternalTypes[scope] select x.DotNetFullTypeName))
+        {
+            return [];
+        }
+
         return
             from type in GetExtraTypes(ExternalTypes[scope], containerTypeDefinition)
             select ExportExtraType(scope, type);
@@ -452,23 +457,32 @@ static class Exporter
 
             List<string> importInputOutputTypes;
             {
-                var inputOutputTypes
-                    =
+                var inputOutputTypes = ListFrom
+                (
                     from methodDefinition in methods
-                    from typeName in new[]
-                    {
-                        methodDefinition.Parameters[0].ParameterType.Name,
-                        getReturnType(methodDefinition).Name
-                    }
-                    where typeName != "BaseClientRequest"
-                    select Tab + typeName;
 
-                importInputOutputTypes = new()
+                    from type in new[]
+                    {
+                        methodDefinition.Parameters[0].ParameterType,
+                        getReturnType(methodDefinition)
+                    }
+                    where type.FullName.NotIn(from x in ExternalTypes[scope] select x.DotNetFullTypeName)
+                    select Tab + type.Name
+                );
+
+                if (inputOutputTypes.Count > 0)
                 {
-                    "import {",
-                    inputOutputTypes.AppendBetween(","),
-                    $"}} from \"../types/{ApiName[scope].ToLowerFirstCharInvariant()}\";"
-                };
+                    importInputOutputTypes = new()
+                    {
+                        "import {",
+                        inputOutputTypes.AppendBetween(","),
+                        $"}} from \"../types/{ApiName[scope].ToLowerFirstCharInvariant()}\";"
+                    };
+                }
+                else
+                {
+                    importInputOutputTypes = [];
+                }
             }
 
             var lines = new List<string>
@@ -525,6 +539,8 @@ static class Exporter
     {
         var controllerTypeDefinition = ControllerTypeDefinition[scope];
 
+        
+        
         return new List<Result<FileModel>>
         {
             // r e q u e s t  -  r e s p o n s e   t y p e s
@@ -546,6 +562,7 @@ static class Exporter
 
             if (methodDefinition.Parameters[0].ParameterType.Name != "BaseClientRequest")
             {
+                
                 return
                     from webProjectPath in getWebProjectFolderPath(projectDirectory)
                     let returnTypeDefinition = getReturnType(methodDefinition).Resolve()
@@ -559,6 +576,19 @@ static class Exporter
                     };
             }
 
+            if (getReturnType(methodDefinition).FullName.In(from x in externalTypes select x.DotNetFullTypeName))
+            {
+                return
+                    from webProjectPath in getWebProjectFolderPath(projectDirectory)
+                    let requestTypeDefinition = methodDefinition.Parameters[0].ParameterType.Resolve()
+                    let tsRequest = TsModelCreator.CreateFrom(externalTypes, requestTypeDefinition, ApiName[scope])
+                    select new FileModel
+                    {
+                        Path    = getOutputFilePath(webProjectPath),
+                        Content = TsOutput.LinesToString(TsOutput.GetTsCode(tsRequest))
+                    };
+            }
+            
             return
                 from webProjectPath in getWebProjectFolderPath(projectDirectory)
                 let returnTypeDefinition = getReturnType(methodDefinition).Resolve()

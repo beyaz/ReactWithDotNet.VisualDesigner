@@ -267,7 +267,7 @@ public static class Extensions
         return TryGetProp(props, propName).HasValue;
     }
 
-    public static bool In<T>(this T item, params T[] list)
+    public static bool In<T>(this T item, params IEnumerable<T> list)
     {
         return list.Contains(item);
     }
@@ -479,6 +479,11 @@ public static class Extensions
     }
 
     public static bool NotIn<T>(this T item, params T[] list)
+    {
+        return !list.Contains(item);
+    }
+    
+    public static bool NotIn<T>(this T item, IEnumerable<T> list)
     {
         return !list.Contains(item);
     }
