@@ -292,15 +292,42 @@ static class Exporter
 
             List<string> outputTypes;
             {
-                var inputOutputTypes
-                    = methodGroup.ControllerMethods.Select(x => Tab + getReturnTypeName(x));
+                var inputOutputTypes = ListFrom
+                (
+                    from m in methodGroup.ControllerMethods
+                    let returnType = getReturnType(m)
+                    where returnType.FullName.NotIn(from x in ExternalTypes[scope] select x.DotNetFullTypeName)
+                    select Tab + getReturnType(m).Name
+                );
 
-                outputTypes = new()
+                if (inputOutputTypes.Count > 0)
                 {
-                    "import {",
-                    inputOutputTypes.AppendBetween(","),
-                    $"}} from \"{directoryPath}types/{apiName.ToLowerFirstCharInvariant()}\";"
-                };
+                    outputTypes = new()
+                    {
+                        "import {",
+                        inputOutputTypes.AppendBetween(","),
+                        $"}} from \"{directoryPath}types/{apiName.ToLowerFirstCharInvariant()}\";"
+                    };
+                }
+                else
+                {
+                    outputTypes = [];
+                }
+                
+                outputTypes.Add
+                (
+                    from m in methodGroup.ControllerMethods
+                        
+                    let returnType = getReturnType(m)
+                        
+                    where returnType.FullName.In(from x in ExternalTypes[scope] select x.DotNetFullTypeName)
+                        
+                    let et = ExternalTypes[scope].First(x=>x.DotNetFullTypeName == returnType.FullName)
+                        
+                    select $"import {{ {et.LocalName} }} from \"{et.Source}\";"
+                );
+                
+               
             }
 
             var lines = new List<string>
