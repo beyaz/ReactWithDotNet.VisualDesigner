@@ -472,6 +472,11 @@ public static class Extensions
     {
         return enumerable.ToList();
     }
+    
+    public static IEnumerable<T> DistinctFrom<T>(IEnumerable<T> enumerable)
+    {
+        return enumerable.Distinct();
+    }
 
     public static IReadOnlyDictionary<string, string> MapFrom((string key, string value)[] items)
     {

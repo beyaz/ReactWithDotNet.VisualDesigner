@@ -313,21 +313,22 @@ static class Exporter
                 {
                     outputTypes = [];
                 }
-                
-                outputTypes.Add
+
+                outputTypes.Add(DistinctFrom
                 (
+
                     from m in methodGroup.ControllerMethods
-                        
+
                     let returnType = getReturnType(m)
-                        
+
                     where returnType.FullName.In(from x in ExternalTypes[scope] select x.DotNetFullTypeName)
-                        
-                    let et = ExternalTypes[scope].First(x=>x.DotNetFullTypeName == returnType.FullName)
-                        
+
+                    let et = ExternalTypes[scope].First(x => x.DotNetFullTypeName == returnType.FullName)
+
                     select $"import {{ {et.LocalName} }} from \"{et.Source}\";"
-                );
-                
-               
+                ));
+
+
             }
 
             var lines = new List<string>
