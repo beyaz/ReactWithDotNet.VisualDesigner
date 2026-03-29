@@ -1,4 +1,6 @@
-﻿namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
+﻿using ReactWithDotNet.ThirdPartyLibraries.GoogleMaterialSymbols;
+
+namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
 [CustomComponent]
 sealed class BInput : PluginComponentBase
@@ -157,7 +159,8 @@ sealed class BInput : PluginComponentBase
                 new div(Color(rgba(0, 0, 0, 0.54)), FontSize16, FontWeight400, FontFamily("Roboto, sans-serif"))
                 {
                     value
-                }
+                },
+                type=="time" ? new MaterialSymbol{ name = "schedule", color = rgba(0, 0, 0, 0.6)}: null
             },
             new FlexRow(JustifyContentSpaceBetween, FontSize12, PaddingLeftRight(14), Color(rgb(158, 158, 158)), LineHeight15)
             {
