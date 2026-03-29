@@ -22,6 +22,8 @@ sealed class BInput : PluginComponentBase
     [JsTypeInfo(JsType.String)]
     public string required { get; set; }
 
+    [JsTypeInfo(JsType.String)]
+    public string type { get; set; }
    
     
     [Suggestions("on , off ")]
