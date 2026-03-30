@@ -22,8 +22,8 @@ class BDigitalDetailDisplay : PluginComponentBase
 
             for (var i = 0; i < node.Children.Count; i += 2)
             {
-                var textContent = TryGetPropValueByPropName(node.TryGetNodeItemAt([i]), Design.Content);
-                var valueContent = TryGetPropValueByPropName(node.TryGetNodeItemAt([i + 1]), Design.Content);
+                var textContent = TryGetPropFinalText(node.TryGetNodeItemAt([i]), Design.Content);
+                var valueContent = TryGetPropFinalText(node.TryGetNodeItemAt([i + 1]), Design.Content);
 
                 if (textContent.HasValue && valueContent.HasValue)
                 {
@@ -49,6 +49,13 @@ class BDigitalDetailDisplay : PluginComponentBase
         var import = (nameof(BDigitalDetailDisplay), "b-digital-detail-display");
 
         return await AnalyzeChildren(input with { Node = node }, AnalyzeReactNode).With(import);
+
+        string TryGetPropFinalText(ReactNode reactNode, string propName)
+        {
+            var tempNode = ApplyTranslateOperationOnProps(reactNode, input.ComponentConfig, propName);
+
+            return TryGetPropValueByPropName(tempNode, propName);
+        }
     }
 
     protected override Element render()
