@@ -6,6 +6,52 @@ class BDigitalDetailDisplay : PluginComponentBase
     [JsTypeInfo(JsType.Array)]
     public string items { get; set; }
 
+    record DetailDisplayItem
+    {
+        public string text { get; init; }
+        
+        public string value { get; init; }
+    }
+
+    static IReadOnlyList<DetailDisplayItem> ReadItems(ReactNode node)
+    {
+        if (node.Children.Count  == 0)
+        {
+            return [];
+        }
+        
+        if (node.Children.Count > 0)
+        {
+            List<DetailDisplayItem> lines = [];
+
+            for (var i = 0; i < node.Children.Count; i += 2)
+            {
+                var textContent = TryGetPropFinalText(node.TryGetNodeItemAt([i]), Design.Content);
+                var valueContent = TryGetPropFinalText(node.TryGetNodeItemAt([i + 1]), Design.Content);
+
+                if (textContent.HasValue && valueContent.HasValue)
+                {
+                    lines.Add($"{{ text: {textContent}, value: {valueContent} }}");
+                }
+            }
+
+            var items = string.Join("," + Environment.NewLine, lines);
+
+            var property = new ReactProperty
+            {
+                Name  = "items",
+                Value = "[" + items + "]"
+            };
+
+            node = node with
+            {
+                Properties = node.Properties.Add(property),
+                Children = []
+            };
+        }
+    }
+    
+    
     [NodeAnalyzer]
     public static async NodeAnalyzeOutput AnalyzeReactNode(NodeAnalyzeInput input)
     {
