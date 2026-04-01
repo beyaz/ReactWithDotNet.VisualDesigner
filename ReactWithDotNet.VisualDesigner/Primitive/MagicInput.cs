@@ -366,7 +366,7 @@ abstract class MagicInput : Component<MagicInput.State>
     [StopPropagation]
     Task OnSuggestionItemClicked(MouseEvent e)
     {
-        var selectedSuggestionOffset = int.Parse(e.target.data["INDEX"]);
+        var selectedSuggestionOffset = int.Parse(e.target.data["index"]);
 
         state = state with
         {
@@ -431,7 +431,7 @@ abstract class MagicInput : Component<MagicInput.State>
         {
             return new div(BorderRadius(4), OnClick(OnSuggestionItemClicked))
             {
-                Data("INDEX", index),
+                Data("index", index),
 
                 (string)text,
                 PaddingLeft(5),
