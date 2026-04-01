@@ -134,7 +134,11 @@ abstract class MagicInput : Component<MagicInput.State>
 
             IgnoreTypingFinishedEvent = state?.IgnoreTypingFinishedEvent ?? false,
 
-            FilteredSuggestions = []
+            FilteredSuggestions = state?.FilteredSuggestions ?? [],
+            
+            SelectedSuggestionOffset = state?.SelectedSuggestionOffset,
+            
+            ShowSuggestions = state?.ShowSuggestions?? false
         };
     }
 
@@ -450,7 +454,7 @@ abstract class MagicInput : Component<MagicInput.State>
 
     internal record State
     {
-        public IReadOnlyList<SuggestionItem> FilteredSuggestions { get; init; }
+        public required IReadOnlyList<SuggestionItem> FilteredSuggestions { get; init; }
 
         public bool IgnoreTypingFinishedEvent { get; init; }
 
