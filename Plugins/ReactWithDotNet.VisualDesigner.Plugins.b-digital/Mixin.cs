@@ -213,6 +213,18 @@ static class Mixin
         };
     }
     
+    public static string TryGetPropValueByPropName(ReactNode node, string propName)
+    {
+        return FirstOrDefaultOf(from p in node.Properties where p.Name == propName select p.Value);
+    }
+    
+    public static string TryGetPropFinalText(ReactNode reactNode, string propName, ComponentConfig componentConfig)
+    {
+        var tempNode = ApplyTranslateOperationOnProps(reactNode, componentConfig, propName);
+
+        return TryGetPropValueByPropName(tempNode, propName);
+    }
+    
     public static ReactNode ApplyTranslateOperationOnProps(ReactNode node, ComponentConfig componentConfig, params string[] propNames)
     {
         return node with

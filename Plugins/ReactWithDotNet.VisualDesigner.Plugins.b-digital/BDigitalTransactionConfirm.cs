@@ -89,6 +89,8 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
             return AnalyzeChildren(input, AnalyzeReactNode);
         }
 
+        var componentConfig = input.ComponentConfig;
+
         var node = input.Node;
 
         List<ReactProperty> finalProps = [];
@@ -122,7 +124,7 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
             var titleNode = sender.title;
             if (titleNode is not null)
             {
-                var titleText = TryGetPropFinalText(titleNode, Design.Content);
+                var titleText = TryGetPropFinalText(titleNode, Design.Content,componentConfig);
                 if (titleText is not null)
                 {
                     lines.Add($"titleText: {titleText}");
@@ -251,7 +253,7 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
             var titleNode = receiver.title;
             if (titleNode is not null)
             {
-                var titleText = TryGetPropFinalText(titleNode, Design.Content);
+                var titleText = TryGetPropFinalText(titleNode, Design.Content,componentConfig);
                 if (titleText is not null)
                 {
                     lines.Add($"titleText: {titleText}");
@@ -384,12 +386,7 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
             { nameof(BDigitalTransactionConfirm), "b-digital-transaction-confirm" }
         }));
 
-        string TryGetPropFinalText(ReactNode reactNode, string propName)
-        {
-            var tempNode = ApplyTranslateOperationOnProps(reactNode, input.ComponentConfig, propName);
-
-            return TryGetPropValueByPropName(tempNode, propName);
-        }
+       
 
         string getItem(ReactNode textNode, ReactNode valueNode)
         {
@@ -402,7 +399,7 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
                     return null;
                 }
 
-                var value = TryGetPropFinalText(textNode, Design.Content);
+                var value = TryGetPropFinalText(textNode, Design.Content,componentConfig);
                 if (value.HasValue)
                 {
                     returnList.Add($"value: {value}");
@@ -424,7 +421,7 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
             }
 
             {
-                var text = TryGetPropFinalText(textNode, Design.Content);
+                var text = TryGetPropFinalText(textNode, Design.Content,componentConfig);
                 if (text.HasValue)
                 {
                     returnList.Add($"text: {text}");
@@ -442,7 +439,7 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
                     returnList.Add($"textColor: {textColor}");
                 }
 
-                var value = TryGetPropFinalText(valueNode, Design.Content);
+                var value = TryGetPropFinalText(valueNode, Design.Content,componentConfig);
                 if (value.HasValue)
                 {
                     returnList.Add($"value: {value}");
@@ -464,10 +461,7 @@ sealed class BDigitalTransactionConfirm : PluginComponentBase
             }
         }
 
-        static string TryGetPropValueByPropName(ReactNode node, string propName)
-        {
-            return FirstOrDefaultOf(from p in node.Properties where p.Name == propName select p.Value);
-        }
+        
     }
 
     protected override Element render()

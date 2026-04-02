@@ -13,43 +13,6 @@ class BDigitalDetailDisplay : PluginComponentBase
         public string value { get; init; }
     }
 
-    static IReadOnlyList<DetailDisplayItem> ReadItems(ReactNode node)
-    {
-        if (node.Children.Count  == 0)
-        {
-            return [];
-        }
-        
-        if (node.Children.Count > 0)
-        {
-            List<DetailDisplayItem> lines = [];
-
-            for (var i = 0; i < node.Children.Count; i += 2)
-            {
-                var textContent = TryGetPropFinalText(node.TryGetNodeItemAt([i]), Design.Content);
-                var valueContent = TryGetPropFinalText(node.TryGetNodeItemAt([i + 1]), Design.Content);
-
-                if (textContent.HasValue && valueContent.HasValue)
-                {
-                    lines.Add($"{{ text: {textContent}, value: {valueContent} }}");
-                }
-            }
-
-            var items = string.Join("," + Environment.NewLine, lines);
-
-            var property = new ReactProperty
-            {
-                Name  = "items",
-                Value = "[" + items + "]"
-            };
-
-            node = node with
-            {
-                Properties = node.Properties.Add(property),
-                Children = []
-            };
-        }
-    }
     
     
     [NodeAnalyzer]
@@ -68,8 +31,8 @@ class BDigitalDetailDisplay : PluginComponentBase
 
             for (var i = 0; i < node.Children.Count; i += 2)
             {
-                var textContent = TryGetPropFinalText(node.TryGetNodeItemAt([i]), Design.Content);
-                var valueContent = TryGetPropFinalText(node.TryGetNodeItemAt([i + 1]), Design.Content);
+                var textContent = TryGetPropFinalText(node.TryGetNodeItemAt([i]), Design.Content, input.ComponentConfig);
+                var valueContent = TryGetPropFinalText(node.TryGetNodeItemAt([i + 1]), Design.Content,input.ComponentConfig);
 
                 if (textContent.HasValue && valueContent.HasValue)
                 {
@@ -96,12 +59,6 @@ class BDigitalDetailDisplay : PluginComponentBase
 
         return await AnalyzeChildren(input with { Node = node }, AnalyzeReactNode).With(import);
 
-        string TryGetPropFinalText(ReactNode reactNode, string propName)
-        {
-            var tempNode = ApplyTranslateOperationOnProps(reactNode, input.ComponentConfig, propName);
-
-            return TryGetPropValueByPropName(tempNode, propName);
-        }
     }
 
     protected override Element render()
@@ -141,8 +98,4 @@ class BDigitalDetailDisplay : PluginComponentBase
         };
     }
 
-    static string TryGetPropValueByPropName(ReactNode node, string propName)
-    {
-        return FirstOrDefaultOf(from p in node.Properties where p.Name == propName select p.Value);
-    }
 }
