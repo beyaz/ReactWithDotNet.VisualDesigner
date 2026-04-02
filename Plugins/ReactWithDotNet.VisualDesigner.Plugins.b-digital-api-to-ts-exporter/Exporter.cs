@@ -567,12 +567,11 @@ static class Exporter
     {
         var controllerTypeDefinition = ControllerTypeDefinition[scope];
 
-        
-        
         return new List<Result<FileModel>>
         {
             // r e q u e s t  -  r e s p o n s e   t y p e s
             from methodDefinition in getExportablePublicMethods(controllerTypeDefinition)
+            where HasAnyExportableType(methodDefinition)
             from file in getMethodRequestResponseTypesInFile(scope, methodDefinition)
             select file,
 
@@ -582,6 +581,26 @@ static class Exporter
             from x in extraTypes
             select x
         };
+
+        bool HasAnyExportableType(MethodDefinition methodDefinition)
+        {
+            if (!IsExternalType(getReturnType(methodDefinition)))
+            {
+                return true;
+            }
+
+            if (methodDefinition.Parameters.Count > 0 && !IsExternalType(methodDefinition.Parameters[0].ParameterType))
+            {
+                return true;
+            }
+
+            return false;
+            
+            bool IsExternalType(TypeReference typeReference)
+            {
+                return typeReference.FullName.In(from x in ExternalTypes[scope] select x.DotNetFullTypeName);
+            }
+        }
 
         static Result<FileModel> getMethodRequestResponseTypesInFile(Scope scope, MethodDefinition methodDefinition)
         {
