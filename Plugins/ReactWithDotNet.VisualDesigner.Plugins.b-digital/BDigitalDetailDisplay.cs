@@ -5,15 +5,6 @@ class BDigitalDetailDisplay : PluginComponentBase
 {
     [JsTypeInfo(JsType.Array)]
     public string items { get; set; }
-
-    record DetailDisplayItem
-    {
-        public string text { get; init; }
-        
-        public string value { get; init; }
-    }
-
-    
     
     [NodeAnalyzer]
     public static async NodeAnalyzeOutput AnalyzeReactNode(NodeAnalyzeInput input)
@@ -72,9 +63,42 @@ class BDigitalDetailDisplay : PluginComponentBase
 
         for (var i = 0; i < children.Count; i += 2)
         {
+            var label = children[i];
+            {
+                if (label is BTypography bTypography)
+                {
+                    if (bTypography.variant.HasNoValue)
+                    {
+                        bTypography.variant = "body2";
+                    }
+                
+                    if (bTypography.color.HasNoValue)
+                    {
+                        bTypography.color = "textSecondary";
+                    }
+                }
+            }
+            
+            var value = children[i + 1];
+            {
+                if (value is BTypography bTypography)
+                {
+                    if (bTypography.variant.HasNoValue)
+                    {
+                        bTypography.variant = "body1";
+                    }
+                
+                    if (bTypography.color.HasNoValue)
+                    {
+                        bTypography.color = "textPrimary";
+                    }
+                }
+            }
+            
+            
             newChildren.Add(new FlexRow(AlignItemsCenter)
             {
-                children[i],
+                label,
                 new BTypography
                 {
                     variant = "body2",
@@ -86,7 +110,7 @@ class BDigitalDetailDisplay : PluginComponentBase
                         ":"
                     }
                 } + PaddingRight(4),
-                children[i + 1]
+                value
             });
         }
 
