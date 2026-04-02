@@ -22,6 +22,11 @@ sealed class BDigitalDialog : PluginComponentBase
     [Suggestions("true , false")]
     [JsTypeInfo(JsType.Boolean)]
     public string displayCloseIcon { get; set; }
+    
+    [Suggestions("true , false")]
+    [JsTypeInfo(JsType.Boolean)]
+    public string overrideMobileFullScreen { get; set; }
+    
 
     [Suggestions("true , false")]
     [JsTypeInfo(JsType.Boolean)]
