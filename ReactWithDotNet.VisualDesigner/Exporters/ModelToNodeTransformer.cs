@@ -20,6 +20,7 @@ static class ModelToNodeTransformer
             { "8px", "1" },
             { "12px", "1.5" },
             { "16px", "2" },
+            { "20px", "2.5" },
             { "24px", "3" },
             { "32px",  "4" },
             { "36px",  "4.5" },
