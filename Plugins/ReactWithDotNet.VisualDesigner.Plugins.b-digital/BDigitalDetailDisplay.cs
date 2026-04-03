@@ -5,7 +5,7 @@ class BDigitalDetailDisplay : PluginComponentBase
 {
     [JsTypeInfo(JsType.Array)]
     public string items { get; set; }
-    
+
     [NodeAnalyzer]
     public static async NodeAnalyzeOutput AnalyzeReactNode(NodeAnalyzeInput input)
     {
@@ -23,47 +23,39 @@ class BDigitalDetailDisplay : PluginComponentBase
             for (var i = 0; i < node.Children.Count; i += 2)
             {
                 var textNode = node.TryGetNodeItemAt([i]);
-                
-                var valueNode = node.TryGetNodeItemAt([i + 1]);
-                
-                
-                
-                
 
-                
-                
-                
+                var valueNode = node.TryGetNodeItemAt([i + 1]);
 
                 var props = new List<string>();
-                
-                var textContent = TryGetPropFinalText(textNode, Design.Content, input.ComponentConfig);
-                if (textContent.HasValue)
                 {
-                    props.Add("text: " + textContent);
+                    var textContent = TryGetPropFinalText(textNode, Design.Content, input.ComponentConfig);
+                    if (textContent.HasValue)
+                    {
+                        props.Add("text: " + textContent);
+                    }
+
+                    var textVariant = TryGetPropValueByPropName(textNode, nameof(BTypography.variant));
+                    if (textVariant.HasValue)
+                    {
+                        props.Add("textVariant: " + textVariant);
+                    }
+
+                    var valueContent = TryGetPropFinalText(valueNode, Design.Content, input.ComponentConfig);
+                    if (valueContent.HasValue)
+                    {
+                        props.Add("value: " + valueContent);
+                    }
+
+                    var valueVariant = TryGetPropValueByPropName(valueNode, nameof(BTypography.variant));
+                    if (valueVariant.HasValue)
+                    {
+                        props.Add("valueVariant: " + valueVariant);
+                    }
                 }
-                
-                var textVariant = TryGetPropValueByPropName(textNode, nameof(BTypography.variant));
-                if (textVariant.HasValue)
-                {
-                    props.Add("textVariant: " + textVariant);
-                }
-                
-                var valueContent = TryGetPropFinalText(valueNode, Design.Content,input.ComponentConfig);
-                if (valueContent.HasValue)
-                {
-                    props.Add("value: " + valueContent);
-                }
-                
-                var valueVariant = TryGetPropValueByPropName(valueNode, nameof(BTypography.variant));
-                if (valueVariant.HasValue)
-                {
-                    props.Add("valueVariant: " + valueVariant);
-                }
-                
-                
+
                 if (props.Count > 0)
                 {
-                    lines.Add("{ " + string.Join(", ", props) +" }");
+                    lines.Add("{ " + string.Join(", ", props) + " }");
                 }
             }
 
@@ -85,7 +77,6 @@ class BDigitalDetailDisplay : PluginComponentBase
         var import = (nameof(BDigitalDetailDisplay), "b-digital-detail-display");
 
         return await AnalyzeChildren(input with { Node = node }, AnalyzeReactNode).With(import);
-
     }
 
     protected override Element render()
@@ -107,14 +98,14 @@ class BDigitalDetailDisplay : PluginComponentBase
                     {
                         bTypography.variant = "body2";
                     }
-                
+
                     if (bTypography.color.HasNoValue)
                     {
                         bTypography.color = "textSecondary";
                     }
                 }
             }
-            
+
             var value = children[i + 1];
             {
                 if (value is BTypography bTypography)
@@ -123,15 +114,14 @@ class BDigitalDetailDisplay : PluginComponentBase
                     {
                         bTypography.variant = "body1";
                     }
-                
+
                     if (bTypography.color.HasNoValue)
                     {
                         bTypography.color = "textPrimary";
                     }
                 }
             }
-            
-            
+
             newChildren.Add(new FlexRow(AlignItemsCenter)
             {
                 label,
@@ -157,5 +147,4 @@ class BDigitalDetailDisplay : PluginComponentBase
             newChildren
         };
     }
-
 }
