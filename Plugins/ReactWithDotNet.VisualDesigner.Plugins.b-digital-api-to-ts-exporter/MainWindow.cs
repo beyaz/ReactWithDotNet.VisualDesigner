@@ -6,6 +6,40 @@ using ReactWithDotNet.ThirdPartyLibraries.MonacoEditorReact;
 
 namespace BDigitalFrameworkApiToTsExporter;
 
+public static class Routes
+{
+    public const string Home = "/";
+    
+    public const string VisualDesigner = "/"+nameof(VisualDesigner);
+    
+    public const string MainWindow = "/BDigitalFrameworkApiToTsExporter";
+}
+
+[Route(Routes.Home)]
+sealed class HomeWindow : Component
+{
+    protected override Element render()
+    {
+        return new FlexColumn
+        {
+            new FlexColumn(Gap(16))
+            {
+                new a
+                {
+                    href = Routes.VisualDesigner,
+                    text = "Visual Designer"
+                },
+
+                new a
+                {
+                    href = Routes.MainWindow,
+                    text = "Internet Branch Types Exporter",
+                    target = "#"
+                }
+            }
+        };
+    }
+}
 [Route(Routes.MainWindow)]
 sealed class MainWindow : Component<MainWindow.State>
 {
