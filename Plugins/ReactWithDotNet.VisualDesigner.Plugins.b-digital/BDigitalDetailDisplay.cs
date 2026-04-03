@@ -22,12 +22,48 @@ class BDigitalDetailDisplay : PluginComponentBase
 
             for (var i = 0; i < node.Children.Count; i += 2)
             {
-                var textContent = TryGetPropFinalText(node.TryGetNodeItemAt([i]), Design.Content, input.ComponentConfig);
-                var valueContent = TryGetPropFinalText(node.TryGetNodeItemAt([i + 1]), Design.Content,input.ComponentConfig);
+                var textNode = node.TryGetNodeItemAt([i]);
+                
+                var valueNode = node.TryGetNodeItemAt([i + 1]);
+                
+                
+                
+                
 
-                if (textContent.HasValue && valueContent.HasValue)
+                
+                
+                
+
+                var props = new List<string>();
+                
+                var textContent = TryGetPropFinalText(textNode, Design.Content, input.ComponentConfig);
+                if (textContent.HasValue)
                 {
-                    lines.Add($"{{ text: {textContent}, value: {valueContent} }}");
+                    props.Add("text: " + textContent);
+                }
+                
+                var textVariant = TryGetPropValueByPropName(textNode, nameof(BTypography.variant));
+                if (textVariant.HasValue)
+                {
+                    props.Add("textVariant: " + textVariant);
+                }
+                
+                var valueContent = TryGetPropFinalText(valueNode, Design.Content,input.ComponentConfig);
+                if (valueContent.HasValue)
+                {
+                    props.Add("value: " + valueContent);
+                }
+                
+                var valueVariant = TryGetPropValueByPropName(valueNode, nameof(BTypography.variant));
+                if (valueVariant.HasValue)
+                {
+                    props.Add("valueVariant: " + valueVariant);
+                }
+                
+                
+                if (props.Count > 0)
+                {
+                    lines.Add("{ " + string.Join(", ", props) +" }");
                 }
             }
 
