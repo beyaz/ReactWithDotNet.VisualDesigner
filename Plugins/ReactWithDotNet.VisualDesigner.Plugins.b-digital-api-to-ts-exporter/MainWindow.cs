@@ -11,31 +11,6 @@ static class InternalRoutes
     public const string MainWindow = "/BDigitalFrameworkApiToTsExporter";
 }
 
-[Route(Routes.Home)]
-sealed class HomeWindow : Component
-{
-    protected override Element render()
-    {
-        return new FlexColumn
-        {
-            new FlexColumn(Gap(16))
-            {
-                new a
-                {
-                    href = Routes.VisualDesigner,
-                    text = "Visual Designer"
-                },
-
-                new a
-                {
-                    href   = InternalRoutes.MainWindow,
-                    text   = "Internet Branch Types Exporter",
-                    target = "#"
-                }
-            }
-        };
-    }
-}
 [Route(InternalRoutes.MainWindow)]
 sealed class MainWindow : Component<MainWindow.State>
 {
