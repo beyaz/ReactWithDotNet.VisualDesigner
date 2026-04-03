@@ -458,6 +458,7 @@ static class ModelToNodeTransformer
         {
             if (styleValue.StartsWith("request.") ||
                 styleValue.StartsWith("context.") ||
+                styleValue.Contains(".palette.") ||
                 styleValue.Contains("(index)")) // todo: think better
             {
                 return true;

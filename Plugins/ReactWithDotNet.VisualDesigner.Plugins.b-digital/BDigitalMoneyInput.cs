@@ -9,6 +9,9 @@ sealed class BDigitalMoneyInput : PluginComponentBase
 
     [JsTypeInfo(JsType.String)]
     public string errorText { get; set; }
+    
+    [JsTypeInfo(JsType.String)]
+    public string inputProps { get; set; }
 
     [JsTypeInfo(JsType.String)]
     public string fec { get; set; }
@@ -55,6 +58,11 @@ sealed class BDigitalMoneyInput : PluginComponentBase
         
         internal static ReactNode inputProps(ReactNode node)
         {
+            if (HasAny(from x in node.Properties where x.Name == nameof(BDigitalMoneyInput.inputProps) select x))
+            {
+                return node;
+            }
+            
             var errorTextProp = node.Properties.FirstOrDefault(x => x.Name == nameof(errorText));
             if (errorTextProp is not null)
             {
