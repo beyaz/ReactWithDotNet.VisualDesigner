@@ -6,12 +6,8 @@ using ReactWithDotNet.ThirdPartyLibraries.MonacoEditorReact;
 
 namespace BDigitalFrameworkApiToTsExporter;
 
-public static class Routes
+static class InternalRoutes
 {
-    public const string Home = "/";
-    
-    public const string VisualDesigner = "/"+nameof(VisualDesigner);
-    
     public const string MainWindow = "/BDigitalFrameworkApiToTsExporter";
 }
 
@@ -32,15 +28,15 @@ sealed class HomeWindow : Component
 
                 new a
                 {
-                    href = Routes.MainWindow,
-                    text = "Internet Branch Types Exporter",
+                    href   = InternalRoutes.MainWindow,
+                    text   = "Internet Branch Types Exporter",
                     target = "#"
                 }
             }
         };
     }
 }
-[Route(Routes.MainWindow)]
+[Route(InternalRoutes.MainWindow)]
 sealed class MainWindow : Component<MainWindow.State>
 {
     static string StateCacheFilePath => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BDigitalFrameworkApiToTsExporter.state.json");

@@ -2,7 +2,7 @@ global using  ReactWithDotNet.VisualDesigner.Infrastructure;
 
 namespace ReactWithDotNet.VisualDesigner.Infrastructure;
 
-static class Routes
+public static class Routes
 {
     public const string Home = "/";
     
