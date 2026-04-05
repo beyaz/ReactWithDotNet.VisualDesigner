@@ -75,6 +75,10 @@ static class ApplicationLogic
         var componentEntities = GetAllComponentsInProjectFromCache(projectId);
 
         var componentEntity = componentEntities.FirstOrDefault(x => x.Id == componentId);
+        if (componentEntity is null)
+        {
+            return componentId.ToString();
+        }
 
         var componentConfig = componentEntity.Config;
 
