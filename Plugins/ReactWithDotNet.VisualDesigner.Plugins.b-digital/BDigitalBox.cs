@@ -9,6 +9,10 @@ sealed class BDigitalBox : PluginComponentBase
     [JsTypeInfo(JsType.String)]
     public string styleContext { get; set; }
     
+    [JsTypeInfo(JsType.Boolean)]
+    public string hasData { get; set; }
+    
+    
     [NodeAnalyzer]
     public static NodeAnalyzeOutput AnalyzeReactNode(NodeAnalyzeInput input)
     {
