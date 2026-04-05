@@ -11,11 +11,9 @@ sealed class BDigitalSearchInput : PluginComponentBase
 
     [JsTypeInfo(JsType.String)]
     public string searchTerm { get; set; }
-    
+
     [JsTypeInfo(JsType.String)]
     public string inputProps { get; set; }
-
-    
 
     [NodeAnalyzer]
     public static NodeAnalyzeOutput AnalyzeReactNode(NodeAnalyzeInput input)
@@ -24,26 +22,14 @@ sealed class BDigitalSearchInput : PluginComponentBase
         {
             return AnalyzeChildren(input, AnalyzeReactNode);
         }
-        
+
         input = ApplyTranslateOperationOnProps(input, nameof(hintText));
-        
-        
-        var (node, componentConfig) = input;
 
+        var node =input.Node;
 
-
-
-        
-
-
-
-        
-        
-        
-        
         return Result.From((node, new TsImportCollection
         {
-            {nameof(BDigitalSearchInput),"b-digital-search-input"}
+            { nameof(BDigitalSearchInput), "b-digital-search-input" }
         }));
     }
 
