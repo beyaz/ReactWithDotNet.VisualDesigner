@@ -160,7 +160,7 @@ sealed class BDigitalDialog : PluginComponentBase
                 }
             }
             
-            partTop.Add(new FlexRow(AlignItemsCenter, PaddingY(12), PaddingX(16))
+            partTop.Add(new FlexRow(AlignItemsCenter, PaddingY(12), PaddingX(24))
             {
                 closeIcon,
 

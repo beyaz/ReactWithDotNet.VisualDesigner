@@ -176,7 +176,7 @@ sealed class BDigitalListAction : PluginComponentBase
                 }
                 ,
             
-                new FlexRowCentered(Size(64))
+                new FlexRowCentered(Size(56))
                 {
                     moreIcon
                 }
@@ -193,14 +193,17 @@ sealed class BDigitalListAction : PluginComponentBase
                     leftListDataContainer?.children
                 },
 
-                new FlexRow(Gap(8))
+                new FlexRow(AlignItemsCenter)
                 {
                     new FlexColumn(AlignItemsFlexEnd)
                     {
                         rightListDataContainer?.children,
                     },
 
-                    moreIcon
+                    new FlexRowCentered(Padding(16))
+                    {
+                        moreIcon
+                    }
                 }
 
             }
