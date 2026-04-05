@@ -228,14 +228,21 @@ public static class Extensions
             return new ConfigurationErrorsException("Config error: Please specify the OutputFile property.");
         }
 
-        var projectConfig = GetProjectConfig(component.ProjectId);
-
-        var projectDirectory = projectConfig.ProjectDirectory;
-
-        var user = await Store.TryGetUser(component.ProjectId, userName);
-        if (user is not null && user.LocalWorkspacePath.HasValue)
+        string projectDirectory;
         {
-            projectDirectory = user.LocalWorkspacePath;
+            var projectConfig = GetProjectConfig(component.ProjectId);
+
+            projectDirectory = projectConfig.ProjectDirectory;
+            if (projectDirectory is not null)
+            {
+                projectDirectory = Path.Combine(projectDirectory.Split(Path.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
+            }
+
+            var user = await Store.TryGetUser(component.ProjectId, userName);
+            if (user is not null && user.LocalWorkspacePath.HasValue)
+            {
+                projectDirectory = user.LocalWorkspacePath;
+            }
         }
 
         outputFilePath = outputFilePath.Replace("{projectDirectory}", projectDirectory, StringComparison.OrdinalIgnoreCase);
