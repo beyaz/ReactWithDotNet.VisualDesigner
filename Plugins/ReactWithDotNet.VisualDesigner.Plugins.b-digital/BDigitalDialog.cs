@@ -35,6 +35,11 @@ sealed class BDigitalDialog : PluginComponentBase
     [Suggestions("true , false")]
     [JsTypeInfo(JsType.Boolean)]
     public string fullScreen { get; set; }
+    
+    [Suggestions("false")]
+    [JsTypeInfo(JsType.Boolean)]
+    public string showDividers { get; set; }
+    
 
     [JsTypeInfo(JsType.Function)]
     public string onClose { get; set; }
@@ -125,7 +130,7 @@ sealed class BDigitalDialog : PluginComponentBase
 
                 bottomActionBar = actionsElement;
 
-                if (displayOkButton?.Equals("false") is true)
+                if (displayOkButton?.Equals("false") is true || showDividers == "false")
                 {
                     actionsElement.isBorderTopNone = true;
                 }
@@ -163,7 +168,11 @@ sealed class BDigitalDialog : PluginComponentBase
                 new div(FontSize("1.5rem"), FontWeight400, LineHeight(1.334), LetterSpacing("0.15px")) { title }
             });
 
-            partTop.Add(new BDivider { Margin(0) });
+            if (showDividers != "false")
+            {
+                partTop.Add(new BDivider { Margin(0) });
+            }
+        
         }
 
         return new div(Background(rgba(0, 0, 0, 0.4)), Margin(4), Padding(24), BorderRadius(8))
