@@ -56,6 +56,12 @@ sealed class MainWindow : Component<MainWindow.State>
                 {
                     new div(FontWeight600)
                     {
+                        "Project Name"
+                    },
+                    new input(input.Type("text"), input.ValueBind(()=> state.ProjectName), input.ValueBindDebounceTimeout(400), input.ValueBindDebounceHandler(OnProjectNameChanged), WidthFull, Border(1, solid, Gray300), BorderRadius(4), PaddingLeft(4), OutlineNone, PaddingTop(4), PaddingBottom(4)),
+                    new div(Height(16)),
+                    new div(FontWeight600)
+                    {
                         "AssemblyFilePath"
                     },
                     new input(input.Type("text"), input.ValueBind(()=> state.AssemblyFilePath), input.ValueBindDebounceTimeout(1000), input.ValueBindDebounceHandler(OnAssemblyFilePathChanged), WidthFull, Border(1, solid, Gray300), BorderRadius(4), PaddingLeft(4), OutlineNone, PaddingTop(4), PaddingBottom(4))
@@ -252,6 +258,16 @@ sealed class MainWindow : Component<MainWindow.State>
         await UpdateFiles();
     }
 
+    Task OnProjectNameChanged()
+    {
+        state = state with
+        {
+            AssemblyFilePath = $@"D:\workgit\BOA.InternetBanking.{state.ProjectName}\API\BOA.InternetBanking.{state.ProjectName}.API\bin\Debug\net8.0\BOA.InternetBanking.{state.ProjectName}.API.dll"
+        };
+        
+        return OnAssemblyFilePathChanged();
+    }
+    
     Task OnAssemblyFilePathChanged()
     {
         if (!File.Exists(state.AssemblyFilePath))
@@ -401,6 +417,8 @@ sealed class MainWindow : Component<MainWindow.State>
 
     internal record State
     {
+        public string ProjectName { get; init; }
+        
         public string AssemblyFilePath { get; init; }
 
         public string StatusMessage { get; set; }
