@@ -1,6 +1,4 @@
-﻿using Newtonsoft.Json;
-
-namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
+﻿namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
 [CustomComponent]
 class BDigitalDetailDisplay : PluginComponentBase
