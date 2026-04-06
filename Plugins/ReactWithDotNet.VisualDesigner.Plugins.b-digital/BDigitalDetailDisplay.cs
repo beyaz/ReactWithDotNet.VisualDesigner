@@ -1,4 +1,6 @@
-﻿namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
+﻿using Newtonsoft.Json;
+
+namespace ReactWithDotNet.VisualDesigner.Plugins.b_digital;
 
 [CustomComponent]
 class BDigitalDetailDisplay : PluginComponentBase
@@ -51,6 +53,51 @@ class BDigitalDetailDisplay : PluginComponentBase
                     {
                         props.Add("valueVariant: " + valueVariant);
                     }
+
+                    string color = null;
+                    {
+                        // try get from typography
+                        {
+                            var valueColor = TryGetPropValueByPropName(valueNode, nameof(BTypography.color));
+                            if (valueColor.HasValue)
+                            {
+                                Result<string> cssColor = valueColor switch
+                                {
+                                    "\"primary\""       => "theme.palette.primary.main",
+                                    "\"secondary\""     => "theme.palette.secondary.main",
+                                    "\"textPrimary\""   => "theme.palette.text.primary",
+                                    "\"textSecondary\"" => "theme.palette.text.secondary",
+                                    _                   => new Exception(valueColor)
+                                };
+
+                                if (cssColor.HasError)
+                                {
+                                    return cssColor.Error;
+                                }
+
+                                color = cssColor.Value;
+                            }
+                        }
+
+                        // try get from style
+                        {
+                            var styleAsJson = TryGetPropValueByPropName(valueNode, "style");
+                            if (styleAsJson.HasValue)
+                            {
+                                var map = JsonConvert.DeserializeObject<IReadOnlyDictionary<string, string>>(styleAsJson);
+                                if (map.TryGetValue(nameof(Style.color), out var colorValue))
+                                {
+                                    color = colorValue;
+                                }
+                            }
+                        }
+                    }
+                    
+                    if (color.HasValue)
+                    {
+                        props.Add("color: " + color);
+                    }
+                    
                 }
 
                 if (props.Count > 0)
