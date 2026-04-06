@@ -81,13 +81,15 @@ class BDigitalDetailDisplay : PluginComponentBase
 
                         // try get from style
                         {
-                            var styleAsJson = TryGetPropValueByPropName(valueNode, "style");
-                            if (styleAsJson.HasValue)
+                            var styleAsJsonObject = TryGetPropValueByPropName(valueNode, "style");
+                            if (styleAsJsonObject.HasValue)
                             {
-                                var map = JsonConvert.DeserializeObject<IReadOnlyDictionary<string, string>>(styleAsJson);
-                                if (map.TryGetValue(nameof(Style.color), out var colorValue))
+                                var array = styleAsJsonObject.Split([',', '{', '}',':'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+                                var index = array.IndexOf(nameof(Style.color));
+                                if (index >= 0 && index + 1 < array.Length)
                                 {
-                                    color = colorValue;
+                                    color = array[index + 1];
                                 }
                             }
                         }
