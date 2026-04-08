@@ -18,6 +18,10 @@ public sealed record DatabaseConfig
     public string SchemaName { get; init; }
 }
 
+/// <summary>
+/// Represents the configuration settings for the application, including browser options, database configuration, and
+/// related operational parameters.
+/// </summary>
 public sealed record ConfigModel
 {
     // @formatter:off
