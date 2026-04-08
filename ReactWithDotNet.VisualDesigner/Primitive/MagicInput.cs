@@ -434,7 +434,7 @@ abstract class MagicInput : Component<MagicInput.State>
 
         Element ToOption(SuggestionItem text, int index)
         {
-            return new div(BorderRadius(4), OnClick(OnSuggestionItemClicked))
+            return new div(BorderRadius(4), OnMouseDown(OnSuggestionItemClicked))
             {
                 Data("index", index),
 
