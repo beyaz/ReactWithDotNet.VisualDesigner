@@ -142,6 +142,7 @@ abstract class MagicInput : Component<MagicInput.State>
         };
     }
 
+    [StopPropagation]
     Task OnBlur(FocusEvent e)
     {
         Client.GotoMethod(200, CloseSuggestion);
