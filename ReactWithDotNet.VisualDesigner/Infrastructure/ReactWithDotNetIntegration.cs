@@ -42,22 +42,7 @@ public static class ReactWithDotNetIntegration
             await next();
         });
 
-        app.Use(async (httpContext, next) =>
-        {
-            var path = httpContext.Request.Path.Value ?? string.Empty;
-
-            foreach (var localFilePath in await TryFindFilePathFromWebRequestPath(path))
-            {
-                foreach (var (contentType, fileBytes) in await TryConvertLocalFilePathToFileContentResultData(localFilePath))
-                {
-                    await Results.File(fileBytes, contentType).ExecuteAsync(httpContext);
-
-                    return;
-                }
-            }
-
-            await next();
-        });
+        app.Use(TryServeStaticFiles);
     }
 
     static Task HandleReactWithDotNetRequest(HttpContext httpContext)
@@ -74,6 +59,23 @@ public static class ReactWithDotNetIntegration
     static Task OnReactContextCreated(ReactContext context)
     {
         return Task.CompletedTask;
+    }
+
+    static async Task TryServeStaticFiles(HttpContext httpContext, Func<Task> next)
+    {
+        var path = httpContext.Request.Path.Value ?? string.Empty;
+
+        foreach (var localFilePath in await TryFindFilePathFromWebRequestPath(path))
+        {
+            foreach (var (contentType, fileBytes) in await TryConvertLocalFilePathToFileContentResultData(localFilePath))
+            {
+                await Results.File(fileBytes, contentType).ExecuteAsync(httpContext);
+
+                return;
+            }
+        }
+
+        await next();
     }
 
     static Task WriteHtmlResponse(HttpContext httpContext, Type layoutType, Type mainContentType)
