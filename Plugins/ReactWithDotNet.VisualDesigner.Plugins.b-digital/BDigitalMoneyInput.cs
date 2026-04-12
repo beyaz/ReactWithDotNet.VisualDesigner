@@ -28,6 +28,9 @@ sealed class BDigitalMoneyInput : PluginComponentBase
     [JsTypeInfo(JsType.Number)]
     public string decimalScale { get; set; }
     
+    [JsTypeInfo(JsType.String)]
+    public string helperText { get; set; }
+    
 
     static class Transforms
     {
@@ -66,18 +69,35 @@ sealed class BDigitalMoneyInput : PluginComponentBase
             {
                 return node;
             }
+
+
+            var props = new List<string>();
+            {
+                var errorTextProp = node.Properties.FirstOrDefault(x => x.Name == nameof(errorText));
+                if (errorTextProp is not null)
+                {
+                    props.Add($"errorText: {errorTextProp.Value}");
+                }
+                
+                var helperTextProp = node.Properties.FirstOrDefault(x => x.Name == nameof(helperText));
+                if (helperTextProp is not null)
+                {
+                    props.Add($"helperText: {helperTextProp.Value}");
+                }
+            }
             
-            var errorTextProp = node.Properties.FirstOrDefault(x => x.Name == nameof(errorText));
-            if (errorTextProp is not null)
+            if (props.Count > 0)
             {
                 node = node with
                 {
-                    Properties = node.Properties.Remove(errorTextProp).Add(new()
+                    Properties = node.Properties.Add(new()
                     {
                         Name  = "inputProps",
-                        Value = $"{{ errorText: {errorTextProp.Value} }}"
+                        Value = "{ " + string.Join(", ", props) + "}"
                     })
                 };
+                
+                return node.RemoveProps(nameof(errorText), nameof(helperText)).ReactNode;
             }
 
             return node;
@@ -100,8 +120,8 @@ sealed class BDigitalMoneyInput : PluginComponentBase
        
 
         node = Run(node, [
-            Transforms.OnChange,
-            Transforms.inputProps
+            Transforms.inputProps,
+            Transforms.OnChange
         ]);
 
 
