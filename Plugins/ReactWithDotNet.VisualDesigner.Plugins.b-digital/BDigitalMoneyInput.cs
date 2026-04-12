@@ -113,7 +113,7 @@ sealed class BDigitalMoneyInput : PluginComponentBase
             return AnalyzeChildren(input, AnalyzeReactNode);
         }
 
-        input = ApplyTranslateOperationOnProps(input, nameof(label), nameof(errorText));
+        input = ApplyTranslateOperationOnProps(input, nameof(label), nameof(errorText), nameof(helperText));
 
         var node = input.Node;
 
@@ -166,12 +166,23 @@ sealed class BDigitalMoneyInput : PluginComponentBase
 
                 new div { fec ?? "TL" }
             },
-            new FlexRow(JustifyContentSpaceBetween, FontSize12, PaddingLeftRight(14), Color(rgb(158, 158, 158)), LineHeight15)
+            
+             new FlexRow(JustifyContentSpaceBetween, FontSize12, PaddingLeftRight(14), Color(rgb(158, 158, 158)), LineHeight15)
             {
-                Color(rgb(211, 47, 47)),
-
-                new div { errorText }
-                //new div{ maxLength }
+                
+                errorText.HasNoValue ? null:
+                new div
+                {
+                    Color(rgb(211, 47, 47)),
+                    errorText
+                },
+                
+                helperText.HasNoValue ? null:
+                    new div
+                    {
+                        helperText
+                    },
+                
             },
 
             Id(id), OnClick(onMouseClick)
