@@ -107,6 +107,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                     [
                         new("4px"),
                         new("8px"),
+                        new("12px"),
                         new("16px"),
                         new("24px")
                     ]
@@ -141,6 +142,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                     [
                         new("4px"),
                         new("8px"),
+                        new("12px"),
                         new("16px"),
                         new("24px")
                     ]
@@ -158,6 +160,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                     [
                         new("4px"),
                         new("8px"),
+                        new("12px"),
                         new("16px"),
                         new("24px")
                     ]
@@ -198,6 +201,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                     [
                         new("4px"),
                         new("8px"),
+                        new("12px"),
                         new("16px"),
                         new("24px")
                     ]
@@ -357,6 +361,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                     [
                         new("4px"),
                         new("8px"),
+                        new("12px"),
                         new("16px"),
                         new("24px")
                     ]
@@ -681,6 +686,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                     [
                         new("4px"),
                         new("8px"),
+                        new("12px"),
                         new("16px"),
                         new("24px")
                     ]
@@ -698,6 +704,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                     [
                         new("4px"),
                         new("8px"),
+                        new("12px"),
                         new("16px"),
                         new("24px")
                     ]
@@ -715,6 +722,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                     [
                         new("4px"),
                         new("8px"),
+                        new("12px"),
                         new("16px"),
                         new("24px")
                     ]
@@ -732,6 +740,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                     [
                         new("4px"),
                         new("8px"),
+                        new("12px"),
                         new("16px"),
                         new("24px")
                     ]
@@ -755,6 +764,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                     [
                         new("4px"),
                         new("8px"),
+                        new("12px"),
                         new("16px"),
                         new("24px")
                     ]
@@ -780,6 +790,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                     [
                         new("4px"),
                         new("8px"),
+                        new("12px"),
                         new("16px"),
                         new("24px")
                     ]
@@ -797,6 +808,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                     [
                         new("4px"),
                         new("8px"),
+                        new("12px"),
                         new("16px"),
                         new("24px")
                     ]
@@ -814,6 +826,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                     [
                         new("4px"),
                         new("8px"),
+                        new("12px"),
                         new("16px"),
                         new("24px")
                     ]
@@ -831,6 +844,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                     [
                         new("4px"),
                         new("8px"),
+                        new("12px"),
                         new("16px"),
                         new("24px")
                     ]
@@ -854,6 +868,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                     [
                         new("4px"),
                         new("8px"),
+                        new("12px"),
                         new("16px"),
                         new("24px")
                     ]
@@ -907,6 +922,7 @@ sealed class StylerComponent : Component<StylerComponent.State>
                     [
                         new("4px"),
                         new("8px"),
+                        new("12px"),
                         new("16px")
                     ]
                 },
