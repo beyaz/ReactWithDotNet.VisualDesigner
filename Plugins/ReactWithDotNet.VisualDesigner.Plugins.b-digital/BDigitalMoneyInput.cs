@@ -24,6 +24,10 @@ sealed class BDigitalMoneyInput : PluginComponentBase
 
     [JsTypeInfo(JsType.Number)]
     public string value { get; set; }
+    
+    [JsTypeInfo(JsType.Number)]
+    public string decimalScale { get; set; }
+    
 
     static class Transforms
     {

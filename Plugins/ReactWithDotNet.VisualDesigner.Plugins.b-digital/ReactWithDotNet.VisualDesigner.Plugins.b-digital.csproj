@@ -34,6 +34,11 @@
 			SourceFiles="$(TargetPath)"
 			DestinationFolder="$(SolutionDir)ReactWithDotNet.VisualDesigner\bin\debug\net8.0\"
 			SkipUnchangedFiles="true" />
+
+        <Copy
+            SourceFiles="$(TargetPath)"
+            DestinationFolder="D:\BOA\tools\b-visual-designer\"
+            SkipUnchangedFiles="true" />
 	</Target>
 	
 
