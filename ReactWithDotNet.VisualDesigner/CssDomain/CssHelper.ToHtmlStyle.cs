@@ -102,6 +102,7 @@ partial class CssHelper
             case "vertical-align":
             case "border-spacing":
             case "zoom":
+            case "stroke-linecap":
             {
                 return CreateFinalCssItem(name, value);
             }
