@@ -27,7 +27,7 @@ sealed class BDigitalGroupView : PluginComponentBase
             return AnalyzeChildren(input, AnalyzeReactNode);
         }
         
-        input = ApplyTranslateOperationOnProps(input, nameof(title));
+        input = ApplyTranslateOperationOnProps(input, nameof(title), nameof(subTitle));
 
         var node = input.Node;
 
