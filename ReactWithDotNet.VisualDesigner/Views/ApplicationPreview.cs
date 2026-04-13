@@ -1079,6 +1079,11 @@ sealed class ApplicationPreview : Component
 
                     propertyValue = maybe.Value.Value;
                 }
+                
+                if (IsStringValue(propertyValue))
+                {
+                    return propertyValue;
+                }
 
                 foreach (var callerProperty in from p in scope.ParentModel.Properties from v in TryParseProperty(p) select v)
                 {
