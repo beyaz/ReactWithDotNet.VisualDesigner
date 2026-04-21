@@ -82,7 +82,14 @@ sealed class BDigitalMoneyInput : PluginComponentBase
                 var helperTextProp = node.Properties.FirstOrDefault(x => x.Name == nameof(helperText));
                 if (helperTextProp is not null)
                 {
-                    props.Add($"helperText: {helperTextProp.Value}");
+                    if (errorTextProp is not null)
+                    {
+                        props.Add($"helperText: {errorTextProp.Value} != null ? null :{helperTextProp.Value}");
+                    }
+                    else
+                    {
+                        props.Add($"helperText: {helperTextProp.Value}");
+                    }
                 }
             }
             
