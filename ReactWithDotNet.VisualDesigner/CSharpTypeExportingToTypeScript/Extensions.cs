@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 
 namespace ReactWithDotNet.VisualDesigner.CSharpTypeExportingToTypeScript;
 
-static class Extensions
+public static class CecilExtensions
 {
     extension(TypeReference typeReference)
     {
@@ -56,7 +56,7 @@ static class Extensions
 
     extension(PropertyDefinition propertyDefinition)
     {
-        internal bool IsExportable
+        public bool IsExportable
         {
             get
             {

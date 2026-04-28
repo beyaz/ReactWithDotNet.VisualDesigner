@@ -1,5 +1,5 @@
 ﻿using Mono.Cecil;
-using static ReactWithDotNet.VisualDesigner.CSharpTypeExportingToTypeScript.Extensions;
+
 
 namespace ReactWithDotNet.VisualDesigner.CSharpTypeExportingToTypeScript;
 

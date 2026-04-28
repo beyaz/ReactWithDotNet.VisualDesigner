@@ -13,3 +13,4 @@ global using Toolbox;
 global using static BDigitalFrameworkApiToTsExporter.Extensions;
 global using ReactWithDotNet.VisualDesigner;
 global using static Toolbox.ExecutionMixins;
+global using  ReactWithDotNet.VisualDesigner.CSharpTypeExportingToTypeScript;
