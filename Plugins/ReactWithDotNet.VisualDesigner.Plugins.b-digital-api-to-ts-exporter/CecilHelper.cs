@@ -8,7 +8,7 @@ static class CecilHelper
     {
         var query =
             from module in assemblyDefinition.Modules
-            from type in module.Types
+            from type in module.Types.Concat(module.Types.SelectMany(GetNestedTypes))
             where type.FullName == fullTypeName
             select type;
 
@@ -18,6 +18,18 @@ static class CecilHelper
         }
 
         return new MissingMemberException(fullTypeName);
+        
+        static IEnumerable<TypeDefinition> GetNestedTypes(TypeDefinition typeDefinition)
+        {
+            foreach (var nestedType in typeDefinition.NestedTypes)
+            {
+                yield return nestedType;
+                foreach (var nestedNestedType in GetNestedTypes(nestedType))
+                {
+                    yield return nestedNestedType;
+                }
+            }
+        }
     }
 
     public static Result<AssemblyDefinition> ReadAssemblyDefinition(string assemblyFilePath)
