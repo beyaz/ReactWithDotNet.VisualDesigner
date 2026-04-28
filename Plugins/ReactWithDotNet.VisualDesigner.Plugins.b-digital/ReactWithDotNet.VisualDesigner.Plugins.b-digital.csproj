@@ -29,7 +29,7 @@
 	</ItemGroup>
 
 
-	<Target Name="CopyOutputAfterBuild" AfterTargets="Build">
+	<Target Name="CopyOutputAfterBuild" AfterTargets="Build" Condition="'$(COMPUTERNAME)' == 'BTARC105NB'">
 		<Copy
 			SourceFiles="$(TargetPath)"
 			DestinationFolder="$(SolutionDir)ReactWithDotNet.VisualDesigner\bin\debug\net8.0\"
