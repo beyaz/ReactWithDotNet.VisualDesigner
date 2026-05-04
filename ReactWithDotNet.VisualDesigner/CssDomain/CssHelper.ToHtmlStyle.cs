@@ -103,6 +103,7 @@ partial class CssHelper
             case "border-spacing":
             case "zoom":
             case "stroke-linecap":
+            case "aspect-ratio":
             {
                 return CreateFinalCssItem(name, value);
             }
