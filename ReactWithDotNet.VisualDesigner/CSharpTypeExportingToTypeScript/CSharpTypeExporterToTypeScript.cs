@@ -14,7 +14,12 @@ sealed record TsFieldDefinition
     public required string Type { get; init; }
     
     public required string ConstantValue { get; init; }
-    
+
+    public override string ToString()
+    {
+        return "{" + Name + ": " + Type + (IsNullable ? " | null" : "") + (ConstantValue != string.Empty ? " = " + ConstantValue : "");
+    }
+
     // @formatter:on
 }
 
@@ -59,9 +64,14 @@ sealed record TsTypeDefinition
  */
 static class CSharpTypeExporterToTypeScript
 {
-
+    
     public static TsTypeDefinition CreateFrom(TypeDefinition typeDefinition)
     {
+        if (typeDefinition == null)
+        {
+            throw new ArgumentNullException(nameof(typeDefinition));
+        }
+
         IEnumerable<TsFieldDefinition> fields;
         if (typeDefinition.IsEnum)
         {
