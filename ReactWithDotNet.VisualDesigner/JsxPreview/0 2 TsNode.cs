@@ -1,11 +1,9 @@
-﻿using Mysqlx.Expr;
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Text.Json.Serialization;
-using static ReactWithDotNet.VisualDesigner.JsxPreview.SyntaxKind;
 
 namespace ReactWithDotNet.VisualDesigner.JsxPreview;
 
-public class SingleOrArrayConverter<T> : JsonConverter<List<T>>
+sealed class SingleOrArrayConverter<T> : JsonConverter<List<T>>
 {
     public override List<T> Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
@@ -34,6 +32,8 @@ public class SingleOrArrayConverter<T> : JsonConverter<List<T>>
 
 sealed record TsNode
 {
+    // @formatter:off
+    
     public int Pos { get; init; }
     
     public int End { get; init; }
@@ -71,5 +71,7 @@ sealed record TsNode
 
     [JsonConverter(typeof(SingleOrArrayConverter<TsNode>))]
     public List<TsNode> Attributes { get; init; }
+
+    // @formatter:on
 
 }
