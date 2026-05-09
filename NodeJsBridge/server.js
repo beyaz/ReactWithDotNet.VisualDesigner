@@ -5,7 +5,7 @@ const ts = require('typescript');
 const app = express();
 const port = 5009;
 
-app.use(express.json({ limit: '4mb' }));
+app.use(express.json({ limit: '900mb' }));
 
 // ------------------------
 // Prettier endpoint
