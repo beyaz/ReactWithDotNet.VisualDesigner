@@ -17,6 +17,11 @@ sealed record TsNode
 
     public string EscapedText { get; init; }
     
+    public TsNode OpeningElement { get; init; }
+    
+    //public TsNode ClosingElement { get; init; }
+
+    
     public string Text { get; init; }
 
     public TsNode Expression { get; init; }
@@ -192,7 +197,7 @@ public class NodeJsBridgeTest
         {
             var element = new JsxElementDto
             {
-                Tag = node.TagName?.Text
+                Tag = node.TagName?.Text //?? node.OpeningElement?.TagName?.EscapedText
             };
 
             // Props
@@ -257,7 +262,7 @@ public class NodeJsBridgeTest
             """
             function greet()
             {
-                const x = 5;");
+                const x = 5;
                 
                 return  (
                   <div>
