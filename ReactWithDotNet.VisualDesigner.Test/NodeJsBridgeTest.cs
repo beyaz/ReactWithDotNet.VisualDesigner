@@ -44,10 +44,12 @@ static class SyntaxKind
 {
     public const int ReturnStatement = 254;
     public const int FunctionDeclaration = 263;
+    public const int ParenthesizedExpression = 218;
     public const int MethodDeclaration = 264;
     public const int IfStatement = 265;
-    public const int JsxElement = 266;
-    public const int JsxSelfClosingElement = 267;
+    public const int JsxElement = 285 ;
+    public const int JsxOpeningElement = 287;
+    public const int JsxSelfClosingElement = 288;
     public const int ConditionalExpression = 3;
 }
 
