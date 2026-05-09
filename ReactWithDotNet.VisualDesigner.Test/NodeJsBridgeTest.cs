@@ -1,9 +1,37 @@
 ﻿using System.Text.Json;
+using System.Text.Json.Serialization;
 using static ReactWithDotNet.VisualDesigner.Test.SyntaxKind;
 
 namespace ReactWithDotNet.VisualDesigner.Test;
 
 
+
+public class SingleOrArrayConverter<T> : JsonConverter<List<T>>
+{
+    public override List<T> Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        var list = new List<T>();
+
+        if (reader.TokenType == JsonTokenType.StartArray)
+        {
+            // normal array
+            list = JsonSerializer.Deserialize<List<T>>(ref reader, options);
+        }
+        else if (reader.TokenType == JsonTokenType.StartObject)
+        {
+            // single object → wrap
+            var item = JsonSerializer.Deserialize<T>(ref reader, options);
+            list.Add(item);
+        }
+
+        return list;
+    }
+
+    public override void Write(Utf8JsonWriter writer, List<T> value, JsonSerializerOptions options)
+    {
+        JsonSerializer.Serialize(writer, value, options);
+    }
+}
 
 sealed record TsNode
 {
@@ -19,7 +47,7 @@ sealed record TsNode
     
     public TsNode OpeningElement { get; init; }
     
-    //public TsNode ClosingElement { get; init; }
+    public TsNode ClosingElement { get; init; }
 
     
     public string Text { get; init; }
@@ -42,6 +70,7 @@ sealed record TsNode
 
     public TsNode TagName { get; init; }
 
+    [JsonConverter(typeof(SingleOrArrayConverter<TsNode>))]
     public List<TsNode> Attributes { get; init; }
 
     public override string ToString()
@@ -197,7 +226,7 @@ public class NodeJsBridgeTest
         {
             var element = new JsxElementDto
             {
-                Tag = node.TagName?.Text //?? node.OpeningElement?.TagName?.EscapedText
+                Tag = node.TagName?.Text ?? node.OpeningElement?.TagName?.EscapedText
             };
 
             // Props
