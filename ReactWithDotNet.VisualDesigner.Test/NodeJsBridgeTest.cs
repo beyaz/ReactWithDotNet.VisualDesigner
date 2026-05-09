@@ -51,6 +51,7 @@ static class SyntaxKind
     public const int JsxOpeningElement = 287;
     public const int JsxSelfClosingElement = 288;
     public const int ConditionalExpression = 3;
+    public const int StringLiteral = 11;
 }
 
 
