@@ -38,10 +38,32 @@ sealed record TsNode
     public TsNode TagName { get; init; }
 
     public List<TsNode> Attributes { get; init; }
+
+    public override string ToString()
+    {
+        if (Kind == FunctionDeclaration)
+        {
+            return Name?.EscapedText ?? nameof(FunctionDeclaration);
+        }
+        
+        if (Kind == Identifier)
+        {
+            return EscapedText ?? nameof(Identifier);
+        }
+        
+        if (Kind == Block)
+        {
+            return $"{nameof(Statements)}: {Statements?.Count ?? 0}";
+        }
+        
+        return base.ToString();
+    }
 }
 
 static class SyntaxKind
 {
+    public const int Block = 242;
+    public const int Identifier = 80;
     public const int ReturnStatement = 254;
     public const int FunctionDeclaration = 263;
     public const int ParenthesizedExpression = 218;
@@ -86,7 +108,7 @@ public class NodeJsBridgeTest
  
     public List<MethodResult> Extract(string json)
     {
-        var root = JsonSerializer.Deserialize<TsNode>(json);
+        var root = JsonSerializer.Deserialize<TsNode>(json, JsonSerializerOptions.Web);
         var results = new List<MethodResult>();
 
         Traverse(root, results, null);
@@ -107,7 +129,7 @@ public class NodeJsBridgeTest
         // RETURN JSX
         if (node.Kind == ReturnStatement && node.Expression != null)
         {
-            var jsx = ParseJsx(node.Expression);
+            var jsx = ParseJsx(node.Expression.Expression);
 
             if (jsx != null && currentMethod != null)
             {
@@ -252,5 +274,7 @@ public class NodeJsBridgeTest
         var tsNode = JsonSerializer.Deserialize<TsNode>(ast.Value, JsonSerializerOptions.Web);
 
         tsNode.Statements[0].Name.EscapedText.ShouldBe("greet");
+
+        Extract(ast.Value);
     }
 }
