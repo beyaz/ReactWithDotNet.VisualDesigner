@@ -16,7 +16,7 @@ public class JsxPreviewTests
                 const x = 5;
                 
                 return  (
-                  <div>
+                  <div id="container" name='abc' p2={yy ? 'a' : 'b'}>
                     <h1>Hello, world!</h1>
                   </div>
                 );

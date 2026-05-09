@@ -70,7 +70,7 @@ static class Parser
 
     static JsxElementDto ParseJsx(TsNode node)
     {
-        if (node == null)
+        if (node == null || node.ContainsOnlyTriviaWhiteSpaces)
         {
             return null;
         }
@@ -78,20 +78,27 @@ static class Parser
         // JSX ELEMENT
         if (node.Kind == SyntaxKind.JsxElement || node.Kind == SyntaxKind.JsxSelfClosingElement)
         {
-            var element = new JsxElementDto
+            var openingElement = node.OpeningElement;
+            
+            JsxElementDto element = new JsxElementDto
             {
-                Tag = node.TagName?.Text ?? node.OpeningElement?.TagName?.EscapedText
+                Tag = node.TagName?.Text ?? openingElement?.TagName?.EscapedText
             };
-
-            // Props
-            if (node.Attributes != null)
+            
+            if (openingElement is not null)
             {
-                foreach (var attr in node.Attributes)
+                element = new JsxElementDto
                 {
-                    element.Props.Add(attr.Name?.Text);
+                    Tag = openingElement.TagName?.EscapedText
+                };
+                
+                foreach (var attr in openingElement.Attributes ?? [])
+                {
+                    element.Props.Add(attr.Name.EscapedText);
                 }
             }
-
+            
+            
             // Children
             foreach (var child in GetAllChildren(node))
             {
@@ -129,7 +136,7 @@ static class Parser
         // METHOD YAKALA
         if (node.Kind == SyntaxKind.FunctionDeclaration || node.Kind == SyntaxKind.MethodDeclaration)
         {
-            currentMethod = node.Name?.Text;
+            currentMethod = node.Name?.EscapedText;
         }
 
         // RETURN JSX

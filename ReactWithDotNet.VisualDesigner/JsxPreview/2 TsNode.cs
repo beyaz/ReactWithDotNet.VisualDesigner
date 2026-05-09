@@ -47,8 +47,9 @@ sealed record TsNode
     public TsNode OpeningElement { get; init; }
     
     public TsNode ClosingElement { get; init; }
-
-    
+       
+    public bool ContainsOnlyTriviaWhiteSpaces { get; init; }
+        
     public string Text { get; init; }
 
     public TsNode Expression { get; init; }
