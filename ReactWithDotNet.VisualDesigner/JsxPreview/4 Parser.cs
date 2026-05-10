@@ -18,15 +18,11 @@ static class Parser
         return $"{name}: {value}";
     }
     
-    public static Result<List<MethodResult>> Extract(string json)
+public  static Result<List<MethodResult>> Extract(string json)
     {
         var root = JsonSerializer.Deserialize<TsNode>(json, JsonSerializerOptions.Web);
 
-        var results = new List<MethodResult>();
-
-        Traverse(root, results, null);
-        
-        return results;
+        return Traverse(root, currentMethod: null);
     }
 
     static JsxElementDto FindReturnJsxStatement(TsNode node)
@@ -94,7 +90,7 @@ static class Parser
         {
             var openingElement = node.OpeningElement;
             
-            JsxElementDto element = new JsxElementDto
+            var element = new JsxElementDto
             {
                 Tag = node.TagName?.Text
             };
@@ -144,30 +140,37 @@ static class Parser
         return null;
     }
 
-    static void Traverse(TsNode node, List<MethodResult> results, string currentMethod)
+    static List<MethodResult> Traverse(TsNode node, string currentMethod)
     {
-        if (node == null)
+        if (node is null)
         {
-            return;
+            return [];
         }
 
-        // METHOD YAKALA
+        // Bu node bir method/function ise scope'u güncelle (recursive scope)
+        var methodInThisScope = currentMethod;
+
         if (node.Kind == SyntaxKind.FunctionDeclaration || node.Kind == SyntaxKind.MethodDeclaration)
         {
-            currentMethod = node.Name?.EscapedText;
+            methodInThisScope = node.Name?.EscapedText;
         }
 
-        // RETURN JSX
-        if (node.Kind == SyntaxKind.ReturnStatement && node.Expression != null)
-        {
-            var jsx = ParseJsx(node.Expression.Expression);
+        List<MethodResult> results = [];
 
-            if (jsx != null && currentMethod != null)
+        // RETURN JSX
+        if (node.Kind == SyntaxKind.ReturnStatement && node.Expression is not null)
+        {
+            // Mevcut kod: node.Expression.Expression
+            // Null güvenliği için fallback:
+            var jsxRoot = node.Expression.Expression ?? node.Expression;
+            var jsx = ParseJsx(jsxRoot);
+
+            if (jsx is not null && methodInThisScope is not null)
             {
                 results.Add(new MethodResult
                 {
-                    MethodName = currentMethod,
-                    Elements   = [jsx]
+                    MethodName = methodInThisScope,
+                    Elements = [jsx]
                 });
             }
         }
@@ -177,25 +180,27 @@ static class Parser
         {
             var conditionText = GetText(node.Condition);
 
-            if (node.ThenStatement != null)
+            if (node.ThenStatement is not null)
             {
                 var jsx = FindReturnJsxStatement(node.ThenStatement);
-                if (jsx != null && currentMethod != null)
+                if (jsx is not null && methodInThisScope is not null)
                 {
                     jsx.Condition = conditionText;
                     results.Add(new MethodResult
                     {
-                        MethodName = currentMethod,
-                        Elements   = [jsx]
+                        MethodName = methodInThisScope,
+                        Elements = [jsx]
                     });
                 }
             }
         }
 
-        // RECURSION
+        // RECURSION: alt sonuçları birleştir
         foreach (var child in GetAllChildren(node))
         {
-            Traverse(child, results, currentMethod);
+            results.AddRange(Traverse(child, methodInThisScope));
         }
+
+        return results;
     }
 }
