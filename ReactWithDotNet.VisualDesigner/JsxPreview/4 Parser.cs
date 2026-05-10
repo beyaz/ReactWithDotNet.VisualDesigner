@@ -11,7 +11,7 @@ static class Parser
         return Traverse(root, currentMethod: null);
     }
 
-    static string AsDesignerPropText(TsNode jsxAttribute)
+    static Result<string> AsDesignerPropText(TsNode jsxAttribute)
     {
         var name = jsxAttribute.Name.EscapedText;
 
@@ -19,13 +19,21 @@ static class Parser
 
         if (jsxAttribute.Initializer.Kind == SyntaxKind.StringLiteral)
         {
+            value = '"'+jsxAttribute.Initializer.Text+'"';
+        }
+        else if (jsxAttribute.Initializer.Kind == SyntaxKind.NumericLiteral)
+        {
             value = jsxAttribute.Initializer.Text;
+        }
+        else
+        {
+            return new ArgumentException($"Unsupported initializer kind: {jsxAttribute.Initializer.Kind}");
         }
 
         return $"{name}: {value}";
     }
 
-    static JsxElementDto FindReturnJsxStatement(TsNode node)
+    static Result<JsxElementDto> FindReturnJsxStatement(TsNode node)
     {
         if (node == null)
         {
@@ -78,7 +86,7 @@ static class Parser
         return node?.Text ?? node?.Name?.Text;
     }
 
-    static JsxElementDto ParseJsx(TsNode node)
+    static Result<JsxElementDto> ParseJsx(TsNode node)
     {
         if (node == null || node.ContainsOnlyTriviaWhiteSpaces)
         {
@@ -106,19 +114,30 @@ static class Parser
                 {
                     foreach (var prop in attr.Properties ?? [])
                     {
-                        element.Props.Add(AsDesignerPropText(prop));
+                        var result = AsDesignerPropText(prop);
+                        if (result.HasError)
+                        {
+                            return result.Error;
+                        }
+                        element.Props.Add(result.Value);
                     }
                 }
             }
 
-            // Children
+            
             foreach (var child in GetAllChildren(node))
             {
                 var childJsx = ParseJsx(child);
-                if (childJsx != null)
+                if (childJsx.HasError)
                 {
-                    element.Children.Add(childJsx);
+                    return childJsx.Error;
                 }
+                
+                if (childJsx.Value is not null)
+                {
+                    element.Children.Add(childJsx.Value);
+                }
+                
             }
 
             return element;
@@ -130,7 +149,7 @@ static class Parser
             var jsx = ParseJsx(node.ThenStatement);
             if (jsx != null)
             {
-                jsx.Condition = GetText(node.Condition);
+                jsx.Value.Condition = GetText(node.Condition);
                 return jsx;
             }
         }
@@ -145,12 +164,11 @@ static class Parser
             return Result.From<IReadOnlyList<MethodResult>>([]);
         }
 
-        // Bu node bir method/function ise scope'u güncelle (recursive scope)
-        var methodInThisScope = currentMethod;
+       
 
         if (node.Kind == SyntaxKind.FunctionDeclaration || node.Kind == SyntaxKind.MethodDeclaration)
         {
-            methodInThisScope = node.Name?.EscapedText;
+            currentMethod = node.Name?.EscapedText;
         }
 
         List<MethodResult> results = [];
@@ -158,17 +176,14 @@ static class Parser
         // RETURN JSX
         if (node.Kind == SyntaxKind.ReturnStatement && node.Expression is not null)
         {
-            // Mevcut kod: node.Expression.Expression
-            // Null güvenliği için fallback:
-            var jsxRoot = node.Expression.Expression ?? node.Expression;
-            var jsx = ParseJsx(jsxRoot);
+            var jsx = ParseJsx(node.Expression.Expression ?? node.Expression);
 
-            if (jsx is not null && methodInThisScope is not null)
+            if (jsx is not null && currentMethod is not null)
             {
                 results.Add(new MethodResult
                 {
-                    MethodName = methodInThisScope,
-                    Elements   = [jsx]
+                    MethodName = currentMethod,
+                    Elements   = [jsx.Value]
                 });
             }
         }
@@ -181,13 +196,13 @@ static class Parser
             if (node.ThenStatement is not null)
             {
                 var jsx = FindReturnJsxStatement(node.ThenStatement);
-                if (jsx is not null && methodInThisScope is not null)
+                if (jsx is not null && currentMethod is not null)
                 {
-                    jsx.Condition = conditionText;
+                    jsx.Value.Condition = conditionText;
                     results.Add(new MethodResult
                     {
-                        MethodName = methodInThisScope,
-                        Elements   = [jsx]
+                        MethodName = currentMethod,
+                        Elements   = [jsx.Value]
                     });
                 }
             }
@@ -196,7 +211,7 @@ static class Parser
         // RECURSION: alt sonuçları birleştir
         foreach (var child in GetAllChildren(node))
         {
-            var result = Traverse(child, methodInThisScope);
+            var result = Traverse(child, currentMethod);
             if (result.HasError)
             {
                 return result.Error;
