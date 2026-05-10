@@ -67,7 +67,7 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
                         () => new IconClose() +
                               Size(24) + Color(Gray300) + Hover(Color(Gray400)) +
                               OnClick(OnClearFilterTextClicked)
-                              )
+                    )
                 },
                 new div(WidthFull, BorderBottom(1, dotted, "#d9d9d9"))
             },
