@@ -1643,7 +1643,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
                 return Task.CompletedTask;
             }
-        } + When(state.LeftTab != LeftTabs.ElementTree, DisplayNone);
+        };
 
         var componentTree = new ComponentTreeView
         {
@@ -1675,7 +1675,7 @@ sealed class ApplicationView : Component<ApplicationState>
             new FlexColumn(WidthFull, Flex(1), OverflowAuto)
             {
                 state.LeftTab == LeftTabs.Components ?  componentTree: null,
-                elementTree
+                state.LeftTab == LeftTabs.ElementTree ?  elementTree: null
             }
         };
     }
