@@ -604,3 +604,17 @@ sealed class IconSearch : PureComponent
         };
     }
 }
+
+sealed class IconLocation : PureComponent
+{
+    protected override Element render()
+    {
+        return new svg( ViewBox(0, 0, 24, 24), Fill(none), svg.Size(24), Stroke("currentColor"), StrokeWidth("2"), StrokeLinecap("round"), StrokeLinejoin("round"))
+        {
+            
+            new path { d = "M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z" },
+                        new circle { cx = "12", cy = "10", r = "3" }
+            
+        };
+    }
+}

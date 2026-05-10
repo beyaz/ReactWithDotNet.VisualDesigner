@@ -1498,10 +1498,10 @@ sealed class ApplicationView : Component<ApplicationState>
                     
                     new FlexRowCentered(WidthFull, Hover(activeTabStyle))
                     {
-                        new IconSearch() + Size(24) + Color(state.LeftTab == LeftTabs.Preview ? Gray500 : Gray200),
+                        new IconSearch() + Size(24) + Color(state.LeftTab == LeftTabs.ExistingJsx ? Gray500 : Gray200),
                         OnClick([StopPropagation](_) =>
                         {
-                            state = state with { LeftTab = LeftTabs.Preview };
+                            state = state with { LeftTab = LeftTabs.ExistingJsx };
                             return Task.CompletedTask;
                         })
                     }
@@ -1660,6 +1660,23 @@ sealed class ApplicationView : Component<ApplicationState>
             },
             SelectionChanged = ChangeSelectedComponent
         };
+        
+        var existingJsxView = new ExistingJsxView
+        {
+            ProjectId   = state.ProjectId,
+            ComponentId = state.ComponentId,
+            FilterText  = state.ComponentTreeViewFilterText,
+            FilterTextChanged = [SkipRender](x) =>
+            {
+                state = state with { ComponentTreeViewFilterText = x };
+
+                SetUserLastState(state);
+
+                return Task.CompletedTask;
+            },
+            SelectionChanged = ChangeSelectedComponent
+        };
+
 
         return new FlexColumn(SizeFull, AlignItemsCenter, BorderRight(1, dotted, "#d9d9d9"), Background(White))
         {
@@ -1675,7 +1692,8 @@ sealed class ApplicationView : Component<ApplicationState>
             new FlexColumn(WidthFull, Flex(1), OverflowAuto)
             {
                 state.LeftTab == LeftTabs.Components ?  componentTree: null,
-                state.LeftTab == LeftTabs.ElementTree ?  elementTree: null
+                state.LeftTab == LeftTabs.ElementTree ?  elementTree: null,
+                state.LeftTab == LeftTabs.ExistingJsx ?  existingJsxView: null
             }
         };
     }

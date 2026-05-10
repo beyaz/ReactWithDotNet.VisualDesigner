@@ -1,0 +1,413 @@
+﻿using System.IO;
+
+namespace ReactWithDotNet.VisualDesigner.Views;
+
+delegate Task ExistingJsxViewSelectionChanged(int componentId);
+
+sealed class ExistingJsxView : Component<ExistingJsxView.State>
+{
+    public required int ComponentId { get; init; }
+
+    public string FilterText { get; init; }
+
+    [CustomEvent]
+    public Func<string, Task> FilterTextChanged { get; init; }
+
+    public int ProjectId { get; init; }
+
+    [CustomEvent]
+    public ExistingJsxViewSelectionChanged SelectionChanged { get; init; }
+
+    protected override Task constructor()
+    {
+        return InitializeState();
+    }
+
+    protected override Task OverrideStateFromPropsBeforeRender()
+    {
+        if (ProjectId != state.ProjectId)
+        {
+            return InitializeState();
+        }
+
+        return Task.CompletedTask;
+    }
+
+    protected override Element render()
+    {
+        if (ProjectId is 0 || ComponentId is 0)
+        {
+            return new FlexRowCentered(SizeFull) { "Empty" };
+        }
+
+        return new FlexColumn(SizeFull, CursorDefault, OutlineNone, TabIndex(0))
+        {
+            new FlexColumn(WidthFull)
+            {
+                new FlexRow(AlignItemsCenter, WidthFull, Gap(8), PaddingX(8))
+                {
+                    new IconLocation() + Size(16) + Color(Gray300),
+                    new input
+                    {
+                        type                     = "text",
+                        placeholder              = "Directory Path",
+                        valueBind                = () => state.SearchDirectory,
+                        valueBindDebounceTimeout = 400,
+                        valueBindDebounceHandler = OnLocationTypeFinished,
+                        autoFocus                = true,
+                        style =
+                        {
+                            FlexGrow(1),
+                            Focus(OutlineNone)
+                        }
+                    },
+                    When
+                    (
+                        state.SearchDirectory?.Length > 0,
+                        () => new IconClose() +
+                              Size(24) + Color(Gray300) + Hover(Color(Gray400)) +
+                              OnClick(OnClearLocationTextClicked)
+                    )
+                },
+                new div(WidthFull, BorderBottom(1, dotted, "#d9d9d9"))
+            },
+            new FlexColumn(WidthFull)
+            {
+                new FlexRow(AlignItemsCenter, WidthFull, Gap(8), PaddingX(8))
+                {
+                    new IconFilter() + Size(16) + Color(Gray300),
+                    new input
+                    {
+                        type                     = "text",
+                        placeholder              = "search",
+                        valueBind                = () => state.FilterText,
+                        valueBindDebounceTimeout = 400,
+                        valueBindDebounceHandler = OnFilterTextTypeFinished,
+                        autoFocus                = true,
+                        style =
+                        {
+                            FlexGrow(1),
+                            Focus(OutlineNone)
+                        }
+                    },
+                    When
+                    (
+                        state.FilterText?.Length > 0,
+                        () => new IconClose() +
+                              Size(24) + Color(Gray300) + Hover(Color(Gray400)) +
+                              OnClick(OnClearFilterTextClicked)
+                    )
+                },
+                new div(WidthFull, BorderBottom(1, dotted, "#d9d9d9"))
+            },
+
+            new FlexColumn(Flex(1), OverflowAuto)
+            {
+                ToVisual(CalculateRootNode(), 0)
+            }
+        };
+    }
+
+    static NodeModel CalculateRootNodeFrom(IEnumerable<NodeModel> nodes)
+    {
+        var rootNode = new NodeModel
+        {
+            Path = "0"
+        };
+
+        foreach (var item in nodes)
+        {
+            openPath(rootNode, item.DesignLocation);
+
+            append(rootNode, item);
+        }
+
+        return rootNode;
+
+        static void append(NodeModel rootNode, NodeModel node)
+        {
+            var names = node.Names.SkipLast(1).ToList();
+
+            var parent = rootNode;
+
+            foreach (var name in names)
+            {
+                parent = parent.Children.First(x => x.Label == name);
+            }
+
+            parent.Children.Add(node with
+            {
+                Label = node.Names[^1],
+
+                Path = $"{parent.Path}_{parent.Children.Count}"
+            });
+        }
+
+        static void openPath(NodeModel rootNode, string componentName)
+        {
+            var names = componentName.Split('/', StringSplitOptions.RemoveEmptyEntries).SkipLast(1).ToList();
+
+            var node = rootNode;
+
+            foreach (var name in names)
+            {
+                var namedChild = node.Children.Find(x => x.Label == name);
+                if (namedChild is not null)
+                {
+                    node = namedChild;
+                    continue;
+                }
+
+                node.Children.Add(new()
+                {
+                    Path  = $"{node.Path}_{node.Children.Count}",
+                    Label = name
+                });
+
+                node = node.Children[^1];
+            }
+        }
+    }
+
+    NodeModel CalculateRootNode()
+    {
+        return CalculateRootNodeFrom(from node in GetAllNodes() where HasMatch(node) select node);
+
+        bool HasMatch(NodeModel node)
+        {
+            if (node.Label?.ContainsIgnoreCase(state.FilterText) is true)
+            {
+                return true;
+            }
+
+            if (HasAny(from x in node.Names where x.ContainsIgnoreCase(state.FilterText) select x))
+            {
+                return true;
+            }
+
+            if (node.ComponentConfig?.Name.ContainsIgnoreCase(state.FilterText) is true)
+            {
+                return true;
+            }
+
+            if (node.ComponentConfig?.OutputFilePath.ContainsIgnoreCase(state.FilterText) is true)
+            {
+                return true;
+            }
+
+            return false;
+        }
+    }
+
+    IReadOnlyList<NodeModel> GetAllNodes()
+    {
+        return Cache.AccessValue($"{nameof(ComponentTreeView)}-{nameof(GetAllNodes)}-{ProjectId}",
+            () => ListFrom(from x in GetAllComponentsInProjectFromCache(ProjectId)
+                           orderby x.Config.DesignLocation
+                           select CreateNode(x)));
+
+        static NodeModel CreateNode(ComponentEntity x)
+        {
+            var designLocation = x.Config.DesignLocation.Replace("{name}", x.Config.Name);
+
+            var names = designLocation.Split(['/', Path.DirectorySeparatorChar], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+            return new NodeModel
+            {
+                ComponentId     = x.Id,
+                Names           = names,
+                DesignLocation  = x.Config.DesignLocation,
+                ComponentConfig = x.Config
+            };
+        }
+    }
+
+    Task InitializeState()
+    {
+        state = new()
+        {
+            ProjectId = ProjectId,
+
+            CollapsedNodes = [],
+
+            FilterText = state?.FilterText ?? FilterText
+        };
+
+        CalculateRootNode();
+
+        return Task.CompletedTask;
+    }
+
+    Task OnClearLocationTextClicked(MouseEvent e)
+    {
+        state = state with
+        {
+            FilterText = null
+        };
+
+        DispatchEvent(FilterTextChanged, [null]);
+
+        return Task.CompletedTask;
+    }
+    
+    Task OnClearFilterTextClicked(MouseEvent e)
+    {
+        state = state with
+        {
+            FilterText = null
+        };
+
+        DispatchEvent(FilterTextChanged, [null]);
+
+        return Task.CompletedTask;
+    }
+
+    Task OnFilterTextTypeFinished()
+    {
+        CalculateRootNode();
+
+        DispatchEvent(FilterTextChanged, [state.FilterText]);
+
+        return Task.CompletedTask;
+    }
+    
+    Task OnLocationTypeFinished()
+    {
+        CalculateRootNode();
+
+        DispatchEvent(FilterTextChanged, [state.FilterText]);
+
+        return Task.CompletedTask;
+    }
+
+    [StopPropagation]
+    async Task OnTreeItemClicked(MouseEvent e)
+    {
+        var selectedPath = e.currentTarget.id;
+
+        var node = CalculateRootNode();
+
+        foreach (var item in selectedPath.Split('_', StringSplitOptions.RemoveEmptyEntries).Skip(1))
+        {
+            var index = int.Parse(item);
+
+            node = node.Children[index];
+        }
+
+        if (node.ComponentId.HasValue)
+        {
+            DispatchEvent(SelectionChanged, [node.ComponentId.Value]);
+        }
+        else
+        {
+            await ToggleFold(e);
+        }
+    }
+
+    [StopPropagation]
+    Task ToggleFold(MouseEvent e)
+    {
+        var nodePath = e.currentTarget.id;
+
+        if (state.CollapsedNodes.Contains(nodePath))
+        {
+            state.CollapsedNodes.Remove(nodePath);
+        }
+        else
+        {
+            state.CollapsedNodes.Add(nodePath);
+        }
+
+        return Task.CompletedTask;
+    }
+
+    IReadOnlyList<Element> ToVisual(NodeModel node, int indent)
+    {
+        const int paddingLength = 18;
+
+        var foldIcon = new FlexRowCentered(Size(16), PositionAbsolute, Top(4), Left(indent * paddingLength - 12), Hover(BorderRadius(36), Background(Gray50)))
+        {
+            new IconArrowRightOrDown { IsArrowDown = !state.CollapsedNodes.Contains(node.Path) },
+
+            Id(node.Path),
+            OnClick(ToggleFold)
+        };
+        if (node.Path == "0" || node.HasNoChild())
+        {
+            foldIcon = null;
+        }
+
+        var returnList = new List<Element>
+        {
+            new FlexRow(PaddingLeft(indent * paddingLength), Id(node.Path), OnClick(OnTreeItemClicked))
+            {
+                When(node.ComponentId == ComponentId, Background(Blue100), BorderRadius(3)),
+
+                UserSelect(none),
+
+                PositionRelative,
+
+                foldIcon,
+
+                new FlexRow(Gap(4), AlignItemsCenter)
+                {
+                    MarginLeft(4), FontSize13,
+
+                    new span { node.Label }
+                }
+            }
+        };
+
+        if (node.HasNoChild())
+        {
+            return returnList;
+        }
+
+        if (state.CollapsedNodes.Contains(node.Path))
+        {
+            return returnList;
+        }
+
+        foreach (var child in node.Children)
+        {
+            returnList.AddRange(ToVisual(child, indent + 1));
+        }
+
+        return returnList;
+    }
+
+    internal record State
+    {
+        public string SearchDirectory { get; init; }
+        
+        public required List<string> CollapsedNodes { get; init; }
+
+        public string FilterText { get; init; }
+
+        public int ProjectId { get; init; }
+
+        public IReadOnlyList<NodeModel> VisibleNodes { get; init; }
+    }
+
+    internal record NodeModel
+    {
+        public List<NodeModel> Children { get; init; } = [];
+
+        public int? ComponentId { get; init; }
+
+        public string DesignLocation { get; init; }
+
+        public string Label { get; init; }
+
+        public IReadOnlyList<string> Names { get; init; } = [];
+
+        public string Path { get; init; }
+
+        public ComponentConfig ComponentConfig { get; init; }
+
+        public bool HasNoChild()
+        {
+            return Children.Count == 0;
+        }
+    }
+}
