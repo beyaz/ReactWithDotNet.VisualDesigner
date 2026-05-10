@@ -1674,7 +1674,16 @@ sealed class ApplicationView : Component<ApplicationState>
 
                 return Task.CompletedTask;
             },
-            SelectionChanged = ChangeSelectedComponent
+            SelectionChanged = async (int _) =>
+            {
+
+                var x = await  JsxPreview.Parser.Extract(await System.IO.File.ReadAllTextAsync("d:\\temp\\A.tsx"));
+
+                state = state with
+                {
+                    ComponentRootElement = x.Value[0].RootElement
+                };
+            }
         };
 
 

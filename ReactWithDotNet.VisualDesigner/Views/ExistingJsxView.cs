@@ -33,7 +33,7 @@ sealed class ExistingJsxView : Component<ExistingJsxView.State>
         return Task.CompletedTask;
     }
 
-    protected override Element render()
+    protected override async Task<Element> renderAsync()
     {
         if (ProjectId is 0 || ComponentId is 0)
         {
@@ -103,7 +103,7 @@ sealed class ExistingJsxView : Component<ExistingJsxView.State>
 
             new FlexColumn(Flex(1), OverflowAuto)
             {
-                ToVisual(CalculateRootNode(), 0)
+                ToVisual(await CalculateRootNode(), 0)
             }
         };
     }
@@ -169,9 +169,9 @@ sealed class ExistingJsxView : Component<ExistingJsxView.State>
         }
     }
 
-    NodeModel CalculateRootNode()
+    async Task<NodeModel> CalculateRootNode()
     {
-        return CalculateRootNodeFrom(from node in GetAllNodes() where HasMatch(node) select node);
+        return CalculateRootNodeFrom(from node in await GetAllNodes() where HasMatch(node) select node);
 
         bool HasMatch(NodeModel node)
         {
@@ -199,30 +199,41 @@ sealed class ExistingJsxView : Component<ExistingJsxView.State>
         }
     }
 
-    IReadOnlyList<NodeModel> GetAllNodes()
+    async Task<IReadOnlyList<NodeModel>> GetAllNodes()
     {
-        return Cache.AccessValue($"{nameof(ComponentTreeView)}-{nameof(GetAllNodes)}-{ProjectId}",
-            () => ListFrom(from x in GetAllComponentsInProjectFromCache(ProjectId)
-                           orderby x.Config.DesignLocation
-                           select CreateNode(x)));
-
-        static NodeModel CreateNode(ComponentEntity x)
+        if (state.LocationText.HasNoValue)
         {
-            var designLocation = x.Config.DesignLocation.Replace("{name}", x.Config.Name);
-
-            var names = designLocation.Split(['/', Path.DirectorySeparatorChar], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-
-            return new NodeModel
-            {
-                ComponentId     = x.Id,
-                Names           = names,
-                DesignLocation  = x.Config.DesignLocation,
-                ComponentConfig = x.Config
-            };
+            return [];
         }
+
+        List<NodeModel> items = [];
+        
+        foreach (var file in Directory.GetFiles(state.LocationText, "*.tsx", SearchOption.AllDirectories))
+        {
+            var result = await JsxPreview.Parser.Extract(await File.ReadAllTextAsync(file));
+            if (result.HasError)
+            {
+                continue;
+            }
+            
+            foreach (var methodResult in result.Value)
+            {
+                var node = new NodeModel
+                {
+                    ComponentId     = -1,
+                    Names           = file.RemoveFromStart(state.LocationText).Split(Path.DirectorySeparatorChar,StringSplitOptions.RemoveEmptyEntries),
+                    DesignLocation  = $"/{Path.GetFileNameWithoutExtension(file)}/{methodResult.MethodName}/a",
+                    ComponentConfig = new ComponentConfig()
+                };
+
+                items.Add(node);
+            }
+        }
+
+        return items;
     }
 
-    Task InitializeState()
+    async Task InitializeState()
     {
         state = new()
         {
@@ -233,9 +244,8 @@ sealed class ExistingJsxView : Component<ExistingJsxView.State>
             FilterText = state?.FilterText ?? FilterText
         };
 
-        CalculateRootNode();
+        await CalculateRootNode();
 
-        return Task.CompletedTask;
     }
 
     Task OnClearLocationTextClicked(MouseEvent e)
@@ -262,22 +272,20 @@ sealed class ExistingJsxView : Component<ExistingJsxView.State>
         return Task.CompletedTask;
     }
 
-    Task OnFilterTextTypeFinished()
+    async Task OnFilterTextTypeFinished()
     {
-        CalculateRootNode();
+        await CalculateRootNode();
 
         DispatchEvent(FilterTextChanged, [state.FilterText]);
 
-        return Task.CompletedTask;
     }
     
-    Task OnLocationTypeFinished()
+    async Task OnLocationTypeFinished()
     {
-        CalculateRootNode();
+        await CalculateRootNode();
 
         DispatchEvent(FilterTextChanged, [state.FilterText]);
 
-        return Task.CompletedTask;
     }
 
     [StopPropagation]
@@ -285,7 +293,7 @@ sealed class ExistingJsxView : Component<ExistingJsxView.State>
     {
         var selectedPath = e.currentTarget.id;
 
-        var node = CalculateRootNode();
+        var node = await CalculateRootNode();
 
         foreach (var item in selectedPath.Split('_', StringSplitOptions.RemoveEmptyEntries).Skip(1))
         {
@@ -378,7 +386,7 @@ sealed class ExistingJsxView : Component<ExistingJsxView.State>
 
     internal record State
     {
-        public string LocationText { get; init; }
+        public string LocationText { get; init; } = @"D:\temp\";
         
         public required List<string> CollapsedNodes { get; init; }
 

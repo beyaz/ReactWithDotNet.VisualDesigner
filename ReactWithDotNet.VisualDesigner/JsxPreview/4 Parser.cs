@@ -160,7 +160,10 @@ static class Parser
                 
                 if (childJsx.Value is not null)
                 {
-                    element.Children.Add(childJsx.Value);
+                    element = element with
+                    {
+                        Children = element.Children.Add(childJsx.Value)
+                    };
                 }
                 
             }
