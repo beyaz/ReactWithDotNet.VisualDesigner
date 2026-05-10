@@ -51,7 +51,7 @@ sealed class ExistingJsxView : Component<ExistingJsxView.State>
                     {
                         type                     = "text",
                         placeholder              = "Directory Path",
-                        valueBind                = () => state.SearchDirectory,
+                        valueBind                = () => state.LocationText,
                         valueBindDebounceTimeout = 400,
                         valueBindDebounceHandler = OnLocationTypeFinished,
                         autoFocus                = true,
@@ -63,7 +63,7 @@ sealed class ExistingJsxView : Component<ExistingJsxView.State>
                     },
                     When
                     (
-                        state.SearchDirectory?.Length > 0,
+                        state.LocationText?.Length > 0,
                         () => new IconClose() +
                               Size(24) + Color(Gray300) + Hover(Color(Gray400)) +
                               OnClick(OnClearLocationTextClicked)
@@ -378,7 +378,7 @@ sealed class ExistingJsxView : Component<ExistingJsxView.State>
 
     internal record State
     {
-        public string SearchDirectory { get; init; }
+        public string LocationText { get; init; }
         
         public required List<string> CollapsedNodes { get; init; }
 
