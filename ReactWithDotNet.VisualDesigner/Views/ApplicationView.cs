@@ -1465,6 +1465,8 @@ sealed class ApplicationView : Component<ApplicationState>
             addIconInLayersTab.Add(VisibilityCollapse);
         }
 
+        var activeTabStyle = Background(Gray50) + BorderRadius(36);
+        
         var tabButtons = new FlexRow(WidthFull, FontWeightBold, AlignItemsCenter, Padding(8, 4), JustifyContentSpaceAround, BorderBottom(1, dotted, "#d9d9d9"), BorderTop(1, dotted, "#d9d9d9"))
         {
             Color(Gray300), CursorDefault, UserSelect(none),
@@ -1475,7 +1477,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
                 new FlexRow(JustifyContentSpaceEvenly, WidthFull, PaddingX(4))
                 {
-                    new FlexRowCentered(WidthFull, Hover(Background(Gray50), BorderRadius(36)))
+                    new FlexRowCentered(WidthFull, Hover(activeTabStyle))
                     {
                         new IconReact() + Size(24) + Color(state.LeftTab == LeftTabs.Components ? Gray500 : Gray200),
                         OnClick([StopPropagation](_) =>
@@ -1484,12 +1486,22 @@ sealed class ApplicationView : Component<ApplicationState>
                             return Task.CompletedTask;
                         })
                     },
-                    new FlexRowCentered(WidthFull, Hover(Background(Gray50), BorderRadius(36)))
+                    new FlexRowCentered(WidthFull, Hover(activeTabStyle))
                     {
                         new IconLayers() + Size(18) + Color(state.LeftTab == LeftTabs.ElementTree ? Gray500 : Gray200),
                         OnClick([StopPropagation](_) =>
                         {
                             state = state with { LeftTab = LeftTabs.ElementTree };
+                            return Task.CompletedTask;
+                        })
+                    },
+                    
+                    new FlexRowCentered(WidthFull, Hover(activeTabStyle))
+                    {
+                        new IconSearch() + Size(24) + Color(state.LeftTab == LeftTabs.Preview ? Gray500 : Gray200),
+                        OnClick([StopPropagation](_) =>
+                        {
+                            state = state with { LeftTab = LeftTabs.Preview };
                             return Task.CompletedTask;
                         })
                     }

@@ -81,7 +81,7 @@ public enum AttributeDragPosition
 
 public enum LeftTabs
 {
-    Components, ElementTree
+    Components, ElementTree, Preview
 }
 
 public enum MainContentTabs
