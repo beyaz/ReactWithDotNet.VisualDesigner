@@ -31,6 +31,8 @@ public class JsxPreviewTests
 
         tsNode.Statements[0].Name.EscapedText.ShouldBe("greet");
 
-        Parser.Extract(ast.Value);
+        var result = Parser.Extract(ast.Value);
+        
+        result.Count.ShouldBe(1);
     }
 }

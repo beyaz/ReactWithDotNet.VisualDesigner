@@ -2,6 +2,9 @@
 
 static class SyntaxKind
 {
+    
+    public const int JsxAttributes = 293;
+    public const int JsxAttribute = 292;
     public const int SourceFile = 308;
     public const int Block = 242;
     public const int Identifier = 80;

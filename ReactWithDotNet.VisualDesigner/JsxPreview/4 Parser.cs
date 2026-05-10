@@ -4,6 +4,20 @@ namespace ReactWithDotNet.VisualDesigner.JsxPreview;
 
 static class Parser
 {
+    static string AsDesignerPropText(TsNode jsxAttribute)
+    {
+        var name = jsxAttribute.Name.EscapedText;
+        
+        string value = null;
+        
+        if (jsxAttribute.Initializer.Kind == SyntaxKind.StringLiteral)
+        {
+            value = jsxAttribute.Initializer.Text;
+        }
+
+        return $"{name}: {value}";
+    }
+    
     public static List<MethodResult> Extract(string json)
     {
         var root = JsonSerializer.Deserialize<TsNode>(json, JsonSerializerOptions.Web);
@@ -82,19 +96,23 @@ static class Parser
             
             JsxElementDto element = new JsxElementDto
             {
-                Tag = node.TagName?.Text ?? openingElement?.TagName?.EscapedText
+                Tag = node.TagName?.Text
             };
             
             if (openingElement is not null)
             {
                 element = new JsxElementDto
                 {
-                    Tag = openingElement.TagName?.EscapedText
+                    Tag = openingElement.TagName.EscapedText
                 };
                 
                 foreach (var attr in openingElement.Attributes ?? [])
                 {
-                    element.Props.Add(attr.Name.EscapedText);
+                    foreach (var prop in attr.Properties ?? [])
+                    {
+                        element.Props.Add(AsDesignerPropText(prop));
+                    }
+                    
                 }
             }
             

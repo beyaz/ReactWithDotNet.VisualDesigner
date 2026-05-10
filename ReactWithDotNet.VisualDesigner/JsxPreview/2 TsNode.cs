@@ -49,6 +49,9 @@ sealed record TsNode
     public TsNode ClosingElement { get; init; }
        
     public bool ContainsOnlyTriviaWhiteSpaces { get; init; }
+    
+    public TsNode Initializer { get; init; }
+    
         
     public string Text { get; init; }
 
@@ -72,6 +75,9 @@ sealed record TsNode
 
     [JsonConverter(typeof(SingleOrArrayConverter<TsNode>))]
     public List<TsNode> Attributes { get; init; }
+    
+    public List<TsNode> Properties { get; init; }
+    
 
     // @formatter:on
 
