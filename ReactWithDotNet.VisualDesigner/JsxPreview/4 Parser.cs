@@ -109,7 +109,7 @@ static class Parser
             return new JsxElementDto
             {
                 Tag = "#text",
-                Props = [$"{Design.Content}: {node.Text}"]
+                Properties = [$"{Design.Content}: {node.Text}"]
             };
         }
 
@@ -139,7 +139,7 @@ static class Parser
                         {
                             return result.Error;
                         }
-                        element.Props = element.Props.Add(result.Value);
+                        element.Properties = element.Properties.Add(result.Value);
                     }
                 }
             }
@@ -169,7 +169,7 @@ static class Parser
             var jsx = ParseJsx(node.ThenStatement, scope);
             if (jsx != null)
             {
-                jsx.Value.Props = jsx.Value.Props.Add( Design.ShowIf + ":" + GetText(node.Condition));
+                jsx.Value.Properties = jsx.Value.Properties.Add( Design.ShowIf + ":" + GetText(node.Condition));
                 return jsx;
             }
         }
@@ -221,7 +221,7 @@ static class Parser
                 var jsx = FindReturnJsxStatement(node.ThenStatement, scope);
                 if (jsx is not null && scope.MethodName is not null)
                 {
-                    jsx.Value.Props = jsx.Value.Props.Add( Design.ShowIf + ":" + conditionText);
+                    jsx.Value.Properties = jsx.Value.Properties.Add( Design.ShowIf + ":" + conditionText);
                     results.Add(new MethodResult
                     {
                         MethodName = scope.MethodName,
