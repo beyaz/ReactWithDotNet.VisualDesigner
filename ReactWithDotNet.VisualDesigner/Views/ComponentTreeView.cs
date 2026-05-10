@@ -122,19 +122,10 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
 
             foreach (var name in names)
             {
-                var hasAlreadyNamedChild = false;
-
-                foreach (var child in node.Children.Where(x => x.Label == name))
+                var namedChild = node.Children.Find(x => x.Label == name);
+                if (namedChild is not null)
                 {
-                    node = child;
-
-                    hasAlreadyNamedChild = true;
-
-                    break;
-                }
-
-                if (hasAlreadyNamedChild)
-                {
+                    node = namedChild;
                     continue;
                 }
 
