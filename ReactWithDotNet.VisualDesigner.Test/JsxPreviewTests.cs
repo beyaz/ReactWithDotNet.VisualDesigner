@@ -17,7 +17,18 @@ public class JsxPreviewTests
                 
                 return  (
                   <div id="container" name='abc' p1={4} p2={yy ? 'a' : 'b'}>
-                    <h1>Hello, world!</h1>
+                    <h1>Hello, world! <span>xyz</span></h1>
+                  </div>
+                );
+            }
+            
+            function greet2()
+            {
+                const x = 5;
+                
+                return  (
+                  <div id="container" name='abc' p1={4} p2={yy ? 'a' : 'b'}>
+                    <h1>Hello, world! <span>xyz</span></h1>
                   </div>
                 );
             }
@@ -27,6 +38,6 @@ public class JsxPreviewTests
 
         var result = await Parser.Extract(tsCode);
         
-        result.Value.Count.ShouldBe(1);
+        result.Value.Count.ShouldBe(2);
     }
 }

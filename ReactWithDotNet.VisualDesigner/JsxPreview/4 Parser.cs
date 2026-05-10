@@ -104,6 +104,15 @@ static class Parser
             return Result.From<JsxElementDto>(null);
         }
 
+        if (node.Kind == SyntaxKind.JsxText)
+        {
+            return new JsxElementDto
+            {
+                Tag = "#text",
+                Props = [$"{Design.Content}: {node.Text}"]
+            };
+        }
+
         // JSX ELEMENT
         if (node.Kind == SyntaxKind.JsxElement || node.Kind == SyntaxKind.JsxSelfClosingElement)
         {
