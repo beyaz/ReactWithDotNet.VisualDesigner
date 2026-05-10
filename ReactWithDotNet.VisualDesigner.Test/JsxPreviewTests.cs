@@ -16,7 +16,7 @@ public class JsxPreviewTests
                 const x = 5;
                 
                 return  (
-                  <div id="container" name='abc' p2={yy ? 'a' : 'b'}>
+                  <div id="container" name='abc' p1={4} p2={yy ? 'a' : 'b'}>
                     <h1>Hello, world!</h1>
                   </div>
                 );
@@ -33,6 +33,6 @@ public class JsxPreviewTests
 
         var result = Parser.Extract(ast.Value);
         
-        result.Count.ShouldBe(1);
+        result.Value.Count.ShouldBe(1);
     }
 }
