@@ -139,7 +139,7 @@ static class Parser
                         {
                             return result.Error;
                         }
-                        element.Props.Add(result.Value);
+                        element.Props = element.Props.Add(result.Value);
                     }
                 }
             }

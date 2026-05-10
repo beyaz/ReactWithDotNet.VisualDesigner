@@ -6,7 +6,7 @@ sealed class JsxElementDto
         
     public string Tag { get; set; }
     
-    public List<string> Props { get; set; } = [];
+    public IReadOnlyList<string> Props { get; set; } = [];
     
     public List<JsxElementDto> Children { get; set; } = [];
     
