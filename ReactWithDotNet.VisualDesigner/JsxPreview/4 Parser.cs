@@ -4,25 +4,25 @@ namespace ReactWithDotNet.VisualDesigner.JsxPreview;
 
 static class Parser
 {
+    public static Result<IReadOnlyList<MethodResult>> Extract(string json)
+    {
+        var root = JsonSerializer.Deserialize<TsNode>(json, JsonSerializerOptions.Web);
+
+        return Traverse(root, currentMethod: null);
+    }
+
     static string AsDesignerPropText(TsNode jsxAttribute)
     {
         var name = jsxAttribute.Name.EscapedText;
-        
+
         string value = null;
-        
+
         if (jsxAttribute.Initializer.Kind == SyntaxKind.StringLiteral)
         {
             value = jsxAttribute.Initializer.Text;
         }
 
         return $"{name}: {value}";
-    }
-    
-public  static Result<List<MethodResult>> Extract(string json)
-    {
-        var root = JsonSerializer.Deserialize<TsNode>(json, JsonSerializerOptions.Web);
-
-        return Traverse(root, currentMethod: null);
     }
 
     static JsxElementDto FindReturnJsxStatement(TsNode node)
@@ -89,30 +89,28 @@ public  static Result<List<MethodResult>> Extract(string json)
         if (node.Kind == SyntaxKind.JsxElement || node.Kind == SyntaxKind.JsxSelfClosingElement)
         {
             var openingElement = node.OpeningElement;
-            
+
             var element = new JsxElementDto
             {
                 Tag = node.TagName?.Text
             };
-            
+
             if (openingElement is not null)
             {
                 element = new JsxElementDto
                 {
                     Tag = openingElement.TagName.EscapedText
                 };
-                
+
                 foreach (var attr in openingElement.Attributes ?? [])
                 {
                     foreach (var prop in attr.Properties ?? [])
                     {
                         element.Props.Add(AsDesignerPropText(prop));
                     }
-                    
                 }
             }
-            
-            
+
             // Children
             foreach (var child in GetAllChildren(node))
             {
@@ -140,11 +138,11 @@ public  static Result<List<MethodResult>> Extract(string json)
         return null;
     }
 
-    static List<MethodResult> Traverse(TsNode node, string currentMethod)
+    static Result<IReadOnlyList<MethodResult>> Traverse(TsNode node, string currentMethod)
     {
         if (node is null)
         {
-            return [];
+            return Result.From<IReadOnlyList<MethodResult>>([]);
         }
 
         // Bu node bir method/function ise scope'u güncelle (recursive scope)
@@ -170,7 +168,7 @@ public  static Result<List<MethodResult>> Extract(string json)
                 results.Add(new MethodResult
                 {
                     MethodName = methodInThisScope,
-                    Elements = [jsx]
+                    Elements   = [jsx]
                 });
             }
         }
@@ -189,7 +187,7 @@ public  static Result<List<MethodResult>> Extract(string json)
                     results.Add(new MethodResult
                     {
                         MethodName = methodInThisScope,
-                        Elements = [jsx]
+                        Elements   = [jsx]
                     });
                 }
             }
@@ -198,9 +196,15 @@ public  static Result<List<MethodResult>> Extract(string json)
         // RECURSION: alt sonuçları birleştir
         foreach (var child in GetAllChildren(node))
         {
-            results.AddRange(Traverse(child, methodInThisScope));
+            var result = Traverse(child, methodInThisScope);
+            if (result.HasError)
+            {
+                return result.Error;
+            }
+
+            results.AddRange(result.Value);
         }
 
-        return results;
+        return results.AsReadOnly();
     }
 }
