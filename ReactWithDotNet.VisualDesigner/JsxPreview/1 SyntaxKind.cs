@@ -19,5 +19,6 @@ static class SyntaxKind
     public const int ConditionalExpression = 3;
     public const int StringLiteral = 11;
     public const int NumericLiteral = 9;
+    public const int JsxExpression = 295;
     
 }

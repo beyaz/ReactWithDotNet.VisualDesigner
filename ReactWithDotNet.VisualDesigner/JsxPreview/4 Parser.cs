@@ -4,31 +4,47 @@ namespace ReactWithDotNet.VisualDesigner.JsxPreview;
 
 static class Parser
 {
-    public static Result<IReadOnlyList<MethodResult>> Extract(string json)
+    record Scope
     {
-        var root = JsonSerializer.Deserialize<TsNode>(json, JsonSerializerOptions.Web);
+        public string TsCode { get; init; }
+        
+        public string MethodName { get; init; }
+    }
+    
+    public static async Task<Result<IReadOnlyList<MethodResult>>> Extract(string tsCode)
+    {
+        var ast = await NodeJsBridge.Ast(tsCode);
 
-        return Traverse(root, currentMethod: null);
+        var root = JsonSerializer.Deserialize<TsNode>(ast.Value, JsonSerializerOptions.Web);
+
+        return Traverse(root, new Scope{ TsCode = tsCode });
     }
 
-    static Result<string> AsDesignerPropText(TsNode jsxAttribute)
+    static Result<string> AsDesignerPropText(TsNode jsxAttribute, Scope scope)
     {
         var name = jsxAttribute.Name.EscapedText;
+
+        var initializer = jsxAttribute.Initializer;
         
-        if (jsxAttribute.Initializer.Kind == SyntaxKind.StringLiteral)
+        if (initializer.Kind == SyntaxKind.StringLiteral)
         {
-            return $"{name}: {'"' + jsxAttribute.Initializer.Text + '"'}";
+            return $"{name}: {'"' + initializer.Text + '"'}";
         }
         
-        if (jsxAttribute.Initializer.Kind == SyntaxKind.NumericLiteral)
+        if (initializer.Kind == SyntaxKind.NumericLiteral)
         {
-            return $"{name}: {jsxAttribute.Initializer.Text}";
+            return $"{name}: {initializer.Text}";
         }
         
-        return new ArgumentException($"Unsupported initializer kind: {jsxAttribute.Initializer.Kind}");
+        if (initializer.Kind == SyntaxKind.JsxExpression)
+        {
+            return $"{name}: {ClearConnectedValue(scope.TsCode.Substring(initializer.Pos, initializer.End-initializer.Pos))}";
+        }
+        
+        return new ArgumentException($"Unsupported initializer kind: {initializer.Kind}");
     }
 
-    static Result<JsxElementDto> FindReturnJsxStatement(TsNode node)
+    static Result<JsxElementDto> FindReturnJsxStatement(TsNode node, Scope scope)
     {
         if (node == null)
         {
@@ -37,12 +53,12 @@ static class Parser
 
         if (node.Kind == SyntaxKind.ReturnStatement)
         {
-            return ParseJsx(node.Expression);
+            return ParseJsx(node.Expression, scope);
         }
 
         foreach (var child in GetAllChildren(node))
         {
-            var res = FindReturnJsxStatement(child);
+            var res = FindReturnJsxStatement(child, scope);
             if (res != null)
             {
                 return res;
@@ -81,11 +97,11 @@ static class Parser
         return node?.Text ?? node?.Name?.Text;
     }
 
-    static Result<JsxElementDto> ParseJsx(TsNode node)
+    static Result<JsxElementDto> ParseJsx(TsNode node, Scope scope)
     {
         if (node == null || node.ContainsOnlyTriviaWhiteSpaces)
         {
-            return null;
+            return Result.From<JsxElementDto>(null);
         }
 
         // JSX ELEMENT
@@ -109,7 +125,7 @@ static class Parser
                 {
                     foreach (var prop in attr.Properties ?? [])
                     {
-                        var result = AsDesignerPropText(prop);
+                        var result = AsDesignerPropText(prop, scope);
                         if (result.HasError)
                         {
                             return result.Error;
@@ -122,7 +138,7 @@ static class Parser
             
             foreach (var child in GetAllChildren(node))
             {
-                var childJsx = ParseJsx(child);
+                var childJsx = ParseJsx(child, scope);
                 if (childJsx.HasError)
                 {
                     return childJsx.Error;
@@ -141,7 +157,7 @@ static class Parser
         // CONDITIONAL JSX (ternary)
         if (node.Kind == SyntaxKind.ConditionalExpression)
         {
-            var jsx = ParseJsx(node.ThenStatement);
+            var jsx = ParseJsx(node.ThenStatement, scope);
             if (jsx != null)
             {
                 jsx.Value.Condition = GetText(node.Condition);
@@ -149,10 +165,10 @@ static class Parser
             }
         }
 
-        return null;
+        return Result.From<JsxElementDto>(null);
     }
 
-    static Result<IReadOnlyList<MethodResult>> Traverse(TsNode node, string currentMethod)
+    static Result<IReadOnlyList<MethodResult>> Traverse(TsNode node, Scope scope)
     {
         if (node is null)
         {
@@ -163,7 +179,10 @@ static class Parser
 
         if (node.Kind == SyntaxKind.FunctionDeclaration || node.Kind == SyntaxKind.MethodDeclaration)
         {
-            currentMethod = node.Name?.EscapedText;
+            scope = scope with
+            {
+                MethodName = node.Name?.EscapedText
+            };
         }
 
         List<MethodResult> results = [];
@@ -171,13 +190,13 @@ static class Parser
         // RETURN JSX
         if (node.Kind == SyntaxKind.ReturnStatement && node.Expression is not null)
         {
-            var jsx = ParseJsx(node.Expression.Expression ?? node.Expression);
+            var jsx = ParseJsx(node.Expression.Expression ?? node.Expression, scope);
 
-            if (jsx is not null && currentMethod is not null)
+            if (jsx is not null && scope.MethodName is not null)
             {
                 results.Add(new MethodResult
                 {
-                    MethodName = currentMethod,
+                    MethodName = scope.MethodName,
                     Elements   = [jsx.Value]
                 });
             }
@@ -190,13 +209,13 @@ static class Parser
 
             if (node.ThenStatement is not null)
             {
-                var jsx = FindReturnJsxStatement(node.ThenStatement);
-                if (jsx is not null && currentMethod is not null)
+                var jsx = FindReturnJsxStatement(node.ThenStatement, scope);
+                if (jsx is not null && scope.MethodName is not null)
                 {
                     jsx.Value.Condition = conditionText;
                     results.Add(new MethodResult
                     {
-                        MethodName = currentMethod,
+                        MethodName = scope.MethodName,
                         Elements   = [jsx.Value]
                     });
                 }
@@ -206,7 +225,7 @@ static class Parser
         // RECURSION: alt sonuçları birleştir
         foreach (var child in GetAllChildren(node))
         {
-            var result = Traverse(child, currentMethod);
+            var result = Traverse(child, scope);
             if (result.HasError)
             {
                 return result.Error;

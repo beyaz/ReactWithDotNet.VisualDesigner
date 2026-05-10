@@ -23,15 +23,9 @@ public class JsxPreviewTests
             }
             """;
 
-        var ast = await NodeJsBridge.Ast(tsCode);
+        
 
-        ast.HasError.ShouldBeFalse();
-
-        var tsNode = JsonSerializer.Deserialize<TsNode>(ast.Value, JsonSerializerOptions.Web);
-
-        tsNode.Statements[0].Name.EscapedText.ShouldBe("greet");
-
-        var result = Parser.Extract(ast.Value);
+        var result = await Parser.Extract(tsCode);
         
         result.Value.Count.ShouldBe(1);
     }
