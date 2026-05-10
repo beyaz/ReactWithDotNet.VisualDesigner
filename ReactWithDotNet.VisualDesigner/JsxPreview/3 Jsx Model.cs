@@ -21,7 +21,7 @@ sealed class MethodResult
       
     public string MethodName { get; set; }
       
-    public List<JsxElementDto> Elements { get; set; } = [];
+    public JsxElementDto RootElement { get; set; }
 
     // @formatter:on
 }

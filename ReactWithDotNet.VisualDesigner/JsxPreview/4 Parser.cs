@@ -206,7 +206,7 @@ static class Parser
                 results.Add(new MethodResult
                 {
                     MethodName = scope.MethodName,
-                    Elements   = [jsx.Value]
+                    RootElement   = jsx.Value
                 });
             }
         }
@@ -225,7 +225,7 @@ static class Parser
                     results.Add(new MethodResult
                     {
                         MethodName = scope.MethodName,
-                        Elements   = [jsx.Value]
+                        RootElement   = jsx.Value
                     });
                 }
             }
