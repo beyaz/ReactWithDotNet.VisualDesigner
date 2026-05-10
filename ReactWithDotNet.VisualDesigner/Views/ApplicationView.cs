@@ -1647,19 +1647,19 @@ sealed class ApplicationView : Component<ApplicationState>
 
         var componentTree = new ComponentTreeView
         {
-            ProjectId        = state.ProjectId,
-            ComponentId      = state.ComponentId,
-            FilterText = state.ComponentTreeViewFilterText,
-            FilterTextChanged = [SkipRender] (x) =>
+            ProjectId   = state.ProjectId,
+            ComponentId = state.ComponentId,
+            FilterText  = state.ComponentTreeViewFilterText,
+            FilterTextChanged = [SkipRender](x) =>
             {
                 state = state with { ComponentTreeViewFilterText = x };
-                
+
                 SetUserLastState(state);
-                
+
                 return Task.CompletedTask;
             },
             SelectionChanged = ChangeSelectedComponent
-        } + When(state.LeftTab != LeftTabs.Components, DisplayNone);
+        };
 
         return new FlexColumn(SizeFull, AlignItemsCenter, BorderRight(1, dotted, "#d9d9d9"), Background(White))
         {
@@ -1674,7 +1674,7 @@ sealed class ApplicationView : Component<ApplicationState>
 
             new FlexColumn(WidthFull, Flex(1), OverflowAuto)
             {
-                componentTree,
+                state.LeftTab == LeftTabs.Components ?  componentTree: null,
                 elementTree
             }
         };
