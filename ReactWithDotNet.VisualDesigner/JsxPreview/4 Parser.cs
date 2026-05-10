@@ -18,14 +18,14 @@ static class Parser
         return $"{name}: {value}";
     }
     
-    public static List<MethodResult> Extract(string json)
+    public static Result<List<MethodResult>> Extract(string json)
     {
         var root = JsonSerializer.Deserialize<TsNode>(json, JsonSerializerOptions.Web);
 
         var results = new List<MethodResult>();
 
         Traverse(root, results, null);
-
+        
         return results;
     }
 
