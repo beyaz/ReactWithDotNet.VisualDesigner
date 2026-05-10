@@ -10,7 +10,6 @@ sealed class JsxElementDto
     
     public List<JsxElementDto> Children { get; set; } = [];
     
-    public string Condition { get; set; }
     
     // @formatter:on
 }

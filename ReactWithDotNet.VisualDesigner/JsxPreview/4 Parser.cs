@@ -169,7 +169,7 @@ static class Parser
             var jsx = ParseJsx(node.ThenStatement, scope);
             if (jsx != null)
             {
-                jsx.Value.Condition = GetText(node.Condition);
+                jsx.Value.Props = jsx.Value.Props.Add( Design.ShowIf + ":" + GetText(node.Condition));
                 return jsx;
             }
         }
@@ -221,7 +221,7 @@ static class Parser
                 var jsx = FindReturnJsxStatement(node.ThenStatement, scope);
                 if (jsx is not null && scope.MethodName is not null)
                 {
-                    jsx.Value.Condition = conditionText;
+                    jsx.Value.Props = jsx.Value.Props.Add( Design.ShowIf + ":" + conditionText);
                     results.Add(new MethodResult
                     {
                         MethodName = scope.MethodName,
