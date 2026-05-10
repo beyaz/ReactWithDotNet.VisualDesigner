@@ -44,7 +44,7 @@ static class Parser
         return new ArgumentException($"Unsupported initializer kind: {initializer.Kind}");
     }
 
-    static Result<JsxElementDto> FindReturnJsxStatement(TsNode node, Scope scope)
+    static Result<VisualElementModel> FindReturnJsxStatement(TsNode node, Scope scope)
     {
         if (node == null)
         {
@@ -97,16 +97,16 @@ static class Parser
         return node?.Text ?? node?.Name?.Text;
     }
 
-    static Result<JsxElementDto> ParseJsx(TsNode node, Scope scope)
+    static Result<VisualElementModel> ParseJsx(TsNode node, Scope scope)
     {
         if (node == null || node.ContainsOnlyTriviaWhiteSpaces)
         {
-            return Result.From<JsxElementDto>(null);
+            return Result.From<VisualElementModel>(null);
         }
 
         if (node.Kind == SyntaxKind.JsxText)
         {
-            return new JsxElementDto
+            return new VisualElementModel
             {
                 Tag = "#text",
                 Properties = [$"{Design.Content}: {node.Text}"]
@@ -118,14 +118,11 @@ static class Parser
         {
             var openingElement = node.OpeningElement;
 
-            var element = new JsxElementDto
-            {
-                Tag = node.TagName?.Text
-            };
+            VisualElementModel element;
 
             if (openingElement is not null)
             {
-                element = new JsxElementDto
+                element = new VisualElementModel
                 {
                     Tag = openingElement.TagName.EscapedText
                 };
@@ -139,9 +136,17 @@ static class Parser
                         {
                             return result.Error;
                         }
-                        element.Properties = element.Properties.Add(result.Value);
+
+                        element = element with
+                        {
+                            Properties = element.Properties.Add(result.Value)
+                        };
                     }
                 }
+            }
+            else
+            {
+                return Result.From<VisualElementModel>(null);
             }
 
             
@@ -166,15 +171,24 @@ static class Parser
         // CONDITIONAL JSX (ternary)
         if (node.Kind == SyntaxKind.ConditionalExpression)
         {
-            var jsx = ParseJsx(node.ThenStatement, scope);
+            var result = ParseJsx(node.ThenStatement, scope);
+            if (result.HasError)
+            {
+                return result.Error;
+            }
+
+            var jsx = result.Value;
+            
             if (jsx != null)
             {
-                jsx.Value.Properties = jsx.Value.Properties.Add( Design.ShowIf + ":" + GetText(node.Condition));
-                return jsx;
+                return jsx with
+                {
+                    Properties = jsx.Properties.Add(Design.ShowIf + ":" + GetText(node.Condition))
+                };
             }
         }
 
-        return Result.From<JsxElementDto>(null);
+        return Result.From<VisualElementModel>(null);
     }
 
     static Result<IReadOnlyList<MethodResult>> Traverse(TsNode node, Scope scope)
@@ -218,14 +232,24 @@ static class Parser
 
             if (node.ThenStatement is not null)
             {
-                var jsx = FindReturnJsxStatement(node.ThenStatement, scope);
+                var result = FindReturnJsxStatement(node.ThenStatement, scope);
+                if (result.HasError)
+                {
+                    return result.Error;
+                }
+
+                var jsx = result.Value;
                 if (jsx is not null && scope.MethodName is not null)
                 {
-                    jsx.Value.Properties = jsx.Value.Properties.Add( Design.ShowIf + ":" + conditionText);
+                    jsx = jsx with
+                    {
+                        Properties = jsx.Properties.Add(Design.ShowIf + ":" + conditionText)
+                    };
+                    
                     results.Add(new MethodResult
                     {
                         MethodName = scope.MethodName,
-                        RootElement   = jsx.Value
+                        RootElement   = jsx
                     });
                 }
             }
