@@ -108,7 +108,7 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
 
             parent.Children.Add(node with
             {
-                Label = node.Names.Last(),
+                Label = node.Names[^1],
 
                 Path = $"{parent.Path}_{parent.Children.Count}"
             });
