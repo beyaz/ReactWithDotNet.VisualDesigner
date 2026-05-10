@@ -14,23 +14,18 @@ static class Parser
     static Result<string> AsDesignerPropText(TsNode jsxAttribute)
     {
         var name = jsxAttribute.Name.EscapedText;
-
-        string value = null;
-
+        
         if (jsxAttribute.Initializer.Kind == SyntaxKind.StringLiteral)
         {
-            value = '"'+jsxAttribute.Initializer.Text+'"';
+            return $"{name}: {'"' + jsxAttribute.Initializer.Text + '"'}";
         }
-        else if (jsxAttribute.Initializer.Kind == SyntaxKind.NumericLiteral)
+        
+        if (jsxAttribute.Initializer.Kind == SyntaxKind.NumericLiteral)
         {
-            value = jsxAttribute.Initializer.Text;
+            return $"{name}: {jsxAttribute.Initializer.Text}";
         }
-        else
-        {
-            return new ArgumentException($"Unsupported initializer kind: {jsxAttribute.Initializer.Kind}");
-        }
-
-        return $"{name}: {value}";
+        
+        return new ArgumentException($"Unsupported initializer kind: {jsxAttribute.Initializer.Kind}");
     }
 
     static Result<JsxElementDto> FindReturnJsxStatement(TsNode node)
