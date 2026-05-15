@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using ReactWithDotNet.VisualDesigner.JsxPreview;
 
 namespace ReactWithDotNet.VisualDesigner.Views;
 
@@ -117,7 +118,7 @@ sealed class ExistingJsxView : Component<ExistingJsxView.State>
 
         foreach (var leaf in nodes)
         {
-            EnsurePath(rootNode,leaf);
+            EnsurePath(rootNode, leaf);
 
             AddLeaf(rootNode, leaf);
         }
@@ -165,6 +166,18 @@ sealed class ExistingJsxView : Component<ExistingJsxView.State>
         }
     }
 
+    static NodeModel GetNodeByPath(NodeModel root, string path)
+    {
+        var node = root;
+
+        foreach (var item in path.Split('_', StringSplitOptions.RemoveEmptyEntries).Skip(1))
+        {
+            node = node.Children[int.Parse(item)];
+        }
+
+        return node;
+    }
+
     async Task<NodeModel> CalculateRootNode()
     {
         return CalculateRootNodeFrom(from node in await GetAllNodes() where HasMatch(node) select node);
@@ -203,29 +216,29 @@ sealed class ExistingJsxView : Component<ExistingJsxView.State>
         }
 
         List<NodeModel> items = [];
-        
+
         foreach (var file in Directory.GetFiles(state.LocationText, "*.tsx", SearchOption.AllDirectories))
         {
-            var result = await JsxPreview.Parser.Extract(await File.ReadAllTextAsync(file));
+            var result = await Parser.Extract(await File.ReadAllTextAsync(file));
             if (result.HasError)
             {
                 continue;
             }
-            
+
             foreach (var methodResult in result.Value)
             {
-                var names = file.RemoveFromStart(state.LocationText).Split(Path.DirectorySeparatorChar,StringSplitOptions.RemoveEmptyEntries);
+                var names = file.RemoveFromStart(state.LocationText).Split(Path.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries);
 
                 var designLocation = new List<string>(names)
                 {
                     methodResult.MethodName
                 };
-                
+
                 var node = new NodeModel
                 {
                     ComponentId     = -1,
                     Names           = designLocation,
-                    DesignLocation  = '/' + string.Join('/', designLocation)+"/",
+                    DesignLocation  = '/' + string.Join('/', designLocation) + "/",
                     ComponentConfig = new ComponentConfig()
                 };
 
@@ -248,10 +261,9 @@ sealed class ExistingJsxView : Component<ExistingJsxView.State>
         };
 
         await CalculateRootNode();
-
     }
 
-    Task OnClearLocationTextClicked(MouseEvent e)
+    Task OnClearFilterTextClicked(MouseEvent e)
     {
         state = state with
         {
@@ -262,8 +274,8 @@ sealed class ExistingJsxView : Component<ExistingJsxView.State>
 
         return Task.CompletedTask;
     }
-    
-    Task OnClearFilterTextClicked(MouseEvent e)
+
+    Task OnClearLocationTextClicked(MouseEvent e)
     {
         state = state with
         {
@@ -280,29 +292,15 @@ sealed class ExistingJsxView : Component<ExistingJsxView.State>
         await CalculateRootNode();
 
         DispatchEvent(FilterTextChanged, [state.FilterText]);
-
     }
-    
+
     async Task OnLocationTypeFinished()
     {
         await CalculateRootNode();
 
         DispatchEvent(FilterTextChanged, [state.FilterText]);
-
     }
 
-    static NodeModel GetNodeByPath(NodeModel root, string path)
-    {
-        var node = root;
-
-        foreach (var item in path.Split('_', StringSplitOptions.RemoveEmptyEntries).Skip(1))
-        {
-            node = node.Children[int.Parse(item)];
-        }
-
-        return node;
-    }
-    
     [StopPropagation]
     async Task OnTreeItemClicked(MouseEvent e)
     {
@@ -391,7 +389,7 @@ sealed class ExistingJsxView : Component<ExistingJsxView.State>
     internal record State
     {
         public string LocationText { get; init; } = @"D:\temp\";
-        
+
         public required HashSet<string> CollapsedNodes { get; init; }
 
         public string FilterText { get; init; }
