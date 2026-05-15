@@ -325,19 +325,15 @@ sealed class ExistingJsxView : Component<ExistingJsxView.State>
     {
         var nodePath = e.currentTarget.id;
 
-        if (state.CollapsedNodes.Contains(nodePath))
+        if (!state.CollapsedNodes.Add(nodePath))
         {
             state.CollapsedNodes.Remove(nodePath);
-        }
-        else
-        {
-            state.CollapsedNodes.Add(nodePath);
         }
 
         return Task.CompletedTask;
     }
 
-    IReadOnlyList<Element> ToVisual(NodeModel node, int indent)
+    List<Element> ToVisual(NodeModel node, int indent)
     {
         const int paddingLength = 18;
 
@@ -396,7 +392,7 @@ sealed class ExistingJsxView : Component<ExistingJsxView.State>
     {
         public string LocationText { get; init; } = @"D:\temp\";
         
-        public required List<string> CollapsedNodes { get; init; }
+        public required HashSet<string> CollapsedNodes { get; init; }
 
         public string FilterText { get; init; }
 
