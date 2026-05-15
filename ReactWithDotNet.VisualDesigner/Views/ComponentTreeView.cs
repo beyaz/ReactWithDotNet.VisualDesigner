@@ -97,11 +97,9 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
 
         static void append(NodeModel rootNode, NodeModel node)
         {
-            var names = node.Names.SkipLast(1).ToList();
-
             var parentNode = rootNode;
 
-            foreach (var name in names)
+            foreach (var name in node.Names.SkipLast(1))
             {
                 parentNode = parentNode.Children.First(x => x.Label == name);
             }
@@ -116,11 +114,9 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
 
         static void openPath(NodeModel rootNode, NodeModel node)
         {
-            var names = node.DesignLocation.Split('/', StringSplitOptions.RemoveEmptyEntries).SkipLast(1).ToList();
-
             var parentNode = rootNode;
 
-            foreach (var name in names)
+            foreach (var name in node.DesignLocation.Split('/', StringSplitOptions.RemoveEmptyEntries).SkipLast(1))
             {
                 var namedChild = parentNode.Children.Find(x => x.Label == name);
                 if (namedChild is not null)
