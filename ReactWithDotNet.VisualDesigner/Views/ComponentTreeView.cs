@@ -86,37 +86,37 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
             Path = "0"
         };
 
-        foreach (var node in nodes)
+        foreach (var leaf in nodes)
         {
-            openPath(rootNode,node);
+            EnsurePath(rootNode,leaf);
 
-            append(rootNode, node);
+            AddLeaf(rootNode, leaf);
         }
 
         return rootNode;
 
-        static void append(NodeModel rootNode, NodeModel node)
+        static void AddLeaf(NodeModel rootNode, NodeModel leafNode)
         {
             var parentNode = rootNode;
 
-            foreach (var name in node.Names.SkipLast(1))
+            foreach (var name in leafNode.Names.SkipLast(1))
             {
                 parentNode = parentNode.Children.First(x => x.Label == name);
             }
 
-            parentNode.Children.Add(node with
+            parentNode.Children.Add(leafNode with
             {
-                Label = node.Names[^1],
+                Label = leafNode.Names[^1],
 
                 Path = $"{parentNode.Path}_{parentNode.Children.Count}"
             });
         }
 
-        static void openPath(NodeModel rootNode, NodeModel node)
+        static void EnsurePath(NodeModel rootNode, NodeModel leafNode)
         {
             var parentNode = rootNode;
 
-            foreach (var name in node.DesignLocation.Split('/', StringSplitOptions.RemoveEmptyEntries).SkipLast(1))
+            foreach (var name in leafNode.DesignLocation.Split('/', StringSplitOptions.RemoveEmptyEntries).SkipLast(1))
             {
                 var namedChild = parentNode.Children.Find(x => x.Label == name);
                 if (namedChild is not null)
