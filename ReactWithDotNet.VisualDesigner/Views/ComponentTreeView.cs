@@ -272,13 +272,15 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
     {
         const int paddingLength = 18;
 
-        var foldIcon = new FlexRowCentered(Size(16), PositionAbsolute, Top(4), Left(indent * paddingLength - 12), Hover(BorderRadius(36), Background(Gray50)))
+        var foldIcon = new FlexRowCentered(Size(16), PositionAbsolute, Top(4), Left(indent * paddingLength - 12), Hover(BorderRadius(36), Background(Gray100)))
         {
             new IconArrowRightOrDown { IsArrowDown = !state.CollapsedNodes.Contains(node.Path) },
-
+            
             Id(node.Path),
+            
             OnClick(ToggleFold)
         };
+        
         if (node.Path == "0" || node.HasNoChild())
         {
             foldIcon = null;
@@ -300,7 +302,7 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
                 {
                     MarginLeft(4), FontSize13,
 
-                    new span { node.Label }
+                    new span { node.Label } + When(foldIcon is not null, Hover(Color(Gray500)))
                 }
             }
         };
