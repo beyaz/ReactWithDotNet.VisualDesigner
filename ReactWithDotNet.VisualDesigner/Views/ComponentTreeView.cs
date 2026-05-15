@@ -226,19 +226,24 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
         return Task.CompletedTask;
     }
 
+    static NodeModel GetNodeByPath(NodeModel root, string path)
+    {
+        var node = root;
+
+        foreach (var item in path.Split('_', StringSplitOptions.RemoveEmptyEntries).Skip(1))
+        {
+            node = node.Children[int.Parse(item)];
+        }
+
+        return node;
+    }
+    
     [StopPropagation]
     async Task OnTreeItemClicked(MouseEvent e)
     {
         var selectedPath = e.currentTarget.id;
 
-        var node = CalculateRootNode();
-
-        foreach (var item in selectedPath.Split('_', StringSplitOptions.RemoveEmptyEntries).Skip(1))
-        {
-            var index = int.Parse(item);
-
-            node = node.Children[index];
-        }
+        var node = GetNodeByPath(CalculateRootNode(), selectedPath);
 
         if (node.ComponentId.HasValue)
         {
