@@ -88,7 +88,7 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
 
         foreach (var leaf in nodes)
         {
-            EnsurePath(rootNode,leaf);
+            EnsurePath(rootNode, leaf);
 
             AddLeaf(rootNode, leaf);
         }
@@ -134,6 +134,18 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
                 parentNode = parentNode.Children[^1];
             }
         }
+    }
+
+    static NodeModel GetNodeByPath(NodeModel root, string path)
+    {
+        var node = root;
+
+        foreach (var item in path.Split('_', StringSplitOptions.RemoveEmptyEntries).Skip(1))
+        {
+            node = node.Children[int.Parse(item)];
+        }
+
+        return node;
     }
 
     NodeModel CalculateRootNode()
@@ -226,18 +238,6 @@ sealed class ComponentTreeView : Component<ComponentTreeView.State>
         return Task.CompletedTask;
     }
 
-    static NodeModel GetNodeByPath(NodeModel root, string path)
-    {
-        var node = root;
-
-        foreach (var item in path.Split('_', StringSplitOptions.RemoveEmptyEntries).Skip(1))
-        {
-            node = node.Children[int.Parse(item)];
-        }
-
-        return node;
-    }
-    
     [StopPropagation]
     async Task OnTreeItemClicked(MouseEvent e)
     {
