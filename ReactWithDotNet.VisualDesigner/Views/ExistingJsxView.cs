@@ -115,56 +115,52 @@ sealed class ExistingJsxView : Component<ExistingJsxView.State>
             Path = "0"
         };
 
-        foreach (var item in nodes)
+        foreach (var leaf in nodes)
         {
-            openPath(rootNode, item.DesignLocation);
+            EnsurePath(rootNode,leaf);
 
-            append(rootNode, item);
+            AddLeaf(rootNode, leaf);
         }
 
         return rootNode;
 
-        static void append(NodeModel rootNode, NodeModel node)
+        static void AddLeaf(NodeModel rootNode, NodeModel leafNode)
         {
-            var names = node.Names.SkipLast(1).ToList();
+            var parentNode = rootNode;
 
-            var parent = rootNode;
-
-            foreach (var name in names)
+            foreach (var name in leafNode.Names.SkipLast(1))
             {
-                parent = parent.Children.First(x => x.Label == name);
+                parentNode = parentNode.Children.First(x => x.Label == name);
             }
 
-            parent.Children.Add(node with
+            parentNode.Children.Add(leafNode with
             {
-                Label = node.Names[^1],
+                Label = leafNode.Names[^1],
 
-                Path = $"{parent.Path}_{parent.Children.Count}"
+                Path = $"{parentNode.Path}_{parentNode.Children.Count}"
             });
         }
 
-        static void openPath(NodeModel rootNode, string componentName)
+        static void EnsurePath(NodeModel rootNode, NodeModel leafNode)
         {
-            var names = componentName.Split('/', StringSplitOptions.RemoveEmptyEntries).SkipLast(1).ToList();
+            var parentNode = rootNode;
 
-            var node = rootNode;
-
-            foreach (var name in names)
+            foreach (var name in leafNode.DesignLocation.Split('/', StringSplitOptions.RemoveEmptyEntries).SkipLast(1))
             {
-                var namedChild = node.Children.Find(x => x.Label == name);
+                var namedChild = parentNode.Children.Find(x => x.Label == name);
                 if (namedChild is not null)
                 {
-                    node = namedChild;
+                    parentNode = namedChild;
                     continue;
                 }
 
-                node.Children.Add(new()
+                parentNode.Children.Add(new()
                 {
-                    Path  = $"{node.Path}_{node.Children.Count}",
+                    Path  = $"{parentNode.Path}_{parentNode.Children.Count}",
                     Label = name
                 });
 
-                node = node.Children[^1];
+                parentNode = parentNode.Children[^1];
             }
         }
     }
