@@ -218,11 +218,18 @@ sealed class ExistingJsxView : Component<ExistingJsxView.State>
             
             foreach (var methodResult in result.Value)
             {
+                var names = file.RemoveFromStart(state.LocationText).Split(Path.DirectorySeparatorChar,StringSplitOptions.RemoveEmptyEntries);
+
+                var designLocation = new List<string>(names)
+                {
+                    methodResult.MethodName
+                };
+                
                 var node = new NodeModel
                 {
                     ComponentId     = -1,
-                    Names           = file.RemoveFromStart(state.LocationText).Split(Path.DirectorySeparatorChar,StringSplitOptions.RemoveEmptyEntries),
-                    DesignLocation  = $"/{Path.GetFileNameWithoutExtension(file)}/{methodResult.MethodName}/a",
+                    Names           = designLocation,
+                    DesignLocation  = '/' + string.Join('/', designLocation)+"/",
                     ComponentConfig = new ComponentConfig()
                 };
 
