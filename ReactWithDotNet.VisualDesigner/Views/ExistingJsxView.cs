@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Collections.Immutable;
+using System.IO;
 
 namespace ReactWithDotNet.VisualDesigner.Views;
 
@@ -203,8 +204,10 @@ sealed class ExistingJsxView : Component<ExistingJsxView.State>
         }
     }
 
-    async Task<IReadOnlyList<NodeModel>> GetAllNodes()
+    async Task<List<NodeModel>> GetAllNodes()
     {
+        
+        
         if (state.LocationText.HasNoValue)
         {
             return [];
@@ -218,13 +221,32 @@ sealed class ExistingJsxView : Component<ExistingJsxView.State>
             
             var node = new NodeModel
             {
-                ComponentId     = -1,
                 Names           = names,
                 DesignLocation  = '/' + string.Join('/', names) + "/",
                 OutputFilePath = file
             };
 
             items.Add(node);
+
+            if (SelectedTsxFilePath == file)
+            {
+                var result = await JsxPreview.Parser.Extract(await File.ReadAllTextAsync(file));
+                if (!result.HasError)
+                {
+                    foreach (var item in result.Value)
+                    {
+                        
+                        node = new NodeModel
+                        {
+                            Names          = names.ToImmutableList().Add(item.MethodName),
+                            DesignLocation = '/' + string.Join('/', names) + "/"+item.MethodName,
+                            OutputFilePath = file
+                        };
+                        
+                        items.Add(node);
+                    }
+                }
+            }
             
         }
 
@@ -386,8 +408,6 @@ sealed class ExistingJsxView : Component<ExistingJsxView.State>
     internal record NodeModel
     {
         public List<NodeModel> Children { get; init; } = [];
-
-        public int? ComponentId { get; init; }
 
         public string DesignLocation { get; init; }
 
