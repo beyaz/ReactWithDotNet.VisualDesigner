@@ -206,23 +206,26 @@ sealed class ExistingJsxView : Component<ExistingJsxView.State>
 
     async Task<List<NodeModel>> GetAllNodes()
     {
-        
-        
-        if (state.LocationText.HasNoValue)
+        return await GetAllNodes(state.LocationText, SelectedTsxFilePath);
+    }
+
+    static async Task<List<NodeModel>> GetAllNodes(string LocationText, string SelectedTsxFilePath)
+    {
+        if (LocationText.HasNoValue)
         {
             return [];
         }
 
         List<NodeModel> items = [];
 
-        foreach (var file in Directory.GetFiles(state.LocationText, "*.tsx", SearchOption.AllDirectories))
+        foreach (var file in Directory.GetFiles(LocationText, "*.tsx", SearchOption.AllDirectories))
         {
-            var names = file.RemoveFromStart(state.LocationText).Split(Path.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries);
+            var names = file.RemoveFromStart(LocationText).Split(Path.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries);
             
             var node = new NodeModel
             {
-                Names           = names,
-                DesignLocation  = '/' + string.Join('/', names) + "/",
+                Names          = names,
+                DesignLocation = '/' + string.Join('/', names) + "/",
                 OutputFilePath = file
             };
 
@@ -252,7 +255,7 @@ sealed class ExistingJsxView : Component<ExistingJsxView.State>
 
         return items;
     }
-
+    
     async Task InitializeState()
     {
         state = new()
