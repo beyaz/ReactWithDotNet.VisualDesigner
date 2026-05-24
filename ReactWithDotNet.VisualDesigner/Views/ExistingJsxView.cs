@@ -192,13 +192,8 @@ sealed class ExistingJsxView : Component<ExistingJsxView.State>
             {
                 return true;
             }
-
-            if (node.ComponentConfig?.Name.ContainsIgnoreCase(state.FilterText) is true)
-            {
-                return true;
-            }
-
-            if (node.ComponentConfig?.OutputFilePath.ContainsIgnoreCase(state.FilterText) is true)
+            
+            if (node.OutputFilePath?.ContainsIgnoreCase(state.FilterText) is true)
             {
                 return true;
             }
@@ -225,8 +220,6 @@ sealed class ExistingJsxView : Component<ExistingJsxView.State>
                 ComponentId     = -1,
                 Names           = names,
                 DesignLocation  = '/' + string.Join('/', names) + "/",
-                ComponentConfig = new ComponentConfig(),
-                
                 OutputFilePath = file
             };
 
@@ -403,8 +396,6 @@ sealed class ExistingJsxView : Component<ExistingJsxView.State>
 
         public string Path { get; init; }
 
-        public ComponentConfig ComponentConfig { get; init; }
-        
         public string OutputFilePath { get; init; }
 
         public bool HasNoChild()
