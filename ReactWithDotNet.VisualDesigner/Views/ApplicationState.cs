@@ -62,6 +62,10 @@ public sealed record ApplicationState
     public string CopiedVisualElementModelInYaml { get; init; }
     
     public string ComponentTreeViewFilterText { get; init; }
+    
+    public string ExistingJsxViewFilterText { get; init; }
+    
+    public string ExistingJsxViewSelectedTsxFilePath { get; init; }
 
     // @formatter:on
 }

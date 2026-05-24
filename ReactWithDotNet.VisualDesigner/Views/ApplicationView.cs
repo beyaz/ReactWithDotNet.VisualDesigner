@@ -1663,12 +1663,12 @@ sealed class ApplicationView : Component<ApplicationState>
         
         var existingJsxView = new ExistingJsxView
         {
-            ProjectId   = state.ProjectId,
-            ComponentId = state.ComponentId,
-            FilterText  = state.ComponentTreeViewFilterText,
+            ProjectId                          = state.ProjectId,
+            FilterText                         = state.ExistingJsxViewFilterText,
+            SelectedTsxFilePath = state.ExistingJsxViewSelectedTsxFilePath,
             FilterTextChanged = [SkipRender](x) =>
             {
-                state = state with { ComponentTreeViewFilterText = x };
+                state = state with { ExistingJsxViewFilterText = x };
 
                 SetUserLastState(state);
 
@@ -1676,6 +1676,11 @@ sealed class ApplicationView : Component<ApplicationState>
             },
             SelectionChanged = async tsxFileFullPath =>
             {
+                state = state with
+                {
+                    ExistingJsxViewSelectedTsxFilePath = tsxFileFullPath
+                };
+
                 var methods = await  JsxPreview.Parser.Extract(await System.IO.File.ReadAllTextAsync(tsxFileFullPath));
 
                 state = state with

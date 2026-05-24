@@ -6,9 +6,10 @@ delegate Task ExistingJsxViewSelectionChanged(string tsxFileFullPath);
 
 sealed class ExistingJsxView : Component<ExistingJsxView.State>
 {
-    public required int ComponentId { get; init; }
-
     public string FilterText { get; init; }
+    
+    public string SelectedTsxFilePath { get; init; }
+    
 
     [CustomEvent]
     public Func<string, Task> FilterTextChanged { get; init; }
@@ -35,7 +36,7 @@ sealed class ExistingJsxView : Component<ExistingJsxView.State>
 
     protected override async Task<Element> renderAsync()
     {
-        if (ProjectId is 0 || ComponentId is 0)
+        if (ProjectId is 0)
         {
             return new FlexRowCentered(SizeFull) { "Empty" };
         }
@@ -334,7 +335,7 @@ sealed class ExistingJsxView : Component<ExistingJsxView.State>
         {
             new FlexRow(PaddingLeft(indent * paddingLength), Id(node.Path), OnClick(OnTreeItemClicked))
             {
-                When(node.ComponentId == ComponentId, Background(Blue100), BorderRadius(3)),
+                When(node.OutputFilePath == SelectedTsxFilePath, Background(Blue100), BorderRadius(3)),
 
                 UserSelect(none),
 
