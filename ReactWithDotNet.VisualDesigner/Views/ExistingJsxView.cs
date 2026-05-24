@@ -1,9 +1,8 @@
 ﻿using System.IO;
-using ReactWithDotNet.VisualDesigner.JsxPreview;
 
 namespace ReactWithDotNet.VisualDesigner.Views;
 
-delegate Task ExistingJsxViewSelectionChanged(int componentId);
+delegate Task ExistingJsxViewSelectionChanged(string tsxFileFullPath);
 
 sealed class ExistingJsxView : Component<ExistingJsxView.State>
 {
@@ -219,31 +218,20 @@ sealed class ExistingJsxView : Component<ExistingJsxView.State>
 
         foreach (var file in Directory.GetFiles(state.LocationText, "*.tsx", SearchOption.AllDirectories))
         {
-            var result = await Parser.Extract(await File.ReadAllTextAsync(file));
-            if (result.HasError)
+            var names = file.RemoveFromStart(state.LocationText).Split(Path.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries);
+            
+            var node = new NodeModel
             {
-                continue;
-            }
+                ComponentId     = -1,
+                Names           = names,
+                DesignLocation  = '/' + string.Join('/', names) + "/",
+                ComponentConfig = new ComponentConfig(),
+                
+                OutputFilePath = file
+            };
 
-            foreach (var methodResult in result.Value)
-            {
-                var names = file.RemoveFromStart(state.LocationText).Split(Path.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries);
-
-                var designLocation = new List<string>(names)
-                {
-                    methodResult.MethodName
-                };
-
-                var node = new NodeModel
-                {
-                    ComponentId     = -1,
-                    Names           = designLocation,
-                    DesignLocation  = '/' + string.Join('/', designLocation) + "/",
-                    ComponentConfig = new ComponentConfig()
-                };
-
-                items.Add(node);
-            }
+            items.Add(node);
+            
         }
 
         return items;
@@ -308,9 +296,9 @@ sealed class ExistingJsxView : Component<ExistingJsxView.State>
 
         var node = GetNodeByPath(await CalculateRootNode(), selectedPath);
 
-        if (node.ComponentId.HasValue)
+        if (node.OutputFilePath.HasValue)
         {
-            DispatchEvent(SelectionChanged, [node.ComponentId.Value]);
+            DispatchEvent(SelectionChanged, [node.OutputFilePath]);
         }
         else
         {
@@ -416,6 +404,8 @@ sealed class ExistingJsxView : Component<ExistingJsxView.State>
         public string Path { get; init; }
 
         public ComponentConfig ComponentConfig { get; init; }
+        
+        public string OutputFilePath { get; init; }
 
         public bool HasNoChild()
         {
