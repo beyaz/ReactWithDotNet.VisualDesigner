@@ -22,5 +22,7 @@ static class SyntaxKind
     public const int JsxExpression = 295;
     public const int JsxText = 12;
     public const int ObjectLiteralExpression = 211;
+    public const int FalseKeyword = 97;
+    public const int JsxFragment = 289;
 
 }

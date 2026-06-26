@@ -1,5 +1,4 @@
-﻿using System.Text.Json;
-using ReactWithDotNet.VisualDesigner.JsxPreview;
+﻿using ReactWithDotNet.VisualDesigner.JsxPreview;
 
 namespace ReactWithDotNet.VisualDesigner.Test;
 
@@ -21,23 +20,48 @@ public class JsxPreviewTests
                   </div>
                 );
             }
-            
-            function greet2()
-            {
-                const x = 5;
-                
-                return  (
-                  <div id="container" name='abc' p1={4} p2={yy ? 'a' : 'b'}>
-                    <h1>Hello, world! <span>xyz</span></h1>
-                  </div>
-                );
-            }
+
             """;
 
-        
-
         var result = await Parser.Extract(tsCode);
-        
-        result.Value.Count.ShouldBe(2);
+
+        result.Value.Count.ShouldBe(1);
+
+        var actualRootElement = result.Value[0].RootElement;
+
+        VisualElementModel expectedRoot = new()
+        {
+            Tag        = "div",
+            Properties = ["id=\"container\"", "name='abc'", "p1={4}", "p2={yy ? 'a' : 'b'}"],
+            Children =
+            [
+                new()
+                {
+                    Tag = "h1",
+                    Children =
+                    [
+                        new()
+                        {
+                            Tag        = "#text",
+                            Properties = ["d-content: Hello, world! "]
+                        },
+                        new()
+                        {
+                            Tag = "span",
+                            Children =
+                            [
+                                new()
+                                {
+                                    Tag        = "#text",
+                                    Properties = ["d-content: xyz"]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        };
+
+        actualRootElement.ShouldBeEquivalentTo(expectedRoot);
     }
 }

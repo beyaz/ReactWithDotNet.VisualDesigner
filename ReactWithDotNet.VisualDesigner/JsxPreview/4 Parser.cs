@@ -3,6 +3,8 @@ using System.Text.Json;
 
 namespace ReactWithDotNet.VisualDesigner.JsxPreview;
 
+
+
 static class Parser
 {
     record Scope
@@ -100,7 +102,7 @@ static class Parser
 
     static Result<VisualElementModel> ParseJsx(TsNode node, Scope scope)
     {
-        if (node == null || node.ContainsOnlyTriviaWhiteSpaces)
+        if (node == null || node.ContainsOnlyTriviaWhiteSpaces || node.Kind == SyntaxKind.FalseKeyword)
         {
             return Result.From<VisualElementModel>(null);
         }
@@ -114,6 +116,34 @@ static class Parser
             };
         }
 
+        if (node.Kind == SyntaxKind.JsxFragment)
+        {
+            var element = new VisualElementModel
+            {
+                Tag = "Fragment"
+            };
+
+            foreach (var child in GetAllChildren(node))
+            {
+                var childJsx = ParseJsx(child, scope);
+                if (childJsx.HasError)
+                {
+                    return childJsx.Error;
+                }
+                
+                if (childJsx.Value is not null)
+                {
+                    element = element with
+                    {
+                        Children = element.Children.Add(childJsx.Value)
+                    };
+                }
+                
+            }
+            
+            return element;
+        }
+        
         // JSX ELEMENT
         if (node.Kind == SyntaxKind.JsxElement || node.Kind == SyntaxKind.JsxSelfClosingElement)
         {

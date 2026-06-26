@@ -236,7 +236,7 @@ sealed class ExistingJsxView : Component<ExistingJsxView.State>
                 var result = await JsxPreview.Parser.Extract(await File.ReadAllTextAsync(file));
                 if (!result.HasError)
                 {
-                    foreach (var item in result.Value)
+                    foreach (var item in result.Value.Where(x=>x.RootElement is not null))
                     {
                         
                         node = new NodeModel
