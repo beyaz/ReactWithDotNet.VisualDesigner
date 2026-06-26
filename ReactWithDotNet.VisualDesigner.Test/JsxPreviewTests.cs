@@ -29,39 +29,31 @@ public class JsxPreviewTests
 
         var actualRootElement = result.Value[0].RootElement;
 
-        VisualElementModel expectedRoot = new()
-        {
-            Tag        = "div",
-            Properties = ["id=\"container\"", "name='abc'", "p1={4}", "p2={yy ? 'a' : 'b'}"],
-            Children =
-            [
-                new()
-                {
-                    Tag = "h1",
-                    Children =
-                    [
-                        new()
-                        {
-                            Tag        = "#text",
-                            Properties = ["d-content: Hello, world! "]
-                        },
-                        new()
-                        {
-                            Tag = "span",
-                            Children =
-                            [
-                                new()
-                                {
-                                    Tag        = "#text",
-                                    Properties = ["d-content: xyz"]
-                                }
-                            ]
-                        }
-                    ]
-                }
-            ]
-        };
 
-        actualRootElement.ShouldBeEquivalentTo(expectedRoot);
+        var actual = SerializeToYaml(actualRootElement);
+
+
+        var expected = """
+                       tag: div
+                       properties:
+                       - 'id: "container"'
+                       - 'name: "abc"'
+                       - 'p1: 4'
+                       - "p2: yy ? 'a' : 'b'"
+                       children:
+                       - tag: h1
+                         children:
+                         - tag: '#text'
+                           properties:
+                           - 'd-content: Hello, world! '
+                         - tag: span
+                           children:
+                           - tag: '#text'
+                             properties:
+                             - 'd-content: xyz'
+
+                       """;
+
+        actual.Trim().ShouldBeEquivalentTo(expected.Trim());
     }
 }
