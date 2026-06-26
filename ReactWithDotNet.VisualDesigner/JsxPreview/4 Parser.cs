@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using ReactWithDotNet.VisualDesigner.PropertyDomain;
+using System.Text.Json;
 
 namespace ReactWithDotNet.VisualDesigner.JsxPreview;
 
@@ -20,7 +21,7 @@ static class Parser
         return Traverse(root, new Scope{ TsCode = tsCode });
     }
 
-    static Result<string> AsDesignerPropText(TsNode jsxAttribute, Scope scope)
+    static Result<ParsedProperty> AsDesignerPropText(TsNode jsxAttribute, Scope scope)
     {
         var name = jsxAttribute.Name.EscapedText;
 
@@ -28,17 +29,17 @@ static class Parser
         
         if (initializer.Kind == SyntaxKind.StringLiteral)
         {
-            return $"{name}: {'"' + initializer.Text + '"'}";
+            return TryCreateProperty(name, '"' + initializer.Text + '"');
         }
         
         if (initializer.Kind == SyntaxKind.NumericLiteral)
         {
-            return $"{name}: {initializer.Text}";
+            return TryCreateProperty(name, initializer.Text);
         }
         
         if (initializer.Kind == SyntaxKind.JsxExpression)
         {
-            return $"{name}: {ClearConnectedValue(scope.TsCode.Substring(initializer.Pos, initializer.End-initializer.Pos))}";
+            return TryCreateProperty(name, ClearConnectedValue(scope.TsCode.Substring(initializer.Pos, initializer.End-initializer.Pos)));
         }
         
         return new ArgumentException($"Unsupported initializer kind: {initializer.Kind}");
@@ -139,7 +140,7 @@ static class Parser
 
                         element = element with
                         {
-                            Properties = element.Properties.Add(result.Value)
+                            Properties = element.Properties.Add(result.Value.ToNameValueCombined())
                         };
                     }
                 }

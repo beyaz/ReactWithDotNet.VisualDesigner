@@ -46,6 +46,26 @@ public static class ParsedPropertyFactory
 
         return None;
     }
+    
+    public static string ToNameValueCombined(this ParsedProperty property)
+    {
+        return  property.Name + ": " + property.Value;
+    }
+    
+    public static Result<ParsedProperty> TryCreateProperty(string name, string value)
+    {
+        if (name.HasNoValue)
+        {
+            return new ArgumentNullException(nameof(name));
+        }
+        
+        return new ParsedPropertyImpl
+        {
+            Name  = name.Trim(),
+            Value = value
+        };
+    }
+    
     public static Result<ParsedProperty> ParseProperty(string nameValueCombined)
     {
         if (string.IsNullOrWhiteSpace(nameValueCombined))
