@@ -138,6 +138,23 @@ static class Parser
                             return result.Error;
                         }
 
+                        if (result.Value.Name == "style")
+                        {
+                            foreach (var styleAttribute in ClearConnectedValue(result.Value.Value).Split(";"))
+                            {
+                                var s = ParseStyleAttribute(styleAttribute);
+                                if (s is not null)
+                                {
+                                    element = element with
+                                    {
+                                        Styles = element.Styles.Add(styleAttribute)
+                                    };
+                                }
+                            }
+
+                            continue;
+                            
+                        }
                         element = element with
                         {
                             Properties = element.Properties.Add(result.Value.ToNameValueCombined())

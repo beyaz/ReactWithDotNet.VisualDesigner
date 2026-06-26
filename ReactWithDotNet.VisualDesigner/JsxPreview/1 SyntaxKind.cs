@@ -21,5 +21,6 @@ static class SyntaxKind
     public const int NumericLiteral = 9;
     public const int JsxExpression = 295;
     public const int JsxText = 12;
+    public const int ObjectLiteralExpression = 211;
 
 }
