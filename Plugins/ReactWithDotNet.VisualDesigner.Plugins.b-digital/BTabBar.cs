@@ -85,7 +85,7 @@ sealed class BTabBar : PluginComponentBase
             Children = []
         };
 
-        return Result.From((node, new TsImportCollection
+        return Result.Success((node, new TsImportCollection
         {
             {nameof(BTabBar),"b-tab-bar"},
             tsImportCollection

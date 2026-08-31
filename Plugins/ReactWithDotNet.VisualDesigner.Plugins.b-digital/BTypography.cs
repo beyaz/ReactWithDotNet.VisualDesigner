@@ -83,7 +83,7 @@ sealed class BTypography : PluginComponentBase
 
                     (ReactNode Node, TsImportCollection TsImportCollection) output = (node, imports);
 
-                    return Task.FromResult(Result.From(output));
+                    return Task.FromResult(Result.Success(output));
                 }
             }
         }

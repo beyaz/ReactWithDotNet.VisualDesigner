@@ -21,7 +21,7 @@ static class CSharpStringExporter
             from fileContentAtDisk in FileSystem.ReadAllText(file.Path)
             select IsEqualsIgnoreWhitespace(fileContentAtDisk, file.Content) switch
             {
-                true => Result.From((false,file)),
+                true => Result.Success((false,file)),
                 false =>
                     from _ in FileSystem.Save(file)
                     select ( true, file)

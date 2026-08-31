@@ -50,12 +50,12 @@ static class ModelToNodeTransformer
         {
             if (spacingSystem is null)
             {
-                return Result.From(finalCssItem);
+                return Result.Success(finalCssItem);
             }
 
             if (!finalCssItem.Name.In(ValidCssPropNames))
             {
-                return Result.From(finalCssItem);
+                return Result.Success(finalCssItem);
             }
 
       
@@ -65,7 +65,7 @@ static class ModelToNodeTransformer
                 return CreateFinalCssItem(finalCssItem.Name, $"{spacingSystem}({spacing})");
             }
 
-            return Result.From(finalCssItem);
+            return Result.Success(finalCssItem);
         }
     }
     
@@ -167,7 +167,7 @@ static class ModelToNodeTransformer
                         let styleAttribute = ParseStyleAttribute(text)
                         where !Design.IsDesignTimeName(styleAttribute.Name)
                         from list in isStyleValueLocatedAtOutputFile(styleAttribute.Value)
-                            ? Result.From<IEnumerable<string>>([$"{KebabToCamelCase(styleAttribute.Name)}: {styleAttribute.Value}"])
+                            ? Result.Success<IEnumerable<string>>([$"{KebabToCamelCase(styleAttribute.Name)}: {styleAttribute.Value}"])
                             : from item in CreateDesignerStyleItemFromText(project, text)
                               from finalCssItem in item.FinalCssItems
                               from finalCssItem1 in RunSequential(finalCssItem, [ReprocessFontWeight, x=> SpacingSystem.ReprocessSpacingSystem(spacingSystem, x)])
@@ -276,7 +276,7 @@ static class ModelToNodeTransformer
                     return new NotSupportedException($"Pseudo styles are not supported in inline styles. {item.OriginalText}");
                 }
 
-                return Result.From(item);
+                return Result.Success(item);
             }
 
             static Result<T> RunSequential<T>(T value, Func<T, Result<T>>[] transformFunc)
@@ -299,7 +299,7 @@ static class ModelToNodeTransformer
             {
                 if (finalCssItem.Name != "font-weight")
                 {
-                    return Result.From(finalCssItem);
+                    return Result.Success(finalCssItem);
                 }
 
                 var fontWeightMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -320,7 +320,7 @@ static class ModelToNodeTransformer
                     return CreateFinalCssItem(finalCssItem.Name, weightAsName);
                 }
 
-                return Result.From(finalCssItem);
+                return Result.Success(finalCssItem);
             }
             
            

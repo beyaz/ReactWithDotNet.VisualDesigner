@@ -119,7 +119,7 @@ sealed class BInput : PluginComponentBase
             AddContextProp
         ]);
 
-        return Result.From((node, new TsImportCollection
+        return Result.Success((node, new TsImportCollection
         {
             { nameof(BInput), "b-input" }
         }));

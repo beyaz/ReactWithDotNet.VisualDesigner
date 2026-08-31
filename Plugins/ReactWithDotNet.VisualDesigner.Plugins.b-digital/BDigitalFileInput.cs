@@ -43,7 +43,7 @@ sealed class BDigitalFileInput : PluginComponentBase
             Transforms.ValueConstraint
         ]);
 
-        return Result.From((node, new TsImportCollection
+        return Result.Success((node, new TsImportCollection
         {
             { nameof(BDigitalFileInput), "b-digital-file-input" }
         }));

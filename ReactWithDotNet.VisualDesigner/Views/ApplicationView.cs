@@ -2768,7 +2768,7 @@ sealed class ApplicationView : Component<ApplicationState>
             {
                 var cacheKey = $"{nameof(TagEditor)}-{ProjectId}";
 
-                return Result.From(Cache.AccessValue(cacheKey, () => GetTagSuggestions(ProjectId)));
+                return Result.Success(Cache.AccessValue(cacheKey, () => GetTagSuggestions(ProjectId)));
             }
         }
     }
@@ -2795,7 +2795,7 @@ sealed class ApplicationView : Component<ApplicationState>
                         {
                             Name = number.ToString()
                         };
-                    return Task.FromResult(Result.From<IReadOnlyList<SuggestionItem>>(suggestions.ToList()));
+                    return Task.FromResult(Result.Success<IReadOnlyList<SuggestionItem>>(suggestions.ToList()));
                 }
 
                 return GetVariableSuggestionsInOutputFile(ComponentId);

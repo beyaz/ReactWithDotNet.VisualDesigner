@@ -194,7 +194,7 @@ static class Parser
             }
             else
             {
-                return Result.From<VisualElementModel>(null as VisualElementModel);
+                return Result.Success<VisualElementModel>(null);
             }
 
             
@@ -239,7 +239,7 @@ static class Parser
             }
         }
 
-        return Result.From<VisualElementModel>(null as VisualElementModel);
+        return Result.Success<VisualElementModel>(null);
     }
 
     static Result<IReadOnlyList<MethodResult>> Traverse(TsNode node, Scope scope)

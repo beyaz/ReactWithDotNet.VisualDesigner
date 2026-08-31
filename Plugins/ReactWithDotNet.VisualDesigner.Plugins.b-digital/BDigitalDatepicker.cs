@@ -52,7 +52,7 @@ sealed class BDigitalDatepicker : PluginComponentBase
             { nameof(BDigitalDatepicker), "b-digital-datepicker" }
         };
 
-        return Result.From((node, importCollection));
+        return Result.Success((node, importCollection));
     }
 
     protected override Element render()

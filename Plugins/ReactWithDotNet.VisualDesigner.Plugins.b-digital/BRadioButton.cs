@@ -30,7 +30,7 @@ sealed class BRadioButton : PluginComponentBase
         var node = input.Node;
 
 
-        return Result.From((node, new TsImportCollection
+        return Result.Success((node, new TsImportCollection
         {
             { nameof(BRadioButton), "b-radio-button" }
         }));

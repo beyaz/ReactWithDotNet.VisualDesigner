@@ -104,20 +104,7 @@ public static class Result
         }
     }
 
-    public static Result<T> From<T>(T value)
-    {
-        return new() { Value = value };
-    }
-
-    public static Result<T> NotNull<T>(T value)
-    {
-        if (value is null)
-        {
-            return Error<T>(new NullReferenceException());
-        }
-
-        return Success(value);
-    }
+    
 
     public static Result<T> Success<T>(T value)
     {
