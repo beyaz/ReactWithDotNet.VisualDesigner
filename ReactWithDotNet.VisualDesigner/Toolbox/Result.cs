@@ -104,8 +104,6 @@ public static class Result
         }
     }
 
-    
-
     public static Result<T> Success<T>(T value)
     {
         return new() { Value = value };
