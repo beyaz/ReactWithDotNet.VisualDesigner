@@ -219,7 +219,7 @@ static class Exporter
         var modelTypeDefinitionResult = getModelTypeDefinition(scope);
         if (modelTypeDefinitionResult.Value is null)
         {
-            return Result.From<FileModel>(null);
+            return Result.Success<FileModel>(null);
         }
 
         return

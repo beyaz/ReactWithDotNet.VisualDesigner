@@ -104,7 +104,7 @@ static class Parser
     {
         if (node == null || node.ContainsOnlyTriviaWhiteSpaces || node.Kind == SyntaxKind.FalseKeyword)
         {
-            return Result.From<VisualElementModel>(null);
+            return Result.Success<VisualElementModel>(null);
         }
 
         if (node.Kind == SyntaxKind.JsxText)
@@ -194,7 +194,7 @@ static class Parser
             }
             else
             {
-                return Result.From<VisualElementModel>(null);
+                return Result.From<VisualElementModel>(null as VisualElementModel);
             }
 
             
@@ -239,14 +239,14 @@ static class Parser
             }
         }
 
-        return Result.From<VisualElementModel>(null);
+        return Result.From<VisualElementModel>(null as VisualElementModel);
     }
 
     static Result<IReadOnlyList<MethodResult>> Traverse(TsNode node, Scope scope)
     {
         if (node is null)
         {
-            return Result.From<IReadOnlyList<MethodResult>>([]);
+            return Result.Success<IReadOnlyList<MethodResult>>([]);
         }
 
        

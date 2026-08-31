@@ -2784,7 +2784,7 @@ sealed class ApplicationView : Component<ApplicationState>
             {
                 if (Name == Design.Name)
                 {
-                    return Task.FromResult(Result.From<IReadOnlyList<SuggestionItem>>([]));
+                    return Task.FromResult(Result.Success<IReadOnlyList<SuggestionItem>>([]));
                 }
 
                 if (Name == Design.ItemsSourceDesignTimeCount)
