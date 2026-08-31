@@ -71,8 +71,6 @@ public static partial class ResultExtensions
         return items;
     }
 
-    
-
     public static void Match<T>(this Result<T> result, Action<T> onSuccess, Action<Exception> onError)
     {
         if (result.HasError)
@@ -85,8 +83,7 @@ public static partial class ResultExtensions
         }
     }
 
-    public static IEnumerable<Result<B>> Select<A, B>
-    (
+    public static IEnumerable<Result<B>> Select<A, B>(
         this IEnumerable<Result<A>> source,
         Func<A, B> selector
     )
@@ -103,12 +100,7 @@ public static partial class ResultExtensions
         }
     }
 
-    
-
-    
-
-    public static Result<B> Select<A, B>
-    (
+    public static Result<B> Select<A, B>(
         this Result<A> source,
         Func<A, B> selector
     )
@@ -121,8 +113,7 @@ public static partial class ResultExtensions
         return selector(source.Value);
     }
 
-    public static Result<B> Select<A, B>
-    (
+    public static Result<B> Select<A, B>(
         this Result<A> source,
         Func<A, Result<B>> selector
     )
@@ -135,8 +126,7 @@ public static partial class ResultExtensions
         return selector(source.Value);
     }
 
-    public static async Task<Result<B>> Select<A, B>
-    (
+    public static async Task<Result<B>> Select<A, B>(
         this Task<Result<A>> source,
         Func<A, B> selector
     )
@@ -151,8 +141,7 @@ public static partial class ResultExtensions
         return selector(a.Value);
     }
 
-    public static Task<Result<B>> Select<A, B>
-    (
+    public static Task<Result<B>> Select<A, B>(
         this Result<A> a,
         Func<A, Task<Result<B>>> selector
     )
@@ -167,8 +156,7 @@ public static partial class ResultExtensions
         return selector(a.Value);
     }
 
-    public static Result<IEnumerable<B>> Select<A, B>
-    (
+    public static Result<IEnumerable<B>> Select<A, B>(
         this Result<IEnumerable<A>> source,
         Func<A, B> selector
     )
@@ -190,8 +178,7 @@ public static partial class ResultExtensions
         return returnItems;
     }
 
-    public static async Task<Result<C>> SelectMany<A, B, C>
-    (
+    public static async Task<Result<C>> SelectMany<A, B, C>(
         this Task<Result<A>> source,
         Func<A, Task<Result<B>>> bind,
         Func<A, B, C> resultSelector
@@ -213,8 +200,7 @@ public static partial class ResultExtensions
         return resultSelector(a.Value, middle.Value);
     }
 
-    public static async Task<Result<C>> SelectMany<A, B, C>
-    (
+    public static async Task<Result<C>> SelectMany<A, B, C>(
         this Task<Result<A>> source,
         Func<A, Task<Result<B>>> bind,
         Func<A, B, Task<Result<C>>> resultSelector
@@ -236,8 +222,7 @@ public static partial class ResultExtensions
         return await resultSelector(a.Value, middle.Value);
     }
 
-    public static Result<C> SelectMany<A, B, C>
-    (
+    public static Result<C> SelectMany<A, B, C>(
         this Result<A> source,
         Func<A, Result<B>> bind,
         Func<A, B, C> resultSelector
@@ -257,8 +242,7 @@ public static partial class ResultExtensions
         return resultSelector(source.Value, middle.Value);
     }
 
-    public static Result<IEnumerable<C>> SelectMany<A, B, C>
-    (
+    public static Result<IEnumerable<C>> SelectMany<A, B, C>(
         this Result<A> source,
         Func<A, IEnumerable<B>> bind,
         Func<A, B, C> resultSelector
@@ -283,8 +267,7 @@ public static partial class ResultExtensions
         }
     }
 
-    public static Result<IEnumerable<C>> SelectMany<A, B, C>
-    (
+    public static Result<IEnumerable<C>> SelectMany<A, B, C>(
         this Result<A> source,
         Func<A, IEnumerable<Result<B>>> bind,
         Func<A, B, C> resultSelector
@@ -318,8 +301,7 @@ public static partial class ResultExtensions
         return returnList;
     }
 
-    public static IEnumerable<Result<C>> SelectMany<A, B, C>
-    (
+    public static IEnumerable<Result<C>> SelectMany<A, B, C>(
         this IEnumerable<A> source,
         Func<A, Result<B>> bind,
         Func<A, B, C> resultSelector
@@ -363,8 +345,7 @@ public static partial class ResultExtensions
         return returnItems;
     }
 
-    public static IEnumerable<Result<C>> SelectMany<A, B, C>
-    (
+    public static IEnumerable<Result<C>> SelectMany<A, B, C>(
         this IEnumerable<Result<A>> source,
         Func<A, Result<B>> bind,
         Func<A, B, C> resultSelector
@@ -418,12 +399,7 @@ public static partial class ResultExtensions
         return returnItems;
     }
 
-    
-
-    
-
-    public static async Task<Result<C>> SelectMany<A, B, C>
-    (
+    public static async Task<Result<C>> SelectMany<A, B, C>(
         this Task<Result<A>> source,
         Func<A, Result<B>> bind,
         Func<A, B, C> resultSelector
@@ -445,15 +421,7 @@ public static partial class ResultExtensions
         return resultSelector(a.Value, middle.Value);
     }
 
-   
-
-    
-
-
-   
-
-    public static Result<IEnumerable<C>> SelectMany<A, B, C>
-    (
+    public static Result<IEnumerable<C>> SelectMany<A, B, C>(
         this Result<IEnumerable<A>> result,
         Func<A, Result<B>> binder,
         Func<A, B, C> projector
@@ -482,12 +450,7 @@ public static partial class ResultExtensions
         return returnList;
     }
 
-    
-
-   
-
-    public static async Task<Result<C>> SelectMany<A, B, C>
-    (
+    public static async Task<Result<C>> SelectMany<A, B, C>(
         this Result<A> source,
         Func<A, Task<Result<B>>> bind,
         Func<A, B, C> resultSelector
@@ -507,8 +470,7 @@ public static partial class ResultExtensions
         return resultSelector(source.Value, middle.Value);
     }
 
-    public static IEnumerable<Result<C>> SelectMany<A, B, C>
-    (
+    public static IEnumerable<Result<C>> SelectMany<A, B, C>(
         this IEnumerable<Result<A>> source,
         Func<A, IEnumerable<B>> bind,
         Func<A, B, C> resultSelector
@@ -554,8 +516,7 @@ public static partial class ResultExtensions
         return returnItems;
     }
 
-    public static IEnumerable<Result<A>> Where<A>
-    (
+    public static IEnumerable<Result<A>> Where<A>(
         this IEnumerable<Result<A>> source,
         Func<A, bool> predicate
     )
@@ -589,8 +550,4 @@ public static partial class ResultExtensions
 
         return returnList;
     }
-    
-   
-    
-
 }
